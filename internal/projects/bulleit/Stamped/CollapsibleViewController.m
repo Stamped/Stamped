@@ -393,32 +393,27 @@ int const SPACE_HEIGHT = 10;
 }
 
 - (void)moveArrowViewIfBehindImageView:(UIImageView*)imageView {
-  if (footerLabel_ && footerLabel_.text && ![footerLabel_.text isEqualToString:@""])
-    return;
-
-  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame toView:imageView.superview];
+  if (footerLabel_ && footerLabel_.text && ![footerLabel_.text isEqualToString:@""]) {
+    CGRect frame = self.arrowView.frame;
+    frame.origin = CGPointMake([self.footerLabel.text sizeWithFont:self.footerLabel.font].width + 15.0, arrowView_.frame.origin.y);
+    self.arrowView.frame = frame;
+  }
+  
+  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame toView:self.view];
   CGRect actualImageFrame = [Util frameForImage:imageView.image inImageViewAspectFit:imageView];
   CGSize offset = CGSizeMake(imageView.frame.size.width-actualImageFrame.size.width,
                              imageView.frame.size.height-actualImageFrame.size.height);
   actualImageFrame = CGRectOffset(actualImageFrame, offset.width/2, offset.height/2);
-  
+  actualImageFrame = [imageView convertRect:actualImageFrame toView:self.view];
   if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(actualImageFrame) &&
       CGRectGetMaxY(convertedArrowFrame) <= CGRectGetMaxY(actualImageFrame)) {
     if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(actualImageFrame)) {
-      UILabel* label = self.sectionLabel;
-      CGSize size = label.frame.size;
-      size.height = label.frame.size.height;
-      size = [label sizeThatFits:size];
-      CGRect frame = self.sectionLabel.frame;
-      frame.size = CGSizeMake(size.width, frame.size.height);
-      self.sectionLabel.frame = frame;
+      CGRect convertedImageFrame = [self.view convertRect:actualImageFrame toView:self.arrowView.superview];
       
-      self.arrowView.frame = CGRectMake(CGRectGetMaxX(self.sectionLabel.frame) + 8.0,
+      self.arrowView.frame = CGRectMake(CGRectGetMinX(convertedImageFrame) - 42.0,
                                         CGRectGetMinY(self.arrowView.frame), 
                                         CGRectGetWidth(self.arrowView.frame),
                                         CGRectGetHeight(self.arrowView.frame));
-      if (self.numLabel.hidden == NO)
-        self.arrowView.frame = CGRectOffset(self.arrowView.frame, 8.0, 0.0);
     }
   }
   else {

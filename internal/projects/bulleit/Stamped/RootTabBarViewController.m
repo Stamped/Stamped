@@ -168,6 +168,8 @@
   [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   [self.selectedViewController.view removeFromSuperview];
   self.tabBar.selectedItem = nil;
+  [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"hasStamped"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)setTabBarIcons {
@@ -228,6 +230,7 @@
   [self.selectedViewController viewDidAppear:animated];
 
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstStamp"]) {
+    
     UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
     overlayContainer.backgroundColor = [UIColor clearColor];
     overlayContainer.alpha = 0;
@@ -270,7 +273,9 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
 
-  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"]) {
+  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+      [AccountManager sharedManager].currentUser.numStamps &&
+      [AccountManager sharedManager].currentUser.numStamps.intValue == 0) { 
     if (!tooltipImageView_) {
       tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
       tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame,
@@ -289,9 +294,11 @@
       [UIView animateWithDuration:0.3
                             delay:1.0
                           options:UIViewAnimationOptionAllowUserInteraction
-                       animations:^{ tooltipImageView_.alpha = 1.0; }
+                       animations:^{tooltipImageView_.alpha = 1.0;}
                        completion:nil];
   }
+    
+  
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -307,8 +314,6 @@
     tooltipImageView_.alpha = 0.0;
     [tooltipImageView_ removeFromSuperview];
     tooltipImageView_ = nil;
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasStamped"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
   }
 }
 

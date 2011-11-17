@@ -24,6 +24,7 @@
 #import "STNavigationBar.h"
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
+#import "SocialManager.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
@@ -38,7 +39,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 @synthesize window = window_;
 @synthesize navigationController = navigationController_;
-@synthesize facebook = facebook_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [self performRestKitMappings];
@@ -56,8 +56,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   }
     
-  // Create an appwide Facebook client.
-  facebook_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
   return YES;
 }
 
@@ -102,7 +100,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)dealloc {
   [window_ release];
   [navigationController_ release];
-  [facebook_ release];
   [super dealloc];
 }
 
@@ -270,18 +267,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 // Pre 4.2 support
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-  if (self.facebook)
-    return [self.facebook handleOpenURL:url];
-  return NO;
+  return [[SocialManager sharedManager] handleOpenURLFromFacebook:url]; 
 }
 
 // For 4.2+ support
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url
   sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-  if (self.facebook) {
-    return [self.facebook handleOpenURL:url];
-  }
-  return NO;
+  return [[SocialManager sharedManager] handleOpenURLFromFacebook:url];
 }
 
 @end

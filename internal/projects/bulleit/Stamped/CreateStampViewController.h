@@ -8,7 +8,6 @@
 
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
-#import "FBConnect.h"
 
 #import "STCreditPickerController.h"
 #import "STViewController.h"
@@ -22,8 +21,6 @@
 @interface CreateStampViewController : STViewController <UITextViewDelegate,
                                                          RKObjectLoaderDelegate,
                                                          RKRequestDelegate,
-                                                         FBRequestDelegate,
-                                                         FBSessionDelegate,
                                                          STCreditPickerControllerDelegate,
                                                          UINavigationControllerDelegate,
                                                          UIImagePickerControllerDelegate,
@@ -36,7 +33,6 @@
 @property (nonatomic, assign) BOOL newEntity;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* creditedUser;
-@property (nonatomic, retain) Facebook* fbClient;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;

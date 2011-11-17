@@ -315,15 +315,19 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     addTodoImageView.frame = CGRectOffset(addTodoImageView.frame, 15, 21);
     [cell.contentView addSubview:addTodoImageView];
     [addTodoImageView release];
+    
+    
     UILabel* addLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    addLabel.text = @"Add a to-do";
     addLabel.textColor = [UIColor stampedLightGrayColor];
     addLabel.highlightedTextColor = [UIColor whiteColor];
-    addLabel.text = @"Add a to-do";
+    addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
     [addLabel sizeToFit];
     addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 23, 22);
     [cell.contentView addSubview:addLabel];
     [addLabel release];
+    
+    
     return cell;
   }
 

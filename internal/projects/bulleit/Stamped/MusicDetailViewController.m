@@ -119,8 +119,9 @@
       section.expandedFooterText = @"Show less";
       section.footerLabel.text = section.collapsedFooterText;
       [section addNumberedListWithValues:tracksArray];
-      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
-                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+      CGRect frame = section.arrowView.frame;
+      frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
+      section.arrowView.frame = frame;
       self.mainContentView.hidden = NO;
     }
     
@@ -133,8 +134,9 @@
       section.expandedFooterText = @"Show less";
       section.footerLabel.text = section.collapsedFooterText;
       [section addNumberedListWithValues:tracksArray];
-      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
-                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+      CGRect frame = section.arrowView.frame;
+      frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
+      section.arrowView.frame = frame;
       self.mainContentView.hidden = NO;
     }
   }
@@ -158,8 +160,9 @@
       section.expandedFooterText = @"Show less";
       section.footerLabel.text = section.collapsedFooterText;
       [section addNumberedListWithValues:albumsArray];
-      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
-                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+      CGRect frame = section.arrowView.frame;
+      frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
+      section.arrowView.frame = frame;
       self.mainContentView.hidden = NO;
   }
 
@@ -198,6 +201,8 @@
     self.mainContentView.hidden = NO; 
   }
   }
+
+    
 }
 
 #pragma mark - STImageViewDelegate methods.

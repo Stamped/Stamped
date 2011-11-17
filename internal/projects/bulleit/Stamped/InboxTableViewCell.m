@@ -28,6 +28,8 @@ NSString* const kInboxTableDidScrollNotification = @"InboxTableDidScrollNotifica
 
 static NSString* const kTitleFontString = @"TitlingGothicFBComp-Light";
 static const CGFloat kTitleFontSize = 47.0;
+static NSString* const kEllipsisFontString = @"TitlingGothicFBComp-Regular";
+static const CGFloat kEllipsisFontSize = 24.0;
 static NSString* const kUserNameFontString = @"Helvetica-Bold";
 static NSString* const kCommentFontString = @"Helvetica";
 static const CGFloat kSubstringFontSize = 12.0;
@@ -59,10 +61,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   // NOT managed. Must manage ownership.
   CATextLayer* titleLayer_;
   CTFontRef titleFont_;
+  CGFloat titleDescent_;
   CTParagraphStyleRef titleStyle_;
   NSMutableDictionary* titleAttributes_;
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
+  CTLineRef ellipsisLine_;
+  CTLineRef titleLine_;
 }
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
@@ -200,6 +205,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     titleLayer_.fontSize = 24.0;
     titleLayer_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding, kTitleMaxWidth, kTitleFontSize);
     titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
+    titleDescent_ = CTFontGetDescent(titleFont_);
     CFIndex numSettings = 1;
     CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
     CTParagraphStyleSetting settings[1] = {
@@ -211,6 +217,19 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
         (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
         (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
         (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil];
+    
+    CTFontRef ellipsisFont = CTFontCreateWithName((CFStringRef)kEllipsisFontString, kEllipsisFontSize, NULL);
+    NSMutableDictionary* ellipsisAttributes = [[[NSMutableDictionary alloc] initWithObjectsAndKeys: 
+                                               (id)ellipsisFont, (id)kCTFontAttributeName,
+                                               (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
+                                               (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
+                                               (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil] autorelease];
+    
+    ellipsisLine_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[NSAttributedString alloc] initWithString:@"…" 
+                                                                                                            attributes:ellipsisAttributes]);
+    CFRelease(ellipsisFont);
+    
+    
     CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding - 1, kUserImageSize, kUserImageSize);
     bottomUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
     [self addSubview:bottomUserImageView_];
@@ -233,6 +252,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   [titleLayer_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
+  CFRelease(ellipsisLine_);
   [super dealloc];
 }
 
@@ -272,10 +292,14 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
+
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSaveGState(ctx);
-  CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
-  [titleLayer_ drawInContext:ctx];
+//  CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
+  CGContextTranslateCTM(ctx, CGRectGetMinX(titleLayer_.frame), CGRectGetMaxY(titleLayer_.frame) - titleDescent_);
+	CGContextScaleCTM(ctx, 1.0, -1.0);
+  CTLineDraw(titleLine_, ctx);
+//  [titleLayer_ drawInContext:ctx];
   CGContextRestoreGState(ctx);
   [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }
@@ -293,11 +317,21 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     title_ = [title copy];
 
     NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
-    titleLayer_.string = attrString;
+//    titleLayer_.string = attrString;
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CGFloat ascent, descent, leading, width;
-    width = fmin(kTitleMaxWidth, CTLineGetTypographicBounds(line, &ascent, &descent, &leading));
+    CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLine_);
+    if (titleLine_)
+      CFRelease(titleLine_);
+    titleLine_ = truncatedLine;
+    
+    CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
+    CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
+    CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
+                                truncatedLineGlyphCount - 1 : lineGlyphCount;
+    CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
+    CGFloat width = fmin(kTitleMaxWidth, offset);
     CFRelease(line);
+
     CGRect oldFrame = stampImageFrame_;
     stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
                                   kStampSize / 2.0,
@@ -456,7 +490,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   return self;
 }
 
-- (void)drawRect:(CGRect)rect {
+- (void)drawRect:(CGRect)rect {  
   if (numDots_ == 0)
     return;
 

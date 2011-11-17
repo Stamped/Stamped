@@ -60,12 +60,12 @@
 					</object>
 					<object class="IBUIScrollView" id="205426438">
 						<reference key="NSNextResponder" ref="540011283"/>
-						<int key="NSvFlags">268</int>
+						<int key="NSvFlags">276</int>
 						<object class="NSMutableArray" key="NSSubviews">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBUIView" id="465083936">
 								<reference key="NSNextResponder" ref="205426438"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">276</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<object class="IBUIButton" id="1049579132">
