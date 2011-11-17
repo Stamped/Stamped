@@ -430,7 +430,7 @@ def _setBody(user, activity, emailAddress, settingsToken):
     params['email_address'] = emailAddress
 
     # Add settings url
-    settingsUrl = 'http://www.stamped.com/settings/alerts?t=%s' % settingsToken
+    settingsUrl = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
     params['settings_url'] = settingsUrl
 
     html = parseTemplate(template, params)

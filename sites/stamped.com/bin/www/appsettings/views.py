@@ -16,6 +16,7 @@ from api.MongoStampedAPI import MongoStampedAPI
 from api.MongoStampedAuth import MongoStampedAuth
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
+from django.views.decorators.http import require_http_methods
 import datetime
 
 stampedAPI  = MongoStampedAPI()
@@ -142,57 +143,44 @@ def passwordSent(request):
         raise Http404
 
 
-def emailSettings(request, **kwargs):
+@require_http_methods(["GET"])
+def alertSettings(request, **kwargs):
     try:
-        if request.method == 'POST':
-            data = request.POST
-        elif request.method == 'GET':
-            data = request.GET
-        else:
-            raise
-
-        tokenId     = data.pop('t', None)
+        # Check token
+        data        = request.GET
+        tokenId     = data.pop('token', None)
         authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
 
-        # Check if user posted
-        if request.method == 'POST':
+        # Display 'change settings' form
+        account = stampedAPI.getAccount(authUserId)
 
-            # DO SOMETHING
-            pass
+        alerts  = HTTPAccountAlerts().importSchema(account)
+        user    = HTTPUser().importSchema(account)
 
-        else:
-            # Check token
-            data = request.GET
+        image_url = user['image_url'].replace('.jpg', '-31x31.jpg')
+        stamp_url = 'http://static.stamped.com/logos/%s-%s-credit-18x18.png' % \
+                    (user.color_primary, user.color_secondary)
 
-            tokenId     = data.pop('t', None)
-            authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
+        settings = {
+            'email_alert_credit':   alerts.email_alert_credit,
+            'email_alert_like':     alerts.email_alert_like,
+            'email_alert_fav':      alerts.email_alert_fav,
+            'email_alert_mention':  alerts.email_alert_mention,
+            'email_alert_comment':  alerts.email_alert_comment,
+            'email_alert_reply':    alerts.email_alert_reply,
+            'email_alert_follow':   alerts.email_alert_follow,
+            }
 
-            # Display 'change settings' form
-            account = stampedAPI.getAccount(authUserId)
+        params = {
+            'screen_name':      user.screen_name,
+            'name':             user.name,
+            'image_url':        image_url,
+            'stamp_url':        stamp_url,
+            'json_settings':    json.dumps(settings, sort_keys=True)
+        }
 
-            alerts  = HTTPAccountAlerts().importSchema(account)
-            user    = HTTPUser().importSchema(account)
-
-            image_url = user['image_url'].replace('.jpg', '-31x31.jpg')
-            stamp_url = 'http://static.stamped.com/logos/%s-%s-credit-18x18.png' % \
-                        (user.color_primary, user.color_secondary)
-
-            params = {
-                'screen_name':          user.screen_name,
-                'name':                 user.name,
-                'image_url':            image_url,
-                'stamp_url':            stamp_url,
-                'email_alert_credit':   alerts.email_alert_credit,
-                'email_alert_like':     alerts.email_alert_like,
-                'email_alert_fav':      alerts.email_alert_fav,
-                'email_alert_mention':  alerts.email_alert_mention,
-                'email_alert_comment':  alerts.email_alert_comment,
-                'email_alert_reply':    alerts.email_alert_reply,
-                'email_alert_follow':   alerts.email_alert_follow,
-                }
-            ### TODO: CHANGE URL
-            response = render_to_response('password-reset.html', params)
-
+        ### TODO: CHANGE URL
+        response = render_to_response('password-reset.html', params)
 
         return response
 
@@ -209,5 +197,51 @@ def emailSettings(request, **kwargs):
         logs.save()
 
         ### TODO: CHANGE URL
-        return render_to_response('password-reset.html', {'error': errorMsg})
+        return render_to_response('password-reset.html', {'error': 'FAIL'})
+
+
+@require_http_methods(["POST"])
+def alertSettingsUpdate(request, **kwargs):
+    try:
+        # Check token
+        data        = request.POST
+        tokenId     = data.pop('token', None)
+        authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
+
+        # Get settings
+        alerts = {
+            'email_alert_credit':   data.pop('email_alert_credit', False),
+            'email_alert_like':     data.pop('email_alert_like', False),
+            'email_alert_fav':      data.pop('email_alert_fav', False),
+            'email_alert_mention':  data.pop('email_alert_mention', False),
+            'email_alert_comment':  data.pop('email_alert_comment', False),
+            'email_alert_reply':    data.pop('email_alert_reply', False),
+            'email_alert_follow':   data.pop('email_alert_follow', False),
+        }
+
+        stampedAPI.updateAlerts(authUserId, alerts)
+
+        params.setdefault('content_type', 'text/javascript; charset=UTF-8')
+        params.setdefault('mimetype', 'application/json')
+        
+        output_json = json.dumps(alerts, sort_keys=True)
+        output = HttpResponse(output_json, **params)
+
+        return output
+
+    except Exception as e:
+        logs.begin(
+            addLog=stampedAPI._logsDB.addLog, 
+            saveLog=stampedAPI._logsDB.saveLog,
+            saveStat=stampedAPI._statsDB.addStat,
+            requestData=request,
+        )
+        logs.request(request)
+        logs.warning("500 Error: %s" % e)
+        logs.error(500)
+        logs.save()
+
+        ### TODO: CHANGE URL
+        return render_to_response('password-reset.html', {'error': 'FAIL'})
+
 
