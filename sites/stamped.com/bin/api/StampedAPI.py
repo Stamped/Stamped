@@ -227,29 +227,8 @@ class StampedAPI(AStampedAPI):
         self._inviteDB.join(account.email)
 
         # Send welcome email
-        testEmails = [
-            'testuser@stamped.com', 
-            'devbot@stamped.com', 
-            'usera@stamped.com', 
-            'userb@stamped.com', 
-            'userc@stamped.com',
-            'userd@stamped.com', 
-            'user1@stamped.com', 
-            'user2@stamped.com', 
-            'user3@stamped.com',
-            'user4@stamped.com', 
-            'user5@stamped.com', 
-            'user6@stamped.com', 
-            'user7@stamped.com',
-            'user8@stamped.com', 
-            'mariobatali@stamped.com', 
-            'petertravers@stamped.com', 
-            'rebeccaminkoff@stamped.com',
-            'nymag@stamped.com',
-            'sample123@stamped.com',
-        ]
-
-        if account.email not in testEmails:
+        domain = str(account.email).split('@')[1]
+        if domain != 'stamped.com':
             msg = {}
             msg['to'] = account.email
             msg['from'] = 'Stamped <noreply@stamped.com>'
