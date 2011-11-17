@@ -20,6 +20,9 @@ def parseCommandLine():
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
+    parser.add_option("-D", "--db", default=None, type="string", 
+        action="store", dest="db", help="db to connect to")
+    
     parser.add_option("-d", "--headers", action="store_true", dest="show_headers", 
         default=False, help="Include HTTP headers in results")
     
@@ -48,6 +51,10 @@ def parseCommandLine():
         default=None, type="string", help="Filter results on severity (debug, info, warning, error, critical)")
     
     (options, args) = parser.parse_args()
+    
+    if options.db:
+        utils.init_db_config(options.db)
+    
     return options
 
 def main():
