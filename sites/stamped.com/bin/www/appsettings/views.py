@@ -16,6 +16,7 @@ from api.MongoStampedAPI import MongoStampedAPI
 from api.MongoStampedAuth import MongoStampedAuth
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
+from django.views.decorators.http import require_http_methods
 import datetime
 
 stampedAPI  = MongoStampedAPI()
