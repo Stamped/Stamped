@@ -5,7 +5,7 @@ height:100%;
 }
 
 body{
-background:url(http://static.stamped.com/assets/img/main-noise.png) left top repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/main-noise.png) left top repeat;
 font-family:'arial',sans-serif;
 color:#666;
 font-size:16px;
@@ -22,7 +22,7 @@ text-decoration: underline;
 
 /* COMMON CLASSES */
 .flood{
-background:url(http://static.stamped.com/assets/img/noisegradient.png) center top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/noisegradient.png) center top no-repeat;
 }
 
 .replaced{
@@ -32,9 +32,9 @@ overflow:hidden;
 }
 
 .wrap{
-width:920px;
+width:940px;
 margin:0 auto;
-background:url(http://static.stamped.com/assets/img/noisegradient.png) center top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/noisegradient.png) center top no-repeat;
 height:100%;
 position:relative;
 }
@@ -48,7 +48,7 @@ font-weight:bold;
 position:relative;
 width:450px;
 height:77px;
-background:url(http://static.stamped.com/assets/img/textinput-sprite.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/textinput-sprite.png) left top no-repeat;
 }
 
 .signup p{
@@ -76,7 +76,7 @@ top:12px;
 }
 
 .signup button{
-background:url(http://static.stamped.com/assets/img/submitbutton-sprite.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/submitbutton-sprite.png) left top no-repeat;
 width:57px;
 height:44px;
 border:0;
@@ -102,132 +102,21 @@ color:#666;
 }
 
 .thanks{
-background:url(http://static.stamped.com/assets/img/whoa-thanks.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/whoa-thanks.png) left top no-repeat;
 width:170px;
 height:29px;
 clear:both;
 display:none;
 }
 
-/* HOME */
-#home.wrap{
-position:relative;
-}
 
-#home .iphone{
-height:750px;
-background:url(http://static.stamped.com/assets/img/iphonebg.png) left -30px no-repeat;
-padding-left:45px;
-width:940px;
-}
-
-.smalldisplay #home .iphone{
-margin-top:-60px;
-position:relative;
-}
-
-.talldisplay #home .iphone{
-position:absolute;
-left:50%;
-top:50%;
-margin-left:-470px;
-margin-top:-405px;
-}
-
-#home .brand{
-background:url(http://static.stamped.com/assets/img/stamped-logo.png) left top no-repeat;
-width:180px;
-height:180px;
-margin-top:80px;
-margin-bottom:40px;
-float:left;
-}
-
-#home .pitch{
-background:url(http://static.stamped.com/assets/img/building-message.png) left top no-repeat;
-width:544px;
-height:96px;
-clear:both;
-margin-bottom:50px;
-}
-
-#home .thanks{
-margin-top:90px;
-margin-left:5px;
-}
-
-#home .more{
-position:absolute;
-left:0;
-bottom:120px;
-}
-
-/* ENTITY */
-#entity .wrap {
-background:none
-}
-
-#entity .thanks {
-margin:0 auto;
-background-position:center center;
-height:83px;
-}
-
-#entity .header {
-background:url(http://static.stamped.com/assets/img/tweet_header_ribbon_90pct_noShdw.png) left bottom repeat-x;
-padding-bottom:8px;
-position:relative;
-z-index:10;
--webkit-box-shadow:0 0 7px rgba(0,0,0,0.1);
--moz-box-shadow:0 0 7px rgba(0,0,0,0.1);
--ms-box-shadow:0 0 7px rgba(0,0,0,0.1);
--o-box-shadow:0 0 7px rgba(0,0,0,0.1);
-box-shadow:0 0 7px rgba(0,0,0,0.1);
-}
-
-#entity .header .inner {
-*background:#fff; /* IE7 */
-background:rgba(255,255,255,0.9);
-padding:11px 0 6px;
-text-align:center;
-
-position:relative;
-z-index:10;
-font-size:14px;
-
-*margin-bottom:115px; /* IE7 */ 
-}
-
-#entity .header .container{
-position:relative;
-width:940px;
-margin:0 auto 10px;
-}
-
-#entity .header a{
-font-weight:bold;
-}
-
-#entity .brand{
-background:url(http://static.stamped.com/assets/img/sample-user-stamp.png) left top no-repeat;
-width:200px;
-height:200px;
-position:absolute;
-z-index:2;
-left:0;
-top:-150px;
-}
-
-#entity .available{
-position:absolute;
-right:130px;
-top:-76px;
-}
-
+/* THE CARD */
 .card{
 border-top:2px solid #fff;
 border-bottom:2px solid #fff;
 *background:#3366cc; /* IE7 */
+*position:relative;
+*top:-105px;
 background:-webkit-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:-moz-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:-ms-gradient(linear, left top, right bottom, from(#3cf), to(#911));
@@ -249,13 +138,13 @@ overflow:hidden;
 }
 
 .card .top-wave{
-background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_top.png) left bottom no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/tweet_main_ribbon_top.png) left bottom no-repeat;
 height:2px;
 margin-top:5px;
 }
 
 .card .bottom-wave{
-background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_bot.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/tweet_main_ribbon_bot.png) left top no-repeat;
 height:2px;
 margin-bottom:5px;
 }
@@ -266,7 +155,7 @@ overflow:hidden;
 
 .card .meta .thumb{
 float:left;
-background:url(http://static.stamped.com/assets/img/user-photo-frame.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/user-photo-frame.png) left top no-repeat;
 width:106px;
 height:106px;
 }
@@ -306,27 +195,27 @@ padding-left:28px;
 }
 
 .card .meta .food{
-background:url(http://static.stamped.com/assets/img/entity-type-food.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-food.png) left top no-repeat;
 padding-left: 28px;
 }
 
 .card .meta .film{
-background:url(http://static.stamped.com/assets/img/entity-type-film.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-film.png) left top no-repeat;
 padding-left: 22px;
 }
 
 .card .meta .book{
-background:url(http://static.stamped.com/assets/img/entity-type-book.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-book.png) left top no-repeat;
 padding-left: 26px;
 }
 
 .card .meta .music{
-background:url(http://static.stamped.com/assets/img/entity-type-music.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-music.png) left top no-repeat;
 padding-left: 22px;
 }
 
 .card .meta .other{
-background:url(http://static.stamped.com/assets/img/entity-type-other.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-other.png) left top no-repeat;
 padding-left: 19px;
 }
 
@@ -362,13 +251,12 @@ float:left;
 margin-top:30px;
 font-size:14px;
 color:#999;
-line-height:22px;
+line-height:20px;
 padding-left: 36px;
 }
 
 .credit .stamp{
 position: absolute;
-float: none;
 width:20px;
 height:20px;
 }
@@ -386,10 +274,329 @@ float:right;
 margin-top:30px;
 font-size:14px;
 color:#999;
-background:url(http://static.stamped.com/assets/img/likes-icon.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/likes-icon.png) left center no-repeat;
 padding-left:25px;
-line-height:22px;
+line-height:20px;
 }
+
+/* HOME */
+#home.public.wrap{
+position:relative;
+}
+
+#home.public .brand{
+margin:-180px auto 0;
+float:none;
+position: relative;
+bottom:-195px;
+}
+
+#home.public .pitch{
+height:35px;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/text-put-your-stamp-on-the-world.png) left top no-repeat;
+width:611px;
+margin:174px auto 14px;
+}
+
+#home.public .intro{
+font-size:16px;
+text-align:center;
+line-height:29px;
+}
+
+#home.public .intro span{
+display:block;
+}
+
+#home.public .intro a{
+font-weight:bold;
+}
+
+#home.public .itunes{
+width:247px;
+height:84px;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/free-download-sprite.png) left top no-repeat;
+margin:23px auto;
+}
+
+#home.public .itunes:hover{
+background-position: left bottom;
+}
+
+#tool-tipper{
+position:relative;
+height:779px;
+width:100%;
+}
+
+
+.tooltip{
+position:absolute;
+}
+
+.tooltip .image-rest{
+z-index:1;
+}
+
+.tooltip .text{
+text-indent:-9999em;
+overflow:hidden;
+}
+
+.tooltip .image-active{
+display:none;
+}
+
+.tooltip .imager{
+position:absolute;
+left:0;
+top:0;
+}
+
+.tooltip.tip-1{
+width:275px;
+height:165px;
+top:124px;
+left:0;
+}
+
+.tooltip.tip-2{
+width:291px;
+height:187px;
+right:-16px;
+top:186px;
+}
+
+.tooltip.tip-3{
+width:275px;
+height:148px;
+top:418px;
+left:0;
+}
+
+
+
+.tooltip .image-active{
+z-index:3;
+}
+
+#home #iphone{
+margin:0 auto;
+width:435px;
+height:774px;
+position:relative;
+overflow:hidden;
+right:-10px;
+z-index:2;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/iphone-background.png) left top no-repeat;
+}
+
+#home #iphone .screen{
+position:absolute;
+left:54px;
+top:136px;
+width:312px;
+height:466px;
+display:none;
+}
+
+#home #iphone .screen.active{
+display:block;
+}
+
+#home .video-block{
+text-align:center;
+position:absolute;
+right:16px;
+bottom:101px;
+}
+
+
+#home .video-block .thumbnail{
+display:block;
+margin-bottom:15px;
+width:218px;
+height:117px;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/video-thumbnail-sprite.png) left top no-repeat;
+}
+
+#home .video-block:hover .thumbnail{
+background-position:left bottom;
+
+}
+
+#home.public .card{
+background:none;
+padding:0;
+background-color:#fff;
+width:940px;
+margin-top:45px;
+border:0;
+}
+
+#home.public .card .inner{
+clear:both;
+padding:0 27px 25px;
+}
+
+#home.public .card .top-wave{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/main-topcap.png) left top no-repeat;
+height:8px;
+margin:0;
+}
+
+#home.public .card .bottom-wave{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/main-botcap.png) left top no-repeat;
+height:8px;
+margin:0;
+}
+
+#home.public .more{
+position:static;
+margin:30px 0;
+padding-bottom:30px;
+}
+
+#home.public .more a{
+margin-left:0;
+margin-right:15px;
+}
+
+#home.public .more .copyright{
+float:right;
+}
+
+#home.wrap{
+position:relative;
+}
+
+#home .iphone{
+height:750px;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/iphonebg.png) left -30px no-repeat;
+padding-left:45px;
+width:940px;
+}
+
+.smalldisplay #home .iphone{
+margin-top:-60px;
+position:relative;
+}
+
+.talldisplay #home .iphone{
+position:absolute;
+left:50%;
+top:50%;
+margin-left:-470px;
+margin-top:-405px;
+}
+
+#home .brand{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamped-logo.png) left top no-repeat;
+width:180px;
+height:180px;
+margin-top:80px;
+margin-bottom:40px;
+float:left;
+}
+
+#home .pitch{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/building-message.png) left top no-repeat;
+width:544px;
+height:96px;
+clear:both;
+margin-bottom:50px;
+}
+
+#home .thanks{
+margin-top:90px;
+margin-left:5px;
+}
+
+#home .more{
+position:absolute;
+left:0;
+bottom:120px;
+}
+
+/* ENTITY */
+#entity .wrap{
+background:none
+}
+
+#entity .thanks{
+margin:0 auto;
+background-position:center center;
+height:83px;
+}
+
+#entity .header{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/tweet_header_ribbon_90pct_noShdw.png) left bottom repeat-x;
+padding-bottom:8px;
+position:relative;
+z-index:10;
+-webkit-box-shadow:0 0 7px rgba(0,0,0,0.1);
+-moz-box-shadow:0 0 7px rgba(0,0,0,0.1);
+-ms-box-shadow:0 0 7px rgba(0,0,0,0.1);
+-o-box-shadow:0 0 7px rgba(0,0,0,0.1);
+box-shadow:0 0 7px rgba(0,0,0,0.1);
+*margin-top:-108px;
+*margin-bottom:108px;
+}
+
+#entity .header .inner{
+*background:#fff; /* IE7 */
+background:rgba(255,255,255,0.9);
+padding:25px 0 7px;
+text-align:center;
+
+position:relative;
+z-index:10;
+font-size:14px;
+
+}
+
+#entity .header .container{
+position:relative;
+width:940px;
+margin:0 auto 10px;
+}
+
+#entity .header .signup{
+margin:0 auto 20px;
+text-align:left;
+width:450px;
+}
+
+#entity .header .hide{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/hide-x.png) right center no-repeat;
+padding-right:15px;
+position:absolute;
+right:0;
+top:0;
+font-size:11px;
+}
+
+#entity .header a{
+font-weight:bold;
+}
+
+#entity .brand{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/sample-user-stamp.png) left top no-repeat;
+width:200px;
+height:200px;
+position:absolute;
+z-index:2;
+left:0;
+top:-150px;
+}
+
+
+#entity .coming-soon{
+position:absolute;
+right:130px;
+top:-76px;
+}
+
 
 #entity .more{
 padding:20px 0;
@@ -398,12 +605,12 @@ text-align:center;
 
 /* PAGE */
 #page{
-padding-top:60px;
+padding-top:45px;
 }
 
 #page .mission{
-background:url(http://static.stamped.com/assets/img/mission-statement.png) left top no-repeat;
-width:747px;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/mission-statement.png) left top no-repeat;
+wtidth:747px;
 height:176px;
 clear:both;
 margin:30px 0;
@@ -425,27 +632,68 @@ color:#666;
 -ms-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 -o-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 box-shadow:0 5px 10px rgba(0,0,0,0.15);
-
 }
 
+
+/* FAQ */
+.faq-title{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/text-frequently-asked-questions.png) left top no-repeat;
+width:419px;
+height:34px;
+margin:30px auto;
+}
+
+.faq-map{
+list-style:none;
+margin:0;
+padding:0;
+font-weight:bold;
+margin-bottom:25px;
+}
+
+.faq-map a{
+padding:5px 0;
+display:inline-block;
+font-size:14px;
+}
+
+.question{
+margin:50px 0;
+width:86%;
+}
+
+
+.question h2{
+font-size:18px;
+padding-top:5px;
+font-weight:bold;
+color:#262626;
+}
+
+.question p{
+color:#595959;
+line-height:27px;
+}
+
+
 .sheet .top-wave{
-background:url(http://static.stamped.com/assets/img/top-wave-plain.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/top-wave-plain.png) left top no-repeat;
 height:9px;
 }
 
 .sheet .bottom-wave{
-background:url(http://static.stamped.com/assets/img/bottom-wave-plain.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/bottom-wave-plain.png) left top no-repeat;
 height:9px;
 }
 
 .sheet .brand{
-background:url(http://static.stamped.com/assets/img/stamped-logo.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamped-logo.png) left top no-repeat;
 width:180px;
 height:180px;
 position:relative;
 left:50%;
 margin-left:-90px;
-margin-top:-50px;
+margin-top:-37px;
 }
 
 .sheet .inner{
@@ -489,36 +737,36 @@ margin-left:178px;
 .team .person{
 margin-top:5px;
 padding:3px 0 3px 50px;
-background:url(http://static.stamped.com/assets/img/stamp-robby.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-robby.png) left top no-repeat;
 min-height:42px;
 }
 
 .person.robby{
-background:url(http://static.stamped.com/assets/img/stamp-robby.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-robby.png) left top no-repeat;
 }
 
 .person.kevin{
-background:url(http://static.stamped.com/assets/img/stamp-kevin.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-kevin.png) left top no-repeat;
 }
 
 .person.bart{
-background:url(http://static.stamped.com/assets/img/stamp-bart.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-bart.png) left top no-repeat;
 }
 
 .person.ed{
-background:url(http://static.stamped.com/assets/img/stamp-ed.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-ed.png) left top no-repeat;
 }
 
 .person.travis{
-background:url(http://static.stamped.com/assets/img/stamp-travis.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-travis.png) left top no-repeat;
 }
 
 .person.bons{
-background:url(http://static.stamped.com/assets/img/stamp-bons.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-bons.png) left top no-repeat;
 }
 
 .person.jake{
-background:url(http://static.stamped.com/assets/img/stamp-jake.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/stamp-jake.png) left top no-repeat;
 }
 
 .team .person .name{
@@ -527,6 +775,23 @@ font-size:18px;
 color:#333;
 display:block;
 }
+
+.team .advisor .name {
+font-weight:bold;
+font-size:18px;
+color:#333;
+display:block;
+}
+
+.team .advisor {
+padding-top: 20px;
+}
+
+.team .advisor .note {
+font-size:12px;
+margin-top: 20px;
+}
+
 
 .team .person .title{
 font-size:14px;
@@ -544,7 +809,7 @@ line-height:18px;
 }
 
 .team .follow{
-background:url(http://static.stamped.com/assets/img/icon-twitter.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/icon-twitter.png) left center no-repeat;
 padding-left:25px;
 font-size:12px;
 display:inline-block;
@@ -560,7 +825,7 @@ font-size:14px;
 }
 
 .investor-contact .bain-ventures{
-background:url(http://static.stamped.com/assets/img/vc-bain.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/vc-bain.png) left top no-repeat;
 width:224px;
 height:28px;
 display:block;
@@ -568,7 +833,7 @@ margin-bottom:10px;
 }
 
 .investor-contact .google-ventures{
-background:url(http://static.stamped.com/assets/img/vc-google.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/vc-google.png) left top no-repeat;
 width:143px;
 height:52px;
 display:block;
@@ -581,7 +846,7 @@ margin-bottom:3px;
 }
 
 .investor-contact .follow-us{
-background:url(http://static.stamped.com/assets/img/follow-us-on-twitter.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/follow-us-on-twitter.png) left top no-repeat;
 width:223px;
 height:40px;
 display:block;
@@ -595,7 +860,7 @@ overflow:hidden;
 }
 
 #mobile-entity .brand{
-background:url(http://static.stamped.com/assets/img/sample-user-stamp.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/sample-user-stamp.png) left top no-repeat;
 width:200px;
 height:200px;
 float:left;
@@ -654,11 +919,7 @@ max-width:572px;
 #mobile-entity .card .credit, #mobile-entity .card .likes{
 font-size:24px;
 margin-top:50px;
-padding-left:36px;
-}
-
-#mobile-entity .card .likes{
-padding-left:28px;
+padding-left: 36px;
 }
 
 #mobile-entity .card .credit .stamp {
@@ -678,7 +939,7 @@ text-align:center;
 margin:30px auto;
 }
 
-#mobile-entity .available{
+#mobile-entity .coming-soon{
 margin:0 auto 25px;
 }
 
@@ -703,27 +964,27 @@ margin-top: 0;
 }
 
 #mobile-entity .card .meta .film{
-background:url(http://static.stamped.com/assets/img/entity-type-film-mobile.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-film-mobile.png) left center no-repeat;
 padding-left: 29px;
 }
 
 #mobile-entity .card .meta .food{
-background:url(http://static.stamped.com/assets/img/entity-type-food-mobile.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-food-mobile.png) left center no-repeat;
 padding-left: 37px;
 }
 
 #mobile-entity .card .meta .book{
-background:url(http://static.stamped.com/assets/img/entity-type-book-mobile.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-book-mobile.png) left center no-repeat;
 padding-left: 33px;
 }
 
 #mobile-entity .card .meta .music{
-background:url(http://static.stamped.com/assets/img/entity-type-music-mobile.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-music-mobile.png) left center no-repeat;
 padding-left: 29px;
 }
 
 #mobile-entity .card .meta .other{
-background:url(http://static.stamped.com/assets/img/entity-type-other-mobile.png) left center no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/entity-type-other-mobile.png) left center no-repeat;
 padding-left: 23px;
 }
 
@@ -739,8 +1000,8 @@ top:auto;
 }
 
 /* MISC */
-.available {
-background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/app-store-available.png) left top no-repeat;
+.coming-soon{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/app-store-coming-soon.png) left top no-repeat;
 width:161px;
 height:49px;
 }
@@ -761,3 +1022,43 @@ display:inline-block;
 font-style: italic;
 }
 
+.shadow{
+width:100%;
+height:100%;
+position:fixed;
+top:0;
+left:0;
+background:#000;
+-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=65)"];
+filter: alpha(opacity=65);
+background:rgba(0,0,0,0.65);
+z-index:100;
+display:none;
+}
+
+.lightbox{
+width:854px;
+height:482px;
+position:fixed;
+top:50%;
+left:50%;
+margin-left:-427px;
+margin-top:-241px;
+background:#000;
+z-index:101;
+display:none;
+}
+
+.close{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/close-sprite.png) left top no-repeat;
+width:66px;
+height:65px;
+position:absolute;
+left:-33px;
+top:-33px;
+}
+
+.close:hover{
+background-position:left bottom;
+
+}

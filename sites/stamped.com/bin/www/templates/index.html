@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
         <meta charset="utf-8">
@@ -6,39 +6,102 @@
         
         <title>Stamped</title>
         
-        <meta name="description" content="Put your stamp of approval on the world."> 
+        <meta name="description" content="Stamped is a new way to recommend only what you like best -- restaurants, books, movies, music and more."> 
         <meta name="author" content="Stamped, Inc."> 
         <meta name="copyright" content="Stamped, Inc."> 
         <meta name="robots" content="index,follow"> 
-        <meta name="viewport" content="width=device-width, initial-scale=0.51">
+        <meta name="viewport" content="width=device-width, initial-scale=0.36">
         
         <!-- Style -->
-        <link rel="stylesheet" href="http://static.stamped.com/assets/css/normalize.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="http://static.stamped.com/assets/css/styles.css" type="text/css" media="screen" />
-        <link rel="shortcut icon" href="http://static.stamped.com/assets/img/favicon.ico"/>
-        <link rel="apple-touch-icon" href="http://static.stamped.com/assets/img/apple-touch-icon.png"/>
+        <link rel="stylesheet" href="http://stamped.com.static.images.s3.amazonaws.com/assets/css/normalize.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="http://stamped.com.static.images.s3.amazonaws.com/assets/css/screen.css" type="text/css" media="screen" />
+        <link rel="shortcut icon" href="/favicon.ico"/>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 
         <!-- Magic -->
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-        <script type="text/javascript" src="http://static.stamped.com/assets/js/function.js"></script>
+        <script type="text/javascript" src="http://stamped.com.static.images.s3.amazonaws.com/assets/js/magic.js"></script>
     </head>
     <body>
-        <div id="home" class="wrap flood">
-            <div class="iphone">
-                <a href="/" class="brand replaced">Stamped</a>
-                <p class="pitch replaced">We're building a new way to put your stamp of approval on the world.</p>
-                <div class="signup">
-                    <p>Sign up to be notified when we go live.</p>
-                    <form action="http://stamped.createsend.com/t/r/s/fqjrk/" method="POST" id="subForm">
-                        <input autocomplete="off" name="cm-fqjrk-fqjrk" id="fqjrk-fqjrk" type="text" rel="Email address"/>
-                        <button type="submit" class="replaced">Submit</button>
-                    </form>
+        <div id="home" class="wrap public flood">
+                <a href="." class="brand replaced">Stamped</a>
+                <div class="card">
+                    <div class="top-wave"></div>
+                    <div class="inner">
+                        
+                        <p class="pitch replaced">Put your stamp of approval on the world</p>
+                        <p class="intro">Stamped&trade; is a new way to recommend only what you like best&mdash;restaurants, books, movies, music and more.
+                        <span>No noise, no strangers, just the things you and your friends love. <a href="#" class="video-launcher">Watch the video</a>.</span></p>
+                        <a class="itunes replaced" href="http://www.stamped.com/download">Free Download. Available in the App Store</a>
+                        <div id="tool-tipper">
+                            <span class="tip-1 tooltip active" rel="1">
+                                <div class="imager image-rest">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-five-star.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="imager image-active">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-five-star-active.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="text">
+                                    <p class="main">A stamp is a five-star recommendation.</p>
+                                    <p class="minor">It's only for the things you like best.</p>
+                                </div>
+                            </span>
+                            <span class="tip-2 tooltip" rel="2">
+                                <div class="imager image-rest">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-shared.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="imager image-active">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-shared-active.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="text">
+                                    <p class="main">A stamp is shared with your friends.</p>
+                                    <p class="minor">It can start a conversation and inspire them to try something new.</p>
+                                </div>
+                            </span>
+                            <span class="tip-3 tooltip" rel="3">
+                                <div class="imager image-rest">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-useful.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="imager image-active">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/intro-stamp-is-useful-active.png" alt="intro-stamp-is-five-star" />
+                                </div>
+                                <div class="text">
+                                    <p class="main">A stamp is useful.</p>
+                                    <p class="minor">It's easy to try the great things 
+your friends have stamped.</p>
+                                </div>
+                            </span>
+                            
+                            <div id="iphone">
+                                <div class="screen active">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/screen-five-star.png"/>
+                                </div>
+                                
+                                <div class="screen">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/screen-shared-stamp.png"/>
+                                </div>
+                                <div class="screen">
+                                    <img src="http://stamped.com.static.images.s3.amazonaws.com/assets/img/public-home/screen-stamp-useful.png"/>
+                                </div>
+                            </div>
+                            <a class="video-block video-launcher" href="#">
+                                <span class="thumbnail replaced">Video Thumbnail</span>
+                                <span>Watch the video</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="bottom-wave"></div>
                 </div>
-                <p class="thanks replaced">Whoa. Thanks!</p>
                 <div class="more">
-                    <span>&copy;2011 Stamped Inc.</span> <a href="about">About Us</a>
+                    <a href="/about-us/">About Us</a>
+                    <a href="/faq/">FAQ</a>
+                    <a href="http://help.stamped.com">Help</a>
+                    <a href="http://blog.stamped.com">Blog</a>
+                    <a href="/terms-of-service/">Terms of Service</a>
+                    <a href="/privacy-policy/">Privacy Policy</a>
+                    <span class="copyright">&copy;2011 Stamped Inc.</span>
                 </div> 
-            </div> <!-- /iphone -->
+            
         </div> <!-- /home -->
         <script type="text/javascript">
             stamped.init();
