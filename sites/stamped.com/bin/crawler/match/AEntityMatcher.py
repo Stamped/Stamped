@@ -8,9 +8,8 @@ __license__   = "TODO"
 import Globals, utils
 import logs
 
-#from api.db.mongo.MongoDeletedEntityCollection import MongoDeletedEntityCollection
 from AStampedAPI            import AStampedAPI
-from utils                  import abstract, AttributeDict, lazyProperty
+from utils                  import abstract, AttributeDict
 from GeocoderEntityProxy    import GeocoderEntityProxy
 from Schemas                import Entity
 from datetime               import datetime
@@ -59,9 +58,9 @@ class AEntityMatcher(object):
     def _favoriteDB(self):
         return self.stamped_api._favoriteDB
     
-    @lazyProperty
+    @property
     def _deletedEntityDB(self):
-        return MongoDeletedEntityCollection()
+        return self.stamped_api._deletedEntityDB
     
     def addOne(self, entity, force=False, override=False):
         if not force:
@@ -232,7 +231,6 @@ class AEntityMatcher(object):
             
             self.resolveDuplicates(keep, delete)
         
-        utils.log("HERE1) %s" % len(duplicates))
         return (keep, duplicates)
     
     def _getBestDuplicate(self, duplicates):
@@ -369,8 +367,11 @@ class AEntityMatcher(object):
                 if 'place' in entity:
                     self._placesDB.removeEntity(entity.entity_id)
                 
-                # backup the deleted entity to a collection just in case..
-                self._deletedEntityDB.addEntity(entity)
+                try:
+                    # backup the deleted entity to a collection just in case..
+                    self._deletedEntityDB.addEntity(entity)
+                except:
+                    pass
         
         if wrap['stale']:
             if self.options.verbose:

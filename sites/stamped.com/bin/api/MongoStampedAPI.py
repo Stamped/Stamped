@@ -17,24 +17,25 @@ from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
 
-from db.mongodb.MongoAccountCollection      import MongoAccountCollection
-from db.mongodb.MongoEntityCollection       import MongoEntityCollection
-from db.mongodb.MongoPlacesEntityCollection import MongoPlacesEntityCollection
-from db.mongodb.MongoUserCollection         import MongoUserCollection
-from db.mongodb.MongoStampCollection        import MongoStampCollection
-from db.mongodb.MongoCommentCollection      import MongoCommentCollection
-from db.mongodb.MongoFavoriteCollection     import MongoFavoriteCollection
-from db.mongodb.MongoCollectionCollection   import MongoCollectionCollection
-from db.mongodb.MongoFriendshipCollection   import MongoFriendshipCollection
-from db.mongodb.MongoActivityCollection     import MongoActivityCollection
-from db.mongodb.MongoInvitationCollection   import MongoInvitationCollection
-from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
-from db.mongodb.MongoTempEntityCollection   import MongoTempEntityCollection
-from db.mongodb.MongoSearchCacheCollection  import MongoSearchCacheCollection
-from db.mongodb.MongoLogsCollection         import MongoLogsCollection
-from db.mongodb.MongoStatsCollection        import MongoStatsCollection
+from db.mongodb.MongoAccountCollection          import MongoAccountCollection
+from db.mongodb.MongoEntityCollection           import MongoEntityCollection
+from db.mongodb.MongoPlacesEntityCollection     import MongoPlacesEntityCollection
+from db.mongodb.MongoUserCollection             import MongoUserCollection
+from db.mongodb.MongoStampCollection            import MongoStampCollection
+from db.mongodb.MongoCommentCollection          import MongoCommentCollection
+from db.mongodb.MongoFavoriteCollection         import MongoFavoriteCollection
+from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
+from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
+from db.mongodb.MongoActivityCollection         import MongoActivityCollection
+from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
+from db.mongodb.MongoEntitySearcher             import MongoEntitySearcher
+from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
+from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
+from db.mongodb.MongoLogsCollection             import MongoLogsCollection
+from db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
+from db.mongodb.MongoDeletedEntityCollection    import MongoDeletedEntityCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -133,6 +134,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
+    
+    @lazyProperty
+    def _deletedEntityDB(self):
+        return MongoDeletedEntityCollection()
     
     def getStats(self, store=False):
         unique_user_stats = {}
