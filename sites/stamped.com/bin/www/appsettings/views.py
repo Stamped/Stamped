@@ -210,13 +210,13 @@ def alertSettingsUpdate(request, **kwargs):
 
         # Get settings
         alerts = {
-            'email_alert_credit':   data.pop('email_alert_credit', False)
-            'email_alert_like':     data.pop('email_alert_like', False)
-            'email_alert_fav':      data.pop('email_alert_fav', False)
-            'email_alert_mention':  data.pop('email_alert_mention', False)
-            'email_alert_comment':  data.pop('email_alert_comment', False)
-            'email_alert_reply':    data.pop('email_alert_reply', False)
-            'email_alert_follow':   data.pop('email_alert_follow', False)
+            'email_alert_credit':   data.pop('email_alert_credit', False),
+            'email_alert_like':     data.pop('email_alert_like', False),
+            'email_alert_fav':      data.pop('email_alert_fav', False),
+            'email_alert_mention':  data.pop('email_alert_mention', False),
+            'email_alert_comment':  data.pop('email_alert_comment', False),
+            'email_alert_reply':    data.pop('email_alert_reply', False),
+            'email_alert_follow':   data.pop('email_alert_follow', False),
         }
 
         stampedAPI.updateAlerts(authUserId, alerts)
