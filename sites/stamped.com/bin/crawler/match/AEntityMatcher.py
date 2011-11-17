@@ -258,6 +258,11 @@ class AEntityMatcher(object):
         return (keep, duplicates)
     
     def resolveDuplicates(self, entity1, entities_to_delete, override=False):
+        """
+            Replaces all references to the entities in entities_to_delete with 
+            entity1, merging all deleted entities into entity1.
+        """
+        
         if not isinstance(entities_to_delete, (list, tuple)):
             entities_to_delete = [ entities_to_delete ]
         
@@ -270,8 +275,12 @@ class AEntityMatcher(object):
                 for doc in docs:
                     item = self._stampDB._convertFromMongo(doc)
                     entity1.exportSchema(item.entity)
-                    pprint(item.value)
                     item.timestamp.modified = datetime.utcnow()
+                    
+                    if self.options.verbose:
+                        utils.log("updating stamp '%s' with entity_id '%s' => '%s'" % \
+                                  (item.stamp_id, entity2.entity_id, entity1.entity_id))
+                        pprint(item.value)
                     
                     if not self.options.noop:
                         self._stampDB.update(item)
@@ -286,6 +295,10 @@ class AEntityMatcher(object):
                     item.link.linked_entity = entity1
                     item.link.linked_entity_id = entity1.entity_id
                     
+                    if self.options.verbose:
+                        utils.log("updating activity '%s' with entity_id '%s' => '%s'" % \
+                                  (item.activity_id, entity2.entity_id, entity1.entity_id))
+                    
                     if not self.options.noop:
                         self._activityDB.update(item)
             
@@ -298,6 +311,10 @@ class AEntityMatcher(object):
                     item = self._favoriteDB._convertFromMongo(doc)
                     entity1.exportSchema(item.entity)
                     
+                    if self.options.verbose:
+                        utils.log("updating favorite '%s' with entity_id '%s' => '%s'" % \
+                                  (item.favorite_id, entity2.entity_id, entity1.entity_id))
+                    
                     if not self.options.noop:
                         self._favoriteDB.update(item)
             
@@ -309,12 +326,22 @@ class AEntityMatcher(object):
                 for doc in docs:
                     item = self._favoriteDB.user_fav_entities_collection._convertFromMongo(doc)
                     refs = item['ref_ids']
+                    found = False
                     
                     for i in xrange(len(refs)):
                         ref = refs[i]
                         
                         if ref == entity2.entity_id:
                             refs[i] = entity1.entity_id
+                            found = True
+                    
+                    if self.options.verbose:
+                        utils.log("updating favorite '%s' with entity_id '%s' => '%s'" % \
+                                  (item.favorite_id, entity2.entity_id, entity1.entity_id))
+                    
+                    if not found:
+                        logs.warn("ERROR: unable to update favorite '%s' with entity_id '%s' => '%s'" % \
+                                  (item.favorite_id, entity2.entity_id, entity1.entity_id))
                     
                     if not self.options.noop:
                         self._favoriteDB.user_fav_entities_collection.update(item)
@@ -350,7 +377,7 @@ class AEntityMatcher(object):
                         if override and not isinstance(v, dict):
                             stale = True
                         
-                        if isinstance(v, basestring) and v != dest[k]:
+                        if isinstance(v, basestring) and v != dest[k] and k != "entity_id":
                             stale = True
                     
                     if stale:
@@ -362,10 +389,14 @@ class AEntityMatcher(object):
             _addDict(entity.value, keep, wrap)
             
             if not self.options.noop and 'entity_id' in entity:
-                self._entityDB.removeEntity(entity.entity_id)
-                
-                if 'place' in entity:
-                    self._placesDB.removeEntity(entity.entity_id)
+                try:
+                    self._entityDB.removeEntity(entity.entity_id)
+                    
+                    if 'place' in entity:
+                        self._placesDB.removeEntity(entity.entity_id)
+                except:
+                    utils.log("warning: unable to remove entity '%s' (title=%s) from db (not found)" % \
+                              (entity.entity_id, entity.title))
                 
                 try:
                     # backup the deleted entity to a collection just in case..
@@ -375,7 +406,8 @@ class AEntityMatcher(object):
         
         if wrap['stale']:
             if self.options.verbose:
-                utils.log("[%s] retaining %s (removed %d):" % (self, keep.title, numDuplicates))
+                utils.log("[%s] retaining %s (title=%s) (removed %d):" % \
+                          (self, keep.entity_id, keep.title, numDuplicates))
                 pprint(keep.value)
             
             if not self.options.noop:
