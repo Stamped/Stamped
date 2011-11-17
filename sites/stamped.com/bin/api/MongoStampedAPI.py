@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs
+import json, logs
 
 from Entity                 import *
 from Schemas                import *
@@ -134,13 +134,86 @@ class MongoStampedAPI(StampedAPI):
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
     
-    def getStats(self):
-        subcategory_stats = { }
-        source_stats = { }
+    def getStats(self, store=False):
+        unique_user_stats = {}
+        #subcategory_stats = { }
+        #source_stats = { }
+        
+        # find the number of unique, active users from the past day / week / month
+        cmd   = 'db.logstats.group({ reduce: function(obj,prev) { prev.users[obj.uid] = 1; }, cond:{uid: {$exists: true}, %s}, initial: {users:{}, }, key:{}, })'
+        
+        times = [
+            ('one_day',   24  * 60 * 60000), # 24 hours in milliseconds
+            ('one_week',  168 * 60 * 60000), # 7  days  in milliseconds
+            ('one_month', 720 * 60 * 60000), # 30 days  in milliseconds
+            ('total'    , None), 
+        ]
+        
+        for k, v in times:
+            try:
+                if v is not None:
+                    mongo_cmd = cmd % ("bgn: {$gte: new Date(new Date() - %s)}, " % v)
+                else:
+                    mongo_cmd = cmd % ""
+                
+                ret = utils.runMongoCommand(mongo_cmd)
+                num_users = len(ret[0]['users'])
+                
+                #print "%s) %d" % (k, num_users)
+                unique_user_stats[k] = num_users
+            except:
+                utils.printException()
+        
+        # evaluate distribution of comments per stamp
+        cmd = 'db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, initial: {count: 0, }, key:{stamp_id:1}, })'
+        ret = utils.runMongoCommand(cmd)
+        num_comments_per_stamp = utils.get_basic_stats(ret, 'count')
+        
+        # evaluate distribution of comments per user
+        cmd = 'db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, initial: {count: 0, }, key:{user:1}, })'
+        ret = utils.runMongoCommand(cmd)
+        num_comments_per_user = utils.get_basic_stats(ret, 'count')
+        
+        custom_stats = {}
+        cmds = {
+            # num stamps per user
+            'num_stamps_per_user' : ('db.stamps.group({ reduce: function(obj,prev) { prev.count += 1 }, %sinitial: {count: 0, }, key:{user:1}, })', 1), 
+            
+            # num stamps left per user
+            'num_stamps_left_per_user' : ('db.users.group({ reduce: function(obj,prev) { prev.count = obj.stats.num_stamps_left }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0, ), 
+            
+            # num likes per stamp
+            'num_likes_per_stamp' : ('db.stamps.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_likes")) { prev.count = obj.stats.num_likes; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 2), 
+            
+            # num likes per user
+            'num_likes_per_user' : ('db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_likes")) { prev.count = obj.stats.num_likes; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0), 
+        }
+        
+        for cmd_key, cmd in cmds.iteritems():
+            custom_stats[cmd_key] = {}
+            
+            for k, v in times:
+                if v is not None:
+                    if cmd[1] == 0:
+                        continue
+                    elif cmd[1] == 1:
+                        field = 'timestamp.created'
+                    else:
+                        field = 'timestamp.modified'
+                    
+                    mongo_cmd = cmd[0] % ('cond: { "%s": {$gte: new Date(new Date() - %s)} }, ' % (field, v))
+                else:
+                    mongo_cmd = cmd[0] % ""
+                
+                ret   = utils.runMongoCommand(mongo_cmd)
+                stats = utils.get_basic_stats(ret, 'count')
+                
+                custom_stats[cmd_key][k] = stats
         
         # TODO: incorporate more metrics
         # https://docs.google.com/a/stamped.com/spreadsheet/ccc?key=0AmEQSQLwlDtTdHoweWRZSjhXTm5Xb3NvSFBCQ0szWlE&hl=en_US#gid=0
         
+        """
         for source in EntitySourcesSchema()._elements:
             count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
             source_stats[source] = count
@@ -148,26 +221,47 @@ class MongoStampedAPI(StampedAPI):
         for subcategory in subcategories:
             count = self._entityDB._collection.find({"subcategory" : subcategory}).count()
             subcategory_stats[subcategory] = count
+        """
         
         stats = {
             'entities' : {
                 'count' : self._entityDB._collection.count(), 
-                'sources' : source_stats, 
-                'subcategory' : subcategory_stats, 
                 'places' : {
                     'count' : self._placesEntityDB._collection.count(), 
                 }, 
             }, 
             'users' : {
-                'count' : self._userDB._collection.count(), 
+                'count'  : self._userDB._collection.count(), 
+                'active' : unique_user_stats, 
             }, 
             'comments' : {
                 'count' : self._commentDB._collection.count(), 
+                'per_stamp' : num_comments_per_stamp, 
+                'per_user'  : num_comments_per_user, 
+            }, 
+            'likes' : {
+                'per_stamp' : custom_stats['num_likes_per_stamp'], 
+                'per_user'  : custom_stats['num_likes_per_user'], 
             }, 
             'stamps' : {
                 'count' : self._stampDB._collection.count(), 
+                'per_user' : custom_stats['num_stamps_per_user'], 
+                'left_per_user' : custom_stats['num_stamps_left_per_user'], 
             }, 
         }
+        
+        # optionally store stats
+        def _store(prefix, stats):
+            for k, v in stats.iteritems():
+                key = "%s.%s" % (prefix, k)
+                
+                if isinstance(v, dict):
+                    _store(key, v)
+                else:
+                    self._statsSink.time(key, v)
+        
+        if store:
+            _store('stamped.stats', stats)
         
         return stats
 

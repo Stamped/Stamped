@@ -37,6 +37,12 @@ class PasswordResetToken(Schema):
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 
+class SettingsEmailAlertToken(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring)
+        self.token_id           = SchemaElement(basestring)
+        self.timestamp          = TimestampSchema()
+
 # ####### #
 # Account #
 # ####### #
