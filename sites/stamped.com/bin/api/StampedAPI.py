@@ -2626,7 +2626,7 @@ class StampedAPI(AStampedAPI):
             entityIds[str(entity.entity_id)] = entity.exportSchema(EntityMini())
 
         # Enrich stamps
-        stamps = self._stampDB.getStamps(stampIds.keys())
+        stamps = self._stampDB.getStamps(stampIds.keys(), limit=len(stampIds.keys()))
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, \
                     entityIds=entityIds)
 
