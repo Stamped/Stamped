@@ -245,7 +245,6 @@ def alertSettingsUpdate(request, **kwargs):
         logs.error(500)
         logs.save()
 
-        ### TODO: CHANGE URL
-        return render_to_response('password-reset.html', {'error': 'FAIL'})
+        return HttpResponse("internal server error", status=500)
 
 
