@@ -336,12 +336,12 @@ class AEntityMatcher(object):
                             found = True
                     
                     if self.options.verbose:
-                        utils.log("updating favorite '%s' with entity_id '%s' => '%s'" % \
-                                  (item.favorite_id, entity2.entity_id, entity1.entity_id))
+                        utils.log("updating userfaventities with entity_id '%s' => '%s'" % \
+                                  (entity2.entity_id, entity1.entity_id))
                     
                     if not found:
-                        logs.warn("ERROR: unable to update favorite '%s' with entity_id '%s' => '%s'" % \
-                                  (item.favorite_id, entity2.entity_id, entity1.entity_id))
+                        logs.warn("ERROR: unable to update favorite with entity_id '%s' => '%s'" % \
+                                  (entity2.entity_id, entity1.entity_id))
                     
                     if not self.options.noop:
                         self._favoriteDB.user_fav_entities_collection.update(item)

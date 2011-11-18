@@ -174,7 +174,10 @@ class AMongoCollection(object):
         if self._obj is not None:
             assert obj.__class__.__name__ == self._obj.__name__
         
-        document = obj.value
+        try:
+            document = obj.value
+        except:
+            document = obj
         
         if self._primary_key:
             if self._primary_key in document:
