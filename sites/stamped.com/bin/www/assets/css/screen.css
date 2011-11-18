@@ -620,6 +620,10 @@ margin-bottom:20px;
 padding:10px 0;
 }
 
+#page.public .more .copyright{
+float:right;
+}
+
 #page .sheet{
 background:#fff;
 width:940px;
