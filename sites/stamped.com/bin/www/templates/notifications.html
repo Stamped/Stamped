@@ -19,7 +19,8 @@
 
         <!-- Magic -->
         <script type="text/javascript">
-          var _PARAMS = {{ json_settings }};
+          var _PARAMS = {{ json_settings|safe|escape }};
+          var _TOKEN = '{{ action_token }}';
         </script>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
         <script type="text/javascript" src="http://stamped.com.static.images.s3.amazonaws.com/assets/js/magic.js"></script>

@@ -175,6 +175,7 @@ def alertSettings(request, **kwargs):
             'name':             user.name,
             'image_url':        image_url,
             'stamp_url':        stamp_url,
+            'action_token':     tokenId,
             'json_settings':    json.dumps(settings, sort_keys=True)
         }
 
@@ -202,23 +203,26 @@ def alertSettings(request, **kwargs):
 def alertSettingsUpdate(request, **kwargs):
     try:
         # Check token
-        data        = request.POST
-        tokenId     = data.pop('token', None)
+        tokenId     = request.POST.get('token', None)
         authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
 
         # Get settings
         alerts = {
-            'email_alert_credit':   data.pop('email_alert_credit', False),
-            'email_alert_like':     data.pop('email_alert_like', False),
-            'email_alert_fav':      data.pop('email_alert_fav', False),
-            'email_alert_mention':  data.pop('email_alert_mention', False),
-            'email_alert_comment':  data.pop('email_alert_comment', False),
-            'email_alert_reply':    data.pop('email_alert_reply', False),
-            'email_alert_follow':   data.pop('email_alert_follow', False),
+            'email_alert_credit':   request.POST.get('email_alert_credit', False),
+            'email_alert_like':     request.POST.get('email_alert_like', False),
+            'email_alert_fav':      request.POST.get('email_alert_fav', False),
+            'email_alert_mention':  request.POST.get('email_alert_mention', False),
+            'email_alert_comment':  request.POST.get('email_alert_comment', False),
+            'email_alert_reply':    request.POST.get('email_alert_reply', False),
+            'email_alert_follow':   request.POST.get('email_alert_follow', False),
         }
 
-        stampedAPI.updateAlerts(authUserId, alerts)
+        print authUserId
+        print alerts
 
+        stampedAPI.updateAlerts(authUserId, alerts)
+        
+        params = {}
         params.setdefault('content_type', 'text/javascript; charset=UTF-8')
         params.setdefault('mimetype', 'application/json')
         
