@@ -288,7 +288,7 @@ position:relative;
 margin:-180px auto 0;
 float:none;
 position: relative;
-bottom:-195px;
+bottom:-197px;
 }
 
 #home.public .pitch{
@@ -620,7 +620,7 @@ margin-bottom:20px;
 padding:10px 0;
 }
 
-#page.public .more .copyright{
+#page .more .copyright{
 float:right;
 }
 
