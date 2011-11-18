@@ -206,15 +206,20 @@ def alertSettingsUpdate(request, **kwargs):
         tokenId     = request.POST.get('token', None)
         authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
 
+        def _checkBool(v):
+            if v in ['True', 'true', '1', 1, True]:
+                return True
+            return False
+
         # Get settings
         alerts = {
-            'email_alert_credit':   request.POST.get('email_alert_credit', False),
-            'email_alert_like':     request.POST.get('email_alert_like', False),
-            'email_alert_fav':      request.POST.get('email_alert_fav', False),
-            'email_alert_mention':  request.POST.get('email_alert_mention', False),
-            'email_alert_comment':  request.POST.get('email_alert_comment', False),
-            'email_alert_reply':    request.POST.get('email_alert_reply', False),
-            'email_alert_follow':   request.POST.get('email_alert_follow', False),
+            'email_alert_credit':   _checkBool(request.POST.get('email_alert_credit', False)),
+            'email_alert_like':     _checkBool(request.POST.get('email_alert_like', False)),
+            'email_alert_fav':      _checkBool(request.POST.get('email_alert_fav', False)),
+            'email_alert_mention':  _checkBool(request.POST.get('email_alert_mention', False)),
+            'email_alert_comment':  _checkBool(request.POST.get('email_alert_comment', False)),
+            'email_alert_reply':    _checkBool(request.POST.get('email_alert_reply', False)),
+            'email_alert_follow':   _checkBool(request.POST.get('email_alert_follow', False)),
         }
 
         print authUserId
