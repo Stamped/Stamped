@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import Globals
-import pymongo, json, codecs, os, sys, bson, unicodedata
+import pymongo, json, codecs, os, sys, bson, utils, unicodedata
 from subprocess import Popen, PIPE
 
 OLD_HOST        = "ec2-67-202-60-185.compute-1.amazonaws.com"
