@@ -222,9 +222,6 @@ def alertSettingsUpdate(request, **kwargs):
             'email_alert_follow':   _checkBool(request.POST.get('email_alert_follow', False)),
         }
 
-        print authUserId
-        print alerts
-
         stampedAPI.updateAlerts(authUserId, alerts)
         
         params = {}
