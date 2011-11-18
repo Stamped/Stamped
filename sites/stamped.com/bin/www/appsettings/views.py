@@ -147,8 +147,7 @@ def passwordSent(request):
 def alertSettings(request, **kwargs):
     try:
         # Check token
-        data        = request.GET
-        tokenId     = data.pop('token', None)
+        tokenId     = request.GET.get('token', None)
         authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
 
         # Display 'change settings' form
@@ -169,7 +168,7 @@ def alertSettings(request, **kwargs):
             'email_alert_comment':  alerts.email_alert_comment,
             'email_alert_reply':    alerts.email_alert_reply,
             'email_alert_follow':   alerts.email_alert_follow,
-            }
+        }
 
         params = {
             'screen_name':      user.screen_name,
@@ -179,8 +178,7 @@ def alertSettings(request, **kwargs):
             'json_settings':    json.dumps(settings, sort_keys=True)
         }
 
-        ### TODO: CHANGE URL
-        response = render_to_response('password-reset.html', params)
+        response = render_to_response('notifications.html', params)
 
         return response
 

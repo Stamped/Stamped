@@ -54,7 +54,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         query = []
         if isinstance(userIds, list):
             for userId in userIds:
-                query.append(self._getObjectIdFromString(userId))
+                query.append(userId)
 
         data = self._collection.find({"_id": {"$in": query}}).limit(limit)
             
