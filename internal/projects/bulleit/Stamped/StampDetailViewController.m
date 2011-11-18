@@ -385,6 +385,7 @@ typedef enum {
   }
   
   alsoStampedByContainer_.hidden = NO;
+  alsoStampedByScrollView_.scrollsToTop = NO;
   alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.frame.size.width,
                                                     alsoStampedByScrollView_.frame.size.height);
   CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);

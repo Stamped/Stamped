@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <title>Notifications | Stamped</title>
+        
+        <meta name="description" content="Stamped. Be the first to know."> 
+        <meta name="author" content="Stamped, Inc."> 
+        <meta name="copyright" content="Stamped, Inc."> 
+        <meta name="robots" content="index,follow"> 
+                
+        <!-- Style -->
+        <link rel="stylesheet" href="http://stamped.com.static.images.s3.amazonaws.com/assets/css/normalize.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="http://stamped.com.static.images.s3.amazonaws.com/assets/css/screen.css" type="text/css" media="screen" />
+        <link rel="shortcut icon" href="/favicon.ico"/>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+
+        <!-- Magic -->
+        <script type="text/javascript">
+          var _PARAMS = {{ json_settings }};
+        </script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+        <script type="text/javascript" src="http://stamped.com.static.images.s3.amazonaws.com/assets/js/magic.js"></script>
+    </head>
+    <body>
+        <div id="page" class="flood">
+            <div class="wrap">
+            <div class="sheet">
+                <div class="top-wave"></div>
+                <a href="." class="brand replaced">Stamped</a>
+                <div class="inner" id="notifications-page">
+                    <h1 class="replaced text-email-notification-settings">Email Notifications Settings</h1>
+                    <div class="personal-status">
+                        <div class="user">
+                            <div class="thumb">
+                                <div class="photo">
+                                    <img src="{{ image_url }}"/>
+                                </div>
+                                <div class="stamp">
+                                    <img src="{{ stamp_url }}"/>
+                                </div>
+                            </div>
+                            <span class="username">{{ screen_name }}</span>
+                            <span class="real-name">{{ name }}</span>
+                        </div>
+                        <a href="#" class="toggle-all">Toggle All</a>
+                    </div>
+                    <ul class="settings">
+                        <li class="followers">
+                            <div class="item">
+                            <div class="thumb replaced">Followers</div>
+                            <h2>Followers</h2>
+                            <span class="description">Someone follows you on Stamped.</span>
+                            </div>
+                            <div class="slider" id="email_alert_follow">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="credit">
+                            <div class="item">
+                                <div class="thumb replaced">Credit</div>
+                                <h2>Credit</h2>
+                                <span class="description">Someone awards you credit on a stamp.</span>
+                            </div>
+                            <div class="slider" id="email_alert_credit">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="mentions">
+                            <div class="item">
+                                <div class="thumb replaced">Mentions</div>
+                                <h2>Mentions</h2>
+                                <span class="description">Someone mentions you on a stamp or a comment.</span>
+                            </div>
+                            <div class="slider" id="email_alert_mention">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="comments">
+                            <div class="item">
+                                <div class="thumb replaced">Comments</div>
+                                <h2>Comments</h2>
+                                <span class="description">Someone comments on one of your stamps.</span>
+                            </div>
+                            <div class="slider" id="email_alert_comment">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="replies">
+                            <div class="item">
+                                <div class="thumb replaced">Replies</div>
+                                <h2>Replies</h2>
+                                <span class="description">Someone replies to one of your stamps.</span>
+                            </div>
+                            <div class="slider" id="email_alert_reply">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="likes">
+                            <div class="item">
+                                <div class="thumb replaced">Likes</div>
+                                <h2>Likes</h2>
+                                <span class="description">Someone likes one of your stamps.</span>
+                            </div>
+                            <div class="slider" id="email_alert_like">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                        <li class="todos">
+                            <div class="item">
+                                <div class="thumb replaced">To-do's</div>
+                                <h2>To-do's</h2>
+                                <span class="description">Someone adds ones of your stamps as a to-do.</span>
+                            </div>
+                            <div class="slider" id="email_alert_todos">
+                                <span class="knob replaced">knob</span>
+                                <span class="mask replaced">mask</span>
+                                <span class="background replaced">background</span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                </div> <!-- /inner -->
+                <div class="bottom-wave"></div>
+            </div> <!-- /sheet -->    
+            <div class="more">
+                <span>&copy;2011 Stamped Inc.</span>
+            </div> 
+            </div>
+        </div> <!-- /page -->
+        <script type="text/javascript">
+            stamped.init();
+        </script>
+    </body>
+    <script type="text/javascript">var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-24470954-1']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();</script>
+</html>

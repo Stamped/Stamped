@@ -54,7 +54,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         query = []
         if isinstance(userIds, list):
             for userId in userIds:
-                query.append(self._getObjectIdFromString(userId))
+                query.append(userId)
 
         data = self._collection.find({"_id": {"$in": query}}).limit(limit)
             
@@ -64,7 +64,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         return result
     
     def getToken(self, tokenId):
-        document = self._collection.find({'token_id': tokenId})
+        document = self._collection.find_one({'token_id': tokenId})
         return self._convertFromMongo(document)
         
     def removeTokenForUser(self, userId):

@@ -59,7 +59,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   MediumUserImageView* bottomUserImageView_;
 
   // NOT managed. Must manage ownership.
-  CATextLayer* titleLayer_;
+  CALayer* titleLayer_;
   CTFontRef titleFont_;
   CGFloat titleDescent_;
   CTParagraphStyleRef titleStyle_;
@@ -68,11 +68,14 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   CGFloat userImageRightMargin_;
   CTLineRef ellipsisLine_;
   CTLineRef titleLine_;
+  CTLineRef ellipsisLineInverted_;
+  CTLineRef titleLineInverted_;
+  UIImage* stampImageInverted_;
 }
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color;
-- (void)invertColors:(BOOL)inverted;
+//- (void)invertColors:(BOOL)inverted;
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated;
 - (void)stampChanged:(NSNotification*)notification;
 - (void)updateTimestamp;
@@ -199,10 +202,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     [numCommentsLabel_ release];
     
     titleLayer_ = [[CATextLayer alloc] init];
-    titleLayer_.truncationMode = kCATruncationEnd;
-    titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
-    titleLayer_.fontSize = 24.0;
+//    titleLayer_.truncationMode = kCATruncationEnd;
+//    titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
+//    titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+//    titleLayer_.fontSize = 24.0;
     titleLayer_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding, kTitleMaxWidth, kTitleFontSize);
     titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
     titleDescent_ = CTFontGetDescent(titleFont_);
@@ -227,6 +230,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     ellipsisLine_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[NSAttributedString alloc] initWithString:@"…" 
                                                                                                             attributes:ellipsisAttributes]);
+    [ellipsisAttributes setObject:(id)[UIColor whiteColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
+    ellipsisLineInverted_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[NSAttributedString alloc] initWithString:@"…" 
+                                                                                                            attributes:ellipsisAttributes]);
+    stampImageInverted_ = [[Util stampImageWithPrimaryColor:@"FFFFFF" secondary:@"FFFFFF"] retain];
+    
     CFRelease(ellipsisFont);
     
     
@@ -253,21 +261,23 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   CFRelease(ellipsisLine_);
+  CFRelease(ellipsisLineInverted_);
+  [stampImageInverted_ release];
   [super dealloc];
 }
 
-- (void)invertColors:(BOOL)inverted {
-  UIColor* titleColor = [UIColor stampedDarkGrayColor];
-  if (inverted) {
-    titleColor = [UIColor whiteColor];
-  }
-  [CATransaction begin];
-  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
-  titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
-  titleLayer_.foregroundColor = titleColor.CGColor;
-  [CATransaction commit];
-  [self setNeedsDisplay];
-}
+//- (void)invertColors:(BOOL)inverted {
+//  UIColor* titleColor = [UIColor stampedDarkGrayColor];
+//  if (inverted) {
+//    titleColor = [UIColor whiteColor];
+//  }
+//  [CATransaction begin];
+//  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+//  titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
+//  titleLayer_.foregroundColor = titleColor.CGColor;
+//  [CATransaction commit];
+//  [self setNeedsDisplay];
+//}
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index {
   NSUInteger stampsCount = stamps_.count;
@@ -282,12 +292,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   selected_ = selected;
-  [self invertColors:selected];
+//  [self invertColors:selected];
 }
 
 - (void)setHighlighted:(BOOL)highlighted {
   highlighted_ = highlighted;
-  [self invertColors:highlighted];
+//  [self invertColors:highlighted];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -295,13 +305,26 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSaveGState(ctx);
-//  CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
+  CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
   CGContextTranslateCTM(ctx, CGRectGetMinX(titleLayer_.frame), CGRectGetMaxY(titleLayer_.frame) - titleDescent_);
 	CGContextScaleCTM(ctx, 1.0, -1.0);
-  CTLineDraw(titleLine_, ctx);
-//  [titleLayer_ drawInContext:ctx];
-  CGContextRestoreGState(ctx);
-  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
+  if (highlighted_ || selected_) {
+    NSAttributedString* attrStringInverted = [self titleAttributedStringWithColor:[UIColor whiteColor]];
+    CTLineRef lineInverted = CTLineCreateWithAttributedString((CFAttributedStringRef)attrStringInverted);
+    CTLineRef truncatedLineInverted = CTLineCreateTruncatedLine(lineInverted, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLineInverted_);
+    if (titleLineInverted_)
+      CFRelease(titleLineInverted_);
+    titleLineInverted_ = truncatedLineInverted;
+    CTLineDraw(titleLineInverted_, ctx);
+    CGContextRestoreGState(ctx);
+    [stampImageInverted_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeNormal alpha:1.0];
+    CFRelease(lineInverted);
+  }
+  else {
+    CTLineDraw(titleLine_, ctx);
+    CGContextRestoreGState(ctx);
+    [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
+  }
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
@@ -317,12 +340,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     title_ = [title copy];
 
     NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
-//    titleLayer_.string = attrString;
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
     CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLine_);
+
     if (titleLine_)
       CFRelease(titleLine_);
     titleLine_ = truncatedLine;
+
     
     CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
     CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
@@ -566,6 +590,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     userImageScrollView_ = [[UIScrollView alloc] initWithFrame:CGRectMake(60, 0, 249, 63)];
     userImageScrollView_.alwaysBounceHorizontal = YES;
     userImageScrollView_.pagingEnabled = YES;
+    userImageScrollView_.scrollsToTop = NO;
     userImageScrollView_.backgroundColor = [UIColor clearColor];
     userImageScrollView_.hidden = YES;
     userImageScrollView_.delegate = self;
