@@ -13,7 +13,7 @@ def getInstances():
     replSetName = 'stamped-dev-01'
     
     dbCount     = 3
-    webCount    = 2
+    webCount    = 6
     monCount    = 1
     
     ### TEMPLATES
@@ -28,6 +28,7 @@ def getInstances():
             'numDisks': 4,
         },
         'placement' : None, 
+        'instance_type' : 'm2.xlarge', 
     }
     
     webInstance = {

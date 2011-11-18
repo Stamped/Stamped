@@ -506,7 +506,7 @@ class AWSDeploymentStack(ADeploymentStack):
         top += 1
         
         # assumes all instances are sequential and zero-indexed
-        assert len(sim) == top
+        #assert len(sim) == top
         
         if 0 == len(sim):
             instances = config.getInstances()
