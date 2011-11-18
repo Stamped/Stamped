@@ -5,29 +5,35 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'www.views.home', name='home'),
-    # url(r'^www/', include('www.foo.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # DOWNLOAD!
+    url(R'^download$',                      'teaser.views.download'),
 
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
-    url(R'^download$', 'teaser.views.download'),
+    # Tweet Pages
     # url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
     # url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.mobile'),
-    # url(R'^about$', 'teaser.views.about'),
-    # url(R'^privacy-mobile', 'teaser.views.privacy'),
-    # url(R'^terms-mobile', 'teaser.views.terms'),
-    # url(R'^feedback-mobile', 'teaser.views.feedback'),
-    # url(R'^licenses-mobile', 'teaser.views.licenses'),
-    # url(R'^faq-mobile', 'teaser.views.faq'),
-    # url(R'^pw/(?P<token>[\w-]{36})$',       'appsettings.views.passwordReset'),
-    # url(R'^settings/password/forgot$',      'appsettings.views.passwordForgot'),
-    # url(R'^settings/password/sent$',        'appsettings.views.passwordSent'),
-    # url(R'^settings/password/success$',     'appsettings.views.passwordSuccess'),
-    # url(R'^settings/alerts$',               'appsettings.views.alertSettings'),
-    # url(R'^settings/alerts/update.json$',   'appsettings.views.alertSettingsUpdate'),
-    # url(R'$', 'teaser.views.index'), 
+
+    # Settings
+    url(R'^pw/(?P<token>[\w-]{36})$',       'appsettings.views.passwordReset'),
+    url(R'^settings/password/forgot$',      'appsettings.views.passwordForgot'),
+    url(R'^settings/password/sent$',        'appsettings.views.passwordSent'),
+    url(R'^settings/password/success$',     'appsettings.views.passwordSuccess'),
+    url(R'^settings/alerts$',               'appsettings.views.alertSettings'),
+    url(R'^settings/alerts/update.json$',   'appsettings.views.alertSettingsUpdate'),
+
+    # Mobile Pages
+    url(R'^privacy-mobile',                 'teaser.views.mobilePrivacy'),
+    url(R'^terms-mobile',                   'teaser.views.mobileTerms'),
+    url(R'^feedback-mobile',                'teaser.views.mobileFeedback'),
+    url(R'^licenses-mobile',                'teaser.views.mobileLicenses'),
+    url(R'^faq-mobile',                     'teaser.views.mobileFaq'),
+
+    # Website
+    url(R'^about$',                         'teaser.views.about'),
+    url(R'^faq$',                           'teaser.views.faq'),
+    url(R'^privacy$',                       'teaser.views.privacy'),
+    url(R'^terms-of-service$',              'teaser.views.terms'),
+
+    # Index
+    url(R'$',                               'teaser.views.index'), 
 )
