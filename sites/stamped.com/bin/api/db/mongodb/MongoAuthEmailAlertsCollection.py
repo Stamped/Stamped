@@ -64,7 +64,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         return result
     
     def getToken(self, tokenId):
-        document = self._collection.find({'token_id': tokenId})
+        document = self._collection.find_one({'token_id': tokenId})
         return self._convertFromMongo(document)
         
     def removeTokenForUser(self, userId):
