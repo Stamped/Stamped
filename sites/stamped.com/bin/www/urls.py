@@ -29,11 +29,11 @@ urlpatterns = patterns('',
     url(R'^faq-mobile',                     'teaser.views.mobileFaq'),
 
     # Website
-    url(R'^about$',                         'teaser.views.about'),
-    url(R'^faq$',                           'teaser.views.faq'),
-    url(R'^privacy$',                       'teaser.views.privacy'),
-    url(R'^terms-of-service$',              'teaser.views.terms'),
+    # url(R'^about$',                         'teaser.views.about'),
+    # url(R'^faq$',                           'teaser.views.faq'),
+    # url(R'^privacy$',                       'teaser.views.privacy'),
+    # url(R'^terms-of-service$',              'teaser.views.terms'),
 
     # Index
-    url(R'$',                               'teaser.views.index'), 
+    # url(R'$',                               'teaser.views.index'), 
 )
