@@ -624,6 +624,11 @@ padding:10px 0;
 float:right;
 }
 
+#page .more a{
+margin-left:0;
+margin-right:15px;
+}
+
 #page .sheet{
 background:#fff;
 width:940px;
