@@ -268,9 +268,6 @@ class MongoEntitySearcher(EntitySearcher):
                          local=False, 
                          user=None):
         
-        # NOTE: remove -- strictly for testing!
-        full = False
-        
         # -------------------------------- #
         # transform input query and coords #
         # -------------------------------- #
