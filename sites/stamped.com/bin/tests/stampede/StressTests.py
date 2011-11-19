@@ -35,7 +35,7 @@ realisticParams = {
     'users_limit': None, 
     'actions_per_minute': 3, 
     'actions_per_minute_decay': False, 
-    'actions_per_user_limit': 50, 
+    'actions_per_user_limit': None, 
     'bieber_protocol': True, 
     'user_class': RealisticSimulatedUser
 }
