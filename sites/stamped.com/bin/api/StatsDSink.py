@@ -24,6 +24,7 @@ class StatsDSink(AStatsSink):
         time.sleep(0.01)
     
     def get_stack_info(self, force_update=False):
+        return None
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
         stack_info = None
         
