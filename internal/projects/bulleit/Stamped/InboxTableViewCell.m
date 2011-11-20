@@ -336,7 +336,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   return [titleAttributedString autorelease];
 }
 
-	 {
+- (void)setTitle:(NSString *)title {
   if (title_ != title) {
     [title_ release];
     title_ = [title copy];
