@@ -321,7 +321,7 @@ int const SPACE_HEIGHT = 10;
     userImageButton.contentMode = UIViewContentModeCenter;
     userImageButton.layer.shadowOffset = CGSizeMake(0.0, 1.0);
     userImageButton.layer.shadowOpacity = 0.20;
-    userImageButton.layer.shadowRadius = 1.75;
+    userImageButton.layer.shadowRadius = 1.33;
     userImageButton.imageURL = s.user.profileImageURL;
     
     [userImageButton addTarget:self

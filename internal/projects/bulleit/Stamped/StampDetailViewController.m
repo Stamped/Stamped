@@ -407,9 +407,9 @@ typedef enum {
 
     userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
     userImage.contentMode = UIViewContentModeCenter;
-    userImage.layer.shadowOffset = CGSizeMake(0, 1);
-    userImage.layer.shadowOpacity = 0.2;
-    userImage.layer.shadowRadius = 1.75;
+//    userImage.layer.shadowOffset = CGSizeMake(0, 1);
+//    userImage.layer.shadowOpacity = 0.2;
+//    userImage.layer.shadowRadius = 1.75;
     userImage.imageURL = s.user.profileImageURL;
     userImage.enabled = YES;
     [userImage addTarget:self

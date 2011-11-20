@@ -38,7 +38,7 @@ static const CGFloat kUserImageSize = 41.0;
 static const CGFloat kCellTopPadding = 10.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
-static const CGFloat kTitleMaxWidth = 210.0;
+static const CGFloat kTitleMaxWidth = 220.0;
 static const CGFloat kSubtitleDefaultWidth = 192.0;
 static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
@@ -201,7 +201,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     [self addSubview:numCommentsLabel_];
     [numCommentsLabel_ release];
     
-    titleLayer_ = [[CATextLayer alloc] init];
+    titleLayer_ = [[CALayer alloc] init];
 //    titleLayer_.truncationMode = kCATruncationEnd;
 //    titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
 //    titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
@@ -292,11 +292,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   selected_ = selected;
+//  NSLog(@"%d selected: %@", selected, self.title);
 //  [self invertColors:selected];
 }
 
 - (void)setHighlighted:(BOOL)highlighted {
   highlighted_ = highlighted;
+//  NSLog(@"%d hilited:  %@", highlighted_, self.title);
 //  [self invertColors:highlighted];
 }
 
@@ -797,9 +799,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     s = [customView_.stamps objectAtIndex:i];
     MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:CGRectInset(userImgFrame, -2, -2)];
     userImageButton.contentMode = UIViewContentModeCenter;
-    userImageButton.layer.shadowOffset = CGSizeZero;
-    userImageButton.layer.shadowOpacity = 0.4;
-    userImageButton.layer.shadowRadius = 1.0;
+    userImageButton.layer.shadowOffset = CGSizeMake(0, 1);
+    userImageButton.layer.shadowOpacity = 0.2;
+    userImageButton.layer.shadowRadius = 1.33;
     userImageButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:
         CGRectMake(2, 2, CGRectGetWidth(userImgFrame), CGRectGetHeight(userImgFrame))].CGPath;
     userImageButton.imageURL = s.user.profileImageURL;
