@@ -419,7 +419,7 @@ class MongoEntitySearcher(EntitySearcher):
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
                 search_amazon  = (category_filter == 'book' or category_filter == 'other')
-                search_amazon |= (random.random() < 0.33)
+                search_amazon |= (random.random() < 0.4)
                 
                 if search_amazon:
                     pool.spawn(_find_amazon)
