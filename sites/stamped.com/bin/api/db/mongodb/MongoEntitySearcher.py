@@ -417,8 +417,8 @@ class MongoEntitySearcher(EntitySearcher):
             wrapper['google_national_results'] = self._find_google_national(national_query)
         
         if full:
-            if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
-                pool.spawn(_find_amazon)
+            #if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
+            #    pool.spawn(_find_amazon)
             
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple)
