@@ -32,8 +32,14 @@ def show(request, **kwargs):
             template = 'sdetail-mobile.html'
 
         encodedStampTitle = encodeStampTitle(stamp.entity.title)
+        
         if encodedStampTitle != stampTitle:
-            raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
+            i = encodedStampTitle.find('.')
+            if i != -1:
+                encodedStampTitle = encodedStampTitle[:i]
+            
+            if encodedStampTitle != stampTitle:
+                raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
 
         params = HTTPStamp().importSchema(stamp).value
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
