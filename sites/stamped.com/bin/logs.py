@@ -181,9 +181,12 @@ def save():
     localData.log['finish'] = datetime.datetime.utcnow()
 
     try:
-        if localData.saveLog == None:
+        # if localData.saveLog == None:
+        #     raise
+        # localData.saveLog(localData.log)
+        if localData.addLog == None:
             raise
-        localData.saveLog(localData.log)
+        localData.addLog(localData.log)
     except:
         pprint.pprint(localData.log)
 
