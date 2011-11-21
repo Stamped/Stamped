@@ -8,7 +8,7 @@ __license__   = "TODO"
 
 import init
 
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import render_to_response
 import datetime
 
@@ -73,7 +73,7 @@ def terms(request):
         raise Http404
 
 def download(request):
-    return HttpResponseRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
+    return HttpResponsePermanentRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
 
 
 
