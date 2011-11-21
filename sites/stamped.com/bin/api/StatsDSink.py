@@ -24,9 +24,6 @@ class StatsDSink(AStatsSink):
         time.sleep(0.01)
     
     def get_stack_info(self, force_update=False):
-        # NOTE: TODO TEMPORARY
-        return None
-        
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
         stack_info = None
         
@@ -61,6 +58,7 @@ class StatsDSink(AStatsSink):
         
         if utils.is_ec2():
             done = False
+            sleep = 1
             
             while not done:
                 try:
@@ -76,7 +74,12 @@ class StatsDSink(AStatsSink):
                             break
                 except:
                     utils.printException()
-                    pass
+                    sleep *= 2
+                    time.sleep(sleep)
+                    
+                    if sleep > 32:
+                        logs.warning("ERROR initializing StatsD!!!")
+                        return
         
         logs.info("initializing StatsD at %s:%d" % (host, port))
         self.statsd = StatsD(host, port)
