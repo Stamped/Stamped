@@ -1007,6 +1007,192 @@ position:relative;
 top:auto;
 }
 
+#notifications-page .text-email-notification-settings{
+width:391px;
+height:34px;
+background:url(http://static.stamped.com/assets/img/email_notifications_title.png) left top no-repeat;
+margin:30px auto;
+}
+
+#notifications-page .personal-status{
+color:#bfbfbf;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+#notifications-page .personal-status .user{
+float:left;
+width:60%;
+}
+
+#notifications-page .personal-status .thumb{
+float:left;
+position:relative;
+width:42px;
+height:42px;
+margin-right:9px;
+margin-left:27px;
+}
+
+#notifications-page .personal-status .photo{
+width:32px;
+height:32px;
+position:absolute;
+left:0;
+bottom:0;
+z-index:1;
+}
+
+#notifications-page .personal-status .stamp{
+width:22px;
+height:22px;
+position:absolute;
+right:0;
+top:0;
+z-index:2;
+}
+
+#notifications-page .personal-status .username{
+font-size:16px;
+font-weight:bold;
+display:block;
+margin-top:9px;
+}
+
+#notifications-page .personal-status .real-name{
+font-size:14px;
+display:block;
+font-weight:normal;
+}
+
+#notifications-page .personal-status .toggle-all{
+color:#bfbfbf;
+float:right;
+margin:22px 23px 0 0;
+}
+
+#notifications-page .settings{
+margin:0 0 25px;
+padding:0;
+background-color:#fdfdfd;
+border:1px solid #f7f7f7;
+-webkit-border-radius:7px;
+-webkit-box-shadow:inset 0 2px 3px rgba(0,0,0,0.1);
+overflow:hidden;
+}
+
+#notifications-page .settings li{
+overflow:hidden;
+list-style-type:none;
+margin:0;
+border-bottom:1px solid #e3e3e3;
+padding:15px 20px;
+}
+
+#notifications-page .settings li .item{
+float:left;
+width:60%;
+}
+
+#notifications-page .settings .thumb{
+float:left;
+margin-right:15px;
+width:42px;
+height:44px;
+}
+
+#notifications-page .settings li h2{
+color:#595959;
+font-size:16px;
+margin:6px 0 0;
+}
+
+#notifications-page .settings li .description{
+color:#999;
+font-size:14px;
+line-height:18px;
+}
+
+#notifications-page .slider{
+width:85px;
+height:40px;
+float:right;
+margin-top:7px;
+cursor:pointer;
+position:relative;
+overflow:hidden;
+padding-left:1px;
+}
+
+#notifications-page .slider.on .knob{
+left:49px;
+}
+
+#notifications-page .slider.on .background{
+background-position:-17px top;
+}
+
+#notifications-page .slider .knob{
+background:url(http://static.stamped.com/assets/img/switch_handle.png) left top no-repeat;
+width:40px;
+height:40px;
+position:absolute;
+left:-2px;
+top:-4px;
+-webkit-user-select:none;
+z-index:3;
+}
+
+#notifications-page .slider .mask{
+background:url(http://static.stamped.com/assets/img/switch_mask.png) left top no-repeat;
+overflow:hidden;
+position:absolute;
+left:0;
+top:0;
+z-index:2;
+width:88px;
+height:32px;
+}
+
+#notifications-page .slider .background{
+background:url(http://static.stamped.com/assets/img/switch_back.png) -66px top no-repeat;
+position:absolute;
+left:0;
+top:0;
+z-index:1;
+width:164px;
+height:32px;
+}
+
+#notifications-page .followers .thumb{
+background:url(http://static.stamped.com/assets/img/icons_follow.png) left top no-repeat;
+}
+
+#notifications-page .credit .thumb{
+background:url(http://static.stamped.com/assets/img/icons_credit.png) left top no-repeat;
+width:44px;
+}
+
+#notifications-page .mentions .thumb{
+background:url(http://static.stamped.com/assets/img/icons_mention.png) left top no-repeat;
+}
+
+#notifications-page .comments .thumb{
+background:url(http://static.stamped.com/assets/img/icons_comment.png) left top no-repeat;
+}
+
+#notifications-page .replies .thumb{
+background:url(http://static.stamped.com/assets/img/icons_comment.png) left top no-repeat;
+}
+
+#notifications-page .likes .thumb{
+background:url(http://static.stamped.com/assets/img/icons_like.png) left top no-repeat;
+}
+
+#notifications-page .todos .thumb{
+background:url(http://static.stamped.com/assets/img/icons_todo.png) left top no-repeat;
+}
+
 /* MISC */
 .available{
 background:url(http://static.stamped.com/assets/img/app-store-available.png) left top no-repeat;
