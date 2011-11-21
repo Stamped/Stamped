@@ -24,7 +24,9 @@ class StatsDSink(AStatsSink):
         time.sleep(0.01)
     
     def get_stack_info(self, force_update=False):
+        # NOTE: TODO TEMPORARY
         return None
+        
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
         stack_info = None
         
@@ -63,6 +65,9 @@ class StatsDSink(AStatsSink):
             while not done:
                 try:
                     stack_info = self.get_stack_info()
+                    
+                    if stack_info is None:
+                        return
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
