@@ -123,5 +123,20 @@ screen_names = set([
     "mobile",
     "password",
     "pw",
+    "stampedadmin",
+    "press",
+    "partners",
+    "bartstein",
+    "robbystein",
+    "nigger",
+    "kike",
+    "chink",
+    "advertising",
+    "ads",
+    "sales",
+    "profile",
+    
+    
+    
 ])
 

@@ -69,9 +69,9 @@
   CALayer* layer = self.layer;
   layer.contentsGravity = kCAGravityResizeAspect;
   layer.frame = self.frame;
-  layer.shadowOpacity = 0.25;
-  layer.shadowOffset = CGSizeMake(0, 0.5);
-  layer.shadowRadius = 1.0;
+  layer.shadowOpacity = 0.20;
+  layer.shadowOffset = CGSizeMake(0, 1.0);
+  layer.shadowRadius = 1.33;
   layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
   [[NSNotificationCenter defaultCenter] addObserver:self 
                                            selector:@selector(imageChanged:)

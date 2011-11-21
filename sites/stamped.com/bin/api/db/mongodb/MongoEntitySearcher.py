@@ -268,6 +268,9 @@ class MongoEntitySearcher(EntitySearcher):
                          local=False, 
                          user=None):
         
+        # NOTE: remove -- strictly for testing!
+        #full = False
+        
         # -------------------------------- #
         # transform input query and coords #
         # -------------------------------- #
@@ -1190,6 +1193,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         self._errors[key].append(error)
         self._statsSink.increment('stamped.api.search.third-party.errors.%s' % key)
+        utils.log("%s search failed (%s)" % (key, error))
         
         if 6 == len(self._errors[key]):
             subject = "%s search failing" % key

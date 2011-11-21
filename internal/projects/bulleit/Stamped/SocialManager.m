@@ -46,6 +46,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
+@property (nonatomic, assign) BOOL isSigningInToTwitter;
+@property (nonatomic, assign) BOOL isSigningInToFacebook;
 
 - (void)checkForEndlessSignIn:(NSNotification*)note;
 - (void)requestTwitterUser;
@@ -78,6 +80,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @synthesize twitterClient = twitterClient_;
 @synthesize twitterFriends = twitterFriends_;
 @synthesize facebookFriends = facebookFriends_;
+@synthesize isSigningInToTwitter = isSigningInToTwitter_;
+@synthesize isSigningInToFacebook = isSigningInToFacebook_;
 
 #pragma mark - Singleton / lifecycle.
 
@@ -163,6 +167,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
   }
   
+  isSigningInToTwitter_ = YES;
+  
   STOAuthViewController* authVC =
   [[STOAuthViewController alloc] initWithScope:kTwitterScope
                                       language:nil
@@ -196,6 +202,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 
 - (void)signOutOfTwitter:(BOOL)unlink {
+  isSigningInToTwitter_ = NO;
   RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterSignOutURI delegate:self];
   request.method = RKRequestMethodPOST;
   [request prepareURLRequest];
@@ -300,11 +307,13 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
   if (!self.facebookClient.isSessionValid) {
     self.facebookClient.sessionDelegate = self;
+    isSigningInToFacebook_ = YES;
     [self.facebookClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
   }
 }
 
 - (void)signOutOfFacebook:(BOOL)unlink {
+  isSigningInToFacebook_ = NO;
   [self.facebookClient logout:self];
   [self removeFacebookCredentials];
   if (unlink)
@@ -404,9 +413,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
-  NSLog(@"FB err code: %d", [error code]);
-  NSLog(@"FB err message: %@", [error description]);
-  if ([request.url rangeOfString:kFacebookFriendsURI].location != NSNotFound)
+//  NSLog(@"FB err code: %d", [error code]);
+//  NSLog(@"FB err message: %@", [error description]);
+  if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
   if (error.code == 10000)
     [self signOutOfFacebook:YES];
@@ -497,18 +506,23 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  NSLog(@"%@", response.bodyAsString);
   if (!response.isOK) {
-    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-        [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
-        [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
-        [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-        [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+    if (isSigningInToTwitter_)
       [self signOutOfTwitter:YES];
-    if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-        [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+    if (isSigningInToFacebook_)
       [self signOutOfFacebook:YES];
-    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
+//    if (response.statusCode == 2)  // Don't sign out just because we aren't connected to the internet.
+//      return;
+//    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
+//        [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
+//        [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
+//        [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
+//        [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+//      [self signOutOfTwitter:YES];
+//    if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
+//        [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+//      [self signOutOfFacebook:YES];
+//    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
     return;
     }
   
@@ -520,18 +534,20 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
   // Response for requestStampedLinkTwitterFollowers. End of Twitter signin.
   if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
+    isSigningInToTwitter_ = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
-  // Response for requestStampedLinkFacebookFollowers. End of Facebook signin.
   if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookRemovePath].location != NSNotFound) {
     return;
   }
+  // Response for requestStampedLinkFacebookFriends. End of Facebook signin.
   if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
+    isSigningInToFacebook_ = NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
   if ([request.resourcePath isEqualToString:kTwitterSignOutURI]) {
@@ -562,40 +578,25 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+  if (isSigningInToTwitter_)
     [self signOutOfTwitter:YES];
-  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+  if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 
 - (void)requestDidTimeout:(RKRequest *)request {
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+  if (isSigningInToTwitter_)
     [self signOutOfTwitter:YES];
-  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+  if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 
 - (void)requestDidCancelLoad:(RKRequest *)request {
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+  if (isSigningInToTwitter_)
     [self signOutOfTwitter:YES];
-  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+  if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }

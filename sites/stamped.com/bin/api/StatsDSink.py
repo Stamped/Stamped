@@ -58,10 +58,14 @@ class StatsDSink(AStatsSink):
         
         if utils.is_ec2():
             done = False
+            sleep = 1
             
             while not done:
                 try:
                     stack_info = self.get_stack_info()
+                    
+                    if stack_info is None:
+                        raise
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
@@ -70,7 +74,12 @@ class StatsDSink(AStatsSink):
                             break
                 except:
                     utils.printException()
-                    pass
+                    sleep *= 2
+                    time.sleep(sleep)
+                    
+                    if sleep > 32:
+                        logs.warning("ERROR initializing StatsD!!!")
+                        return
         
         logs.info("initializing StatsD at %s:%d" % (host, port))
         self.statsd = StatsD(host, port)

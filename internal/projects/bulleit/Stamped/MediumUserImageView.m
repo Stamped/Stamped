@@ -24,9 +24,9 @@
   if (self) {
     self.layer.shadowPath =
         [UIBezierPath bezierPathWithRect:CGRectInset(self.bounds, 2, 2)].CGPath;
-    self.layer.shadowOffset = CGSizeZero;
-    self.layer.shadowOpacity = 0.4;
-    self.layer.shadowRadius = 1.0;
+    self.layer.shadowOffset = CGSizeMake(0, 1);
+    self.layer.shadowOpacity = 0.2;
+    self.layer.shadowRadius = 1.33;
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(mediumImageChanged:)
                                                  name:@"kMediumUserImageLoadedNotification"

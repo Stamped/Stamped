@@ -85,7 +85,13 @@
 
 - (IBAction)twitterButtonPressed:(id)sender {
   if (self.twitterConnectButton.isSelected) {
-    [[SocialManager sharedManager] signOutOfTwitter:YES];
+    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure you want to disconnect from Twitter?"
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:@"Disconnect", nil] autorelease];
+    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [sheet showInView:self.view];
   } 
   else {
     [[SocialManager sharedManager] signInToTwitter:self.navigationController];
@@ -93,10 +99,18 @@
 }
 
 - (IBAction)fbButtonPressed:(id)sender {
-  if (self.fbConnectButton.isSelected)
-    [[SocialManager sharedManager] signOutOfFacebook:YES];
-  else
+  if (self.fbConnectButton.isSelected) {
+    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure you want to disconnect from Facebook?"
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:@"Disconnect", nil] autorelease];
+    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [sheet showInView:self.view];
+  } 
+  else {
     [[SocialManager sharedManager] signInToFacebook];
+  }
 }
 
 - (IBAction)settingsButtonPressed:(id)sender {
@@ -164,6 +178,18 @@
   }
   
 }
+
+#pragma mark - UIActionSheetDelegate methods
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == 0) {
+    if ([actionSheet.title rangeOfString:@"Twitter"].location != NSNotFound)
+      [[SocialManager sharedManager] signOutOfTwitter:YES];
+    else if ([actionSheet.title rangeOfString:@"Facebook"].location != NSNotFound)
+      [[SocialManager sharedManager] signOutOfFacebook:YES];
+  }
+}
+
 
 
 @end
