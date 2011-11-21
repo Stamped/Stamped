@@ -65,7 +65,7 @@ class StatsDSink(AStatsSink):
                     stack_info = self.get_stack_info()
                     
                     if stack_info is None:
-                        return
+                        raise
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
