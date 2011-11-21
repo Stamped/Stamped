@@ -2720,6 +2720,9 @@ class StampedAPI(AStampedAPI):
         activity = []
         for item in activityData:
             try:
+                if item.genre in ['invite_received', 'invite_sent']:
+                    continue
+                
                 if item.user.user_id != None:
                     item.user = userIds[item.user.user_id]
                 if item.linked_user_id != None:
