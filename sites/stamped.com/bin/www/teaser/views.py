@@ -73,6 +73,11 @@ def terms(request):
         raise Http404
 
 def download(request):
+    response = render_to_response('redirect.html', None)
+    response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+    response['Cache-Control'] = 'max-age=600'
+    
+    return response
     return HttpResponsePermanentRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
 
 
