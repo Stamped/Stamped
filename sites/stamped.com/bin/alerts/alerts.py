@@ -56,8 +56,6 @@ if USE_PROD_CERT:
 else:
     pem = IPHONE_APN_PUSH_CERT_DEV
 
-apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
-
 # DB Connections
 alertDB             = MongoAlertQueueCollection()
 accountDB           = MongoAccountCollection()
@@ -563,6 +561,7 @@ def sendPushNotifications(queue, options):
     
     for user, pushQueue in queue.iteritems():
         if IS_PROD or user in admin_tokens:
+            apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
             count = 0
             
             pushQueue.reverse()
@@ -598,8 +597,9 @@ def sendPushNotifications(queue, options):
                     print 'PUSH MSG FAILED (activity_id=%s): device_id = %s ' % \
                         (msg['activity_id'], msg['device_id'])
                     utils.printException()
+            
+            apns_wrapper.notify()
     
-    apns_wrapper.notify()
     return
     
     host_name = 'gateway.sandbox.push.apple.com'
