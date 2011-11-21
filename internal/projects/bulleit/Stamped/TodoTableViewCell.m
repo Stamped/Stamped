@@ -86,8 +86,11 @@ static const CGFloat kSubstringFontSize = 12.0;
   if (!favorite_)
     return;
   UIColor* titleColor = (self.selected || self.highlighted) ? [UIColor whiteColor] : [UIColor stampedDarkGrayColor]; 
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
   titleLayer_.foregroundColor = titleColor.CGColor;
+  [CATransaction commit];
   [self setNeedsDisplay];
 }
 
