@@ -21,9 +21,10 @@
 #import "Util.h"
 
 static NSString* const kTitleFontString = @"TitlingGothicFBComp-Light";
+static NSString* const kEllipsisFontString = @"TitlingGothicFBComp-Regular";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
-static const CGFloat kTitleMaxWidth = 210.0;
+static const CGFloat kTitleMaxWidth = 214.0;
 static const CGFloat kTitleFontSize = 47.0;
 static const CGFloat kSubstringFontSize = 12.0;
 
@@ -168,6 +169,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   titleLayer_.truncationMode = kCATruncationEnd;
   titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
   titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+  titleLayer_.font = CTFontCreateWithName((CFStringRef)kEllipsisFontString, 0, NULL);  // So the ellipsis draws the way we like it.
   titleLayer_.fontSize = 24.0;
   titleLayer_.frame = CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15,
                                  8, kTitleMaxWidth, kTitleFontSize);
