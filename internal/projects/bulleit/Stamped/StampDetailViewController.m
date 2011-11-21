@@ -128,6 +128,7 @@ typedef enum {
 }
 
 - (void)dealloc {
+  [Stamp.managedObjectContext save:NULL];
   [Stamp.managedObjectContext refreshObject:stamp_ mergeChanges:NO];
   [stamp_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -407,9 +408,9 @@ typedef enum {
 
     userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
     userImage.contentMode = UIViewContentModeCenter;
-    userImage.layer.shadowOffset = CGSizeMake(0, 1);
-    userImage.layer.shadowOpacity = 0.2;
-    userImage.layer.shadowRadius = 1.75;
+//    userImage.layer.shadowOffset = CGSizeMake(0, 1);
+//    userImage.layer.shadowOpacity = 0.2;
+//    userImage.layer.shadowRadius = 1.75;
     userImage.imageURL = s.user.profileImageURL;
     userImage.enabled = YES;
     [userImage addTarget:self

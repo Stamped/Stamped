@@ -1,4 +1,11 @@
 var stamped = stamped || {};
+
+stamped.showVideo = function() {
+    $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0&amp;color=66a6ff&amp;autoplay=1" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
+    clearInterval(slidechanger);
+    $('.shadow, .lightbox').fadeIn('slow');
+};
+
 stamped.init = function(){
     rotator = function(){
         time = '6000';
@@ -64,15 +71,9 @@ stamped.init = function(){
         };
     };
     
-    showVideo = function() {
-        $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0&amp;color=66a6ff&amp;autoplay=1" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
-        clearInterval(slidechanger);
-        $('.shadow, .lightbox').fadeIn('slow');
-    };
-    
     $('.video-launcher').live('click', function(event){    
         event.preventDefault();
-        showVideo();
+        stamped.showVideo();
     });
     
     $('.close').live('click', function(event){
@@ -84,6 +85,123 @@ stamped.init = function(){
         event.preventDefault();
         
     });
+    
+    var clearStutterTimer = null;
+    stutterBar = function(type, message){
+        clearStutter = function(){
+            $('.stutter-bar').stop('true', 'true').fadeOut('slow', function(){
+                $('.stutter-bar').remove();
+            });
+        }
+        
+        clearTimeout(clearStutterTimer);
+        clearStutterTimer = setTimeout(clearStutter, 1500);
+        
+        // check for presence and update innerHTML if stutter-bar is there. otherwise do this:
+        if(type == 'success') {    
+            if($('.stutter-bar').length) {
+                $('.stutter-bar').html('<span class="success text">'+message+'</span>');
+            } else {
+                $('body').append('<div class="stutter-bar"><span class="success text">'+message+'</span></div>');
+            }
+            
+        } else {
+            $('body').append('<div class="stutter-bar"><span class="success text">Something went very very wrong</span></div>');
+        }
+        
+        $('.stutter-bar').fadeIn('slow');
+        
+    };
+    
+    slider = function(){
+    
+    
+        sliderAnimateOff = function(target){
+            target.find('.knob').animate({
+                'left' : '-2px'
+            }, 175);
+            target.find('.background').animate({
+                'background-position-x' : '-66px'
+            }, 175);
+            target.removeClass('on');
+        };
+        
+        sliderAnimateOn = function(target){
+            
+            target.find('.knob').animate({
+                'left' : '49px'
+            }, 175);
+            target.find('.background').animate({
+                'background-position-x' : '-17px'
+            }, 175);
+            target.addClass('on');
+        };
+        
+        updateParams = function(){
+            updatedParams = {};
+            
+            $('.slider').each(function(){
+                sliderID = $(this).attr('id');
+                if($(this).hasClass('on')) {
+                    sliderBool = true;
+                } else {
+                    sliderBool = false;
+                }
+                
+                updatedParams[sliderID] = sliderBool;
+            });
+            updatedParams['token'] = _TOKEN;
+            $.ajax({
+              type: 'POST',
+              url: '/settings/alerts/update.json',
+              data: updatedParams,
+              success: function() {
+                stutterBar('success', 'Notification settings updated successfully.');
+              },
+              error: function() {
+                stutterBar('error', 'Something went wrong. Try again?');
+              }
+            });
+        }
+        
+        $('.toggle-all').live('click', function(){
+            if($('.slider.on').length) {
+                $('.slider').each(function(){
+                    targetSetting = $(this);
+                    sliderAnimateOff(targetSetting); 
+                });
+            } else {
+                $('.slider').each(function(){
+                    targetSetting = $(this);
+                    sliderAnimateOn(targetSetting); 
+                });
+            };
+            
+            updateParams();
+            event.preventDefault();
+        });
+        
+        if(typeof(_PARAMS) != 'undefined') {
+            $.each(_PARAMS, function(key, value){
+                if(value == true) {
+                    $('#' + key).addClass('on');
+                }
+            });
+        };
+        
+        $('.slider').live('click', function(){
+            targetSetting = $(this);
+            
+            if(targetSetting.hasClass('on')) {
+                sliderAnimateOff(targetSetting);
+            } else {
+               sliderAnimateOn(targetSetting)
+            }
+            
+            updateParams();
+        });
+    };
+
     
     windowHeight = function(){
         currentWindowHeight = window.innerHeight;
@@ -106,4 +224,5 @@ stamped.init = function(){
     agentInspector();
     windowHeight();
     rotator();
+    slider();
 };

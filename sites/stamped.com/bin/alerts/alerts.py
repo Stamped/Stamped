@@ -224,7 +224,7 @@ def runAlerts(options):
                         userEmailQueue[recipient.email] = []
 
                     # Grab settings token
-                    token = tokens[user.user_id]
+                    token = tokens[recipient.user_id]
 
                     # Build email
                     email = buildEmail(user, recipient, activity, token)

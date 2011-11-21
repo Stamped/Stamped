@@ -10,8 +10,8 @@ urlpatterns = patterns('',
     url(R'^download$',                      'teaser.views.download'),
 
     # Tweet Pages
-    # url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
-    # url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.mobile'),
+    url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
+    url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.mobile'),
 
     # Settings
     url(R'^pw/(?P<token>[\w-]{36})$',       'appsettings.views.passwordReset'),
@@ -36,4 +36,8 @@ urlpatterns = patterns('',
 
     # Index
     # url(R'$',                               'teaser.views.index'), 
+
+    # OLD
+    url(R'^about$',                         'teaser.views.aboutOld'),
+    url(R'$',                               'teaser.views.indexOld'), 
 )
