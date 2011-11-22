@@ -69,6 +69,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
 @property (nonatomic, assign) BOOL isSigningInToFB; // Used to handle edge case wherein user doesn't complete fb login.
+@property (nonatomic, retain) StampDetailHeaderView* headerView;
 @end
 
 @implementation CreateStampViewController
@@ -112,6 +113,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize isSigningInToFB = isSigningInToFB_;
+@synthesize headerView = headerView_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -187,6 +189,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
+  if (self.headerView)
+    self.headerView.delegate = nil;
+  self.headerView = nil;
   [super dealloc];
 }
 
@@ -287,10 +292,22 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
   self.reasoningTextView.inputAccessoryView = accessoryView;
   [accessoryView release];
+  
+  
+  CGRect frame = CGRectMake(0, 4, scrollView_.frame.size.width, 68);
+  headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
+  [headerView_ setEntity:objectToStamp_];
+  headerView_.delegate = self;
+  [scrollView_ addSubview:headerView_];
+  
 
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
   titleLabel_.textColor = [UIColor stampedDarkGrayColor];
-
+  titleLabel_.hidden = YES;
+  detailLabel_.hidden = YES;
+  categoryImageView_.hidden = YES;
+  disclosureButton_.hidden = YES;
+  
   stampLayer_ = [[CALayer alloc] init];
   stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
   stampLayer_.opacity = 0.0;
@@ -298,6 +315,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [stampLayer_ release];
 
   detailLabel_.textColor = [UIColor stampedGrayColor];
+
+  
   // Place the reasoning label (fake placeholder) within the TextView.
   reasoningLabel_.textColor = [UIColor stampedGrayColor];
   CGRect reasoningFrame = reasoningLabel_.frame;
@@ -410,6 +429,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
+  if (self.headerView)
+    self.headerView.delegate = nil;
+  self.headerView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -424,6 +446,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                                  11 - (46 / 2),
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+  
+  if (headerView_.inverted)
+    headerView_.inverted = NO;
+  [headerView_ setNeedsDisplay];
+  
   [super viewWillAppear:animated];
 }
 
@@ -657,7 +684,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
 #pragma mark - Actions.
 
-- (IBAction)disclosureButtonPressed:(id)sender {
+- (IBAction)handleEntityTap:(id)sender {
   UIViewController* vc = nil;
   if (entityObject_) {
     vc = [Util detailViewControllerForEntity:entityObject_];

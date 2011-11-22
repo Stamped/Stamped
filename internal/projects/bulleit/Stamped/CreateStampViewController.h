@@ -11,6 +11,7 @@
 
 #import "STCreditPickerController.h"
 #import "STViewController.h"
+#import "StampDetailHeaderView.h"
 
 @class Entity;
 @class UserImageView;
@@ -24,7 +25,8 @@
                                                          STCreditPickerControllerDelegate,
                                                          UINavigationControllerDelegate,
                                                          UIImagePickerControllerDelegate,
-                                                         UIActionSheetDelegate> {
+                                                         UIActionSheetDelegate,
+                                                         StampDetailHeaderViewDelegate> {
  @private
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
@@ -56,7 +58,7 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 
-- (IBAction)disclosureButtonPressed:(id)sender;
+- (IBAction)handleEntityTap:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;
 - (IBAction)fbButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;

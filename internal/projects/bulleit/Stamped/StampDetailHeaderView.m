@@ -8,7 +8,6 @@
 
 #import "StampDetailHeaderView.h"
 #import "Util.h"
-#import "Entity.h"
 #import "UIColor+Stamped.h"
 #import <CoreText/CoreText.h>
 
@@ -95,7 +94,7 @@
     
     self.arrowLayer = [CALayer layer];
     [arrowLayer_ setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
-    [arrowLayer_ setFrame:CGRectMake(287, 23, 23, 23)];
+    [arrowLayer_ setFrame:CGRectMake(287, 20, 23, 23)];
     
     [self.layer addSublayer:gradientLayer_];
     [self.layer addSublayer:titleLayer_];
@@ -129,7 +128,6 @@
   self.stampImage = [Util stampImageForUser:stamp_.user];
   self.stampImageInverted = [Util stampImageWithPrimaryColor:@"ffffff" secondary:@"ffffff"];
   self.title = stamp.entityObject.title;
-  [self setNeedsDisplay];
   
   categoryImageView_.image = stamp_.entityObject.categoryImage;
   categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.categoryImage];
@@ -141,6 +139,26 @@
   frame = subtitleLabel_.frame;
   frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
   subtitleLabel_.frame = frame;
+  [self setNeedsDisplay];
+}
+
+// only used in stamp creator, i.e., when there is no stamp yet.
+- (void)setEntity:(Entity *)entity {
+  self.stampImage = nil;
+  self.stampImageInverted = nil;
+  self.title = [entity valueForKey:@"title"];
+  
+  categoryImageView_.image = [entity valueForKey:@"categoryImage"];
+  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
+  [categoryImageView_  sizeToFit];
+  CGRect frame = categoryImageView_.frame;
+  frame.origin.x = titleLayer_.frame.origin.x + 1;
+  categoryImageView_.frame = frame;
+  subtitleLabel_.text = [entity valueForKey:@"subtitle"];
+  frame = subtitleLabel_.frame;
+  frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
+  subtitleLabel_.frame = frame;
+  [self setNeedsDisplay];
 }
 
 - (void)setTitle:(NSString *)title {
@@ -162,10 +180,10 @@
                                           (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
   
   [titleAttributes setObject:(id)[UIColor stampedDarkGrayColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  titleAttrString_ = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
+  titleAttrString_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
   
   [titleAttributes setObject:(id)[UIColor whiteColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
+  titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
   
   self.titleLayer.string = self.titleAttrString;
   
@@ -204,7 +222,8 @@
 }
 
 - (void)drawRect:(CGRect)rect {
-  if (!stamp_ || !title_) return;
+  if (!title_) 
+    return;
   
   if (inverted_) {
     CGPoint top = CGPointMake(160, 0);
