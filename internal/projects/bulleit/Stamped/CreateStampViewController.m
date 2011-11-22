@@ -847,9 +847,10 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 }
 
 - (void)socialNetworksDidChange:(id)sender {
-  if ([[SocialManager sharedManager] isSignedInToTwitter])
+  if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     if (signInTwitterActivityIndicator_.isAnimating)
       tweetButton_.selected = YES;
+  }
   else
     tweetButton_.selected = NO;
 
