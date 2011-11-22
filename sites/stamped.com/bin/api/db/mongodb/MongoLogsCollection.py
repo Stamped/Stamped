@@ -32,8 +32,11 @@ class MongoLogsCollection(AMongoCollection):
             if 'form' in logData:
                 logData['form'] = str(logData['form'])
 
-            if '_id' not in logData and logId:
-                logData['_id'] = logId
+            # if '_id' not in logData and logId:
+            #     logData['_id'] = logId
+
+            if '_id' in logData:
+                logData.pop('_id')
 
             self._collection.save(logData, log=False, safe=False)
         except Exception as e:

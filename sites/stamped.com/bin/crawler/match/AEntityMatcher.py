@@ -70,7 +70,9 @@ class AEntityMatcher(object):
                 return result
         
         if 'place' in entity and entity.lat is None:
-            entity = self._geocoderProxy._transform(entity)
+            entity2 = self._geocoderProxy._transform(entity)
+            if entity2 is not None:
+                entity = entity2
         
         entity = self._entityDB.addEntity(entity)
         
