@@ -583,13 +583,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [self.addFavoriteButton setNeedsDisplay];
   [self.spinner setNeedsDisplay];
   
-  NSString* path = kCreateFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateFavoritePath delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:detailedEntity_.entityID, @"entity_id", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];
 }
 

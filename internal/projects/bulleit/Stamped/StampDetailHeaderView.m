@@ -176,8 +176,8 @@
                                              (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
                                              (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
   
-  CTLineRef ellipsisLine = CTLineCreateWithAttributedString((CFAttributedStringRef)[[NSAttributedString alloc] initWithString:@"…" 
-                                                                                                                   attributes:ellipsisAttributes]);
+  CTLineRef ellipsisLine = CTLineCreateWithAttributedString((CFAttributedStringRef)[[[NSAttributedString alloc] initWithString:@"…" 
+                                                                                                                   attributes:ellipsisAttributes] autorelease]);
   
   CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self.titleAttrString);
   CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, 270, kCTLineTruncationEnd, ellipsisLine);
