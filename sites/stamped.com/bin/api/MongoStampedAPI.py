@@ -45,6 +45,7 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self, db=None, **kwargs):
         self.__statsSink = None
         StampedAPI.__init__(self, "MongoStampedAPI", **kwargs)
+        self.lite_mode = kwargs.pop('lite_mode', False)
         
         if db:
             utils.init_db_config(db)
@@ -55,7 +56,7 @@ class MongoStampedAPI(StampedAPI):
     @property
     def _statsSink(self):
         if self.__statsSink is None:
-            self.__statsSink = StatsDSink()
+            self.__statsSink = StatsDSink(self)
         
         return self.__statsSink
     
@@ -192,6 +193,9 @@ class MongoStampedAPI(StampedAPI):
             
             # num likes per user
             'num_likes_per_user' : ('db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_likes")) { prev.count = obj.stats.num_likes; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0), 
+            
+            # num followers per user
+            'num_followers_per_user' : ('db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_followers")) { prev.count = obj.stats.num_followers; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0), 
         }
         
         for cmd_key, cmd in cmds.iteritems():

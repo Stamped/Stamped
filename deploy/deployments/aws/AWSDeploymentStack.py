@@ -75,7 +75,9 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def _get_init_config(self):
         db_instances = self.db_instances
-        assert len(db_instances) > 1
+        assert len(db_instances) >= 1
+        if len(db_instances) == 1:
+            utils.log("[%s] warning found only 1 db instance (at least 2 needed for a valid replica set)" % (self, ))
         
         replica_set_members = []
         replica_set = None

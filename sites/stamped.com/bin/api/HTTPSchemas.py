@@ -55,6 +55,7 @@ def _profileImageURL(screenName, cache=None):
 def encodeStampTitle(title):
     stamp_title = title.replace(' ', '-').encode('ascii', 'ignore')
     stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
+    
     return stamp_title
 
 def _encodeLinkShareDeepURL(raw_url):

@@ -13,6 +13,7 @@
 #import "TTTAttributedLabel.h"
 #import "STViewController.h"
 #import "StampDetailCommentView.h"
+#import "StampDetailHeaderView.h"
 
 extern NSString* const kRemoveCommentPath;
 extern NSString* const kRemoveStampPath;
@@ -25,7 +26,8 @@ extern NSString* const kRemoveStampPath;
                                                          UIScrollViewDelegate,
                                                          RKObjectLoaderDelegate,
                                                          TTTAttributedLabelDelegate,
-                                                         StampDetailCommentViewDelegate> {
+                                                         StampDetailCommentViewDelegate,
+                                                         StampDetailHeaderViewDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.

@@ -8,6 +8,7 @@ urlpatterns = patterns('',
 
     # DOWNLOAD!
     url(R'^download$',                      'teaser.views.download'),
+    url(R'^download/$',                     'teaser.views.download'),
 
     # Tweet Pages
     url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
@@ -29,15 +30,15 @@ urlpatterns = patterns('',
     url(R'^faq-mobile',                     'teaser.views.mobileFaq'),
 
     # Website
-    # url(R'^about$',                         'teaser.views.about'),
-    # url(R'^faq$',                           'teaser.views.faq'),
-    # url(R'^privacy$',                       'teaser.views.privacy'),
-    # url(R'^terms-of-service$',              'teaser.views.terms'),
+    url(R'^about$',                         'teaser.views.about'),
+    url(R'^faq$',                           'teaser.views.faq'),
+    url(R'^privacy$',                       'teaser.views.privacy'),
+    url(R'^terms-of-service$',              'teaser.views.terms'),
 
     # Index
-    # url(R'$',                               'teaser.views.index'), 
+    url(R'$',                               'teaser.views.index'), 
 
     # OLD
-    url(R'^about$',                         'teaser.views.aboutOld'),
-    url(R'$',                               'teaser.views.indexOld'), 
+    # url(R'^about$',                         'teaser.views.aboutOld'),
+    # url(R'$',                               'teaser.views.indexOld'), 
 )

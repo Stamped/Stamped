@@ -55,9 +55,16 @@ echo '>>>> Clone repo'
 
 if [ ! -d /stamped ]; then
     mkdir -p /stamped
-    #sudo chown -R ubuntu /stamped
-    #sudo chmod -R 770 /stamped
-    git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
+    
+    while :; do
+        if [ ! -d /stamped/bootstrap ]; then
+            set +e
+            git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
+            set -e
+        else
+            break
+        fi
+    done
 fi
 
 cd /stamped/bootstrap

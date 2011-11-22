@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, math, pymongo, re, string
+import logs, math, pymongo, random, re, string
 import unicodedata, gevent
 import CityList
 
@@ -365,6 +365,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
+        input_query = input_query.encode('utf-8')
+        
         """
         data = {}
         data['input']       = input_query
@@ -418,7 +420,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
-                pool.spawn(_find_amazon)
+                search_amazon  = (category_filter == 'book' or category_filter == 'other')
+                search_amazon |= (random.random() < 0.33)
+                
+                if search_amazon:
+                    pool.spawn(_find_amazon)
             
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple)

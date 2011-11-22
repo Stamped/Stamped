@@ -30,7 +30,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     ### PUBLIC
     
     def _convertFromMongo(self, document):
-        entity = AMongoCollection._convertFromMongo(document)
+        entity = AMongoCollection._convertFromMongo(self, document)
         if entity is not None and entity.titlel is None:
             entity.titlel = entity.title.lower()
         
