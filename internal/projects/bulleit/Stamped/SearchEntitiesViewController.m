@@ -150,8 +150,10 @@ typedef enum {
   [self.view addSubview:self.notConnectedImageView];
   [iv release];
 
-  self.notConnectedImageView.alpha = 0.0;  
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  self.notConnectedImageView.alpha = 0.0;
+  
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     self.notConnectedImageView.alpha = 1.0;
 }
 
@@ -262,7 +264,8 @@ typedef enum {
 - (void)viewWillAppear:(BOOL)animated {
   [self.navigationController setNavigationBarHidden:YES animated:animated];
 
-  if ([[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
     self.notConnectedImageView.alpha = 0.0;
   else {
     [self resetState];
@@ -285,8 +288,9 @@ typedef enum {
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   [self.locationManager startUpdatingLocation];
+  RKClient* client = [RKClient sharedClient];
   if (self.searchField.text.length == 0 && currentResultType_ != ResultTypeLocal &&
-      [[RKClient sharedClient] isNetworkAvailable]) {
+      client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
     [UIView animateWithDuration:0.3 animations:^{
       tooltipImageView_.alpha = 1.0;
     }];
@@ -317,7 +321,8 @@ typedef enum {
 }
 
 - (IBAction)searchButtonPressed:(id)sender {
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     return;
   currentResultType_ = ResultTypeFast;
   searchField_.enabled = YES;
@@ -359,7 +364,8 @@ typedef enum {
     return;
   }
   
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     return;
   self.currentResultType = ResultTypeLocal;
   self.currentSearchFilter = SearchFilterNone;
@@ -499,8 +505,10 @@ typedef enum {
 }
 
 - (void)sendFastSearchRequest {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-      return;
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
+    return;
+
   self.currentResultType = ResultTypeFast;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   NSString* query = self.searchField.text;
@@ -519,7 +527,8 @@ typedef enum {
 }
 
 - (void)sendSearchRequest {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     self.resultsArray = nil;
     [self reloadTableData];
     if (notConnectedImageView_.alpha < 0.1)
@@ -816,15 +825,17 @@ typedef enum {
 - (void)textFieldDidChange:(id)sender {
   if (sender != self.searchField)
     return;
-  if ([[RKClient sharedClient] isNetworkAvailable])
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
-                   animations:^{
-                     tooltipImageView_.alpha = self.searchField.text.length > 0 ? 0.0 : 1.0;
-                   }
-                   completion:nil];
-
+  
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
+    [UIView animateWithDuration:0.3
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+                       tooltipImageView_.alpha = self.searchField.text.length > 0 ? 0.0 : 1.0;
+                     }
+                     completion:nil];
+  }
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
   if (searchField_.text.length > 0) {
     [self sendFastSearchRequest];

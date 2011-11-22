@@ -735,7 +735,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   if (savePhoto_ && self.stampPhoto)
     UIImageWriteToSavedPhotosAlbum(self.stampPhoto, nil, nil, nil);
   
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
     return;
   }

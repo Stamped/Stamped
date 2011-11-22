@@ -512,10 +512,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   else if ([request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound) {
     unfollowButton_.hidden = NO;
   }
+  RKClient* client = [RKClient sharedClient];
+  
   if (error.code == 2)
     if (followIndicator_.isAnimating)
       [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
-  else if ([[RKClient sharedClient] isNetworkAvailable])
+  else if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   [followIndicator_ stopAnimating];
   NSLog(@"Error %@ for request %@", error, request.resourcePath);
