@@ -302,7 +302,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   [titleLayer_ drawInContext:ctx];
   CGContextRestoreGState(ctx);
   if (highlighted_ || selected_)
-    [stampImageInverted_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeNormal alpha:1.0];
+    [stampImageInverted_ drawInRect:stampImageFrame_];
   else
     [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }

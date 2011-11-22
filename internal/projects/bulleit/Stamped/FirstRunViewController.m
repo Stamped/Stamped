@@ -259,15 +259,17 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 }
 
 - (void)signInFailed:(NSString*)reason {
+  if (!activityIndicator_.isAnimating)
+    return;
+  if (!reason)
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
+    [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
   if (signInScrollView_.superview) {
     [activityIndicator_ stopAnimating];
     [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
     confirmButton_.enabled = YES;
   }
-  if (!reason)
-    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
-    [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
 }
 
 - (void)signUpSucess {
@@ -636,6 +638,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 }
 
 - (IBAction)textFieldEditingChanged:(id)sender {
+  
   if ([sender isEqual:self.usernameTextField] || 
       [sender isEqual:self.signUpUsernameTextField]) {
     
