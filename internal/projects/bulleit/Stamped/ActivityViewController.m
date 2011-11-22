@@ -214,14 +214,15 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
                                 constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                     lineBreakMode:UILineBreakModeWordWrap];
-    return fmaxf(52.0, stringSize.height + 57);
+    return (stringSize.height + 57);
   } else if ([event.genre isEqualToString:@"restamp"]) {
     return 80.0;
   } else if ([event.genre isEqualToString:@"friend"]) {
-    CGSize stringSize = [event.subject sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
-                                  constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                                      lineBreakMode:UILineBreakModeWordWrap];
-    return fmaxf(52.0, stringSize.height + 57);
+    NSString* full = [NSString stringWithFormat:@"%@ just joined Stamped as %@", event.subject, event.user.screenName];
+    CGSize stringSize = [full sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+                         constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                             lineBreakMode:UILineBreakModeWordWrap];
+    return fmaxf(52.0, stringSize.height + 42);
   }
 
   return 55.0;
