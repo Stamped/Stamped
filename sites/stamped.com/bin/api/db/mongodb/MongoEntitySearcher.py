@@ -26,7 +26,7 @@ from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
 from libs.TheTVDB   import TheTVDB
 
-from Entity         import setFields, isEqual
+from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
 
 # Stamped coords: '40.736006685255155,-73.98884296417236'
@@ -740,8 +740,7 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     def _simplify(self, title):
-        title = title.lower().strip()
-        title = unicodedata.normalize('NFKD', unicode(title)).encode('ascii', 'ignore')
+        title = getSimplifiedTitle(title)
         title = title.replace('-', ' ')
         
         if title.startswith('the '):

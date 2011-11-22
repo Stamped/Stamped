@@ -12,6 +12,7 @@ from AStampedAPI            import AStampedAPI
 from utils                  import abstract, AttributeDict
 from GeocoderEntityProxy    import GeocoderEntityProxy
 from Schemas                import Entity
+from Entity                 import setFields, isEqual, getSimplifiedTitle
 from datetime               import datetime
 from pprint                 import pprint
 from errors                 import *
@@ -413,6 +414,7 @@ class AEntityMatcher(object):
                 pprint(keep.value)
             
             if not self.options.noop:
+                keep.titlel = getSimplifiedTitle(keep.title)
                 self._entityDB.updateEntity(keep)
                 
                 if 'place' in entity:

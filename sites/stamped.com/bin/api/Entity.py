@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import logs, re
-import utils
+import unicodedata, utils
 
 from difflib    import SequenceMatcher
 
@@ -262,4 +262,10 @@ def isEqual(entity1, entity2, prefix=False):
         return False
     
     return True
+
+def getSimplifiedTitle(title):
+    title = unicodedata.normalize('NFKD', unicode(title)).encode('ascii', 'ignore')
+    title = title.lower().strip()
+    
+    return title
 
