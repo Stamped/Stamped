@@ -71,6 +71,7 @@ int const SPACE_HEIGHT = 10;
   self.numLabel = nil;
   self.footerLabel = nil;
   self.contentDict = nil;
+  self.stamps = nil;
   [super dealloc];
 }
 
@@ -99,6 +100,7 @@ int const SPACE_HEIGHT = 10;
   self.numLabel = nil;
   self.footerLabel = nil;
   self.contentDict = nil;
+  self.stamps = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {

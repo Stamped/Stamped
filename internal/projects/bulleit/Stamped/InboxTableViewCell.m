@@ -222,8 +222,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                 (id)ellipsisFont, (id)kCTFontAttributeName,
                                                 (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil] autorelease];
     
-    ellipsisLine_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[NSAttributedString alloc] initWithString:@"…" 
-                                                                                                            attributes:ellipsisAttributes]);
+    ellipsisLine_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[[NSAttributedString alloc] initWithString:@"…" 
+                                                                                                            attributes:ellipsisAttributes] autorelease]);
     CFRelease(ellipsisFont);
     
     

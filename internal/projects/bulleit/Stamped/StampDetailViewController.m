@@ -286,8 +286,8 @@ typedef enum {
   subtitleLabel_.hidden = YES;
   categoryImageView_.hidden = YES;
   
-  CGRect frame = CGRectMake(0, 0, scrollView_.frame.size.width, 72);
-  self.headerView = [[StampDetailHeaderView alloc] initWithFrame:frame];
+  CGRect frame = CGRectMake(0, 0, scrollView_.frame.size.width, 68);
+  headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
   headerView_.stamp = stamp_;
   headerView_.delegate = self;
   
