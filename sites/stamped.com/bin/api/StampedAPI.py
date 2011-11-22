@@ -53,11 +53,22 @@ class StampedAPI(AStampedAPI):
         if utils.is_ec2():
             try:
                 stack_info = self._statsSink.get_stack_info()
-                self.node_name = stack_info.instance.name
+                self._node_name = stack_info.instance.name
             except:
-                self.node_name = "unknown"
+                self._node_name = "unknown"
         else:
-            self.node_name = "localhost"
+            self._node_name = "localhost"
+    
+    @property
+    def node_name(self):
+        if self._node_name == 'unknown':
+            try:
+                stack_info = self._statsSink.get_stack_info()
+                self._node_name = stack_info.instance.name
+            except:
+                utils.printException()
+        
+        return self._node_name
     
     def API_CALL(f):
         @wraps(f)
