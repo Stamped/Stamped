@@ -73,20 +73,20 @@
     titleLayer_.fontSize = 24;
     titleLayer_.hidden = YES;
     
-    CGFloat ascender = CTFontGetAscent(titleLayer_.font);
-    CGRect frame = CGRectMake(15, 3, 270, 56);
+    CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
+    CGRect frame = CGRectMake(15, ascender, 270, 56);
 
-    frame.origin.y += ascender;
+//    frame.origin.y += ascender;
     titleLayer_.frame = frame;
     NSDictionary *newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     titleLayer_.actions = newActions;
     [newActions release];
     
-    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(17, 46, 15, 12)];
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(15, 45, 15, 12)];
     categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
-    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 45, 270, 15)];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 44, 270, 15)];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
@@ -95,7 +95,7 @@
     
     self.arrowLayer = [CALayer layer];
     [arrowLayer_ setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
-    [arrowLayer_ setFrame:CGRectMake(287, 25, 23, 23)];
+    [arrowLayer_ setFrame:CGRectMake(287, 23, 23, 23)];
     
     [self.layer addSublayer:gradientLayer_];
     [self.layer addSublayer:titleLayer_];
@@ -199,7 +199,7 @@
   CFRelease(ellipsisLine);
   
   // Badge stamp.
-  stampFrame_ = CGRectMake(15 + width - (46 / 2), 13 - (46 / 2), 46, 46);
+  stampFrame_ = CGRectMake(15 + width - (46 / 2), 11 - (46 / 2), 46, 46);
   [self setNeedsDisplay];
 }
 
