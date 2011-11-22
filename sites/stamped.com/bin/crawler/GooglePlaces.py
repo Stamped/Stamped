@@ -556,9 +556,11 @@ print r
 """
 
 p = GooglePlaces()
-r = p.getPlaceDetails("CnRjAAAAOWcj9BHdipBhJutaRIqJfNhDV_NhpkgAB378Dy6E-Obc56Oe4aUi2lxksP4rnbRcFOri_7d3A8Fp-jLnDmQfIgYnU0mZIOYtHoC4HyEGoSXgOninGgDwGH30UkNiy4L8feBUck1nXQH2OtNIRPwyRBIQhj2ao75IwT5zOTsGJEUKBxoUZZ0QsuCpU9WR6H8f3vl7XJTrxug")
+f = "CkQ6AAAAe9fbCd2v01fWvsL1pth68lnlyo2zugxpxZZV8-qBHRyA6q5_YkHpeETA8Vt5KpNkGAzDQUIkXUT3RKG3EFPPyBIQpMwl-TJnQi3amCWI9_r6YBoUzs7f38upa92ztqtXe5EDaSudw2Q"
+r = p.getPlaceDetails(f)
+from pprint import pprint
+pprint(r)
 
 if __name__ == '__main__':
-    #main()
-    pass
+    pass#main()
 
