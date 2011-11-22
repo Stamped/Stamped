@@ -31,7 +31,6 @@
 #import "UIColor+Stamped.h"
 #import "SharedRequestDelegate.h"
 #import "WebViewController.h"
-#import "StampImageView.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
 NSString* const kRemoveStampPath = @"/stamps/remove.json";
