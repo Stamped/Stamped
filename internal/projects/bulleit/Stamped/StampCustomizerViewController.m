@@ -32,6 +32,7 @@
       CGFloat r1, g1, b1, s1;
       [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
       UIColor* primaryColor = [UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0];
+#warning iOS 4 crashes.
       [primaryColor getHue:&primaryHue_ saturation:&s1 brightness:&primaryBrightness_ alpha:NULL];
       if (s1 < 1.0)
         primaryBrightness_ = ((-0.5 * (s1 - 1)) / 0.8) + 0.5;
