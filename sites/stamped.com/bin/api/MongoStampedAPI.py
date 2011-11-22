@@ -267,6 +267,12 @@ class MongoStampedAPI(StampedAPI):
                 if isinstance(v, dict):
                     _store(key, v)
                 else:
+                    if isinstance(v, basestring):
+                        try:
+                            v = float(v)
+                        except:
+                            continue
+                    
                     self._statsSink.time(key, v)
         
         if store:

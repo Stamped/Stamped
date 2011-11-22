@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import "Stamp.h"
+#import "Entity.h"
 
 @protocol StampDetailHeaderViewDelegate <NSObject>
 - (IBAction)handleEntityTap:(id)sender;
@@ -20,5 +21,7 @@
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) id <StampDetailHeaderViewDelegate> delegate;
+
+- (void)setEntity:(Entity*)entity;
 
 @end
