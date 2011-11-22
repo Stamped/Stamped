@@ -29,6 +29,12 @@ class AppleEntityMatcher(AIDBasedEntityMatcher):
 class GooglePlacesEntityMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.googlePlaces.gid')
+    
+    def getMatchingDuplicates(self, entity, candidate_entities):
+        value   = self.getIDValue(entity)
+        titlel  = entity.title.lower()
+        
+        return filter(lambda e: self.getIDValue(e) == value and e.title.lower() == titlel, candidate_entities)
 
 class FandangoEntityMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options=None):

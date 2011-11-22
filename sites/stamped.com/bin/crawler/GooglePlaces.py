@@ -555,10 +555,11 @@ r = g.addPlaceReport(e)
 print r
 """
 
+"""
 p = GooglePlaces()
 r = p.getPlaceDetails("CnRjAAAAOWcj9BHdipBhJutaRIqJfNhDV_NhpkgAB378Dy6E-Obc56Oe4aUi2lxksP4rnbRcFOri_7d3A8Fp-jLnDmQfIgYnU0mZIOYtHoC4HyEGoSXgOninGgDwGH30UkNiy4L8feBUck1nXQH2OtNIRPwyRBIQhj2ao75IwT5zOTsGJEUKBxoUZZ0QsuCpU9WR6H8f3vl7XJTrxug")
+"""
 
 if __name__ == '__main__':
-    #main()
-    pass
+    main()
 

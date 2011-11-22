@@ -11,6 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 
 from Schemas import *
+from Entity  import setFields, isEqual, getSimplifiedTitle
 
 from AMongoCollection import AMongoCollection
 from MongoPlacesEntityCollection import MongoPlacesEntityCollection
@@ -32,13 +33,13 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     def _convertFromMongo(self, document):
         entity = AMongoCollection._convertFromMongo(self, document)
         if entity is not None and entity.titlel is None:
-            entity.titlel = entity.title.lower()
+            entity.titlel = getSimplifiedTitle(entity.title)
         
         return entity
     
     def addEntity(self, entity):
         if entity.titlel is None:
-            entity.titlel = entity.title.lower()
+            entity.titlel = getSimplifiedTitle(entity.title)
         
         return self._addObject(entity)
     
@@ -82,7 +83,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     def addEntities(self, entities):
         for entity in entities:
             if entity.titlel is None:
-                entity.titlel = entity.title.lower()
+                entity.titlel = getSimplifiedTitle(entity.title)
         
         return self._addObjects(entities)
 
