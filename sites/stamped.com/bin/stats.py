@@ -20,6 +20,9 @@ def parseCommandLine():
     parser.add_option("-d", "--db", default=None, type="string", 
         action="store", dest="db", help="db to connect to")
     
+    parser.add_option("-s", "--store", default=False, 
+        action="store_true", help="store results to stats sink")
+    
     (options, args) = parser.parse_args()
     
     if options.db:
@@ -31,7 +34,7 @@ def main():
     options, args = parseCommandLine()
     
     stampedAPI = MongoStampedAPI(lite_mode=True)
-    stats = stampedAPI.getStats()
+    stats = stampedAPI.getStats(store=options.store)
     
     pprint(stats)
 
