@@ -198,14 +198,27 @@ def setFields(entity, detailed=False):
     return entity
 
 def isEqual(entity1, entity2, prefix=False):
+    """
+    # note: useful for debugging search dupes
+    from pprint import pformat
+    utils.log("-" * 40)
+    utils.log(pformat(entity1.value))
+    utils.log(pformat(entity2.value))
+    utils.log("-" * 40)
+    """
+    
+    is_google_places_special_case = \
+        ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
+         (entity2.subcategory == 'other' and entity2.googleLocal is not None))
+    
     if not prefix and entity1.subcategory != entity2.subcategory:
-        if not ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
-                (entity2.subcategory == 'other' and entity2.googleLocal is not None)):
+        # if either entity came from google autosuggest, disregard subcategories not matching
+        if not is_google_places_special_case:
             return False
     
     if entity1.simplified_title != entity2.simplified_title:
         return False
-    elif prefix:
+    elif prefix or is_google_places_special_case:
         return True
     
     if entity1.lat is not None:
