@@ -30,7 +30,7 @@ def parseCommandLine():
 def main():
     options, args = parseCommandLine()
     
-    stampedAPI = MongoStampedAPI()
+    stampedAPI = MongoStampedAPI(lite_mode=True)
     stats = stampedAPI.getStats()
     
     pprint(stats)

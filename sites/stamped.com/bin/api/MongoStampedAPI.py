@@ -45,6 +45,7 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self, db=None, **kwargs):
         self.__statsSink = None
         StampedAPI.__init__(self, "MongoStampedAPI", **kwargs)
+        self.lite_mode = kwargs.pop('lite_mode', False)
         
         if db:
             utils.init_db_config(db)
@@ -55,7 +56,7 @@ class MongoStampedAPI(StampedAPI):
     @property
     def _statsSink(self):
         if self.__statsSink is None:
-            self.__statsSink = StatsDSink()
+            self.__statsSink = StatsDSink(self)
         
         return self.__statsSink
     
