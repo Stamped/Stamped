@@ -683,12 +683,14 @@ def runMongoCommand(mongo_cmd, db='stamped', verbose=False):
     if verbose:
         log(cmd)
     
-    f=open('.temp.sh', 'w')
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.temp.sh')
+    
+    f=open(path, 'w')
     f.write(cmd)
     f.close()
-    os.system('chmod +x .temp.sh')
+    os.system('chmod +x %s' % path)
     
-    cmd = '/bin/bash -c .temp.sh'
+    cmd = '/bin/bash -c %s' % path
     ret = shell(cmd)
     
     try:

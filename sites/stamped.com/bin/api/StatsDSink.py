@@ -16,11 +16,15 @@ from pprint         import pformat
 
 class StatsDSink(AStatsSink):
     
-    def __init__(self):
+    def __init__(self, stampedAPI):
         self.statsd = StatsD(host="localhost", port=8125)
-        self._pool  = Pool(1)
-        self._pool.spawn(self._init)
+        self.stampedAPI = stampedAPI
+        
+        self._pool = Pool(1)
         self._ec2_utils = EC2Utils()
+        if not self.stampedAPI.lite_mode:
+            self._pool.spawn(self._init)
+        
         time.sleep(0.01)
     
     def get_stack_info(self, force_update=False):

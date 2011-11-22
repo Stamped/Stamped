@@ -63,12 +63,12 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'name' : 'db', 
                 'desc' : 'Database security group', 
                 'rules' : [
-                    {
-                        'ip_protocol' : 'tcp', 
-                        'from_port'   : 27017, 
-                        'to_port'     : 27017, 
-                        'cidr_ip'     : '0.0.0.0/0', 
-                    }, 
+                    #{
+                    #    'ip_protocol' : 'tcp', 
+                    #    'from_port'   : 27017, 
+                    #    'to_port'     : 27017, 
+                    #    'cidr_ip'     : '0.0.0.0/0', 
+                    #}, 
                     #{
                     #    'src_group' : 'webserver', 
                     #}, 
