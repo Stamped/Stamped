@@ -74,18 +74,18 @@
     titleLayer_.hidden = YES;
     
     CGFloat ascender = CTFontGetAscent(titleLayer_.font) - 1.0; // Not sure why we need this 1.0 in there, but it didn't match otherwise.
-    CGRect frame = CGRectMake(15, 8, 270, 56);
+    CGRect frame = CGRectMake(15, 4, 270, 56);
     frame.origin.y += ascender;
     titleLayer_.frame = frame;
     NSDictionary *newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     titleLayer_.actions = newActions;
     [newActions release];
     
-    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(17, 50, 15, 12)];
+    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(17, 46, 15, 12)];
     categoryImageView_.contentMode = UIViewContentModeScaleAspectFit;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
-    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 49, 270, 15)];
+    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 45, 270, 15)];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
@@ -94,7 +94,7 @@
     
     CALayer* arrowLayer = [CALayer layer];
     [arrowLayer setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
-    [arrowLayer setFrame:CGRectMake(287, 25, 23, 23)];
+    [arrowLayer setFrame:CGRectMake(287, 21, 23, 23)];
     [arrowLayer retain];
     
     [self.layer addSublayer:gradientLayer_];
@@ -139,7 +139,6 @@
   // Create title label.  
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
-  
   
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -191,12 +190,11 @@
   CFRelease(ellipsisLine);
   
   // Badge stamp.
-  stampFrame_ = CGRectMake(15 + width - (46 / 2), 17 - (46 / 2), 46, 46);
+  stampFrame_ = CGRectMake(15 + width - (46 / 2), 13 - (46 / 2), 46, 46);
   [self setNeedsDisplay];
 }
 
-- (void)drawRect:(CGRect)rect
-{
+- (void)drawRect:(CGRect)rect {
   if (!stamp_ || !title_) return;
   
   if (inverted_) {
@@ -237,17 +235,17 @@
   }
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {  
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {  
   inverted_ = YES;
   [self setNeedsDisplay];
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {  
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {  
   inverted_ = NO;
   [self setNeedsDisplay];
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {  
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {  
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.frame, [touch locationInView:self])) {
     inverted_ = YES;
@@ -258,7 +256,6 @@
   [self setNeedsDisplay];
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-}
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {}
 
 @end
