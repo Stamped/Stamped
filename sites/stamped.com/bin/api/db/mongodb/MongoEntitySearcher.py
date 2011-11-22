@@ -365,6 +365,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
+        input_query = input_query.encode('utf-8')
+        
         """
         data = {}
         data['input']       = input_query
