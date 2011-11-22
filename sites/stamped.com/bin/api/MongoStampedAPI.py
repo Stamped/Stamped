@@ -193,6 +193,9 @@ class MongoStampedAPI(StampedAPI):
             
             # num likes per user
             'num_likes_per_user' : ('db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_likes")) { prev.count = obj.stats.num_likes; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0), 
+            
+            # num followers per user
+            'num_followers_per_user' : ('db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_followers")) { prev.count = obj.stats.num_followers; } else { prev.count = 0; } }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})', 0), 
         }
         
         for cmd_key, cmd in cmds.iteritems():
