@@ -25,6 +25,7 @@
 @property (nonatomic, retain) UILabel* subtitleLabel;
 @property (nonatomic, retain) UIImageView* categoryImageView;
 @property (nonatomic, retain) CALayer* stampLayer;
+@property (nonatomic, retain) CALayer* arrowLayer;
 
 @end
 
@@ -46,6 +47,7 @@
 @synthesize gradientLayer = gradientLayer_;
 @synthesize stampLayer = stampLayer_;
 @synthesize delegate = delegate_;
+@synthesize arrowLayer = arrowLayer_;
 
 
 - (id)initWithFrame:(CGRect)frame
@@ -65,7 +67,7 @@
     gradientLayer_.frame = self.bounds;
     gradientLayer_.hidden = YES;
     
-    self.titleLayer = [[CATextLayer alloc] init];
+    titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
     titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
@@ -73,33 +75,32 @@
     titleLayer_.fontSize = 24;
     titleLayer_.hidden = YES;
     
-    CGFloat ascender = CTFontGetAscent(titleLayer_.font) - 1.0; // Not sure why we need this 1.0 in there, but it didn't match otherwise.
-    CGRect frame = CGRectMake(15, 8, 270, 56);
+    CGFloat ascender = CTFontGetAscent(titleLayer_.font);
+    CGRect frame = CGRectMake(15, 7, 270, 56);
     frame.origin.y += ascender;
     titleLayer_.frame = frame;
     NSDictionary *newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     titleLayer_.actions = newActions;
     [newActions release];
     
-    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(17, 50, 15, 12)];
-    categoryImageView_.contentMode = UIViewContentModeScaleAspectFit;
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(17, 50, 15, 12)];
+    categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
-    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 49, 270, 15)];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 49, 270, 15)];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
     subtitleLabel_.textColor = [UIColor stampedGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
     
-    CALayer* arrowLayer = [CALayer layer];
-    [arrowLayer setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
-    [arrowLayer setFrame:CGRectMake(287, 25, 23, 23)];
-    [arrowLayer retain];
+    self.arrowLayer = [CALayer layer];
+    [arrowLayer_ setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
+    [arrowLayer_ setFrame:CGRectMake(287, 25, 23, 23)];
     
     [self.layer addSublayer:gradientLayer_];
     [self.layer addSublayer:titleLayer_];
-    [self.layer addSublayer:arrowLayer];
+    [self.layer addSublayer:arrowLayer_];
     [self addSubview:categoryImageView_];
     [self addSubview:subtitleLabel_];
   }
@@ -120,6 +121,7 @@
   self.categoryImageView = nil;
   self.gradientLayer = nil;
   self.delegate = nil;
+  self.arrowLayer = nil;
 }
 
 - (void)setStamp:(Stamp *)stamp {
@@ -131,7 +133,14 @@
   
   categoryImageView_.image = stamp_.entityObject.categoryImage;
   categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.categoryImage];
+  [categoryImageView_  sizeToFit];
+  CGRect frame = categoryImageView_.frame;
+  frame.origin.x = titleLayer_.frame.origin.x + 1;
+  categoryImageView_.frame = frame;
   subtitleLabel_.text = stamp_.entityObject.subtitle;
+  frame = subtitleLabel_.frame;
+  frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
+  subtitleLabel_.frame = frame;
 }
 
 - (void)setTitle:(NSString *)title {
@@ -154,10 +163,10 @@
                                           (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
   
   [titleAttributes setObject:(id)[UIColor stampedDarkGrayColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  self.titleAttrString = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
+  titleAttrString_ = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
   
   [titleAttributes setObject:(id)[UIColor whiteColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  self.titleAttrStringInverted = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
+  titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:stamp_.entityObject.title attributes:titleAttributes];
   
   self.titleLayer.string = self.titleAttrString;
   
@@ -201,7 +210,7 @@
   
   if (inverted_) {
     CGPoint top = CGPointMake(160, 0);
-    CGPoint bottom = CGPointMake(160, 82);
+    CGPoint bottom = CGPointMake(160, self.bounds.size.height);
     
     CGContextDrawLinearGradient(UIGraphicsGetCurrentContext(), gradientRef_, top, bottom, 0);
     
@@ -209,6 +218,7 @@
     [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
       [titleLayer_ setString:titleAttrStringInverted_];
       titleLayer_.foregroundColor = [UIColor whiteColor].CGColor;
+      arrowLayer_.contents = (id)[UIImage imageNamed:@"gray_disclosure_arrow_highlighted"].CGImage;
       categoryImageView_.highlighted = YES;
       subtitleLabel_.highlighted = YES;
     [CATransaction commit];
@@ -218,13 +228,13 @@
     [titleLayer_ drawInContext:UIGraphicsGetCurrentContext()];
     CGContextRestoreGState(UIGraphicsGetCurrentContext());
     [stampImageInverted_ drawInRect:stampFrame_];
-    
   }
   else {
     [CATransaction begin];
     [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
       [titleLayer_ setString:titleAttrString_];
       titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+      arrowLayer_.contents = (id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage;
       categoryImageView_.highlighted = NO;
       subtitleLabel_.highlighted = NO;
     [CATransaction commit];

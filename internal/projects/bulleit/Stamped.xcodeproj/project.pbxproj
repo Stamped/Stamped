@@ -609,6 +609,7 @@
 		CB7B23141461C4C0004C247F /* settings_about_stampedbutton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B23121461C4C0004C247F /* settings_about_stampedbutton@2x.png */; };
 		CB958E8E141E438200BBCCBC /* OtherDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */; };
 		CB9C0909147B19D50007D9A6 /* StampDetailHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = CB9C0908147B19D50007D9A6 /* StampDetailHeaderView.m */; };
+		CB9C090B147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB9C090A147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png */; };
 		CB9C846C14687FCE00504FEC /* first_run_button_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = CB9C846A14687FCE00504FEC /* first_run_button_bg.png */; };
 		CB9C846D14687FCE00504FEC /* first_run_button_done_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = CB9C846B14687FCE00504FEC /* first_run_button_done_bg.png */; };
 		CB9C847E14688B4100504FEC /* welcome_icon_contacts_off.png in Resources */ = {isa = PBXBuildFile; fileRef = CB9C846E14688B4000504FEC /* welcome_icon_contacts_off.png */; };
@@ -1511,6 +1512,7 @@
 		CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OtherDetailViewController.m; sourceTree = "<group>"; };
 		CB9C0907147B19D50007D9A6 /* StampDetailHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailHeaderView.h; sourceTree = "<group>"; };
 		CB9C0908147B19D50007D9A6 /* StampDetailHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailHeaderView.m; sourceTree = "<group>"; };
+		CB9C090A147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray_disclosure_arrow_highlighted@2x.png"; sourceTree = "<group>"; };
 		CB9C846A14687FCE00504FEC /* first_run_button_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = first_run_button_bg.png; sourceTree = "<group>"; };
 		CB9C846B14687FCE00504FEC /* first_run_button_done_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = first_run_button_done_bg.png; sourceTree = "<group>"; };
 		CB9C846E14688B4000504FEC /* welcome_icon_contacts_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = welcome_icon_contacts_off.png; sourceTree = "<group>"; };
@@ -1725,6 +1727,7 @@
 		7E22679A13D4E94800657A66 /* Stamp Detail */ = {
 			isa = PBXGroup;
 			children = (
+				CB9C090A147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png */,
 				7EBD8B5B145B73860034E8A1 /* also_stamped_by_badge@2x.png */,
 				7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */,
 				7E407E8D14507BF300D7847F /* comment_fail_button_bg@2x.png */,
@@ -3621,6 +3624,7 @@
 				CB467748146B71DF00114474 /* settings_sharing_button_disconnect@2x.png in Resources */,
 				7E374627146D9DE8005E9271 /* icon_addToDo_button.png in Resources */,
 				7E374628146D9DE8005E9271 /* icon_addToDo_button@2x.png in Resources */,
+				CB9C090B147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

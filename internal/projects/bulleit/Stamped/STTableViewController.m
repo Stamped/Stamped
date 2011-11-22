@@ -100,6 +100,7 @@ static const CGFloat kReloadHeight = 60.0;
                             animated:animated];
 }
 
+
 - (void)setIsLoading:(BOOL)loading {
   if (disableReload_)
     return;
@@ -182,7 +183,8 @@ static const CGFloat kReloadHeight = 60.0;
 
 #pragma mark - UIScrollView delegate methods
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView
+{
   [super scrollViewDidScroll:scrollView];
 
   if (isLoading_ && hasHeaders_) {

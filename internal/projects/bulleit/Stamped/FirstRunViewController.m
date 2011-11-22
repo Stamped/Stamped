@@ -259,11 +259,11 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 }
 
 - (void)signInFailed:(NSString*)reason {
-  if (!activityIndicator_.isAnimating)
-    return;
+//  if (!activityIndicator_.isAnimating)
+//    return;
   if (!reason)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
+  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound && activityIndicator_.isAnimating)
     [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
   if (signInScrollView_.superview) {
     [activityIndicator_ stopAnimating];
@@ -787,7 +787,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
         usernameTaken_ = YES;
       }
       [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
       confirmButton_.enabled = YES;
       return;
     }
@@ -803,7 +803,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                              cancelButtonTitle:@"OK"
                              otherButtonTitles:nil] autorelease] show];
           [activityIndicator_ stopAnimating];
-          [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+          [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
           confirmButton_.enabled = YES;
         }
         return;
@@ -823,7 +823,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
     else if (response.statusCode == 400) {
       [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
       [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
       usernameValid_ = NO;
       usernameTaken_ = YES;
       emailValid_ = NO;
@@ -833,7 +833,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
     else {
       [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
       [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
       confirmButton_.enabled = YES;
       usernameValid_ = NO;
       usernameTaken_ = YES;
@@ -846,7 +846,10 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
   NSLog(@"request: %@ hit error: %d", request.resourcePath, error.code);
   [activityIndicator_ stopAnimating];
-  [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+  if (signInScrollView_.superview)
+    [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+  if (signUpScrollView_.superview)
+    [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
 }
 
