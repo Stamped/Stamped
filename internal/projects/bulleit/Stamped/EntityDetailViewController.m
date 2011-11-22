@@ -120,7 +120,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)loadEntityDataFromServer {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     return;
   } 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
@@ -219,7 +220,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   [self ensureTitleLabelHeight];
   
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_notConnected"]];
     CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
     CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);

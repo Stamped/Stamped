@@ -104,7 +104,9 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)setIsLoading:(BOOL)loading {
   if (disableReload_)
     return;
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     loading = NO;
   
   if (isLoading_ == loading)
@@ -131,7 +133,8 @@ static const CGFloat kReloadHeight = 60.0;
                        CGRect reloadFrame = reloadLabel_.frame;
                        reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
-                       if (![[RKClient sharedClient] isNetworkAvailable]) {
+                       RKClient* client = [RKClient sharedClient];
+                       if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
                          reloadLabel_.text = kNotConnectedText;
                          arrowImageView_.alpha = 0.0;
                        }
@@ -156,7 +159,8 @@ static const CGFloat kReloadHeight = 60.0;
                        CGRect reloadFrame = reloadLabel_.frame;
                        reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
-                       if (![[RKClient sharedClient] isNetworkAvailable])
+                       RKClient* client = [RKClient sharedClient];
+                       if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
                          reloadLabel_.text = kNotConnectedText;
                        else 
                          reloadLabel_.text = kLoadingText;
@@ -170,7 +174,8 @@ static const CGFloat kReloadHeight = 60.0;
     CGRect reloadFrame = reloadLabel_.frame;
     reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
     reloadLabel_.frame = reloadFrame;
-    if (![[RKClient sharedClient] isNetworkAvailable]) {
+    RKClient* client = [RKClient sharedClient];
+    if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
       self.isLoading = NO;
     }
     else {
@@ -198,14 +203,15 @@ static const CGFloat kReloadHeight = 60.0;
     self.highlightView.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
   }
   
-  if (isLoading_ && ![[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (isLoading_ && client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     self.isLoading = NO;
   
   if (isLoading_ || disableReload_)
     return;
   
   shouldReload_ = scrollView.contentOffset.y < -kReloadHeight;
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     reloadLabel_.text = kNotConnectedText;
   else
     reloadLabel_.text = shouldReload_ ? kReleaseText : kPullDownText;
@@ -217,9 +223,10 @@ static const CGFloat kReloadHeight = 60.0;
                      CGAffineTransform transform = shouldReload_ ?
                          CGAffineTransformMakeRotation(M_PI) : CGAffineTransformIdentity;
                      arrowImageView_.transform = transform;
-                     if ([[RKClient sharedClient] isNetworkAvailable] && !isLoading_)
+                     RKClient* client = [RKClient sharedClient];
+                     if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable && !isLoading_)
                        arrowImageView_.alpha = 1.0;
-                     if (![[RKClient sharedClient] isNetworkAvailable])
+                     if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
                        arrowImageView_.alpha = 0.0;
                    }
                    completion:nil];
