@@ -50,6 +50,7 @@ typedef enum {
   StampDetailActionTypeShare
 } StampDetailActionType;
 
+
 @interface StampDetailViewController ()
 - (void)setUpHeader;
 - (void)setUpToolbar;
@@ -80,6 +81,7 @@ typedef enum {
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
 @property (nonatomic, retain) NSMutableArray* commentViews;
+@property (nonatomic, retain) StampDetailHeaderView* headerView;
 @end
 
 @implementation StampDetailViewController
@@ -117,6 +119,8 @@ typedef enum {
 @synthesize alsoStampedByLabel = alsoStampedByLabel_;
 @synthesize alsoStampedByContainer = alsoStampedByContainer_;
 @synthesize alsoStampedByScrollView = alsoStampedByScrollView_;
+@synthesize headerView = headerView_;
+
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -159,6 +163,8 @@ typedef enum {
   self.alsoStampedByContainer = nil;
   self.alsoStampedByLabel = nil;
   self.alsoStampedByScrollView = nil;
+  self.headerView.delegate = nil;
+  self.headerView = nil;
   [super dealloc];
 }
 
@@ -182,11 +188,15 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  if (headerView_.inverted)
+    headerView_.inverted = NO;
+  [headerView_ setNeedsDisplay];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   stampPhotoView_.imageURL = stamp_.imageURL;
+
 }
 
 - (void)viewDidLoad {
@@ -261,33 +271,29 @@ typedef enum {
   self.alsoStampedByContainer = nil;
   self.alsoStampedByLabel = nil;
   self.alsoStampedByScrollView = nil;
+  self.headerView.delegate = nil;
+  self.headerView = nil;
 }
 
 - (void)setUpHeader {
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
-  CGSize stringSize = [stamp_.entityObject.title sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
-                                                     forWidth:270
-                                                lineBreakMode:UILineBreakModeTailTruncation];
 
   titleLabel_.font = [UIFont fontWithName:fontString size:fontSize];
   titleLabel_.text = stamp_.entityObject.title;
   titleLabel_.textColor = [UIColor stampedDarkGrayColor];
-
-  // Badge stamp.
-  CALayer* stampLayer = [[CALayer alloc] init];
-  stampLayer.frame = CGRectMake(15 + stringSize.width - (46 / 2),
-                                17 - (46 / 2),
-                                46, 46);
-  stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-  [scrollView_.layer insertSublayer:stampLayer above:titleLabel_.layer];
-  [stampLayer release];
+  titleLabel_.hidden = YES;
+  subtitleLabel_.hidden = YES;
+  categoryImageView_.hidden = YES;
   
-  categoryImageView_.image = stamp_.entityObject.categoryImage;
-  subtitleLabel_.text = stamp_.entityObject.subtitle;
-  subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
-  subtitleLabel_.textColor = [UIColor stampedGrayColor];
+  CGRect frame = CGRectMake(0, 0, scrollView_.frame.size.width, 82);
+  self.headerView = [[StampDetailHeaderView alloc] initWithFrame:frame];
+  headerView_.stamp = stamp_;
+  headerView_.delegate = self;
+  
+  [scrollView_ insertSubview:headerView_ belowSubview:activityView_];
 }
+
 
 - (void)setUpToolbar {
   if (stamp_.entityObject.favorite) {
