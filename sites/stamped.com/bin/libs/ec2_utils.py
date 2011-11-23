@@ -101,16 +101,17 @@ class AWSInstance(object):
         
         if hasattr(self._instance, 'tags'):
             def _fix_config(cfg):
-                for elem in cfg:
-                    val = cfg[elem]
-                    
-                    if isinstance(val, basestring):
-                        try:
-                            val = eval(val)
-                            val = _fix_config(val)
-                            cfg[elem] = val
-                        except Exception:
-                            pass
+                if isinstance(cfg, dict):
+                    for elem in cfg:
+                        val = cfg[elem]
+                        
+                        if isinstance(val, basestring):
+                            try:
+                                val = eval(val)
+                                val = _fix_config(val)
+                                cfg[elem] = val
+                            except Exception:
+                                pass
                 return cfg
             
             return utils.AttributeDict(_fix_config(self._instance.tags))
