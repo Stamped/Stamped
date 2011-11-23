@@ -179,18 +179,18 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.response isUnauthorized] &&
-      [objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
+      [objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
     [self refreshToken];
     return;
   }
 
   if ([objectLoader.response isUnauthorized] &&
-      [objectLoader.resourcePath isEqualToString:kLoginPath]) {
+      [objectLoader.resourcePath rangeOfString:kLoginPath].location != NSNotFound) {
     if (firstRunViewController_){  
       [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];}    
     else
       [self performSelector:@selector(logout) withObject:self afterDelay:0];
-  } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
+  } else if ([objectLoader.resourcePath rangeOfString:kRefreshPath].location != NSNotFound) {
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
     [self.firstRunViewController signUpFailed:nil];
@@ -206,7 +206,7 @@ static AccountManager* sharedAccountManager_ = nil;
       firstInstall_ = NO;
     }
     return;
-  } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+  } else if ([objectLoader.resourcePath rangeOfString:kLoginPath].location != NSNotFound) {
     // Simple log in: store the OAuth token.
     self.firstRunViewController.delegate = nil;
     StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -216,7 +216,7 @@ static AccountManager* sharedAccountManager_ = nil;
     User* user = [object objectForKey:@"user"];
     [passwordKeychainItem_ setObject:user.screenName forKey:(id)kSecAttrAccount];
     [self sendUserInfoRequest];
-  } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
+  } else if ([objectLoader.resourcePath rangeOfString:kRefreshPath].location != NSNotFound) {
     [self storeOAuthToken:object];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
     // Registering a new user.

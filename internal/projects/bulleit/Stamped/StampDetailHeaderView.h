@@ -24,5 +24,6 @@
 @property (nonatomic, assign) BOOL hideArrow;
 
 - (void)setEntity:(Entity*)entity;
+- (CGRect)stampFrame;
 
 @end

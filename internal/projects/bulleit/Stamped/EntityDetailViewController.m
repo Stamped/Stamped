@@ -100,6 +100,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.spinner = nil;
+  if (imageView_)
+    imageView_.delegate = nil;
   self.imageView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
@@ -381,6 +383,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainContentView = nil;
   self.addFavoriteButton = nil;
   self.spinner = nil;
+  if (imageView_)
+    imageView_.delegate = nil;
   self.imageView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
@@ -405,7 +409,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  NSLog(@"loaded: %@ %@", objectLoader.resourcePath, object);
+//  NSLog(@"loaded: %@ %@", objectLoader.resourcePath, object);
   if ([objectLoader.resourcePath rangeOfString:kEntityLookupPath].location != NSNotFound) {
     dataLoaded_ = YES;
     [detailedEntity_ release];
@@ -416,14 +420,13 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   // Handle callback from "Add To-Do"
   if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
-    NSLog(@"id: %@", ((Favorite*)object).entityObject.entityID);
     [self.spinner stopAnimating];
     [self dismissSelf];
   }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  NSLog(@"Hit error: %@", error);
+//  NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
@@ -440,7 +443,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
-  NSLog(@"unexpected: %@", objectLoader.response.bodyAsString);
+//  NSLog(@"unexpected: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
