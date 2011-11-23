@@ -220,10 +220,10 @@ class AWSInstance(object):
                 return self.__dict__[key]
         except:
             try:
+                return self.tags[key]
+            except:
                 # TODO: make this less hacky...
                 return eval("self._instance.%s" % key)
-            except:
-                return self.tags[key]
     
     def __str__(self):
         return "%s(%s.%s)" % (self.__class__.__name__, self.stack.name, self.name)
