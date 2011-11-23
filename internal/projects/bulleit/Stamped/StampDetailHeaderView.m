@@ -221,7 +221,7 @@
   CFRelease(ellipsisLine);
   
   // Badge stamp.
-  stampFrame_ = CGRectMake(15 + width - (46 / 2), 11 - (46 / 2), 46, 46);
+  stampFrame_ = CGRectMake(22 + width - (46 / 2), 13 - (46 / 2), 46, 46);
   [self setNeedsDisplay];
 }
 
@@ -300,5 +300,9 @@
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {}
+
+- (CGRect)stampFrame {
+  return stampFrame_;
+}
 
 @end

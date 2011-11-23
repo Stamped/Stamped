@@ -26,6 +26,7 @@
 #import "User.h"
 #import "Util.h"
 #import "Stamp.h"
+#import "Alerts.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
@@ -386,8 +387,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  if ([objectLoader.resourcePath rangeOfString:kRemoveFavoritePath].location != NSNotFound)
-    NSLog(@"loaded: %@", objects);
+//  if ([objectLoader.resourcePath rangeOfString:kRemoveFavoritePath].location != NSNotFound)
+//    NSLog(@"loaded: %@", objects);
   NSDate* now = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
   [[NSUserDefaults standardUserDefaults] synchronize];
@@ -400,7 +401,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 } 
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
-  NSLog(@"unexpected: %@\n\n", objectLoader.response.bodyAsString);
+  [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+//  NSLog(@"unexpected: %@\n\n", objectLoader.response.bodyAsString);
 }
 
 #pragma mark - TodoTableViewCellDelegate Methods.
