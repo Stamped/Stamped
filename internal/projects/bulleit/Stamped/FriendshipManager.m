@@ -95,7 +95,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   for (Stamp* s in results)
     s.temporary = [NSNumber numberWithBool:YES];
 
-  [Stamp.managedObjectContext processPendingChanges];
   [Stamp.managedObjectContext save:NULL];
 }
 

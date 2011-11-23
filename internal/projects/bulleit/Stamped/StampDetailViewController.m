@@ -1160,6 +1160,7 @@ typedef enum {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSLog(@"Stamp detail response: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     lastCommentAttemptFailed_ = NO;
     [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];

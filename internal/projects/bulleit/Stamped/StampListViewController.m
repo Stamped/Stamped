@@ -141,8 +141,9 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
   for (Stamp* stamp in [sectionInfo objects]) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
-    [stamp.managedObjectContext save:NULL];
   }
+
+  [Stamp.managedObjectContext save:NULL];
 }
 
 - (void)filterStamps {
