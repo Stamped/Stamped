@@ -18,6 +18,7 @@ from boto.ec2.connection    import EC2Connection
 from boto.ec2.address       import Address
 from boto.exception         import EC2ResponseError
 
+from collections            import defaultdict
 from gevent.pool            import Pool
 from pprint                 import pprint
 from fabric.operations      import *
@@ -140,6 +141,10 @@ class AWSDeploymentStack(ADeploymentStack):
             with settings(host_string=instance.public_dns_name):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/update.py', pty=False)
+    
+    def repair(self):
+        # TODO
+        pass
     
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
@@ -493,6 +498,10 @@ class AWSDeploymentStack(ADeploymentStack):
         add = args[0]
         sim = []
         ids = set()
+        placements = defaultdict(int)
+        placements['us-east-1a'] = 0
+        placements['us-east-1b'] = 0
+        placements['us-east-1c'] = 0
         top = -1
         
         # infer the suffix number for the new instance (e.g., api4, db2, etc.)
@@ -501,6 +510,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 sim.append(instance)
                 ids.add(instance.instance_id)
                 cur = int(instance.name[len(add):])
+                placements[instance.placement] += 1
                 
                 if cur > top:
                     top = cur
@@ -524,10 +534,23 @@ class AWSDeploymentStack(ADeploymentStack):
         if isinstance(conf['roles'], basestring):
             conf['roles'] = eval(conf['roles'])
         
-        conf['placement'] = 'us-east-1b'
+        # attempt to distribute the node evenly across availability zones by 
+        # placing this new node into the AZ which has the minimum number of 
+        # existing nodes
+        min_v = None
+        for k, v in placements.iteritems():
+            if min_v is None or v < min_v[1]:
+                min_v = (k, v)
+        
+        if min_v is None:
+            placement = 'us-east-1a'
+        else:
+            placement = min_v[0]
+        
+        conf['placement'] = placement
         
         # create and bootstrap the new instance
-        utils.log("[%s] creating instance %s" % (self, conf['name']))
+        utils.log("[%s] creating instance %s in AZ %s" % (self, conf['name'], conf['placement']))
         instance = AWSInstance(self, conf)
         
         try:

@@ -36,6 +36,10 @@ class ADeploymentStack(object):
         pass
     
     @abstract
+    def repair(self):
+        pass
+    
+    @abstract
     def crawl(self, *args):
         pass
     

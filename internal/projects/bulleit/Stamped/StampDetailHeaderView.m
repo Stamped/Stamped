@@ -45,6 +45,7 @@
 @synthesize gradientLayer = gradientLayer_;
 @synthesize delegate = delegate_;
 @synthesize arrowLayer = arrowLayer_;
+@synthesize hideArrow = hideArrow_;
 
 
 - (id)initWithFrame:(CGRect)frame
@@ -267,8 +268,18 @@
   }
 }
 
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {  
-  inverted_ = YES;
+- (void)setHideArrow:(BOOL)hideArrow {
+  hideArrow_ = hideArrow;
+  if (hideArrow_)
+    arrowLayer_.hidden = YES;
+  else
+    arrowLayer_.hidden = NO;
+}
+
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (!hideArrow_)
+    inverted_ = YES;
   [self setNeedsDisplay];
 }
 
@@ -279,7 +290,7 @@
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {  
   UITouch* touch = [touches anyObject];
-  if (CGRectContainsPoint(self.frame, [touch locationInView:self])) {
+  if (CGRectContainsPoint(self.frame, [touch locationInView:self]) && !hideArrow_) {
     inverted_ = YES;
     [delegate_ handleEntityTap:self];
   }

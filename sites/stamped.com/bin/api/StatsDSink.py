@@ -6,10 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
-import pickle, os, time
+import libs.ec2_utils, pickle, os, time
 
 from AStatsSink     import AStatsSink
-from libs.EC2Utils  import EC2Utils
 from libs.StatsD    import StatsD
 from gevent.pool    import Pool
 from pprint         import pformat
@@ -21,40 +20,10 @@ class StatsDSink(AStatsSink):
         self.stampedAPI = stampedAPI
         
         self._pool = Pool(1)
-        self._ec2_utils = EC2Utils()
         if not self.stampedAPI.lite_mode:
             self._pool.spawn(self._init)
         
         time.sleep(0.01)
-    
-    def get_stack_info(self, force_update=False):
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
-        stack_info = None
-        
-        if not force_update and os.path.exists(path):
-            try:
-                f = open(path, 'r')
-                stack_info = utils.AttributeDict(dict(pickle.loads(f.read())))
-            except:
-                utils.printException()
-                stack_info = None
-            finally:
-                f.close()
-        
-        if force_update or stack_info is None:
-            stack_info = self._ec2_utils.get_stack_info()
-            utils.log(pformat(dict(stack_info)))
-            
-            try:
-                f = open(path, 'w')
-                f.write(pickle.dumps(dict(stack_info)))
-            except:
-                utils.printException()
-                pass
-            finally:
-                f.close()
-        
-        return stack_info
     
     def _init(self):
         logs.info("initializing StatsD")
@@ -66,14 +35,14 @@ class StatsDSink(AStatsSink):
             
             while not done:
                 try:
-                    stack_info = self.get_stack_info()
+                    stack_info = libs.ec2_utils.get_stack()
                     
                     if stack_info is None:
                         raise
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
-                            host, port = node.private_dns, 8125
+                            host, port = node.private_ip_address, 8125
                             done = True
                             break
                 except:

@@ -50,7 +50,6 @@
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="269090794"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -283,7 +282,7 @@
 							</object>
 							<object class="IBUIView" id="1040904761">
 								<reference key="NSNextResponder" ref="1008158405"/>
-								<int key="NSvFlags">-2147483368</int>
+								<int key="NSvFlags">-2147483344</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<object class="IBUIView" id="198390049">

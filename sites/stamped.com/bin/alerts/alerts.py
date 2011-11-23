@@ -15,7 +15,6 @@ from socket import socket
 from errors import Fail
 from HTTPSchemas import *
 
-from libs.EC2Utils import EC2Utils
 from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
