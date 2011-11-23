@@ -215,9 +215,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
-
-  editButton_.hidden = !newEntity_;
-  disclosureButton_.hidden = newEntity_;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
   ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -298,8 +295,10 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
   [headerView_ setEntity:objectToStamp_];
   headerView_.delegate = self;
-  [scrollView_ addSubview:headerView_];
+  [scrollView_ insertSubview:headerView_ belowSubview:editButton_];
   
+  editButton_.hidden = !newEntity_;
+  headerView_.hideArrow = newEntity_;
 
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
   titleLabel_.textColor = [UIColor stampedDarkGrayColor];
@@ -446,6 +445,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                                  11 - (46 / 2),
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+  
+  [headerView_ setEntity:objectToStamp_];
   
   if (headerView_.inverted)
     headerView_.inverted = NO;
@@ -685,6 +686,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 #pragma mark - Actions.
 
 - (IBAction)handleEntityTap:(id)sender {
+  if (newEntity_)
+    return;
+  
   UIViewController* vc = nil;
   if (entityObject_) {
     vc = [Util detailViewControllerForEntity:entityObject_];
