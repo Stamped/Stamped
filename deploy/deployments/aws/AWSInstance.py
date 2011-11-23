@@ -245,7 +245,7 @@ class AWSInstance(AInstance):
                 try:
                     self._instance.add_tag(key, value)
                     break
-                except: EC2ResponseError:
+                except EC2ResponseError:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
