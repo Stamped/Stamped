@@ -12,7 +12,7 @@ import copy
 def getInstances():
     replSetName = 'stamped-dev-01'
     
-    dbCount     = 2
+    dbCount     = 3
     webCount    = 1
     monCount    = 1
     
