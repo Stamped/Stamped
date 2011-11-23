@@ -66,7 +66,7 @@ class StampedAPI(AStampedAPI):
                 stack_info = self._statsSink.get_stack_info()
                 self._node_name = stack_info.instance.name
             except:
-                utils.printException()
+                pass
         
         return self._node_name
     

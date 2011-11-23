@@ -801,12 +801,14 @@ class MongoEntitySearcher(EntitySearcher):
                                   quality_value * quality_weight + \
                                   distance_value * distance_weight
             
+            """
             entity.stats.titlev     = title_value
             entity.stats.subcatv    = subcategory_value
             entity.stats.sourcev    = source_value
             entity.stats.qualityv   = quality_value
             entity.stats.distancev  = distance_value
             entity.stats.totalv     = aggregate_value
+            """
             
             """
             data = {}

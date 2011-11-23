@@ -140,7 +140,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     [self findFromTwitter:self];
   else if (self.findSource == FindFriendsSourceFacebook)
     [self findFromFacebook:self];
-  if (![[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
 }
 
@@ -167,7 +168,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                                            selector:@selector(facebookFriendsDidChange:)
                                                name:kFacebookFriendsChangedNotification
                                              object:nil];
-  if ([[RKClient sharedClient] isNetworkAvailable])
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
     [self loadSuggestedUsers];
 
   if (self.findSource == FindFriendsSourceStamped)
@@ -245,7 +247,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceSuggested;
   [self setSearchFieldHidden:NO animated:NO];
   [self adjustNippleToView:self.stampedButton];
-  if ([[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
     if (!suggestedFriends_ || suggestedFriends_.count == 0)
       [self loadSuggestedUsers];
   }
@@ -309,7 +312,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       if (sanitized)
         [sanitizedNumbers addObject:sanitized];
     }
-    if ([[RKClient sharedClient] isNetworkAvailable])
+    RKClient* client = [RKClient sharedClient];
+    if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
       [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
     [tableView_ reloadData];
   });

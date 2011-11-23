@@ -364,7 +364,8 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   if (sender != confirmButton_)
     return;
   
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
     return;
   }

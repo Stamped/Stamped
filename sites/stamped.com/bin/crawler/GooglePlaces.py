@@ -555,12 +555,14 @@ r = g.addPlaceReport(e)
 print r
 """
 
+"""
 p = GooglePlaces()
 f = "CkQ6AAAAe9fbCd2v01fWvsL1pth68lnlyo2zugxpxZZV8-qBHRyA6q5_YkHpeETA8Vt5KpNkGAzDQUIkXUT3RKG3EFPPyBIQpMwl-TJnQi3amCWI9_r6YBoUzs7f38upa92ztqtXe5EDaSudw2Q"
 r = p.getPlaceDetails(f)
 from pprint import pprint
 pprint(r)
+"""
 
 if __name__ == '__main__':
-    pass#main()
+    main()
 
