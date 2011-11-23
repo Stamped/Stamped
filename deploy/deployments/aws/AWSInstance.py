@@ -199,7 +199,10 @@ class AWSInstance(AInstance):
             
             if 'db' in self.roles:
                 # Check for mongo to finish
-                self._validate_port(27017, desc="mongo", timeout=1000)
+                #self._validate_port(27017, desc="mongo", timeout=1000)
+                sleep = 20
+                utils.log("sleeping for %d seconds to ensure mongo is online" % sleep)
+                time.sleep(sleep)
     
     def start(self):
         self.update()
