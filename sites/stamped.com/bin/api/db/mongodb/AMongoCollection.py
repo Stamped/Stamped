@@ -45,7 +45,7 @@ class MongoDBConfig(Singleton):
                 if 'db' in node.roles:
                     self.config = AttributeDict({
                        "mongodb" : {
-                           "host" : node.private_dns, 
+                           "host" : node.private_ip_address, 
                            "port" : 27017, 
                        }
                     })
