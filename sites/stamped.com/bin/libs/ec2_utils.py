@@ -14,7 +14,7 @@ from boto.ec2.elb           import ELBConnection
 from collections            import defaultdict
 from subprocess             import Popen, PIPE
 
-def get_local_instance_id(self):
+def get_local_instance_id():
     ret = _shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')
     
     if 0 != ret[1]:
