@@ -189,8 +189,18 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 
 - (void)viewDidAppear:(BOOL)animated {
   [activityIndicator_ stopAnimating];
-  [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
-  confirmButton_.enabled = YES;
+  if (signInScrollView_.superview) {
+    [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+    confirmButton_.enabled = (usernameTextField_.text.length &&
+                              passwordTextField_.text.length);
+  }
+  if (signUpScrollView_.superview) {
+    [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+    confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
+                              signUpUsernameTextField_.text.length &&
+                              signUpEmailTextField_.text.length &&
+                              signUpPasswordTextField_.text.length );
+  }
   [super viewDidAppear:animated];
 }
 
