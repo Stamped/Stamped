@@ -14,7 +14,7 @@ from boto.ec2.elb           import ELBConnection
 from collections            import defaultdict
 from subprocess             import Popen, PIPE
 
-def get_local_instance_id(self):
+def get_local_instance_id():
     ret = _shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')
     
     if 0 != ret[1]:
@@ -31,7 +31,7 @@ def get_stack(stack=None):
     reservations = conn.get_all_instances()
     instance_id  = get_local_instance_id()
     stacks       = defaultdict(list)
-    cur_isntance = None
+    cur_instance = None
     
     for reservation in reservations:
         for instance in reservation.instances:
@@ -41,7 +41,7 @@ def get_stack(stack=None):
                     instance = AWSInstance(instance)
                     stacks[stack_name].append(instance)
                     
-                    if stack is not None and instance.instance_id == instance_id:
+                    if stack is None and instance.instance_id == instance_id:
                         stack = stack_name
                         cur_instance = instance
             except:
@@ -101,16 +101,17 @@ class AWSInstance(object):
         
         if hasattr(self._instance, 'tags'):
             def _fix_config(cfg):
-                for elem in cfg:
-                    val = cfg[elem]
-                    
-                    if isinstance(val, basestring):
-                        try:
-                            val = eval(val)
-                            val = _fix_config(val)
-                            cfg[elem] = val
-                        except Exception:
-                            pass
+                if isinstance(cfg, dict):
+                    for elem in cfg:
+                        val = cfg[elem]
+                        
+                        if isinstance(val, basestring):
+                            try:
+                                val = eval(val)
+                                val = _fix_config(val)
+                                cfg[elem] = val
+                            except Exception:
+                                pass
                 return cfg
             
             return utils.AttributeDict(_fix_config(self._instance.tags))
@@ -154,12 +155,12 @@ class AWSInstance(object):
             while True:
                 try:
                     return self._instance.update(validate)
-                except EC2ResponseError:
+                except:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
                     
-                    time.sleep(2)
+                    time.sleep(1)
         else:
             raise NotInitializedError()
     
@@ -170,7 +171,7 @@ class AWSInstance(object):
             while True:
                 try:
                     return self._instance.add_tag(key, value)
-                except EC2ResponseError:
+                except:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
@@ -219,11 +220,13 @@ class AWSInstance(object):
             if key in self.__dict__:
                 return self.__dict__[key]
         except:
-            try:
-                # TODO: make this less hacky...
-                return eval("self._instance.%s" % key)
-            except:
-                return self.tags[key]
+            pass
+        
+        try:
+            return self.tags[key]
+        except:
+            # TODO: make this less hacky...
+            return eval("self._instance.%s" % key)
     
     def __str__(self):
         return "%s(%s.%s)" % (self.__class__.__name__, self.stack.name, self.name)

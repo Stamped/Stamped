@@ -44,6 +44,8 @@ available_commands = {
     'backup' : 'backup', 
     
     'add' : 'add_stack', 
+    
+    'repair' : 'repair_stack', 
 }
 
 def parseCommandLine():

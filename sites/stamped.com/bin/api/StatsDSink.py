@@ -42,7 +42,7 @@ class StatsDSink(AStatsSink):
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
-                            host, port = node.private_dns, 8125
+                            host, port = node.private_ip_address, 8125
                             done = True
                             break
                 except:
