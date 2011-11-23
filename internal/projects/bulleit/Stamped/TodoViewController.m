@@ -386,6 +386,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if ([objectLoader.resourcePath rangeOfString:kRemoveFavoritePath].location != NSNotFound)
+    NSLog(@"loaded: %@", objects);
   NSDate* now = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
   [[NSUserDefaults standardUserDefaults] synchronize];
@@ -396,6 +398,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
 } 
+
+- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
+  NSLog(@"unexpected: %@\n\n", objectLoader.response.bodyAsString);
+}
 
 #pragma mark - TodoTableViewCellDelegate Methods.
 
@@ -519,9 +525,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   NSString* path = kRemoveFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
+  NSLog(@"entityID: %@", entityID);
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityID, @"entity_id", nil];
   [objectLoader send];
 }
