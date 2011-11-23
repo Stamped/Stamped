@@ -273,12 +273,12 @@
     return;
   }
   if (r == max)
-    *hue = (g - b) / delta;     // between yellow & magenta
+    *hue = (g - b) / delta;
   else if(g == max)
-    *hue = 2 + (b - r) / delta; // between cyan & yellow
+    *hue = 2 + (b - r) / delta;
   else
-    *hue = 4 + (r - g) / delta; // between magenta & cyan
-  *hue *= 60;               // degrees
+    *hue = 4 + (r - g) / delta;
+  *hue *= 60;
   if (*hue < 0)
     *hue += 360;
   

@@ -1030,8 +1030,7 @@ typedef enum {
     blurb = [substring stringByAppendingString:@"..."];
   
   // Stamped: [blurb] [link]
-  [twitter setInitialText:[NSString stringWithFormat:@"Stamped: %@", blurb]];
-  [twitter addURL:[NSURL URLWithString:stamp_.URL]];
+  [twitter setInitialText:[NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp_.URL]];
   
   if ([TWTweetComposeViewController canSendTweet]) {
     [self presentViewController:twitter animated:YES completion:nil];
