@@ -219,7 +219,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     return 80.0;
   } else if ([event.genre isEqualToString:@"friend"]) {
     NSString* full = [NSString stringWithFormat:@"%@ just joined Stamped as %@", event.subject, event.user.screenName];
-    CGSize stringSize = [full sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+    CGSize stringSize = [full sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
                          constrainedToSize:CGSizeMake(210, MAXFLOAT)
                              lineBreakMode:UILineBreakModeWordWrap];
     return fmaxf(52.0, stringSize.height + 42);
