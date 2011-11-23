@@ -957,7 +957,8 @@ class HTTPFavorite(Schema):
 
 class HTTPFavoriteNew(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
         self.stamp_id           = SchemaElement(basestring)
 
 

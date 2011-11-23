@@ -15,10 +15,14 @@ def create(request):
     authUserId  = checkOAuth(request)
 
     schema      = parseRequest(HTTPFavoriteNew(), request)
-    entityId    = schema.entity_id
-    stampId     = schema.stamp_id
 
-    favorite    = stampedAPI.addFavorite(authUserId, entityId, stampId)
+    stampId     = schema.stamp_id
+    entityRequest = {
+        'entity_id': schema.entity_id,
+        'search_id': schema.search_id,
+    }
+
+    favorite    = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
     favorite    = HTTPFavorite().importSchema(favorite)
 
     return transformOutput(favorite.exportSparse())

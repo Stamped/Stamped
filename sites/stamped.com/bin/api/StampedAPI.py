@@ -2497,8 +2497,8 @@ class StampedAPI(AStampedAPI):
     """
 
     @API_CALL
-    def addFavorite(self, authUserId, entityId, stampId=None):
-        entity  = self._entityDB.getEntity(entityId)
+    def addFavorite(self, authUserId, entityRequest, stampId=None):
+        entity      = self._getEntityFromRequest(entityRequest)
 
         favorite = Favorite({
             'entity': entity.exportSchema(EntityMini()),
@@ -2511,7 +2511,7 @@ class StampedAPI(AStampedAPI):
 
         # Check to verify that user hasn't already favorited entity
         try:
-            fav = self._favoriteDB.getFavorite(authUserId, entityId)
+            fav = self._favoriteDB.getFavorite(authUserId, entity.entity_id)
             if fav.favorite_id == None:
                 raise
             exists = True
@@ -2524,7 +2524,7 @@ class StampedAPI(AStampedAPI):
             raise IllegalActionError(msg)
 
         # Check if user has already stamped entity, mark as complete if so
-        if self._stampDB.checkStamp(authUserId, entityId):
+        if self._stampDB.checkStamp(authUserId, entity.entity_id):
             favorite.complete = True
         
         favorite = self._favoriteDB.addFavorite(favorite)
