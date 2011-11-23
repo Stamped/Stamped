@@ -35,6 +35,7 @@ from db.mongodb.MongoLogsCollection             import MongoLogsCollection
 from db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
+from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from db.mongodb.MongoDeletedEntityCollection    import MongoDeletedEntityCollection
 
 class MongoStampedAPI(StampedAPI):
@@ -135,6 +136,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
+
+    @lazyProperty
+    def _emailAlertDB(self):
+        return MongoAuthEmailAlertsCollection()
     
     @lazyProperty
     def _deletedEntityDB(self):
