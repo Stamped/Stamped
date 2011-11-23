@@ -189,7 +189,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (self.headerView)
+  if (headerView_)
     self.headerView.delegate = nil;
   self.headerView = nil;
   [super dealloc];
@@ -428,7 +428,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (self.headerView)
+  if (headerView_)
     self.headerView.delegate = nil;
   self.headerView = nil;
 }
