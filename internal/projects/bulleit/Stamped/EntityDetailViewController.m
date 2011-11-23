@@ -104,6 +104,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
 
+  [Entity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
   [entityObject_ release];
   [detailedEntity_ release];
   [searchResult_ release];
