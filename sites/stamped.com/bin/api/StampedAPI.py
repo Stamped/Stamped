@@ -269,6 +269,11 @@ class StampedAPI(AStampedAPI):
         friendIds   = self._friendshipDB.getFriends(account.user_id)
         followerIds = self._friendshipDB.getFollowers(account.user_id)
 
+        # Remove tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
+        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
+        self._emailAlertDB.removeTokenForUser(account.user_id)
+
         # Remove friends / followers
         for followerId in followerIds:
             friendship              = Friendship()
