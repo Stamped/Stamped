@@ -227,12 +227,12 @@ class AWSInstance(AInstance):
             while True:
                 try:
                     return self._instance.update(validate)
-                except EC2ResponseError:
+                except:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
                     
-                    time.sleep(2)
+                    time.sleep(1)
         else:
             raise NotInitializedError()
     
@@ -243,12 +243,12 @@ class AWSInstance(AInstance):
             while True:
                 try:
                     return self._instance.add_tag(key, value)
-                except EC2ResponseError:
+                except:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
                     
-                    time.sleep(2)
+                    time.sleep(1)
         else:
             raise NotInitializedError()
     

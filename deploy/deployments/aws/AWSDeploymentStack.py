@@ -44,6 +44,8 @@ class AWSDeploymentStack(ADeploymentStack):
         for instance in instances:
             awsInstance = AWSInstance(self, instance)
             self.instances.append(awsInstance)
+        
+        self.isodate_re = re.compile('ISODate\(([^)]+)\)')
     
     @property
     def conn(self):
@@ -142,9 +144,185 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/update.py', pty=False)
     
+    def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True):
+        db_instances = self.db_instances
+        assert len(db_instances) > 1
+        
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
+        
+        cmd_template = "mongo stamped --quiet --eval 'printjson(%s);'"
+        cmd = cmd_template % mongo_cmd
+        
+        if not slave_okay:
+            primary = self._get_primary()
+            assert primary is not None
+            
+            db_instances = [ primary ]
+        
+        for instance in db_instances:
+            try:
+                with settings(host_string=instance.public_dns_name):
+                    with hide('stdout'):
+                        result = run(cmd, pty=False, shell=True)
+                        
+                        if transform:
+                            result = re.sub(self.isodate_re, r'\1', result)
+                            
+                            try:
+                                result = utils.AttributeDict(json.loads(result))
+                            except:
+                                utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                                utils.printException()
+                                utils.log(result)
+                                return None
+                        
+                        return result
+            except:
+                utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+        
+        return None
+    
+    def _get_primary(self):
+        utils.log("[%s] attempting to find primary db node" % self)
+        
+        maxdelay = 16
+        delay = 1
+        
+        while True:
+            status = self._get_replset_status()
+            
+            primaries = filter(lambda m: 0 == m.state, status.members)
+            if 0 == len(primaries):
+                utils.log("[%s] unable to find a primary! retrying..." % self)
+                
+                if delay > maxdelay:
+                    msg = "timeout trying to find primary node on stack %s" % self
+                    utils.log(msg)
+                    raise Fail(msg)
+                
+                time.sleep(delay)
+                delay *= 2
+            elif len(primaries) > 1:
+                msg = "stack %s contains more than one primary!" % self
+                utils.log(msg)
+                raise Fail(msg)
+            else:
+                primary = primaries[0]
+                ip = primary.name.split(':')[0].lower()
+                
+                for instance in self.db_instances:
+                    if ip == instance.private_ip_address.lower():
+                        return instance
+                
+                msg = "stack %s contains an unrecognized primary!" % self
+                utils.log(msg)
+                raise Fail(msg)
+    
+    def _get_replset_status(self):
+        status  = self.run_mongo_cmd('rs.status()')
+        status.members = list(utils.AttributeDict(node) for node in status.members)
+        
+        return status
+    
     def repair(self):
-        # TODO
-        pass
+        db_instances = self.db_instances
+        utils.log("[%s] attempting to repair replica set containing %d db instances" % (self, len(db_instances)))
+        
+        status  = self._get_replset_status()
+        #pprint(status)
+        
+        # group replica set members by state
+        node_state = defaultdict(list)
+        for node in status.members:
+            if node.state == 1:
+                node_state['primary'].append(node)
+            elif node.state == 2:
+                node_state['secondary'].append(node)
+            elif node.state == 3 or node.state == 9:
+                node_state['recovering'].append(node)
+            elif node.state == 7:
+                node_state['arbiter'].append(node)
+            else:
+                node_state['unhealthy'].append(node)
+        
+        utils.log()
+        for state, nodes in node_state.iteritems():
+            utils.log("[%s] found %d %s nodes" % (self, len(nodes), state))
+        
+        utils.log()
+        warn = False
+        
+        # display warnings if there are obvious problems with the replica set
+        if not 'primary' in node_state or 0 == len(node_state['primary']):
+            utils.log("[%s] warning: replica set has no primary!" % self)
+            warn = True
+        
+        if len(status.members) < len(db_instances):
+            utils.log("[%s] warning: #nodes in replica set > #db-nodes in stack!" % self)
+            warn = True
+        elif len(status.members) > len(db_instances):
+            utils.log("[%s] warning: #nodes in replica set < #db-nodes in stack!" % self)
+            warn = True
+        
+        if warn:
+            utils.log()
+            warn = False
+        
+        new_members = []
+        
+        for state, nodes in node_state.iteritems():
+            for node in nodes:
+                ip = node.name.split(':')[0].lower()
+                valid = False
+                
+                if state != 'unhealthy':
+                    for instance in db_instances:
+                        if ip == instance.private_ip_address.lower():
+                            valid = True
+                            break
+                
+                if valid:
+                    new_members.append({
+                        '_id' : len(new_members), 
+                        'host' : instance.private_ip_address, 
+                    })
+                else:
+                    utils.log("[%s] warning: removing stale/unhealthy db node at '%s'" % (self, ip))
+                    warn = True
+        
+        conf = {
+            "_id" : status.set, 
+            "members" : new_members, 
+        }
+        
+        if warn:
+            utils.log()
+            warn = False
+        
+        if len(new_members) != len(status.members):
+            utils.log("[%s] reinitializing replica set '%s' with %d nodes'" % 
+                      (self, status.set, len(new_members)))
+            
+            pprint(conf)
+            confs = json.dumps(conf)
+            
+            min_members = 3
+            if len(new_members) < min_members:
+                utils.log()
+                utils.log("[%s] warning: not enough replica set members to elect primary (%d minimum)" % (self, min_members))
+                
+                # TODO: test this
+                for i in xrange(min_members - len(new_members)):
+                    utils.log("[%s] adding new db node to replica set" % self)
+                    self.add('db')
+            
+            utils.log()
+            ret = self.run_mongo_cmd('rs.reconfig(%s)' % confs, slave_okay=False)
+            pprint(ret)
+        else:
+            # everything looks peachy
+            assert not warn
     
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
@@ -550,7 +728,8 @@ class AWSDeploymentStack(ADeploymentStack):
         conf['placement'] = placement
         
         # create and bootstrap the new instance
-        utils.log("[%s] creating instance %s in AZ %s" % (self, conf['name'], conf['placement']))
+        utils.log("[%s] creating instance %s in availability zone %s" % 
+                  (self, conf['name'], conf['placement']))
         instance = AWSInstance(self, conf)
         
         try:
