@@ -12,6 +12,7 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "Entity.h"
 #import "Stamp.h"
@@ -586,9 +587,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)prepareForReuse {
-  [super prepareForReuse];
   self.entityObject = nil;
   self.stamp = nil;
+  [super prepareForReuse];
 }
 
 - (void)dealloc {
