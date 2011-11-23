@@ -12,6 +12,7 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "Entity.h"
 #import "Stamp.h"
@@ -327,7 +328,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
     CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
     CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
-    truncatedLineGlyphCount - 1 : lineGlyphCount;
+                              truncatedLineGlyphCount - 1 : lineGlyphCount;
+    CFIndex ligatureCt = title_.length - lineGlyphCount;
+    if (ligatureCt > 0)
+      lastCharIndex += ligatureCt;
     CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
     CGFloat width = fmin(kTitleMaxWidth, offset);
     CFRelease(line);
@@ -583,9 +587,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)prepareForReuse {
-  [super prepareForReuse];
   self.entityObject = nil;
   self.stamp = nil;
+  [super prepareForReuse];
 }
 
 - (void)dealloc {

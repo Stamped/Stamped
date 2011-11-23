@@ -42,6 +42,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
 - (void)appDidBecomeActive:(NSNotification*)notification;
+- (void)appDidEnterBackground:(NSNotification*)notification;
 
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
@@ -152,6 +153,11 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(appDidEnterBackground:)
+                                               name:UIApplicationDidEnterBackgroundNotification
+                                             object:nil];
+  
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
   mapView_.delegate = self;
@@ -221,15 +227,17 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)managedObjectContextChanged:(NSNotification*)notification {
   NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
   objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
-  
   NSSet* stamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    return ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue] && ![[(Stamp*)obj deleted] boolValue]);
+    return ([obj isMemberOfClass:[Stamp class]]);
   }];
 
   for (Stamp* s in stamps) {
     Entity* e = s.entityObject;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO && deleted == NO"]];
+    if (filteredStamps.count == 0)
+      continue;
+
     filteredStamps = [filteredStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     Stamp* latestStamp = [filteredStamps objectAtIndex:0];
     e.mostRecentStampDate = latestStamp.created;
@@ -590,6 +598,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
   [self.tableView reloadData];
+}
+
+- (void)appDidEnterBackground:(NSNotification*)notification {
+
 }
 
 #pragma mark - MKMapViewDelegate Methods

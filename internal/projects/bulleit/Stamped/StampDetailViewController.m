@@ -132,8 +132,6 @@ typedef enum {
 }
 
 - (void)dealloc {
-  [Stamp.managedObjectContext save:NULL];
-  [Stamp.managedObjectContext refreshObject:stamp_ mergeChanges:NO];
   [stamp_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
