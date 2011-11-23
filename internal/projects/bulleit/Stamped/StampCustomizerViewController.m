@@ -8,12 +8,14 @@
 
 #import "StampCustomizerViewController.h"
 
+#import "UIColor+Stamped.h"
 #import "Util.h"
 
 @interface StampCustomizerViewController ()
 - (void)hueChanged:(id)sender;
 - (void)brightnessChanged:(id)sender;
 - (void)setColor:(UIColor*)color forButton:(UIButton*)button;
+- (void)getHue:(CGFloat*)hue saturation:(CGFloat*)saturation brightness:(CGFloat*)brightness alpha:(CGFloat*)alpha fromColor:(UIColor*)color;
 @end
 
 @implementation StampCustomizerViewController
@@ -32,8 +34,7 @@
       CGFloat r1, g1, b1, s1;
       [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
       UIColor* primaryColor = [UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0];
-#warning iOS 4 crashes.
-      [primaryColor getHue:&primaryHue_ saturation:&s1 brightness:&primaryBrightness_ alpha:NULL];
+      [self getHue:&primaryHue_ saturation:&s1 brightness:&primaryBrightness_ alpha:NULL fromColor:primaryColor];
       if (s1 < 1.0)
         primaryBrightness_ = ((-0.5 * (s1 - 1)) / 0.8) + 0.5;
       else
@@ -41,7 +42,7 @@
       CGFloat r2, g2, b2, s2;
       [Util splitHexString:secondary toRed:&r2 green:&g2 blue:&b2];
       UIColor* secondaryColor = [UIColor colorWithRed:r2 green:g2 blue:b2 alpha:1.0];
-      [secondaryColor getHue:&secondaryHue_ saturation:&s2 brightness:&secondaryBrightness_ alpha:NULL];
+      [self getHue:&secondaryHue_ saturation:&s2 brightness:&secondaryBrightness_ alpha:NULL fromColor:secondaryColor];
       if (s2 < 1.0)
         secondaryBrightness_ = ((-0.5 * (s2 - 1)) / 0.8) + 0.5;
       else
@@ -241,6 +242,48 @@
 }
 
 #pragma mark - Actions
+
+- (void)getHue:(CGFloat*)hue saturation:(CGFloat*)saturation brightness:(CGFloat*)brightness alpha:(CGFloat*)alpha fromColor:(UIColor*)color {
+  if ([color respondsToSelector:@selector(getHue:saturation:brightness:alpha:)]) {
+    [color getHue:hue saturation:saturation brightness:brightness alpha:alpha];
+    return;
+  }
+  CGColorRef colorRef = color.CGColor;
+  size_t numComponents = CGColorGetNumberOfComponents(colorRef);
+  if (numComponents < 4)
+    return;
+
+  const CGFloat* components = CGColorGetComponents(colorRef);
+  CGFloat r = components[0];
+  CGFloat g = components[1];
+  CGFloat b = components[2];
+
+  CGFloat min, max, delta;
+  min = MIN(MIN(r, g), b);
+  max = MAX(MAX(r, g), b);
+  *brightness = max;
+  delta = max - min;
+  if (max != 0)
+    *saturation = delta / max;
+  else {
+    // r = g = b = 0
+    // s = 0, brightness is undefined
+    *saturation = 0;
+    *hue = -1;
+    return;
+  }
+  if (r == max)
+    *hue = (g - b) / delta;     // between yellow & magenta
+  else if(g == max)
+    *hue = 2 + (b - r) / delta; // between cyan & yellow
+  else
+    *hue = 4 + (r - g) / delta; // between magenta & cyan
+  *hue *= 60;               // degrees
+  if (*hue < 0)
+    *hue += 360;
+  
+  *hue = (*hue / 360);
+}
 
 - (IBAction)cancelButtonPressed:(id)sender {
   if ([self respondsToSelector:@selector(presentingViewController)]) {
