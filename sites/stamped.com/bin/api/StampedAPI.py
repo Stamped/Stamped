@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
+import libs.ec2_utils
 
 from datetime        import datetime
 from errors          import *
@@ -51,19 +52,17 @@ class StampedAPI(AStampedAPI):
         self._rollback = []
         
         if utils.is_ec2():
-            try:
-                stack_info = self._statsSink.get_stack_info()
-                self._node_name = stack_info.instance.name
-            except:
-                self._node_name = "unknown"
+            self._node_name = "unknown"
         else:
             self._node_name = "localhost"
+        
+        utils.log("StampedAPI running on node '%s'" % (self.node_name))
     
     @property
     def node_name(self):
         if self._node_name == 'unknown':
             try:
-                stack_info = self._statsSink.get_stack_info()
+                stack_info = libs.ec2_utils.get_stack()
                 self._node_name = stack_info.instance.name
             except:
                 pass

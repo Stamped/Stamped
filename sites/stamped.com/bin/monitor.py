@@ -6,10 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import init
-import logs, re, sys, time, urllib2, utils
+import libs.ec2_utils, logs, re, sys, time, urllib2, utils
 
 from libs.notify    import StampedNotificationHandler
-from libs.EC2Utils  import EC2Utils
 from optparse       import OptionParser
 from pprint         import pprint
 
@@ -26,7 +25,6 @@ class Monitor(object):
     
     def __init__(self, options=None):
         self.handler  = StampedNotificationHandler()
-        self.ec2utils = EC2Utils()
         self.status   = { }
         self._info    = None
         
@@ -42,7 +40,7 @@ class Monitor(object):
     
     def update(self, force=False):
         if self._info is None or force:
-            self._info = self.ec2utils.get_stack_info(stack=self.options.stack)
+            self._info = libs.ec2_utils.get_stack(stack=self.options.stack)
             
             if self._info is None:
                 utils.log("error retrieving stack data from AWS")
@@ -60,13 +58,13 @@ class Monitor(object):
         if self.options.stack:
             mich = None
         else:
-            mich = self._info.instance.id
+            mich = self._info.instance.instance_id
         
         for node in self._info.nodes:
             node_status = 1
             
             # don't try to monitor myself
-            if node.id == mich:
+            if node.instance_id == mich:
                 continue
             
             try:
@@ -97,7 +95,7 @@ class Monitor(object):
                 # the last time we checked, so we don't get duplicate notifications 
                 # related to the same incident.
                 try:
-                    notify = (-1 != self.status[node.id])
+                    notify = (-1 != self.status[node.instance_id])
                 except KeyError:
                     notify = False
                 
@@ -114,7 +112,7 @@ class Monitor(object):
                     if unexpected or e.sms:
                         self.handler.sms(subject, message)
             
-            self.status[node.id] = node_status
+            self.status[node.instance_id] = node_status
     
     def _try_ping_webServer(self, node):
         url = 'https://%s/v0/temp/ping.json' % node.public_dns

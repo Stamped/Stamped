@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals
 import atexit, bson, copy, math, os, pymongo, time, traceback, utils, logs
+import libs.ec2_utils
 
-from libs.EC2Utils          import EC2Utils
 from pprint                 import pprint
 from errors                 import *
 from utils                  import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
@@ -37,41 +37,21 @@ class MongoDBConfig(Singleton):
                   'port' in self.config.mongodb
     
     def _init(self):
-        ### TODO: Make this more robust!
-        try:
-            config_path = os.path.abspath(__file__)
-            for i in xrange(4):
-                config_path = os.path.dirname(config_path)
-            config_path = os.path.join(config_path, "conf/stamped.conf")
-            self.config = getPythonConfigFile(config_path, jsonPickled=True)
-            if not 'mongodb' in self.config:
-                raise Exception()
-        except:
-            try:
-                config_path = os.path.abspath(__file__)
-                for i in xrange(8):
-                    config_path = os.path.dirname(config_path)
-                config_path = os.path.join(config_path, "conf/stamped.conf")
-                #print config_path
-                self.config = getPythonConfigFile(config_path, jsonPickled=True)
-                #print self.config
-            except:
-                ec2_utils   = EC2Utils()
-                stack_info  = ec2_utils.get_stack_info()
-                self.config = None
-                
-                for node in stack_info.nodes:
+        if utils.is_ec2():
+            stack_info  = libs.ec2_utils.get_stack()
+            self.config = None
+            
+            for node in stack_info.nodes:
+                if 'db' in node.roles:
+                    self.config = AttributeDict({
+                       "mongodb" : {
+                           "host" : node.private_dns, 
+                           "port" : 27017, 
+                       }
+                    })
+                    
                     if node.name.endswith('.db0'):
-                        self.config = AttributeDict({
-                           "mongodb" : {
-                               "host" : node.private_dns, 
-                               "port" : 27017, 
-                           }
-                        })
                         break
-                
-                if self.config is None:
-                    raise Fail("Error: invalid configuration file")
         
         if not 'mongodb' in self.config:
             self.config = AttributeDict({
@@ -81,7 +61,8 @@ class MongoDBConfig(Singleton):
                }
             })
             
-            logs.info("Invalid config file; defaulting to %s:%d" % (self.config.mongodb.host, self.config.mongodb.port))
+            logs.info("MongoDB connection defaulting to %s:%d" % 
+                      (self.config.mongodb.host, self.config.mongodb.port))
     
     @property
     def host(self):
@@ -108,20 +89,33 @@ class MongoDBConfig(Singleton):
         #for line in traceback.format_stack():
         #    logs.debug(line)
         
+        reinitialized = False
         delay = 1
         max_delay = 16
+        
+        if utils.is_ec2():
+            replicaset = 'stamped-dev-01'
+        else:
+            replicaset = None
         
         while True:            
             try:
                 logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
+                
                 self._connection = pymongo.Connection(self.host, 
                                                       self.port, 
                                                       slave_okay=True, 
-                                                      replicaset='stamped-dev-01')
+                                                      replicaset=replicaset)
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
-                    raise
+                    if reinitialized:
+                        raise
+                    
+                    # attempt to reinitialize our MongoDB configuration and retry
+                    self._init()
+                    delay = 1
+                    reinitialized = True
                 
                 logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
                 time.sleep(delay)
