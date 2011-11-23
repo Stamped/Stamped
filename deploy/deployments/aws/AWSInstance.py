@@ -239,7 +239,18 @@ class AWSInstance(AInstance):
     
     def add_tag(self, key, value=None):
         if self._instance:
-            self._instance.add_tag(key, value)
+            num_retries = 0
+            
+            while True:
+                try:
+                    self._instance.add_tag(key, value)
+                    break
+                except: EC2ResponseError:
+                    num_retries += 1
+                    if num_retries >= 5:
+                        raise
+                    
+                    time.sleep(2)
         else:
             raise NotInitializedError()
     

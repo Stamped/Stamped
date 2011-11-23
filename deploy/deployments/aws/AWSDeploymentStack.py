@@ -530,8 +530,15 @@ class AWSDeploymentStack(ADeploymentStack):
         utils.log("[%s] creating instance %s" % (self, conf['name']))
         instance = AWSInstance(self, conf)
         
-        self._pool.spawn(instance.create)
-        self._pool.join()
+        try:
+            instance.create()
+        except:
+            utils.printException()
+            utils.log("error adding instance %s" % instance)
+            raise
+        
+        #self._pool.spawn(instance.create)
+        #self._pool.join()
         
         if add == 'api':
             # initialize new API instance
