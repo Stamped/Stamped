@@ -189,7 +189,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (self.headerView)
+  if (headerView_)
     self.headerView.delegate = nil;
   self.headerView = nil;
   [super dealloc];
@@ -292,10 +292,12 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   
   
   CGRect frame = CGRectMake(0, 4, scrollView_.frame.size.width, 68);
+  if (newEntity_)
+    frame.size.width -= 40; // Make room for edit button.
   headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
   [headerView_ setEntity:objectToStamp_];
   headerView_.delegate = self;
-  [scrollView_ insertSubview:headerView_ belowSubview:editButton_];
+  [scrollView_ insertSubview:headerView_ belowSubview:titleLabel_];
   
   editButton_.hidden = !newEntity_;
   headerView_.hideArrow = newEntity_;
@@ -310,7 +312,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   stampLayer_ = [[CALayer alloc] init];
   stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
   stampLayer_.opacity = 0.0;
-  [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
+  [scrollView_.layer insertSublayer:stampLayer_ below:headerView_.layer];
   [stampLayer_ release];
 
   detailLabel_.textColor = [UIColor stampedGrayColor];
@@ -428,7 +430,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (self.headerView)
+  if (headerView_)
     self.headerView.delegate = nil;
   self.headerView = nil;
 }
@@ -437,20 +439,21 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
   detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
   categoryImageView_.image = [objectToStamp_ valueForKey:@"categoryImage"];
-  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
-                                            forWidth:CGRectGetWidth(titleLabel_.frame)
-                                       lineBreakMode:titleLabel_.lineBreakMode];
-  stampLayer_.transform = CATransform3DIdentity;
-  stampLayer_.frame = CGRectMake(15 + stringSize.width - (46 / 2),
-                                 11 - (46 / 2),
-                                 46, 46);
-  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+//  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
+//                                            forWidth:CGRectGetWidth(titleLabel_.frame)
+//                                       lineBreakMode:titleLabel_.lineBreakMode];
   
   [headerView_ setEntity:objectToStamp_];
   
   if (headerView_.inverted)
     headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
+  
+  CGRect stampFrame = [headerView_ stampFrame];
+  stampFrame.origin.y += 4;
+  stampLayer_.transform = CATransform3DIdentity;
+  stampLayer_.frame = stampFrame;
+  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
   [super viewWillAppear:animated];
 }
@@ -1008,11 +1011,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
     [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 
     [spinner_ stopAnimating];
-    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(self.shelfView.frame));
+//    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(self.shelfView.frame));
     CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
     [UIView animateWithDuration:0.2
                      animations:^{ 
-                       self.shelfView.transform = topTransform;
+//                       self.shelfView.transform = topTransform;
                        bottomToolbar_.transform = bottomTransform;
                        stampItButton_.transform = bottomTransform;
                        stampsRemainingLayer_.transform = CATransform3DMakeAffineTransform(bottomTransform);
