@@ -206,19 +206,19 @@ class AWSInstance(AInstance):
     
     def start(self):
         self.update()
-        self._instance.start()
+        return self._instance.start()
     
     def stop(self, force=False):
         self.update()
-        self._instance.stop(force)
+        return self._instance.stop(force)
     
     def terminate(self):
         self.update()
-        self._instance.terminate()
+        return self._instance.terminate()
     
     def reboot(self):
         self.update()
-        self._instance.reboot()
+        return self._instance.reboot()
     
     def update(self, validate=False):
         if self._instance:
@@ -226,8 +226,7 @@ class AWSInstance(AInstance):
             
             while True:
                 try:
-                    self._instance.update(validate)
-                    break
+                    return self._instance.update(validate)
                 except EC2ResponseError:
                     num_retries += 1
                     if num_retries >= 5:
@@ -243,8 +242,7 @@ class AWSInstance(AInstance):
             
             while True:
                 try:
-                    self._instance.add_tag(key, value)
-                    break
+                    return self._instance.add_tag(key, value)
                 except EC2ResponseError:
                     num_retries += 1
                     if num_retries >= 5:
@@ -256,7 +254,7 @@ class AWSInstance(AInstance):
     
     def remove_tag(self, key, value=None):
         if self._instance:
-            self._instance.remove_tag(key, value)
+            return self._instance.remove_tag(key, value)
         else:
             raise NotInitializedError()
     
@@ -293,6 +291,14 @@ class AWSInstance(AInstance):
     def _get_image(self, instance_type, instance_region):
         ami = _getAMI(instance_type, instance_region, INSTANCE_OS, INSTANCE_EBS)
         return self.conn.get_image(ami)
+    
+    def __getattr__(self, key):
+        try:
+            if key in self.__dict__:
+                return self.__dict__[key]
+        except:
+            # TODO: make this less hacky...
+            return eval("self._instance.%s" % key)
     
     #def __getattr__(self, name):
     #    if name in self.__dict__:

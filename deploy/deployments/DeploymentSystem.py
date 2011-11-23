@@ -72,6 +72,11 @@ class DeploymentSystem(ADeploymentSystem):
         stack = self._get_matching_stack(stackName)
         stack.update()
     
+    def repair_stack(self, *args):
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.repair()
+    
     def crawl(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
