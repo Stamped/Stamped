@@ -31,7 +31,7 @@ def get_stack(stack=None):
     reservations = conn.get_all_instances()
     instance_id  = get_local_instance_id()
     stacks       = defaultdict(list)
-    cur_isntance = None
+    cur_instance = None
     
     for reservation in reservations:
         for instance in reservation.instances:
@@ -41,7 +41,7 @@ def get_stack(stack=None):
                     instance = AWSInstance(instance)
                     stacks[stack_name].append(instance)
                     
-                    if stack is not None and instance.instance_id == instance_id:
+                    if stack is None and instance.instance_id == instance_id:
                         stack = stack_name
                         cur_instance = instance
             except:
