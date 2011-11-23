@@ -292,6 +292,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   
   
   CGRect frame = CGRectMake(0, 4, scrollView_.frame.size.width, 68);
+  if (newEntity_)
+    frame.size.width -= 40; // Make room for edit button.
   headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
   [headerView_ setEntity:objectToStamp_];
   headerView_.delegate = self;

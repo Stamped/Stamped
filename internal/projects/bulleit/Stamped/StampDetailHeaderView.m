@@ -48,9 +48,9 @@
 @synthesize hideArrow = hideArrow_;
 
 
-- (id)initWithFrame:(CGRect)frame
+- (id)initWithFrame:(CGRect)aFrame
 {
-  self = [super initWithFrame:frame];
+  self = [super initWithFrame:aFrame];
   if (self) {
     inverted_ = NO;
     self.backgroundColor = [UIColor clearColor];
@@ -74,7 +74,7 @@
     titleLayer_.hidden = YES;
     
     CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
-    CGRect frame = CGRectMake(15, ascender, 270, 56);
+    CGRect frame = CGRectMake(15, ascender, aFrame.size.width - 50, 56);
 
 //    frame.origin.y += ascender;
     titleLayer_.frame = frame;
@@ -86,7 +86,7 @@
     categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
-    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 44, 270, 15)];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 44, aFrame.size.width - 50, 15)];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
@@ -208,7 +208,7 @@
   if (ligatureCt > 0)
     lastCharIndex += ligatureCt;
   CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
-  CGFloat width = fmin(270, offset);
+  CGFloat width = fmin(self.frame.size.width - 56, offset);
   
   // Subtitle.
   CFRelease(line);
