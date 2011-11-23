@@ -25,6 +25,7 @@
 #import "Favorite.h"
 #import "User.h"
 #import "StampedAppDelegate.h"
+#import "Alerts.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -404,41 +405,52 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  // Handle callback from "Add To-Do"
-  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
-    [self.spinner stopAnimating];
-    [self dismissSelf];
-    return;
+  NSLog(@"loaded: %@ %@", objectLoader.resourcePath, object);
+  if ([objectLoader.resourcePath rangeOfString:kEntityLookupPath].location != NSNotFound) {
+    dataLoaded_ = YES;
+    [detailedEntity_ release];
+    detailedEntity_ = [(DetailedEntity*)object retain];
+    [self showContents];
+    [self.loadingView stopAnimating];
   }
   
-  dataLoaded_ = YES;
-  [detailedEntity_ release];
-  detailedEntity_ = [(DetailedEntity*)object retain];
-  [self showContents];
-  [self.loadingView stopAnimating];
+  // Handle callback from "Add To-Do"
+  if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
+    NSLog(@"id: %@", ((Favorite*)object).entityObject.entityID);
+    [self.spinner stopAnimating];
+    [self dismissSelf];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  // Handle callback from "Add To-Do"
-  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
-    [self.spinner stopAnimating];
-    self.addFavoriteButton.hidden = NO;
-  }
-  
-	NSLog(@"Hit error: %@", error);
+  NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
     return;
   }
+  // Handle callback from "Add To-Do"
+  if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
+    [self.spinner stopAnimating];
+    self.addFavoriteButton.hidden = NO;
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  }
+  
   [self.loadingView stopAnimating];
 }
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
+  NSLog(@"unexpected: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
   }
+  if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
+    [self.spinner stopAnimating];
+    self.addFavoriteButton.hidden = NO;
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  }
+
   [self.loadingView stopAnimating];
 }
 
@@ -585,12 +597,27 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [self.addFavoriteButton setNeedsDisplay];
   [self.spinner setNeedsDisplay];
   
+  NSString* key = @"entity_id";
+  id objectForKey = nil;
+  if (entityObject_) 
+    objectForKey = entityObject_.entityID;
+  else if (searchResult_) {
+    if (searchResult_.entityID) {
+      objectForKey = searchResult_.entityID;
+    } 
+    else if (searchResult_.searchID) {
+      key = @"search_id";
+      objectForKey = searchResult_.searchID;
+    }
+  }
+
+  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateFavoritePath delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:objectForKey, key, nil];
   [objectLoader send];
 }
 
@@ -621,5 +648,5 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
   // Default does nothing. Override in subclasses.
 }
-  
+
 @end

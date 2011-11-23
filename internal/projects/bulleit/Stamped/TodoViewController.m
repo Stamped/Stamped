@@ -354,6 +354,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
   NSIndexPath* offsetIndexPath = [NSIndexPath indexPathForRow:(indexPath.row - 1) inSection:0];
   Favorite* fave = [fetchedResultsController_ objectAtIndexPath:offsetIndexPath];
+  
   UIViewController* detailViewController = [Util detailViewControllerForEntity:fave.entityObject];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
