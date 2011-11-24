@@ -75,7 +75,12 @@ class DeploymentSystem(ADeploymentSystem):
     def repair_stack(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
-        stack.repair()
+        stack.repair(*args[1:])
+    
+    def force_db_primary_change(self, *args):
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.force_db_primary_change(*args[1:])
     
     def crawl(self, *args):
         stackName = args[0]

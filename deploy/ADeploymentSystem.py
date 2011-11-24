@@ -46,6 +46,10 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
+    def force_db_primary_change(self, *args):
+        pass
+    
+    @abstract
     def crawl(self, *args):
         pass
     

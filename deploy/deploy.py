@@ -46,6 +46,8 @@ available_commands = {
     'add' : 'add_stack', 
     
     'repair' : 'repair_stack', 
+    
+    'force_db_primary' : 'force_db_primary_change', 
 }
 
 def parseCommandLine():
