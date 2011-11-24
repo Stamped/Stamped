@@ -58,7 +58,7 @@ def suggested(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(None, request)
 
-    screenNames = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
+    screenNames = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag', 'michaelkors']
     users       = stampedAPI.getUsers(None, screenNames, authUserId)
     logs.info('users: %s' % users)
 
