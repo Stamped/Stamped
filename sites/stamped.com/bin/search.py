@@ -161,64 +161,64 @@ def parseCommandLine():
     
     return (options, args)
 
-#def main():
-options, args = parseCommandLine()
+def main():
+    options, args = parseCommandLine()
 
-api      = MongoStampedAPI(lite_mode=True)
-searcher = api._entitySearcher
+    api      = MongoStampedAPI(lite_mode=True)
+    searcher = api._entitySearcher
 
-for i in xrange(1):
-    t1 = time.time()
-    results  = searcher.getSearchResults(query=args[0], 
-                                         coords=options.location, 
-                                         limit=options.limit, 
-                                         category_filter=options.category, 
-                                         subcategory_filter=options.subcategory, 
-                                         full=options.full, 
-                                         prefix=options.prefix, 
-                                         local=options.Local)
-    
-    t2 = time.time()
-    duration = (t2 - t1) * 1000.0
-    print "search took %g ms" % duration
-    
-    # display all results
-    for result in results:
-        entity   = result[0]
-        distance = result[1]
+    for i in xrange(1):
+        t1 = time.time()
+        results  = searcher.getSearchResults(query=args[0], 
+                                             coords=options.location, 
+                                             limit=options.limit, 
+                                             category_filter=options.category, 
+                                             subcategory_filter=options.subcategory, 
+                                             full=options.full, 
+                                             prefix=options.prefix, 
+                                             local=options.Local)
         
-        setFields(entity, detailed=True)
+        t2 = time.time()
+        duration = (t2 - t1) * 1000.0
+        print "search took %g ms" % duration
         
-        if options.verbose:
-            data = entity.getDataAsDict()
-            if not options.Stats:
-                try:
-                    del data['stats']
-                except:
-                    pass
-        else:
-            data = { }
-            data['title']  = utils.normalize(entity.title)
-            data['subtitle'] = entity.subtitle
+        # display all results
+        for result in results:
+            entity   = result[0]
+            distance = result[1]
             
-            #data['titles'] = utils.normalize(entity.simplified_title)
+            setFields(entity, detailed=True)
             
-            data['subcategory'] = utils.normalize(entity.subcategory)
-            if 'address' in entity:
-                data['addr'] = utils.normalize(entity.address)
-            #data['subtitle'] = utils.normalize(entity.subtitle)
+            if options.verbose:
+                data = entity.getDataAsDict()
+                if not options.Stats:
+                    try:
+                        del data['stats']
+                    except:
+                        pass
+            else:
+                data = { }
+                data['title']  = utils.normalize(entity.title)
+                data['subtitle'] = entity.subtitle
+                
+                #data['titles'] = utils.normalize(entity.simplified_title)
+                
+                data['subcategory'] = utils.normalize(entity.subcategory)
+                if 'address' in entity:
+                    data['addr'] = utils.normalize(entity.address)
+                #data['subtitle'] = utils.normalize(entity.subtitle)
+                
+                if options.Stats:
+                    data['stats'] = entity.getDataAsDict()['stats']
             
-            if options.Stats:
-                data['stats'] = entity.getDataAsDict()['stats']
+            if distance >= 0:
+                data['distance'] = distance
+            
+            pprint(data)
         
-        if distance >= 0:
-            data['distance'] = distance
-        
-        pprint(data)
-    
-    print
-    print
+        print
+        print
 
 if __name__ == '__main__':
-    pass#main()
+    main()
 

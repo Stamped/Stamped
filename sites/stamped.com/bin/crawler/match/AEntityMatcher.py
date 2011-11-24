@@ -273,7 +273,7 @@ class AEntityMatcher(object):
             if not entity2.entity_id:
                 logs.debug('SKIPPED: %s' % entity2)
                 continue
-
+            
             # update all stamp references of entity2 with entity1
             docs = self._stampDB._collection.find({ 
                 'entity.entity_id' : entity2.entity_id }, output=list)
