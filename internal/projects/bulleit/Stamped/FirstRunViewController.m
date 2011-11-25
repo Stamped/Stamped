@@ -905,16 +905,12 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
         [usernameTextField_ resignFirstResponder];
       else if ([passwordTextField_ isFirstResponder])
         [passwordTextField_ resignFirstResponder];
-      /*
-      WebViewController* wvc = [self.webViewNavigationController.viewControllers objectAtIndex:0];
-      wvc.url = [NSURL URLWithString:kStampedResetPasswordURL];
-      [self presentModalViewController:self.webViewNavigationController animated:YES];
-      wvc.shareButton.hidden = YES;*/
     }
 }
 
 #pragma - Regex.
-- (BOOL)stringIsValidEmail:(NSString *)checkString {
+
+- (BOOL)stringIsValidEmail:(NSString*)checkString {
   BOOL stricterFilter = YES; 
   NSString* stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
   NSString* laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
@@ -928,6 +924,5 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   NSPredicate* usernameTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", filterString];
   return [usernameTest evaluateWithObject:checkString];  
 }
-
 
 @end
