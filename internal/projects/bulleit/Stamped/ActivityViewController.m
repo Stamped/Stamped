@@ -129,7 +129,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     [params setObject:oldestTimeInBatchString forKey:@"before"];
   }
 
-  NSLog(@"params: %@", params);
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kActivityLookupPath

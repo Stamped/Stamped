@@ -316,8 +316,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     addTodoImageView.frame = CGRectOffset(addTodoImageView.frame, 15, 21);
     [cell.contentView addSubview:addTodoImageView];
     [addTodoImageView release];
-    
-    
+  
     UILabel* addLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     addLabel.text = @"Add a to-do";
     addLabel.textColor = [UIColor stampedLightGrayColor];
@@ -327,8 +326,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 23, 22);
     [cell.contentView addSubview:addLabel];
     [addLabel release];
-    
-    
+
     return cell;
   }
 
@@ -387,13 +385,32 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-//  if ([objectLoader.resourcePath rangeOfString:kRemoveFavoritePath].location != NSNotFound)
-//    NSLog(@"loaded: %@", objects);
-  NSDate* now = [NSDate date];
-  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
-  [[NSUserDefaults standardUserDefaults] synchronize];
-  [self updateLastUpdatedTo:now];
-  [self setIsLoading:NO];
+  Favorite* oldestFavoriteInBatch = objects.lastObject;
+  if (oldestFavoriteInBatch.created) {
+    [[NSUserDefaults standardUserDefaults] setObject:oldestFavoriteInBatch.created
+                                              forKey:@"FavoritesOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+
+  if (objects.count < 10) {
+    // Grab latest favorite.
+    NSFetchRequest* request = [Favorite fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setFetchLimit:1];
+    Favorite* latestFavorite = [Favorite objectWithFetchRequest:request];
+    
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"FavoritesOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] setObject:latestFavorite.created
+                                              forKey:@"FavoriteLatestCreated"];
+    NSDate* now = [NSDate date];
+    [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self updateLastUpdatedTo:now];
+    [self setIsLoading:NO];
+  } else {
+    [self loadFavoritesFromNetwork];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -402,7 +419,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
   [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-//  NSLog(@"unexpected: %@\n\n", objectLoader.response.bodyAsString);
 }
 
 #pragma mark - TodoTableViewCellDelegate Methods.
@@ -492,11 +508,27 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 - (void)loadFavoritesFromNetwork {
   [self setIsLoading:YES];
+
+  NSTimeInterval latestTimestamp = 0;
+  NSDate* lastUpdated = [[NSUserDefaults standardUserDefaults] objectForKey:@"FavoriteLatestCreated"];
+  if (lastUpdated)
+    latestTimestamp = lastUpdated.timeIntervalSince1970;
+  
+  NSString* latestTimestampString = [NSString stringWithFormat:@"%.0f", latestTimestamp];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:latestTimestampString, @"since", nil];
+  NSDate* oldestTimeInBatch = [[NSUserDefaults standardUserDefaults] objectForKey:@"FavoritesOldestTimestampInBatch"];
+  if (oldestTimeInBatch && oldestTimeInBatch.timeIntervalSince1970 > 0) {
+    NSString* oldestTimeInBatchString = [NSString stringWithFormat:@"%.0f", oldestTimeInBatch.timeIntervalSince1970];
+    [params setObject:oldestTimeInBatchString forKey:@"before"];
+  }
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kShowFavoritesPath
                                                                     delegate:self];
   objectLoader.objectMapping = favoriteMapping;
+  NSLog(@"Params: %@", params);
+  objectLoader.params = params;
   [objectLoader send];
 }
 
