@@ -253,6 +253,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)updateLastUpdatedTo:(NSDate*)date {
   lastUpdatedLabel_.text = [NSString stringWithFormat:@"Last updated %@", [Util userReadableTimeSinceDate:date]];
+  [lastUpdatedLabel_ setNeedsDisplay];
 }
 
 @end
