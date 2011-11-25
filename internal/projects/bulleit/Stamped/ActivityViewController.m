@@ -115,11 +115,27 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)loadEventsFromNetwork {
   [self setIsLoading:YES];
+  
+  NSTimeInterval latestTimestamp = 0;
+  NSDate* lastUpdated = [[NSUserDefaults standardUserDefaults] objectForKey:@"EventLatestCreated"];
+  if (lastUpdated)
+    latestTimestamp = lastUpdated.timeIntervalSince1970;
+
+  NSString* latestTimestampString = [NSString stringWithFormat:@"%.0f", latestTimestamp];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:latestTimestampString, @"since", nil];
+  NSDate* oldestTimeInBatch = [[NSUserDefaults standardUserDefaults] objectForKey:@"EventsOldestTimestampInBatch"];
+  if (oldestTimeInBatch && oldestTimeInBatch.timeIntervalSince1970 > 0) {
+    NSString* oldestTimeInBatchString = [NSString stringWithFormat:@"%.0f", oldestTimeInBatch.timeIntervalSince1970];
+    [params setObject:oldestTimeInBatchString forKey:@"before"];
+  }
+
+  NSLog(@"params: %@", params);
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kActivityLookupPath
                                                                     delegate:self];
   objectLoader.objectMapping = eventMapping;
+  objectLoader.params = params;
   [objectLoader send];
 }
 
@@ -250,11 +266,33 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSDate* now = [NSDate date];
-  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"ActivityLastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-  [self updateLastUpdatedTo:now];
-  [self setIsLoading:NO];
+  Event* oldestEventInBatch = objects.lastObject;
+  if (oldestEventInBatch.created) {
+    [[NSUserDefaults standardUserDefaults] setObject:oldestEventInBatch.created
+                                              forKey:@"EventsOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+
+  // No need to download every event on the first run.
+  if (objects.count < 10 || ![[NSUserDefaults standardUserDefaults] objectForKey:@"ActivityLastUpdatedAt"]) {
+    // Grab latest event.
+    NSFetchRequest* request = [Event fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setFetchLimit:1];
+    Event* latestEvent = [Event objectWithFetchRequest:request];
+    
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"EventsOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] setObject:latestEvent.created
+                                              forKey:@"EventLatestCreated"];
+    NSDate* now = [NSDate date];
+    [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"ActivityLastUpdatedAt"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self updateLastUpdatedTo:now];
+    [self setIsLoading:NO];
+  } else {
+    [self loadEventsFromNetwork];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
