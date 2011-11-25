@@ -140,12 +140,13 @@ class AWSDeploymentSystem(DeploymentSystem):
                 try:
                     ret = sg.authorize(**rule)
                     assert ret
-                except EC2ResponseError:
-                    pass
+                except:
+                    utils.log("error initializing security group '%s'" % name)
+                    break
     
     def _init_env(self):
         self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
-        self._init_security_groups()
+        #self._init_security_groups()
         
         self.env = utils.AttributeDict(os.environ)
         reservations = self.conn.get_all_instances()

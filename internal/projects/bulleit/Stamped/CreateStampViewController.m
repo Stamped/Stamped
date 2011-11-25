@@ -988,11 +988,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  if ([objectLoader.resourcePath isEqualToString:kCreateEntityPath]) {
+  if ([objectLoader.resourcePath rangeOfString:kCreateEntityPath].location != NSNotFound) {
     DetailedEntity* entity = object;
     [objectToStamp_ setEntityID:entity.entityID];
     [self sendSaveStampRequest];
-  } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
+  } else if ([objectLoader.resourcePath rangeOfString:kCreateStampPath].location != NSNotFound) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
     if (tweetButton_.selected)
       [[SocialManager sharedManager] requestTwitterPostWithStamp:stamp];

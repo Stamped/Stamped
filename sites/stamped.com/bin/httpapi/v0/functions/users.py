@@ -58,7 +58,7 @@ def suggested(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(None, request)
 
-    screenNames = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
+    screenNames = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag', 'michaelkors']
     users       = stampedAPI.getUsers(None, screenNames, authUserId)
     logs.info('users: %s' % users)
 
@@ -66,7 +66,7 @@ def suggested(request):
     for user in users:
         output.append(HTTPUser().importSchema(user).exportSparse())
 
-    order = {'mariobatali':1, 'petertravers':2, 'nymag':3, 'rebeccaminkoff':4}
+    order = {'mariobatali':1, 'petertravers':2, 'nymag':3, 'rebeccaminkoff':4, 'michaelkors':5}
     output = sorted(output, key=lambda k: order[k['screen_name']])
     
     return transformOutput(output)

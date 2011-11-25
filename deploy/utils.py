@@ -60,7 +60,7 @@ def lazy_property(undecorated):
             return v
     return decorated
 
-def log(s):
+def log(s=""):
     print _formatLog(s)
 
 def logRaw(s, includeFormat=False):

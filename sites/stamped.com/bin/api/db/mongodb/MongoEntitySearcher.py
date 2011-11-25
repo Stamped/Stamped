@@ -774,62 +774,67 @@ class MongoEntitySearcher(EntitySearcher):
                 rank of this entity w.r.t. quality in this set of search results
             """
             
-            entity   = result[0]
-            distance = result[1]
+            try:
+                entity   = result[0]
+                distance = result[1]
+                
+                entity.simplified_title = self._simplify(entity.title)
+                
+                title_value         = self._get_title_value(input_query, entity, prefix)
+                negative_value      = self._get_negative_value(entity)
+                subcategory_value   = self._get_subcategory_value(entity)
+                source_value        = self._get_source_value(entity)
+                quality_value       = self._get_quality_value(entity)
+                distance_value      = self._get_distance_value(distance)
+                
+                title_weight        = 1.0
+                negative_weight     = 1.0
+                subcategory_weight  = 0.8
+                source_weight       = 0.4
+                quality_weight      = 1.0
+                distance_weight     = 1.0
+                
+                # TODO: revisit and iterate on this simple linear ranking formula
+                aggregate_value     = title_value * title_weight + \
+                                      negative_value * negative_weight + \
+                                      subcategory_value * subcategory_weight + \
+                                      source_value * source_weight + \
+                                      quality_value * quality_weight + \
+                                      distance_value * distance_weight
+                
+                """
+                entity.stats.titlev     = title_value
+                entity.stats.subcatv    = subcategory_value
+                entity.stats.sourcev    = source_value
+                entity.stats.qualityv   = quality_value
+                entity.stats.distancev  = distance_value
+                entity.stats.totalv     = aggregate_value
+                """
+                
+                """
+                data = {}
+                data['title']       = entity.title
+                data['titlev']      = title_value
+                data['subcatv']     = subcategory_value
+                data['sourcev']     = source_value
+                data['qualityv']    = quality_value
+                data['distancev']   = distance_value
+                data['distance']    = distance
+                data['totalv']      = aggregate_value
+                
+                #if input_query.lower() == entity.title.lower():
+                from pprint import pprint
+                print
+                pprint(entity.title)
+                pprint(data)
+                print
+                """
+                
+                return aggregate_value
+            except:
+                utils.printException()
             
-            entity.simplified_title = self._simplify(entity.title)
-            
-            title_value         = self._get_title_value(input_query, entity, prefix)
-            negative_value      = self._get_negative_value(entity)
-            subcategory_value   = self._get_subcategory_value(entity)
-            source_value        = self._get_source_value(entity)
-            quality_value       = self._get_quality_value(entity)
-            distance_value      = self._get_distance_value(distance)
-            
-            title_weight        = 1.0
-            negative_weight     = 1.0
-            subcategory_weight  = 0.8
-            source_weight       = 0.4
-            quality_weight      = 1.0
-            distance_weight     = 1.0
-            
-            # TODO: revisit and iterate on this simple linear ranking formula
-            aggregate_value     = title_value * title_weight + \
-                                  negative_value * negative_weight + \
-                                  subcategory_value * subcategory_weight + \
-                                  source_value * source_weight + \
-                                  quality_value * quality_weight + \
-                                  distance_value * distance_weight
-            
-            """
-            entity.stats.titlev     = title_value
-            entity.stats.subcatv    = subcategory_value
-            entity.stats.sourcev    = source_value
-            entity.stats.qualityv   = quality_value
-            entity.stats.distancev  = distance_value
-            entity.stats.totalv     = aggregate_value
-            """
-            
-            """
-            data = {}
-            data['title']       = entity.title
-            data['titlev']      = title_value
-            data['subcatv']     = subcategory_value
-            data['sourcev']     = source_value
-            data['qualityv']    = quality_value
-            data['distancev']   = distance_value
-            data['distance']    = distance
-            data['totalv']      = aggregate_value
-            
-            #if input_query.lower() == entity.title.lower():
-            from pprint import pprint
-            print
-            pprint(entity.title)
-            pprint(data)
-            print
-            """
-            
-            return aggregate_value
+            return -1
         
         return _get_entity_weight
     

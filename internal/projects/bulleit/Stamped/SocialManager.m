@@ -550,7 +550,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
-  if ([request.resourcePath isEqualToString:kTwitterSignOutURI]) {
+  if ([request.resourcePath rangeOfString:kTwitterSignOutURI].location != NSNotFound) {
     return;
   }
   

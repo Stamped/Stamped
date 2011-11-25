@@ -40,6 +40,10 @@ class ADeploymentStack(object):
         pass
     
     @abstract
+    def force_db_primary_change(self):
+        pass
+    
+    @abstract
     def crawl(self, *args):
         pass
     

@@ -60,7 +60,7 @@ def lazyProperty(undecorated):
             return v
     return decorated
 
-def log(s):
+def log(s=""):
     s = _formatLog(s) + "\n"
     
     logs.debug(s)

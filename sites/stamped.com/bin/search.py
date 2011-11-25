@@ -163,10 +163,10 @@ def parseCommandLine():
 
 def main():
     options, args = parseCommandLine()
-    
+
     api      = MongoStampedAPI(lite_mode=True)
     searcher = api._entitySearcher
-    
+
     for i in xrange(1):
         t1 = time.time()
         results  = searcher.getSearchResults(query=args[0], 
