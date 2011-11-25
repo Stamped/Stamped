@@ -527,7 +527,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kShowFavoritesPath
                                                                     delegate:self];
   objectLoader.objectMapping = favoriteMapping;
-  NSLog(@"Params: %@", params);
   objectLoader.params = params;
   [objectLoader send];
 }

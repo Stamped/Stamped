@@ -5222,8 +5222,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5242,8 +5242,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5263,7 +5263,7 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -5282,7 +5282,7 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "95141734-444D-470E-BD2D-DEA6241E66BE";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
@@ -5304,8 +5304,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5323,8 +5323,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
+				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
