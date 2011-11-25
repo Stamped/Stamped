@@ -24,6 +24,9 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
                                         ('user_id', pymongo.ASCENDING)])
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), \
+                                        ('timestamp.created', pymongo.DESCENDING)])
     
     ### PUBLIC
     

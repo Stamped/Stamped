@@ -2598,7 +2598,7 @@ class StampedAPI(AStampedAPI):
     def getFavorites(self, authUserId, **kwargs):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
-        sort            = kwargs.pop('sort', 'modified')
+        sort            = kwargs.pop('sort', 'created')
                        
         # Set quality
         if quality == 1:
