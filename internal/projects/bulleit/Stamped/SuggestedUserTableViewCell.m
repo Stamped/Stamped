@@ -112,14 +112,18 @@ static const CGFloat kUserImageSize = 50.0;
   if (user_ != user) {
     [user_ release];
     user_ = [user retain];
+  }
 
+  if (user) {
     userImageView_.imageURL = user.profileImageURL;
     stampImageView_.image = user.stampImage;
     usernameLabel_.text = user.screenName;
     fullNameLabel_.text = user.name;
     locationLabel_.text = user.location;
     bioLabel_.text = user.bio;
-    [bioLabel_ sizeToFit];
+    // sizeToFit isn't working here for some reason.
+    CGSize bioSize = [bioLabel_ sizeThatFits:CGSizeMake(300, MAXFLOAT)];
+    bioLabel_.frame = CGRectMake(bioLabel_.frame.origin.x, bioLabel_.frame.origin.y, bioSize.width, bioSize.height);
   }
 }
 

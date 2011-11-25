@@ -392,7 +392,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
 
-  if (objects.count < 10) {
+#warning remove YES.
+  if (objects.count < 10 || YES) {
     // Grab latest favorite.
     NSFetchRequest* request = [Favorite fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
