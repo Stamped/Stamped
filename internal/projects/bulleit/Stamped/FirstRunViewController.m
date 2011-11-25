@@ -269,8 +269,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 }
 
 - (void)signInFailed:(NSString*)reason {
-//  if (!activityIndicator_.isAnimating)
-//    return;
   if (!reason)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound && activityIndicator_.isAnimating)
@@ -403,7 +401,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
       return;
     }
 
-    
     if ([self stringIsValidEmail:signUpEmailTextField_.text])
       [self validateEmail];
     else {
@@ -415,7 +412,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
       return;
     }
   }
-
   
   confirmButton_.enabled = NO;
   [confirmButton_ setTitle:nil forState:UIControlStateNormal];
@@ -664,11 +660,10 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                                                 selector:@selector(validateUsername)
                                                 userInfo:nil
                                                  repeats:NO];
-  }
-  
-  else if ([sender isEqual:self.signUpEmailTextField]) {
+  } else if ([sender isEqual:self.signUpEmailTextField]) {
     if (timer2_)
       [timer2_ invalidate];
+
     self.timer2 = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                    target:self
                                                  selector:@selector(validateEmail)
@@ -688,7 +683,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 
 #pragma mark - Validation.
 
-- (void) validateUsername {
+- (void)validateUsername {
   NSString* text = signInScrollView_.superview ? usernameTextField_.text : signUpUsernameTextField_.text;
   if (!text || [text isEqualToString:@""])
     return;
@@ -712,7 +707,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   [requestQueue_ addRequest:request];
 }
 
-- (void) validateEmail {
+- (void)validateEmail {
   NSString* text = signUpEmailTextField_.text;
   if (!text || [text isEqualToString:@""])
     return;
@@ -732,7 +727,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 
 #pragma mark - RKRequestDelegate methods.
 
-- (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (signInScrollView_.superview) {  
     if (response.statusCode == 200) {
       // valid username & user exists. 
@@ -801,8 +796,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
       [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
       confirmButton_.enabled = YES;
       return;
-    }
-    else if (response.statusCode == 404) {           //available
+    } else if (response.statusCode == 404) {           //available
       if (emailTaken_) {
         emailTaken_ = NO;
         if ([self stringIsValidUsername:signUpUsernameTextField_.text])
@@ -830,8 +824,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                      profileImage:self.profilePhoto
                       phoneNumber:num];
       }
-    }
-    else if (response.statusCode == 400) {
+    } else if (response.statusCode == 400) {
       [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
       [activityIndicator_ stopAnimating];
       [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
@@ -840,8 +833,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
       emailValid_ = NO;
       emailTaken_ = YES;
       return;
-    }
-    else {
+    } else {
       [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
       [activityIndicator_ stopAnimating];
       [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
