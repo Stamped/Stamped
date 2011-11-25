@@ -18,7 +18,7 @@ CLIENT_SECRET = "august1ftw"
 _accounts  = []
 _test_case = None
 _baseurl   = "http://localhost:18000/v0"
-_baseurl   = "http://ec2-107-22-68-117.compute-1.amazonaws.com:5000/v0"
+# _baseurl   = "http://ec2-107-22-68-117.compute-1.amazonaws.com:5000/v0"
 # _baseurl   = "https://elb-mario-312027982.us-east-1.elb.amazonaws.com/v0"
 
 # _baseurl = "http://107.20.179.250:5000/v0"
