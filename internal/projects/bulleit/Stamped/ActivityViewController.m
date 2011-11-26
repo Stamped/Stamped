@@ -273,7 +273,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   }
 
   // No need to download every event on the first run.
-  if (objects.count < 10 || ![[NSUserDefaults standardUserDefaults] objectForKey:@"ActivityLastUpdatedAt"]) {
+  if (objects.count < 10 || ![[NSUserDefaults standardUserDefaults] boolForKey:@"ActivityHasBeenLoadedOnce"]) {
     // Grab latest event.
     NSFetchRequest* request = [Event fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
@@ -281,6 +281,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     [request setFetchLimit:1];
     Event* latestEvent = [Event objectWithFetchRequest:request];
     
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ActivityHasBeenLoadedOnce"];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"EventsOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] setObject:latestEvent.created
                                               forKey:@"EventLatestCreated"];
