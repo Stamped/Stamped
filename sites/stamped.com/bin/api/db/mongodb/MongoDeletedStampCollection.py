@@ -21,6 +21,8 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='deletedstamps', primary_key='stamp_id', obj=DeletedStamp)
         AStampDB.__init__(self)
+
+        self._collection.ensure_index('timestamp.modified', unique=False)
     
     ### PUBLIC
     
