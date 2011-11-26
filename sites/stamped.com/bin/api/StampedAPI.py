@@ -2400,7 +2400,11 @@ class StampedAPI(AStampedAPI):
         commentPreviews = {}
 
         if includeComments == True:
-            commentData = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
+            # Only grab comments for slice
+            realizedStampIds = []
+            for stamp in stampData:
+                realizedStampIds.append(stamp.stamp_id)
+            commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
 
             # Group previews by stamp_id
             for comment in commentData:
