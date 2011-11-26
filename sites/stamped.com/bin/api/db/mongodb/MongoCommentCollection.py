@@ -67,27 +67,30 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        logs.debug('getCommentIdsAcrossStampIds: %s' % duration)
+        logs.debug('getCommentIdsAcrossStampIds: %s ms' % duration)
 
         documentIds = []
         for commentId in commentIds:
             documentIds.append(self._getObjectIdFromString(commentId))
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        logs.debug('Convert commentIds: %s' % duration)
+        logs.debug('Convert commentIds: %s ms' % duration)
+
+        if len(documentIds) == 0:
+            return []
         
         # Get comments
-        documents = self._getMongoDocumentsFromIds(documentIds, limit=len(commentIds))
+        documents = self._getMongoDocumentsFromIds(documentIds, limit=len(documentIds))
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        logs.debug('_getMongoDocumentsFromIds: %s' % duration)
+        logs.debug('_getMongoDocumentsFromIds: %s ms' % duration)
         
         comments = []
         for document in documents:
             comments.append(self._convertFromMongo(document))
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        logs.debug('Convert comments: %s' % duration)
+        logs.debug('Convert comments: %s ms' % duration)
         
         return comments
     
