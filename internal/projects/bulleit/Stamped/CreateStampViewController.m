@@ -364,6 +364,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   if (!stampsLeft)
     return;
+
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;

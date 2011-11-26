@@ -42,15 +42,11 @@
   self = [super init];
   if (self) {
     self.pills = [NSMutableArray array];
-
     User* currentUser = [AccountManager sharedManager].currentUser;
-    NSFetchRequest* request = [User fetchRequest];
-    request.predicate = [NSPredicate predicateWithFormat:@"userID != %@ AND name != NIL", currentUser.userID];
     NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
                                                                      ascending:YES 
                                                                       selector:@selector(localizedCaseInsensitiveCompare:)];
-    request.sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-    self.peopleArray = [User objectsWithFetchRequest:request];
+    self.peopleArray = [currentUser.following sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self filterPeople];
   }
   return self;
