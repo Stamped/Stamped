@@ -5237,10 +5237,7 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlightSDK\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
@@ -5277,10 +5274,7 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlightSDK\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
@@ -5318,10 +5312,7 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/TestFlightSDK\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";

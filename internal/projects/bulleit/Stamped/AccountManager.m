@@ -189,7 +189,7 @@ static AccountManager* sharedAccountManager_ = nil;
     if (firstRunViewController_) {
       [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];
     } else {
-      [self performSelector:@selector(logout) withObject:self afterDelay:0];
+      [self performSelector:@selector(logout) withObject:nil afterDelay:0];
     }
   } else if ([objectLoader.resourcePath rangeOfString:kRefreshPath].location != NSNotFound) {
     [self sendLoginRequest];

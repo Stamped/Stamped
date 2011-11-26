@@ -88,7 +88,7 @@
   [pill sizeToFit];
   [creditTextField_ addSubview:pill];
   [creditTextField_ sizeToFit];
-  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
+  [self performSelector:@selector(resizeTableView) withObject:nil afterDelay:0.0];
   [pills_ addObject:pill];
   [pill release];
 }
@@ -110,7 +110,7 @@
   for (STCreditPill* pill in pills_)
     pill.highlighted = NO;
 
-  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
+  [self performSelector:@selector(resizeTableView) withObject:nil afterDelay:0.0];
 }
 
 - (NSString*)usersSeparatedByCommas {
@@ -163,7 +163,7 @@
   if ([string isEqualToString:@" "]) {
     if (!textField.hidden) {
       [self decorateTextField];
-      [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
+      [self performSelector:@selector(filterPeople) withObject:nil afterDelay:0.0];
     } else {
       textField.hidden = NO;
       for (STCreditPill* pill in pills_)
@@ -182,7 +182,7 @@
       [pills_.lastObject setHighlighted:YES];
       textField.hidden = YES;
     }
-    [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
+    [self performSelector:@selector(filterPeople) withObject:nil afterDelay:0.0];
     return NO;
   }
   textField.hidden = NO;
@@ -190,8 +190,8 @@
     pill.highlighted = NO;
   
   [creditTextField_ setNeedsLayout];
-  [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
-  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
+  [self performSelector:@selector(filterPeople) withObject:nil afterDelay:0.0];
+  [self performSelector:@selector(resizeTableView) withObject:nil afterDelay:0.0];
   return YES;
 }
 
@@ -215,7 +215,9 @@
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   [self decorateTextField];
-  [delegate_ creditTextFieldDidEndEditing:creditTextField_];
+  [(id)delegate_ performSelector:@selector(creditTextFieldDidEndEditing:)
+                      withObject:creditTextField_
+                      afterDelay:0.0];
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 0.0;
   }];
@@ -232,7 +234,7 @@
   [self addPerson:user.screenName];
   creditTextField_.text = @"\u200b";
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
-  [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.3];
+  [self performSelector:@selector(filterPeople) withObject:nil afterDelay:0.3];
 }
 
 #pragma mark - UITableViewDataSource methods.
