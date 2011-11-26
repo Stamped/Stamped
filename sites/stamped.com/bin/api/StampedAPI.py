@@ -2361,6 +2361,9 @@ class StampedAPI(AStampedAPI):
             return cap
     
     def _getStampCollection(self, authUserId, stampIds, **kwargs):
+
+        # t0 = time.time()
+
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         sort            = kwargs.pop('sort', 'created')
@@ -2391,16 +2394,26 @@ class StampedAPI(AStampedAPI):
 
         stampData = self._stampDB.getStamps(stampIds, **params)
         
+        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        # self._statsSink.time('stamped.api.methods._getStampCollection.getStamps', duration)
+        
         commentPreviews = {}
 
         if includeComments == True:
-            commentData = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
+            # Only grab comments for slice
+            realizedStampIds = []
+            for stamp in stampData:
+                realizedStampIds.append(stamp.stamp_id)
+            commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
 
             # Group previews by stamp_id
             for comment in commentData:
                 if comment.stamp_id not in commentPreviews:
                     commentPreviews[comment.stamp_id] = []
                 commentPreviews[comment.stamp_id].append(comment)
+        
+            # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+            # self._statsSink.time('stamped.api.methods._getStampCollection.comments', duration)
 
         # Add user object and preview to stamps
         stamps = []
@@ -2410,13 +2423,22 @@ class StampedAPI(AStampedAPI):
             stamps.append(stamp)
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+        
+        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        # self._statsSink.time('stamped.api.methods._getStampCollection.enrichStamps', duration)
 
         if kwargs.pop('deleted', False):
             deleted = self._stampDB.getDeletedStamps(stampIds, **params)
             if len(deleted) > 0:
                 stamps = stamps + deleted
+        
+            # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+            # self._statsSink.time('stamped.api.methods._getStampCollection.deleted', duration)
 
         stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+        
+        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        # self._statsSink.time('stamped.api.methods._getStampCollection.sort', duration)
 
         return stamps[:limit]
     

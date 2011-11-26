@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import Globals, logs, time
 
 from datetime import datetime
 from utils import lazyProperty
@@ -63,13 +63,16 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def getCommentsAcrossStamps(self, stampIds, limit=4):
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)
-        
+
         documentIds = []
         for commentId in commentIds:
             documentIds.append(self._getObjectIdFromString(commentId))
+
+        if len(documentIds) == 0:
+            return []
         
         # Get comments
-        documents = self._getMongoDocumentsFromIds(documentIds, limit=len(commentIds))
+        documents = self._getMongoDocumentsFromIds(documentIds, limit=len(documentIds))
         
         comments = []
         for document in documents:
