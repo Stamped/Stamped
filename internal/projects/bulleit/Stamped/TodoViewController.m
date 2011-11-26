@@ -513,7 +513,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   NSDate* lastUpdated = [[NSUserDefaults standardUserDefaults] objectForKey:@"FavoriteLatestCreated"];
   if (lastUpdated)
     latestTimestamp = lastUpdated.timeIntervalSince1970;
-  
+
   NSString* latestTimestampString = [NSString stringWithFormat:@"%.0f", latestTimestamp];
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:latestTimestampString, @"since", nil];
   NSDate* oldestTimeInBatch = [[NSUserDefaults standardUserDefaults] objectForKey:@"FavoritesOldestTimestampInBatch"];
@@ -561,7 +561,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  NSLog(@"entityID: %@", entityID);
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityID, @"entity_id", nil];
   [objectLoader send];
 }
