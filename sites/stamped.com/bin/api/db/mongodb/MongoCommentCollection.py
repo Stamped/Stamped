@@ -64,6 +64,8 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def getCommentsAcrossStamps(self, stampIds, limit=4):
         t0 = time.time()
 
+        logs.debug('stampIds: %s' % stampIds)
+
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
@@ -75,6 +77,8 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         
         t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
         logs.debug('Convert commentIds: %s ms' % duration)
+
+        logs.debug('documentIds: %s' % documentIds)
 
         if len(documentIds) == 0:
             return []
