@@ -181,23 +181,22 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   if (needToRefetch_) {
     NSError* error;
     if (![self.fetchedResultsController performFetch:&error]) {
       // Update to handle the error appropriately.
       NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
     }
+
     needToRefetch_ = NO;
     [self.tableView reloadData];
-    [self.tableView selectRowAtIndexPath:self.selectedIndexPath
-                                animated:NO
-                          scrollPosition:UITableViewScrollPositionNone];
   }
-  [super viewWillAppear:animated];
-}
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
   if (mapView_.alpha > 0)
     mapView_.showsUserLocation = YES;
 
