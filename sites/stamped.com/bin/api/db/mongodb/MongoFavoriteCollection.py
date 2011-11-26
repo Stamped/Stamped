@@ -80,11 +80,11 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         params = {'user_id': userId}
         
         if since != None and before != None:
-            params['timestamp.created'] = {'$gte': since, '$lte': before}
+            params[sort] = {'$gte': since, '$lte': before}
         elif since != None:
-            params['timestamp.created'] = {'$gte': since}
+            params[sort] = {'$gte': since}
         elif before != None:
-            params['timestamp.created'] = {'$lte': before}
+            params[sort] = {'$lte': before}
         
         documents = self._collection.find(params).sort(sort, \
             pymongo.DESCENDING).limit(limit)
