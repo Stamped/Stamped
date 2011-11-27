@@ -50,7 +50,4 @@ def timeout(request):
 
     time.sleep(55)
 
-def ping(request):
-    return pingServer()
-
 

@@ -117,7 +117,8 @@ urlpatterns = patterns('',
     (r'v0/activity/show.json',          'v0.functions.activity.show'),
     
     ### TEMP
-    (r'v0/temp/ping.json',              'v0.functions.temp.ping'),
+    (r'v0/temp/ping.json',              'v0.functions.ping.ping'),
+
     (r'v0/temp/friends.json',           'v0.functions.temp.friends'),
     (r'v0/temp/followers.json',         'v0.functions.temp.followers'),
     (r'v0/temp/timeout.json',           'v0.functions.temp.timeout'),

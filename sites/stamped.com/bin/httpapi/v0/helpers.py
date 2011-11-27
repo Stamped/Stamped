@@ -90,13 +90,6 @@ def handleHTTPRequest(fn):
     
     return handleHTTPRequest
 
-def pingServer():
-    try:
-        return transformOutput(True)
-    except Exception as e:
-        response = HttpResponse("internal server error", status=500)
-        return response
-
 def checkClient(request):
     ### Parse Request for Client Credentials
     try:
