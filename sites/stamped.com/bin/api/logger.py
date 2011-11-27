@@ -84,16 +84,16 @@ def main():
         print
 
         if 'path' in logs[i] and 'method' in logs[i]:
-            print '%-10s %s %s' % (i+1, logs[i]['method'], logs[i]['path'])
+            node = ''
+            if 'node' in logs[i]:
+                node = '(%s)' % logs[i]['node']
+            print '%-10s %s %s %s' % (i+1, logs[i]['method'], logs[i]['path'], node)
         else:
             print i+1
 
         if 'result' in logs[i] and logs[i]['result'] != '200':
             print '%-10s %s ERROR' % ('', logs[i]['result'])
         print '-' * 40
-
-        if 'node' in logs[i]:
-            print '%-10s %s' % ('Node:', logs[i]['node'])
 
         if 'request_id' in logs[i]:
             print '%-10s %s' % ('ID:', logs[i]['request_id'])
