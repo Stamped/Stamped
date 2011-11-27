@@ -99,7 +99,13 @@ def warn(msg, *args, **kwargs):
 
 
 # HTTP Log Requests
-def begin(addLog=None, saveLog=None, saveStat=None, requestData=None):
+def begin(**kwargs):
+    addLog      = kwargs.pop('addLog', None)
+    saveLog     = kwargs.pop('saveLog', None)
+    saveStat    = kwargs.pop('saveStat', None)
+    requestData = kwargs.pop('requestData', None)
+    nodeName    = kwargs.pop('nodeName', None)
+
     refresh(format='object')
     localData.saveLog = saveLog
     localData.saveStat = saveStat
@@ -107,6 +113,8 @@ def begin(addLog=None, saveLog=None, saveStat=None, requestData=None):
         request(requestData)
     if addLog:
         localData.log['_id'] = addLog(localData.log)
+    if nodeName:
+        localData.log['node'] = nodeName
 
 def request(request):
     try:

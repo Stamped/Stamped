@@ -32,6 +32,7 @@ def handleHTTPRequest(fn):
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 requestData=request,
+                nodeName=stampedAPI.node_name,
             )
             # logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
