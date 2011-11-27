@@ -92,6 +92,9 @@ def main():
             print '%-10s %s ERROR' % ('', logs[i]['result'])
         print '-' * 40
 
+        if 'node' in logs[i]:
+            print '%-10s %s' % ('Node:', logs[i]['node'])
+
         if 'request_id' in logs[i]:
             print '%-10s %s' % ('ID:', logs[i]['request_id'])
 
