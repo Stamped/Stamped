@@ -99,6 +99,7 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
             match = True
             break
     
+    entities = filter(lambda e: e.entity_id != entity.entity_id, entities)
     if len(entities) < 7:
         return
     
