@@ -85,7 +85,6 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
         seen.add(entity2.entity_id)
         entities.append(entity2)
     
-    utils.log("%s (%s) => %d" % (entity.title, entity.subtitle, len(entities)))
     results = appleAPI.search(term=entity.title, media='software', transform=True, limit=5)
     match   = False
     
@@ -97,6 +96,7 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
             match = True
             break
     
+    utils.log("%s (%s) => %d (match=%s)" % (entity.title, entity.subtitle, len(entities), match))
     if match and not options.noop:
         matcher.resolveDuplicates(entity, entities)
 
