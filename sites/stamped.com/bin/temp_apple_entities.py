@@ -58,7 +58,7 @@ def main():
     pool.join()
     utils.log("done processing %d entities" % len(rs))
 
-def handle_entity(entity, geocoder, googlePlaces, entityDB, seen, options):
+def handle_entity(entity, entityDB, seen, options):
     if entity.entity_id in seen:
         return
     seen.add(entity.entity_id)
