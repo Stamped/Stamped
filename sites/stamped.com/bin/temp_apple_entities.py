@@ -99,6 +99,7 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
             match = True
             entity2.entity_id = entity.entity_id
             entity2.generated_by = entity.generated_by
+            entity = entity2
             break
     
     entities = filter(lambda e: e.entity_id != entity.entity_id, entities)
