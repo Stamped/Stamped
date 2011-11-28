@@ -36,7 +36,7 @@ class AppleAPICall(object):
     
     def __init__(self, **kwargs):
         self.transform = kwargs.pop('transform', False)
-        self.transform = kwargs.pop('verbose',   False)
+        self.verbose   = kwargs.pop('verbose',   False)
         
         self.method = kwargs.pop('method', None)
         self.params = kwargs
