@@ -51,7 +51,7 @@ def main():
     
     rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "subtitle" : {"$in" : subtitles }}, output=list)
     
-    pool = Pool(16)
+    pool = Pool(1)
     seen = set()
     
     utils.log("processing %d entities" % len(rs))
@@ -60,6 +60,7 @@ def main():
         entity = entityDB._convertFromMongo(result)
         
         pool.spawn(handle_entity, entity, entityDB, matcher, appleAPI, seen, options)
+        break
     
     pool.join()
     utils.log("done processing %d entities" % len(rs))
