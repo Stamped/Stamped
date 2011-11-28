@@ -1112,7 +1112,7 @@ class MongoEntitySearcher(EntitySearcher):
                 apple_pool.spawn(_find_apple_specific, media='music', entity='song')
             
             if subcategory_filter is None or subcategory_filter == 'app':
-                apple_pool.spawn(_find_apple_specific, media='software')
+                apple_pool.spawn(_find_apple_specific, media='software', entity=None)
             
             apple_pool.join(timeout=6.5)
         except:
