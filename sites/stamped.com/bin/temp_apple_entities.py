@@ -70,6 +70,7 @@ def handle_entity(entity, entityDB, seen, options):
         entity2 = entityDB._convertFromMongo(result)
         if entity2 in seen:
             continue
+        seen.add(entity2.entity_id)
         entities.append(entity2)
     
     utils.log("%s => %d" % (entity.title, len(entities)))
