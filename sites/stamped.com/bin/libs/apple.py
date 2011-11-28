@@ -8,8 +8,10 @@ __license__   = "TODO"
 import Globals
 import copy, json, urllib, utils
 
-from Schemas import Entity
-from utils   import AttributeDict
+from Schemas    import Entity
+from optparse   import OptionParser
+from utils      import AttributeDict
+from pprint     import pprint
 
 __all__ = [ "AppleAPI", "AppleAPIError" ]
 
@@ -21,6 +23,7 @@ class AppleAPICall(object):
         'artist'        : 'artist', 
         'collection'    : 'album', 
         'track'         : 'song', 
+        'software'      : 'app', 
     }
     
     _kind_to_subcategory = {
@@ -28,10 +31,12 @@ class AppleAPICall(object):
         'album'         : 'album', 
         'artist'        : 'artist', 
         'feature-movie' : 'movie', 
+        'software'      : 'app', 
     }
     
     def __init__(self, **kwargs):
         self.transform = kwargs.pop('transform', False)
+        self.transform = kwargs.pop('verbose',   False)
         
         self.method = kwargs.pop('method', None)
         self.params = kwargs
@@ -45,6 +50,7 @@ class AppleAPICall(object):
     def __call__(self, **kwargs):
         assert self.method is not None
         transform = kwargs.pop('transform', self.transform)
+        verbose   = kwargs.pop('verbose',   self.verbose)
         params    = copy.copy(self.params)
         
         for kwarg in kwargs:
@@ -60,11 +66,10 @@ class AppleAPICall(object):
             params['term'] = term
         
         url    = self._get_url(params)
-        #utils.log(url)
-        result = json.loads(utils.getFile(url))
+        if verbose:
+            utils.log(url)
         
-        #from pprint import pprint
-        #pprint(result)
+        result = json.loads(utils.getFile(url))
         
         if transform:
             return self.transform_result(result)
@@ -99,7 +104,7 @@ class AppleAPICall(object):
                 entity = Entity()
                 entity.subcategory = subcategory
                 
-                if wrapperType == 'track':
+                if wrapperType == u'track':
                     entity.title    = result['trackName']
                     entity.aid      = result['trackId']
                     entity.view_url = result['trackViewUrl']
@@ -128,11 +133,11 @@ class AppleAPICall(object):
                         album_id   = result['collectionId']
                         if album_id is not None:
                             entity.song_album_id = album_id
-                elif subcategory == 'album':
+                elif subcategory == u'album':
                     entity.title    = result['collectionName']
                     entity.aid      = result['collectionId']
                     entity.view_url = result['collectionViewUrl']
-                elif subcategory == 'artist':
+                elif subcategory == u'artist':
                     entity.title    = result['artistName']
                     entity.aid      = result['artistId']
                     
@@ -143,37 +148,52 @@ class AppleAPICall(object):
                             entity.view_url = result['artistLinkUrl']
                         except:
                             pass
+                elif wrapperType == u'software':
+                    entity.title    = result['trackName']
+                    entity.aid      = result['trackId']
+                    entity.view_url = result['trackViewUrl']
                 else:
                     # should never reach this point, but not raising an error just 
                     # in case i'm wrong for robustness purposes if we receive 
                     # an unexpected result
+                    print "warning: unexpected / invalid entity type returned from iTunes API"
+                    pprint(reuslt)
                     continue
                 
                 if subcategory != 'artist':
                     entity.artist_display_name = result['artistName']
+                    
                     if 'artistId' in result and result['artistId'] is not None:
                         entity.artist_id       = result['artistId']
                 
-                entity_map = {
-                    'previewUrl'            : 'preview_url', 
-                    'artworkUrl100'         : 'large', 
-                    'artworkUrl60'          : 'small', 
-                    'artworkUrl30'          : 'tiny', 
-                    'longDescription'       : 'desc', 
-                    'shortDescription'      : 'desc', 
-                    'primaryGenreName'      : 'genre', 
-                    'releaseDate'           : 'original_release_date', 
-                    'contentAdvisoryRating' : 'mpaa_rating', 
-                    'copyright'             : 'copyright', 
-                    'trackCount'            : 'track_count', 
-                }
+                entity_map = [
+                    ('artistName',            'artist_display_name'), 
+                    ('description',           'desc'), 
+                    ('previewUrl',            'preview_url'), 
+                    ('artworkUrl100',         'large'), 
+                    ('artworkUrl60',          'small'), 
+                    ('artworkUrl30',          'tiny'), 
+                    ('artworkUrl512',         'large'), 
+                    ('longDescription',       'desc'), 
+                    ('shortDescription',      'desc'), 
+                    ('primaryGenreName',      'genre'), 
+                    ('releaseDate',           'original_release_date'), 
+                    ('contentAdvisoryRating', 'mpaa_rating'), 
+                    ('copyright',             'copyright'), 
+                    ('trackCount',            'track_count'), 
+                    ('sellerName',            'studio_name'), 
+                    ('sellerUrl',             'studio_url'), 
+                    ('screenshotUrls',        'screenshots'), 
+                ]
                 
-                for key in entity_map:
+                for t in entity_map:
+                    key, key2 = t
+                    
                     if key in result:
                         value = result[key]
                         
                         if value is not None:
-                            entity[entity_map[key]] = result[key]
+                            entity[key2] = result[key]
                 
                 if wrapperType == 'track':
                     if 'trackTimeMillis' in result:
@@ -182,9 +202,11 @@ class AppleAPICall(object):
                         if length is not None:
                             entity.track_length = length / 1000.0
                 
+                if u'genres' in result:
+                    entity.genre = u', '.join(result[u'genres'])
+                
                 output.append(AttributeDict(result=result, entity=entity))
             except:
-                from pprint import pprint
                 utils.printException()
                 pprint(result)
         
@@ -205,4 +227,83 @@ class AppleAPI(AppleAPICall):
                 return AppleAPICall.__getattr__(self, k)
             else:
                 raise AppleAPIError("undefined api method '%s'" % k)
+
+def parseCommandLine():
+    usage   = "Usage,%prog [options] query"
+    version = "%prog " + __version__
+    parser  = OptionParser(usage=usage, version=version)
+    
+    parser.add_option("-s", "--search", action="store_true", default=False, 
+                      help="Perform search query")
+    
+    parser.add_option("-t", "--term", action="store", type="string", default=None, 
+                      help="Term to search for")
+    
+    parser.add_option("-c", "--country", action="store", type="string", default='US', 
+                      help="Two-letter country code for the store you want to search (defaults to US)")
+    
+    parser.add_option("-m", "--media", action="store", type="string", default=None, 
+                      help="Media type you want to search for")
+    
+    parser.add_option("-e", "--entity", action="store", type="string", default=None, 
+                      help="Type of results you want returned, relative to the specified media type. For example, movieArtist for amovie media type search.")
+    
+    parser.add_option("-a", "--attribute", action="store", type="string", default=None, 
+                      help="The attribute you want to search for in the stores, relative to the specified media type. For example, if you wnat to search for an artist by name, specify --entity=allArtist --attribute=allArtistTerm")
+    
+    parser.add_option("-l", "--limit", action="store", type="int", default=None, 
+                      help="Numer of search results to return (1 to 200)")
+    
+    parser.add_option("-L", "--language", action="store", type="string", default=None, 
+                      help="Language to use when returning search results, using the five-character codename (default en_us)")
+    
+    parser.add_option("-E", "--explicit", action="store_true", default=None, 
+                      help="Whether or not to include explicit content in search results (default is True)")
+    
+    parser.add_option("-v", "--verbose", action="store_true", default=False, 
+                      help="Whether or not to transform results (not verbose) or return results from the API verbatim")
+    
+    (options, args) = parser.parse_args()
+    
+    return (options, args)
+
+def extract_args(options):
+    func_args = copy.copy(options.__dict__)
+    delete = []
+    
+    for arg in func_args:
+        if func_args[arg] is None or arg == 'search':
+            delete.append(arg)
+    
+    for d in delete:
+        del func_args[d]
+    
+    func_args['transform'] = not options.verbose
+    return func_args
+
+def main():
+    options, args = parseCommandLine()
+    
+    api = AppleAPI()
+    func_args = extract_args(options)
+    
+    if options.search:
+        results = api.search(**func_args)
+    else:
+        if len(args) < 1:
+            print "default lookup search takes an apple id"
+            return
+        
+        func_args['id'] = args[0]
+        results = api.lookup(**func_args)
+    
+    if options.verbose:
+        pprint(results)
+    else:
+        for result in results:
+            entity = result.entity
+            pprint(entity.value)
+
+if __name__ == '__main__':
+    main()
 

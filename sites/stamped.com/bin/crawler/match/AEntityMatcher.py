@@ -269,6 +269,9 @@ class AEntityMatcher(object):
         if not isinstance(entities_to_delete, (list, tuple)):
             entities_to_delete = [ entities_to_delete ]
         
+        filter_func = (lambda e: e is not None and e.entity_id is not None)
+        entities_to_delete = filter(filter_func, entities_to_delete)
+        
         for entity2 in entities_to_delete:
             if not entity2.entity_id:
                 logs.debug('SKIPPED: %s' % entity2)
@@ -299,7 +302,7 @@ class AEntityMatcher(object):
             if docs is not None and len(docs) > 0:
                 for doc in docs:
                     item = self._activityDB._convertFromMongo(doc)
-                    item.link.linked_entity = entity1
+                    #item.link.linked_entity = entity1
                     item.link.linked_entity_id = entity1.entity_id
                     
                     if self.options.verbose:

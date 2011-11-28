@@ -434,7 +434,7 @@ class EntityDetailsSchema(Schema):
         self.place              = PlaceSchema()
         self.contact            = ContactSchema()
         self.restaurant         = RestaurantSchema()
-        self.iPhoneApp          = AppSchema()
+        self.app                = AppSchema()
         self.book               = BookSchema()
         self.video              = VideoSchema()
         self.artist             = ArtistSchema()
@@ -498,6 +498,7 @@ class RestaurantSchema(Schema):
 
 class AppSchema(Schema):
     def setSchema(self):
+        
         pass
         #self.developer          = SchemaElement(basestring)
         #self.developerURL       = SchemaElement(basestring)
@@ -533,6 +534,7 @@ class BookSchema(Schema):
 class VideoSchema(Schema):
     def setSchema(self):
         self.studio_name        = SchemaElement(basestring)
+        self.studio_url         = SchemaElement(basestring)
         self.network_name       = SchemaElement(basestring)
         self.short_description  = SchemaElement(basestring)
         self.long_description   = SchemaElement(basestring)
@@ -623,6 +625,7 @@ class MediaSchema(Schema):
         self.mpaa_rating                = SchemaElement(basestring)
         self.genre                      = SchemaElement(basestring)
         self.artist_id                  = SchemaElement(basestring)
+        self.screenshots                = SchemaList(SchemaElement(basestring))
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
