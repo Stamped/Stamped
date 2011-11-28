@@ -8,13 +8,17 @@ __license__   = "TODO"
 import init
 import json, re, time, utils
 
-from MongoStampedAPI    import MongoStampedAPI
+from MongoStampedAPI        import MongoStampedAPI
+from libs.apple             import AppleAPI
+from match.EntityMatcher    import EntityMatcher
 
-from gevent.pool        import Pool
-from optparse           import OptionParser
-from pprint             import pprint
+from gevent.pool            import Pool
+from optparse               import OptionParser
+from pprint                 import pprint
 
-subtitles = [ "app", "App", "apps", "Apps", "iOS Apps", "iOS App", "Application", "Software", "ios app", "ios apps", "iOS App / Web Service", "iPhone App", "Iphone App", "Service", "Social Networks", "iphone app", "iphone apps", "Photography app", "iOS application", "Social service", "OCD/Hoarding Tools", "Feelings", "application", "software", "Software", "Applications", "applications", "Other", "other"]
+subtitles = [ "app", "App", "apps", "Apps", "iOS Apps", "iOS App", "Application", "Software", "ios app", "ios apps", "iOS App / Web Service", "iPhone App", "Iphone App", "Service", "Social Networks", "iphone app", "iphone apps", "Photography app", "iOS application", "Social service", "OCD/Hoarding Tools", "application", "software", "Software", "Applications", "applications", ]
+subtitles2 = (a for a in subtitles)
+subtitles.extend(['Other', 'other'])
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -42,6 +46,8 @@ def main():
     
     stampedAPI = MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
+    matcher    = EntityMatcher(stampedAPI, options)
+    appleAPI   = AppleAPI()
     
     rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "subtitle" : {"$in" : subtitles }}, output=list)
     
@@ -53,17 +59,23 @@ def main():
     for result in rs:
         entity = entityDB._convertFromMongo(result)
         
-        pool.spawn(handle_entity, entity, entityDB, seen, options)
+        pool.spawn(handle_entity, entity, entityDB, matcher, appleAPI, seen, options)
     
     pool.join()
     utils.log("done processing %d entities" % len(rs))
 
-def handle_entity(entity, entityDB, seen, options):
+def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
     if entity.entity_id in seen:
         return
     seen.add(entity.entity_id)
     
-    rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "subtitle" : {"$in" : subtitles }, "titlel" : entity.titlel, }, output=list)
+    title  = entity.titlel
+    titles = [ title ]
+    if title.endswith(' (app)'):
+        title = entity.titlel[:-6]
+        titles.append(title)
+    
+    rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "subtitle" : {"$in" : subtitles2 }, "titlel" : {"$in" : titles}, }, output=list)
     
     entities = []
     for result in rs:
@@ -73,11 +85,20 @@ def handle_entity(entity, entityDB, seen, options):
         seen.add(entity2.entity_id)
         entities.append(entity2)
     
-    utils.log("%s => %d" % (entity.title, len(entities)))
-    """
-    if not options.noop:
-        entityDB.updateEntity(entity)
-    """
+    utils.log("%s (%s) => %d" % (entity.title, entity.subtitle, len(entities)))
+    results = appleAPI.search(term=entity.title, media='software', transform=True, limit=5)
+    match   = False
+    
+    for result in results:
+        entity2 = result.entity
+        
+        if entity2.title.lower() == title:
+            entities.append(entity2)
+            match = True
+            break
+    
+    if match and not options.noop:
+        matcher.resolveDuplicates(entity, entities)
 
 if __name__ == '__main__':
     main()
