@@ -67,7 +67,6 @@ def main():
 def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
     if entity.entity_id in seen:
         return
-    seen.add(entity.entity_id)
     
     title  = entity.titlel
     titles = [ title ]
