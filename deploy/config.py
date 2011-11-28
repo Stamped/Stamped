@@ -13,6 +13,7 @@ def getInstances():
     replSetName = 'stamped-dev-01'
     
     dbCount     = 3
+    apiCount    = 1
     webCount    = 1
     monCount    = 1
     
@@ -29,6 +30,14 @@ def getInstances():
         },
         'placement' : None, 
         'instance_type' : 'm2.xlarge', 
+    }
+    
+    apiInstance = {
+        'roles' : [ 'apiServer', ], 
+        'port' : '5000', 
+        'replSet' : replSetName, 
+        'instance_type' : 'c1.xlarge', 
+        'placement' : None, 
     }
     
     webInstance = {
@@ -65,8 +74,11 @@ def getInstances():
     for i in xrange(dbCount):
         _addNode(dbInstance, 'db', i)
     
+    for i in xrange(apiCount):
+        _addNode(apiInstance, 'api', i)
+    
     for i in xrange(webCount):
-        _addNode(webInstance, 'api', i)
+        _addNode(webInstance, 'web', i)
     
     for i in xrange(monCount):
         _addNode(monInstance, 'mon', i)
