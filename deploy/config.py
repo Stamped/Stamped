@@ -29,16 +29,14 @@ def getInstances():
             'numDisks': 4,
         },
         'placement' : None, 
-        # 'instance_type' : 'm2.xlarge', # PROD
-        'instance_type' : 'm1.large', 
+        'instance_type' : 'm2.xlarge', # PROD
     }
     
     apiInstance = {
         'roles' : [ 'apiServer', ], 
         'port' : '5000', 
         'replSet' : replSetName, 
-        # 'instance_type' : 'c1.xlarge',  # PROD
-        'instance_type' : 'm1.large', 
+        'instance_type' : 'c1.xlarge',  # PROD
         'placement' : None, 
     }
     
@@ -46,8 +44,7 @@ def getInstances():
         'roles' : [ 'webServer', ], 
         'port' : '5000', 
         'replSet' : replSetName, 
-        # 'instance_type' : 'c1.xlarge',  # PROD
-        'instance_type' : 'm1.large', 
+        'instance_type' : 'c1.xlarge',  # PROD
         'placement' : None, 
     }
     
