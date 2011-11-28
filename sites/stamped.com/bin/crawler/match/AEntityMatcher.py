@@ -269,7 +269,8 @@ class AEntityMatcher(object):
         if not isinstance(entities_to_delete, (list, tuple)):
             entities_to_delete = [ entities_to_delete ]
         
-        filter_func = (lambda e: e is not None and e.entity_id is not None)
+        # ensure we're not deleting the entity we want to keep
+        filter_func = (lambda e: e is not None and e.entity_id is not None and e.entity_id != entity1.entity_id)
         entities_to_delete = filter(filter_func, entities_to_delete)
         
         for entity2 in entities_to_delete:

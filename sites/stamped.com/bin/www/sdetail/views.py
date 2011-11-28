@@ -51,7 +51,7 @@ def show(request, **kwargs):
         return response
 
     except Exception as e:
-        logs.begin(stampedAPI._logsDB.addLog)
+        logs.begin()
         logs.request(request)
         logs.warning("500 Error: %s" % e)
         logs.error(500)
