@@ -67,7 +67,7 @@ class MongoEntitySearcher(EntitySearcher):
         # --------------------------
         #           other
         # --------------------------
-        'app'               : 15, 
+        'app'               : 65, 
         'other'             : 5, 
         
         # the following subcategories are from google places
@@ -1110,6 +1110,9 @@ class MongoEntitySearcher(EntitySearcher):
             
             if subcategory_filter is None or subcategory_filter == 'song':
                 apple_pool.spawn(_find_apple_specific, media='music', entity='song')
+            
+            if subcategory_filter is None or subcategory_filter == 'app':
+                apple_pool.spawn(_find_apple_specific, media='software', entity=None)
             
             apple_pool.join(timeout=6.5)
         except:

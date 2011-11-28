@@ -45,7 +45,7 @@ def runbg(host, user, cmd):
     assert not '"' in cmd
     ssh_cmd = 'ssh -i keys/test-keypair -f -o StrictHostKeyChecking=no %s@%s "%s"' % (user, host, cmd)
     log(ssh_cmd)
-    return Popen(ssh_cmd, shell=True).wait()
+    return Popen(ssh_cmd, shell=True)
 
 def lazy_property(undecorated):
     name = '_' + undecorated.__name__

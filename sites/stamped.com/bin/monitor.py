@@ -70,6 +70,9 @@ class Monitor(object):
             try:
                 utils.logRaw("pinging node '%s.%s'..." % (node.stack, node.name), True)
                 
+                if 'apiServer' in node.roles:
+                    self._try_ping_apiServer(node)
+                
                 if 'webServer' in node.roles:
                     self._try_ping_webServer(node)
                 
@@ -115,7 +118,26 @@ class Monitor(object):
             self.status[node.instance_id] = node_status
     
     def _try_ping_webServer(self, node):
-        url = 'https://%s/v0/temp/ping.json' % node.public_dns
+        url = 'http://%s/index.html' % node.public_dns
+        retries = 0
+        
+        while retries < 5:
+            try:
+                response = urllib2.urlopen(url)
+            except urllib2.HTTPError, e:
+                utils.log(url)
+                utils.printException()
+            else:
+                return
+            
+            retries += 1
+            time.sleep(retries * retries)
+        
+        error = "unable to ping web server at '%s.%s'" % (node.stack, node.name)
+        raise MonitorException(error, email=True, sms=True)
+    
+    def _try_ping_apiServer(self, node):
+        url = 'https://%s/v0/ping.json' % node.public_dns
         retries = 0
         
         while retries < 5:
