@@ -67,7 +67,7 @@ class MongoEntitySearcher(EntitySearcher):
         # --------------------------
         #           other
         # --------------------------
-        'app'               : 15, 
+        'app'               : 65, 
         'other'             : 5, 
         
         # the following subcategories are from google places
