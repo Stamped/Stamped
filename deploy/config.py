@@ -12,9 +12,9 @@ import copy
 def getInstances():
     replSetName = 'stamped-dev-01'
     
-    dbCount     = 3
-    apiCount    = 1
-    webCount    = 1
+    dbCount     = 2
+    apiCount    = 2
+    webCount    = 2
     monCount    = 1
     
     ### TEMPLATES
@@ -29,14 +29,16 @@ def getInstances():
             'numDisks': 4,
         },
         'placement' : None, 
-        'instance_type' : 'm2.xlarge', 
+        # 'instance_type' : 'm2.xlarge', # PROD
+        'instance_type' : 'm1.large', 
     }
     
     apiInstance = {
         'roles' : [ 'apiServer', ], 
         'port' : '5000', 
         'replSet' : replSetName, 
-        'instance_type' : 'c1.xlarge', 
+        # 'instance_type' : 'c1.xlarge',  # PROD
+        'instance_type' : 'm1.large', 
         'placement' : None, 
     }
     
@@ -44,7 +46,8 @@ def getInstances():
         'roles' : [ 'webServer', ], 
         'port' : '5000', 
         'replSet' : replSetName, 
-        'instance_type' : 'c1.xlarge', 
+        # 'instance_type' : 'c1.xlarge',  # PROD
+        'instance_type' : 'm1.large', 
         'placement' : None, 
     }
     
