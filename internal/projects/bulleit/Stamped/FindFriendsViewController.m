@@ -143,6 +143,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
+  [self findFromStamped:self];
 }
 
 - (void)viewDidLoad {
