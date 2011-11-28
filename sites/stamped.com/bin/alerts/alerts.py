@@ -33,7 +33,7 @@ AWS_SECRET_KEY = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
 IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
-IS_PROD       = True
+IS_PROD       = False
 USE_PROD_CERT = True
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
