@@ -84,7 +84,10 @@ def main():
         print
 
         if 'path' in logs[i] and 'method' in logs[i]:
-            print '%-10s %s %s' % (i+1, logs[i]['method'], logs[i]['path'])
+            node = ''
+            if 'node' in logs[i]:
+                node = '(%s)' % logs[i]['node']
+            print '%-10s %s %s %s' % (i+1, logs[i]['method'], logs[i]['path'], node)
         else:
             print i+1
 

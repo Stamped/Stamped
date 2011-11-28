@@ -67,7 +67,7 @@ class MongoEntitySearcher(EntitySearcher):
         # --------------------------
         #           other
         # --------------------------
-        'app'               : 15, 
+        'app'               : 65, 
         'other'             : 5, 
         
         # the following subcategories are from google places
@@ -1100,16 +1100,24 @@ class MongoEntitySearcher(EntitySearcher):
         try:
             apple_pool = Pool(4)
             
+            # search for matching artists
             if subcategory_filter is None or subcategory_filter == 'artist':
                 apple_pool.spawn(_find_apple_specific, media='all', entity='allArtist')
             
-            apple_pool.spawn(_find_apple_specific, media='all', entity=None)
-            
+            # search for matching albums
             if subcategory_filter is None or subcategory_filter == 'album':
                 apple_pool.spawn(_find_apple_specific, media='music', entity='album')
             
+            # search for matching songs
             if subcategory_filter is None or subcategory_filter == 'song':
                 apple_pool.spawn(_find_apple_specific, media='music', entity='song')
+            
+            # search for matching apps
+            if subcategory_filter is None or subcategory_filter == 'app':
+                apple_pool.spawn(_find_apple_specific, media='software', entity=None)
+            
+            # search for misc matches that might not have been returned above
+            apple_pool.spawn(_find_apple_specific, media='all', entity=None)
             
             apple_pool.join(timeout=6.5)
         except:

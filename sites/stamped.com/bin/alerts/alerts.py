@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -32,7 +33,7 @@ AWS_SECRET_KEY = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
 IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
-IS_PROD       = True
+IS_PROD       = False
 USE_PROD_CERT = True
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
@@ -252,7 +253,10 @@ def runAlerts(options):
         print 'ALERT EMAILS:'
         for k, v in userEmailQueue.iteritems():
             for email in v:
-                print "%64s | %s" % (email['to'], email['subject'])
+                try:
+                    print u"%64s | %s" % (email['to'], email['subject'])
+                except Exception as e:
+                    print e
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
@@ -328,11 +332,11 @@ def runInvites(options):
                 email = {}
                 email['to'] = emailAddress
                 email['from'] = 'Stamped <noreply@stamped.com>'
-                email['subject'] = '%s thinks you have great taste' % user['name']
+                email['subject'] = u'%s thinks you have great taste' % user['name']
                 email['invite_id'] = invite.invite_id
 
                 if not IS_PROD:
-                    email['subject'] = 'DEV: %s' % email['subject']
+                    email['subject'] = u'DEV: %s' % email['subject']
                 
                 params = HTTPUser().importSchema(user).value
                 html = parseTemplate(template, params)
@@ -363,7 +367,10 @@ def runInvites(options):
         print 'INVITE EMAILS:'
         for k, v in userEmailQueue.iteritems():
             for email in v:
-                print "%64s | %s" % (email['to'], email['subject'])
+                try:
+                    print u"%64s | %s" % (email['to'], email['subject'])
+                except Exception as e:
+                    print e
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
@@ -374,31 +381,31 @@ def runInvites(options):
 def _setSubject(user, genre):
 
     if genre == 'restamp':
-        msg = '%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
 
     elif genre == 'like':
-        msg = '%s (@%s) liked your stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) liked your stamp' % (user['name'], user.screen_name)
 
     elif genre == 'favorite':
-        msg = '%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
 
     elif genre == 'mention':
-        msg = '%s (@%s) mentioned you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) mentioned you on Stamped' % (user['name'], user.screen_name)
 
     elif genre == 'comment':
-        msg = '%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
 
     elif genre == 'reply':
-        msg = '%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
 
     elif genre == 'follower':
-        msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
     else:
         ### TODO: Add error logging?
         raise
 
     if not IS_PROD:
-        msg = 'DEV: %s' % msg
+        msg = u'DEV: %s' % msg
 
     return msg
 

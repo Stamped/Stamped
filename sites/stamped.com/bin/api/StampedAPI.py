@@ -2361,22 +2361,22 @@ class StampedAPI(AStampedAPI):
             return cap
     
     def _getStampCollection(self, authUserId, stampIds, **kwargs):
-
+        
         # t0 = time.time()
-
+        
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         sort            = kwargs.pop('sort', 'created')
         includeComments = kwargs.pop('comments', False)
-                       
+        
         # Set quality
-        if quality == 1:
+        if quality == 1:        # wifi
             stampCap    = 50
             commentCap  = 20
-        elif quality == 2:
+        elif quality == 2:      # 3G
             stampCap    = 30
             commentCap  = 10
-        else:
+        else:                   # edge
             stampCap    = 20
             commentCap  = 4
         
@@ -2384,14 +2384,14 @@ class StampedAPI(AStampedAPI):
         
         # Limit slice of data returned
         since, before = self._setSliceParams(kwargs)
-
+        
         params = {
             'since':    since,
             'before':   before, 
             'limit':    limit,
             'sort':     sort,
         }
-
+        
         stampData = self._stampDB.getStamps(stampIds, **params)
         
         # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1

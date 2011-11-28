@@ -42,6 +42,9 @@ class MongoStatsCollection(AMongoCollection):
             if 'finish' in statData:
                 stat['end'] = statData['finish']
 
+            if 'node' in statData:
+                stat['nde'] = statData['node']
+
 
             self._collection.insert_one(stat, log=False, safe=False)
 

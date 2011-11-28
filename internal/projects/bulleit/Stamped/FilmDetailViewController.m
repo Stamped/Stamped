@@ -132,8 +132,6 @@
 - (IBAction)mainActionButtonPressed:(id)sender {
   if (detailedEntity_.fandangoURL)
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.fandangoURL]];
-  else if (detailedEntity_.itunesURL)
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesURL]];
   else if (detailedEntity_.itunesShortURL)
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesShortURL]];
   else if (detailedEntity_.amazonURL)

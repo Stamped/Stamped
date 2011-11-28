@@ -25,6 +25,7 @@
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
 #import "SocialManager.h"
+#import "EditEntityViewController.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
@@ -122,6 +123,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
   UIImage* backButtonImage = [[UIImage imageNamed:@"default_back_button_bg"]
       resizableImageWithCapInsets:UIEdgeInsetsMake(0, 13, 0, 5)];
+  
+  
   [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackButtonBackgroundImage:backButtonImage
                                                     forState:UIControlStateNormal
                                                   barMetrics:UIBarMetricsDefault];
@@ -140,6 +143,29 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                               forState:UIControlStateHighlighted];
 
   [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageNamed:@"clear_image"]];
+  
+  
+  UIImage* segmentSelected = [[UIImage imageNamed:@"segmentedControl_sel"] resizableImageWithCapInsets:UIEdgeInsetsMake(4, 5, 5, 5)];
+  UIImage* segmentUnselected = [[UIImage imageNamed:@"segmentedControl_uns"] resizableImageWithCapInsets:UIEdgeInsetsMake(4, 5, 5, 5)];
+  UIImage* segmentDivUnselectedUnselected = [UIImage imageNamed:@"segmentedControl_div_uns_uns"];
+  UIImage* segmentDivSelectedUnselected = [UIImage imageNamed:@"segmentedControl_div_sel_uns"];
+  UIImage* segmentDivUnselectedSelected = [UIImage imageNamed:@"segmentedControl_div_uns_sel"];
+  
+  [[UISegmentedControl appearance] setBackgroundImage:segmentUnselected forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setBackgroundImage:segmentSelected forState:UIControlStateSelected barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivUnselectedUnselected
+                               forLeftSegmentState:UIControlStateNormal
+                                 rightSegmentState:UIControlStateNormal
+                                        barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivSelectedUnselected
+                               forLeftSegmentState:UIControlStateSelected
+                                 rightSegmentState:UIControlStateNormal
+                                        barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivUnselectedSelected
+                               forLeftSegmentState:UIControlStateNormal
+                                 rightSegmentState:UIControlStateSelected
+                                        barMetrics:UIBarMetricsDefault];
+  
 }
 
 - (void)performRestKitMappings {

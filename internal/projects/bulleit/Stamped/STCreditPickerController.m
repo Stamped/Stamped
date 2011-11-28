@@ -126,6 +126,7 @@
 - (void)decorateTextField {
   // Take raw text and convert it into pills.
   NSString* text = [creditTextField_.text stringByReplacingOccurrencesOfString:@"\u200b" withString:@""];
+  text = [text stringByReplacingOccurrencesOfString:@"@" withString:@""]; 
   NSArray* people = [text componentsSeparatedByString:@" "];
   for (NSString* username in people) {
     if (!username.length)
@@ -146,6 +147,7 @@
 
 - (void)filterPeople {
   NSString* text = [creditTextField_.text stringByReplacingOccurrencesOfString:@"\u200b" withString:@""];
+  text = [text stringByReplacingOccurrencesOfString:@"@" withString:@""];
   if (text.length) {
     NSPredicate* p = [NSPredicate predicateWithFormat:@"(userID != %@ AND name != NIL) AND ((name contains[cd] %@) OR (screenName contains[cd] %@))",
         [AccountManager sharedManager].currentUser.userID, text, text];

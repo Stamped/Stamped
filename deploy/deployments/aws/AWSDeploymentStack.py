@@ -46,6 +46,8 @@ class AWSDeploymentStack(ADeploymentStack):
             self.instances.append(awsInstance)
         
         self.isodate_re = re.compile('ISODate\(([^)]+)\)')
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
     
     @property
     def conn(self):
@@ -64,6 +66,10 @@ class AWSDeploymentStack(ADeploymentStack):
         return self._getInstancesByRole('db')
     
     @property
+    def api_server_instances(self):
+        return self._getInstancesByRole('apiServer')
+    
+    @property
     def web_server_instances(self):
         return self._getInstancesByRole('webServer')
     
@@ -76,7 +82,7 @@ class AWSDeploymentStack(ADeploymentStack):
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
     
-    def _get_init_config(self):
+    def _get_init_config(self, role):
         db_instances = self.db_instances
         assert len(db_instances) >= 1
         if len(db_instances) == 1:
@@ -95,21 +101,30 @@ class AWSDeploymentStack(ADeploymentStack):
         return self._encode_params({
             "_id" : replica_set, 
             "members" : replica_set_members, 
+            "role": role,
         })
     
     def init(self):
-        config = self._get_init_config()
+        api_config = self._get_init_config(role='api')
+        web_config = self._get_init_config(role='web')
         
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
+        api_server_instances = self.api_server_instances
         web_server_instances = self.web_server_instances
+        assert len(api_server_instances) > 0
         assert len(web_server_instances) > 0
+        
+        for instance in api_server_instances:
+            with settings(host_string=instance.public_dns_name):
+                with cd("/stamped"):
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % api_config, pty=False)
         
         for instance in web_server_instances:
             with settings(host_string=instance.public_dns_name):
                 with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % config, pty=False)
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % web_config, pty=False)
         
         if self.system.options.ip:
             """ associate ip address here"""
@@ -136,15 +151,27 @@ class AWSDeploymentStack(ADeploymentStack):
     def update(self):
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py'"
+        pp  = []
         
         for instance in self.instances:
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/update.py', pty=False)
+            pp.append((instance, utils.runbg(instance.public_dns_name, env.user, cmd)))
+        
+        for kv in pp:
+            instance, p = kv
+            ret = p.wait()
+        
+        utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
     
     def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, db='stamped'):
+        """
+            Runs the desired mongo shell command in the context of the given db, 
+            on either a random db node in the stack if slave_okay is True or the 
+            current primary node if slave_okay is False. If transform is True, 
+            the console output of running the given command will be interpreted 
+            as JSON and returned as a Python AttributeDict.
+        """
+        
         db_instances = self.db_instances
         assert len(db_instances) > 1
         
@@ -184,6 +211,13 @@ class AWSDeploymentStack(ADeploymentStack):
         return None
     
     def _get_primary(self):
+        """
+            Returns the current primary db node if one exists, retrying 
+            several times in case the replica set is failing over and 
+            reelecting a primary. If no primary is found, will raise an 
+            Exception.
+        """
+        
         utils.log("[%s] attempting to find primary db node" % self)
         
         maxdelay = 16
@@ -192,7 +226,7 @@ class AWSDeploymentStack(ADeploymentStack):
         while True:
             status = self._get_replset_status()
             
-            primaries = filter(lambda m: 0 == m.state, status.members)
+            primaries = filter(lambda m: 1 == m.state, status.members)
             if 0 == len(primaries):
                 utils.log("[%s] unable to find a primary! retrying..." % self)
                 
@@ -225,9 +259,16 @@ class AWSDeploymentStack(ADeploymentStack):
         
         return status
     
+    def _get_replset_conf(self):
+        status  = self.run_mongo_cmd('rs.conf()')
+        status.members = list(utils.AttributeDict(node) for node in status.members)
+        
+        return status
+    
     def force_db_primary_change(self, *args):
         if 0 == len(args):
-            raise Fail("must specify instance to make primary (either node name or instance-id)")
+            utils.log("must specify instance to make primary (either node name or instance-id)")
+            return
         
         db_instance = None
         arg   = args[0]
@@ -239,32 +280,51 @@ class AWSDeploymentStack(ADeploymentStack):
                 break
         
         if db_instance is None:
-            raise Fail("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            return
         
+        conf = self._get_replset_conf()
+        highest_nodes = []
         priority = 1
-        conf = self.run_mongo_cmd('rs.conf()')
+        
+        # find highest existing priority in replica set config
         for node in conf.members:
-            node = utils.AttributeDict(node)
-            
-            if 'priority' in node and node['priority'] > priority:
-                 priority = node['priority']
+            if 'priority' in node:
+                cur_priority = node['priority']
+                
+                if cur_priority > priority:
+                    priority = cur_priority
+                    highest_nodes = [ node.host ]
+                elif cur_priority == priority:
+                    highest_nodes.append(node.host)
         
         found = False
         for node in conf.members:
             ip = node.host.split(':')[0].lower()
+            
             if ip == db_instance.private_ip_address:
-                node['priority'] = priority + 1
-                found = True
-                break
+                if 1 == len(highest_nodes) and node.host in highest_nodes:
+                    utils.log("[%s] warning: node %s already set to highest priority in replica set %s" % 
+                              (self, db_instance, conf._id))
+                    return
+                else:
+                    node['priority'] = priority + 1
+                    found = True
+                    break
          
         if not found:
-            raise Fail("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            utils.log("[%s] error: unable to find db instance '%s'" % (self, arg))
+            return
         
         utils.log()
         utils.log("[%s] attempting to reconfigure replica set '%s'" % (self, conf._id))
+        conf['version'] += 1
         conf = dict(conf)
+        conf['members'] = list(dict(m) for m in conf['members'])
         pprint(conf)
         
+        # TODO: if force is true and a primary exists, step down current primary first?
+        # TODO: test sync'ing on dev stack during stress
         confs = json.dumps(conf)
         ret   = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
                                    (confs, str(force).lower()), slave_okay=force)
@@ -314,7 +374,6 @@ class AWSDeploymentStack(ADeploymentStack):
         
         if warn:
             utils.log()
-            warn = False
         
         new_members = []
         
@@ -345,7 +404,6 @@ class AWSDeploymentStack(ADeploymentStack):
         
         if warn:
             utils.log()
-            warn = False
         
         if len(new_members) != len(status.members):
             utils.log("[%s] reinitializing replica set '%s' with %d nodes'" % 
@@ -723,8 +781,8 @@ class AWSDeploymentStack(ADeploymentStack):
         return json.dumps(params).replace('"', "'")
     
     def add(self, *args):
-        if 0 == len(args) or args[0] not in [ 'db', 'api' ]:
-            raise Fail("must specify what type of instance to add (e.g., db, api)")
+        if 0 == len(args) or args[0] not in [ 'db', 'api', 'web' ]:
+            raise Fail("must specify what type of instance to add (e.g., db, api, web)")
         
         add = args[0]
         sim = []
@@ -795,10 +853,11 @@ class AWSDeploymentStack(ADeploymentStack):
         #self._pool.spawn(instance.create)
         #self._pool.join()
         
-        if add == 'api':
+        if add in ['api', 'web']:
+
             # initialize new API instance
             # ---------------------------
-            conf = self._get_init_config()
+            conf = self._get_init_config(role=add)
             
             env.user = 'ubuntu'
             env.key_filename = [ 'keys/test-keypair' ]

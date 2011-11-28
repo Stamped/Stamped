@@ -144,7 +144,7 @@ def setFields(entity, detailed=False):
                 setSubtitle(entity)
     
     elif entity.category == 'book':
-        if entity.author != None:
+        if entity.author is not None:
             entity.subtitle = entity.author
         else:
             setSubtitle(entity)
@@ -152,7 +152,7 @@ def setFields(entity, detailed=False):
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
             original_release_date = entity.original_release_date
-            if original_release_date != None:
+            if original_release_date is not None:
                 try:
                     year = int(original_release_date[0:4])
                 except:
@@ -162,31 +162,30 @@ def setFields(entity, detailed=False):
             else:
                 entity.subtitle = 'Movie'
         elif entity.subcategory == 'tv':
-            if entity.network_name != None:
+            if entity.network_name is not None:
                 entity.subtitle = 'TV Show (%s)' % entity.network_name
             else:
                 entity.subtitle = 'TV Show'
     
-    elif entity.category == 'music' and entity.subcategory == 'artist':
-        entity.subtitle = 'Artist'
-    
-    elif entity.category == 'music' and entity.subcategory == 'album':
-        if entity.artist_display_name != None:
-            entity.subtitle = "%s (Album)" % entity.artist_display_name
-        else:
-            entity.subtitle = 'Album'
-    
-    elif entity.category == 'music' and entity.subcategory == 'song':
-        if entity.artist_display_name != None:
-            entity.subtitle = "%s (Song)" % entity.artist_display_name
-        else:
-            entity.subtitle = 'Song'
+    elif entity.category == 'music':
+        if entity.subcategory == 'artist':
+            entity.subtitle = 'Artist'
+        elif entity.subcategory == 'album':
+            if entity.artist_display_name is not None:
+                entity.subtitle = "%s (Album)" % entity.artist_display_name
+            else:
+                entity.subtitle = 'Album'
+        elif entity.subcategory == 'song':
+            if entity.artist_display_name is not None:
+                entity.subtitle = "%s (Song)" % entity.artist_display_name
+            else:
+                entity.subtitle = 'Song'
     
     elif entity.category == 'other':
-        if entity.subtitle:
-            pass
-        else:
-            entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+        if entity.subcategory == 'app' and entity.artist_display_name is not None:
+            entity.subtitle = 'App (%s)' % entity.artist_display_name
+        elif entity.subtitle is None:
+            setSubtitle(entity)
     
     if entity.subtitle is None or len(entity.subtitle) == 0:
         logs.warning('Invalid subtitle: %s' % entity)
