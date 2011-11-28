@@ -18,7 +18,7 @@ from pprint                 import pprint
 
 subtitles = [ "app", "App", "apps", "Apps", "iOS Apps", "iOS App", "Application", "Software", "ios app", "ios apps", "iOS App / Web Service", "iPhone App", "Iphone App", "Service", "Social Networks", "iphone app", "iphone apps", "Photography app", "iOS application", "Social service", "OCD/Hoarding Tools", "application", "software", "Software", "Applications", "applications", ]
 subtitles2 = list(a for a in subtitles)
-subtitles.extend(['Other', 'other'])
+subtitles2.extend(['Other', 'other'])
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
