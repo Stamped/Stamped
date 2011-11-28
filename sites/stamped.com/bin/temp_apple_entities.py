@@ -16,7 +16,7 @@ from gevent.pool            import Pool
 from optparse               import OptionParser
 from pprint                 import pprint
 
-subtitles = [ "app", "App", "apps", "Apps", "iOS Apps", "iOS App", "Application", "Software", "ios app", "ios apps", "iOS App / Web Service", "iPhone App", "Iphone App", "Service", "Social Networks", "iphone app", "iphone apps", "Photography app", "iOS application", "Social service", "OCD/Hoarding Tools", "application", "software", "Software", "Applications", "applications", ]
+subtitles = [ "app", "App", "apps", "Apps", "iOS Apps", "iOS App", "Application", "ios app", "ios apps", "iOS App / Web Service", "iPhone App", "Iphone App", "Service", "Social Networks", "iphone app", "iphone apps", "Photography app", "iOS application", "Social service", "OCD/Hoarding Tools", "application", "Applications", "applications", ]
 subtitles2 = list(a for a in subtitles)
 subtitles2.extend(['Other', 'other'])
 
@@ -77,6 +77,10 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
     
     rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "subtitle" : {"$in" : subtitles2 }, "titlel" : {"$in" : titles}, }, output=list)
     
+    if entity.entity_id in seen:
+        return
+    seen.add(entity.entity_id)
+    
     entities = []
     for result in rs:
         entity2 = entityDB._convertFromMongo(result)
@@ -95,6 +99,9 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
             entities.append(entity2)
             match = True
             break
+    
+    if len(entities) < 7:
+        return
     
     utils.log("%s (%s) => %d (match=%s)" % (entity.title, entity.subtitle, len(entities), match))
     if match and not options.noop:
