@@ -95,8 +95,9 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
         entity2 = result.entity
         
         if entity2.title.lower() == title:
-            entities.append(entity2)
             match = True
+            entity2.entity_id = entity.entity_id
+            entity2.generated_by = entity.generated_by
             break
     
     entities = filter(lambda e: e.entity_id != entity.entity_id, entities)
@@ -104,7 +105,7 @@ def handle_entity(entity, entityDB, matcher, appleAPI, seen, options):
         return
     
     utils.log("%s (%s) => %d (match=%s)" % (entity.title, entity.subtitle, len(entities), match))
-    if match and not options.noop:
+    if match:
         matcher.resolveDuplicates(entity, entities)
 
 if __name__ == '__main__':

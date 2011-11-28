@@ -290,7 +290,7 @@ class AEntityMatcher(object):
                     if self.options.verbose:
                         utils.log("updating stamp '%s' with entity_id '%s' => '%s'" % \
                                   (item.stamp_id, entity2.entity_id, entity1.entity_id))
-                        pprint(item.value)
+                        #pprint(item.value)
                     
                     if not self.options.noop:
                         self._stampDB.update(item)
