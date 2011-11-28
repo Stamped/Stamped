@@ -64,6 +64,10 @@ class AWSDeploymentStack(ADeploymentStack):
         return self._getInstancesByRole('db')
     
     @property
+    def api_server_instances(self):
+        return self._getInstancesByRole('apiServer')
+    
+    @property
     def web_server_instances(self):
         return self._getInstancesByRole('webServer')
     
@@ -76,7 +80,7 @@ class AWSDeploymentStack(ADeploymentStack):
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
     
-    def _get_init_config(self):
+    def _get_init_config(self, role):
         db_instances = self.db_instances
         assert len(db_instances) >= 1
         if len(db_instances) == 1:
@@ -95,21 +99,30 @@ class AWSDeploymentStack(ADeploymentStack):
         return self._encode_params({
             "_id" : replica_set, 
             "members" : replica_set_members, 
+            "role": role,
         })
     
     def init(self):
-        config = self._get_init_config()
+        api_config = self._get_init_config(role='api')
+        web_config = self._get_init_config(role='web')
         
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
+        api_server_instances = self.api_server_instances
         web_server_instances = self.web_server_instances
+        assert len(api_server_instances) > 0
         assert len(web_server_instances) > 0
+        
+        for instance in api_server_instances:
+            with settings(host_string=instance.public_dns_name):
+                with cd("/stamped"):
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % api_config, pty=False)
         
         for instance in web_server_instances:
             with settings(host_string=instance.public_dns_name):
                 with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % config, pty=False)
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % web_config, pty=False)
         
         if self.system.options.ip:
             """ associate ip address here"""
@@ -723,8 +736,8 @@ class AWSDeploymentStack(ADeploymentStack):
         return json.dumps(params).replace('"', "'")
     
     def add(self, *args):
-        if 0 == len(args) or args[0] not in [ 'db', 'api' ]:
-            raise Fail("must specify what type of instance to add (e.g., db, api)")
+        if 0 == len(args) or args[0] not in [ 'db', 'api', 'web' ]:
+            raise Fail("must specify what type of instance to add (e.g., db, api, web)")
         
         add = args[0]
         sim = []
@@ -795,10 +808,11 @@ class AWSDeploymentStack(ADeploymentStack):
         #self._pool.spawn(instance.create)
         #self._pool.join()
         
-        if add == 'api':
+        if add in ['api', 'web']:
+
             # initialize new API instance
             # ---------------------------
-            conf = self._get_init_config()
+            conf = self._get_init_config(role=add)
             
             env.user = 'ubuntu'
             env.key_filename = [ 'keys/test-keypair' ]

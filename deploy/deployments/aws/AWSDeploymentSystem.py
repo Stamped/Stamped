@@ -78,6 +78,18 @@ class AWSDeploymentSystem(DeploymentSystem):
                 ], 
             }, 
             {
+                'name' : 'apiserver', 
+                'desc' : 'ApiServer security group', 
+                'rules' : [
+                    {
+                        'ip_protocol' : 'tcp', 
+                        'from_port'   : 5000, 
+                        'to_port'     : 5000, 
+                        'cidr_ip'     : '0.0.0.0/0', 
+                    }, 
+                ], 
+            }, 
+            {
                 'name' : 'webserver', 
                 'desc' : 'WebServer security group', 
                 'rules' : [
