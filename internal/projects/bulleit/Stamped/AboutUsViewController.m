@@ -11,37 +11,37 @@
 
 @implementation AboutUsViewController
 
-@synthesize scrollView;
-@synthesize contentView;
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
+@synthesize scrollView = scrollView_;
+@synthesize contentView = contentView_;
+@synthesize versionLabel = versionLabel_;
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad
-{
+- (void)dealloc {
+  self.scrollView = nil;
+  self.contentView = nil;
+  self.versionLabel = nil;
+  [super dealloc];
+}
+
+- (void)viewDidLoad {
   [super viewDidLoad];
+  self.versionLabel.text =
+      [NSString stringWithFormat:@"Version %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
   [self.scrollView addSubview:self.contentView];
   self.scrollView.contentSize = self.contentView.bounds.size;
 }
 
-- (void)viewDidUnload
-{
+- (void)viewDidUnload {
   [super viewDidUnload];
+  self.versionLabel = nil;
   self.contentView = nil;
   self.scrollView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  self.navigationController.navigationBarHidden = YES;
+  [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
 }
 
 #pragma mark - Actions
