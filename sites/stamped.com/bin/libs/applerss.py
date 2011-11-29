@@ -22,9 +22,10 @@ class AppleRSS(object):
     DEFAULT_FORMAT = 'json'
     
     _subcategory_map = {
-        'artist' : 'artist', 
-        'track'  : 'song', 
-        'album'  : 'album', 
+        'artist'        : 'artist', 
+        'track'         : 'song', 
+        'album'         : 'album', 
+        'application'   : 'app', 
     }
     
     _webobject_feeds = set([
@@ -41,6 +42,15 @@ class AppleRSS(object):
     
     def get_top_songs(self, **kwargs):
         return self._parse_feed('topsongs', **kwargs)
+    
+    def get_top_free_apps(self, **kwargs):
+        return self._parse_feed('topfreeapplications', **kwargs)
+    
+    def get_top_paid_apps(self, **kwargs):
+        return self._parse_feed('toppaidapplications', **kwargs)
+    
+    def get_top_grossing_apps(self, **kwargs):
+        return self._parse_feed('topgrossingapplications', **kwargs)
     
     def get_new_releases(self, **kwargs):
         return self._parse_feed('newreleases', **kwargs)
@@ -122,22 +132,31 @@ class AppleRSS(object):
             'genre'                 : [ 'category', 'attributes', 'term' ], 
             'original_release_date' : [ 'im:releaseDate', 'attributes', 'label' ], 
             'label_studio'          : [ 'rights', 'label' ], 
-            'subcategory'           : [ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
+            'subcategory'           : ([ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
+                                       [ 'im:contentType', 'attributes', 'term' ], ), 
             'album_name'            : [ 'im:collection', 'im:name', 'label' ], 
+            'desc'                  : [ 'summary', 'label' ], 
         }
         
         # parse entity details
         for k, v in details_map.iteritems():
-            e = entry
             
-            try:
-                for v2 in v:
-                    e = e[v2]
+            v3 = v
+            if not isinstance(v, tuple):
+                v3 = [ v ]
+            
+            for v in v3:
+                e = entry
                 
-                if e is not None:
-                    entity[k] = e
-            except:
-                pass
+                try:
+                    for v2 in v:
+                        e = e[v2]
+                    
+                    if e is not None:
+                        entity[k] = e
+                        break
+                except:
+                    pass
         
         try:
             entity.subcategory = self._subcategory_map[entity.subcategory.lower()]
@@ -158,7 +177,7 @@ class AppleRSS(object):
                     height = cur_height
                     entity.image = image['label']
             
-            if entity.image is not None:
+            if entity.image is not None and entity.subcategory != 'app':
                 entity.image = entity.image.replace('100x100', '200x200').replace('170x170', '200x200')
         except:
             utils.printException()
@@ -177,8 +196,11 @@ class AppleRSS(object):
                 
                 if 'im:duration' in link:
                     if link['attributes']['im:assetType'].lower() == 'preview':
-                        entity.preview_url = href
-                        entity.preview_length = link['im:duration']['label']
+                        if entity.subcategory == 'app':
+                            entity.image = href
+                        else:
+                            entity.preview_url = href
+                            entity.preview_length = link['im:duration']['label']
                 else:
                     entity.view_url = href
             except:

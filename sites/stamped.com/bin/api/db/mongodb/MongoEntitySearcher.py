@@ -739,7 +739,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    def _simplify(self, title):
+    def _simplify(self, entity, title):
         title = getSimplifiedTitle(title)
         title = title.replace('-', ' ')
         
@@ -748,6 +748,9 @@ class MongoEntitySearcher(EntitySearcher):
         
         if title.endswith(' the'):
             title = title[:-4]
+        
+        if title.endswith(' free'):
+            title = title[:-5]
         
         for regex in self._suffix_regexes:
             match = regex.match(title)
@@ -778,7 +781,7 @@ class MongoEntitySearcher(EntitySearcher):
                 entity   = result[0]
                 distance = result[1]
                 
-                entity.simplified_title = self._simplify(entity.title)
+                entity.simplified_title = self._simplify(entity, entity.title)
                 
                 title_value         = self._get_title_value(input_query, entity, prefix)
                 negative_value      = self._get_negative_value(entity)

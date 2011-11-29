@@ -29,6 +29,12 @@ def parseCommandLine():
     parser.add_option("-v", "--verbose", default=False, action="store_true", 
         help="enable verbose logging")
     
+    parser.add_option("-m", "--musiconly", default=False, action="store_true", 
+        help="only parse music feeds")
+    
+    parser.add_option("-a", "--appsonly", default=False, action="store_true", 
+        help="only parse app feeds")
+    
     (options, args) = parser.parse_args()
     
     if options.db:
@@ -46,8 +52,8 @@ def main():
     pool = Pool(8)
     aids = set()
     
-    # feed popularity prioritized by genre
-    feeds = [
+    # music feed popularity prioritized by genre
+    music_feeds = [
         { 'limit' : 150,               'name' : 'overall' }, 
         { 'limit' : 50,  'genre' : 18, 'name' : 'hip-hop', }, 
         { 'limit' : 50,  'genre' : 14, 'name' : 'pop', }, 
@@ -71,20 +77,51 @@ def main():
         { 'limit' : 10,  'genre' : 2,  'name' : 'blues', }, 
     ]
     
-    utils.log("processing %d feeds" % (2 * len(feeds), ))
+    if not options.appsonly:
+        utils.log("processing %d music feeds" % (2 * len(music_feeds), ))
+        
+        for feed in music_feeds:
+            pool.spawn(handle_music_feed, feed, matcher, appleRSS, aids, options)
     
-    for feed in feeds:
-        pool.spawn(handle_feed, feed, matcher, appleRSS, aids, options)
+    app_feeds = [
+        { 'limit' : 150,                    'name' : 'overall' }, 
+        { 'limit' : 20,  'genre' : 6018,    'name' : 'books', }, 
+        { 'limit' : 20,  'genre' : 6000,    'name' : 'business', }, 
+        { 'limit' : 20,  'genre' : 6017,    'name' : 'education', }, 
+        { 'limit' : 50,  'genre' : 6016,    'name' : 'entertainment', }, 
+        { 'limit' : 20,  'genre' : 6015,    'name' : 'finance', }, 
+        { 'limit' : 25,  'genre' : 6013,    'name' : 'health & fitness', }, 
+        { 'limit' : 25,  'genre' : 6012,    'name' : 'lifestyle', }, 
+        { 'limit' : 25,  'genre' : 6020,    'name' : 'medical', }, 
+        { 'limit' : 30,  'genre' : 6011,    'name' : 'music', }, 
+        { 'limit' : 25,  'genre' : 6010,    'name' : 'navigation', }, 
+        { 'limit' : 50,  'genre' : 6009,    'name' : 'news', }, 
+        { 'limit' : 25,  'genre' : 6021,    'name' : 'newsstand', }, 
+        { 'limit' : 50,  'genre' : 6008,    'name' : 'photo & video', }, 
+        { 'limit' : 25,  'genre' : 6007,    'name' : 'productivity', }, 
+        { 'limit' : 25,  'genre' : 6006,    'name' : 'reference', }, 
+        { 'limit' : 50,  'genre' : 6005,    'name' : 'social networking', }, 
+        { 'limit' : 25,  'genre' : 6004,    'name' : 'sports', }, 
+        { 'limit' : 50,  'genre' : 6003,    'name' : 'travel', }, 
+        { 'limit' : 20,  'genre' : 6002,    'name' : 'utilities', }, 
+        { 'limit' : 10,  'genre' : 6001,    'name' : 'weather', }, 
+    ]
+    
+    if not options.musiconly:
+        utils.log("processing %d app feeds" % (3 * len(app_feeds), ))
+        
+        for feed in app_feeds:
+            pool.spawn(handle_app_feed, feed, matcher, appleRSS, aids, options)
     
     pool.join()
 
-def handle_feed(feed, matcher, appleRSS, aids, options):
+def handle_music_feed(feed, matcher, appleRSS, aids, options):
     name = feed['name']
     del feed['name']
     
-    utils.log("processing feed '%s'" % name)
-    
+    utils.log("processing music feed '%s'" % name)
     feed['transform'] = 2
+    
     albums = appleRSS.get_top_albums(**feed)
     songs  = appleRSS.get_top_songs(**feed)
     
@@ -94,10 +131,10 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
     entities = albums
     
     for entity in entities:
-        entity_id = int(entity.aid)
-        if entity_id in aids:
+        aid = int(entity.aid)
+        if aid in aids:
             continue
-        aids.add(entity_id)
+        aids.add(aid)
         
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
         entity.a_popular = True
@@ -106,10 +143,10 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
             results = filter(lambda r: r.entity.subcategory == 'song', results)
             entity.tracks = list(result.entity.title for result in results)
         
-        if not options.noop:
-            matcher.addOne(entity)
-        else:
+        if options.noop:
             pprint(entity.value)
+        else:
+            matcher.addOne(entity)
         
         # attempt to lookup artist for this entity
         if entity.artist_id is not None:
@@ -134,6 +171,31 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
                 artist.a_popular = True
                 if not options.noop:
                     matcher.addOne(artist)
+
+def handle_app_feed(feed, matcher, appleRSS, aids, options):
+    name = feed['name']
+    del feed['name']
+    
+    utils.log("processing app feed '%s'" % name)
+    feed['transform'] = 2
+    
+    apps  = appleRSS.get_top_free_apps(**feed)
+    apps2 = appleRSS.get_top_paid_apps(**feed); apps.extend(apps2)
+    apps2 = appleRSS.get_top_grossing_apps(**feed); apps.extend(apps2)
+    
+    for entity in apps:
+        aid = int(entity.aid)
+        if aid in aids:
+            continue
+        aids.add(aid)
+        
+        utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
+        entity.a_popular = True
+        
+        if options.noop:
+            pass#pprint(entity.value)
+        else:
+            matcher.addOne(entity)
 
 if __name__ == '__main__':
     main()
