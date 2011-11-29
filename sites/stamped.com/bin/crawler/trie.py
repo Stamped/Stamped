@@ -176,7 +176,7 @@ def main():
     subcategories = [
         ('song', 1.0, ), 
         ('album', 1.0, ), 
-        ('app', importance_threshold, {'sources.apple.a_popular' : True}), 
+        ('app', importance_threshold, ), 
         ('song', importance_threshold, {'sources.apple.a_popular' : True}), 
         ('album', importance_threshold, {'sources.apple.a_popular' : True}), 
         ('artist', importance_threshold), 
