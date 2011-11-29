@@ -62,11 +62,6 @@ class DeploymentSystem(ADeploymentSystem):
         stack = self._get_matching_stack(stackName)
         stack.connect()
     
-    def init_stack(self, *args):
-        stackName = args[0]
-        stack = self._get_matching_stack(stackName)
-        stack.init()
-    
     def update_stack(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)

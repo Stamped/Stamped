@@ -81,8 +81,13 @@ class AWSDeploymentStack(ADeploymentStack):
         
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
+        
+        utils.log("[%s] initializing replica set" % (self, len(self.instances)))
+        db_instances = self.db_instances
+        
+        status = self.run_mongo_cmd('rs.status()')
     
-    def _get_init_config(self, role):
+    def _get_initial_replica_set_config(self):
         db_instances = self.db_instances
         assert len(db_instances) >= 1
         if len(db_instances) == 1:
@@ -98,40 +103,10 @@ class AWSDeploymentStack(ADeploymentStack):
                 "host": instance.private_ip_address
             })
         
-        return self._encode_params({
+        return {
             "_id" : replica_set, 
             "members" : replica_set_members, 
-            "role": role,
-        })
-    
-    def init(self):
-        api_config = self._get_init_config(role='api')
-        web_config = self._get_init_config(role='web')
-        
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
-        
-        api_server_instances = self.api_server_instances
-        web_server_instances = self.web_server_instances
-        assert len(api_server_instances) > 0
-        assert len(web_server_instances) > 0
-        
-        for instance in api_server_instances:
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % api_config, pty=False)
-        
-        for instance in web_server_instances:
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % web_config, pty=False)
-        
-        if self.system.options.ip:
-            """ associate ip address here"""
-            address = Address(self.conn, ELASTIC_IP_ADDRESS)
-            
-            if not address.associate(web_server_instances[0].instance_id):
-                raise Fail("Error: failed to set elastic ip")
+        }
     
     def backup(self):
         db_instances = self.db_instances
@@ -255,7 +230,8 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def _get_replset_status(self):
         status  = self.run_mongo_cmd('rs.status()')
-        status.members = list(utils.AttributeDict(node) for node in status.members)
+        if 'members' in status:
+            status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
     
@@ -338,6 +314,16 @@ class AWSDeploymentStack(ADeploymentStack):
         
         status  = self._get_replset_status()
         #pprint(status)
+        
+        if "startupStatus" in status:
+            if 3 == status['startupStatus']:
+                utils.log("[%s] initializing empty replica set")
+                
+                config = self._get_initial_replica_set_config()
+                confs  = json.dumps(config)
+                retval = self.run_mongo_cmd('rs.initiate(%s)' % confs, slave_okay=True, db='stamped')
+                
+                pprint(retval)
         
         # group replica set members by state
         node_state = defaultdict(list)
@@ -777,9 +763,6 @@ class AWSDeploymentStack(ADeploymentStack):
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)
     
-    def _encode_params(self, params):
-        return json.dumps(params).replace('"', "'")
-    
     def add(self, *args):
         types = [ 'db', 'api', 'web' ]
         if 0 == len(args) or args[0] not in types:
@@ -873,48 +856,34 @@ class AWSDeploymentStack(ADeploymentStack):
         if len(instances) != count:
             utils.log("[%s] error: failed to add %d instances" % (self, count))
         
-        # TODO: check if we can initialize N instances in parallel here instead of synchronously
-        for instance in instances:
-            if add in ['api', 'web']:
-                # initialize new API instance
-                # ---------------------------
-                conf = self._get_init_config(role=add)
-                
-                env.user = 'ubuntu'
-                env.key_filename = [ 'keys/test-keypair' ]
-                
-                # initialize the new instance
-                utils.log("[%s] initializing instance %s" % (self, instance.name))
-                with settings(host_string=instance.public_dns_name):
-                    with cd("/stamped"):
-                        sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % conf, pty=False)
-                
-                utils.log("[%s] done initializing instance %s" % (self, instance.name))
-                utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
-                
-                # get all ELBs
-                conn = ELBConnection(AWSDeploymentSystem.AWS_ACCESS_KEY_ID, 
-                                     AWSDeploymentSystem.AWS_SECRET_KEY)
-                elbs = conn.get_all_load_balancers()
-                the_elb = None
-                
-                # attempt to find the ELB belonging to this stack's set of API servers
-                for elb in elbs:
-                    for awsInstance in elb.instances: 
-                        if awsInstance.id in ids:
-                            the_elb = elb
-                            break
-                    
-                    if the_elb is not None:
+        if add in ['api', 'web']:
+            utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
+            
+            # get all ELBs
+            conn = ELBConnection(AWSDeploymentSystem.AWS_ACCESS_KEY_ID, 
+                                 AWSDeploymentSystem.AWS_SECRET_KEY)
+            elbs = conn.get_all_load_balancers()
+            the_elb = None
+            
+            # attempt to find the ELB belonging to this stack's set of API servers
+            for elb in elbs:
+                for awsInstance in elb.instances: 
+                    if awsInstance.id in ids:
+                        the_elb = elb
                         break
                 
-                # register the new instance with the appropriate ELB
                 if the_elb is not None:
-                    utils.log("[%s] registering instance '%s' with ELB '%s'" % (self, instance.name, the_elb))
-                    the_elb.register_instances([ instance.instance_id ])
-                else:
-                    utils.log("[%s] unable to find ELB for instance '%s'" % (self, instance.name))
-            elif add == 'db':
+                    break
+            
+            # register the new instance with the appropriate ELB
+            if the_elb is not None:
+                utils.log("[%s] registering instances with ELB '%s'" % (self, the_elb))
+                the_elb.register_instances(list(i.instance_id for i in instances))
+            else:
+                utils.log("[%s] unable to find ELB for instances'" % (self, ))
+        elif add == 'db':
+            # TODO: check if we can initialize N instances in parallel here instead of synchronously
+            for instance in instances:
                 # initialize new DB instance
                 # --------------------------
                 db_instances = self.db_instances
@@ -991,11 +960,10 @@ class AWSDeploymentStack(ADeploymentStack):
                     utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
                     print ret[0]
             """
-            
-            self.instances.append(instance)
-            utils.log("[%s] done creating instance %s" % (self, instance.name))
         
-        utils.log("[%s] done creating %d %s instances" % (self, count, arg))
+        self.instances.extend(instances)
+        utils.log("[%s] done creating %d %s instance%s" % 
+                  (self, count, add, 's' if 1 != count else ''))
     
     def stress(self, *args):
         numInstances = 2

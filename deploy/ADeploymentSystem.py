@@ -34,10 +34,6 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
-    def init_stack(self, *args):
-        pass
-    
-    @abstract
     def update_stack(self, *args):
         pass
     

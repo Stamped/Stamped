@@ -204,18 +204,18 @@ class AWSInstance(AInstance):
         utils.log("[%s] %s is online" % (self, desc))
     
     def _post_create(self, block):
-        # Check for SSH
+        # wait for ssh service to come online
         self._validate_port(22, desc="ssh service", timeout=60)
         
         if block:
-            # Check for init to finish
+            # wait for init script to finish
             self._validate_port(8649, desc="init script / ganglia", timeout=1200)
             
             if 'db' in self.roles:
                 # Check for mongo to finish
                 #self._validate_port(27017, desc="mongo", timeout=1000)
                 sleep = 20
-                utils.log("sleeping for %d seconds to ensure mongo is online" % sleep)
+                utils.log("[%s] sleeping for %d seconds to ensure mongo is online" % (self, sleep))
                 time.sleep(sleep)
     
     def start(self):
