@@ -142,8 +142,10 @@ def add_entries(entries, hint, output, scale_factor=1.0):
             key = re.sub('([^a-zA-Z0-9._ -])', '', key)
             key = key.strip()
             
-            if key.startswith('-'):
-                print '"%s"' % (key, )
+            if key == 'instagram':
+                utils.log('INSTAGRAM1')
+            #if key.startswith('-'):
+            #    print '"%s"' % (key, )
             
             output.add(key, scale_factor)
             
@@ -222,6 +224,9 @@ def main():
             orig_name = tree.full()
             if 0 == len(orig_name):
                 return
+            
+            if orig_name == 'instagram':
+                utils.log('INSTAGRAM2')
             
             name = encode_s3_name(orig_name)
             if 0 == len(name) or name in names:

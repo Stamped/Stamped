@@ -188,6 +188,7 @@ def main():
                     
                     time.sleep(1)
             
+            """
             if len(results) <= 1:
                 i = len(orig_name)
                 
@@ -197,6 +198,7 @@ def main():
                 
                 if 0 == len(results):
                     return False
+            """
             
             autosuggest = []
             for item in results:
