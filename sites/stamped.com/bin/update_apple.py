@@ -134,10 +134,11 @@ def handle_music_feed(feed, matcher, appleRSS, aids, options):
         aid = int(entity.aid)
         if aid in aids:
             continue
-        aids.add(aid)
         
+        aids.add(aid)
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
         entity.a_popular = True
+        
         if entity.subcategory == 'album':
             results = appleRSS._apple.lookup(id=entity.aid, media='music', entity='song', transform=True)
             results = filter(lambda r: r.entity.subcategory == 'song', results)
@@ -187,6 +188,7 @@ def handle_app_feed(feed, matcher, appleRSS, aids, options):
         aid = int(entity.aid)
         if aid in aids:
             continue
+        
         aids.add(aid)
         
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
