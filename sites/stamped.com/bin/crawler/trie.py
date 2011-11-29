@@ -88,8 +88,8 @@ class Trie(object):
     def _prune(self, max_depth, orig_max_depth, min_count=0):
         if max_depth <= 1 or self.count < min_count:
             self.children = {}
-        elif orig_max_depth > max_depth + 4 and self.count == min_count:
-            self.children = {}
+        #elif orig_max_depth > max_depth + 4 and self.count == min_count:
+        #    self.children = {}
         else:
             to_delete = []
             for child in self.children:
@@ -142,11 +142,6 @@ def add_entries(entries, hint, output, scale_factor=1.0):
             key = re.sub('([^a-zA-Z0-9._ -])', '', key)
             key = key.strip()
             
-            if key == 'instagram':
-                utils.log('INSTAGRAM1')
-            #if key.startswith('-'):
-            #    print '"%s"' % (key, )
-            
             output.add(key, scale_factor)
             
             done += 1
@@ -172,7 +167,7 @@ def main():
     
     # weight places results to count for more when pruning the trie tree
     # later on for less important subtrees
-    entries = placesDB._collection.find(fields={'title' : 1})
+    entries = placesDB._collection.find(fields={'title' : 1, '_id' : 0})
     add_entries(entries, 'places', trie, importance_threshold)
     
     subcategories = [
@@ -193,7 +188,7 @@ def main():
             for k, v in s[2].iteritems():
                 query[k] = v
         
-        entries = entityDB._collection.find(query, fields={'title' : 1})
+        entries = entityDB._collection.find(query, fields={'title' : 1, '_id' : 0})
         add_entries(entries, s[0], trie, s[1])
     
     print "done constructing trie!"
@@ -205,7 +200,7 @@ def main():
     
     print "pruning tree..."
     trie.prune(max_depth=17, min_count=importance_threshold)
-
+    
     pprint({
         'num_nodes' : trie.num_nodes(), 
         'max_depth' : trie.max_depth(), 
@@ -225,9 +220,6 @@ def main():
             if 0 == len(orig_name):
                 return
             
-            if orig_name == 'instagram':
-                utils.log('INSTAGRAM2')
-            
             name = encode_s3_name(orig_name)
             if 0 == len(name) or name in names:
                 return
@@ -237,6 +229,7 @@ def main():
             out_name = orig_name.encode('ascii', 'replace')
             if out_name == orig_name:
                 out.write(orig_name + "\n")
+            
             return
         except:
             utils.printException()
