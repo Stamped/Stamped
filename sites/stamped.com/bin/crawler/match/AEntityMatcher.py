@@ -273,6 +273,9 @@ class AEntityMatcher(object):
         filter_func = (lambda e: e is not None and e.entity_id is not None and e.entity_id != entity1.entity_id)
         entities_to_delete = filter(filter_func, entities_to_delete)
         
+        if 0 == len(entities_to_delete)
+            return
+        
         for entity2 in entities_to_delete:
             if not entity2.entity_id:
                 logs.debug('SKIPPED: %s' % entity2)
@@ -363,6 +366,9 @@ class AEntityMatcher(object):
     
     def _mergeDuplicates(self, keep, duplicates, override=False):
         numDuplicates = len(duplicates)
+        
+        if 0 == numDuplicates:
+            return
         
         assert numDuplicates > 0
         assert 'entity_id' in keep
