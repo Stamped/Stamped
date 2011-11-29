@@ -109,7 +109,21 @@ class AWSInstance(AInstance):
         self.update()
         
         if hasattr(self._instance, 'tags'):
-            return self._instance.tags
+            def _fix_config(cfg):
+                if isinstance(cfg, dict):
+                    for elem in cfg:
+                        val = cfg[elem]
+                        
+                        if isinstance(val, basestring):
+                            try:
+                                val = eval(val)
+                                val = _fix_config(val)
+                                cfg[elem] = val
+                            except Exception:
+                                pass
+                return cfg
+            
+            return utils.AttributeDict(_fix_config(self._instance.tags))
         else:
             return None
     
@@ -190,18 +204,18 @@ class AWSInstance(AInstance):
         utils.log("[%s] %s is online" % (self, desc))
     
     def _post_create(self, block):
-        # Check for SSH
-        self._validate_port(22, desc="ssh service", timeout=40)
+        # wait for ssh service to come online
+        self._validate_port(22, desc="ssh service", timeout=60)
         
         if block:
-            # Check for init to finish
+            # wait for init script to finish
             self._validate_port(8649, desc="init script / ganglia", timeout=1200)
             
             if 'db' in self.roles:
                 # Check for mongo to finish
                 #self._validate_port(27017, desc="mongo", timeout=1000)
                 sleep = 20
-                utils.log("sleeping for %d seconds to ensure mongo is online" % sleep)
+                utils.log("[%s] sleeping for %d seconds to ensure mongo is online" % (self, sleep))
                 time.sleep(sleep)
     
     def start(self):
@@ -296,6 +310,11 @@ class AWSInstance(AInstance):
         try:
             if key in self.__dict__:
                 return self.__dict__[key]
+        except:
+            pass
+        
+        try:
+            return self.tags[key]
         except:
             # TODO: make this less hacky...
             return eval("self._instance.%s" % key)

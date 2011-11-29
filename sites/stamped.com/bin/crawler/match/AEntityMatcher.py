@@ -260,20 +260,20 @@ class AEntityMatcher(object):
         keep = duplicates.pop(ishortest)
         return (keep, duplicates)
     
-    def resolveDuplicates(self, entity1, entities_to_delete, override=False):
+    def resolveDuplicates(self, entity1, entities, override=False):
         """
-            Replaces all references to the entities in entities_to_delete with 
+            Replaces all references to the entities in entities with 
             entity1, merging all deleted entities into entity1.
         """
         
-        if not isinstance(entities_to_delete, (list, tuple)):
-            entities_to_delete = [ entities_to_delete ]
+        if not isinstance(entities, (list, tuple)):
+            entities = [ entities ]
         
         # ensure we're not deleting the entity we want to keep
         filter_func = (lambda e: e is not None and e.entity_id is not None and e.entity_id != entity1.entity_id)
-        entities_to_delete = filter(filter_func, entities_to_delete)
+        entities_to_delete = filter(filter_func, entities)
         
-        if 0 == len(entities_to_delete)
+        if 0 == len(entities_to_delete):
             return
         
         for entity2 in entities_to_delete:
@@ -360,9 +360,12 @@ class AEntityMatcher(object):
                     if not self.options.noop:
                         self._favoriteDB.user_fav_entities_collection.update(item)
         
+        filter_func = (lambda e: e is not None and e.entity_id != entity1.entity_id)
+        entities = filter(filter_func, entities)
+        
         # merge data from entities to delete into entity1, updating entity1 and removing 
         # all other entities from the entities and places collections
-        self._mergeDuplicates(keep=entity1, duplicates=entities_to_delete, override=override)
+        self._mergeDuplicates(keep=entity1, duplicates=entities, override=override)
     
     def _mergeDuplicates(self, keep, duplicates, override=False):
         numDuplicates = len(duplicates)

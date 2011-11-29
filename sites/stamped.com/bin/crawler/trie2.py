@@ -217,12 +217,18 @@ def main():
             sys.stdout.flush()
             
             if not options.noop:
-                try:
-                    autocompleteDB.add_key(name, value, content_type='application/json', apply_gzip=True)
-                except:
-                    utils.printException()
-                    time.sleep(1)
-                    return
+                retries = 0
+                while True:
+                    try:
+                        autocompleteDB.add_key(name, value, content_type='application/json', apply_gzip=True)
+                        break
+                    except:
+                        retries += 1
+                        if retries > 5:
+                            utils.printException()
+                            return
+                        
+                        time.sleep(1)
         except:
             utils.printException()
             time.sleep(1)

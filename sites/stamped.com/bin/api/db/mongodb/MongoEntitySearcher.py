@@ -749,8 +749,11 @@ class MongoEntitySearcher(EntitySearcher):
         if title.endswith(' the'):
             title = title[:-4]
         
-        if title.endswith(' free'):
-            title = title[:-5]
+        if entity.subcategory == 'app':
+            if title.endswith(' free') or title.endswith(' lite'):
+                title = title[:-5]
+            elif title.endswith(' pro'):
+                title = title[:-4]
         
         for regex in self._suffix_regexes:
             match = regex.match(title)

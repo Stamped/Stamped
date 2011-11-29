@@ -30,9 +30,6 @@ available_commands = {
     
     'create_and_connect' : [ 'create_stack', 'connect' ], 
     
-    'init' : 'init_stack', 
-    'init_stack' : 'init_stack', 
-    
     'update' : 'update_stack', 
     'update_stack' : 'update_stack', 
     

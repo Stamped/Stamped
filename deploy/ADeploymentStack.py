@@ -28,10 +28,6 @@ class ADeploymentStack(object):
         pass
     
     @abstract
-    def init(self):
-        pass
-    
-    @abstract
     def update(self):
         pass
     

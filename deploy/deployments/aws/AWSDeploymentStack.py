@@ -81,8 +81,13 @@ class AWSDeploymentStack(ADeploymentStack):
         
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
+        
+        utils.log("[%s] initializing replica set" % (self, len(self.instances)))
+        db_instances = self.db_instances
+        
+        status = self.run_mongo_cmd('rs.status()')
     
-    def _get_init_config(self, role):
+    def _get_initial_replica_set_config(self):
         db_instances = self.db_instances
         assert len(db_instances) >= 1
         if len(db_instances) == 1:
@@ -98,40 +103,10 @@ class AWSDeploymentStack(ADeploymentStack):
                 "host": instance.private_ip_address
             })
         
-        return self._encode_params({
+        return {
             "_id" : replica_set, 
             "members" : replica_set_members, 
-            "role": role,
-        })
-    
-    def init(self):
-        api_config = self._get_init_config(role='api')
-        web_config = self._get_init_config(role='web')
-        
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
-        
-        api_server_instances = self.api_server_instances
-        web_server_instances = self.web_server_instances
-        assert len(api_server_instances) > 0
-        assert len(web_server_instances) > 0
-        
-        for instance in api_server_instances:
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % api_config, pty=False)
-        
-        for instance in web_server_instances:
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % web_config, pty=False)
-        
-        if self.system.options.ip:
-            """ associate ip address here"""
-            address = Address(self.conn, ELASTIC_IP_ADDRESS)
-            
-            if not address.associate(web_server_instances[0].instance_id):
-                raise Fail("Error: failed to set elastic ip")
+        }
     
     def backup(self):
         db_instances = self.db_instances
@@ -255,7 +230,8 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def _get_replset_status(self):
         status  = self.run_mongo_cmd('rs.status()')
-        status.members = list(utils.AttributeDict(node) for node in status.members)
+        if 'members' in status:
+            status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
     
@@ -338,6 +314,16 @@ class AWSDeploymentStack(ADeploymentStack):
         
         status  = self._get_replset_status()
         #pprint(status)
+        
+        if "startupStatus" in status:
+            if 3 == status['startupStatus']:
+                utils.log("[%s] initializing empty replica set")
+                
+                config = self._get_initial_replica_set_config()
+                confs  = json.dumps(config)
+                retval = self.run_mongo_cmd('rs.initiate(%s)' % confs, slave_okay=True, db='stamped')
+                
+                pprint(retval)
         
         # group replica set members by state
         node_state = defaultdict(list)
@@ -777,14 +763,20 @@ class AWSDeploymentStack(ADeploymentStack):
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)
     
-    def _encode_params(self, params):
-        return json.dumps(params).replace('"', "'")
-    
     def add(self, *args):
-        if 0 == len(args) or args[0] not in [ 'db', 'api', 'web' ]:
-            raise Fail("must specify what type of instance to add (e.g., db, api, web)")
+        types = [ 'db', 'api', 'web' ]
+        if 0 == len(args) or args[0] not in types:
+            raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         
-        add = args[0]
+        add   = args[0]
+        count = 1
+        
+        if 2 == len(args):
+            try:
+                count = int(args[1])
+            except:
+                raise Fail("last argument should be number of %s instances to add" % add)
+        
         sim = []
         ids = set()
         placements = defaultdict(int)
@@ -799,6 +791,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 sim.append(instance)
                 ids.add(instance.instance_id)
                 cur = int(instance.name[len(add):])
+                
                 placements[instance.placement] += 1
                 
                 if cur > top:
@@ -807,6 +800,7 @@ class AWSDeploymentStack(ADeploymentStack):
         top += 1
         
         # assumes all instances are sequential and zero-indexed
+        # TODO: reuse old / deleted IDs
         #assert len(sim) == top
         
         if 0 == len(sim):
@@ -818,7 +812,6 @@ class AWSDeploymentStack(ADeploymentStack):
                     }))
         
         conf = dict(sim[0].config).copy()
-        conf['name'] = '%s%d' % (add, top)
         
         if isinstance(conf['roles'], basestring):
             conf['roles'] = eval(conf['roles'])
@@ -826,49 +819,44 @@ class AWSDeploymentStack(ADeploymentStack):
         # attempt to distribute the node evenly across availability zones by 
         # placing this new node into the AZ which has the minimum number of 
         # existing nodes
-        min_v = None
-        for k, v in placements.iteritems():
-            if min_v is None or v < min_v[1]:
-                min_v = (k, v)
+        placements = sorted(placements.iteritems(), key=lambda p: (p[1], p[0]))
         
-        if min_v is None:
-            placement = 'us-east-1a'
-        else:
-            placement = min_v[0]
+        pool = Pool(8)
+        instances = []
         
-        conf['placement'] = placement
+        def _create_instance(i):
+            conf['name'] = '%s%d' % (add, top + i)
+            
+            if 0 == placements[-1][1] and count == 1:
+                placement = 'us-east-1a' # default availability zone
+            else:
+                placement = placements[i][0]
+            
+            conf['placement'] = placement
+            
+            # create and bootstrap the new instance
+            utils.log("[%s] creating instance %s in availability zone %s" % 
+                      (self, conf['name'], conf['placement']))
+            instance = AWSInstance(self, conf)
+            
+            try:
+                instance.create()
+                instances.append(instance)
+            except:
+                utils.printException()
+                utils.log("error adding instance %s" % instance)
+                raise
         
-        # create and bootstrap the new instance
-        utils.log("[%s] creating instance %s in availability zone %s" % 
-                  (self, conf['name'], conf['placement']))
-        instance = AWSInstance(self, conf)
+        # initialize instances in parallel
+        for i in xrange(count):
+            pool.spawn(_create_instance, i)
         
-        try:
-            instance.create()
-        except:
-            utils.printException()
-            utils.log("error adding instance %s" % instance)
-            raise
+        pool.join()
         
-        #self._pool.spawn(instance.create)
-        #self._pool.join()
+        if len(instances) != count:
+            utils.log("[%s] error: failed to add %d instances" % (self, count))
         
         if add in ['api', 'web']:
-
-            # initialize new API instance
-            # ---------------------------
-            conf = self._get_init_config(role=add)
-            
-            env.user = 'ubuntu'
-            env.key_filename = [ 'keys/test-keypair' ]
-            
-            # initialize the new instance
-            utils.log("[%s] initializing instance %s" % (self, instance.name))
-            with settings(host_string=instance.public_dns_name):
-                with cd("/stamped"):
-                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % conf, pty=False)
-            
-            utils.log("[%s] done initializing instance %s" % (self, instance.name))
             utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
             
             # get all ELBs
@@ -889,90 +877,93 @@ class AWSDeploymentStack(ADeploymentStack):
             
             # register the new instance with the appropriate ELB
             if the_elb is not None:
-                utils.log("[%s] registering instance '%s' with ELB '%s'" % (self, instance.name, the_elb))
-                the_elb.register_instances([ instance.instance_id ])
+                utils.log("[%s] registering instances with ELB '%s'" % (self, the_elb))
+                the_elb.register_instances(list(i.instance_id for i in instances))
             else:
-                utils.log("[%s] unable to find ELB for instance '%s'" % (self, instance.name))
+                utils.log("[%s] unable to find ELB for instances'" % (self, ))
         elif add == 'db':
-            # initialize new DB instance
-            # --------------------------
-            db_instances = self.db_instances
-            assert len(db_instances) > 0
-            
-            host = db_instances[0]
-            port = conf['mongodb']['port']
-            replSet = conf['mongodb']['replSet']
-            
-            utils.log("[%s] registering instance '%s' with replica set '%s'" % (self, instance.name, replSet))
-            
-            # register new instance with existing replia set
-            node_name = '%s:%d' % (instance.private_ip_address, port)
-            mongo_cmd = 'rs.add("%s")' % node_name
-            
-            utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-            status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin')
-            
-            pprint(status)
-            status = self._get_replset_status()
-            found  = False
-            
-            for node in status.members:
-                ip = node.name.split(':')[0].lower()
-                if ip == instance.private_ip_address:
-                    found = True
-                    break
-            
-            if found:
-                utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
-            else:
-                utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                status.members = list(dict(m) for m in status.members)
-                pprint(dict(status))
-            
-            """
-            command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
-                         (host.public_dns_name, port, mongo_cmd)
-            
-            utils.log(command)
-            ret = utils.shell(command)
-            
-            if 0 == ret[1]:
-                utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                utils.log("[%s] waiting for node to come online (may take a few minutes during initial sync)" % self)
-                print ret[0]
+            # TODO: check if we can initialize N instances in parallel here instead of synchronously
+            for instance in instances:
+                # initialize new DB instance
+                # --------------------------
+                db_instances = self.db_instances
+                assert len(db_instances) > 0
                 
-                mongo_cmd = 'rs.status()'
+                host = db_instances[0]
+                port = conf['mongodb']['port']
+                replSet = conf['mongodb']['replSet']
+                
+                utils.log("[%s] registering instance '%s' with replica set '%s'" % (self, instance.name, replSet))
+                
+                # register new instance with existing replia set
+                node_name = '%s:%d' % (instance.private_ip_address, port)
+                mongo_cmd = 'rs.add("%s")' % node_name
+                
+                utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin')
+                
+                pprint(status)
+                status = self._get_replset_status()
+                found  = False
+                
+                for node in status.members:
+                    ip = node.name.split(':')[0].lower()
+                    if ip == instance.private_ip_address:
+                        found = True
+                        break
+                
+                if found:
+                    utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
+                else:
+                    utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                    status.members = list(dict(m) for m in status.members)
+                    pprint(dict(status))
+                
+                """
                 command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
                              (host.public_dns_name, port, mongo_cmd)
                 
-                # wait until the replica set reports the newly added instance as healthy
-                while True:
-                    ret = utils.shell(command)
-                    #print ret[0]
+                utils.log(command)
+                ret = utils.shell(command)
+                
+                if 0 == ret[1]:
+                    utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                    utils.log("[%s] waiting for node to come online (may take a few minutes during initial sync)" % self)
+                    print ret[0]
                     
-                    if 0 == ret[1]:
-                        status  = re.sub("ISODate\(([^)]*)\)", '""', ret[0])
-                        status  = json.loads(status)
-                        healthy = False
+                    mongo_cmd = 'rs.status()'
+                    command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
+                                 (host.public_dns_name, port, mongo_cmd)
+                    
+                    # wait until the replica set reports the newly added instance as healthy
+                    while True:
+                        ret = utils.shell(command)
+                        #print ret[0]
                         
-                        for node in status['members']:
-                            if node['name'] == node_name:
-                                healthy = (1 == node['health'])
+                        if 0 == ret[1]:
+                            status  = re.sub("ISODate\(([^)]*)\)", '""', ret[0])
+                            status  = json.loads(status)
+                            healthy = False
+                            
+                            for node in status['members']:
+                                if node['name'] == node_name:
+                                    healthy = (1 == node['health'])
+                                    break
+                            
+                            if healthy:
                                 break
                         
-                        if healthy:
-                            break
+                        time.sleep(2)
                     
-                    time.sleep(2)
-                
-                utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
-            else:
-                utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                print ret[0]
-        """
+                    utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
+                else:
+                    utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                    print ret[0]
+            """
         
-        self.instances.append(instance)
-        utils.log("[%s] done creating instance %s" % (self, instance.name))
+        self.instances.extend(instances)
+        utils.log("[%s] done creating %d %s instance%s" % 
+                  (self, count, add, 's' if 1 != count else ''))
     
     def stress(self, *args):
         numInstances = 2
