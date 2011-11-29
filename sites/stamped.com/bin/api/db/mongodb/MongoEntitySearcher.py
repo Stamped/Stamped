@@ -846,11 +846,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         if (entity.subcategory == 'song' or entity.subcategory == 'album') and \
             'artist_display_name' in entity:
-            candidates.append(self._simplify(entity.artist_display_name))
+            candidates.append(self._simplify(entity, entity.artist_display_name))
         
         try:
             if entity.subcategory == 'song' and entity.details.song.album_name is not None:
-                candidates.append(self._simplify(entity.details.song.album_name))
+                candidates.append(self._simplify(entity, entity.details.song.album_name))
         except:
             pass
         
