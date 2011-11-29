@@ -109,7 +109,21 @@ class AWSInstance(AInstance):
         self.update()
         
         if hasattr(self._instance, 'tags'):
-            return self._instance.tags
+            def _fix_config(cfg):
+                if isinstance(cfg, dict):
+                    for elem in cfg:
+                        val = cfg[elem]
+                        
+                        if isinstance(val, basestring):
+                            try:
+                                val = eval(val)
+                                val = _fix_config(val)
+                                cfg[elem] = val
+                            except Exception:
+                                pass
+                return cfg
+            
+            return utils.AttributeDict(_fix_config(self._instance.tags))
         else:
             return None
     
@@ -191,7 +205,7 @@ class AWSInstance(AInstance):
     
     def _post_create(self, block):
         # Check for SSH
-        self._validate_port(22, desc="ssh service", timeout=40)
+        self._validate_port(22, desc="ssh service", timeout=60)
         
         if block:
             # Check for init to finish
@@ -296,6 +310,11 @@ class AWSInstance(AInstance):
         try:
             if key in self.__dict__:
                 return self.__dict__[key]
+        except:
+            pass
+        
+        try:
+            return self.tags[key]
         except:
             # TODO: make this less hacky...
             return eval("self._instance.%s" % key)
