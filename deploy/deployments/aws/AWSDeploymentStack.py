@@ -995,7 +995,7 @@ class AWSDeploymentStack(ADeploymentStack):
             self.instances.append(instance)
             utils.log("[%s] done creating instance %s" % (self, instance.name))
         
-        utils.log("[%s] done creating %d %s instances" % (self, count, arg))
+        utils.log("[%s] done creating %d %s instances" % (self, count, add))
     
     def stress(self, *args):
         numInstances = 2
