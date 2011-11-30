@@ -20,15 +20,12 @@
 
 @implementation FilmDetailViewController
 
-@synthesize imageView = imageView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
 @synthesize ratingView = ratingView_;
 
 - (void)dealloc {
-  self.imageView = nil;
   self.affiliateLogoView = nil;
   self.ratingView = nil;
-  self.imageView.delegate = nil;
   [super dealloc];
 }
 
@@ -89,8 +86,7 @@
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
     [self.imageView addGestureRecognizer:gr];
     [gr release];
-  }
-  else {
+  } else {
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
@@ -106,18 +102,12 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  self.imageView.delegate = nil;
-  self.imageView = nil;
   self.affiliateLogoView = nil;
   self.ratingView = nil;
-  self.imageView.delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   self.affiliateLogoView.image = [UIImage imageNamed:@"logo_fandango"];
-//  CGFloat offset = self.imageView.bounds.size.width - self.imageView.image.size.width;
-//  if (offset > 0)
-//    self.imageView.frame = CGRectOffset(self.imageView.frame, ceilf(offset/2), 0);
   [super viewWillAppear:animated];
 }
 
@@ -145,24 +135,21 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
-  } 
-  else if (detailedEntity_.itunesURL) {
+  } else if (detailedEntity_.itunesURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
     self.mainActionLabel.text = @"Download";
     self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, -3.0);
     self.affiliateLogoView.image = [UIImage imageNamed:@"logo_itunes"];
-  }
-  else if (detailedEntity_.amazonURL) {
+  } else if (detailedEntity_.amazonURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
     self.mainActionLabel.text = @"Buy now";
     self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, 2.0);
     self.affiliateLogoView.image = [UIImage imageNamed:@"logo_amazon"];
-  }
-    else {
+  } else {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, 
                                               -CGRectGetHeight(self.mainActionsView.frame));
   }
@@ -171,7 +158,6 @@
 - (void)setupSectionViews {
   // Synopsis
   if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
-        
     [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];

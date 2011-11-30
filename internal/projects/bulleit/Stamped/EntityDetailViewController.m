@@ -100,8 +100,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.spinner = nil;
-  if (imageView_)
-    imageView_.delegate = nil;
+  self.imageView.delegate = nil;
   self.imageView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
@@ -383,8 +382,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainContentView = nil;
   self.addFavoriteButton = nil;
   self.spinner = nil;
-  if (imageView_)
-    imageView_.delegate = nil;
+  self.imageView.delegate = nil;
   self.imageView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
@@ -648,7 +646,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [controller release];
 }
 
-- (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   // Default does nothing. Override in subclasses.
 }
 

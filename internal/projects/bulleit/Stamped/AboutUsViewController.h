@@ -12,6 +12,7 @@
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* contentView;
+@property (nonatomic, retain) IBOutlet UILabel* versionLabel;
 
 - (IBAction)settingsButtonPressed:(id)sender;
 - (IBAction)followButtonPressed:(id)sender;

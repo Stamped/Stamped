@@ -21,13 +21,10 @@
 
 @implementation MusicDetailViewController
 
-@synthesize imageView;
-@synthesize affiliateLogoView;
+@synthesize affiliateLogoView = affiliateLogoView_;
 
 - (void)dealloc {
-  self.imageView = nil;
   self.affiliateLogoView = nil;
-  self.imageView.delegate = nil;
   [super dealloc];
 }
 
@@ -51,8 +48,7 @@
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
     [self.imageView addGestureRecognizer:gr];
     [gr release];
-  }
-  else {
+  } else {
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
@@ -68,10 +64,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  self.imageView.delegate = nil;
-  self.imageView = nil;
   self.affiliateLogoView = nil;
-  self.imageView.delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -87,24 +80,21 @@
   [super viewDidDisappear:animated];
 }
 
-
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
    [NSURL URLWithString:detailedEntity_.itunesShortURL]];
 }
-
-
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void)setupMainActionsContainer {
   if (detailedEntity_.itunesShortURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
+  } else {
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }
-  
-  else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
 }
 
 - (void)setupSectionViews {
@@ -123,9 +113,7 @@
       frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
       section.arrowView.frame = frame;
       self.mainContentView.hidden = NO;
-    }
-    
-    else {
+    } else {
       NSArray* tracksArray = detailedEntity_.songs;
       
       [self addSectionWithName:@"Tracks" previewHeight:136.f];
@@ -152,8 +140,7 @@
       section.numLabel.text = [NSString stringWithFormat:@"(%d)", albumsArray.count];
       section.numLabel.frame = CGRectOffset(section.numLabel.frame, -42.0, 0.0);
       self.mainContentView.hidden = NO;
-    }
-    else {
+    } else {
       [self addSectionWithName:@"Albums" previewHeight:136.f];
       CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Albums"];
       section.collapsedFooterText = [NSString stringWithFormat:@"Show all %d albums", albumsArray.count];
@@ -164,66 +151,58 @@
       frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
       section.arrowView.frame = frame;
       self.mainContentView.hidden = NO;
-  }
+   }
 
-
-  // Details
-  if (detailedEntity_.genre || detailedEntity_.releaseDate) {
-    
-    CollapsibleViewController* section = [self makeSectionWithName:@"Details"];
+    // Details
+    if (detailedEntity_.genre || detailedEntity_.releaseDate) {
       
-    if (detailedEntity_.genre && ![detailedEntity_.genre isEqualToString:@""])
-      [section addPairedLabelWithName:@"Genres" value:detailedEntity_.genre forKey:@"genre"]; 
-    if (detailedEntity_.releaseDate && ![detailedEntity_.releaseDate isEqualToString:@""])
-      [section addPairedLabelWithName:@"Release Date" value:detailedEntity_.releaseDate forKey:@"releaseDate"];
+      CollapsibleViewController* section = [self makeSectionWithName:@"Details"];
+        
+      if (detailedEntity_.genre && ![detailedEntity_.genre isEqualToString:@""])
+        [section addPairedLabelWithName:@"Genres" value:detailedEntity_.genre forKey:@"genre"]; 
+      if (detailedEntity_.releaseDate && ![detailedEntity_.releaseDate isEqualToString:@""])
+        [section addPairedLabelWithName:@"Release Date" value:detailedEntity_.releaseDate forKey:@"releaseDate"];
 
-    if (section.contentDict.objectEnumerator.allObjects.count > 0) {
-      [self addSection:section];
-      self.mainContentView.hidden = NO;
+      if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+        [self addSection:section];
+        self.mainContentView.hidden = NO;
+      }
+    }
+    
+    if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+      [self addSectionWithName:@"iTunes Notes"];
+      CollapsibleViewController* section = [sectionsDict_ objectForKey:@"iTunes Notes"];
+      [section addText:detailedEntity_.desc forKey:@"desc"];
+      
+      if (section.contentDict.objectEnumerator.allObjects.count > 0)
+        self.mainContentView.hidden = NO;
+    }
+    
+    
+    // Stamped by  
+    NSSet* stamps = entityObject_.stamps;
+    
+    if (stamps && stamps.count > 0) {
+      [self addSectionStampedBy];
+      self.mainContentView.hidden = NO; 
     }
   }
-  
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
-    [self addSectionWithName:@"iTunes Notes"];
-    CollapsibleViewController* section = [sectionsDict_ objectForKey:@"iTunes Notes"];
-    [section addText:detailedEntity_.desc forKey:@"desc"];
-    
-    if (section.contentDict.objectEnumerator.allObjects.count > 0)
-      self.mainContentView.hidden = NO;
-  }
-  
-  
-  // Stamped by  
-  NSSet* stamps = entityObject_.stamps;
-  
-  if (stamps && stamps.count > 0) {
-    [self addSectionStampedBy];
-    self.mainContentView.hidden = NO; 
-  }
-  }
-
-    
 }
 
 #pragma mark - STImageViewDelegate methods.
 
-- (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   self.imageView.contentMode = UIViewContentModeScaleAspectFit;
   self.imageView.layer.backgroundColor = [UIColor clearColor].CGColor;
   self.imageView.hidden = NO;
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius = 4.0;
+  self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
   CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
   self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
-  
   [self setupMainActionsContainer];
   [self setupSectionViews];
 }
-
-
-
-
 
 @end

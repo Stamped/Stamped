@@ -20,7 +20,6 @@
 
 @implementation BookDetailViewController
 
-@synthesize imageView = imageView_;
 @synthesize gradientView = gradientView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
 
@@ -31,11 +30,8 @@
 }
 
 - (void)dealloc {
-  self.imageView = nil;
   self.gradientView = nil;
   self.affiliateLogoView = nil;
-  self.mainContentView = nil;
-  self.imageView.delegate = nil;
   [super dealloc];
 }
 
@@ -54,8 +50,7 @@
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
     [self.gradientView addGestureRecognizer:gr];
     [gr release];
-  }
-  else {
+  } else {
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
@@ -71,12 +66,8 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  self.imageView.delegate = nil;
-  self.imageView = nil;
   self.gradientView = nil;
   self.affiliateLogoView = nil;
-  self.mainContentView = nil;
-  self.imageView.delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -175,14 +166,13 @@
 
 #pragma mark - STImageViewDelegate methods.
 
-- (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
-
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   self.imageView.contentMode = UIViewContentModeScaleAspectFit;
   self.imageView.layer.backgroundColor = [UIColor clearColor].CGColor;
   self.imageView.hidden = NO;
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius = 4.0;
+  self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
 
   CGRect frame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
@@ -195,7 +185,7 @@
   self.imageView.hidden = NO;
   CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
   self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
-  
+
   [self setupMainActionsContainer];
   [self setupSectionViews];
 }

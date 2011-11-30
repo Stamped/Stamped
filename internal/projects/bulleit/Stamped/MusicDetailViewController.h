@@ -10,7 +10,6 @@
 
 @interface MusicDetailViewController : EntityDetailViewController {}
 
-//@property (nonatomic, retain) IBOutlet STImageView* imageView;
 @property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
 
 @end
