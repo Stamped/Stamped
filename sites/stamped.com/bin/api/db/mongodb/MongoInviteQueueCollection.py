@@ -5,10 +5,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs, copy, pymongo, errors
+import Globals, logs, copy, pymongo
 
 from datetime import datetime
 from utils import lazyProperty
+from errors import *
 
 from Schemas import *
 
