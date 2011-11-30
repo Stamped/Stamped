@@ -764,20 +764,32 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
           self.validationStamp2ImageView.alpha = 0.0;
           self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
           self.validationStamp2ImageView.hidden = NO;
-          [UIView animateWithDuration:0.4 animations:^{self.validationStamp2ImageView.alpha = 1.0;}
-           completion:^(BOOL finished) {
-             self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
-             self.validationStamp2ImageView.hidden = YES;
-             self.validationStamp2ImageView.image = nil;
-           }];
+          [UIView animateWithDuration:0.4
+                                delay:0
+                              options:UIViewAnimationOptionAllowUserInteraction
+                           animations:^{
+                             self.validationStamp2ImageView.alpha = 1.0;
+                           }
+                           completion:^(BOOL finished) {
+                             self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
+                             self.validationStamp2ImageView.hidden = YES;
+                             self.validationStamp2ImageView.image = nil;
+                           }];
         }
       }
     }  // end response for 200
     else { 
       if (self.validationStampView.hidden == NO) {
-        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 0.0;}
-                                        completion:^(BOOL finished){self.validationStampView.hidden = YES;
-                                                                    self.validationStampView.alpha = 1.0;}];
+        [UIView animateWithDuration:0.4
+                              delay:0 
+                            options:UIViewAnimationOptionAllowUserInteraction 
+                         animations:^{
+                           self.validationStampView.alpha = 0.0;
+                         }
+                         completion:^(BOOL finished) {
+                           self.validationStampView.hidden = YES;
+                           self.validationStampView.alpha = 1.0;
+                         }];
       }
     }
   } // end signIn responses
@@ -823,7 +835,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
         return;
       }
       usernameTaken_ = NO;
-      if (!emailTaken_ && !usernameTaken_) {  //create an account
+      if (!emailTaken_ && !usernameTaken_) {  // Create an account.
         NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
         [delegate_ viewController:self
            willCreateUserWithName:signUpFullNameTextField_.text
