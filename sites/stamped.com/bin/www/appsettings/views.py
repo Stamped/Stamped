@@ -94,7 +94,12 @@ def passwordForgot(request):
                 raise StampedHTTPError('invalid_input', 400, "Invalid email address")
             
             # Verify account exists
-            user = stampedAPI.checkAccount(email)
+            try:
+                user = stampedAPI.checkAccount(email)
+            except:
+                ### TODO: Display appropriate error message
+                errorMsg = 'No account information was found for that email address.'
+                raise StampedHTTPError('invalid_input', 404, "Email address not found")
 
             # Send email
             stampedAuth.forgotPassword(email)
