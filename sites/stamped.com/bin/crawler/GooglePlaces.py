@@ -72,6 +72,8 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         "store", 
         "university", 
         "zoo", 
+        "other", 
+        "establishment", 
     ])
     
     def __init__(self):
@@ -408,14 +410,21 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         return "%s/%s/%s?%s" % (self.BASE_URL, method, self.FORMAT, urllib.urlencode(params))
     
     def getSubcategoryFromTypes(self, types):
+        establishment = False
+        
         for t in types:
-            if t != "establishment":
+            if t == "establishment":
+                establishment = True
+            else:
                 try:
                     return self._googleTypeToSubcategoryMap[t]
                 except KeyError:
                     return t
         
-        return "other"
+        if establishment:
+            return "establishment"
+        else:
+            return "other"
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] address|latLng"

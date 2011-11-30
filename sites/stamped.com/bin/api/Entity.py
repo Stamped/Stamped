@@ -65,6 +65,7 @@ subcategories = {
     'casino'            : 'other', 
     'clothing_store'    : 'other', 
     'department_store'  : 'other', 
+    'establishment'     : 'other', 
     'florist'           : 'other', 
     'gym'               : 'other', 
     'home_goods_store'  : 'other', 
