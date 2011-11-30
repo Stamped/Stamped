@@ -364,13 +364,13 @@ static AccountManager* sharedAccountManager_ = nil;
                                                  kClientSecret, @"client_secret",
                                                  number, @"phone",  // Last so it can be nil.
                                                  nil]];
-  
+
   if (image) {
     NSData* imageData = UIImageJPEGRepresentation(image, 0.8);
     [params setData:imageData MIMEType:@"image/jpeg" forParam:@"profile_image"];
   }
   loader.params = params;
-  
+
   [oAuthRequestQueue_ addRequest:loader];
 }
 
@@ -438,10 +438,10 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)logout {
   [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-  // remove Facebook credentials
+  // Remove Facebook credentials.
   [[SocialManager sharedManager] signOutOfFacebook:NO];
   [[SocialManager sharedManager] signOutOfTwitter:NO];
-  
+
   [oAuthRequestQueue_ cancelAllRequests];
   [[RKClient sharedClient].requestQueue cancelAllRequests];
   [passwordKeychainItem_ resetKeychainItem];

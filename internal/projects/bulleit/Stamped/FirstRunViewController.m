@@ -689,12 +689,21 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
     return;
   
   if (![self stringIsValidUsername:text]) {
-    if ([text isEqualToString:usernameTextField_.text] && ![self stringIsValidEmail:text]) {      // Sign in username field also accepts email addresses.
+    // Sign in username field also accepts email addresses.
+    if ([text isEqualToString:usernameTextField_.text] && ![self stringIsValidEmail:text]) {
       usernameValid_ = NO;
-      if (self.validationStampView.hidden == NO)
-        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 0.0;}
-                         completion:^(BOOL finished){self.validationStampView.hidden = YES;
-                                                     self.validationStampView.alpha = 1.0;}];
+      if (self.validationStampView.hidden == NO) {
+        [UIView animateWithDuration:0.4
+                              delay:0 
+                            options:UIViewAnimationOptionAllowUserInteraction 
+                         animations:^{
+                           self.validationStampView.alpha = 0.0;
+                         }
+                         completion:^(BOOL finished) {
+                           self.validationStampView.hidden = YES;
+                           self.validationStampView.alpha = 1.0;
+                         }];
+      }
       return;
     }
   }
@@ -889,21 +898,22 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 #pragma mark - UIAlertViewDelegate methods.
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if ([alertView.title isEqualToString:[Alerts alertWithTemplate:AlertTemplateInvalidLogin].title])
+  if ([alertView.title isEqualToString:[Alerts alertWithTemplate:AlertTemplateInvalidLogin].title]) {
     if (buttonIndex == alertView.cancelButtonIndex) {
-      NSURL *url = [NSURL URLWithString:kStampedResetPasswordURL];
+      NSURL* url = [NSURL URLWithString:kStampedResetPasswordURL];
       [[UIApplication sharedApplication] openURL:url];
       if ([usernameTextField_ isFirstResponder])
         [usernameTextField_ resignFirstResponder];
       else if ([passwordTextField_ isFirstResponder])
         [passwordTextField_ resignFirstResponder];
     }
+  }
 }
 
 #pragma - Regex.
 
 - (BOOL)stringIsValidEmail:(NSString*)checkString {
-  BOOL stricterFilter = YES; 
+  BOOL stricterFilter = YES;
   NSString* stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
   NSString* laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
   NSString* emailRegex = stricterFilter ? stricterFilterString : laxString;
@@ -914,7 +924,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 - (BOOL)stringIsValidUsername:(NSString*)checkString {
   NSString* filterString = @"[a-zA-Z0-9_-]{1,20}";
   NSPredicate* usernameTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", filterString];
-  return [usernameTest evaluateWithObject:checkString];  
+  return [usernameTest evaluateWithObject:checkString];
 }
 
 @end
