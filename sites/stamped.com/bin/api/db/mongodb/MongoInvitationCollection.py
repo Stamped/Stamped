@@ -41,7 +41,7 @@ class MongoInvitationCollection(AMongoCollection):
         if exists == True:
             msg = "Invite already exists"
             logs.warning(msg)
-            raise Exception(msg)
+            raise InputError(msg)
 
         data = {
             'user_id': userId, 

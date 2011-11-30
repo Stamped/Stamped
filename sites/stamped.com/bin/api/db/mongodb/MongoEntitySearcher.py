@@ -81,6 +81,7 @@ class MongoEntitySearcher(EntitySearcher):
         'casino'            : 25, 
         'clothing_store'    : 20, 
         'department_store'  : 20, 
+        'establishment'     : 5, 
         'florist'           : 15, 
         'gym'               : 10, 
         'home_goods_store'  : 5, 
@@ -497,7 +498,16 @@ class MongoEntitySearcher(EntitySearcher):
                     
                     self._statsSink.increment('stamped.api.search.third-party.googlePlaces')
                     google_results = self._googlePlaces.getEntityResultsByLatLng(specific_coords, params, detailed=False)
+                    if google_results is None:
+                        return
+                    
                     entities = []
+                    
+                    if 0 == len(google_results):
+                        # retry with (undocumented) max radius allowed by Google Places API
+                        params['radius'] = 50000
+                        self._statsSink.increment('stamped.api.search.third-party.googlePlaces')
+                        google_results = self._googlePlaces.getEntityResultsByLatLng(specific_coords, params, detailed=False)
                     
                     if google_results is not None and len(google_results) > 0:
                         #utils.log(len(google_results))

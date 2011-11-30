@@ -2594,7 +2594,7 @@ class StampedAPI(AStampedAPI):
         if not favorite or not favorite.favorite_id:
             msg = 'Invalid favorite: %s' % favorite
             logs.warning(msg)
-            raise Exception(msg)
+            raise Unavailable(msg)
 
         self._favoriteDB.removeFavorite(authUserId, entityId)
 
