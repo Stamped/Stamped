@@ -82,10 +82,8 @@ class AWSDeploymentStack(ADeploymentStack):
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
         
-        utils.log("[%s] initializing replica set" % (self, len(self.instances)))
-        db_instances = self.db_instances
-        
-        status = self.run_mongo_cmd('rs.status()')
+        # initialize replica set
+        self.repair()
     
     def _get_initial_replica_set_config(self):
         db_instances = self.db_instances
@@ -173,6 +171,11 @@ class AWSDeploymentStack(ADeploymentStack):
                             
                             try:
                                 result = utils.AttributeDict(json.loads(result))
+                                
+                                if 'errmsg' in result:
+                                    raise Fail(result['errmsg'])
+                            except Fail:
+                                raise
                             except:
                                 utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
                                 utils.printException()
@@ -180,6 +183,8 @@ class AWSDeploymentStack(ADeploymentStack):
                                 return None
                         
                         return result
+            except Fail:
+                raise
             except:
                 utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
         
@@ -229,7 +234,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 raise Fail(msg)
     
     def _get_replset_status(self):
-        status  = self.run_mongo_cmd('rs.status()')
+        status = self.run_mongo_cmd('rs.status()')
         if 'members' in status:
             status.members = list(utils.AttributeDict(node) for node in status.members)
         
@@ -312,18 +317,36 @@ class AWSDeploymentStack(ADeploymentStack):
         db_instances = self.db_instances
         utils.log("[%s] attempting to repair replica set containing %d db instances" % (self, len(db_instances)))
         
-        status  = self._get_replset_status()
-        #pprint(status)
+        try:
+            status = self._get_replset_status()
+            initialize = False
+        except Fail:
+            initialize = True
         
-        if "startupStatus" in status:
-            if 3 == status['startupStatus']:
-                utils.log("[%s] initializing empty replica set")
+        if initialize or ('startupStatus' in status and 3 == status['startupStatus']):
+            utils.log("[%s] initializing empty replica set")
+            
+            config = self._get_initial_replica_set_config()
+            confs  = json.dumps(config)
+            retval = self.run_mongo_cmd('rs.initiate(%s)' % confs, slave_okay=True, db='stamped')
+            
+            if 1 == retval.ok and 'info' in retval:
+                utils.log("[%s] %s" % (self, retval.info))
+            else:
+                utils.log("[%s] error initializing replica set: '%s'" % (self, retval.info))
+                return
+            
+            utils.log("[%s] waiting for replica set '%s' to come online..." % (self, config['_id']))
+            while True:
+                time.sleep(1)
                 
-                config = self._get_initial_replica_set_config()
-                confs  = json.dumps(config)
-                retval = self.run_mongo_cmd('rs.initiate(%s)' % confs, slave_okay=True, db='stamped')
-                
-                pprint(retval)
+                try:
+                    status = self._get_replset_status()
+                    if status is not None:
+                        utils.log("[%s] replica set '%s' is online!" % (self, status.set))
+                        break
+                except:
+                    pass
         
         # group replica set members by state
         node_state = defaultdict(list)
@@ -341,7 +364,8 @@ class AWSDeploymentStack(ADeploymentStack):
         
         utils.log()
         for state, nodes in node_state.iteritems():
-            utils.log("[%s] found %d %s nodes" % (self, len(nodes), state))
+            l = len(nodes)
+            utils.log("[%s] found %d %s node%s" % (self, l, state, '' if 1 == l else 's'))
         
         utils.log()
         warn = False
@@ -420,12 +444,15 @@ class AWSDeploymentStack(ADeploymentStack):
         else:
             # everything looks peachy
             assert not warn
+            utils.log("[%s] everything looks peachy with replica set %s" % (self, status.set))
     
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
+        pool = Pool(8)
         for instance in self.instances:
-            instance.terminate()
+            pool.spawn(instance.terminate)
         
+        pool.join()
         self.instances = [ ]
     
     def connect(self):

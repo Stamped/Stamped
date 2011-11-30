@@ -318,18 +318,4 @@ class AWSInstance(AInstance):
         except:
             # TODO: make this less hacky...
             return eval("self._instance.%s" % key)
-    
-    #def __getattr__(self, name):
-    #    if name in self.__dict__:
-    #        return self.__dict__[name]
-    #    else:
-    #        return self[name]
-    
-    #def __getitem__(self, name):
-    #    if name in self.__dict__:
-    #        return self.__dict__[name]
-    #    elif self._instance:
-    #        return self._instance.__dict__[name]
-    #    else:
-    #        raise NotInitializedError()
 
