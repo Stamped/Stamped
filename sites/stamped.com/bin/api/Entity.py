@@ -206,61 +206,65 @@ def isEqual(entity1, entity2, prefix=False):
     utils.log("-" * 40)
     """
     
-    is_google_places_special_case = \
-        ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
-         (entity2.subcategory == 'other' and entity2.googleLocal is not None))
-    
-    if not prefix and entity1.subcategory != entity2.subcategory:
-        # if either entity came from google autosuggest, disregard subcategories not matching
-        if not is_google_places_special_case:
+    try:
+        is_google_places_special_case = \
+            ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
+             (entity2.subcategory == 'other' and entity2.googleLocal is not None))
+        
+        if not prefix and entity1.subcategory != entity2.subcategory:
+            # if either entity came from google autosuggest, disregard subcategories not matching
+            if not is_google_places_special_case:
+                return False
+        
+        if entity1.simplified_title != entity2.simplified_title:
             return False
-    
-    if entity1.simplified_title != entity2.simplified_title:
-        return False
-    elif prefix or is_google_places_special_case:
+        elif prefix or is_google_places_special_case:
+            return True
+        
+        if entity1.lat is not None:
+            if entity2.lat is None:
+                return False
+            
+            earthRadius = 3959.0 # miles
+            
+            distance = utils.get_spherical_distance((entity1.lat, entity1.lng), 
+                                                    (entity2.lat, entity2.lng))
+            
+            distance = distance * earthRadius
+            
+            if distance > 0.8 or distance < 0:
+                return False
+            
+            """
+            is_junk = " \t-,".__contains__ # characters for SequenceMatcher to disregard
+            
+            addr1 = entity1.address.lower()
+            addr2 = entity2.address.lower()
+            
+            def _normalize_addr(addr):
+                addr = addr.replace(' street ' ' st ')
+                addr = addr.replace(' st. ' ' st ')
+                addr = addr.replace(' boulevard ' ' st ')
+                addr = addr.replace(' lane ' ' st ')
+                addr = addr.replace(' highway ' ' st ')
+                addr = addr.replace(' road ' ' st ')
+                addr = addr.replace(',' ' ')
+                return addr
+            
+            addr1 = _normalize_addr(addr1)
+            addr2 = _normalize_addr(addr2)
+            
+            ratio = SequenceMatcher(is_junk, addr1, addr2).ratio()
+            
+            return (ratio >= 0.95)
+            """
+        
+        elif entity2.lat is not None:
+            return False
+        
         return True
-    
-    if entity1.lat is not None:
-        if entity2.lat is None:
-            return False
-        
-        earthRadius = 3959.0 # miles
-        
-        distance = utils.get_spherical_distance((entity1.lat, entity1.lng), 
-                                                (entity2.lat, entity2.lng))
-        distance = distance * earthRadius
-        
-        if distance > 0.8:
-            return False
-        
-        """
-        is_junk = " \t-,".__contains__ # characters for SequenceMatcher to disregard
-        
-        addr1 = entity1.address.lower()
-        addr2 = entity2.address.lower()
-        
-        def _normalize_addr(addr):
-            addr = addr.replace(' street ' ' st ')
-            addr = addr.replace(' st. ' ' st ')
-            addr = addr.replace(' boulevard ' ' st ')
-            addr = addr.replace(' lane ' ' st ')
-            addr = addr.replace(' highway ' ' st ')
-            addr = addr.replace(' road ' ' st ')
-            addr = addr.replace(',' ' ')
-            return addr
-        
-        addr1 = _normalize_addr(addr1)
-        addr2 = _normalize_addr(addr2)
-        
-        ratio = SequenceMatcher(is_junk, addr1, addr2).ratio()
-        
-        return (ratio >= 0.95)
-        """
-    
-    elif entity2.lat is not None:
+    except:
         return False
-    
-    return True
 
 def getSimplifiedTitle(title):
     title = unicodedata.normalize('NFKD', unicode(title)).encode('ascii', 'ignore')

@@ -561,24 +561,27 @@ def is_func(obj):
     return hasattr(obj, '__call__')
 
 def get_spherical_distance(latLng1, latLng2):
-    # convert latitude and longitude to spherical coordinates in radians
-    degrees_to_radians = math.pi / 180.0
-    
-    # phi = 90 - latitude
-    phi1 = (90.0 - latLng1[0]) * degrees_to_radians
-    phi2 = (90.0 - latLng2[0]) * degrees_to_radians
-    
-    # theta = longitude
-    theta1 = latLng1[1] * degrees_to_radians
-    theta2 = latLng2[1] * degrees_to_radians
-    
-    # compute distance from spherical coordinates
-    cos = (math.sin(phi1) * math.sin(phi2) * math.cos(theta1 - theta2) + 
-           math.cos(phi1) * math.cos(phi2))
-    arc = math.acos(cos)
-    
-    # multiply arc by the earth's radius in your desired units to get length
-    return arc
+    try:
+        # convert latitude and longitude to spherical coordinates in radians
+        degrees_to_radians = math.pi / 180.0
+        
+        # phi = 90 - latitude
+        phi1 = (90.0 - latLng1[0]) * degrees_to_radians
+        phi2 = (90.0 - latLng2[0]) * degrees_to_radians
+        
+        # theta = longitude
+        theta1 = latLng1[1] * degrees_to_radians
+        theta2 = latLng2[1] * degrees_to_radians
+        
+        # compute distance from spherical coordinates
+        cos = (math.sin(phi1) * math.sin(phi2) * math.cos(theta1 - theta2) + 
+               math.cos(phi1) * math.cos(phi2))
+        arc = math.acos(cos)
+        
+        # multiply arc by the earth's radius in your desired units to get length
+        return arc
+    except:
+        return -1
 
 def validate_email(email):
     # Taken from Django validators.py
