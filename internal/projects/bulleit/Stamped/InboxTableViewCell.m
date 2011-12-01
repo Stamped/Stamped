@@ -319,32 +319,33 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (title_ != title) {
     [title_ release];
     title_ = [title copy];
-
-    NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
-    titleLayer_.string = attrString;
-    CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLine_);
-    
-    CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
-    CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
-    CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
-                              truncatedLineGlyphCount - 1 : lineGlyphCount;
-    CFIndex ligatureCt = title_.length - lineGlyphCount;
-    if (ligatureCt > 0)
-      lastCharIndex += ligatureCt;
-    CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
-    CGFloat width = fmin(kTitleMaxWidth, offset);
-    CFRelease(line);
-    CFRelease(truncatedLine);
-    
-    CGRect oldFrame = stampImageFrame_;
-    stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
-                                  kStampSize / 2.0,
-                                  kStampSize,
-                                  kStampSize);
-    [self setNeedsDisplayInRect:oldFrame];
-    [self setNeedsDisplayInRect:stampImageFrame_];
-    [self setNeedsDisplayInRect:titleLayer_.frame];
+    if (title) {
+      NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
+      titleLayer_.string = attrString;
+      CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
+      CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLine_);
+      
+      CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
+      CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
+      CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
+                                truncatedLineGlyphCount - 1 : lineGlyphCount;
+      CFIndex ligatureCt = title_.length - lineGlyphCount;
+      if (ligatureCt > 0)
+        lastCharIndex += ligatureCt;
+      CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
+      CGFloat width = fmin(kTitleMaxWidth, offset);
+      CFRelease(line);
+      CFRelease(truncatedLine);
+      
+      CGRect oldFrame = stampImageFrame_;
+      stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
+                                    kStampSize / 2.0,
+                                    kStampSize,
+                                    kStampSize);
+      [self setNeedsDisplayInRect:oldFrame];
+      [self setNeedsDisplayInRect:stampImageFrame_];
+      [self setNeedsDisplayInRect:titleLayer_.frame];
+    }
   }
 }
 

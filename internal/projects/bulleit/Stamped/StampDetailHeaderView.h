@@ -20,7 +20,7 @@
 @property (nonatomic, assign) BOOL inverted;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, retain) NSString* title;
-@property (nonatomic, retain) id <StampDetailHeaderViewDelegate> delegate;
+@property (nonatomic, assign) id<StampDetailHeaderViewDelegate> delegate;
 @property (nonatomic, assign) BOOL hideArrow;
 
 - (void)setEntity:(Entity*)entity;

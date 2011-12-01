@@ -25,6 +25,7 @@
 #import "Util.h"
 
 static NSString* const kFriendsPath = @"/temp/friends.json";
+//static NSSTring* const kFriendIDsPath = @"friends
 
 @interface PeopleViewController ()
 - (void)loadFriendsFromNetwork;
