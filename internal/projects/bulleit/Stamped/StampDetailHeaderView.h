@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import "Stamp.h"
-#import "Entity.h"
+
+@class Stamp;
+@class Entity;
 
 @protocol StampDetailHeaderViewDelegate <NSObject>
 - (IBAction)handleEntityTap:(id)sender;

@@ -9,6 +9,9 @@
 #import <CoreText/CoreText.h>
 
 #import "StampDetailHeaderView.h"
+
+#import "Stamp.h"
+#import "Entity.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
