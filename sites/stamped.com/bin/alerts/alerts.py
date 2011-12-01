@@ -104,7 +104,7 @@ def main():
     except Exception as e:
         print e
         utils.printException()
-        print 'FAIL'
+        print 'FAIL!'
         print '-' * 40
     finally:
         os.remove(lock)
@@ -260,6 +260,7 @@ def runAlerts(options):
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
+        print
         sendEmails(userEmailQueue, options)
         print
     
@@ -374,6 +375,7 @@ def runInvites(options):
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
+        print
         sendEmails(userEmailQueue, options)
         print
 
@@ -554,9 +556,13 @@ def sendEmails(queue, options):
                         continue
                     
                     ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format='html')
-                except:
-                    print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
-                        (msg['activity_id'], msg['to'], msg['subject'])
+                except Exception as e:
+                    try:
+                        print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
+                            (msg['activity_id'], msg['to'], msg['subject'])
+                    except:
+                        print 'EMAIL FAILED (activity_id=%s)' % msg['activity_id']
+                    print e
         else:
             print 'SKIPPED: %s' % user
 
@@ -607,36 +613,6 @@ def sendPushNotifications(queue, options):
             apns_wrapper.notify()
     
     return
-    
-    host_name = 'gateway.sandbox.push.apple.com'
-    certificate = IPHONE_APN_PUSH_CERT_DEV
-    
-    try:
-        s = socket()
-        c = ssl.wrap_socket(s,
-                            ssl_version=ssl.PROTOCOL_SSLv3,
-                            certfile=certificate)
-        c.connect((host_name, 2195))
-        
-        for user, pushQueue in queue.iteritems():
-            if IS_PROD or user in admin_tokens:
-                count = 0
-                pushQueue.reverse()
-                for msg in pushQueue:
-                    try:
-                        count += 1
-                        if count > limit:
-                            print 'LIMIT EXCEEDED (%s)' % count
-                            raise
-                        c.write(msg['payload'])
-                    except:
-                        print 'MESSAGE FAILED (activity_id=%s): device_id = %s ' % \
-                            (msg['activity_id'], msg['device_id'])
-            else:
-                print 'SKIPPED: %s' % user
-        c.close()
-    except:
-        print 'FAIL: %s' % queue
 
 
 if __name__ == '__main__':
