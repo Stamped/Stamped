@@ -33,6 +33,28 @@
   return [UIImage imageNamed:@"cat_icon_other"];
 }
 
+- (UIImage*)inboxTodoCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other"];
+}
+
+- (UIImage*)highlightedInboxTodoCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@_white", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other_white"];
+}
+
+- (UIImage*)stampDetailCategoryImage {
+  return nil;
+}
+
+- (UIImage*)entitySearchCategoryImage {
+  return nil;
+}
+
 - (EntityCategory)entityCategory {
   NSString* cat = self.category;
   if ([cat isEqualToString:@"food"]) {

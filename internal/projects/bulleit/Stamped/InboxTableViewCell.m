@@ -112,15 +112,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     userImageRightMargin_ = kUserImageSize + (kUserImageHorizontalMargin * 2.0);
     
-    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 74, 15, 12)];
-    typeImageView_.contentMode = UIViewContentModeBottomLeft;
+    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
+    typeImageView_.contentMode = UIViewContentModeLeft;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
     
-    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
-                                                               CGRectGetMinY(typeImageView_.frame) + 1, 
-                                                               kSubtitleDefaultWidth,
-                                                               CGRectGetHeight(typeImageView_.frame))];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     subtitleLabel_.textColor = [UIColor stampedLightGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
@@ -226,9 +223,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     ellipsisLine_ = CTLineCreateWithAttributedString((CFAttributedStringRef)[[[NSAttributedString alloc] initWithString:@"…" 
                                                                                                             attributes:ellipsisAttributes] autorelease]);
     CFRelease(ellipsisFont);
-    
-    
-    
     CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding - 1, kUserImageSize, kUserImageSize);
     bottomUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
     [self addSubview:bottomUserImageView_];
@@ -259,6 +253,36 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     stampImageInverted_ = nil;
   }
   [super dealloc];
+}
+
+- (void)layoutSubviews {
+  CGSize imageSize = typeImageView_.image.size;
+  typeImageView_.frame = CGRectMake(userImageRightMargin_, 75, imageSize.width, imageSize.height);
+  CGRect subtitleFrame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
+                                    CGRectGetMinY(typeImageView_.frame) + 1, 
+                                    kSubtitleDefaultWidth,
+                                    CGRectGetHeight(typeImageView_.frame));
+
+  CGRect timeFrame = timestampLabel_.frame;
+  timeFrame.origin.x = 283 - timeFrame.size.width;
+  timeFrame.origin.y = 74;
+  timestampLabel_.frame = timeFrame;
+  subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(timeFrame);
+  subtitleLabel_.frame = subtitleFrame;
+  NSLog(@"subtitle label frame: %@", NSStringFromCGRect(subtitleFrame));
+
+  numCommentsLabel_.hidden = (numComments_ == 0);
+  commentBubbleImageView_.hidden = numCommentsLabel_.hidden;
+  if (numComments_ > 0) {
+    numCommentsLabel_.frame = CGRectMake(283 - CGRectGetWidth(numCommentsLabel_.frame),
+                                         58,
+                                         CGRectGetWidth(numCommentsLabel_.frame),
+                                         CGRectGetHeight(numCommentsLabel_.frame));
+    commentBubbleImageView_.frame = CGRectMake(CGRectGetMinX(numCommentsLabel_.frame) - CGRectGetWidth(commentBubbleImageView_.frame) - 3,
+                                               60,
+                                               CGRectGetWidth(commentBubbleImageView_.frame),
+                                               CGRectGetHeight(commentBubbleImageView_.frame));
+  }
 }
 
 - (void)invertColors:(BOOL)inverted {
@@ -351,34 +375,16 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)setNumComments:(NSUInteger)numComments {
   numComments_ = numComments;
-  numCommentsLabel_.hidden = (numComments_ == 0);
-  commentBubbleImageView_.hidden = numCommentsLabel_.hidden;
   numCommentsLabel_.text = [NSString stringWithFormat:@"%u", numComments];
   [numCommentsLabel_ sizeToFit];
-  if (numComments_ > 0) {
-    numCommentsLabel_.frame = CGRectMake(283 - CGRectGetWidth(numCommentsLabel_.frame),
-                                         58,
-                                         CGRectGetWidth(numCommentsLabel_.frame),
-                                         CGRectGetHeight(numCommentsLabel_.frame));
-    commentBubbleImageView_.frame = CGRectMake(CGRectGetMinX(numCommentsLabel_.frame) - CGRectGetWidth(commentBubbleImageView_.frame) - 3,
-                                               60,
-                                               CGRectGetWidth(commentBubbleImageView_.frame),
-                                               CGRectGetHeight(commentBubbleImageView_.frame));
-  }
-  [self setNeedsDisplay];
+
+  [self setNeedsLayout];
 }
 
 - (void)updateTimestamp {
   timestampLabel_.text = [Util userReadableTimeSinceDate:[(Stamp*)stamps_.lastObject created]];
   [timestampLabel_ sizeToFit];
-  CGRect timeFrame = timestampLabel_.frame;  // heh.
-  timeFrame.origin.x = 283 - timeFrame.size.width;
-  timeFrame.origin.y = 74;
-  timestampLabel_.frame = timeFrame;
-  CGRect subtitleFrame = subtitleLabel_.frame;
-  subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(timeFrame);
-  subtitleLabel_.frame = subtitleFrame;
-  [self setNeedsDisplay];
+  [self setNeedsLayout];
 }
 
 - (void)setStamps:(NSArray*)stamps {
@@ -612,9 +618,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     stamp_ = [stamp retain];
     if (stamp) {
       customView_.title = stamp.entityObject.title;
-      customView_.typeImageView.image = stamp.entityObject.categoryImage;
-      customView_.typeImageView.highlightedImage =
-          [Util whiteMaskedImageUsingImage:stamp.entityObject.categoryImage];
+      customView_.typeImageView.image = stamp.entityObject.inboxTodoCategoryImage;
+      customView_.typeImageView.highlightedImage = stamp.entityObject.highlightedInboxTodoCategoryImage;
       customView_.subtitleLabel.text = stamp.entityObject.subtitle;
       customView_.stamps = [NSArray arrayWithObject:stamp];
       pageDotsView_.numDots = 0;
@@ -632,8 +637,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (entityObject) {
     [self collapseStack];
     customView_.title = entityObject.title;
-    customView_.typeImageView.image = entityObject.categoryImage;
-    customView_.typeImageView.highlightedImage = [Util whiteMaskedImageUsingImage:entityObject.categoryImage];
+    customView_.typeImageView.image = entityObject.inboxTodoCategoryImage;
+    customView_.typeImageView.highlightedImage = entityObject.highlightedInboxTodoCategoryImage;
     customView_.subtitleLabel.text = entityObject.subtitle;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
 
