@@ -269,7 +269,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   timestampLabel_.frame = timeFrame;
   subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(timeFrame);
   subtitleLabel_.frame = subtitleFrame;
-  NSLog(@"subtitle label frame: %@", NSStringFromCGRect(subtitleFrame));
 
   numCommentsLabel_.hidden = (numComments_ == 0);
   commentBubbleImageView_.hidden = numCommentsLabel_.hidden;
