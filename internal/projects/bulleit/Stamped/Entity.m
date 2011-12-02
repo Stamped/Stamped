@@ -48,11 +48,17 @@
 }
 
 - (UIImage*)stampDetailCategoryImage {
-  return nil;
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_sDetail_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_sDetail_other"];
 }
 
 - (UIImage*)entitySearchCategoryImage {
-  return nil;
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_eSearch_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_eSearch_other"];
 }
 
 - (EntityCategory)entityCategory {

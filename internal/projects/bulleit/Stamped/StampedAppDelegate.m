@@ -42,8 +42,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  RKLogConfigureByName("RestKit/Network", RKLogLevelDebug);
-
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
