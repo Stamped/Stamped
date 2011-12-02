@@ -20,6 +20,10 @@ static NSString* kLoadingText = @"Updating...";
 static NSString* kNotConnectedText = @"Not connected to the internet.";
 static const CGFloat kReloadHeight = 60.0;
 
+@interface STTableViewController ()
+- (void)overlayTapped:(UITapGestureRecognizer*)recognizer;
+@end
+
 @implementation STTableViewController
 
 @synthesize tableView = tableView_;
@@ -32,6 +36,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = lastUpdatedLabel_;
 @synthesize arrowImageView = arrowImageView_;
 @synthesize spinnerView = spinnerView_;
+@synthesize searchOverlay = searchOverlay_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
@@ -40,6 +45,7 @@ static const CGFloat kReloadHeight = 60.0;
   self.shelfView = nil;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
+  self.searchOverlay = nil;
   [super dealloc];
 }
 
@@ -49,14 +55,25 @@ static const CGFloat kReloadHeight = 60.0;
   self.shelfView = nil;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
+  self.searchOverlay = nil;
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
 
   CGFloat bottomPadding = 0;
-  if (stampFilterBar_)
+  if (stampFilterBar_) {
     bottomPadding = 46;
+
+    searchOverlay_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
+    searchOverlay_.backgroundColor = [UIColor blackColor];
+    searchOverlay_.alpha = 0;
+    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(overlayTapped:)];
+    [searchOverlay_ addGestureRecognizer:recognizer];
+    [recognizer release];
+    [self.view insertSubview:searchOverlay_ belowSubview:self.shelfView];
+  }
 
   if (!disableReload_) {
     arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
@@ -100,6 +117,12 @@ static const CGFloat kReloadHeight = 60.0;
                             animated:animated];
 }
 
+- (void)overlayTapped:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  [stampFilterBar_.searchField resignFirstResponder];
+}
 
 - (void)setIsLoading:(BOOL)loading {
   if (disableReload_)
@@ -188,8 +211,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 #pragma mark - UIScrollView delegate methods
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView
-{
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [super scrollViewDidScroll:scrollView];
 
   if (isLoading_ && hasHeaders_) {
@@ -244,6 +266,22 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
               andQuery:(NSString*)query {}
+
+- (void)stampFilterBarSearchFieldDidBeginEditing {
+  [self.tableView setContentOffset:CGPointZero animated:YES];
+  self.tableView.scrollEnabled = NO;
+  [UIView animateWithDuration:0.3 animations:^{
+    searchOverlay_.alpha = 0.75;
+  }];
+}
+
+- (void)stampFilterBarSearchFieldDidEndEditing {
+  [UIView animateWithDuration:0.3 animations:^{
+    searchOverlay_.alpha = 0;
+  } completion:^(BOOL finished) {
+    self.tableView.scrollEnabled = YES;
+  }];
+}
 
 #pragma mark - To be implemented by subclasses.
 
