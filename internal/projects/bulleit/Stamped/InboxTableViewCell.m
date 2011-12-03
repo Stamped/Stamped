@@ -405,8 +405,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (stamps_ != stamps) {
     [stamps_ release];
     stamps_ = [stamps copy];
-    Stamp* stamp = [stamps_ lastObject];
-    
+  }
+
+  if (stamps) {
+    Stamp* stamp = [stamps lastObject];
+
     cameraImageView_.hidden = stamp.imageURL ? NO : YES;
     disclosureImageView_.hidden = !cameraImageView_.hidden;
 
@@ -419,14 +422,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     self.numComments = [stamp.numComments unsignedIntegerValue];    
 
     self.hidePhotos = NO;
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    for (Stamp* s in stamps_) {
-      [[NSNotificationCenter defaultCenter] addObserver:self
-                                               selector:@selector(stampChanged:)
-                                                   name:kStampDidChangeNotification
-                                                 object:s];
-    }
+
     distanceLabel_.hidden = YES;
     timestampLabel_.hidden = NO;
     locationImageView_.hidden = YES;
