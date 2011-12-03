@@ -256,6 +256,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)layoutSubviews {
+  [super layoutSubviews];
   userNameLabel_.frame = CGRectMake(userImageRightMargin_,
                                     57,
                                     CGRectGetWidth(userNameLabel_.frame),
