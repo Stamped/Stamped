@@ -65,7 +65,7 @@ static const CGFloat kSubstringFontSize = 12.0;
     [self setupViews];
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(currentUserChanged:) 
-                                                 name:kCurrentUserHasUpdatedNotification 
+                                                 name:kCurrentUserHasUpdatedNotification
                                                object:nil];
   }
   return self;

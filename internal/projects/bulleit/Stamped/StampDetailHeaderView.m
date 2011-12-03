@@ -72,7 +72,8 @@
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
     titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
-    titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);  // So the ellipsis draws the way we like it.
+    // So the ellipsis draws the way we like it.
+    titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);
     titleLayer_.fontSize = 24;
     titleLayer_.hidden = YES;
     
@@ -80,11 +81,11 @@
     CGRect frame = CGRectMake(15, ascender, aFrame.size.width - 50, 56);
 
     titleLayer_.frame = frame;
-    NSDictionary *newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
+    NSDictionary* newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     titleLayer_.actions = newActions;
     [newActions release];
     
-    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(15, 45, 15, 12)];
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
     categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
@@ -126,6 +127,15 @@
   [super dealloc];
 }
 
+- (void)layoutSubviews {
+  CGSize imageSize = categoryImageView_.image.size;
+  categoryImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 48, imageSize.width, imageSize.height);
+  subtitleLabel_.frame = CGRectMake(CGRectGetMaxX(categoryImageView_.frame) + 4,
+                                    CGRectGetMinY(categoryImageView_.frame) + 1,
+                                    CGRectGetWidth(subtitleLabel_.frame),
+                                    CGRectGetHeight(categoryImageView_.frame));
+}
+
 - (void)setStamp:(Stamp*)stamp {
   if (stamp_ != stamp) {
     [stamp_ release];
@@ -134,18 +144,10 @@
       self.stampImage = [Util stampImageForUser:stamp_.user];
       self.stampImageInverted = [Util stampImageWithPrimaryColor:@"ffffff" secondary:@"ffffff"];
       self.title = stamp.entityObject.title;
-      
-      categoryImageView_.image = stamp_.entityObject.categoryImage;
-      categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.categoryImage];
-      [categoryImageView_ sizeToFit];
-      CGRect frame = categoryImageView_.frame;
-      frame.origin.x = titleLayer_.frame.origin.x + 1;
-      categoryImageView_.frame = frame;
       subtitleLabel_.text = stamp_.entityObject.subtitle;
-      frame = subtitleLabel_.frame;
-      frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
-      subtitleLabel_.frame = frame;
-      [self setNeedsDisplay];
+      categoryImageView_.image = stamp_.entityObject.stampDetailCategoryImage;
+      categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.stampDetailCategoryImage];
+      [self setNeedsLayout];
     }
   }
 }
@@ -155,18 +157,10 @@
   self.stampImage = nil;
   self.stampImageInverted = nil;
   self.title = [entity valueForKey:@"title"];
-  
-  categoryImageView_.image = [entity valueForKey:@"categoryImage"];
-  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
-  [categoryImageView_  sizeToFit];
-  CGRect frame = categoryImageView_.frame;
-  frame.origin.x = titleLayer_.frame.origin.x + 1;
-  categoryImageView_.frame = frame;
   subtitleLabel_.text = [entity valueForKey:@"subtitle"];
-  frame = subtitleLabel_.frame;
-  frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
-  subtitleLabel_.frame = frame;
-  [self setNeedsDisplay];
+  categoryImageView_.image = [entity valueForKey:@"stampDetailCategoryImage"];
+  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
+  [self setNeedsLayout];
 }
 
 - (void)setTitle:(NSString*)title {
