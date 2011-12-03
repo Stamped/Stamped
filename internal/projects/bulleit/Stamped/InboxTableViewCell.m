@@ -256,6 +256,21 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)layoutSubviews {
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_,
+                                    57,
+                                    CGRectGetWidth(userNameLabel_.frame),
+                                    CGRectGetHeight(userNameLabel_.frame));
+  CGFloat commentMaxWidth = kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 3;
+  if (numComments_ > 0)
+    commentMaxWidth -= (CGRectGetWidth(numCommentsLabel_.frame) + CGRectGetWidth(commentBubbleImageView_.frame) + 8);
+
+  CGSize stringSize = [commentLabel_.text sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
+                                              forWidth:commentMaxWidth
+                                         lineBreakMode:UILineBreakModeTailTruncation];
+  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3,
+                                   57,
+                                   stringSize.width,
+                                   stringSize.height);
   CGSize imageSize = typeImageView_.image.size;
   typeImageView_.frame = CGRectMake(userImageRightMargin_, 75, imageSize.width, imageSize.height);
   CGRect subtitleFrame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
@@ -398,28 +413,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     self.stampImage = stamp.user.stampImage;
     userNameLabel_.text = stamp.user.screenName;
     [userNameLabel_ sizeToFit];
-    userNameLabel_.frame = CGRectMake(userImageRightMargin_,
-                                      57,
-                                      CGRectGetWidth(userNameLabel_.frame),
-                                      CGRectGetHeight(userNameLabel_.frame));
 
-    NSString* comment = stamp.blurb.length ?
+    commentLabel_.text = stamp.blurb.length ?
         [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb] : @"stamped";
-    
-    self.numComments = [stamp.numComments unsignedIntegerValue];
-
-    CGFloat commentMaxWidth = kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 3;
-    if (numComments_ > 0)
-      commentMaxWidth -= (CGRectGetWidth(numCommentsLabel_.frame) + CGRectGetWidth(commentBubbleImageView_.frame) + 8);
-
-    CGSize stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
-                                     forWidth:commentMaxWidth
-                                lineBreakMode:UILineBreakModeTailTruncation];
-    commentLabel_.text = comment;
-    commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3,
-                                     57,
-                                     stringSize.width,
-                                     stringSize.height);
+    self.numComments = [stamp.numComments unsignedIntegerValue];    
 
     self.hidePhotos = NO;
     
