@@ -25,13 +25,15 @@
 #import "Util.h"
 
 static NSString* const kFriendsPath = @"/temp/friends.json";
-//static NSSTring* const kFriendIDsPath = @"friends
+static NSString* const kFriendIDsPath = @"/friendships/friends.json";
+static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @interface PeopleViewController ()
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
 - (void)userProfileHasChanged:(NSNotification*)notification;
+- (void)currentUserUpdated:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
 @end
@@ -67,6 +69,11 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                            selector:@selector(userProfileHasChanged:)
                                                name:kUserProfileHasChangedNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(currentUserUpdated:)
+                                               name:kCurrentUserHasUpdatedNotification
+                                             object:nil];
+
   if ([AccountManager sharedManager].currentUser) {
     [self loadFriendsFromNetwork];
     [self loadFriendsFromDataStore];
@@ -90,9 +97,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
-
-  if (!friendsArray_.count)
-    [self loadFriendsFromNetwork];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -129,6 +133,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                                                ascending:YES 
                                                                 selector:@selector(localizedCaseInsensitiveCompare:)];
   User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser)
+    return;
+
   self.friendsArray = [currentUser.following sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
   [self.tableView reloadData];
 }
@@ -147,6 +154,12 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if ([objectLoader.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound) {
+    // Kick off load of friend data if new friend is added and unfollow anyone who isn't in the
+    // list anymore.
+    
+  }
+  
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
     User* currentUser = [AccountManager sharedManager].currentUser;
@@ -292,6 +305,13 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
   [self.tableView reloadData];
+}
+
+- (void)currentUserUpdated:(NSNotification*)notification {
+  if (!friendsArray_) {
+    [self loadFriendsFromNetwork];
+    [self loadFriendsFromDataStore];
+  }
 }
 
 @end
