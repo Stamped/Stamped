@@ -14,19 +14,14 @@ from errors import Fail
 
 available_commands = {
     'create' : 'create_stack', 
-    'create_stack' : 'create_stack', 
     
     'delete' : 'delete_stack', 
-    'delete_stack' : 'delete_stack', 
     
     'delete' : 'delete_stack', 
-    'delete_stack' : 'delete_stack', 
     
     'list' : 'list_stacks', 
-    'list_stacks' : 'list_stacks', 
     
     'update' : 'update_stack', 
-    'update_stack' : 'update_stack', 
     
     'crawl' : 'crawl', 
     'stress' : 'stress', 
@@ -40,6 +35,8 @@ available_commands = {
     'repair' : 'repair_stack', 
     
     'force_db_primary' : 'force_db_primary_change', 
+    
+    'create_image' : 'create_image', 
 }
 
 def parseCommandLine():

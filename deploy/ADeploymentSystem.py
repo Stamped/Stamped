@@ -18,6 +18,10 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
+    def create_image(self, *args):
+        pass
+    
+    @abstract
     def create_stack(self, *args):
         pass
     

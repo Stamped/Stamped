@@ -6,17 +6,20 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import re, os, utils
+import re, os, time, utils
 
 from ..DeploymentSystem     import DeploymentSystem
 from errors                 import Fail
 
+from datetime               import datetime
+from AWSInstance            import AWSInstance
 from AWSDeploymentStack     import AWSDeploymentStack
 from boto.ec2.connection    import EC2Connection
 from boto.exception         import EC2ResponseError
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_SECRET_KEY = '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'
+AWS_SECRET_KEY    = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
+AWS_AMI_USER_ID   = '688550672341'
 
 class AWSDeploymentSystem(DeploymentSystem):
     def __init__(self, name, options):
@@ -104,8 +107,17 @@ class AWSDeploymentSystem(DeploymentSystem):
             {
                 'name' : 'crawler', 
                 'desc' : 'Crawler security group', 
-                'rules' : [
-                ], 
+                'rules' : [ ], 
+            }, 
+            {
+                'name' : 'bootstrap', 
+                'desc' : 'Bootstrap security group', 
+                'rules' : [ ], 
+            }, 
+            {
+                'name' : 'temp', 
+                'desc' : 'Temporary security group', 
+                'rules' : [ ], 
             }, 
             {
                 'name' : 'test', 
@@ -153,12 +165,13 @@ class AWSDeploymentSystem(DeploymentSystem):
                     ret = sg.authorize(**rule)
                     assert ret
                 except:
-                    utils.log("error initializing security group '%s'" % name)
+                    #utils.log("error initializing security group '%s'" % name)
+                    #utils.printException()
                     break
     
     def _init_env(self):
         self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
-        #self._init_security_groups()
+        self._init_security_groups()
         
         self.env = utils.AttributeDict(os.environ)
         reservations = self.conn.get_all_instances()
@@ -184,4 +197,58 @@ class AWSDeploymentSystem(DeploymentSystem):
             
             instances = stacks[stackName]
             self._stacks[stackName] = AWSDeploymentStack(stackName, self, instances)
+    
+    def get_bootstrap_image(self):
+        images = self.conn.get_all_images(owners=[ AWS_AMI_USER_ID ])
+        if 0 == len(images):
+            utils.log("[%s] unable to find custom AMI to use" % self)
+        
+        # return the latest image (empirically the last one returned from amazon, 
+        # though as far as i can tell, there is no guarantee this is the latest)
+        for i in xrange(len(images)):
+            image = images[-(i + 1)]
+            
+            print image
+            if image.state == u'available':
+                return image
+            elif image.state == u'pending':
+                utils.log("[%s] warning: recent AMI %s still pending; falling back to earlier image" % \
+                          self, image)
+            else:
+                utils.log("[%s] warning: found AMI %s with unexpected state (%s)" % \
+                          self, image, image.state)
+        
+        return None
+    
+    def create_image(self, *args):
+        config = { 'roles' : [ 'bootstrap', 'temp', ], 'name' : 'temp0' }
+        instance = AWSInstance(self, config)
+        instance.create()
+        
+        now     = datetime.utcnow()
+        name    = 'stamped.base.ami (%s-%s-%s %s.%s.%s)' % (now.year, now.month, now.day, now.hour, now.minute,  now.second)
+        image   = self.conn.create_image(instance.instance_id, name, "Base AMI for Stamped instances", False)
+        
+        utils.log("[%s] waiting for AMI %s (%s) to come online" % (self, name, image))
+        images  = self.conn.get_all_images(image_ids=[ image ])
+        image   = images[0]
+        success = False
+        
+        while True:
+            image.update()
+            
+            if image.state == u'pending':
+                time.sleep(2)
+            elif image.state == u'available':
+                success = True
+                break
+            else:
+                utils.log("[%s] error creating AMI %s (%s) (invalid state: %s)" % (self, name, image, image.state))
+                break
+        
+        if success:
+            utils.log("[%s] successfully created AMI %s (%s)" % (self, name, image))
+        
+        utils.log("[%s] cleaning up temp instance %s" % (self, instance))
+        instance.delete()
 
