@@ -37,7 +37,6 @@ typedef enum {
 @property (nonatomic, retain) NSSet* stamps;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
-@property (nonatomic, readonly) UIImage* categoryImage;
 @property (nonatomic, readonly) UIImage* inboxTodoCategoryImage;
 @property (nonatomic, readonly) UIImage* highlightedInboxTodoCategoryImage;
 @property (nonatomic, readonly) UIImage* stampDetailCategoryImage;
