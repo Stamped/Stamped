@@ -439,10 +439,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)viewWillAppear:(BOOL)animated {
   titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
   detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
-  categoryImageView_.image = [objectToStamp_ valueForKey:@"categoryImage"];
-//  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
-//                                            forWidth:CGRectGetWidth(titleLabel_.frame)
-//                                       lineBreakMode:titleLabel_.lineBreakMode];
+  //categoryImageView_.image = [objectToStamp_ valueForKey:@"stampDetailCategoryImage"];
   
   [headerView_ setEntity:objectToStamp_];
   

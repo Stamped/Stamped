@@ -86,9 +86,9 @@
     if (searchResult) {
       titleLabel_.text = searchResult.title;
       subtitleLabel_.text = searchResult.subtitle;
-      categoryImageView_.image = searchResult.largeCategoryImage;
+      categoryImageView_.image = searchResult.entitySearchCategoryImage;
       categoryImageView_.highlightedImage =
-          [Util whiteMaskedImageUsingImage:searchResult.largeCategoryImage];
+          [Util whiteMaskedImageUsingImage:searchResult.entitySearchCategoryImage];
       if (searchResult.distance) {
         CGFloat miles = searchResult.distance.floatValue;
         if (miles < 2.0) {

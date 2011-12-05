@@ -26,7 +26,9 @@ typedef enum {
 @property (nonatomic, copy) NSString* entityID;
 
 @property (nonatomic, readonly) SearchCategory searchCategory;
-@property (nonatomic, readonly) UIImage* categoryImage;
-@property (nonatomic, readonly) UIImage* largeCategoryImage;
+
+@property (nonatomic, readonly) UIImage* stampDetailCategoryImage;
+@property (nonatomic, readonly) UIImage* entitySearchCategoryImage;
+
 
 @end
