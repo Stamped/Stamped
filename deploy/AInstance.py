@@ -7,8 +7,10 @@ __license__ = "TODO"
 
 import Globals
 import time, utils
+
+from pprint import pprint
 from errors import *
-from utils import abstract
+from utils  import abstract
 
 class AInstance(object):
     def __init__(self, stack, config):
@@ -110,13 +112,18 @@ class AInstance(object):
         raise NotImplementedError
     
     def _init_config(self):
-        assert 'name'  in self.config
-        assert 'roles' in self.config
-        
-        self.config['stack'] = self.stack.name
+        if self.stack is not None:
+            self.config['stack'] = self.stack.name
+        else:
+            self.config['stack'] = 'null'
     
     def __str__(self):
-        name = "%s(%s.%s)" % (self.__class__.__name__, self.stack.name, self.name)
+        if self.stack is not None:
+            stack_name = self.stack.name
+        else:
+            stack_name = 'null'
+        
+        name = "%s(%s.%s)" % (self.__class__.__name__, stack_name, self.name)
         
         #if self.state == 'running':
         #    try:

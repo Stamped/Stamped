@@ -243,14 +243,15 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def _get_replset_status(self):
         status = self.run_mongo_cmd('rs.status()')
-        if 'members' in status:
+        if status is not None and 'members' in status:
             status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
     
     def _get_replset_conf(self):
         status  = self.run_mongo_cmd('rs.conf()')
-        status.members = list(utils.AttributeDict(node) for node in status.members)
+        if status is not None and 'members' in status:
+            status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
     
@@ -584,6 +585,7 @@ class AWSDeploymentStack(ADeploymentStack):
         # placing this new node into the AZ which has the minimum number of 
         # existing nodes
         placements = sorted(placements.iteritems(), key=lambda p: (p[1], p[0]))
+        pprint(placements)
         
         pool = Pool(8)
         instances = []
@@ -592,10 +594,10 @@ class AWSDeploymentStack(ADeploymentStack):
             cur_conf = conf.copy()
             cur_conf['name'] = '%s%d' % (add, top + i)
             
-            if 0 == placements[-1][1] and count == 1:
-                placement = 'us-east-1a' # default availability zone
-            else:
-                placement = placements[i % len(placements)][0]
+            #if 0 == placements[0][1] and count == 1:
+            #    placement = 'us-east-1a' # default availability zone
+            #else:
+            placement = placements[i % len(placements)][0]
             
             cur_conf['placement'] = placement
             

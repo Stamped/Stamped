@@ -143,7 +143,10 @@ class AWSInstance(AInstance):
     
     @property
     def conn(self):
-        return self.stack.conn
+        if self.stack is not None:
+            return self.stack.conn
+        else:
+            return None
     
     def _create(self, block):
         assert self.state is None
@@ -303,8 +306,11 @@ class AWSInstance(AInstance):
         #return user_data64
     
     def _get_image(self, instance_type, instance_region):
-        ami = _getAMI(instance_type, instance_region, INSTANCE_OS, INSTANCE_EBS)
-        return self.conn.get_image(ami)
+        if 'bootstrap' in self.roles:
+            ami = _getAMI(instance_type, instance_region, INSTANCE_OS, INSTANCE_EBS)
+            return self.conn.get_image(ami)
+        else:
+            return self.stack.system.get_bootstrap_image()
     
     def __getattr__(self, key):
         try:
