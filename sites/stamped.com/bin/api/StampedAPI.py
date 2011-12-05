@@ -1270,6 +1270,7 @@ class StampedAPI(AStampedAPI):
                         stamp.credit[i].color_secondary = creditedUser['color_secondary']
                         stamp.credit[i].privacy = creditedUser['privacy']
                     else:
+                        stamp.credit[i] = None
                         msg = 'Unable to match user_id %s for credit on stamp id %s' % \
                             (stamp.credit[i].user_id, stamp.stamp_id)
                         logs.warning(msg)
