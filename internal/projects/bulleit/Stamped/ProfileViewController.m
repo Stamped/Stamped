@@ -137,6 +137,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                                   action:@selector(editButtonPressed:)];
     [self.navigationItem setRightBarButtonItem:editButton];
     [editButton release];
+
+    [followIndicator_ stopAnimating];
+    followButton_.hidden = YES;
+    unfollowButton_.hidden = YES;
+    [self addStampsRemainingLayer];
   }
   
   self.highlightView.backgroundColor = [UIColor whiteColor];
@@ -212,8 +217,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
   if ([sectionInfo numberOfObjects] == 0)
     [self loadStampsFromNetwork];
-  if (followButton_.hidden && unfollowButton_.hidden)
-    [self loadRelationshipData];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -664,16 +667,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)loadRelationshipData {
   NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
-  if (!currentUserID)
+  if (!currentUserID || [currentUserID isEqualToString:user_.userID])
     return;
 
-  if ([currentUserID isEqualToString:user_.userID]) {
-    [followIndicator_ stopAnimating];
-    followButton_.hidden = YES;
-    unfollowButton_.hidden = YES;
-    [self addStampsRemainingLayer];
-    return;
-  }
   [followIndicator_ startAnimating];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kFriendshipCheckPath delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:currentUserID, @"user_id_a",
