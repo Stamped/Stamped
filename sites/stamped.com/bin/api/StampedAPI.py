@@ -2883,6 +2883,9 @@ class StampedAPI(AStampedAPI):
             if details is not None:
                 entity2 = self._googlePlaces.parseEntity(details, valid=True)
             
+            # TODO: if entity is not None and entity2 is not None, make sure 
+            # entity2's title is ~= entity1's title. if not, take entity1
+            
             if entity2 is not None:
                 entity = entity2
             
