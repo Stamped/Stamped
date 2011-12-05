@@ -1355,11 +1355,15 @@ class StampedAPI(AStampedAPI):
         # Extract credit
         credit = []
         creditedUserIds = []
-        if creditData != None:
+        if creditData != None and isinstance(creditData, list):
 
             ### TODO: Filter out non-ASCII data for credit
+            creditedScreenNames = []
+            for creditedScreenName in creditData:
+                if utils.validate_screen_name(creditedScreenName):
+                    creditedScreenNames.append(creditedScreenName)
 
-            creditedUsers = self._userDB.lookupUsers(None, creditData)
+            creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
             
             for creditedUser in creditedUsers:
                 userId = creditedUser['user_id']
@@ -1640,7 +1644,7 @@ class StampedAPI(AStampedAPI):
         # Credit
         credit = []
         creditedUserIds = []
-        if creditData == None:
+        if creditData == None or not isinstance(creditData, list):
             stamp.credit = None
         else:
             previouslyCredited = []
@@ -1648,8 +1652,12 @@ class StampedAPI(AStampedAPI):
                 previouslyCredited.append(creditedUser.user_id)
 
             ### TODO: Filter out non-ASCII data for credit
+            creditedScreenNames = []
+            for creditedScreenName in creditData:
+                if utils.validate_screen_name(creditedScreenName):
+                    creditedScreenNames.append(creditedScreenName)
 
-            creditedUsers = self._userDB.lookupUsers(None, creditData)
+            creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
 
             for creditedUser in creditedUsers:
                 userId = creditedUser['user_id']
