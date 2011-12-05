@@ -136,7 +136,7 @@ def handle_music_feed(feed, matcher, appleRSS, aids, options):
             continue
         
         aids.add(aid)
-        utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
+        utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
         entity.a_popular = True
         
         if entity.subcategory == 'album':
