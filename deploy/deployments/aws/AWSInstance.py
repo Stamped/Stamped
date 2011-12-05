@@ -209,7 +209,7 @@ class AWSInstance(AInstance):
         
         if block:
             # wait for init script to finish
-            self._validate_port(8649, desc="init script / ganglia", timeout=1200)
+            self._validate_port(8649, desc="init script", timeout=1200)
             
             if 'db' in self.roles:
                 # Check for mongo to finish

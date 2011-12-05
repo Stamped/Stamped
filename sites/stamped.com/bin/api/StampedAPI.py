@@ -9,6 +9,7 @@ import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
 
+from pprint          import pprint, pformat
 from datetime        import datetime
 from errors          import *
 from auth            import convertPasswordForStorage
@@ -2888,14 +2889,26 @@ class StampedAPI(AStampedAPI):
             
             details = self._googlePlaces.getPlaceDetails(gref)
             entity2 = None
+            
             if details is not None:
                 entity2 = self._googlePlaces.parseEntity(details, valid=True)
-            
-            if entity2 is not None:
-                entity = entity2
-            
-            if entity is not None:
-                self._googlePlaces.parseEntityDetail(details, entity)
+                
+                replace  = (entity is None and entity2 is not None)
+                replace |= (entity is not None and entity2 is not None and 
+                            entity.title.lower() == entity2.title.lower())
+                
+                if replace:
+                    entity = entity2
+                    self._googlePlaces.parseEntityDetail(details, entity)
+                elif entity is None:
+                    logs.warn("_convertSearchId: unable to find search_id in tempentities (%s) and unable to convert google places reference" % search_id)
+                elif entity2 is None:
+                    logs.warn("_convertSearchId: unable to convert google places reference (%s)" % search_id)
+                else:
+                    e1 = pformat(entity.value)
+                    e2 = pformat(entity2.value)
+                    
+                    logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             

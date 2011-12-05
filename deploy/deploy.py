@@ -19,16 +19,11 @@ available_commands = {
     'delete' : 'delete_stack', 
     'delete_stack' : 'delete_stack', 
     
-    'connect' : 'connect', 
-    'connect_stack' : 'connect', 
-    
     'delete' : 'delete_stack', 
     'delete_stack' : 'delete_stack', 
     
     'list' : 'list_stacks', 
     'list_stacks' : 'list_stacks', 
-    
-    'create_and_connect' : [ 'create_stack', 'connect' ], 
     
     'update' : 'update_stack', 
     'update_stack' : 'update_stack', 
@@ -97,20 +92,17 @@ def main():
     deploymentSystemClass = deployments[options.deployment]
     deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__, options)
     
-    commands = available_commands[args[0]]
-    if not isinstance(commands, (list, tuple)):
-        commands = [ commands ]
+    command = available_commands[args[0]]
     
-    for command in commands:
-        func = getattr(deploymentSystem, command, None)
-        if func is None:
-            raise Fail("'%s' does not support command '%s'" % (deploymentSystem, command))
-        
-        try:
-            func(*args[1:])
-        except Exception:
-            utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
-            raise
+    func = getattr(deploymentSystem, command, None)
+    if func is None:
+        raise Fail("'%s' does not support command '%s'" % (deploymentSystem, command))
+    
+    try:
+        func(*args[1:])
+    except Exception:
+        utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
+        raise
     
     deploymentSystem.shutdown()
 

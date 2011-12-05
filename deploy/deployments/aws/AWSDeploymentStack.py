@@ -136,13 +136,16 @@ class AWSDeploymentStack(ADeploymentStack):
         
         utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
     
-    def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, db='stamped'):
+    def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, 
+                      db='stamped', instance=None, verbose=False):
         """
             Runs the desired mongo shell command in the context of the given db, 
             on either a random db node in the stack if slave_okay is True or the 
             current primary node if slave_okay is False. If transform is True, 
             the console output of running the given command will be interpreted 
             as JSON and returned as a Python AttributeDict.
+            
+            If an instance is specified, the command will be run on that instance, instead.
         """
         
         db_instances = self.db_instances
@@ -154,16 +157,22 @@ class AWSDeploymentStack(ADeploymentStack):
         cmd_template = "mongo %s --quiet --eval 'printjson(%s);'"
         cmd = cmd_template % (db, mongo_cmd)
         
-        if not slave_okay:
+        if instance is not None:
+            db_instances = [ instance ]
+        elif not slave_okay:
             primary = self._get_primary()
             assert primary is not None
             
             db_instances = [ primary ]
         
+        hide_args = [ 'stdout', ]
+        if not verbose:
+            hide_args.append('running')
+        
         for instance in db_instances:
             try:
                 with settings(host_string=instance.public_dns_name):
-                    with hide('stdout'):
+                    with hide(*hide_args):
                         result = run(cmd, pty=False, shell=True)
                         
                         if transform:
@@ -198,8 +207,7 @@ class AWSDeploymentStack(ADeploymentStack):
             Exception.
         """
         
-        utils.log("[%s] attempting to find primary db node" % self)
-        
+        #utils.log("[%s] attempting to find primary db node" % self)
         maxdelay = 16
         delay = 1
         
@@ -323,9 +331,11 @@ class AWSDeploymentStack(ADeploymentStack):
         except Fail:
             initialize = True
         
+        # check if replica set needs to be initialized
         if initialize or ('startupStatus' in status and 3 == status['startupStatus']):
             utils.log("[%s] initializing empty replica set")
             
+            # initialize the replica set with a default configuration
             config = self._get_initial_replica_set_config()
             confs  = json.dumps(config)
             retval = self.run_mongo_cmd('rs.initiate(%s)' % confs, slave_okay=True, db='stamped')
@@ -336,6 +346,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 utils.log("[%s] error initializing replica set: '%s'" % (self, retval.info))
                 return
             
+            # wait until replica set reports its status as online
             utils.log("[%s] waiting for replica set '%s' to come online..." % (self, config['_id']))
             while True:
                 time.sleep(1)
@@ -344,6 +355,7 @@ class AWSDeploymentStack(ADeploymentStack):
                     status = self._get_replset_status()
                     if status is not None:
                         utils.log("[%s] replica set '%s' is online!" % (self, status.set))
+                        pprint(status)
                         break
                 except:
                     pass
@@ -351,6 +363,8 @@ class AWSDeploymentStack(ADeploymentStack):
         # group replica set members by state
         node_state = defaultdict(list)
         for node in status.members:
+            if node.state == 0 or node.state == 5:
+                node_state['initializing'].append(node)
             if node.state == 1:
                 node_state['primary'].append(node)
             elif node.state == 2:
@@ -385,17 +399,31 @@ class AWSDeploymentStack(ADeploymentStack):
         if warn:
             utils.log()
         
-        new_members = []
+        new_members  = []
+        db_members   = {}
+        highest_id   = 0
+        changed_conf = False
         
+        for instance in db_instances:
+            db_members[instance.private_ip_address] = -1
+        
+        # initialize a new replica set configuration by finding the intersection 
+        # between db nodes in this stack and healthy nodes in the replica set
         for state, nodes in node_state.iteritems():
             for node in nodes:
+                if node._id > highest_id:
+                    highest_id = node._id
+                
                 ip = node.name.split(':')[0].lower()
                 valid = False
                 
-                if state != 'unhealthy':
-                    for instance in db_instances:
-                        if ip == instance.private_ip_address.lower():
+                for instance in db_instances:
+                    if ip == instance.private_ip_address.lower():
+                        if state == 'unhealthy':
+                            db_members[instance.private_ip_address] = 0
+                        else:
                             valid = True
+                            db_members[instance.private_ip_address] = 1
                             break
                 
                 if valid:
@@ -406,6 +434,44 @@ class AWSDeploymentStack(ADeploymentStack):
                 else:
                     utils.log("[%s] warning: removing stale/unhealthy db node at '%s'" % (self, ip))
                     warn = True
+                    changed_conf = True
+        
+        # add any db nodes which weren't originally in the replica set to the 
+        # new configuration
+        for ip, state in db_members.iteritems():
+            if state == -1:
+                instance = None
+                for node in db_instances:
+                    if node.private_ip_address == ip:
+                        instance = node
+                        break
+                
+                if instance is None:
+                    continue
+                
+                # test if this db node is healthy by running a serverStatus command
+                error = None
+                try:
+                    ret = self.run_mongo_cmd('db.serverStatus()', slave_okay=True, instance=instance)
+                    if not 'ok' in ret or ret['ok'] != 1:
+                        error = str(ret)
+                except Exception, e:
+                    error = e
+                
+                if error is not None:
+                    utils.log("[%s] db node %s not reachable / healthy: '%s'" % 
+                              (self, instance.name, str(error)))
+                    continue
+                
+                utils.log("[%s] adding db node %s to replica set" % (self, instance.name))
+                highest_id += 1
+                changed_conf = True
+                warn = True
+                
+                new_members.append({
+                    '_id' : highest_id, 
+                    'host' : ip, 
+                })
         
         conf = {
             "_id" : status.set, 
@@ -415,8 +481,9 @@ class AWSDeploymentStack(ADeploymentStack):
         if warn:
             utils.log()
         
-        if len(new_members) != len(status.members):
-            utils.log("[%s] reinitializing replica set '%s' with %d nodes'" % 
+        # check if desired configuration has changed
+        if changed_conf or len(new_members) != len(status.members):
+            utils.log("[%s] reinitializing replica set '%s' with %d nodes" % 
                       (self, status.set, len(new_members)))
             
             pprint(conf)
@@ -425,14 +492,16 @@ class AWSDeploymentStack(ADeploymentStack):
             utils.log()
             ret = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
                                      (confs, str(force).lower()), slave_okay=force)
-            if 1 != ret['okay']:
+            
+            if 'ok' in ret and 1 == ret['ok']:
                 utils.log("[%s] successfully reconfigured replica set %s" % (self, status.set))
             else:
                 msg = "[%s] error reconfiguring replica set %s" % (self, status.set)
                 utils.log(msg)
                 pprint(ret)
-                raise msg
+                raise Fail(msg)
             
+            # ensure there are enough members in the replica set
             min_members = 2
             if len(new_members) < min_members:
                 utils.log()
@@ -454,338 +523,6 @@ class AWSDeploymentStack(ADeploymentStack):
         
         pool.join()
         self.instances = [ ]
-    
-    def connect(self):
-        web_server_instances = self.web_server_instances
-        assert len(web_server_instances) > 0
-        
-        web_server = web_server_instances[0]
-        if web_server.state != 'running':
-            raise Fail("Unable to connect to '%s'" % web_server_instances[0])
-        
-        cmd = './connect.sh %s.%s' % (self.name, web_server.name)
-        utils.log(cmd)
-        os.system(cmd)
-    
-    def crawl(self, *args):
-        crawlers = [
-            {
-                'sources' : [ 
-                    'apple_artists', 
-                    #'apple_albums', 
-                    'apple_videos', 
-                ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-            {
-                'sources' : [ 
-                    'opentable', 
-                ], 
-                'numInstances' : 2, 
-                'numProcesses' : 8, 
-            }, 
-            {
-                'sources' : [ 
-                    'zagat', 
-                    #'sfmag', 
-                ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-        ]
-        """
-            {
-                'sources' : [ 
-                    'nymag', 
-                    'bostonmag', 
-                ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-            {
-                'sources' : [ 
-                    'phillymag', 
-                    'chicagomag', 
-                    'washmag', 
-                ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-        ]
-        """
-        
-        #crawler_instances = self.crawler_instances
-        crawler_instances = []
-        reservations = self.conn.get_all_instances()
-        
-        # find all previous crawler instances
-        for reservation in reservations:
-            for instance in reservation.instances:
-                if hasattr(instance, 'tags') and 'stack' in instance.tags and instance.state == 'running':
-                    stackName = instance.tags['stack']
-                    
-                    if stackName == self.name and instance.tags['name'].startswith('crawler'):
-                        crawler_instances.append(AWSInstance(self, instance))
-        
-        # count the number of expected crawler instances per the crawlers config
-        num_instances = 0
-        for crawler in crawlers:
-            num_instances += crawler['numInstances']
-        
-        # attempt to reuse previous crawler instances that are very likely already 
-        # initialized for this crawler run, as opposed to spawning a new set
-        if len(crawler_instances) == num_instances:
-            for instance in crawler_instances:
-                num  = int(instance.tags['name'].replace('crawler', ''))
-                inum = 0
-                while True:
-                    num -= crawlers[inum]['numInstances']
-                    if num < 0:
-                        break
-                    inum += 1
-                
-                if 'instances' in crawlers[inum]:
-                    crawlers[inum]['instances'].append(instance)
-                else:
-                    crawlers[inum]['instances'] = [ instance ]
-            #for crawler in crawlers:
-            #    from pprint import pprint
-            #    pprint(crawler)
-        else:
-            # unable to reuse previous crawler instances since their 
-            # configuration doesn't match the current config. terminate all 
-            # previous crawler instances and create a new set from scratch.
-            if len(crawler_instances) > 0:
-                utils.log("[%s] terminating %d stale crawler instances" % (self, len(crawler_instances)))
-                for instance in crawler_instances:
-                    instance.terminate()
-            
-            instances = []
-            index = 0
-            
-            utils.log("[%s] creating %d crawler instances" % (self, num_instances))
-            
-            # spawn and initialize a new AWS instance per crawler requirements
-            for crawler in crawlers:
-                for i in xrange(crawler['numInstances']):
-                    config = {
-                        'name'  : 'crawler%d' % index, 
-                        'roles' : [ 'crawler' ], 
-                        'instance_type' : 'm1.small', 
-                        # TODO: don't hardcode this
-                        'placement' : 'us-east-1b', 
-                    }
-                    
-                    instance = AWSInstance(self, config)
-                    index += 1
-                    if not 'instances' in crawler:
-                        crawler['instances'] = []
-                    
-                    crawler['instances'].append(instance)
-                    self._pool.spawn(instance.create)
-            
-            # wait until all crawler AWSInstances are initialized before 
-            # beginning to crawl on any of them
-            
-            # TODO: this isn't really necessary; could start crawling on 
-            # instance i once it's ready since each instance is wholly 
-            # independent of all other instances.
-            self._pool.join()
-        
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
-        
-        db_instances = self.db_instances
-        assert len(db_instances) > 1
-        
-        host = db_instances[0].private_ip_address
-        
-        # begin m crawler processes on each of the n crawler instances
-        for crawler in crawlers:
-            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
-                numProcesses = len(crawler['sources'])
-            else:
-                numProcesses = crawler['numProcesses']
-            
-            numCrawlers = crawler['numInstances'] * numProcesses
-            index = 0
-            
-            for instance in crawler['instances']:
-                with settings(host_string=instance.public_dns_name):
-                    num_retries = 5
-                    while num_retries > 0:
-                        try:
-                            cmd = 'mkdir -p /stamped/logs && chmod -R 777 /stamped/logs'
-                            sudo(cmd)
-                            break
-                        except SystemExit:
-                            num_retries -= 1
-                            time.sleep(1)
-                    
-                    for i in xrange(numProcesses):
-                        mount = ""
-                        
-                        if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
-                            sources = [ crawler['sources'][i], ]
-                            if i == 0:
-                                mount = "-m"
-                            
-                            # for now, only change the source for each process, not the ratio
-                            ratio = "%s/%s" % (1, 1)
-                        else:
-                            sources = crawler['sources']
-                            ratio = "%s/%s" % (index + 1, numCrawlers)
-                        
-                        sources = string.joinfields(sources, ' ')
-                        crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
-                        
-                        log = "/stamped/logs/crawler%d.log" % index
-                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -s merge -g %s --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, mount, ratio, sources, log)
-                        index += 1
-                        
-                        num_retries = 5
-                        while num_retries > 0:
-                            ret = utils.runbg(instance.public_dns_name, env.user, cmd)
-                            if 0 == ret:
-                                break
-                            num_retries -= 1
-    
-    def setup_crawler_data(self, *args):
-        config = {
-            'name' : 'crawler_setup0', 
-            'roles' : [ ], 
-            'instance_type' : 'm1.small', 
-            'placement' : 'us-east-1b', 
-        }
-        
-        # create temporary instance whose only purpose will be to attach and mount 
-        # the crawler data AWS volume, add data to it, and then cleanup.
-        instance = AWSInstance(self, config)
-        instance.create(block=False)
-        
-        files = [
-            "album_popularity_per_genre", 
-            "artist_collection", 
-            "artist", 
-            "artist_type", 
-            "collection", 
-            "collection_type", 
-            "genre", 
-            "media_type", 
-            #"song", 
-            "role", 
-            "storefront", 
-            "video", 
-            "video_price", 
-        ]
-        
-        volume_dir = "/dev/sdh5"
-        mount_dir = "/mnt/crawlerdata"
-        
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
-        
-        # create and attach volume to temporary instance
-        with settings(host_string=instance.public_dns_name):
-            utils.log("creating volume and attaching to instance %s..." % instance._instance.id)
-            volume = self.conn.create_volume(8, instance._instance.placement)
-            #volume = self.conn.get_all_volumes(volume_ids=['vol-8cbb5ce6', ])[0]
-            
-            while volume.status == u'creating':
-                time.sleep(2)
-                volume.update()
-            
-            try:
-                if volume.status != 'available':
-                    i = self.conn.get_all_instances(instance_ids=[ volume.attach_data.instance_id, ])[0].instances[0]
-                    with settings(host_string=i.public_dns_name):
-                        sudo("umount %s" % volume_dir)
-                    
-                    volume.detach(force=True)
-                    time.sleep(6)
-                    while volume.status != 'available':
-                        time.sleep(2)
-                        print volume.update()
-            except EC2ResponseError:
-                pass
-            
-            try:
-                #with settings(warn_only=True):
-                #    sudo("umount %s" % volume_dir)
-                
-                volume.attach(instance._instance.id, volume_dir)
-            except EC2ResponseError:
-                volumes = self.conn.get_all_volumes()
-                
-                for v in volumes:
-                    if v.status == u'in-use' and \
-                       v.attach_data.instance_id == instance._instance.id:
-                        with settings(warn_only=True):
-                            sudo("umount %s" % volume_dir)
-                        
-                        v.detach(force=True)
-                        
-                        while v.status != u'available':
-                            time.sleep(2)
-                            v.update()
-                
-                while not volume.attach(instance._instance.id, volume_dir):
-                    time.sleep(5)
-            
-            while volume.status != u'in-use':
-                time.sleep(2)
-                volume.update()
-            
-            cmds = [
-                'mkdir -p %s' % mount_dir, 
-                'sync', 
-                'mkfs -t ext3 %s' % volume_dir, 
-                'mount -t ext3 %s %s' % (volume_dir, mount_dir), 
-                'chown -R %s %s' % (env.user, mount_dir, ), 
-                'chmod -R 700 %s' % (mount_dir, ), 
-            ]
-            
-            # initialize and mount volume
-            for cmd in cmds:
-                sudo(cmd)
-            
-            def _put_file(filename):
-                zipped = filename + ".gz"
-                if os.path.exists(zipped):
-                    filename = zipped
-                
-                #remote_path = os.path.join(os.path.join(mount_dir, "data/apple"), name)
-                
-                utils.log("uploading file '%s'" % filename)
-                #utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
-                put(local_path=filename, remote_path=mount_dir, use_sudo=True)
-                utils.log("done uploading file '%s'" % filename)
-                #if not fabricfiles.exists(os.path.join(mount_dir, os.path.basename(filename)), use_sudo=True):
-                #else:
-                #    utils.log("remote file '%s' already exists" % filename)
-            
-            pool = Pool(2)
-            
-            # copy all files over to volume
-            epf_base = "/Users/fisch0920/dev/stamped/sites/stamped.com/bin/crawler/sources/dumps/data/apple"
-            for name in files:
-                filename = os.path.join(epf_base, name)
-                pool.spawn(_put_file, filename)
-                #_put_file(filename)
-            
-            pool.join()
-            utils.log("upload successful; unmounting and detaching volume...")
-            
-            # unmount and detach volume
-            sudo("umount %s" % mount_dir)
-            volume.detach()
-            
-            while volume.status != u'available':
-                time.sleep(2)
-                volume.update()
-            
-            utils.log("volume: %s" % volume.id)
     
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)
@@ -852,19 +589,20 @@ class AWSDeploymentStack(ADeploymentStack):
         instances = []
         
         def _create_instance(i):
-            conf['name'] = '%s%d' % (add, top + i)
+            cur_conf = conf.copy()
+            cur_conf['name'] = '%s%d' % (add, top + i)
             
             if 0 == placements[-1][1] and count == 1:
                 placement = 'us-east-1a' # default availability zone
             else:
-                placement = placements[i][0]
+                placement = placements[i % len(placements)][0]
             
-            conf['placement'] = placement
+            cur_conf['placement'] = placement
             
             # create and bootstrap the new instance
             utils.log("[%s] creating instance %s in availability zone %s" % 
-                      (self, conf['name'], conf['placement']))
-            instance = AWSInstance(self, conf)
+                      (self, cur_conf['name'], cur_conf['placement']))
+            instance = AWSInstance(self, cur_conf)
             
             try:
                 instance.create()
@@ -884,6 +622,7 @@ class AWSDeploymentStack(ADeploymentStack):
             utils.log("[%s] error: failed to add %d instances" % (self, count))
         
         if add in ['api', 'web']:
+            return
             utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
             
             # get all ELBs

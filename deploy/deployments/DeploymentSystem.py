@@ -57,11 +57,6 @@ class DeploymentSystem(ADeploymentSystem):
         stack.delete()
         del self._stacks[stack.name]
     
-    def connect(self, *args):
-        stackName = args[0]
-        stack = self._get_matching_stack(stackName)
-        stack.connect()
-    
     def update_stack(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)

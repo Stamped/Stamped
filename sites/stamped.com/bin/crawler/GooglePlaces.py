@@ -459,15 +459,14 @@ def parseCommandLine():
     parser.add_option("-s", "--suggest", action="store_true", default=False, 
                       help="Use Places autosuggest API")
     
-    #parser.add_option("-d", "--detail", action="store_true", dest="detail", 
-    #    default=False, help="Included more detailed search result info.")
+    parser.add_option("-d", "--detail", action="store_true", default=False, 
+                      help="Use Places detail API")
     
     parser.set_defaults(address=True)
     parser.set_defaults(name=None)
     parser.set_defaults(types=None)
     parser.set_defaults(limit=None)
     parser.set_defaults(radius=None)
-    parser.set_defaults(detail=False)
     
     (options, args) = parser.parse_args()
     
@@ -479,7 +478,7 @@ def parseCommandLine():
         options.radius = 500
     
     do = True
-    if options.suggest:
+    if options.suggest or options.detail:
         if len(args) > 1:
             options.input = args[1]
             args[0] = args[1]
@@ -537,7 +536,13 @@ def main():
     if options.types:
         params['types'] = options.types
     
-    if options.suggest:
+    if options.detail:
+        results = places.getPlaceDetails(options.input, params)
+        
+        #for result in ret:
+        #entity = self.parseEntity(result)
+        #self.parseEntityDetail(details, entity)
+    elif options.suggest:
         results = places.getAutocompleteResults(options.latLng, options.input, params)
     elif options.address:
         results = places.getSearchResultsByAddress(options.latLng, params)
@@ -574,5 +579,5 @@ pprint(r)
 """
 
 if __name__ == '__main__':
-    pass#main()
+    main()
 
