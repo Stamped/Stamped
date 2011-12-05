@@ -6,10 +6,14 @@
 //  Copyright (c) 2011 Stamped. All rights reserved.
 //
 
+#import <CoreText/CoreText.h>
+
 #import "StampDetailHeaderView.h"
+
+#import "Stamp.h"
+#import "Entity.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
-#import <CoreText/CoreText.h>
 
 @interface StampDetailHeaderView ()
 
@@ -48,8 +52,7 @@
 @synthesize hideArrow = hideArrow_;
 
 
-- (id)initWithFrame:(CGRect)aFrame
-{
+- (id)initWithFrame:(CGRect)aFrame {
   self = [super initWithFrame:aFrame];
   if (self) {
     inverted_ = NO;
@@ -69,20 +72,20 @@
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
     titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
-    titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);  // So the ellipsis draws the way we like it.
+    // So the ellipsis draws the way we like it.
+    titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);
     titleLayer_.fontSize = 24;
     titleLayer_.hidden = YES;
     
     CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
     CGRect frame = CGRectMake(15, ascender, aFrame.size.width - 50, 56);
 
-//    frame.origin.y += ascender;
     titleLayer_.frame = frame;
-    NSDictionary *newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
+    NSDictionary* newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     titleLayer_.actions = newActions;
     [newActions release];
     
-    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(15, 45, 15, 12)];
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
     categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
@@ -106,7 +109,6 @@
   return self;
 }
 
-
 - (void)dealloc {
   self.title = nil;
   self.stamp = nil;
@@ -122,107 +124,111 @@
   self.gradientLayer = nil;
   self.delegate = nil;
   self.arrowLayer = nil;
+  [super dealloc];
 }
 
-- (void)setStamp:(Stamp *)stamp {
-  stamp_ = stamp;
-  self.stampImage = [Util stampImageForUser:stamp_.user];
-  self.stampImageInverted = [Util stampImageWithPrimaryColor:@"ffffff" secondary:@"ffffff"];
-  self.title = stamp.entityObject.title;
-  
-  categoryImageView_.image = stamp_.entityObject.categoryImage;
-  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.categoryImage];
-  [categoryImageView_  sizeToFit];
-  CGRect frame = categoryImageView_.frame;
-  frame.origin.x = titleLayer_.frame.origin.x + 1;
-  categoryImageView_.frame = frame;
-  subtitleLabel_.text = stamp_.entityObject.subtitle;
-  frame = subtitleLabel_.frame;
-  frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
-  subtitleLabel_.frame = frame;
-  [self setNeedsDisplay];
+- (void)layoutSubviews {
+  CGSize imageSize = categoryImageView_.image.size;
+  categoryImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 48, imageSize.width, imageSize.height);
+  subtitleLabel_.frame = CGRectMake(CGRectGetMaxX(categoryImageView_.frame) + 4,
+                                    CGRectGetMinY(categoryImageView_.frame) + 1,
+                                    CGRectGetWidth(subtitleLabel_.frame),
+                                    CGRectGetHeight(categoryImageView_.frame));
 }
 
-// only used in stamp creator, i.e., when there is no stamp yet.
-- (void)setEntity:(Entity *)entity {
+- (void)setStamp:(Stamp*)stamp {
+  if (stamp_ != stamp) {
+    [stamp_ release];
+    stamp_ = [stamp retain];
+    if (stamp) {
+      self.stampImage = [Util stampImageForUser:stamp_.user];
+      self.stampImageInverted = [Util stampImageWithPrimaryColor:@"ffffff" secondary:@"ffffff"];
+      self.title = stamp.entityObject.title;
+      subtitleLabel_.text = stamp_.entityObject.subtitle;
+      categoryImageView_.image = stamp_.entityObject.stampDetailCategoryImage;
+      categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stamp_.entityObject.stampDetailCategoryImage];
+      [self setNeedsLayout];
+    }
+  }
+}
+
+// Only used in stamp creator, i.e., when there is no stamp yet.
+- (void)setEntity:(Entity*)entity {
   self.stampImage = nil;
   self.stampImageInverted = nil;
   self.title = [entity valueForKey:@"title"];
-  
-  categoryImageView_.image = [entity valueForKey:@"categoryImage"];
-  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
-  [categoryImageView_  sizeToFit];
-  CGRect frame = categoryImageView_.frame;
-  frame.origin.x = titleLayer_.frame.origin.x + 1;
-  categoryImageView_.frame = frame;
   subtitleLabel_.text = [entity valueForKey:@"subtitle"];
-  frame = subtitleLabel_.frame;
-  frame.origin.x = categoryImageView_.frame.origin.x + categoryImageView_.frame.size.width + 8;
-  subtitleLabel_.frame = frame;
-  [self setNeedsDisplay];
+  categoryImageView_.image = [entity valueForKey:@"stampDetailCategoryImage"];
+  categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
+  [self setNeedsLayout];
 }
 
-- (void)setTitle:(NSString *)title {
-  title_ = title;
-  // Create title label.  
-  NSString* fontString = @"TitlingGothicFBComp-Regular";
-  CGFloat fontSize = 36.0;
-  
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTFontRef titleFont = CTFontCreateWithName((CFStringRef)fontString, fontSize, NULL);
-  CTParagraphStyleRef titleStyle = CTParagraphStyleCreate(settings, numSettings);
-  NSMutableDictionary* titleAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-                                          (id)titleFont, (id)kCTFontAttributeName,
-                                          (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
-                                          (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
-  
-  [titleAttributes setObject:(id)[UIColor stampedDarkGrayColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  titleAttrString_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
-  
-  [titleAttributes setObject:(id)[UIColor whiteColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
-  titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
-  
-  self.titleLayer.string = self.titleAttrString;
-  
-  
-  CTFontRef ellipsisFont = CTFontCreateWithName((CFStringRef)fontString, 24, NULL);
-  NSMutableDictionary* ellipsisAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-                                             (id)ellipsisFont, (id)kCTFontAttributeName,
-                                             (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
-                                             (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
-  
-  CTLineRef ellipsisLine = CTLineCreateWithAttributedString((CFAttributedStringRef)[[[NSAttributedString alloc] initWithString:@"…" 
-                                                                                                                   attributes:ellipsisAttributes] autorelease]);
-  
-  CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self.titleAttrString);
-  CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, 270, kCTLineTruncationEnd, ellipsisLine);
-  
-  CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
-  CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
-  CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? truncatedLineGlyphCount - 1 : lineGlyphCount;
-  CFIndex ligatureCt = title_.length - lineGlyphCount;
-  if (ligatureCt > 0)
-    lastCharIndex += ligatureCt;
-  CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
-  CGFloat width = fmin(self.frame.size.width - 56, offset);
-  
-  // Subtitle.
-  CFRelease(line);
-  CFRelease(truncatedLine);
-  CFRelease(titleFont);
-  CFRelease(titleStyle);
-  [titleAttributes release];
-  CFRelease(ellipsisFont);
-  [ellipsisAttributes release];
-  CFRelease(ellipsisLine);
-  
-  // Badge stamp.
-  stampFrame_ = CGRectMake(22 + width - (46 / 2), 13 - (46 / 2), 46, 46);
-  [self setNeedsDisplay];
+- (void)setTitle:(NSString*)title {
+  if (title_ != title) {
+    [title_ release];
+    title_ = [title copy];
+    if (title) {
+      // Create title label.
+      NSString* fontString = @"TitlingGothicFBComp-Regular";
+      CGFloat fontSize = 36.0;
+
+      CFIndex numSettings = 1;
+      CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+      CTParagraphStyleSetting settings[1] = {
+        {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+      };
+      CTFontRef titleFont = CTFontCreateWithName((CFStringRef)fontString, fontSize, NULL);
+      CTParagraphStyleRef titleStyle = CTParagraphStyleCreate(settings, numSettings);
+      NSMutableDictionary* titleAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                                              (id)titleFont, (id)kCTFontAttributeName,
+                                              (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
+                                              (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
+
+      [titleAttributes setObject:(id)[UIColor stampedDarkGrayColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
+      titleAttrString_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
+      
+      [titleAttributes setObject:(id)[UIColor whiteColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
+      titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
+      
+      self.titleLayer.string = self.titleAttrString;
+      
+      
+      CTFontRef ellipsisFont = CTFontCreateWithName((CFStringRef)fontString, 24, NULL);
+      NSMutableDictionary* ellipsisAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                                                 (id)ellipsisFont, (id)kCTFontAttributeName,
+                                                 (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
+                                                 (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
+      
+      CTLineRef ellipsisLine = CTLineCreateWithAttributedString((CFAttributedStringRef)[[[NSAttributedString alloc] initWithString:@"…" 
+                                                                                                                       attributes:ellipsisAttributes] autorelease]);
+      
+      CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self.titleAttrString);
+      CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, 270, kCTLineTruncationEnd, ellipsisLine);
+      
+      CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
+      CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
+      CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? truncatedLineGlyphCount - 1 : lineGlyphCount;
+      CFIndex ligatureCt = title_.length - lineGlyphCount;
+      if (ligatureCt > 0)
+        lastCharIndex += ligatureCt;
+      CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
+      CGFloat width = fmin(self.frame.size.width - 56, offset);
+      
+      // Subtitle.
+      CFRelease(line);
+      CFRelease(truncatedLine);
+      CFRelease(titleFont);
+      CFRelease(titleStyle);
+      [titleAttributes release];
+      CFRelease(ellipsisFont);
+      [ellipsisAttributes release];
+      CFRelease(ellipsisLine);
+      
+      // Badge stamp.
+      stampFrame_ = CGRectMake(22 + width - (46 / 2), 13 - (46 / 2), 46, 46);
+      [self setNeedsDisplay];
+    }
+  }
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -249,8 +255,7 @@
     [titleLayer_ drawInContext:UIGraphicsGetCurrentContext()];
     CGContextRestoreGState(UIGraphicsGetCurrentContext());
     [stampImageInverted_ drawInRect:stampFrame_];
-  }
-  else {
+  } else {
     [CATransaction begin];
     [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
       [titleLayer_ setString:titleAttrString_];
@@ -293,9 +298,9 @@
   if (CGRectContainsPoint(self.frame, [touch locationInView:self]) && !hideArrow_) {
     inverted_ = YES;
     [delegate_ handleEntityTap:self];
-  }
-  else
+  } else {
     inverted_ = NO;
+  }
   [self setNeedsDisplay];
 }
 

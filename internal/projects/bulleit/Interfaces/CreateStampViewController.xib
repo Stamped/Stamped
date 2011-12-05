@@ -733,30 +733,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">categoryImageView</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="715334343"/>
-					</object>
-					<int key="connectionID">13</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">detailLabel</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="895504012"/>
-					</object>
-					<int key="connectionID">14</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">titleLabel</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="9764505"/>
-					</object>
-					<int key="connectionID">15</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">userImageView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="410269748"/>
@@ -861,14 +837,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">disclosureButton</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="110642938"/>
-					</object>
-					<int key="connectionID">120</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">creditTextField</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="149435353"/>
@@ -906,6 +874,38 @@
 						<reference key="destination" ref="835933604"/>
 					</object>
 					<int key="connectionID">142</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">disclosureButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="110642938"/>
+					</object>
+					<int key="connectionID">120</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">detailLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="895504012"/>
+					</object>
+					<int key="connectionID">14</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">titleLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="9764505"/>
+					</object>
+					<int key="connectionID">15</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">categoryImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="715334343"/>
+					</object>
+					<int key="connectionID">13</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -1035,24 +1035,6 @@
 						<string key="objectName">Toolbar</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">8</int>
-						<reference key="object" ref="9764505"/>
-						<reference key="parent" ref="870662028"/>
-						<string key="objectName">Title Label</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">10</int>
-						<reference key="object" ref="895504012"/>
-						<reference key="parent" ref="870662028"/>
-						<string key="objectName">Entity Detail Label</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">9</int>
-						<reference key="object" ref="715334343"/>
-						<reference key="parent" ref="870662028"/>
-						<string key="objectName">Category Image</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">36</int>
 						<reference key="object" ref="101741781"/>
 						<object class="NSMutableArray" key="children">
@@ -1165,12 +1147,6 @@
 						<string key="objectName">Share Label</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">119</int>
-						<reference key="object" ref="110642938"/>
-						<reference key="parent" ref="870662028"/>
-						<string key="objectName">Disclosure Button</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">124</int>
 						<reference key="object" ref="149435353"/>
 						<reference key="parent" ref="101741781"/>
@@ -1219,6 +1195,30 @@
 						<reference key="object" ref="753084178"/>
 						<reference key="parent" ref="870662028"/>
 						<string key="objectName">Share Label</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">119</int>
+						<reference key="object" ref="110642938"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Disclosure Button</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">10</int>
+						<reference key="object" ref="895504012"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Entity Detail Label</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">8</int>
+						<reference key="object" ref="9764505"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Title Label</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">9</int>
+						<reference key="object" ref="715334343"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Category Image</string>
 					</object>
 				</object>
 			</object>

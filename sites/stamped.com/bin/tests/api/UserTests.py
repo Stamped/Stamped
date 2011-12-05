@@ -257,23 +257,39 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
 
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):
-        (self.userS1, self.tokenS1) = self.createAccount('mariobatali')
-        (self.userS2, self.tokenS2) = self.createAccount('petertravers')
-        (self.userS3, self.tokenS3) = self.createAccount('rebeccaminkoff')
-        (self.userS4, self.tokenS4) = self.createAccount('nymag')
+
+        suggestedUsers = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
+        newAccounts = []
+
+        for suggestedUser in suggestedUsers:
+            path = "account/check.json"
+            data = {
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+                "login": suggestedUser,
+            }
+
+            try:
+                result = self.handlePOST(path, data)
+            except:
+                newAccounts.append(self.createAccount(suggestedUser))
 
         path = "users/suggested.json"
         data = { 
             "oauth_token": self.tokenA['access_token']
         }
         result = self.handleGET(path, data)
+
+        returnedScreenNames = []
         for user in result:
             self.assertTrue('screen_name' in user)
+            returnedScreenNames.append(user['screen_name'])
 
-        self.deleteAccount(self.tokenS1)
-        self.deleteAccount(self.tokenS2)
-        self.deleteAccount(self.tokenS3)
-        self.deleteAccount(self.tokenS4)
+        for suggestedUser in suggestedUsers:
+            self.assertTrue(suggestedUser in returnedScreenNames)
+
+        for user, token in newAccounts:
+            self.deleteAccount(token)
 
 if __name__ == '__main__':
     main()

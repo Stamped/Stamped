@@ -22,9 +22,12 @@ typedef enum {
 @class STStampFilterBar;
 
 @protocol STStampFilterBarDelegate
+@required
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
               andQuery:(NSString*)query;
+- (void)stampFilterBarSearchFieldDidBeginEditing;
+- (void)stampFilterBarSearchFieldDidEndEditing;
 @end
 
 @interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate>

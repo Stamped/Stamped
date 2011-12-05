@@ -15,7 +15,8 @@
 
 @interface PeopleViewController : STTableViewController <UITableViewDelegate,
                                                          UITableViewDataSource,
-                                                         RKObjectLoaderDelegate>
+                                                         RKObjectLoaderDelegate,
+                                                         RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;

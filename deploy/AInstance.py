@@ -46,7 +46,7 @@ class AInstance(object):
     
     def create(self, block=True):
         self._pre_create(block)
-        utils.log("[%s] create" % self)
+        utils.log("[%s] initializing instance" % self)
         
         # don't create an instance more than once
         assert self.state is None

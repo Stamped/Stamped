@@ -377,6 +377,7 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
+  NSLog(@"Request: %@", request.resourcePath);
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
   if (queue == oAuthRequestQueue_) {
     [RKClient sharedClient].requestQueue.suspended = YES;

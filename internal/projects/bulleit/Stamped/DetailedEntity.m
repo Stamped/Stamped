@@ -63,4 +63,32 @@
   return [UIImage imageNamed:@"cat_icon_other"];
 }
 
+- (UIImage*)inboxTodoCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other"];
+}
+
+- (UIImage*)highlightedInboxTodoCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@_white", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other_white"];
+}
+
+- (UIImage*)stampDetailCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_sDetail_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_sDetail_other"];
+}
+
+- (UIImage*)entitySearchCategoryImage {
+  if (self.category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_eSearch_%@", self.category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_eSearch_other"];
+}
+
 @end

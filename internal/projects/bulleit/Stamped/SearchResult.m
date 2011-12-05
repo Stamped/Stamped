@@ -36,18 +36,18 @@
   return SearchCategoryOther;
 }
 
-- (UIImage*)categoryImage {
+- (UIImage*)stampDetailCategoryImage {
   if (self.category)
-    return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_sDetail_%@", self.category.lowercaseString]];
   
-  return [UIImage imageNamed:@"cat_icon_other"];
+  return [UIImage imageNamed:@"cat_icon_sDetail_other"];
 }
 
-- (UIImage*)largeCategoryImage {
+- (UIImage*)entitySearchCategoryImage {
   if (self.category)
-    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_%@_large", [self.category lowercaseString]]];
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_eSearch_%@", self.category.lowercaseString]];
   
-  return [UIImage imageNamed:@"cat_icon_other_large"];
+  return [UIImage imageNamed:@"cat_icon_eSearch_other"];
 }
 
 @end
