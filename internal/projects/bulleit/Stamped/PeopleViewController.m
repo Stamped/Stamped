@@ -203,7 +203,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
       }      
       NSLog(@"sets not equal");
       // New people that need following. Load in 100-user increments.
-      self.userIDsToBeFetched = [NSMutableArray arrayWithCapacity:100];
+      self.userIDsToBeFetched = [NSMutableArray array];
       for (NSString* userID in followingIDs) {
         if (![currentIDs containsObject:userID])
           [userIDsToBeFetched_ addObject:userID];
