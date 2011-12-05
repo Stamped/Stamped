@@ -26,10 +26,6 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
-    def connect(self, *args):
-        pass
-    
-    @abstract
     def list_stacks(self, *args, **kwargs):
         pass
     

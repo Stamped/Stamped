@@ -24,10 +24,6 @@ class ADeploymentStack(object):
         pass
     
     @abstract
-    def connect(self):
-        pass
-    
-    @abstract
     def update(self):
         pass
     
