@@ -310,8 +310,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)userPulledToReload {
   [super userPulledToReload];
   [self loadEventsFromNetwork];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
-                                                      object:self];
 }
 
 - (void)reloadData {

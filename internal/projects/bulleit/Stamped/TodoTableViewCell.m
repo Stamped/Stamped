@@ -65,7 +65,7 @@ static const CGFloat kSubstringFontSize = 12.0;
     [self setupViews];
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(currentUserChanged:) 
-                                                 name:kCurrentUserHasUpdatedNotification 
+                                                 name:kCurrentUserHasUpdatedNotification
                                                object:nil];
   }
   return self;
@@ -80,6 +80,15 @@ static const CGFloat kSubstringFontSize = 12.0;
   self.favorite = nil;
   self.delegate = nil;
   [super dealloc];
+}
+
+- (void)layoutSubviews {
+  [super layoutSubviews];
+  CGSize imageSize = typeImageView_.image.size;
+  typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 56, imageSize.width, imageSize.height);
+  descriptionLabel_.frame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
+                                       CGRectGetMinY(typeImageView_.frame) + 1,
+                                       200, CGRectGetHeight(typeImageView_.frame));
 }
 
 - (void)invertColors {
@@ -124,9 +133,8 @@ static const CGFloat kSubstringFontSize = 12.0;
       completedImageView_.hidden = ![favorite.complete boolValue];
       self.title = favorite.entityObject.title;
       titleLayer_.string = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
-      UIImage* typeImage = [favorite.entityObject categoryImage];
-      typeImageView_.image = typeImage;
-      typeImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:typeImage];
+      typeImageView_.image = favorite.entityObject.inboxTodoCategoryImage;
+      typeImageView_.highlightedImage = favorite.entityObject.highlightedInboxTodoCategoryImage;
       descriptionLabel_.text = favorite.entityObject.subtitle;
       
       [self setNeedsDisplay];
@@ -151,7 +159,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   UIImage* disclosureArrowImage = [UIImage imageNamed:@"disclosure_arrow"];
   disclosureImageView_.image = disclosureArrowImage;
   disclosureImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureArrowImage];
-  [self addSubview:disclosureImageView_];
+  [self.contentView addSubview:disclosureImageView_];
   [disclosureImageView_ release];
   
   UIImage* stampImage = [UIImage imageNamed:@"stamp_42pt_strokePlus"];
@@ -193,12 +201,12 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self.contentView.layer addSublayer:titleLayer_];
   [titleLayer_ release];
   
-  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 13, 56, 15, 12)];
-  typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
-  [self addSubview:typeImageView_];
+  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
+  typeImageView_.contentMode = UIViewContentModeLeft;
+  [self.contentView addSubview:typeImageView_];
   [typeImageView_ release];
   
-  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 3, 54, 200, 16)];
+  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   descriptionLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   descriptionLabel_.highlightedTextColor = [UIColor whiteColor];

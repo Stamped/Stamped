@@ -165,7 +165,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                forLeftSegmentState:UIControlStateNormal
                                  rightSegmentState:UIControlStateSelected
                                         barMetrics:UIBarMetricsDefault];
-  
 }
 
 - (void)performRestKitMappings {

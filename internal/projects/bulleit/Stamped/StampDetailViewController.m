@@ -930,8 +930,6 @@ typedef enum {
   
   stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] - 1];
   [stamp_.managedObjectContext save:NULL];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
-                                                      object:stamp_];
 }
 
 - (void)handleURL:(NSURL*)url {
@@ -1170,8 +1168,6 @@ typedef enum {
     [stamp_ addCommentsObject:comment];
     stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] + 1];
     [stamp_.managedObjectContext save:NULL];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
-                                                        object:stamp_];
     return;
   } else if ([objectLoader.resourcePath rangeOfString:kCommentsPath].location != NSNotFound) {
     stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
@@ -1180,8 +1176,6 @@ typedef enum {
     [Stamp.managedObjectContext save:NULL];
     [self renderComments];
   }
-  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
-                                                      object:stamp_];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {

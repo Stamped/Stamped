@@ -515,8 +515,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
   [[NSUserDefaults standardUserDefaults] synchronize];
   [self loadStampsFromNetwork];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
-                                                      object:self];
 }
 
 - (void)reloadData {

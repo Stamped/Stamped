@@ -103,16 +103,18 @@ const CGFloat kKeyboardHeight = 217.0;
       [NSArray arrayWithObjects:@"Restaurant", @"Bar", nil]];
   segmentedControl_.alpha = 0.0;
   segmentedControl_.segmentedControlStyle = UISegmentedControlStyleBar;
-  NSDictionary* titleTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor stampedGrayColor], (id)UITextAttributeTextColor,
-                                                                                 (id)[UIColor whiteColor], (id)UITextAttributeTextShadowColor, 
-                                                                                 (id)[NSValue valueWithUIOffset:UIOffsetMake(0, 1)], (id)UITextAttributeTextShadowOffset,  nil];
-  [segmentedControl_ setTitleTextAttributes:titleTextAttributes forState:UIControlStateNormal];
-  NSDictionary* selectedTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor whiteColor], (id)UITextAttributeTextColor,
-                                                                                    (id)[UIColor colorWithWhite:0.5 alpha:1.0], (id)UITextAttributeTextShadowColor,
-                                                                                    (id)[NSValue valueWithUIOffset:UIOffsetMake(0, -1)], (id)UITextAttributeTextShadowOffset,  nil];
-  [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateSelected];
-  [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateHighlighted];
-  [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
+  if ([segmentedControl_ conformsToProtocol:@protocol(UIAppearance)]) {
+    NSDictionary* titleTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor stampedGrayColor], (id)UITextAttributeTextColor,
+                                                                                   (id)[UIColor whiteColor], (id)UITextAttributeTextShadowColor, 
+                                                                                   (id)[NSValue valueWithUIOffset:UIOffsetMake(0, 1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [segmentedControl_ setTitleTextAttributes:titleTextAttributes forState:UIControlStateNormal];
+    NSDictionary* selectedTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor whiteColor], (id)UITextAttributeTextColor,
+                                                                                      (id)[UIColor colorWithWhite:0.5 alpha:1.0], (id)UITextAttributeTextShadowColor,
+                                                                                      (id)[NSValue valueWithUIOffset:UIOffsetMake(0, -1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateSelected];
+    [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateHighlighted];
+    [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
+  }
   segmentedControl_.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
   [primaryTextField_.superview insertSubview:segmentedControl_ belowSubview:categoryDropdownTableView_];
   [segmentedControl_ release];

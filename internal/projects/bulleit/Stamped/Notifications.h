@@ -10,9 +10,6 @@
 
 extern NSString* const kUserProfileHasChangedNotification;
 extern NSString* const kAppShouldReloadAllPanes;
-extern NSString* const kAppShouldReloadNewsPane;
 extern NSString* const kPushNotificationReceivedNotification;
 extern NSString* const kNewsItemCountHasChangedNotification;
-// Use NSManagedObjectContextObjectsDidChangeNotification instead...
-extern NSString* const kStampDidChangeNotification;
 extern NSString* const kStampWasCreatedNotification;

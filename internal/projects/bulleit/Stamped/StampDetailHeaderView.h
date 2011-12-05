@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import "Stamp.h"
-#import "Entity.h"
+
+@class Stamp;
+@class Entity;
 
 @protocol StampDetailHeaderViewDelegate <NSObject>
 - (IBAction)handleEntityTap:(id)sender;
@@ -19,8 +20,8 @@
 
 @property (nonatomic, assign) BOOL inverted;
 @property (nonatomic, retain) Stamp* stamp;
-@property (nonatomic, retain) NSString* title;
-@property (nonatomic, retain) id <StampDetailHeaderViewDelegate> delegate;
+@property (nonatomic, copy) NSString* title;
+@property (nonatomic, assign) id<StampDetailHeaderViewDelegate> delegate;
 @property (nonatomic, assign) BOOL hideArrow;
 
 - (void)setEntity:(Entity*)entity;

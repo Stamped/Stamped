@@ -9,9 +9,7 @@
 #import "Notifications.h"
 
 NSString* const kAppShouldReloadAllPanes = @"kAppShouldReloadAllPanes";
-NSString* const kAppShouldReloadNewsPane = @"kAppShouldReloadNewsPane";
 NSString* const kPushNotificationReceivedNotification = @"kPushNotificationReceivedNotification";
 NSString* const kNewsItemCountHasChangedNotification = @"kNewsItemCountHasChangedNotification";
-NSString* const kStampDidChangeNotification = @"StampDidChangeNotification";
 NSString* const kStampWasCreatedNotification = @"StampWasCreatedNotification";
 NSString* const kUserProfileHasChangedNotification = @"kUserProfileHasChangedNotification";

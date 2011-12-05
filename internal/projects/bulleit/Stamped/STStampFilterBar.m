@@ -277,12 +277,6 @@ static const CGFloat kTopMargin = 7;
 
 #pragma mark - UITextFieldDelegate methods.
 
-- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
-  self.searchQuery = [textField.text stringByReplacingCharactersInRange:range withString:string];
-  [self fireDelegateMethod];
-  return YES;
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
   self.searchQuery = searchField_.text;
@@ -290,10 +284,26 @@ static const CGFloat kTopMargin = 7;
   return YES;
 }
 
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  if (result.length == 0)
+    self.searchQuery = nil;
+
+  return YES;
+}
+
 - (BOOL)textFieldShouldClear:(UITextField*)textField {
   self.searchQuery = nil;
-  [self fireDelegateMethod];
   return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  [self.delegate stampFilterBarSearchFieldDidBeginEditing];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  [self.delegate stampFilterBarSearchFieldDidEndEditing];
+  [self fireDelegateMethod];
 }
 
 @end
