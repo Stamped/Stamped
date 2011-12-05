@@ -1261,19 +1261,25 @@ class StampedAPI(AStampedAPI):
 
             # Add credited user(s)
             if stamp.credit != None:
+                credits = []
                 for i in xrange(len(stamp.credit)):
                     creditedUser = userIds[stamp.credit[i].user_id]
 
                     if creditedUser != 1:
-                        stamp.credit[i].screen_name = creditedUser['screen_name']
-                        stamp.credit[i].color_primary = creditedUser['color_primary']
-                        stamp.credit[i].color_secondary = creditedUser['color_secondary']
-                        stamp.credit[i].privacy = creditedUser['privacy']
+                        credit = CreditSchema()
+                        credit.user_id          = stamp.credit[i].user_id
+                        credit.stamp_id         = stamp.credit[i].stamp_id
+                        credit.screen_name      = creditedUser['screen_name']
+                        credit.color_primary    = creditedUser['color_primary']
+                        credit.color_secondary  = creditedUser['color_secondary']
+                        credit.privacy          = creditedUser['privacy']
+                        credits.append(credit)
                     else:
-                        stamp.credit[i] = None
                         msg = 'Unable to match user_id %s for credit on stamp id %s' % \
                             (stamp.credit[i].user_id, stamp.stamp_id)
                         logs.warning(msg)
+                
+                stamp.credit = credits
 
             # Add commenting user(s)
             if stamp.comment_preview != None:
