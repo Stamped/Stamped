@@ -35,16 +35,19 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)userProfileHasChanged:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
 
+@property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
 @end
 
 @implementation PeopleViewController
 
+@synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize friendsArray = friendsArray_;
 @synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
+  self.userIDsToBeFetched = nil;
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
@@ -78,7 +81,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     [self loadFriendsFromNetwork];
     [self loadFriendsFromDataStore];
   }
-  
+
   self.hasHeaders = YES;
 }
 
@@ -141,25 +144,61 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)loadFriendsFromNetwork {
+  NSString* userID = [AccountManager sharedManager].currentUser.userID;
+  if (!userID)
+    return;
+
   [self setIsLoading:YES];
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kFriendIDsPath
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [request send];
+  
+  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
-  NSString* userID = [AccountManager sharedManager].currentUser.userID;
+  
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendsPath delegate:self];
   objectLoader.objectMapping = userMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"user_id", nil];
   [objectLoader send];
 }
 
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if (!response.isOK)
+    return;
+
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser)
+    return;
+
+  if ([request.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound) {
+    NSError* error = NULL;
+    id responseObj = [response parsedBody:&error];
+    if (error) {
+      NSLog(@"Problem parsing response JSON: %@", error);
+    } else {
+      NSArray* followingIDs = (NSArray*)[responseObj objectForKey:@"user_ids"];
+      NSLog(@"response: %@", followingIDs);
+      // Which users need information fetched for them?
+      NSSet* currentIDs = [currentUser.following valueForKeyPath:@"@distinctUnionOfObjects.userID"];
+      if ([[NSSet setWithArray:followingIDs] isEqualToSet:currentIDs])
+        return;
+      
+      NSLog(@"sets not equal");
+      // New people that need following. Load in 100-user increments.
+      self.userIDsToBeFetched = [NSMutableArray arrayWithCapacity:100];
+      
+      // Unfollowed. Remove stamps from inbox and following set.
+    }
+  }
+}
+
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  if ([objectLoader.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound) {
-    // Kick off load of friend data if new friend is added and unfollow anyone who isn't in the
-    // list anymore.
-    
-  }
-  
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
     User* currentUser = [AccountManager sharedManager].currentUser;
