@@ -70,6 +70,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(reloadData)
+                                               name:kAppShouldReloadNewsPane
+                                             object:nil];
   [self loadEventsFromDataStore];
   [self.tableView reloadData];
   [self loadEventsFromNetwork];
@@ -310,6 +314,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)userPulledToReload {
   [super userPulledToReload];
   [self loadEventsFromNetwork];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadInboxPane object:nil];
 }
 
 - (void)reloadData {
