@@ -13,28 +13,24 @@ from deployments import AWSDeploymentSystem, LocalDeploymentSystem
 from errors import Fail
 
 available_commands = set([
+    # CRUD
     'create', 
-    
+    'list', 
+    'update', 
     'delete', 
     
-    'list', 
+    # node management
+    'add', 
+    'repair', 
+    'force_db_primary_change', 
+    'remove_db_node', 
     
-    'update', 
-    
+    # utilities
+    'bootstrap', 
     'crawl', 
     'stress', 
-    
     'setup_crawler_data', 
-    
     'backup', 
-    
-    'add', 
-    
-    'repair', 
-    
-    'force_db_primary', 
-    
-    'bootstrap', 
 ])
 
 def parseCommandLine():
