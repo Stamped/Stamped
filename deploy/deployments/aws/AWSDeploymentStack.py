@@ -225,6 +225,7 @@ class AWSDeploymentStack(ADeploymentStack):
             
             primaries = filter(lambda m: 1 == m.state, status.members)
             if 0 == len(primaries):
+                pprint(dict(status))
                 utils.log("[%s] unable to find a primary! retrying..." % self)
                 
                 if delay > maxdelay:
@@ -328,6 +329,58 @@ class AWSDeploymentStack(ADeploymentStack):
         ret   = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
                                    (confs, str(force).lower()), slave_okay=force)
         pprint(ret)
+    
+    def remove_db_node(self, *args):
+        if 0 == len(args):
+            utils.log("must specify instance to make primary (either node name or instance-id)")
+            return
+        
+        
+        # TODO: only allow a node to be removed if it wouldn't cause indecision around primary
+        
+        
+        db_instance = None
+        arg   = args[0]
+        force = (len(args) > 1 and args[1] == 'force')
+        
+        for instance in self.db_instances:
+            if instance.name == arg or instance.instance_id == arg:
+                db_instance = instance
+                break
+        
+        if db_instance is None:
+            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            return
+        
+        conf = self._get_replset_conf()
+        index = -1
+        
+        # find highest existing priority in replica set config
+        for i in xrange(len(conf.members)):
+            node = conf.members[i]
+            ip = node.host.split(':')[0].lower()
+            
+            if ip == db_instance.private_ip_address:
+                index = i
+                break
+         
+        if index < 0:
+            utils.log("[%s] error: unable to find db instance '%s'" % (self, arg))
+            return
+        
+        conf.members.pop(index)
+        utils.log()
+        utils.log("[%s] attempting to reconfigure replica set '%s'" % (self, conf._id))
+        conf = dict(conf)
+        conf['members'] = list(dict(m) for m in conf['members'])
+        pprint(conf)
+        
+        confs = json.dumps(conf)
+        ret   = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
+                                   (confs, str(force).lower()), slave_okay=force)
+        pprint(ret)
+        if force:
+            db_node.terminate()
     
     def repair(self, *args):
         force = (len(args) >= 1 and args[0] == 'force')
@@ -676,7 +729,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 mongo_cmd = 'rs.add("%s")' % node_name
                 
                 utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin')
+                status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin', slave_okay=False)
                 
                 pprint(status)
                 utils.log()

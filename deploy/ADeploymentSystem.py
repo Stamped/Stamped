@@ -43,6 +43,10 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
+    def remove_db_node(self, *args):
+        pass
+    
+    @abstract
     def crawl(self, *args):
         pass
     

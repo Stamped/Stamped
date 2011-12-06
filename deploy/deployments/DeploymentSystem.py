@@ -72,6 +72,11 @@ class DeploymentSystem(ADeploymentSystem):
         stack = self._get_matching_stack(stackName)
         stack.force_db_primary_change(*args[1:])
     
+    def remove_db_node(self, *args):
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.remove_db_node(*args[1:])
+    
     def crawl(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
