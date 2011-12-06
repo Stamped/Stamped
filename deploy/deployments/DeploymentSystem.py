@@ -39,30 +39,30 @@ class DeploymentSystem(ADeploymentSystem):
         utils.log(msg)
         raise Fail(msg)
     
-    def create_stack(self, *args):
+    def create(self, *args):
         stackName = args[0]
         
         if stackName in self._stacks:
             utils.log("Warning: deleting duplicate stack '%s' before create can occur" % stackName)
-            self.delete_stack(stackName)
+            self.delete(stackName)
         
         stack = self.stack_class(stackName, self)
         stack.create()
         
         self._stacks[stackName] = stack
     
-    def delete_stack(self, *args):
+    def delete(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
         stack.delete()
         del self._stacks[stack.name]
     
-    def update_stack(self, *args):
+    def update(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
         stack.update()
     
-    def repair_stack(self, *args):
+    def repair(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
         stack.repair(*args[1:])
@@ -87,7 +87,7 @@ class DeploymentSystem(ADeploymentSystem):
         stack = self._get_matching_stack(stackName)
         stack.backup()
     
-    def list_stacks(self, stackName=None, stackStatus=None):
+    def list(self, stackName=None, stackStatus=None):
         stacks = self._stacks
         
         index = 1
@@ -95,7 +95,7 @@ class DeploymentSystem(ADeploymentSystem):
             utils.log("%d) '%s'" % (index, stackName))
             index += 1
     
-    def add_stack(self, *args):
+    def add(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
         stack.add(*args[1:])
