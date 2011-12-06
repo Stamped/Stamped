@@ -131,8 +131,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   self.validationButton = nil;
   self.timer = nil;
   self.timer2 = nil;
-  if (requestQueue_)
-    [requestQueue_ cancelAllRequests];
+  [requestQueue_ cancelAllRequests];
   self.requestQueue = nil;
   self.primaryColor = nil;
   self.secondaryColor = nil;
