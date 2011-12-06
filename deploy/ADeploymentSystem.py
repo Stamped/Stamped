@@ -14,31 +14,28 @@ class ADeploymentSystem(object):
         self.name = name
         self.options = options
     
-    def shutdown(self):
+    @abstract
+    def bootstrap(self, *args):
         pass
     
     @abstract
-    def create_image(self, *args):
+    def create(self, *args):
         pass
     
     @abstract
-    def create_stack(self, *args):
+    def delete(self, *args):
         pass
     
     @abstract
-    def delete_stack(self, *args):
+    def list(self, *args, **kwargs):
         pass
     
     @abstract
-    def list_stacks(self, *args, **kwargs):
+    def update(self, *args):
         pass
     
     @abstract
-    def update_stack(self, *args):
-        pass
-    
-    @abstract
-    def repair_stack(self, *args):
+    def repair(self, *args):
         pass
     
     @abstract
@@ -62,7 +59,7 @@ class ADeploymentSystem(object):
         pass
     
     @abstract
-    def add_stack(self, *args):
+    def add(self, *args):
         pass
     
     def local(self, cmd, env=None):

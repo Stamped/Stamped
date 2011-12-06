@@ -54,12 +54,15 @@ INSTANCE_AMI_UBUNTU_1004_EBS = {
 }
 
 def _getAMI(instanceType, region, software='Ubuntu 10.04', ebs=True):
-    if software == 'Amazon' and ebs == True:
+    if software == 'Amazon' and ebs:
         return INSTANCE_AMI_AMAZON_EBS[region][INSTANCE_ARCHITECTURE[instanceType]]
-    if software == 'Ubuntu 10.04' and ebs == True:
-        return INSTANCE_AMI_UBUNTU_1004_EBS[region][INSTANCE_ARCHITECTURE[instanceType]]
-    if software == 'Ubuntu 10.04' and ebs == False:
-        return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[instanceType]]
+    
+    if software == 'Ubuntu 10.04':
+        if ebs:
+            return INSTANCE_AMI_UBUNTU_1004_EBS[region][INSTANCE_ARCHITECTURE[instanceType]]
+        else:
+            return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[instanceType]]
+    
     return False
 
 INSTANCE_TYPE   = 'm1.large' #'t1.micro'
@@ -181,6 +184,11 @@ class AWSInstance(AInstance):
         self._instance = reservation.instances[0]
     
     def _validate_port(self, port, desc=None, timeout=None):
+        """ 
+            block until the given port begins receiving connections or until 
+            the specified timeout is reached
+        """
+        
         if desc is None:
             desc = "port %s" % (str(port))
         
@@ -206,32 +214,48 @@ class AWSInstance(AInstance):
         
         utils.log("[%s] %s is online" % (self, desc))
     
-    def _block_mongo(self):
+    def _block_mongo(self, timeout=300):
+        """ 
+            block until mongod is up and running on this instance 
+        """
+        
         time.sleep(10)
-        error = None
         tries = 0
+        sleep = 5
+        timeout = timeout / sleep
         
         utils.log("[%s] waiting for mongo to come online (this may take a few minutes)..." % self)
+        
         while True:
             try:
-                ret = self.stack.run_mongo_cmd('db.serverStatus()', slave_okay=True, instance=self)
+                ret = self.stack.run_mongo_cmd('rs.status()', instance=self, 
+                                               slave_okay=True, error_okay=True)
                 
-                if not 'ok' in ret or ret['ok'] != 1:
-                    error = str(ret)
-            except Exception, e:
-                error = e
+                #utils.log("[%s] %s" % (self, ret))
+                
+                assert 0 == ret['ok']
+                assert 3 == ret['startupStatus']
+                
+                break
+            except:
+                pass
             
-            if error is not None:
-                tries += 1
-                
-                if tries > 60:
-                    msg = "[%s] error: timeout attempting to access mongodb" % self
-                    utils.log(msg)
-                    raise Fail(msg)
-                else:
-                    time.sleep(1)
+            tries += 1
+            
+            if tries > timeout:
+                msg = "[%s] error: timeout attempting to access mongodb" % self
+                utils.log(msg)
+                raise Fail(msg)
+            else:
+                time.sleep(sleep)
+        
+        utils.log("[%s] mongo is online" % self)
     
     def _post_create(self, block):
+        """
+            block until all public interfaces to this instance are up & running
+        """
+        
         # wait for ssh service to come online
         self._validate_port(22, desc="ssh service", timeout=60)
         

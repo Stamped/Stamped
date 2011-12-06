@@ -219,7 +219,9 @@ class AWSDeploymentSystem(DeploymentSystem):
         
         return None
     
-    def create_image(self, *args):
+    def bootstrap(self, *args):
+        utils.log("[%s] initializing temp instance to create bootstrap AMI" % self)
+        
         config = { 'roles' : [ 'bootstrap', 'temp', ], 'name' : 'temp0' }
         instance = AWSInstance(self, config)
         instance.create()
