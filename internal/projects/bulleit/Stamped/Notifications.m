@@ -8,6 +8,8 @@
 
 #import "Notifications.h"
 
+NSString* const kAppShouldReloadNewsPane = @"kAppShouldReloadNewsPane";
+NSString* const kAppShouldReloadInboxPane = @"kAppShouldReloadInboxPane";
 NSString* const kAppShouldReloadAllPanes = @"kAppShouldReloadAllPanes";
 NSString* const kPushNotificationReceivedNotification = @"kPushNotificationReceivedNotification";
 NSString* const kNewsItemCountHasChangedNotification = @"kNewsItemCountHasChangedNotification";

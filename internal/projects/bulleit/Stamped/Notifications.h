@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString* const kAppShouldReloadNewsPane;
+extern NSString* const kAppShouldReloadInboxPane;
 extern NSString* const kUserProfileHasChangedNotification;
 extern NSString* const kAppShouldReloadAllPanes;
 extern NSString* const kPushNotificationReceivedNotification;

@@ -18,6 +18,7 @@
 @dynamic category;
 @dynamic coordinates;
 @dynamic entityID;
+@dynamic localModificationDate;
 @dynamic mostRecentStampDate;
 @dynamic subcategory;
 @dynamic subtitle;

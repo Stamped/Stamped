@@ -150,6 +150,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                                name:NSManagedObjectContextObjectsDidChangeNotification
                                              object:[Entity managedObjectContext]];
   [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(reloadData)
+                                               name:kAppShouldReloadInboxPane
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
@@ -515,6 +519,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
   [[NSUserDefaults standardUserDefaults] synchronize];
   [self loadStampsFromNetwork];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadNewsPane object:nil];
 }
 
 - (void)reloadData {
@@ -595,6 +600,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
   [self.tableView reloadData];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
 }
 
 - (void)appDidEnterBackground:(NSNotification*)notification {
