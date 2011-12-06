@@ -794,7 +794,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   } // end signIn responses
   
   if (signUpScrollView_.superview) {
-    if (response.statusCode == 200) {                 //exists
+    if (response.statusCode == 200) {  // Exists.
       NSString* s = [NSString stringWithFormat:@"\"%@\"", signUpUsernameTextField_.text];
       if ([response.bodyAsString rangeOfString:s].location == NSNotFound) {
         [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
@@ -803,8 +803,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
                            cancelButtonTitle:@"OK"
                            otherButtonTitles:nil] autorelease] show];
         emailTaken_ = YES;
-      }
-      else {
+      } else {
         [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
                                      message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
                                     delegate:nil

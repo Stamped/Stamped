@@ -142,8 +142,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   } else {
     if ([currentUser.following containsObject:user_]) {
       unfollowButton_.hidden = NO;
+      self.stampsAreTemporary = NO;
     } else {
       followButton_.hidden = NO;
+      self.stampsAreTemporary = YES;
     }
   }
   
