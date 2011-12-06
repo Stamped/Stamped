@@ -121,6 +121,7 @@ def check(request):
         user    = stampedAPI.checkAccount(schema.login)
         user    = HTTPUser().importSchema(user)
 
+        ### TODO: REMOVE THIS TEMPORARY CONVERSION!!!!
         try:
             if str(schema.login).lower() == str(user.screen_name).lower():
                 user.screen_name = str(schema.login)
