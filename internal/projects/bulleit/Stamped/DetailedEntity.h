@@ -57,7 +57,6 @@
 @property (nonatomic, retain) NSString * year;
 @property (nonatomic, retain) NSString * zipcode;
 
-@property (nonatomic, readonly) UIImage* categoryImage;
 @property (nonatomic, readonly) UIImage* inboxTodoCategoryImage;
 @property (nonatomic, readonly) UIImage* highlightedInboxTodoCategoryImage;
 @property (nonatomic, readonly) UIImage* stampDetailCategoryImage;

@@ -14,6 +14,7 @@
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
 #import "FindFriendsViewController.h"
+#import "FriendshipManager.h"
 #import "STSectionHeaderView.h"
 #import "STNavigationBar.h"
 #import "UserImageView.h"
@@ -24,11 +25,11 @@
 #import "SettingsViewController.h"
 #import "Util.h"
 
-static NSString* const kFriendsPath = @"/temp/friends.json";
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @interface PeopleViewController ()
+- (void)loadUserDataFromNetwork;
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
@@ -131,6 +132,23 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [self loadFriendsFromNetwork];
 }
 
+- (void)loadUserDataFromNetwork {
+  if (!userIDsToBeFetched_ || userIDsToBeFetched_.count == 0)
+    return;
+  
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = userMapping;
+  NSUInteger userIDCount = userIDsToBeFetched_.count;
+  NSArray* subArray = [userIDsToBeFetched_ subarrayWithRange:NSMakeRange(0, MIN(100, userIDCount))];
+  objectLoader.params = [NSDictionary dictionaryWithObject:[subArray componentsJoinedByString:@","]
+                                                    forKey:@"user_ids"];
+  objectLoader.method = RKRequestMethodPOST;
+  [objectLoader send];
+}
+
 - (void)loadFriendsFromDataStore {
   NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
                                                                ascending:YES 
@@ -153,26 +171,21 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
   [request send];
-  
-  
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
-  
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendsPath delegate:self];
-  objectLoader.objectMapping = userMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"user_id", nil];
-  [objectLoader send];
 }
 
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  if (!response.isOK)
+  if (!response.isOK) {
+    [self setIsLoading:NO];
     return;
+  }
 
   User* currentUser = [AccountManager sharedManager].currentUser;
-  if (!currentUser)
+  if (!currentUser) {
+    [self setIsLoading:NO];
     return;
+  }
 
   if ([request.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound) {
     NSError* error = NULL;
@@ -184,14 +197,33 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
       NSLog(@"response: %@", followingIDs);
       // Which users need information fetched for them?
       NSSet* currentIDs = [currentUser.following valueForKeyPath:@"@distinctUnionOfObjects.userID"];
-      if ([[NSSet setWithArray:followingIDs] isEqualToSet:currentIDs])
+      if ([[NSSet setWithArray:followingIDs] isEqualToSet:currentIDs]) {
+        [self setIsLoading:NO];
         return;
-      
+      }      
       NSLog(@"sets not equal");
       // New people that need following. Load in 100-user increments.
-      self.userIDsToBeFetched = [NSMutableArray arrayWithCapacity:100];
-      
+      self.userIDsToBeFetched = [NSMutableArray array];
+      for (NSString* userID in followingIDs) {
+        if (![currentIDs containsObject:userID])
+          [userIDsToBeFetched_ addObject:userID];
+      }
+      if (userIDsToBeFetched_.count > 0) {
+        [self loadUserDataFromNetwork];
+      } else {
+        self.userIDsToBeFetched = nil;
+        [self setIsLoading:NO];
+      }
+      NSLog(@"follow users: %@", userIDsToBeFetched_);
+
       // Unfollowed. Remove stamps from inbox and following set.
+      for (NSString* userID in currentIDs.allObjects) {
+        if (![followingIDs containsObject:userID]) {
+          User* userToUnFollow = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+          if (userToUnFollow)
+            [[FriendshipManager sharedManager] unfollowUser:userToUnFollow];
+        }
+      }
     }
   }
 }
@@ -199,18 +231,31 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
-    self.friendsArray = nil;
-    User* currentUser = [AccountManager sharedManager].currentUser;
-    [currentUser removeFollowing:currentUser.following];
-    [currentUser addFollowing:[NSSet setWithArray:objects]];
-    [User.managedObjectContext save:NULL];
-    NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
-                                                                     ascending:YES 
-                                                                      selector:@selector(localizedCaseInsensitiveCompare:)];
-    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser)
+    return;
+
+  if ([objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
+    NSLog(@"objects: %@", objects);
+    
+    for (User* user in objects) {
+      [currentUser addFollowingObject:user];
+      [userIDsToBeFetched_ removeObject:user.userID];
+    }
+    if (userIDsToBeFetched_.count > 0) {
+      [self loadUserDataFromNetwork];
+      return;
+    } else {
+      self.userIDsToBeFetched = nil;
+    }
   }
+  self.friendsArray = nil;
+  NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                                   ascending:YES 
+                                                                    selector:@selector(localizedCaseInsensitiveCompare:)];
+  self.friendsArray = [currentUser.following.allObjects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   [self.tableView reloadData];
+
   NSDate* now = [NSDate date];
   [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"PeopleLastUpdatedAt"];
   [[NSUserDefaults standardUserDefaults] synchronize];

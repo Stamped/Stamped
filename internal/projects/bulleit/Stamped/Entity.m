@@ -26,13 +26,6 @@
 @dynamic favorite;
 @dynamic stamps;
 
-- (UIImage*)categoryImage {
-  if (self.category)
-    return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
-  
-  return [UIImage imageNamed:@"cat_icon_other"];
-}
-
 - (UIImage*)inboxTodoCategoryImage {
   if (self.category)
     return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@", self.category.lowercaseString]];
