@@ -174,9 +174,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0.0, delta);
     self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0.0, delta);
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
-    if ([self isKindOfClass:[PlaceDetailViewController class]] ||
-        [self isKindOfClass:[OtherDetailViewController class]]) {
+    if ([self isKindOfClass:[PlaceDetailViewController class]])
       ((PlaceDetailViewController*)self).mapContainerView.frame = CGRectOffset(((PlaceDetailViewController*)self).mapContainerView.frame, 0.0, delta);
+    if ([self isKindOfClass:[OtherDetailViewController class]]) {
+      ((OtherDetailViewController*)self).mapContainerView.frame = CGRectOffset(((PlaceDetailViewController*)self).mapContainerView.frame, 0.0, delta);
+      ((OtherDetailViewController*)self).appActionsView.frame = CGRectOffset(((OtherDetailViewController*)self).appActionsView.frame, 0.0, delta);
     }
   }
   if (titleLabel_.text.length > 60) {
@@ -414,6 +416,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     detailedEntity_ = [(DetailedEntity*)object retain];
     [self showContents];
     [self.loadingView stopAnimating];
+//    NSLog(@"%@", detailedEntity_);
   }
   
   // Handle callback from "Add To-Do"

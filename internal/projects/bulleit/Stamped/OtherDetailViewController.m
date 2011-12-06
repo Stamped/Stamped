@@ -15,6 +15,7 @@
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
 #import "Util.h"
+#import "MusicDetailViewController.h"
 
 @interface OtherDetailViewController ()
 - (void)confirmCall;
@@ -22,6 +23,8 @@
 - (void)setupMainActionsContainer;
 - (void)setupMapView;
 - (void)setupSectionViews;
+- (void)loadAppImage;
+- (void)setupAsAppDetail;
 @end
 
 @implementation OtherDetailViewController
@@ -30,15 +33,19 @@
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
 @synthesize mapContainerView = mapContainerView_;
+@synthesize appActionsView = appActionsView_;
 
 #pragma mark - View lifecycle
 
 - (void)showContents {
   self.descriptionLabel.text = detailedEntity_.subtitle;
-
-  [self setupMainActionsContainer];
-  [self setupMapView];
-  [self setupSectionViews];
+  if ([detailedEntity_.subcategory isEqualToString:@"app"])
+    [self loadAppImage];
+  else {
+    [self setupMainActionsContainer];
+    [self setupMapView];
+    [self setupSectionViews];
+  }
 }
 
 - (void)viewDidLoad {
@@ -88,6 +95,11 @@
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
+  self.mainActionLabel = nil;
+  self.mainActionButton = nil;
+  self.imageView.delegate = nil;
+  self.imageView = nil;
+  self.appActionsView = nil;
 }
 
 - (void)dealloc {
@@ -97,6 +109,11 @@
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
+  self.mainActionLabel = nil;
+  self.mainActionButton = nil;
+  self.imageView.delegate = nil;
+  self.imageView = nil;
+  self.appActionsView = nil;
   [super dealloc];
 }
 
@@ -220,6 +237,79 @@
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO;
   }
+}
+
+
+- (void)loadAppImage {
+  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+    self.imageView.imageURL = detailedEntity_.image;
+    self.imageView.delegate = self;
+    self.imageView.hidden = NO;
+//    UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
+//    [self.imageView addGestureRecognizer:gr];
+//    [gr release];
+    
+    self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.imageView.layer.cornerRadius = 18.0;
+    self.imageView.layer.masksToBounds = YES;
+  }
+}
+
+- (void)setupAsAppDetail {
+  self.mainActionsView.hidden = YES;
+  self.imageView.hidden = NO;
+  
+  // Set up actions container (download link)
+  if (detailedEntity_.itunesShortURL) {
+    self.mainActionButton.hidden = NO;
+    self.mainActionLabel.hidden = NO;
+    self.appActionsView.hidden = NO;
+  }
+  else {
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.appActionsView.frame));
+  }
+  
+  // Add content sections
+  self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  
+  CollapsibleViewController* section;
+  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+    [self addSectionWithName:@"Description"];
+    section = [sectionsDict_ objectForKey:@"Description"];
+    [section addText:detailedEntity_.desc forKey:@"desc"];
+    self.mainContentView.hidden = NO;
+  }
+  
+  // Add also stamped by
+  NSSet* stamps = entityObject_.stamps;
+  if (stamps && stamps.count > 0) {
+    [self addSectionStampedBy];
+    self.mainContentView.hidden = NO;
+  }
+  
+  // Because clipping the imageview to bounds, which is necessary for rounded corners, hides the shadow.
+  UIView* shadowView = [[UIImageView alloc] initWithFrame:self.imageView.frame];
+  shadowView.backgroundColor = [UIColor stampedLightGrayColor];
+  shadowView.layer.cornerRadius = 18.0;
+  shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+  shadowView.layer.shadowOffset = CGSizeMake(0.0, 3.0);
+  shadowView.layer.shadowRadius = 3.0;
+  shadowView.layer.shadowOpacity = 0.3;
+  shadowView.layer.contents = nil;
+  [self.scrollView insertSubview:shadowView belowSubview:self.imageView];
+  [shadowView.layer setNeedsDisplay];
+  [shadowView release];
+  
+  self.imageView.layer.shadowPath = nil;
+}
+
+- (IBAction)mainActionButtonPressed:(id)sender {
+  [[UIApplication sharedApplication] openURL:
+   [NSURL URLWithString:detailedEntity_.itunesShortURL]];
+}
+
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {  
+  [self setupAsAppDetail];
 }
 
 

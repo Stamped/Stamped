@@ -402,14 +402,16 @@ int const SPACE_HEIGHT = 10;
     self.arrowView.frame = frame;
   }
   
-  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame toView:self.view];
+  CGRect convertedArrowFrame = [self.view convertRect:self.arrowView.frame toView:self.view];
   CGRect actualImageFrame = [Util frameForImage:imageView.image inImageViewAspectFit:imageView];
   CGSize offset = CGSizeMake(imageView.frame.size.width-actualImageFrame.size.width,
                              imageView.frame.size.height-actualImageFrame.size.height);
   actualImageFrame = CGRectOffset(actualImageFrame, offset.width/2, offset.height/2);
   actualImageFrame = [imageView convertRect:actualImageFrame toView:self.view];
+//  NSLog(@"image: %f %f %f %f", actualImageFrame.origin.x, actualImageFrame.origin.y, actualImageFrame.size.width, actualImageFrame.size.height);
+//  NSLog(@"arrow: %f %f %f %f", convertedArrowFrame.origin.x, convertedArrowFrame.origin.y, convertedArrowFrame.size.width, convertedArrowFrame.size.height);
   if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(actualImageFrame) &&
-      CGRectGetMaxY(convertedArrowFrame) <= CGRectGetMaxY(actualImageFrame)) {
+      CGRectGetMaxY(convertedArrowFrame) - 20 <= CGRectGetMaxY(actualImageFrame)) {
     if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(actualImageFrame)) {
       CGRect convertedImageFrame = [self.view convertRect:actualImageFrame toView:self.arrowView.superview];
       
