@@ -112,6 +112,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)showFirstRunViewController {
+  // TODO(auth): Cancel requests from shared queue as well.
   [oAuthRequestQueue_ cancelAllRequests];
 
   self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
@@ -377,6 +378,8 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
+//  NSLog(@"Normal request queue count: %u", [RKClient sharedClient].requestQueue.count);
+//  NSLog(@"Oauth request queue count: %u", oAuthRequestQueue_.count);
   NSLog(@"Request: %@", request.resourcePath);
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
   if (queue == oAuthRequestQueue_) {
