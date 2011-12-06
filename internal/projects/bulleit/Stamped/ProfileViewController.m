@@ -130,18 +130,21 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
   
-  if ([user_.screenName isEqualToString:[AccountManager sharedManager].currentUser.screenName]) {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if ([user_.screenName isEqualToString:currentUser.screenName]) {
     UIBarButtonItem* editButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
                                                                    style:UIBarButtonItemStylePlain
                                                                   target:self
                                                                   action:@selector(editButtonPressed:)];
     [self.navigationItem setRightBarButtonItem:editButton];
     [editButton release];
-
-    [followIndicator_ stopAnimating];
-    followButton_.hidden = YES;
-    unfollowButton_.hidden = YES;
     [self addStampsRemainingLayer];
+  } else {
+    if ([currentUser.following containsObject:user_]) {
+      unfollowButton_.hidden = NO;
+    } else {
+      followButton_.hidden = NO;
+    }
   }
   
   self.highlightView.backgroundColor = [UIColor whiteColor];
@@ -517,11 +520,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
   RKClient* client = [RKClient sharedClient];
   
-  if (error.code == 2)
+  if (error.code == 2) {
     if (followIndicator_.isAnimating)
       [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
-  else if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
+  } else if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  }
   [followIndicator_ stopAnimating];
   NSLog(@"Error %@ for request %@", error, request.resourcePath);
 }
