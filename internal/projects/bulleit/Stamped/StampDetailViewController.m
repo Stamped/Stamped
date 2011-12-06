@@ -499,10 +499,7 @@ typedef enum {
                          }];
   }
   commentLabel.numberOfLines = 0;
-  CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
-                               constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                                   lineBreakMode:commentLabel.lineBreakMode];
-  
+  CGSize stringSize = [commentLabel sizeThatFits:CGSizeMake(210, MAXFLOAT)];
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
 
   commentLabel.frame = CGRectMake(leftPadding, 25, stringSize.width, stringSize.height);
