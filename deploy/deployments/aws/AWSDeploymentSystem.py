@@ -208,7 +208,6 @@ class AWSDeploymentSystem(DeploymentSystem):
         for i in xrange(len(images)):
             image = images[-(i + 1)]
             
-            print image
             if image.state == u'available':
                 return image
             elif image.state == u'pending':
@@ -227,11 +226,17 @@ class AWSDeploymentSystem(DeploymentSystem):
         
         now     = datetime.utcnow()
         name    = 'stamped.base.ami (%s-%s-%s %s.%s.%s)' % (now.year, now.month, now.day, now.hour, now.minute,  now.second)
-        image   = self.conn.create_image(instance.instance_id, name, "Base AMI for Stamped instances", False)
+        ami_id  = self.conn.create_image(instance.instance_id, name, "Base AMI for Stamped instances")
+        image   = None
         
         utils.log("[%s] waiting for AMI %s (%s) to come online" % (self, name, image))
-        images  = self.conn.get_all_images(image_ids=[ image ])
-        image   = images[0]
+        while True:
+            try:
+                images = self.conn.get_all_images(image_ids=[ ami_id ])
+                image  = images[0]
+            except:
+                time.sleep(0)
+        
         success = False
         
         while True:
@@ -250,5 +255,5 @@ class AWSDeploymentSystem(DeploymentSystem):
             utils.log("[%s] successfully created AMI %s (%s)" % (self, name, image))
         
         utils.log("[%s] cleaning up temp instance %s" % (self, instance))
-        instance.delete()
+        instance.terminate()
 

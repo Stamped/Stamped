@@ -206,20 +206,47 @@ class AWSInstance(AInstance):
         
         utils.log("[%s] %s is online" % (self, desc))
     
+    def _block_mongo(self):
+        time.sleep(10)
+        error = None
+        tries = 0
+        
+        utils.log("[%s] waiting for mongo to come online (this may take a few minutes)..." % self)
+        while True:
+            try:
+                ret = self.stack.run_mongo_cmd('db.serverStatus()', slave_okay=True, instance=self)
+                
+                if not 'ok' in ret or ret['ok'] != 1:
+                    error = str(ret)
+            except Exception, e:
+                error = e
+            
+            if error is not None:
+                tries += 1
+                
+                if tries > 60:
+                    msg = "[%s] error: timeout attempting to access mongodb" % self
+                    utils.log(msg)
+                    raise Fail(msg)
+                else:
+                    time.sleep(1)
+    
     def _post_create(self, block):
         # wait for ssh service to come online
         self._validate_port(22, desc="ssh service", timeout=60)
         
         if block:
-            # wait for init script to finish
-            self._validate_port(8649, desc="init script", timeout=1200)
-            
-            if 'db' in self.roles:
-                # Check for mongo to finish
-                #self._validate_port(27017, desc="mongo", timeout=1000)
-                sleep = 20
-                utils.log("[%s] sleeping for %d seconds to ensure mongo is online" % (self, sleep))
-                time.sleep(sleep)
+            if 'bootstrap' in self.roles:
+                # wait for init script to finish
+                self._validate_port(8649, desc="init script", timeout=1200)
+            elif 'db' in self.roles:
+                self._block_mongo()
+            elif 'webServer' in self.roles:
+                self._validate_port(80, desc="server", timeout=100)
+            elif 'apiServer' in self.roles:
+                self._validate_port(5000, desc="server", timeout=100)
+            elif 'monitor' in self.roles:
+                self._validate_port(8080, desc="monitor",  timeout=100)
     
     def start(self):
         self.update()

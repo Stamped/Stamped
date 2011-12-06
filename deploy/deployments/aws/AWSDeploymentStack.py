@@ -153,6 +153,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
+        env.warn_only = True
         
         cmd_template = "mongo %s --quiet --eval 'printjson(%s);'"
         cmd = cmd_template % (db, mongo_cmd)
@@ -168,6 +169,10 @@ class AWSDeploymentStack(ADeploymentStack):
         hide_args = [ 'stdout', ]
         if not verbose:
             hide_args.append('running')
+            hide_args.append('stderr')
+            hide_args.append('warnings')
+            hide_args.append('aborts')
+            hide_args.append('status')
         
         for instance in db_instances:
             try:
@@ -186,16 +191,20 @@ class AWSDeploymentStack(ADeploymentStack):
                             except Fail:
                                 raise
                             except:
-                                utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
-                                utils.printException()
-                                utils.log(result)
+                                if verbose:
+                                    utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                                    utils.printException()
+                                    utils.log(result)
+                                
                                 return None
                         
                         return result
             except Fail:
                 raise
             except:
-                utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                if verbose:
+                    utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                raise
         
         return None
     
