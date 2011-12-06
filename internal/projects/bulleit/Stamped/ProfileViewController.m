@@ -184,9 +184,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
+  [self loadUserInfoFromNetwork];
   [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
-  [self loadUserInfoFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -214,14 +214,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
                             animated:animated];
-  if (!user_.name)
+  if (!user_.name && RKClient.sharedClient.requestQueue.count == 0)
     [self loadUserInfoFromNetwork];
   else
     [self fillInUserData];
-
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  if ([sectionInfo numberOfObjects] == 0)
-    [self loadStampsFromNetwork];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -412,6 +408,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if ([objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
     self.user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", user_.screenName]];
     [self fillInUserData];
+    id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+    if (user_.numStamps.unsignedIntValue > 0 && [sectionInfo numberOfObjects] == 0)
+      [self loadStampsFromNetwork];
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
