@@ -27,6 +27,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* category;
 @property (nonatomic, retain) NSString* coordinates;
 @property (nonatomic, retain) NSString* entityID;
+@property (nonatomic, retain) NSDate* localModificationDate;
 @property (nonatomic, retain) NSDate* mostRecentStampDate;
 @property (nonatomic, retain) NSString* subcategory;
 @property (nonatomic, retain) NSString* subtitle;

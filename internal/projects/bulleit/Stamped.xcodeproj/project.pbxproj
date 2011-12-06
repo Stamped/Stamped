@@ -2197,6 +2197,7 @@
 		7EF1105713C906A90059F9BD /* EntityDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityDetailViewController.m; sourceTree = "<group>"; };
 		7EF1F719142FE25E00233835 /* ActivityTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityTableViewCell.h; sourceTree = "<group>"; };
 		7EF1F71A142FE25E00233835 /* ActivityTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityTableViewCell.m; sourceTree = "<group>"; };
+		7EF25E3D148ED778004E4F11 /* StampedModel 16.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 16.xcdatamodel"; sourceTree = "<group>"; };
 		7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray_disclosure_arrow@2x.png"; sourceTree = "<group>"; };
 		7EFA58321413E39B007ADA64 /* delete_circle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "delete_circle@2x.png"; sourceTree = "<group>"; };
 		7EFDC99F13F865C600589E11 /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
@@ -5869,6 +5870,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7EF25E3D148ED778004E4F11 /* StampedModel 16.xcdatamodel */,
 				7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */,
 				7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */,
 				7E4B8E0C14687D42009A33DD /* StampedModel 13.xcdatamodel */,
@@ -5885,7 +5887,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */;
+			currentVersion = 7EF25E3D148ED778004E4F11 /* StampedModel 16.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;
