@@ -85,10 +85,12 @@ static const CGFloat kSubstringFontSize = 12.0;
 - (void)layoutSubviews {
   [super layoutSubviews];
   CGSize imageSize = typeImageView_.image.size;
-  typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 56, imageSize.width, imageSize.height);
+  typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 58, imageSize.width, imageSize.height);
+  CGSize descriptionSize = [descriptionLabel_ sizeThatFits:CGSizeMake(200, MAXFLOAT)];
   descriptionLabel_.frame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
-                                       CGRectGetMinY(typeImageView_.frame) + 1,
-                                       200, CGRectGetHeight(typeImageView_.frame));
+                                       CGRectGetMinY(typeImageView_.frame) - 2,
+                                       descriptionSize.width,
+                                       descriptionSize.height);
 }
 
 - (void)invertColors {
@@ -165,7 +167,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   UIImage* stampImage = [UIImage imageNamed:@"stamp_42pt_strokePlus"];
   UIImage* highlightedImage = [Util whiteMaskedImageUsingImage:stampImage];
   stampImageView_ = [[UIImageView alloc] initWithImage:stampImage highlightedImage:highlightedImage];
-  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 12, 6);
+  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 12, 8);
   stampImageView_.hidden = [favorite_.complete boolValue];
   [self.contentView addSubview:stampImageView_];
   [stampImageView_ release];
@@ -183,7 +185,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   titleLayer_.font = CTFontCreateWithName((CFStringRef)kEllipsisFontString, 0, NULL);  // So the ellipsis draws the way we like it.
   titleLayer_.fontSize = 24.0;
   titleLayer_.frame = CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15,
-                                 8, kTitleMaxWidth, kTitleFontSize);
+                                 10, kTitleMaxWidth, kTitleFontSize);
   titleLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
                                                     forKey:@"contents"];
   titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);

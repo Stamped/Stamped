@@ -1227,16 +1227,19 @@ class MongoEntitySearcher(EntitySearcher):
         if key not in self._errors:
             self._errors[key] = []
         
-        self._errors[key].append(error)
+        detail = utils.getFormattedException()
+        
+        self._errors[key].append((error, detail))
         self._statsSink.increment('stamped.api.search.third-party.errors.%s' % key)
         utils.log("%s search failed (%s)" % (key, error))
+        utils.log("%s search failed (%s)" % (key, detail))
         
         if 6 == len(self._errors[key]):
             subject = "%s search failing" % key
             message = "%s search failing\n\n" % key
             
             for error in self._errors[key]:
-                message += "%s\n\n" % error
+                message += "%s\n%s\n\n" % (error[0], error[1])
             
             self._notificationHandler.email(subject, message)
     

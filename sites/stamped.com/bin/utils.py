@@ -87,18 +87,21 @@ def write(filename, content):
     f.write(content)
     f.close()
 
+def getFormattedException():
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    
+    f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    return string.joinfields(f, '')
+
 def printException():
     """
         Simple debug utility to print a stack trace.
     """
     #traceback.print_exc()
-    exc_type, exc_value, exc_traceback = sys.exc_info()
     
     #traceback.print_exception(exc_type, exc_value, exc_traceback,
     #                          limit=8, file=sys.stderr)
-    f = traceback.format_exception(exc_type, exc_value, exc_traceback)
-    f = string.joinfields(f, '')
-    logs.warning(f)
+    logs.warning(getFormattedException())
 
 def resolvePath(path):
     if "." in path and not os.path.exists(path):
