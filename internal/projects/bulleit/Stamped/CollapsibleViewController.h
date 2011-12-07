@@ -19,8 +19,7 @@
 
 @interface CollapsibleViewController : UIViewController {
  @protected
-  BOOL isCollapsed;
-  BOOL previewMode;
+  BOOL previewMode_;
   NSMutableDictionary* contentDict;
   CGFloat maxNameLabelWidth;
   CGFloat collapsedHeight;
@@ -30,7 +29,7 @@
   NSMutableArray* stamps;
 }
 
-- (void)setIsCollapsed:(BOOL)collapsed;
+//- (void)setIsCollapsed:(BOOL)collapsed;
 - (void)collapse;
 - (void)expand;
 - (void)collapseAnimated;
@@ -67,12 +66,6 @@
 @property (nonatomic, retain) NSArray* stamps;
 
 @property (nonatomic, assign) id<CollapsibleViewControllerDelegate> delegate;
-
-extern int const COLLAPSED_HEIGHT;
-extern int const LABEL_HEIGHT;
-extern int const IMAGE_HEIGHT;
-extern int const SPACE_HEIGHT;
-
 
 @end
 

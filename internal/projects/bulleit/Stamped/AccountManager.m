@@ -477,3 +477,4 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 @end
+
