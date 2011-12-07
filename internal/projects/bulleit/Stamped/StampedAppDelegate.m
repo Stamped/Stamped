@@ -26,6 +26,7 @@
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
 #import "SocialManager.h"
+#import "SKPSMTPMessage.h"
 #import "EditEntityViewController.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
@@ -58,6 +59,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   if (![crashReporter enableCrashReporterAndReturnError:&error])
     NSLog(@"Warning: Could not enable crash reporter: %@", error);
   
+  // crash
+  //[self setColor:[UIColor whiteColor]];
+  
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
@@ -85,7 +89,41 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)handleCrashReport {
-  NSLog(@"Handling crash report...");
+  PLCrashReporter* crashReporter = [PLCrashReporter sharedReporter];
+  NSData* crashData;
+  NSError* error;
+
+  // Try loading the crash report
+  crashData = [crashReporter loadPendingCrashReportDataAndReturnError:&error];
+  if (crashData == nil) {
+    NSLog(@"Could not load crash report: %@", error);
+    goto finish;
+  }
+
+  PLCrashReport* report = [[[PLCrashReport alloc] initWithData:crashData error:&error] autorelease];
+  if (report == nil) {
+    NSLog(@"Could not parse crash report");
+    goto finish;
+  }
+  
+  NSMutableString* reportBody = [NSMutableString string];
+
+  if (report.hasExceptionInfo) {
+    [reportBody appendFormat:@"Exception %@ -- %@\n", report.exceptionInfo.exceptionName, report.exceptionInfo.exceptionReason];
+  }
+  
+  [reportBody appendFormat:@"Signal %@ -- %@ at 0x%llx\n",
+      report.signalInfo.name, report.signalInfo.code, (unsigned long long)report.signalInfo.address];
+
+  NSLog(@"Report body: %@", reportBody);
+  NSLog(@"Crashed on %@", report.systemInfo.timestamp);
+  NSLog(@"Crashed with signal %@ (code %@, address=0x%" PRIx64 ")", report.signalInfo.name,
+        report.signalInfo.code, report.signalInfo.address);
+
+  // Purge the report
+finish:
+  [crashReporter purgePendingCrashReport];
+  return;
 }
 
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
