@@ -108,9 +108,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   NSMutableString* reportBody = [NSMutableString string];
 
   if (report.hasExceptionInfo)
-    [reportBody appendFormat:@"Exception %@ -- %@\n", report.exceptionInfo.exceptionName, report.exceptionInfo.exceptionReason];
+    [reportBody appendFormat:@"%@: %@\n", report.exceptionInfo.exceptionName, report.exceptionInfo.exceptionReason];
   
-  [reportBody appendFormat:@"Signal %@ -- %@ at 0x%llx\n",
+  [reportBody appendFormat:@"Signal %@ - %@ at 0x%llx\n",
       report.signalInfo.name, report.signalInfo.code, (unsigned long long)report.signalInfo.address];
   
   SKPSMTPMessage* testMsg = [[SKPSMTPMessage alloc] init];
@@ -120,7 +120,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   testMsg.requiresAuth = YES;
   testMsg.login = @"crashlogger@stamped.com";
   testMsg.pass = @"august1ftw";
-  testMsg.subject = @"test message";
+  testMsg.subject = reportBody;
   testMsg.wantsSecure = YES; // smtp.gmail.com requires TLS.
   testMsg.delegate = self;
   
