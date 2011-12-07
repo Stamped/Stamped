@@ -130,10 +130,11 @@
 - (void)layoutSubviews {
   CGSize imageSize = categoryImageView_.image.size;
   categoryImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 48, imageSize.width, imageSize.height);
-  [subtitleLabel_ sizeToFit];
-  subtitleLabel_.frame = CGRectOffset(subtitleLabel_.frame,
-                                      CGRectGetMaxX(categoryImageView_.frame) + 4,
-                                      CGRectGetMinY(categoryImageView_.frame) - 1);
+  CGSize subtitleSize = [subtitleLabel_ sizeThatFits:CGSizeMake(280, MAXFLOAT)];
+  subtitleLabel_.frame = CGRectMake(CGRectGetMaxX(categoryImageView_.frame) + 4,
+                                    CGRectGetMinY(categoryImageView_.frame) - 1,
+                                    subtitleSize.width,
+                                    subtitleSize.height);
 }
 
 - (void)setStamp:(Stamp*)stamp {
