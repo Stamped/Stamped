@@ -89,7 +89,7 @@
     categoryImageView_.contentMode = UIViewContentModeLeft;
     categoryImageView_.backgroundColor = [UIColor clearColor];
     
-    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 44, aFrame.size.width - 50, 15)];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
@@ -130,10 +130,11 @@
 - (void)layoutSubviews {
   CGSize imageSize = categoryImageView_.image.size;
   categoryImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 48, imageSize.width, imageSize.height);
+  CGSize subtitleSize = [subtitleLabel_ sizeThatFits:CGSizeMake(280, MAXFLOAT)];
   subtitleLabel_.frame = CGRectMake(CGRectGetMaxX(categoryImageView_.frame) + 4,
-                                    CGRectGetMinY(categoryImageView_.frame) + 1,
-                                    CGRectGetWidth(subtitleLabel_.frame),
-                                    CGRectGetHeight(categoryImageView_.frame));
+                                    CGRectGetMinY(categoryImageView_.frame) - 1,
+                                    subtitleSize.width,
+                                    subtitleSize.height);
 }
 
 - (void)setStamp:(Stamp*)stamp {

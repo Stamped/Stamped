@@ -8,6 +8,7 @@
 
 #import "StampedAppDelegate.h"
 
+#import <CrashReporter/CrashReporter.h>
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
@@ -32,19 +33,42 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface StampedAppDelegate ()
+- (void)handleCrashReport;
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
+- (void)handleTitleTap:(UIGestureRecognizer*)recognizer;
+- (void)handleGridTap:(UIGestureRecognizer*)recognizer;
+
+@property (nonatomic, retain) UIImageView* gridView;
 @end
 
 @implementation StampedAppDelegate
 
 @synthesize window = window_;
 @synthesize navigationController = navigationController_;
+@synthesize gridView = gridView_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  PLCrashReporter* crashReporter = [PLCrashReporter sharedReporter];
+  NSError* error;
+
+  if ([crashReporter hasPendingCrashReport])
+    [self handleCrashReport];
+
+  if (![crashReporter enableCrashReporterAndReturnError:&error])
+    NSLog(@"Warning: Could not enable crash reporter: %@", error);
+  
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
+  gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
+  gridView_.userInteractionEnabled = YES;
+  gridView_.alpha = 0;
+  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGridTap:)];
+  [gridView_ addGestureRecognizer:recognizer];
+  [recognizer release];
+  [window_ addSubview:gridView_];
+  [gridView_ release];
   [self.window makeKeyAndVisible];
 
   NSDictionary* userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
@@ -58,6 +82,24 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   }
     
   return YES;
+}
+
+- (void)handleCrashReport {
+  NSLog(@"Handling crash report...");
+}
+
+- (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  gridView_.alpha = 1;
+}
+
+- (void)handleGridTap:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  recognizer.view.alpha = 0;
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {
