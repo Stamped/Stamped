@@ -39,8 +39,9 @@
 
 - (void)showContents {
   self.descriptionLabel.text = detailedEntity_.subtitle;
-  if ([detailedEntity_.subcategory isEqualToString:@"app"])
+  if ([detailedEntity_.subcategory.lowercaseString isEqualToString:@"app"]) {
     [self loadAppImage];
+  }
   else {
     [self setupMainActionsContainer];
     [self setupMapView];
@@ -125,19 +126,19 @@
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:detailedEntity_.phone];
-	[alert setDelegate:self];
-	[alert addButtonWithTitle:@"Cancel"];
-	[alert addButtonWithTitle:@"Call"];
-	[alert show];
-	[alert release];
+  [alert setTitle:detailedEntity_.phone];
+  [alert setDelegate:self];
+  [alert addButtonWithTitle:@"Cancel"];
+  [alert addButtonWithTitle:@"Call"];
+  [alert show];
+  [alert release];
 }
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 1) {
+  if (buttonIndex == 1) {
     NSString* telURL = [NSString stringWithFormat:@"tel://%i",
-        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
+                        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }
 
@@ -192,7 +193,7 @@
   }
   
   
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];
@@ -201,26 +202,26 @@
   
   section = [self makeSectionWithName:@"Information"];
   
-  if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) { 
+  if (detailedEntity_.subcategory && detailedEntity_.subcategory.length > 0) { 
     [section addPairedLabelWithName:@"Category:"
                               value:detailedEntity_.subcategory.capitalizedString
                              forKey:@"subcategory"];
   }
   
   
-  if (detailedEntity_.address && ![detailedEntity_.address isEqualToString:@""]) {
+  if (detailedEntity_.address && detailedEntity_.address.length > 0) {
     [section addPairedLabelWithName:@"Address:"
                               value:detailedEntity_.address
                              forKey:@"address"];
   }
     
-  if (detailedEntity_.neighborhood && ![detailedEntity_.neighborhood isEqualToString:@""]) {
+  if (detailedEntity_.neighborhood && detailedEntity_.neighborhood.length > 0) {
     [section addPairedLabelWithName:@"Neighborhood:"
                               value:detailedEntity_.neighborhood.capitalizedString
                              forKey:@"neighborhood"];
   }
   
-  if (detailedEntity_.website && ![detailedEntity_.website isEqualToString:@""]) {
+  if (detailedEntity_.website && detailedEntity_.website.length > 0) {
     [section addPairedLabelWithName:@"Website:"
                               value:detailedEntity_.website
                              forKey:@"website"];
@@ -241,14 +242,10 @@
 
 
 - (void)loadAppImage {
-  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     self.imageView.imageURL = detailedEntity_.image;
     self.imageView.delegate = self;
     self.imageView.hidden = NO;
-//    UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
-//    [self.imageView addGestureRecognizer:gr];
-//    [gr release];
-    
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     self.imageView.layer.cornerRadius = 18.0;
     self.imageView.layer.masksToBounds = YES;
@@ -271,9 +268,8 @@
   
   // Add content sections
   self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
-  
   CollapsibleViewController* section;
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];
@@ -304,11 +300,10 @@
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:
-   [NSURL URLWithString:detailedEntity_.itunesShortURL]];
+  [[UIApplication sharedApplication] openURL: [NSURL URLWithString:detailedEntity_.itunesShortURL]];
 }
 
-- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {  
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   [self setupAsAppDetail];
 }
 

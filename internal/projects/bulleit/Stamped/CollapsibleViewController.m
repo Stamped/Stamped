@@ -40,19 +40,18 @@
 @synthesize stamps = stamps_;
 @synthesize isSilent = isSilent_;
 
-int const LABEL_HEIGHT = 20;
-int const IMAGE_HEIGHT = 40;
-int const SPACE_HEIGHT = 10;
+static const NSUInteger kLabelHeight = 20;
+static const NSUInteger kImageHeight = 40;
+static const NSUInteger kSpaceHeight = 10;
 
 - (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
     isCollapsed_ = YES;
-    isSilent_ = NO;
     collapsedHeight_ = 40.0f;
 
     if ([nibNameOrNil isEqualToString:@"CollapsiblePreviewController"])
-      previewMode = YES;
+      previewMode_ = YES;
 
     contentDict_ = [[NSMutableDictionary alloc] init];
 
@@ -87,6 +86,7 @@ int const SPACE_HEIGHT = 10;
   UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
   [self.view addGestureRecognizer:gr];
   [gr release];
+  [super viewDidLoad];
 }
 
 - (void)viewDidUnload {
@@ -113,13 +113,14 @@ int const SPACE_HEIGHT = 10;
 
 - (void)collapse {
   if (!self.isSilent)
-    [self.delegate collapsibleViewController:self willChangeHeightBy:collapsedHeight_-self.view.bounds.size.height];
+    [self.delegate collapsibleViewController:self 
+                          willChangeHeightBy:(collapsedHeight_ - self.view.bounds.size.height)];
   self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
                                self.view.frame.size.width, collapsedHeight_);
-  if (self.footerLabel && ![self.footerLabel.text isEqualToString:@""]) {
+  if (self.footerLabel && self.footerLabel.text.length > 0) {
     self.footerLabel.text = self.collapsedFooterText;
     CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + 
-    [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
+      [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
     arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
   }
   if (!isCollapsed_)
@@ -127,9 +128,9 @@ int const SPACE_HEIGHT = 10;
 }
 
 - (void)expand {
-  CGFloat newHeight = 40.f + [self contentHeight] + SPACE_HEIGHT;
+  CGFloat newHeight = 40.f + [self contentHeight] + kSpaceHeight;
   if (self.footerView)
-    newHeight += self.footerView.frame.size.height - SPACE_HEIGHT;
+    newHeight += self.footerView.frame.size.height - kSpaceHeight;
   if (!self.isSilent)
     [self.delegate collapsibleViewController:self willChangeHeightBy:newHeight - self.view.bounds.size.height];
   self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
@@ -177,7 +178,6 @@ int const SPACE_HEIGHT = 10;
   }
 }
 
-
 #pragma mark - Adding content
 
 - (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key {
@@ -215,7 +215,7 @@ int const SPACE_HEIGHT = 10;
     
     CGRect frame = newLabel.view.frame;
     frame.origin = CGPointMake(sectionLabel_.frame.origin.x, [self contentHeight]);
-    frame.size   = CGSizeMake(contentView_.frame.size.width, 16.f); 
+    frame.size = CGSizeMake(contentView_.frame.size.width, 16.f); 
     newLabel.view.frame = frame;
     
     // Change "label" field font for numbering.
@@ -275,7 +275,7 @@ int const SPACE_HEIGHT = 10;
   CGSize previewRectSize = CGSizeMake(0,0);
   
   if (self.imageView && self.imageView.hidden == NO) {
-    CGRect  imageViewFrame = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
+    CGRect imageViewFrame = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
     previewRectSize = CGSizeMake(CGRectGetMinX(self.imageView.frame) - 25.0, CGRectGetMaxY(imageViewFrame) + 12.0);
   }
   
@@ -344,10 +344,11 @@ int const SPACE_HEIGHT = 10;
 - (void)addContent:(id)content forKey:(NSString*)key {
   [self.contentDict setObject:content forKey:key];
   if ([content respondsToSelector:@selector(view)])
-      [contentView_ addSubview:((CollapsibleViewController*)content).view];
-  else [contentView_ addSubview:(UIView*)content];
+    [contentView_ addSubview:((CollapsibleViewController*)content).view];
+  else 
+    [contentView_ addSubview:(UIView*)content];
   
-  if (self.footerLabel.hidden == NO  &&  self.contentHeight <= self.contentView.frame.size.height) {
+  if (self.footerLabel.hidden == NO && self.contentHeight <= self.contentView.frame.size.height) {
     self.footerLabel.hidden = YES;
     self.arrowView.hidden = YES;
     self.collapsedHeight = self.headerView.frame.size.height + self.contentHeight;
@@ -379,9 +380,7 @@ int const SPACE_HEIGHT = 10;
 - (float)contentHeight {
   float contentHeight = 0.f;
   
-  if (!contentDict_)
-    return 0.f;
-  if (contentDict_.count == 0)
+  if (!contentDict_ || contentDict_.count == 0)
     return 0.f;
   
   for (id content in self.contentDict.objectEnumerator) {
@@ -408,8 +407,7 @@ int const SPACE_HEIGHT = 10;
                              imageView.frame.size.height-actualImageFrame.size.height);
   actualImageFrame = CGRectOffset(actualImageFrame, offset.width/2, offset.height/2);
   actualImageFrame = [imageView convertRect:actualImageFrame toView:self.view];
-//  NSLog(@"image: %f %f %f %f", actualImageFrame.origin.x, actualImageFrame.origin.y, actualImageFrame.size.width, actualImageFrame.size.height);
-//  NSLog(@"arrow: %f %f %f %f", convertedArrowFrame.origin.x, convertedArrowFrame.origin.y, convertedArrowFrame.size.width, convertedArrowFrame.size.height);
+
   if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(actualImageFrame) &&
       CGRectGetMaxY(convertedArrowFrame) - 20 <= CGRectGetMaxY(actualImageFrame)) {
     if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(actualImageFrame)) {
@@ -420,8 +418,7 @@ int const SPACE_HEIGHT = 10;
                                         CGRectGetWidth(self.arrowView.frame),
                                         CGRectGetHeight(self.arrowView.frame));
     }
-  }
-  else {
+  } else {
     CGRect frame = self.arrowView.frame;
     CGPoint origin = frame.origin;
     origin.x = self.view.frame.size.width - frame.size.width;
