@@ -8,6 +8,7 @@
 
 #import "StampedAppDelegate.h"
 
+#import <CrashReporter/CrashReporter.h>
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
@@ -32,6 +33,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface StampedAppDelegate ()
+- (void)handleCrashReport;
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer;
@@ -47,6 +49,15 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @synthesize gridView = gridView_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  PLCrashReporter* crashReporter = [PLCrashReporter sharedReporter];
+  NSError* error;
+
+  if ([crashReporter hasPendingCrashReport])
+    [self handleCrashReport];
+
+  if (![crashReporter enableCrashReporterAndReturnError:&error])
+    NSLog(@"Warning: Could not enable crash reporter: %@", error);
+  
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
@@ -71,6 +82,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   }
     
   return YES;
+}
+
+- (void)handleCrashReport {
+  NSLog(@"Handling crash report...");
 }
 
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
