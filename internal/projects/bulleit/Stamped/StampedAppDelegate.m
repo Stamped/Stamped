@@ -69,6 +69,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken {
+  if (!devToken || ![AccountManager sharedManager].authenticated)
+    return;
+
   NSString* deviceToken = [NSString stringWithFormat:@"%@", devToken];
   deviceToken = [deviceToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
   deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
@@ -168,7 +171,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)performRestKitMappings {
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;

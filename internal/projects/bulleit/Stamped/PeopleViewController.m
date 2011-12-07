@@ -194,14 +194,12 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
       NSLog(@"Problem parsing response JSON: %@", error);
     } else {
       NSArray* followingIDs = (NSArray*)[responseObj objectForKey:@"user_ids"];
-      NSLog(@"response: %@", followingIDs);
       // Which users need information fetched for them?
       NSSet* currentIDs = [currentUser.following valueForKeyPath:@"@distinctUnionOfObjects.userID"];
       if ([[NSSet setWithArray:followingIDs] isEqualToSet:currentIDs]) {
         [self setIsLoading:NO];
         return;
-      }      
-      NSLog(@"sets not equal");
+      }
       // New people that need following. Load in 100-user increments.
       self.userIDsToBeFetched = [NSMutableArray array];
       for (NSString* userID in followingIDs) {
@@ -214,7 +212,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
         self.userIDsToBeFetched = nil;
         [self setIsLoading:NO];
       }
-      NSLog(@"follow users: %@", userIDsToBeFetched_);
 
       // Unfollowed. Remove stamps from inbox and following set.
       for (NSString* userID in currentIDs.allObjects) {
@@ -236,8 +233,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     return;
 
   if ([objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
-    NSLog(@"objects: %@", objects);
-    
     for (User* user in objects) {
       [currentUser addFollowingObject:user];
       [userIDsToBeFetched_ removeObject:user.userID];

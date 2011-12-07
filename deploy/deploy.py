@@ -12,32 +12,26 @@ from optparse import OptionParser
 from deployments import AWSDeploymentSystem, LocalDeploymentSystem
 from errors import Fail
 
-available_commands = {
-    'create' : 'create_stack', 
+available_commands = set([
+    # CRUD
+    'create', 
+    'list', 
+    'update', 
+    'delete', 
     
-    'delete' : 'delete_stack', 
+    # node management
+    'add', 
+    'repair', 
+    'force_db_primary_change', 
+    'remove_db_node', 
     
-    'delete' : 'delete_stack', 
-    
-    'list' : 'list_stacks', 
-    
-    'update' : 'update_stack', 
-    
-    'crawl' : 'crawl', 
-    'stress' : 'stress', 
-    
-    'setup_crawler_data' : 'setup_crawler_data', 
-    
-    'backup' : 'backup', 
-    
-    'add' : 'add_stack', 
-    
-    'repair' : 'repair_stack', 
-    
-    'force_db_primary' : 'force_db_primary_change', 
-    
-    'create_image' : 'create_image', 
-}
+    # utilities
+    'bootstrap', 
+    'crawl', 
+    'stress', 
+    'setup_crawler_data', 
+    'backup', 
+])
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -89,7 +83,7 @@ def main():
     deploymentSystemClass = deployments[options.deployment]
     deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__, options)
     
-    command = available_commands[args[0]]
+    command = args[0]
     
     func = getattr(deploymentSystem, command, None)
     if func is None:
@@ -100,8 +94,6 @@ def main():
     except Exception:
         utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
         raise
-    
-    deploymentSystem.shutdown()
 
 if __name__ == '__main__':
     main()

@@ -112,6 +112,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)showFirstRunViewController {
+  // TODO(auth): Cancel requests from shared queue as well.
   [oAuthRequestQueue_ cancelAllRequests];
 
   self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
@@ -377,7 +378,7 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
-  NSLog(@"Request: %@", request.resourcePath);
+  NSLog(@"%f | Network activity indicator: Begin", ([[NSDate date] timeIntervalSince1970]));
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
   if (queue == oAuthRequestQueue_) {
     [RKClient sharedClient].requestQueue.suspended = YES;
@@ -406,8 +407,10 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
-  if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0)
+  if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0) {
+    NSLog(@"%f | Network activity indicator: End", ([[NSDate date] timeIntervalSince1970]));
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+  }
   if (queue == oAuthRequestQueue_ && queue.count == 0) {
     [RKClient sharedClient].requestQueue.suspended = NO;
   }

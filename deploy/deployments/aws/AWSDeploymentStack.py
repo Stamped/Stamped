@@ -137,7 +137,7 @@ class AWSDeploymentStack(ADeploymentStack):
         utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
     
     def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, 
-                      db='stamped', instance=None, verbose=False):
+                      db='stamped', instance=None, verbose=False, error_okay=False):
         """
             Runs the desired mongo shell command in the context of the given db, 
             on either a random db node in the stack if slave_okay is True or the 
@@ -153,6 +153,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
+        env.warn_only = True
         
         cmd_template = "mongo %s --quiet --eval 'printjson(%s);'"
         cmd = cmd_template % (db, mongo_cmd)
@@ -168,6 +169,10 @@ class AWSDeploymentStack(ADeploymentStack):
         hide_args = [ 'stdout', ]
         if not verbose:
             hide_args.append('running')
+            hide_args.append('stderr')
+            hide_args.append('warnings')
+            hide_args.append('aborts')
+            hide_args.append('status')
         
         for instance in db_instances:
             try:
@@ -181,21 +186,25 @@ class AWSDeploymentStack(ADeploymentStack):
                             try:
                                 result = utils.AttributeDict(json.loads(result))
                                 
-                                if 'errmsg' in result:
+                                if not error_okay and 'errmsg' in result:
                                     raise Fail(result['errmsg'])
                             except Fail:
                                 raise
                             except:
-                                utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
-                                utils.printException()
-                                utils.log(result)
+                                if verbose:
+                                    utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                                    utils.printException()
+                                    utils.log(result)
+                                
                                 return None
                         
                         return result
             except Fail:
                 raise
             except:
-                utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                if verbose:
+                    utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
+                raise
         
         return None
     
@@ -216,6 +225,7 @@ class AWSDeploymentStack(ADeploymentStack):
             
             primaries = filter(lambda m: 1 == m.state, status.members)
             if 0 == len(primaries):
+                pprint(dict(status))
                 utils.log("[%s] unable to find a primary! retrying..." % self)
                 
                 if delay > maxdelay:
@@ -320,6 +330,58 @@ class AWSDeploymentStack(ADeploymentStack):
                                    (confs, str(force).lower()), slave_okay=force)
         pprint(ret)
     
+    def remove_db_node(self, *args):
+        if 0 == len(args):
+            utils.log("must specify instance to make primary (either node name or instance-id)")
+            return
+        
+        
+        # TODO: only allow a node to be removed if it wouldn't cause indecision around primary
+        
+        
+        db_instance = None
+        arg   = args[0]
+        force = (len(args) > 1 and args[1] == 'force')
+        
+        for instance in self.db_instances:
+            if instance.name == arg or instance.instance_id == arg:
+                db_instance = instance
+                break
+        
+        if db_instance is None:
+            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            return
+        
+        conf = self._get_replset_conf()
+        index = -1
+        
+        # find highest existing priority in replica set config
+        for i in xrange(len(conf.members)):
+            node = conf.members[i]
+            ip = node.host.split(':')[0].lower()
+            
+            if ip == db_instance.private_ip_address:
+                index = i
+                break
+         
+        if index < 0:
+            utils.log("[%s] error: unable to find db instance '%s'" % (self, arg))
+            return
+        
+        conf.members.pop(index)
+        utils.log()
+        utils.log("[%s] attempting to reconfigure replica set '%s'" % (self, conf._id))
+        conf = dict(conf)
+        conf['members'] = list(dict(m) for m in conf['members'])
+        pprint(conf)
+        
+        confs = json.dumps(conf)
+        ret   = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
+                                   (confs, str(force).lower()), slave_okay=force)
+        pprint(ret)
+        if force:
+            db_node.terminate()
+    
     def repair(self, *args):
         force = (len(args) >= 1 and args[0] == 'force')
         
@@ -328,7 +390,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         try:
             status = self._get_replset_status()
-            initialize = False
+            initialize = (status is not None)
         except Fail:
             initialize = True
         
@@ -364,9 +426,10 @@ class AWSDeploymentStack(ADeploymentStack):
         # group replica set members by state
         node_state = defaultdict(list)
         for node in status.members:
-            if node.state == 0 or node.state == 5:
+            if node.state == 0 or node.state == 5 or \
+                (node.state == 8 and 'errmsg' in node and node.errmsg == u'still initializing'):
                 node_state['initializing'].append(node)
-            if node.state == 1:
+            elif node.state == 1:
                 node_state['primary'].append(node)
             elif node.state == 2:
                 node_state['secondary'].append(node)
@@ -513,8 +576,10 @@ class AWSDeploymentStack(ADeploymentStack):
                     self.add('db')
         else:
             # everything looks peachy
-            assert not warn
-            utils.log("[%s] everything looks peachy with replica set %s" % (self, status.set))
+            if warn:
+                utils.log("[%s] replica set %s seems healthy (possibly still initializing)" % (self, status.set))
+            else:
+                utils.log("[%s] replica set %s is healthy" % (self, status.set))
     
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
@@ -594,11 +659,7 @@ class AWSDeploymentStack(ADeploymentStack):
             cur_conf = conf.copy()
             cur_conf['name'] = '%s%d' % (add, top + i)
             
-            #if 0 == placements[0][1] and count == 1:
-            #    placement = 'us-east-1a' # default availability zone
-            #else:
             placement = placements[i % len(placements)][0]
-            
             cur_conf['placement'] = placement
             
             # create and bootstrap the new instance
@@ -622,9 +683,9 @@ class AWSDeploymentStack(ADeploymentStack):
         
         if len(instances) != count:
             utils.log("[%s] error: failed to add %d instances" % (self, count))
+            return
         
         if add in ['api', 'web']:
-            return
             utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
             
             # get all ELBs
@@ -668,9 +729,11 @@ class AWSDeploymentStack(ADeploymentStack):
                 mongo_cmd = 'rs.add("%s")' % node_name
                 
                 utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin')
+                status = self.run_mongo_cmd(mongo_cmd, transform=True, db='admin', slave_okay=False)
                 
                 pprint(status)
+                utils.log()
+                
                 status = self._get_replset_status()
                 found  = False
                 
@@ -686,48 +749,6 @@ class AWSDeploymentStack(ADeploymentStack):
                     utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
                     status.members = list(dict(m) for m in status.members)
                     pprint(dict(status))
-                
-                """
-                command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
-                             (host.public_dns_name, port, mongo_cmd)
-                
-                utils.log(command)
-                ret = utils.shell(command)
-                
-                if 0 == ret[1]:
-                    utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                    utils.log("[%s] waiting for node to come online (may take a few minutes during initial sync)" % self)
-                    print ret[0]
-                    
-                    mongo_cmd = 'rs.status()'
-                    command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
-                                 (host.public_dns_name, port, mongo_cmd)
-                    
-                    # wait until the replica set reports the newly added instance as healthy
-                    while True:
-                        ret = utils.shell(command)
-                        #print ret[0]
-                        
-                        if 0 == ret[1]:
-                            status  = re.sub("ISODate\(([^)]*)\)", '""', ret[0])
-                            status  = json.loads(status)
-                            healthy = False
-                            
-                            for node in status['members']:
-                                if node['name'] == node_name:
-                                    healthy = (1 == node['health'])
-                                    break
-                            
-                            if healthy:
-                                break
-                        
-                        time.sleep(2)
-                    
-                    utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
-                else:
-                    utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                    print ret[0]
-            """
         
         self.instances.extend(instances)
         utils.log("[%s] done creating %d %s instance%s" % 
