@@ -378,7 +378,6 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
-  NSLog(@"%f | Network activity indicator: Begin", ([[NSDate date] timeIntervalSince1970]));
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
   if (queue == oAuthRequestQueue_) {
     [RKClient sharedClient].requestQueue.suspended = YES;
@@ -408,7 +407,6 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
   if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0) {
-    NSLog(@"%f | Network activity indicator: End", ([[NSDate date] timeIntervalSince1970]));
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
   }
   if (queue == oAuthRequestQueue_ && queue.count == 0) {
