@@ -538,10 +538,6 @@ def main():
     
     if options.detail:
         results = places.getPlaceDetails(options.input, params)
-        
-        #for result in ret:
-        #entity = self.parseEntity(result)
-        #self.parseEntityDetail(details, entity)
     elif options.suggest:
         results = places.getAutocompleteResults(options.latLng, options.input, params)
     elif options.address:

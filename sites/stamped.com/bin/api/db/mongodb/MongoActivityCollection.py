@@ -54,7 +54,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
         limit       = kwargs.pop('limit', 20)
-
+        
         params = {'recipient_id': userId}
         
         if since != None and before != None:
@@ -66,11 +66,11 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         
         documents = self._collection.find(params).sort('timestamp.created', \
             pymongo.DESCENDING).limit(limit)
-
+        
         activity = []
         for document in documents:
             activity.append(self._convertFromMongo(document))
-
+        
         return activity
     
     def getActivityItem(self, activityId):

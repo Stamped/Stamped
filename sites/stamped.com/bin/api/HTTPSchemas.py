@@ -854,15 +854,12 @@ class HTTPGenericSlice(Schema):
         self.quality            = SchemaElement(int)
         self.sort               = SchemaElement(basestring)
 
-class HTTPUserCollectionSlice(Schema):
+class HTTPUserCollectionSlice(HTTPGenericSlice):
     def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
-        self.limit              = SchemaElement(int)
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
-        self.quality            = SchemaElement(int)
-        self.sort               = SchemaElement(basestring)
         self.deleted            = SchemaElement(bool)
 
 class HTTPStampImage(Schema):
@@ -918,13 +915,11 @@ class HTTPCommentId(Schema):
     def setSchema(self):
         self.comment_id         = SchemaElement(basestring, required=True)
 
-class HTTPCommentSlice(Schema):
+class HTTPCommentSlice(HTTPGenericSlice):
     def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
         self.stamp_id           = SchemaElement(basestring, required=True)
-        self.limit              = SchemaElement(int)
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
-        self.sort               = SchemaElement(basestring)
 
 # ######## #
 # Favorite #

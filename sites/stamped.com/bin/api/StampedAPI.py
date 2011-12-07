@@ -1323,13 +1323,7 @@ class StampedAPI(AStampedAPI):
         
         user        = self._userDB.getUser(authUserId)
         
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.-2', duration)
-        
         entity      = self._getEntityFromRequest(entityRequest)
-        
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.-1', duration)
         
         blurbData   = data.pop('blurb', None)
         creditData  = data.pop('credit', None)
@@ -1346,9 +1340,6 @@ class StampedAPI(AStampedAPI):
             msg = "Cannot stamp same entity twice (id = %s)" % entity.entity_id
             logs.warning(msg)
             raise IllegalActionError(msg)
-        
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.0', duration)
         
         # Build stamp
         stamp                       = Stamp()
@@ -1429,9 +1420,6 @@ class StampedAPI(AStampedAPI):
         ### TODO: Rollback adds stamp to "deleted stamps" table. Fix that.
         self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
         
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.1', duration)
-        
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
@@ -1447,24 +1435,15 @@ class StampedAPI(AStampedAPI):
             
             self._statsSink.increment('stamped.api.stamps.images')
         
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.2', duration)
-        
         # Add user objects back into stamp
         entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
             userIds=userIds, entityIds=entityIds)
         
-        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.3', duration)
-        
         # Add a reference to the stamp in the user's collection
         self._rollback.append((self._stampDB.removeUserStampReference, \
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
-        
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.4', duration)
         
         # Add a reference to the stamp in followers' inbox
         followers = self._friendshipDB.getFollowers(user.user_id)
@@ -1472,9 +1451,6 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._stampDB.removeInboxStampReference, \
             {'stampId': stamp.stamp_id, 'userIds': followers}))
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
-        
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.5', duration)
         
         # Update user stats 
         ### TODO: Should rollback go before or after?
@@ -1492,9 +1468,6 @@ class StampedAPI(AStampedAPI):
                     None, increment=1)
         self._rollback.append((self._userDB.updateUserStats, \
             {'userId': authUserId, 'stat': 'num_stamps_total', 'increment': -1}))
-        
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.6', duration)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -1552,9 +1525,6 @@ class StampedAPI(AStampedAPI):
         
         # Note: No activity should be generated for the user creating the stamp
         
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.7', duration)
-        
         # Add activity for credited users
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
@@ -1572,9 +1542,6 @@ class StampedAPI(AStampedAPI):
             # Increment activity count
             for user_id in creditedUserIds:
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
-        
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.8', duration)
         
         # Add activity for mentioned users
         if self._activity == True and stamp.mentions != None \
@@ -1612,9 +1579,6 @@ class StampedAPI(AStampedAPI):
                 
                 # Increment mentions metric
                 self._statsSink.increment('stamped.api.stamps.mentions')
-        
-        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        self._statsSink.time('stamped.api.methods.addStamp.9', duration)
         
         return stamp
     
@@ -2361,20 +2325,35 @@ class StampedAPI(AStampedAPI):
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
 
-    def _setSliceParams(self, data):
+    def _setSliceParams(self, data, default_limit=20, default_sort=None):
         # Since
         try: 
-            since = datetime.utcfromtimestamp(int(data.pop('since', None))-2)
+            since = datetime.utcfromtimestamp(int(data.pop('since', None)) - 2)
         except:
             since = None
         
         # Before
         try: 
-            before = datetime.utcfromtimestamp(int(data.pop('before', None))+2)
+            before = datetime.utcfromtimestamp(int(data.pop('before', None)) + 2)
         except:
             before = None
         
-        return since, before
+        try:
+            limit = int(data.pop('limit', default_limit))
+            
+            if default_limit is not None and limit > default_limit:
+                limit = default_limit
+        except:
+            limit = default_limit
+        
+        sort = data.pop('sort', default_sort)
+        
+        return {
+            'since'  : since, 
+            'before' : before, 
+            'limit'  : limit, 
+            'sort'   : sort, 
+        }
     
     def _setLimit(self, limit, cap=20):
         try:
@@ -2384,12 +2363,7 @@ class StampedAPI(AStampedAPI):
             return cap
     
     def _getStampCollection(self, authUserId, stampIds, **kwargs):
-        
-        # t0 = time.time()
-        
         quality         = kwargs.pop('quality', 3)
-        limit           = kwargs.pop('limit', None)
-        sort            = kwargs.pop('sort', 'created')
         includeComments = kwargs.pop('comments', False)
         
         # Set quality
@@ -2403,22 +2377,10 @@ class StampedAPI(AStampedAPI):
             stampCap    = 20
             commentCap  = 4
         
-        limit = self._setLimit(limit, cap=stampCap)
-        
         # Limit slice of data returned
-        since, before = self._setSliceParams(kwargs)
-        
-        params = {
-            'since':    since,
-            'before':   before, 
-            'limit':    limit,
-            'sort':     sort,
-        }
+        params = self._setSliceParams(kwargs, stampCap, 'created')
         
         stampData = self._stampDB.getStamps(stampIds, **params)
-        
-        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        # self._statsSink.time('stamped.api.methods._getStampCollection.getStamps', duration)
         
         commentPreviews = {}
 
@@ -2434,9 +2396,6 @@ class StampedAPI(AStampedAPI):
                 if comment.stamp_id not in commentPreviews:
                     commentPreviews[comment.stamp_id] = []
                 commentPreviews[comment.stamp_id].append(comment)
-        
-            # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-            # self._statsSink.time('stamped.api.methods._getStampCollection.comments', duration)
 
         # Add user object and preview to stamps
         stamps = []
@@ -2446,23 +2405,14 @@ class StampedAPI(AStampedAPI):
             stamps.append(stamp)
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        
-        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        # self._statsSink.time('stamped.api.methods._getStampCollection.enrichStamps', duration)
 
         if kwargs.pop('deleted', False):
             deleted = self._stampDB.getDeletedStamps(stampIds, **params)
             if len(deleted) > 0:
                 stamps = stamps + deleted
-        
-            # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-            # self._statsSink.time('stamped.api.methods._getStampCollection.deleted', duration)
 
         stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
         
-        # t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
-        # self._statsSink.time('stamped.api.methods._getStampCollection.sort', duration)
-
         return stamps[:limit]
     
     @API_CALL
@@ -2505,27 +2455,27 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName(userRequest)
-
+        
         # Check privacy
         if user.privacy == True:
             if authUserId == None:
                 msg = "Must be logged in to view account"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+            
             friendship = Friendship({
                 'user_id':      authUserId,
                 'friend_id':    user['user_id']
             })
-
+            
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to view user"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+        
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
         logs.info("STAMP IDS: %s" % stampIds)
-
+        
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     @API_CALL
@@ -2641,10 +2591,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getFavorites(self, authUserId, **kwargs):
-        quality         = kwargs.pop('quality', 3)
-        limit           = kwargs.pop('limit', None)
-        sort            = kwargs.pop('sort', 'created')
-                       
+        quality     = kwargs.pop('quality', 3)
+        
         # Set quality
         if quality == 1:
             favCap  = 50
@@ -2652,24 +2600,12 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
-
-        # TEMP
-        favCap = 50
-        
-        limit = self._setLimit(limit, cap=favCap)
         
         # Limit slice of data returned
-        since, before = self._setSliceParams(kwargs)
-
-        params = {
-            'since':    since,
-            'before':   before, 
-            'limit':    limit,
-            'sort':     sort,
-        }
-
+        params = self._setSliceParams(kwargs, favCap, 'created')
+        
         favoriteData = self._favoriteDB.getFavorites(authUserId, **params)
-
+        
         # Extract entities & stamps
         entityIds   = {}
         stampIds    = {}
@@ -2677,22 +2613,21 @@ class StampedAPI(AStampedAPI):
             entityIds[str(favorite.entity.entity_id)] = 1
             if favorite.stamp_id != None:
                 stampIds[str(favorite.stamp_id)] = 1
-
-
+        
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
-
+        
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity.exportSchema(EntityMini())
-
+        
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys(), limit=len(stampIds.keys()))
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, \
                     entityIds=entityIds)
-
+        
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
-
+        
         favorites = []
         for favorite in favoriteData:
             # Enrich Entity
@@ -2726,9 +2661,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getActivity(self, authUserId, **kwargs):
-        quality     = kwargs.pop('quality', 3)
-        limit       = kwargs.pop('limit', None)
-                       
+        quality         = kwargs.pop('quality', 3)
+        
         # Set quality
         if quality == 1:
             stampCap    = 50
@@ -2740,19 +2674,11 @@ class StampedAPI(AStampedAPI):
             stampCap    = 20
             commentCap  = 4
         
-        limit = self._setLimit(limit, cap=stampCap)
-        
         # Limit slice of data returned
-        since, before = self._setSliceParams(kwargs)
-
-        params = {
-            'since':    since,
-            'before':   before, 
-            'limit':    limit,
-        }
+        params = self._setSliceParams(kwargs, stampCap)
         
         activityData = self._activityDB.getActivity(authUserId, **params)
-
+        
         # Append user objects
         userIds = {}
         stampIds = {}

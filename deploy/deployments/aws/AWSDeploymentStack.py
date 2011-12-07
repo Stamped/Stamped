@@ -137,7 +137,8 @@ class AWSDeploymentStack(ADeploymentStack):
         utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
     
     def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, 
-                      db='stamped', instance=None, verbose=False, error_okay=False):
+                      db='stamped', instance=None, verbose=False, error_okay=False, 
+                      offset=0):
         """
             Runs the desired mongo shell command in the context of the given db, 
             on either a random db node in the stack if slave_okay is True or the 
@@ -174,7 +175,10 @@ class AWSDeploymentStack(ADeploymentStack):
             hide_args.append('aborts')
             hide_args.append('status')
         
-        for instance in db_instances:
+        num_db_instances = len(db_instances)
+        for i in xrange(num_db_instances):
+            instance = db_instances[(i + offset) % num_db_instances]
+            
             try:
                 with settings(host_string=instance.public_dns_name):
                     with hide(*hide_args):
@@ -219,9 +223,11 @@ class AWSDeploymentStack(ADeploymentStack):
         #utils.log("[%s] attempting to find primary db node" % self)
         maxdelay = 16
         delay = 1
+        offset = 0
         
         while True:
-            status = self._get_replset_status()
+            status = self._get_replset_status(offset=offset)
+            offset += 1
             
             primaries = filter(lambda m: 1 == m.state, status.members)
             if 0 == len(primaries):
@@ -251,19 +257,28 @@ class AWSDeploymentStack(ADeploymentStack):
                 utils.log(msg)
                 raise Fail(msg)
     
-    def _get_replset_status(self):
-        status = self.run_mongo_cmd('rs.status()')
+    def _get_replset_status(self, offset=0):
+        status = self.run_mongo_cmd('rs.status()', offset=offset)
+        
         if status is not None and 'members' in status:
             status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
     
-    def _get_replset_conf(self):
-        status  = self.run_mongo_cmd('rs.conf()')
+    def _get_replset_conf(self, offset=0):
+        status = self.run_mongo_cmd('rs.conf()', offset=offset)
+        
         if status is not None and 'members' in status:
             status.members = list(utils.AttributeDict(node) for node in status.members)
         
         return status
+    
+    def _find_db_node(node):
+        for instance in self.db_instances:
+            if instance.name == node or instance.instance_id == node:
+                return instance
+        
+        return None
     
     def force_db_primary_change(self, *args):
         if 0 == len(args):
@@ -271,16 +286,11 @@ class AWSDeploymentStack(ADeploymentStack):
             return
         
         db_instance = None
-        arg   = args[0]
         force = (len(args) > 1 and args[1] == 'force')
-        
-        for instance in self.db_instances:
-            if instance.name == arg or instance.instance_id == arg:
-                db_instance = instance
-                break
+        db_instance = self._find_db_node(args[0])
         
         if db_instance is None:
-            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, args[0]))
             return
         
         conf = self._get_replset_conf()
@@ -332,24 +342,16 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def remove_db_node(self, *args):
         if 0 == len(args):
-            utils.log("must specify instance to make primary (either node name or instance-id)")
+            utils.log("must specify an instance to remove (either node name or instance-id)")
             return
         
+        db_instance = self._find_db_node(args[0])
+        force = (len(args) > 1 and args[1] == 'force')
         
         # TODO: only allow a node to be removed if it wouldn't cause indecision around primary
         
-        
-        db_instance = None
-        arg   = args[0]
-        force = (len(args) > 1 and args[1] == 'force')
-        
-        for instance in self.db_instances:
-            if instance.name == arg or instance.instance_id == arg:
-                db_instance = instance
-                break
-        
         if db_instance is None:
-            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, arg))
+            utils.log("[%s] error: unavailable to find db instance '%s'" % (self, args[0]))
             return
         
         conf = self._get_replset_conf()
