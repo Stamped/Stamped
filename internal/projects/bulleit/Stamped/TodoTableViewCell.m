@@ -86,9 +86,11 @@ static const CGFloat kSubstringFontSize = 12.0;
   [super layoutSubviews];
   CGSize imageSize = typeImageView_.image.size;
   typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 58, imageSize.width, imageSize.height);
+  CGSize descriptionSize = [descriptionLabel_ sizeThatFits:CGSizeMake(200, MAXFLOAT)];
   descriptionLabel_.frame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
-                                       CGRectGetMinY(typeImageView_.frame) + 1,
-                                       200, CGRectGetHeight(typeImageView_.frame));
+                                       CGRectGetMinY(typeImageView_.frame) - 2,
+                                       descriptionSize.width,
+                                       descriptionSize.height);
 }
 
 - (void)invertColors {
