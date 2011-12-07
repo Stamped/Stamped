@@ -274,10 +274,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                    stringSize.height);
   CGSize imageSize = typeImageView_.image.size;
   typeImageView_.frame = CGRectMake(userImageRightMargin_, 75, imageSize.width, imageSize.height);
+  CGSize subtitleSize = [subtitleLabel_ sizeThatFits:CGSizeMake(kSubtitleDefaultWidth, MAXFLOAT)];
   CGRect subtitleFrame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
-                                    CGRectGetMinY(typeImageView_.frame) + 1, 
-                                    kSubtitleDefaultWidth,
-                                    CGRectGetHeight(typeImageView_.frame));
+                                    CGRectGetMinY(typeImageView_.frame) - 1,
+                                    subtitleSize.width,
+                                    subtitleSize.height);
 
   CGRect timeFrame = timestampLabel_.frame;
   timeFrame.origin.x = 283 - timeFrame.size.width;
@@ -367,7 +368,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
       CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
       CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
       CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
-                                truncatedLineGlyphCount - 1 : lineGlyphCount;
+          truncatedLineGlyphCount - 1 : lineGlyphCount;
       CFIndex ligatureCt = title_.length - lineGlyphCount;
       if (ligatureCt > 0)
         lastCharIndex += ligatureCt;
