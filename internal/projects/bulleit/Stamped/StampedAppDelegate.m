@@ -20,13 +20,13 @@
 #import "Stamp.h"
 #import "User.h"
 #import "Notifications.h"
+#import "NSData+Base64Additions.h"
 #import "SearchResult.h"
 #import "OAuthToken.h"
 #import "STNavigationBar.h"
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
 #import "SocialManager.h"
-#import "SKPSMTPMessage.h"
 #import "EditEntityViewController.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
@@ -59,9 +59,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   if (![crashReporter enableCrashReporterAndReturnError:&error])
     NSLog(@"Warning: Could not enable crash reporter: %@", error);
   
-  // crash
-  //[self setColor:[UIColor whiteColor]];
-  
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
@@ -93,37 +90,67 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   NSData* crashData;
   NSError* error;
 
-  // Try loading the crash report
+  // Try loading the crash report.
   crashData = [crashReporter loadPendingCrashReportDataAndReturnError:&error];
   if (crashData == nil) {
     NSLog(@"Could not load crash report: %@", error);
-    goto finish;
+    [crashReporter purgePendingCrashReport];
+    return;
   }
 
   PLCrashReport* report = [[[PLCrashReport alloc] initWithData:crashData error:&error] autorelease];
   if (report == nil) {
     NSLog(@"Could not parse crash report");
-    goto finish;
+    [crashReporter purgePendingCrashReport];
+    return;
   }
   
   NSMutableString* reportBody = [NSMutableString string];
 
-  if (report.hasExceptionInfo) {
+  if (report.hasExceptionInfo)
     [reportBody appendFormat:@"Exception %@ -- %@\n", report.exceptionInfo.exceptionName, report.exceptionInfo.exceptionReason];
-  }
   
   [reportBody appendFormat:@"Signal %@ -- %@ at 0x%llx\n",
       report.signalInfo.name, report.signalInfo.code, (unsigned long long)report.signalInfo.address];
+  
+  SKPSMTPMessage* testMsg = [[SKPSMTPMessage alloc] init];
+  testMsg.fromEmail = @"crashlogger@stamped.com";
+  testMsg.toEmail = @"crashers@stamped.com";
+  testMsg.relayHost = @"smtp.gmail.com";
+  testMsg.requiresAuth = YES;
+  testMsg.login = @"crashlogger@stamped.com";
+  testMsg.pass = @"august1ftw";
+  testMsg.subject = @"test message";
+  testMsg.wantsSecure = YES; // smtp.gmail.com requires TLS.
+  testMsg.delegate = self;
+  
+  NSDictionary* plainPart = [NSDictionary dictionaryWithObjectsAndKeys:@"text/plain", kSKPSMTPPartContentTypeKey,
+                             reportBody, kSKPSMTPPartMessageKey,
+                             @"8bit", kSKPSMTPPartContentTransferEncodingKey, nil];
 
-  NSLog(@"Report body: %@", reportBody);
-  NSLog(@"Crashed on %@", report.systemInfo.timestamp);
-  NSLog(@"Crashed with signal %@ (code %@, address=0x%" PRIx64 ")", report.signalInfo.name,
-        report.signalInfo.code, report.signalInfo.address);
+  NSDictionary* dataPart =
+      [NSDictionary dictionaryWithObjectsAndKeys:@"text/directory;\r\n\tx-unix-mode=0644;\r\n\tname=\"report.plcrash\"", kSKPSMTPPartContentTypeKey,
+          @"attachment;\r\n\tfilename=\"report.plcrash\"", kSKPSMTPPartContentDispositionKey,
+          [crashData encodeBase64ForData], kSKPSMTPPartMessageKey,
+          @"base64", kSKPSMTPPartContentTransferEncodingKey, nil];
 
-  // Purge the report
-finish:
+  testMsg.parts = [NSArray arrayWithObjects:plainPart, dataPart, nil];
+  [testMsg send];
+
+  // Purge the report.
   [crashReporter purgePendingCrashReport];
   return;
+}
+
+#pragma mark - SKPSMTPMessageDelegate methods.
+
+- (void)messageSent:(SKPSMTPMessage*)message {
+  [message release];
+}
+
+- (void)messageFailed:(SKPSMTPMessage*)message error:(NSError*)error {
+  [message release];
+  NSLog(@"delegate - error(%d): %@", [error code], [error localizedDescription]);
 }
 
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
@@ -185,12 +212,6 @@ finish:
   [window_ release];
   [navigationController_ release];
   [super dealloc];
-}
-
-#pragma mark - RKRequestDelegate methods.
-
-- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  // NSLog(@"Push nofification registration response: %@", response.bodyAsString);
 }
 
 #pragma mark - Private methods.
