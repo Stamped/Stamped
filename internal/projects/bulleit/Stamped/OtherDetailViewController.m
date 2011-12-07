@@ -248,6 +248,8 @@
     self.imageView.hidden = NO;
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     self.imageView.layer.cornerRadius = 18.0;
+    self.imageView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    self.imageView.layer.shouldRasterize = YES;
     self.imageView.layer.masksToBounds = YES;
   }
 }
@@ -291,12 +293,12 @@
   shadowView.layer.shadowOffset = CGSizeMake(0.0, 3.0);
   shadowView.layer.shadowRadius = 3.0;
   shadowView.layer.shadowOpacity = 0.3;
-  shadowView.layer.contents = nil;
+  shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:shadowView.bounds cornerRadius:18.0].CGPath;
   [self.scrollView insertSubview:shadowView belowSubview:self.imageView];
   [shadowView.layer setNeedsDisplay];
   [shadowView release];
   
-  self.imageView.layer.shadowPath = nil;
+  self.imageView.layer.shadowOpacity = 0;
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {

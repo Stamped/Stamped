@@ -13,9 +13,9 @@
 #import "WrappingTextView.h"
 #import "UIColor+Stamped.h"
 #import "Stamp.h"
+#import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
-#import "MediumUserImageButton.h"
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
 
@@ -310,7 +310,7 @@ static const NSUInteger kSpaceHeight = 10;
   NSUInteger pageNum = 1;
   for (NSUInteger i = 0; i < stamps_.count; ++i) {
     s = [stamps_ objectAtIndex:i];
-    MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:userImgFrame];
+    UserImageView* userImage = [[UserImageView alloc] initWithFrame:userImgFrame];
     
     if (i > 1 && i % 6 == 0) {
       scrollView.contentSize = CGSizeMake(scrollView.contentSize.width + scrollView.frame.size.width, scrollView.contentSize.height);
@@ -319,19 +319,16 @@ static const NSUInteger kSpaceHeight = 10;
     
     CGFloat xOffset = i * (userImgFrame.size.width + 7.0) + 18.0 * (pageNum - 1) + 14.0;
     
-    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 0.0);
-    userImageButton.contentMode = UIViewContentModeCenter;
-    userImageButton.layer.shadowOffset = CGSizeMake(0.0, 1.0);
-    userImageButton.layer.shadowOpacity = 0.20;
-    userImageButton.layer.shadowRadius = 1.33;
-    userImageButton.imageURL = s.user.profileImageURL;
-    
-    [userImageButton addTarget:self
-                        action:@selector(userImageTapped:)
-              forControlEvents:UIControlEventTouchUpInside];
-    userImageButton.tag = i;
-    [scrollView addSubview:userImageButton];
-    [userImageButton release];
+    userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
+    userImage.contentMode = UIViewContentModeCenter;
+    userImage.imageURL = s.user.profileImageURL;
+    userImage.enabled = YES;
+    [userImage addTarget:self
+                  action:@selector(userImageTapped:)
+        forControlEvents:UIControlEventTouchUpInside];
+    userImage.tag = i;
+    [scrollView addSubview:userImage];
+    [userImage release];
   }
   
   self.numLabel.text = [NSString stringWithFormat:@"(%d)", stamps_.count];
@@ -433,7 +430,7 @@ static const NSUInteger kSpaceHeight = 10;
   if (self.stamps.count > 0) {
     CGPoint loc = [(UITapGestureRecognizer*)sender locationInView:self.view];
     UIView* subview = [self.view hitTest:loc withEvent:nil];
-    if ([subview isKindOfClass:[MediumUserImageButton class]]) {
+    if ([subview isKindOfClass:[UserImageView class]]) {
       [self userImageTapped:subview];
       return;
     }
