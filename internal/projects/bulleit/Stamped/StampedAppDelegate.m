@@ -129,7 +129,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                              @"8bit", kSKPSMTPPartContentTransferEncodingKey, nil];
 
   NSDictionary* dataPart =
-      [NSDictionary dictionaryWithObjectsAndKeys:@"text/directory;\r\n\tx-unix-mode=0644;\r\n\tname=\"report.plcrash\"", kSKPSMTPPartContentTypeKey,
+      [NSDictionary dictionaryWithObjectsAndKeys:@"application/octet-stream;\r\n\tx-unix-mode=0644;\r\n\tname=\"report.plcrash\"", kSKPSMTPPartContentTypeKey,
           @"attachment;\r\n\tfilename=\"report.plcrash\"", kSKPSMTPPartContentDispositionKey,
           [crashData encodeBase64ForData], kSKPSMTPPartMessageKey,
           @"base64", kSKPSMTPPartContentTransferEncodingKey, nil];
@@ -273,7 +273,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)performRestKitMappings {
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;
