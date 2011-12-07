@@ -137,7 +137,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   testMsg.parts = [NSArray arrayWithObjects:plainPart, dataPart, nil];
   [testMsg send];
 
-  // Purge the report.
   [crashReporter purgePendingCrashReport];
   return;
 }
@@ -152,6 +151,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [message release];
   NSLog(@"delegate - error(%d): %@", [error code], [error localizedDescription]);
 }
+
+#pragma mark - Gesture Recognizers.
 
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
