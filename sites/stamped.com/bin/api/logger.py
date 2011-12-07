@@ -137,7 +137,11 @@ def main():
             prefix = 'Logs:'
             for log in logs[i]['log']:
                 if log[1] in levels:
-                    print '%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
+                    try:
+                        print '%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
+                    except:
+                        utils.printException()
+                    
                     prefix = ''
 
         if 'stack_trace' in logs[i]:
