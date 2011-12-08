@@ -46,6 +46,10 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
+  reloadLabel_ = nil;
+  lastUpdatedLabel_ = nil;
+  arrowImageView_ = nil;
+  spinnerView_ = nil;
   [super dealloc];
 }
 
@@ -56,6 +60,10 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
+  reloadLabel_ = nil;
+  lastUpdatedLabel_ = nil;
+  arrowImageView_ = nil;
+  spinnerView_ = nil;
 }
 
 - (void)viewDidLoad {

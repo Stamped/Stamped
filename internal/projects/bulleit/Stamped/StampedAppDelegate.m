@@ -54,7 +54,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"3999903c72892bb98e58f843990bba66"];
 #endif
 
-#if defined (CONFIGURATION_Distribution)
+#if defined (CONFIGURATION_Release)
 #warning QuincyKit Distribution is configured for this build
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
 #endif
