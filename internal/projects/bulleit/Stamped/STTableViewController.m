@@ -17,7 +17,7 @@
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";
 static NSString* kLoadingText = @"Updating...";
-static NSString* kNotConnectedText = @"Not connected to the internet.";
+static NSString* kNotConnectedText = @"Not connected to the Internet.";
 static const CGFloat kReloadHeight = 60.0;
 
 @interface STTableViewController ()
