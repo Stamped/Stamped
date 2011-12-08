@@ -1204,6 +1204,14 @@
 		7ECF3DAD145E26C900A1CF38 /* tab_todo_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D97145E26C900A1CF38 /* tab_todo_button.png */; };
 		7ECF3DAE145E26C900A1CF38 /* tab_todo_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D98145E26C900A1CF38 /* tab_todo_button@2x.png */; };
 		7ECF3DB0145EF47800A1CF38 /* tab_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3DAF145EF47700A1CF38 /* tab_bar_bg@2x.png */; };
+		7ED2824714914ABA0086FF18 /* BWQuincyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2824314914ABA0086FF18 /* BWQuincyManager.m */; };
+		7ED2824814914ABA0086FF18 /* BWQuincyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2824314914ABA0086FF18 /* BWQuincyManager.m */; };
+		7ED2824914914ABA0086FF18 /* CrashReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED2824414914ABA0086FF18 /* CrashReporter.framework */; };
+		7ED2824A14914ABA0086FF18 /* CrashReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED2824414914ABA0086FF18 /* CrashReporter.framework */; };
+		7ED2824B14914ABA0086FF18 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2824514914ABA0086FF18 /* LICENSE.txt */; };
+		7ED2824C14914ABA0086FF18 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2824514914ABA0086FF18 /* LICENSE.txt */; };
+		7ED2824D14914ABA0086FF18 /* Quincy.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2824614914ABA0086FF18 /* Quincy.bundle */; };
+		7ED2824E14914ABA0086FF18 /* Quincy.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2824614914ABA0086FF18 /* Quincy.bundle */; };
 		7ED60828141E85B8001C499D /* BookDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60827141E85B8001C499D /* BookDetailViewController.xib */; };
 		7ED6082B141E85E7001C499D /* MusicDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60829141E85E7001C499D /* MusicDetailViewController.xib */; };
 		7ED6082C141E85E7001C499D /* OtherDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */; };
@@ -2150,6 +2158,11 @@
 		7ECF3D97145E26C900A1CF38 /* tab_todo_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_todo_button.png; sourceTree = "<group>"; };
 		7ECF3D98145E26C900A1CF38 /* tab_todo_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_todo_button@2x.png"; sourceTree = "<group>"; };
 		7ECF3DAF145EF47700A1CF38 /* tab_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_bar_bg@2x.png"; sourceTree = "<group>"; };
+		7ED2824214914ABA0086FF18 /* BWQuincyManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BWQuincyManager.h; sourceTree = "<group>"; };
+		7ED2824314914ABA0086FF18 /* BWQuincyManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BWQuincyManager.m; sourceTree = "<group>"; };
+		7ED2824414914ABA0086FF18 /* CrashReporter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CrashReporter.framework; sourceTree = "<group>"; };
+		7ED2824514914ABA0086FF18 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		7ED2824614914ABA0086FF18 /* Quincy.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Quincy.bundle; sourceTree = "<group>"; };
 		7ED60827141E85B8001C499D /* BookDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BookDetailViewController.xib; path = Interfaces/BookDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED60829141E85E7001C499D /* MusicDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MusicDetailViewController.xib; path = Interfaces/MusicDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OtherDetailViewController.xib; path = Interfaces/OtherDetailViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -2418,6 +2431,7 @@
 				7E589434147C468B002268C4 /* UIKit.framework in Frameworks */,
 				7E589435147C468B002268C4 /* Foundation.framework in Frameworks */,
 				7E589436147C468B002268C4 /* CoreGraphics.framework in Frameworks */,
+				7ED2824A14914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2446,6 +2460,7 @@
 				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
 				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
 				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+				7ED2824914914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2476,6 +2491,7 @@
 		1E5AFFC5141D2A5000772F11 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				7ED2824114914ABA0086FF18 /* QuincyKit */,
 				7E407E7F144F462400D7847F /* TTTAttributedLabel */,
 				7EA969C414353AEA00AE5FF3 /* FBConnect */,
 				7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */,
@@ -3511,6 +3527,18 @@
 				7EC0189C145F28B400C586E7 /* tab_stamps_button_ios4@2x.png */,
 			);
 			name = "Tab bar icons";
+			sourceTree = "<group>";
+		};
+		7ED2824114914ABA0086FF18 /* QuincyKit */ = {
+			isa = PBXGroup;
+			children = (
+				7ED2824214914ABA0086FF18 /* BWQuincyManager.h */,
+				7ED2824314914ABA0086FF18 /* BWQuincyManager.m */,
+				7ED2824414914ABA0086FF18 /* CrashReporter.framework */,
+				7ED2824514914ABA0086FF18 /* LICENSE.txt */,
+				7ED2824614914ABA0086FF18 /* Quincy.bundle */,
+			);
+			path = QuincyKit;
 			sourceTree = "<group>";
 		};
 		7ED2EF5C13E0DA48007F1AFB /* Activity */ = {
@@ -4600,6 +4628,8 @@
 				7E1248BC14902C440082563D /* cat_icon_eDetail_other@2x.png in Resources */,
 				7E1248BE14902C440082563D /* cat_icon_eDetail_place.png in Resources */,
 				7E1248C014902C440082563D /* cat_icon_eDetail_place@2x.png in Resources */,
+				7ED2824C14914ABA0086FF18 /* LICENSE.txt in Resources */,
+				7ED2824E14914ABA0086FF18 /* Quincy.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5183,6 +5213,8 @@
 				7E1248BB14902C440082563D /* cat_icon_eDetail_other@2x.png in Resources */,
 				7E1248BD14902C440082563D /* cat_icon_eDetail_place.png in Resources */,
 				7E1248BF14902C440082563D /* cat_icon_eDetail_place@2x.png in Resources */,
+				7ED2824B14914ABA0086FF18 /* LICENSE.txt in Resources */,
+				7ED2824D14914ABA0086FF18 /* Quincy.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5324,6 +5356,7 @@
 				7E58941E147C468B002268C4 /* Alerts.m in Sources */,
 				7E58941F147C468B002268C4 /* SocialManager.m in Sources */,
 				7E589420147C468B002268C4 /* StampDetailHeaderView.m in Sources */,
+				7ED2824814914ABA0086FF18 /* BWQuincyManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5437,6 +5470,7 @@
 				CBC5C1E3146A4B7300DD305C /* Alerts.m in Sources */,
 				CB6556271471C56600865AAE /* SocialManager.m in Sources */,
 				CB9C0909147B19D50007D9A6 /* StampDetailHeaderView.m in Sources */,
+				7ED2824714914ABA0086FF18 /* BWQuincyManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5528,10 +5562,13 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5543,6 +5580,7 @@
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -5567,9 +5605,12 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5582,6 +5623,7 @@
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -5606,9 +5648,12 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5621,6 +5666,7 @@
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = "Ad Hoc";
@@ -5676,9 +5722,11 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5801,10 +5849,12 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5840,9 +5890,11 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/QuincyKit\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
