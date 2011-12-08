@@ -16,14 +16,18 @@ CELERY_IMPORTS = ("APITasks", )
 CELERY_RESULT_BACKEND = "amqp"
 
 host, port = "localhost", 5672
-user, password, vhost = "test", "mariotennis", "stampedvhost"
+user, password, vhost = "guest", "guest", "/"
 
+host = "monitor"
+
+"""
 if utils.is_ec2():
     stack = libs.ec2_utils.get_stack()
     
     for node in stack.nodes:
         if 'monitor' in node.roles:
             host, port = node.private_ip_address, 5672
+"""
 
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
