@@ -27,6 +27,7 @@ if utils.is_ec2():
 
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
+utils.log("BROKER_URL: %s" % BROKER_URL)
 
 ## Worker settings
 ## If you're doing mostly I/O you can have more processes,
