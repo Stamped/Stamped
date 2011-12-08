@@ -25,6 +25,7 @@ class AWSDeploymentSystem(DeploymentSystem):
     def __init__(self, name, options):
         self.commonOptions = '--headers'
         DeploymentSystem.__init__(self, name, options, AWSDeploymentStack)
+        self._ami_re = re.compile('.*stamped\.base\.ami \(([0-9]+)-([0-9]+)-([0-9]+) +([0-9]+)\.([0-9]+)\.([0-9]+)\).*')
     
     def _get_security_group(self, name):
         security_groups = self.conn.get_all_security_groups()
@@ -115,6 +116,19 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'rules' : [ ], 
             }, 
             {
+                'name' : 'work', 
+                'desc' : 'Work security group', 
+                'rules' : [
+                    #{
+                    #    'ip_protocol' : 'tcp', 
+                    #    'from_port'   : 5672, 
+                    #    'to_port'     : 5672, 
+                    #    'cidr_ip'     : '0.0.0.0/0', 
+                    # TODO: cidr_ip is a security group
+                    #}, 
+                ], 
+            }, 
+            {
                 'name' : 'temp', 
                 'desc' : 'Temporary security group', 
                 'rules' : [ ], 
@@ -199,23 +213,44 @@ class AWSDeploymentSystem(DeploymentSystem):
             self._stacks[stackName] = AWSDeploymentStack(stackName, self, instances)
     
     def get_bootstrap_image(self):
+        if hasattr(self, '_bootstrap_image') and self._bootstrap_image is not None:
+            return self._bootstrap_image
+        
         images = self.conn.get_all_images(owners=[ AWS_AMI_USER_ID ])
         if 0 == len(images):
             utils.log("[%s] unable to find custom AMI to use" % self)
         
+        recent = None
+        
         # return the latest image (empirically the last one returned from amazon, 
         # though as far as i can tell, there is no guarantee this is the latest)
         for i in xrange(len(images)):
-            image = images[-(i + 1)]
-            
-            if image.state == u'available':
-                return image
-            elif image.state == u'pending':
-                utils.log("[%s] warning: recent AMI %s still pending; falling back to earlier image" % \
-                          self, image)
-            else:
-                utils.log("[%s] warning: found AMI %s with unexpected state (%s)" % \
-                          self, image, image.state)
+            try:
+                image = images[-(i + 1)]
+                
+                # stamped.base.ami (2011-12-7 22.47.9)
+                
+                if image.state == u'available':
+                    match = self._ami_re.match(image.name)
+                    
+                    if match is not None:
+                        groups = map(lambda s: int(s), match.groups())
+                        date = datetime(*groups)
+                        
+                        if recent is None or date > recent[0]:
+                            recent = (date, image)
+                elif image.state == u'pending':
+                    utils.log("[%s] warning: recent AMI %s still pending; falling back to earlier image" % \
+                              self, image)
+                else:
+                    utils.log("[%s] warning: found AMI %s with unexpected state (%s)" % \
+                              self, image, image.state)
+            except:
+                utils.printException()
+        
+        if recent is not None:
+            self._bootstrap_image = recent[1]
+            return recent[1]
         
         return None
     
@@ -231,7 +266,7 @@ class AWSDeploymentSystem(DeploymentSystem):
         ami_id  = self.conn.create_image(instance.instance_id, name, "Base AMI for Stamped instances")
         image   = None
         
-        utils.log("[%s] waiting for AMI %s (%s) to come online" % (self, name, image))
+        utils.log("[%s] waiting for AMI %s (%s) to come online" % (self, name, ami_id))
         while True:
             try:
                 images = self.conn.get_all_images(image_ids=[ ami_id ])
@@ -250,11 +285,11 @@ class AWSDeploymentSystem(DeploymentSystem):
                 success = True
                 break
             else:
-                utils.log("[%s] error creating AMI %s (%s) (invalid state: %s)" % (self, name, image, image.state))
+                utils.log("[%s] error creating AMI %s (%s) (invalid state: %s)" % (self, name, ami_id, image.state))
                 break
         
         if success:
-            utils.log("[%s] successfully created AMI %s (%s)" % (self, name, image))
+            utils.log("[%s] successfully created AMI %s (%s)" % (self, name, ami_id))
         
         utils.log("[%s] cleaning up temp instance %s" % (self, instance))
         instance.terminate()

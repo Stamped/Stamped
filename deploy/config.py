@@ -12,45 +12,66 @@ import copy
 def getInstances():
     replSetName = 'stamped-dev-01'
     
-    dbCount     = 2
-    apiCount    = 1
-    webCount    = 1
-    monCount    = 1
-    
-    ### TEMPLATES
-    dbInstance = {
-        'roles' : [ 'db', ], 
-        'mongodb' : {
-            'replSet' : replSetName, 
-            'port' : 27017, 
+    stack = {
+        # db nodes handle storing/retrieving all of our platform's core data via mongodb
+        'db' : {
+            'count' : 2, 
+            
+            'template' : {
+                'roles' : [ 'db', ], 
+                'mongodb' : {
+                    'replSet' : replSetName, 
+                    'port' : 27017, 
+                }, 
+                'raid' : {
+                    'diskSize': 8,
+                    'numDisks': 4,
+                },
+                'placement' : None, 
+                'instance_type' : 'm2.xlarge', 
+            }, 
         }, 
-        'raid' : {
-            'diskSize': 8,
-            'numDisks': 4,
-        },
-        'placement' : None, 
-        'instance_type' : 'm2.xlarge', # PROD
-    }
-    
-    apiInstance = {
-        'roles' : [ 'apiServer', ], 
-        'port' : '5000', 
-        'replSet' : replSetName, 
-        'instance_type' : 'c1.xlarge',  # PROD
-        'placement' : None, 
-    }
-    
-    webInstance = {
-        'roles' : [ 'webServer', ], 
-        'port' : '5000', 
-        'replSet' : replSetName, 
-        'instance_type' : 'c1.xlarge',  # PROD
-        'placement' : None, 
-    }
-    
-    monInstance = {
-        'roles' : [ 'monitor', ], 
-        'replSet' : replSetName, 
+        
+        # api nodes run our api web servers
+        'api' : {
+            'count' : 1, 
+            
+            'template' : {
+                'roles' : [ 'apiServer', ], 
+                'port' : '5000', 
+                'replSet' : replSetName, 
+                'instance_type' : 'c1.xlarge',  
+                'placement' : None, 
+            }, 
+        }, 
+        
+        # web nodes run our public web servers
+        'web' : {
+            'count' : 1, 
+            
+            'template' : {
+                'roles' : [ 'webServer', ], 
+                'port' : '5000', 
+                'replSet' : replSetName, 
+                'instance_type' : 'c1.xlarge',  
+                'placement' : None, 
+            }, 
+        }, 
+        
+        # monitor nodes monitor the rest of the stack
+        'mon' : {
+            'template' : {
+                'roles' : [ 'monitor', ], 
+                'replSet' : replSetName, 
+            }, 
+        }, 
+        
+        # worker nodes handle stateless, asynchronous tasks
+        'work' : {
+            'template' : {
+                'roles' : [ 'work', ], 
+            }, 
+        }, 
     }
     
     placements = [
@@ -62,26 +83,20 @@ def getInstances():
     ### BUILD CONFIG FILE
     config = []
     
-    def _addNode(template, namePrefix, count):
-        instance = template.copy()
-        instance['name'] = '%s%d' % (namePrefix, count)
+    for nodeType in stack:
+        v = stack[nodeType]
+        template = v['template']
+        count    = v['count'] if 'count' in v else 1
         
-        if 'placement' in instance and instance['placement'] is None:
-            instance['placement'] = placements[i % len(placements)]
-        
-        config.append(instance)
-    
-    for i in xrange(dbCount):
-        _addNode(dbInstance, 'db', i)
-    
-    for i in xrange(apiCount):
-        _addNode(apiInstance, 'api', i)
-    
-    for i in xrange(webCount):
-        _addNode(webInstance, 'web', i)
-    
-    for i in xrange(monCount):
-        _addNode(monInstance, 'mon', i)
+        for i in xrange(count):
+            instance = template.copy()
+            instance['name'] = '%s%d' % (nodeType, i)
+            
+            # automate placement via round-robin of us-east availability zones
+            if 'placement' in instance and instance['placement'] is None:
+                instance['placement'] = placements[i % len(placements)]
+            
+            config.append(instance)
     
     return config
 
