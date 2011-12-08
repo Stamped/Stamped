@@ -22,8 +22,6 @@ class StatsDSink(AStatsSink):
         self._pool = Pool(1)
         if not self.stampedAPI.lite_mode:
             self._pool.spawn(self._init)
-        
-        time.sleep(0.01)
     
     def _init(self):
         logs.info("initializing StatsD")

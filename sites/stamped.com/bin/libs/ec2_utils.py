@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import aws, time, utils
+import aws, os, time, utils
 
 from boto.exception         import EC2ResponseError
 from boto.ec2.connection    import EC2Connection
@@ -15,11 +15,26 @@ from collections            import defaultdict
 from subprocess             import Popen, PIPE
 
 def get_local_instance_id():
+    # cache instance id locally
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.instance.id.txt')
+    
+    if os.path.exists(path):
+        f = open(path, 'r')
+        instance_id = f.read()
+        f.close()
+        
+        if len(instance_id) > 1 and instance_id.startswith('i-'):
+            return instance_id
+    
     ret = _shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')
     
     if 0 != ret[1]:
         return None
     else:
+        f = open(path, 'w')
+        f.write(ret[0])
+        f.close()
+        
         return ret[0]
 
 def get_stack(stack=None):

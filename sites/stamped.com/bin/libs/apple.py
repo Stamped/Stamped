@@ -70,6 +70,7 @@ class AppleAPICall(object):
             utils.log(url)
         
         result = utils.getFile(url)
+        
         """
         f=open('out.apple.xml', 'w')
         f.write(result)
