@@ -1319,10 +1319,7 @@ class StampedAPI(AStampedAPI):
             # 2) call to _enrichStampObjects
             # 3) _stampDB.addStamp itself
         
-        t0 = time.time()
-        
         user        = self._userDB.getUser(authUserId)
-        
         entity      = self._getEntityFromRequest(entityRequest)
         
         blurbData   = data.pop('blurb', None)
@@ -1544,8 +1541,7 @@ class StampedAPI(AStampedAPI):
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
         
         # Add activity for mentioned users
-        if self._activity == True and stamp.mentions != None \
-            and len(stamp.mentions) > 0:
+        if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
             mentionedUserIds = []
             
             for mention in stamp.mentions:
@@ -1629,15 +1625,15 @@ class StampedAPI(AStampedAPI):
             previouslyCredited = []
             for creditedUser in stamp.credit:
                 previouslyCredited.append(creditedUser.user_id)
-
+            
             ### TODO: Filter out non-ASCII data for credit
             creditedScreenNames = []
             for creditedScreenName in creditData:
                 if utils.validate_screen_name(creditedScreenName):
                     creditedScreenNames.append(creditedScreenName)
-
+            
             creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
-
+            
             for creditedUser in creditedUsers:
                 userId = creditedUser['user_id']
                 if userId == user.user_id or userId in creditedUserIds:
