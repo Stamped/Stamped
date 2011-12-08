@@ -155,7 +155,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[[RKClient sharedClient] requestQueue] cancelRequestsWithDelegate:self]; 
+  [[[RKClient sharedClient] requestQueue] cancelRequestsWithDelegate:self];
   self.entityObject = nil;
   self.creditedUser = nil;
   self.stampPhoto = nil;
@@ -189,8 +189,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (headerView_)
-    self.headerView.delegate = nil;
+  self.headerView.delegate = nil;
   self.headerView = nil;
   [super dealloc];
 }
@@ -431,18 +430,16 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  if (headerView_)
-    self.headerView.delegate = nil;
+  self.headerView.delegate = nil;
   self.headerView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
   detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
-  //categoryImageView_.image = [objectToStamp_ valueForKey:@"stampDetailCategoryImage"];
-  
+
   [headerView_ setEntity:objectToStamp_];
-  
+
   if (headerView_.inverted)
     headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
