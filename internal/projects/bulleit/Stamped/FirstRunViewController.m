@@ -818,7 +818,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 
 #pragma mark - RKRequestDelegate helper methods.
 
-- (void) handleSignInRequest:(RKRequest*)request response:(RKResponse*)response {
+- (void)handleSignInRequest:(RKRequest*)request response:(RKResponse*)response {
   if (response.statusCode == 200) {
     // valid username & user exists. 
     usernameValid_ = YES;
@@ -874,29 +874,36 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   }
 }
 
-- (void) handleSignUpRequest:(RKRequest*)request response:(RKResponse*)response {
+- (void)handleSignUpRequest:(RKRequest*)request response:(RKResponse*)response {
   if (response.statusCode == 200) {  // Exists.
-    NSString* s = [NSString stringWithFormat:@"\"%@\"", signUpUsernameTextField_.text];
-    if ([response.bodyAsString rangeOfString:s].location == NSNotFound) {
-      [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
-                                   message:[NSString stringWithFormat:@"Someone is already using \"%@\".", signUpEmailTextField_.text]
-                                  delegate:nil
-                         cancelButtonTitle:@"OK"
-                         otherButtonTitles:nil] autorelease] show];
-      emailTaken_ = YES;
-    } else {
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for response %@: %@", response, err);
+      return;
+    }
+
+    NSString* screenName = [[body objectForKey:@"screen_name"] lowercaseString];
+    if ([screenName isEqualToString:signUpUsernameTextField_.text.lowercaseString]) {
       [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
-                                   message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
+                                   message:[NSString stringWithFormat:@"Someone has already claimed \"%@\"", signUpUsernameTextField_.text]
                                   delegate:nil
                          cancelButtonTitle:@"OK"
                          otherButtonTitles:nil] autorelease] show];
       usernameTaken_ = YES;
+    } else {
+      [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
+                                   message:[NSString stringWithFormat:@"Someone is already using \"%@\"", signUpEmailTextField_.text]
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      emailTaken_ = YES;
     }
     [activityIndicator_ stopAnimating];
     [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
     confirmButton_.enabled = YES;
     return;
-  } else if (response.statusCode == 404) {           //available
+  } else if (response.statusCode == 404) {  // Available.
     if (emailTaken_) {
       emailTaken_ = NO;
       if ([self stringIsValidUsername:signUpUsernameTextField_.text])

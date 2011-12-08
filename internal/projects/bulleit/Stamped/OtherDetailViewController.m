@@ -287,7 +287,7 @@
   
   // Because clipping the imageview to bounds, which is necessary for rounded corners, hides the shadow.
   UIView* shadowView = [[UIImageView alloc] initWithFrame:self.imageView.frame];
-  shadowView.backgroundColor = [UIColor stampedLightGrayColor];
+  shadowView.backgroundColor = [UIColor clearColor];
   shadowView.layer.cornerRadius = 18.0;
   shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
   shadowView.layer.shadowOffset = CGSizeMake(0.0, 3.0);
@@ -297,7 +297,7 @@
   [self.scrollView insertSubview:shadowView belowSubview:self.imageView];
   [shadowView.layer setNeedsDisplay];
   [shadowView release];
-  
+
   self.imageView.layer.shadowOpacity = 0;
 }
 
