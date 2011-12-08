@@ -2413,7 +2413,7 @@ class StampedAPI(AStampedAPI):
 
         stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
         
-        return stamps[:limit]
+        return stamps[:params['limit']]
     
     @API_CALL
     def getInboxStamps(self, authUserId, **kwargs):

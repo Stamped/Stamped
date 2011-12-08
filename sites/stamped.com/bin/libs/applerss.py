@@ -95,6 +95,12 @@ class AppleRSS(object):
         utils.log(url)
         data = utils.getFile(url)
         
+        """
+        f=open('out.xml', 'w')
+        f.write(data)
+        f.close()
+        """
+        
         if 0 == transform:
             return data
         
@@ -197,7 +203,7 @@ class AppleRSS(object):
                 if 'im:duration' in link:
                     if link['attributes']['im:assetType'].lower() == 'preview':
                         if entity.subcategory == 'app':
-                            entity.image = href
+                            entity.screenshots = [ href ]
                         else:
                             entity.preview_url = href
                             entity.preview_length = link['im:duration']['label']

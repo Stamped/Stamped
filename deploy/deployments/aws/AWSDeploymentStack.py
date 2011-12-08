@@ -73,6 +73,10 @@ class AWSDeploymentStack(ADeploymentStack):
     def web_server_instances(self):
         return self._getInstancesByRole('webServer')
     
+    @property
+    def work_server_instances(self):
+        return self._getInstancesByRole('work')
+    
     def create(self):
         utils.log("[%s] creating %d instances" % (self, len(self.instances)))
         
@@ -596,7 +600,7 @@ class AWSDeploymentStack(ADeploymentStack):
         return filter(lambda instance: role in instance.roles, self.instances)
     
     def add(self, *args):
-        types = [ 'db', 'api', 'web' ]
+        types = [ 'db', 'api', 'web', 'work' ]
         if 0 == len(args) or args[0] not in types:
             raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         

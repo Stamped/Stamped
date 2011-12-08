@@ -361,7 +361,10 @@ class AWSInstance(AInstance):
             ami = _getAMI(instance_type, instance_region, INSTANCE_OS, INSTANCE_EBS)
             return self.conn.get_image(ami)
         else:
-            return self.stack.system.get_bootstrap_image()
+            image = self.stack.system.get_bootstrap_image()
+            utils.log("[%s] using AMI %s (%s)" % (self, image.name, image.id))
+            
+            return image
     
     def __getattr__(self, key):
         try:

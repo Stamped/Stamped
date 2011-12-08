@@ -69,7 +69,14 @@ class AppleAPICall(object):
         if verbose:
             utils.log(url)
         
-        result = json.loads(utils.getFile(url))
+        result = utils.getFile(url)
+        """
+        f=open('out.apple.xml', 'w')
+        f.write(result)
+        f.close()
+        """
+        
+        result = json.loads(result)
         
         if transform:
             return self.transform_result(result)
