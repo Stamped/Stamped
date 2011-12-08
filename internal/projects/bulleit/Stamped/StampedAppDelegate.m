@@ -50,15 +50,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if defined (CONFIGURATION_Beta)
-#warning QuincyKit Beta is configured for this build
+#warning QuincyKit Beta (Ad Hoc) is configured for this build
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"3999903c72892bb98e58f843990bba66"];
 #endif
 
-#if defined (CONFIGURATION_Debug)
-#warning QuincyKit Debug is configured for this build
-  [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"afc681d3921e0d18cfc553fe8989f86a"];
-#endif
-  
 #if defined (CONFIGURATION_Distribution)
 #warning QuincyKit Distribution is configured for this build
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
