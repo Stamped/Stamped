@@ -29,11 +29,13 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 @interface FirstRunViewController () 
 - (void)setupBottomView;
 - (void)setSecondaryButtonsVisible:(BOOL)visible;
-- (BOOL)stringIsValidEmail:(NSString *)checkString;
-- (BOOL)stringIsValidUsername:(NSString *)checkString;
+- (BOOL)stringIsValidEmail:(NSString*)checkString;
+- (BOOL)stringIsValidUsername:(NSString*)checkString;
 - (void)validateUsername;
 - (void)validateEmail;
 - (void)accessoryDoneButtonPressed:(id)sender;
+- (void)handleSignInRequest:(RKRequest*)request response:(RKResponse*)response;
+- (void)handleSignUpRequest:(RKRequest*)request response:(RKResponse*)response;
 
 @property (nonatomic, assign) BOOL editing;
 @property (nonatomic, assign) BOOL usernameValid;
@@ -251,7 +253,6 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
                             (id)[UIColor colorWithWhite:0.88 alpha:1.0].CGColor, nil];
   bottomGradient.frame = bottomView_.bounds;
   
-  
   [bottomView_.layer insertSublayer:bottomGradient atIndex:0];
   [bottomGradient release];
 }
@@ -270,7 +271,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 - (void)signInFailed:(NSString*)reason {
   if (!reason)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound && activityIndicator_.isAnimating)
+  else if (reason && activityIndicator_.isAnimating)
     [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
   if (signInScrollView_.superview) {
     [activityIndicator_ stopAnimating];
@@ -289,8 +290,9 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   [activityIndicator_ stopAnimating];
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
-  if (!reason) 
+  if (!reason) {
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  }
   else if (![reason isEqualToString:@""]) {
     UIAlertView* alert = [Alerts alertWithTemplate:AlertTemplateInvalidSignup];
     alert.message = reason;
@@ -736,133 +738,10 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  if (signInScrollView_.superview) {  
-    if (response.statusCode == 200) {
-      // valid username & user exists. 
-      usernameValid_ = YES;
-      NSError* err = nil;
-      id body = [response parsedBody:&err];
-      if (err) {
-        NSLog(@"Parse error for response %@: %@", response, err);
-        return;
-      }
-      
-      NSString* primaryColorHex = [body objectForKey:@"color_primary"];
-      NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
-      
-      if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) {
-        
-        if (self.validationStampView.hidden == YES) {
-          self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
-          self.validationStampView.alpha = 0.0;
-          self.validationStampView.hidden = NO;
-          [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
-        }
-        
-        else if (self.validationStampView.hidden == NO) {
-          self.validationStamp2ImageView.alpha = 0.0;
-          self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
-          self.validationStamp2ImageView.hidden = NO;
-          [UIView animateWithDuration:0.4
-                                delay:0
-                              options:UIViewAnimationOptionAllowUserInteraction
-                           animations:^{
-                             self.validationStamp2ImageView.alpha = 1.0;
-                           }
-                           completion:^(BOOL finished) {
-                             self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
-                             self.validationStamp2ImageView.hidden = YES;
-                             self.validationStamp2ImageView.image = nil;
-                           }];
-        }
-      }
-    }  // end response for 200
-    else { 
-      if (self.validationStampView.hidden == NO) {
-        [UIView animateWithDuration:0.4
-                              delay:0 
-                            options:UIViewAnimationOptionAllowUserInteraction 
-                         animations:^{
-                           self.validationStampView.alpha = 0.0;
-                         }
-                         completion:^(BOOL finished) {
-                           self.validationStampView.hidden = YES;
-                           self.validationStampView.alpha = 1.0;
-                         }];
-      }
-    }
-  } // end signIn responses
-  
-  if (signUpScrollView_.superview) {
-    if (response.statusCode == 200) {  // Exists.
-      NSString* s = [NSString stringWithFormat:@"\"%@\"", signUpUsernameTextField_.text];
-      if ([response.bodyAsString rangeOfString:s].location == NSNotFound) {
-        [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
-                                     message:[NSString stringWithFormat:@"Someone is already using \"%@\".", signUpEmailTextField_.text]
-                                    delegate:nil
-                           cancelButtonTitle:@"OK"
-                           otherButtonTitles:nil] autorelease] show];
-        emailTaken_ = YES;
-      } else {
-        [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
-                                     message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
-                                    delegate:nil
-                           cancelButtonTitle:@"OK"
-                           otherButtonTitles:nil] autorelease] show];
-        usernameTaken_ = YES;
-      }
-      [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
-      confirmButton_.enabled = YES;
-      return;
-    } else if (response.statusCode == 404) {           //available
-      if (emailTaken_) {
-        emailTaken_ = NO;
-        if ([self stringIsValidUsername:signUpUsernameTextField_.text])
-          [self validateUsername];
-        else {
-          [[[[UIAlertView alloc] initWithTitle:@"Invalid Username"
-                                       message:@"Usernames may only include letters, numbers, dashes, and underscores."
-                                      delegate:nil
-                             cancelButtonTitle:@"OK"
-                             otherButtonTitles:nil] autorelease] show];
-          [activityIndicator_ stopAnimating];
-          [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
-          confirmButton_.enabled = YES;
-        }
-        return;
-      }
-      usernameTaken_ = NO;
-      if (!emailTaken_ && !usernameTaken_) {  // Create an account.
-        NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
-        [delegate_ viewController:self
-           willCreateUserWithName:signUpFullNameTextField_.text
-                         username:signUpUsernameTextField_.text
-                         password:signUpPasswordTextField_.text
-                            email:signUpEmailTextField_.text
-                     profileImage:self.profilePhoto
-                      phoneNumber:num];
-      }
-    } else if (response.statusCode == 400) {
-      [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
-      [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
-      usernameValid_ = NO;
-      usernameTaken_ = YES;
-      emailValid_ = NO;
-      emailTaken_ = YES;
-      return;
-    } else {
-      [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
-      [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
-      confirmButton_.enabled = YES;
-      usernameValid_ = NO;
-      usernameTaken_ = YES;
-      emailValid_ = NO;
-      emailTaken_ = YES;
-    }
-  } // end signUp responses
+  if (signInScrollView_.superview)
+    [self handleSignInRequest:request response:response];
+  if (signUpScrollView_.superview)
+    [self handleSignUpRequest:request response:response];
 }
 
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
@@ -920,7 +799,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   }
 }
 
-#pragma - Regex.
+#pragma mark - Regex.
 
 - (BOOL)stringIsValidEmail:(NSString*)checkString {
   BOOL stricterFilter = YES;
@@ -937,4 +816,141 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   return [usernameTest evaluateWithObject:checkString];
 }
 
+#pragma mark - RKRequestDelegate helper methods.
+
+- (void)handleSignInRequest:(RKRequest*)request response:(RKResponse*)response {
+  if (response.statusCode == 200) {
+    // valid username & user exists. 
+    usernameValid_ = YES;
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for response %@: %@", response, err);
+      return;
+    }
+    
+    NSString* primaryColorHex = [body objectForKey:@"color_primary"];
+    NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
+    
+    if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) {
+      
+      if (self.validationStampView.hidden == YES) {
+        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
+        self.validationStampView.alpha = 0.0;
+        self.validationStampView.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+      }
+      
+      else {
+        self.validationStamp2ImageView.alpha = 0.0;
+        self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
+        self.validationStamp2ImageView.hidden = NO;
+        [UIView animateWithDuration:0.4
+                              delay:0
+                            options:UIViewAnimationOptionAllowUserInteraction
+                         animations:^{
+                           self.validationStamp2ImageView.alpha = 1.0;
+                         }
+                         completion:^(BOOL finished) {
+                           self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
+                           self.validationStamp2ImageView.hidden = YES;
+                           self.validationStamp2ImageView.image = nil;
+                         }];
+      }
+    }
+  } else { 
+    if (self.validationStampView.hidden == NO) {
+      [UIView animateWithDuration:0.4
+                            delay:0 
+                          options:UIViewAnimationOptionAllowUserInteraction 
+                       animations:^{
+                         self.validationStampView.alpha = 0.0;
+                       }
+                       completion:^(BOOL finished) {
+                         self.validationStampView.hidden = YES;
+                         self.validationStampView.alpha = 1.0;
+                       }];
+    }
+  }
+}
+
+- (void)handleSignUpRequest:(RKRequest*)request response:(RKResponse*)response {
+  if (response.statusCode == 200) {  // Exists.
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for response %@: %@", response, err);
+      return;
+    }
+
+    NSString* screenName = [[body objectForKey:@"screen_name"] lowercaseString];
+    if ([screenName isEqualToString:signUpUsernameTextField_.text.lowercaseString]) {
+      [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
+                                   message:[NSString stringWithFormat:@"Someone has already claimed \"%@\"", signUpUsernameTextField_.text]
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      usernameTaken_ = YES;
+    } else {
+      [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
+                                   message:[NSString stringWithFormat:@"Someone is already using \"%@\"", signUpEmailTextField_.text]
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      emailTaken_ = YES;
+    }
+    [activityIndicator_ stopAnimating];
+    [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+    confirmButton_.enabled = YES;
+    return;
+  } else if (response.statusCode == 404) {  // Available.
+    if (emailTaken_) {
+      emailTaken_ = NO;
+      if ([self stringIsValidUsername:signUpUsernameTextField_.text])
+        [self validateUsername];
+      else {
+        [[[[UIAlertView alloc] initWithTitle:@"Invalid Username"
+                                     message:@"Usernames may only include letters, numbers, dashes, and underscores."
+                                    delegate:nil
+                           cancelButtonTitle:@"OK"
+                           otherButtonTitles:nil] autorelease] show];
+        [activityIndicator_ stopAnimating];
+        [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+        confirmButton_.enabled = YES;
+      }
+      return;
+    }
+    usernameTaken_ = NO;
+    if (!emailTaken_ && !usernameTaken_) {  // Create an account.
+      NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
+      [delegate_ viewController:self
+         willCreateUserWithName:signUpFullNameTextField_.text
+                       username:signUpUsernameTextField_.text
+                       password:signUpPasswordTextField_.text
+                          email:signUpEmailTextField_.text
+                   profileImage:self.profilePhoto
+                    phoneNumber:num];
+    }
+  } else if (response.statusCode == 400) {
+    [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
+    [activityIndicator_ stopAnimating];
+    [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+    usernameValid_ = NO;
+    usernameTaken_ = YES;
+    emailValid_ = NO;
+    emailTaken_ = YES;
+    return;
+  } else {
+    [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
+    [activityIndicator_ stopAnimating];
+    [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+    confirmButton_.enabled = YES;
+    usernameValid_ = NO;
+    usernameTaken_ = YES;
+    emailValid_ = NO;
+    emailTaken_ = YES;
+  }
+}
+
 @end
+

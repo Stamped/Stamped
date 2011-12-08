@@ -15,6 +15,7 @@
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
 #import "Util.h"
+#import "MusicDetailViewController.h"
 
 @interface OtherDetailViewController ()
 - (void)confirmCall;
@@ -22,6 +23,8 @@
 - (void)setupMainActionsContainer;
 - (void)setupMapView;
 - (void)setupSectionViews;
+- (void)loadAppImage;
+- (void)setupAsAppDetail;
 @end
 
 @implementation OtherDetailViewController
@@ -30,15 +33,20 @@
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
 @synthesize mapContainerView = mapContainerView_;
+@synthesize appActionsView = appActionsView_;
 
 #pragma mark - View lifecycle
 
 - (void)showContents {
   self.descriptionLabel.text = detailedEntity_.subtitle;
-
-  [self setupMainActionsContainer];
-  [self setupMapView];
-  [self setupSectionViews];
+  if ([detailedEntity_.subcategory.lowercaseString isEqualToString:@"app"]) {
+    [self loadAppImage];
+  }
+  else {
+    [self setupMainActionsContainer];
+    [self setupMapView];
+    [self setupSectionViews];
+  }
 }
 
 - (void)viewDidLoad {
@@ -88,6 +96,11 @@
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
+  self.mainActionLabel = nil;
+  self.mainActionButton = nil;
+  self.imageView.delegate = nil;
+  self.imageView = nil;
+  self.appActionsView = nil;
 }
 
 - (void)dealloc {
@@ -97,6 +110,11 @@
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
+  self.mainActionLabel = nil;
+  self.mainActionButton = nil;
+  self.imageView.delegate = nil;
+  self.imageView = nil;
+  self.appActionsView = nil;
   [super dealloc];
 }
 
@@ -108,19 +126,19 @@
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:detailedEntity_.phone];
-	[alert setDelegate:self];
-	[alert addButtonWithTitle:@"Cancel"];
-	[alert addButtonWithTitle:@"Call"];
-	[alert show];
-	[alert release];
+  [alert setTitle:detailedEntity_.phone];
+  [alert setDelegate:self];
+  [alert addButtonWithTitle:@"Cancel"];
+  [alert addButtonWithTitle:@"Call"];
+  [alert show];
+  [alert release];
 }
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 1) {
+  if (buttonIndex == 1) {
     NSString* telURL = [NSString stringWithFormat:@"tel://%i",
-        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
+                        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }
 
@@ -175,7 +193,7 @@
   }
   
   
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];
@@ -184,26 +202,26 @@
   
   section = [self makeSectionWithName:@"Information"];
   
-  if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) { 
+  if (detailedEntity_.subcategory && detailedEntity_.subcategory.length > 0) { 
     [section addPairedLabelWithName:@"Category:"
                               value:detailedEntity_.subcategory.capitalizedString
                              forKey:@"subcategory"];
   }
   
   
-  if (detailedEntity_.address && ![detailedEntity_.address isEqualToString:@""]) {
+  if (detailedEntity_.address && detailedEntity_.address.length > 0) {
     [section addPairedLabelWithName:@"Address:"
                               value:detailedEntity_.address
                              forKey:@"address"];
   }
     
-  if (detailedEntity_.neighborhood && ![detailedEntity_.neighborhood isEqualToString:@""]) {
+  if (detailedEntity_.neighborhood && detailedEntity_.neighborhood.length > 0) {
     [section addPairedLabelWithName:@"Neighborhood:"
                               value:detailedEntity_.neighborhood.capitalizedString
                              forKey:@"neighborhood"];
   }
   
-  if (detailedEntity_.website && ![detailedEntity_.website isEqualToString:@""]) {
+  if (detailedEntity_.website && detailedEntity_.website.length > 0) {
     [section addPairedLabelWithName:@"Website:"
                               value:detailedEntity_.website
                              forKey:@"website"];
@@ -220,6 +238,75 @@
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO;
   }
+}
+
+
+- (void)loadAppImage {
+  if (detailedEntity_.image && detailedEntity_.image.length > 0) {
+    self.imageView.imageURL = detailedEntity_.image;
+    self.imageView.delegate = self;
+    self.imageView.hidden = NO;
+    self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.imageView.layer.cornerRadius = 18.0;
+    self.imageView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    self.imageView.layer.shouldRasterize = YES;
+    self.imageView.layer.masksToBounds = YES;
+  }
+}
+
+- (void)setupAsAppDetail {
+  self.mainActionsView.hidden = YES;
+  self.imageView.hidden = NO;
+  
+  // Set up actions container (download link)
+  if (detailedEntity_.itunesShortURL) {
+    self.mainActionButton.hidden = NO;
+    self.mainActionLabel.hidden = NO;
+    self.appActionsView.hidden = NO;
+  }
+  else {
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.appActionsView.frame));
+  }
+  
+  // Add content sections
+  self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  CollapsibleViewController* section;
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
+    [self addSectionWithName:@"Description"];
+    section = [sectionsDict_ objectForKey:@"Description"];
+    [section addText:detailedEntity_.desc forKey:@"desc"];
+    self.mainContentView.hidden = NO;
+  }
+  
+  // Add also stamped by
+  NSSet* stamps = entityObject_.stamps;
+  if (stamps && stamps.count > 0) {
+    [self addSectionStampedBy];
+    self.mainContentView.hidden = NO;
+  }
+  
+  // Because clipping the imageview to bounds, which is necessary for rounded corners, hides the shadow.
+  UIView* shadowView = [[UIImageView alloc] initWithFrame:self.imageView.frame];
+  shadowView.backgroundColor = [UIColor clearColor];
+  shadowView.layer.cornerRadius = 18.0;
+  shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+  shadowView.layer.shadowOffset = CGSizeMake(0.0, 3.0);
+  shadowView.layer.shadowRadius = 3.0;
+  shadowView.layer.shadowOpacity = 0.3;
+  shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:shadowView.bounds cornerRadius:18.0].CGPath;
+  [self.scrollView insertSubview:shadowView belowSubview:self.imageView];
+  [shadowView.layer setNeedsDisplay];
+  [shadowView release];
+
+  self.imageView.layer.shadowOpacity = 0;
+}
+
+- (IBAction)mainActionButtonPressed:(id)sender {
+  [[UIApplication sharedApplication] openURL: [NSURL URLWithString:detailedEntity_.itunesShortURL]];
+}
+
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
+  [self setupAsAppDetail];
 }
 
 

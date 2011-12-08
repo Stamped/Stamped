@@ -417,7 +417,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 	NSLog(@"Hit error: %@", error);
 } 
 
-- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
+- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader*)objectLoader {
+  if (objectLoader.response.isNotFound)
+    return;
+
   [[Alerts alertWithTemplate:AlertTemplateDefault] show];
 }
 

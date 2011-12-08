@@ -155,14 +155,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)setupSectionViews {
-  
-//  if (self.contentHeight < self.scrollView.frame.size.height) {
-//    self.mainContentView.backgroundColor = [UIColor colorWithWhite:0.83 alpha:1.0];
-//    UIImageView* imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_empty_shadow"]];
-//    imageView.frame = CGRectMake(0, self.contentHeight, 320, 320);
-//    [self.mainContentView addSubview:imageView];
-//    [imageView release];
-//  }
+  // Default does nothing. Override in subclasses.
 }
 
 - (void)ensureTitleLabelHeight {
@@ -174,9 +167,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0.0, delta);
     self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0.0, delta);
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
-    if ([self isKindOfClass:[PlaceDetailViewController class]] ||
-        [self isKindOfClass:[OtherDetailViewController class]]) {
-      ((PlaceDetailViewController*)self).mapContainerView.frame = CGRectOffset(((PlaceDetailViewController*)self).mapContainerView.frame, 0.0, delta);
+    if ([self isKindOfClass:[PlaceDetailViewController class]]) {
+      PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
+      vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+    }
+    if ([self isKindOfClass:[OtherDetailViewController class]]) {
+      OtherDetailViewController* vc = (OtherDetailViewController*)self;
+      vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+      vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
     }
   }
   if (titleLabel_.text.length > 60) {
@@ -407,7 +405,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-//  NSLog(@"loaded: %@ %@", objectLoader.resourcePath, object);
   if ([objectLoader.resourcePath rangeOfString:kEntityLookupPath].location != NSNotFound) {
     dataLoaded_ = YES;
     [detailedEntity_ release];
@@ -424,7 +421,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-//  NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
@@ -441,7 +437,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
-//  NSLog(@"unexpected: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
@@ -461,7 +456,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   CGRect frame = label.frame;
   frame.size.width = label.frame.size.width;
   frame.size = [label sizeThatFits:frame.size];
-//  label.frame = frame;
   CGFloat lineHeight = label.font.lineHeight;
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;

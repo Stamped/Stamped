@@ -20,6 +20,7 @@
 #import "Stamp.h"
 #import "User.h"
 #import "Notifications.h"
+#import "NSData+Base64Additions.h"
 #import "SearchResult.h"
 #import "OAuthToken.h"
 #import "STNavigationBar.h"
@@ -85,8 +86,73 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)handleCrashReport {
-  NSLog(@"Handling crash report...");
+  PLCrashReporter* crashReporter = [PLCrashReporter sharedReporter];
+  NSData* crashData;
+  NSError* error;
+
+  // Try loading the crash report.
+  crashData = [crashReporter loadPendingCrashReportDataAndReturnError:&error];
+  if (crashData == nil) {
+    NSLog(@"Could not load crash report: %@", error);
+    [crashReporter purgePendingCrashReport];
+    return;
+  }
+
+  PLCrashReport* report = [[[PLCrashReport alloc] initWithData:crashData error:&error] autorelease];
+  if (report == nil) {
+    NSLog(@"Could not parse crash report");
+    [crashReporter purgePendingCrashReport];
+    return;
+  }
+  
+  NSMutableString* reportBody = [NSMutableString string];
+
+  if (report.hasExceptionInfo)
+    [reportBody appendFormat:@"%@: %@\n", report.exceptionInfo.exceptionName, report.exceptionInfo.exceptionReason];
+  
+  [reportBody appendFormat:@"Signal %@ - %@ at 0x%llx\n",
+      report.signalInfo.name, report.signalInfo.code, (unsigned long long)report.signalInfo.address];
+  
+  SKPSMTPMessage* testMsg = [[SKPSMTPMessage alloc] init];
+  testMsg.fromEmail = @"crashlogger@stamped.com";
+  testMsg.toEmail = @"crashers@stamped.com";
+  testMsg.relayHost = @"smtp.gmail.com";
+  testMsg.requiresAuth = YES;
+  testMsg.login = @"crashlogger@stamped.com";
+  testMsg.pass = @"august1ftw";
+  testMsg.subject = reportBody;
+  testMsg.wantsSecure = YES; // smtp.gmail.com requires TLS.
+  testMsg.delegate = self;
+  
+  NSDictionary* plainPart = [NSDictionary dictionaryWithObjectsAndKeys:@"text/plain", kSKPSMTPPartContentTypeKey,
+                             reportBody, kSKPSMTPPartMessageKey,
+                             @"8bit", kSKPSMTPPartContentTransferEncodingKey, nil];
+
+  NSDictionary* dataPart =
+      [NSDictionary dictionaryWithObjectsAndKeys:@"application/octet-stream;\r\n\tx-unix-mode=0644;\r\n\tname=\"report.plcrash\"", kSKPSMTPPartContentTypeKey,
+          @"attachment;\r\n\tfilename=\"report.plcrash\"", kSKPSMTPPartContentDispositionKey,
+          [crashData encodeBase64ForData], kSKPSMTPPartMessageKey,
+          @"base64", kSKPSMTPPartContentTransferEncodingKey, nil];
+
+  testMsg.parts = [NSArray arrayWithObjects:plainPart, dataPart, nil];
+  [testMsg send];
+
+  [crashReporter purgePendingCrashReport];
+  return;
 }
+
+#pragma mark - SKPSMTPMessageDelegate methods.
+
+- (void)messageSent:(SKPSMTPMessage*)message {
+  [message release];
+}
+
+- (void)messageFailed:(SKPSMTPMessage*)message error:(NSError*)error {
+  [message release];
+  NSLog(@"delegate - error(%d): %@", [error code], [error localizedDescription]);
+}
+
+#pragma mark - Gesture Recognizers.
 
 - (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
@@ -147,12 +213,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [window_ release];
   [navigationController_ release];
   [super dealloc];
-}
-
-#pragma mark - RKRequestDelegate methods.
-
-- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  // NSLog(@"Push nofification registration response: %@", response.bodyAsString);
 }
 
 #pragma mark - Private methods.
