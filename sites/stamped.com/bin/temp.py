@@ -68,7 +68,7 @@ def handle_entity(entity, entityDB, appleAPI, matcher, options):
             entity.image = entity2.image
             
             if entity2.screenshots is not None:
-                entity.screenshots = entity2.screenshots
+                entity.details.media.screenshots = entity2.screenshots
             
             if not options.noop:
                 entityDB.save(entity)

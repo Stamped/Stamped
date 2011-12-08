@@ -536,10 +536,12 @@ class HTTPEntity(Schema):
                 self.preview_url = schema.preview_url
             
             # Affiliates
-            if schema.sources.openTable.reserveURL != None:
-                url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                        (schema.sources.openTable.reserveURL, )
-                self.opentable_url = url
+            if schema.rid is not None:
+                self.opentable_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+                                      schema.rid
+            elif schema.reserveURL is not None:
+                self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
+                                      schema.reserveURL
             
             if schema.sources.fandango.f_url is not None:
                 self.fandango_url = schema.f_url

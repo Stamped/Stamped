@@ -195,7 +195,7 @@ def handle_app_feed(feed, matcher, appleRSS, aids, options):
         entity.a_popular = True
         
         if options.noop:
-            pass#pprint(entity.value)
+            pprint(entity.value)
         else:
             matcher.addOne(entity)
 
