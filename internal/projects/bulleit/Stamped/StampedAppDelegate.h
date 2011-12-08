@@ -9,9 +9,7 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "SKPSMTPMessage.h"
-
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate, SKPSMTPMessageDelegate>
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
