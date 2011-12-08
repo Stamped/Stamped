@@ -35,6 +35,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)settingsButtonPressed:(NSNotification*)notification;
 - (void)userProfileHasChanged:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
+- (void)updateShelf;
 
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
@@ -177,12 +178,14 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
+    [self updateShelf];
     [self setIsLoading:NO];
     return;
   }
 
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser) {
+    [self updateShelf];
     [self setIsLoading:NO];
     return;
   }
@@ -197,6 +200,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
       // Which users need information fetched for them?
       NSSet* currentIDs = [currentUser.following valueForKeyPath:@"@distinctUnionOfObjects.userID"];
       if ([[NSSet setWithArray:followingIDs] isEqualToSet:currentIDs]) {
+        [self updateShelf];
         [self setIsLoading:NO];
         return;
       }
@@ -210,6 +214,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
         [self loadUserDataFromNetwork];
       } else {
         self.userIDsToBeFetched = nil;
+        [self updateShelf];
         [self setIsLoading:NO];
       }
 
@@ -223,14 +228,19 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
       }
     }
   }
+  [self updateShelf];
+  [self setIsLoading:NO];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   User* currentUser = [AccountManager sharedManager].currentUser;
-  if (!currentUser)
+  if (!currentUser) {
+    [self updateShelf];
+    [self setIsLoading:NO];
     return;
+  }
 
   if ([objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
     for (User* user in objects) {
@@ -251,10 +261,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   self.friendsArray = [currentUser.following.allObjects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   [self.tableView reloadData];
 
-  NSDate* now = [NSDate date];
-  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"PeopleLastUpdatedAt"];
-  [[NSUserDefaults standardUserDefaults] synchronize];
-  [self updateLastUpdatedTo:now];
+  [self updateShelf];
   [self setIsLoading:NO];
 }
 
@@ -267,6 +274,13 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   }
   
   [self setIsLoading:NO];
+}
+
+- (void)updateShelf {
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"PeopleLastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
 }
 
 #pragma mark - Table view data source.

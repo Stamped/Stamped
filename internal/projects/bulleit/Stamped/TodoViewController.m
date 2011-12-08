@@ -111,7 +111,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.delegate = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.searchQuery = nil;
