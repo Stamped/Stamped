@@ -42,28 +42,28 @@
     categoryLabel_.textColor = [UIColor stampedBlackColor];
     categoryLabel_.highlightedTextColor = [UIColor whiteColor];
     categoryLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-    categoryImage_.contentMode = UIViewContentModeScaleAspectFit;
+    categoryImage_.contentMode = UIViewContentModeCenter;
 
     switch (categoryRow) {
       case STEditCategoryRowFood:
         categoryLabel_.text = @"Restaurants & Bars";
-        categoryImage_.image = [UIImage imageNamed:@"cat_icon_food"];
+        categoryImage_.image = [UIImage imageNamed:@"cat_icon_inbox-todo_food"];
         break;
       case STEditCategoryRowBooks:
         categoryLabel_.text = @"Books";
-        categoryImage_.image = [UIImage imageNamed:@"cat_icon_book"];
+        categoryImage_.image = [UIImage imageNamed:@"cat_icon_inbox-todo_book"];
         break;
       case STEditCategoryRowFilm:
         categoryLabel_.text = @"Film & TV";
-        categoryImage_.image = [UIImage imageNamed:@"cat_icon_film"];
+        categoryImage_.image = [UIImage imageNamed:@"cat_icon_inbox-todo_film"];
         break;
       case STEditCategoryRowMusic:
         categoryLabel_.text = @"Music";
-        categoryImage_.image = [UIImage imageNamed:@"cat_icon_music"];
+        categoryImage_.image = [UIImage imageNamed:@"cat_icon_inbox-todo_music"];
         break;
       case STEditCategoryRowOther:
         categoryLabel_.text = @"Other";
-        categoryImage_.image = [UIImage imageNamed:@"cat_icon_other"];
+        categoryImage_.image = [UIImage imageNamed:@"cat_icon_inbox-todo_other"];
         break;
       default:
         NSLog(@"This should not happen.");
