@@ -91,32 +91,32 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         
     def addUserStampReference(self, userId, stampId):
         # Add a reference to the stamp in the user's collection
-        self.user_stamps_collection.addUserStamp(userId, stampId) 
-        
+        self.user_stamps_collection.addUserStamp(userId, stampId)
+    
     def removeUserStampReference(self, userId, stampId):
         # Remove a reference to the stamp in the user's collection
-        self.user_stamps_collection.removeUserStamp(userId, stampId) 
-
+        self.user_stamps_collection.removeUserStamp(userId, stampId)
+    
     def removeAllUserStampReferences(self, userId):
         self.user_stamps_collection.removeAllUserStamps(userId)
-
+    
     def addInboxStampReference(self, userIds, stampId):
         # Add a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.addInboxStamps(userIds, stampId)
-
+    
     def removeInboxStampReference(self, userIds, stampId):
         # Remove a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.removeInboxStamps(userIds, stampId)
-
+    
     def addInboxStampReferencesForUser(self, userId, stampIds):
         self.inbox_stamps_collection.addInboxStampsForUser(userId, stampIds)
-
+    
     def removeInboxStampReferencesForUser(self, userId, stampIds):
         self.inbox_stamps_collection.removeInboxStampsForUser(userId, stampIds)
-
+    
     def removeAllInboxStampReferences(self, userId):
         self.inbox_stamps_collection.removeAllInboxStamps(userId)
-
+    
     def getStamps(self, stampIds, **kwargs):
         sort = kwargs.pop('sort', None)
         if sort in ['modified', 'created']:
@@ -284,4 +284,4 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         result = self._removeMongoDocuments(documentIds)
 
         return result     
-            
+

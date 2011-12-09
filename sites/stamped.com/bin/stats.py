@@ -8,9 +8,9 @@ __license__   = "TODO"
 import init
 import utils
 
-from MongoStampedAPI import MongoStampedAPI
-from optparse import OptionParser
-from pprint import pprint
+from MongoStampedAPI    import MongoStampedAPI
+from optparse           import OptionParser
+from pprint             import pprint
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"

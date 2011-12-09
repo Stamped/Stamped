@@ -35,6 +35,7 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
+from tasks.APITasks  import APITasks
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -1359,13 +1360,12 @@ class StampedAPI(AStampedAPI):
         credit = []
         creditedUserIds = []
         if creditData != None and isinstance(creditData, list):
-
             ### TODO: Filter out non-ASCII data for credit
             creditedScreenNames = []
             for creditedScreenName in creditData:
                 if utils.validate_screen_name(creditedScreenName):
                     creditedScreenNames.append(creditedScreenName)
-
+            
             creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
             
             for creditedUser in creditedUsers:
@@ -1420,7 +1420,6 @@ class StampedAPI(AStampedAPI):
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
-            
             ### TODO: Rollback: Delete Image
             image = self._imageDB.getImage(imageData)
             self._imageDB.addStampImage(stamp.stamp_id, image)
@@ -1442,9 +1441,11 @@ class StampedAPI(AStampedAPI):
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
-        # Add a reference to the stamp in followers' inbox
-        followers = self._friendshipDB.getFollowers(user.user_id)
-        followers.append(user.user_id)
+        # Asynchronously add references to the stamp in follower's inboxes
+        APITasks.addStamp.delay(user.user_id, stamp.stamp_id)
+        
+        # Add a reference to the stamp in the user's inbox
+        followers = [ user.user_id ]
         self._rollback.append((self._stampDB.removeInboxStampReference, \
             {'stampId': stamp.stamp_id, 'userIds': followers}))
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
