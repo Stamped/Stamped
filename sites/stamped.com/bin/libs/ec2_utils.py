@@ -56,6 +56,7 @@ def get_stack(stack=None):
                 f.close()
                 info = utils.AttributeDict(info)
                 if info.instance is not None and len(info.nodes) > 0:
+                    info.nodes = map(utils.AttributeDict, info.nodes)
                     return info
             except:
                 utils.log("error getting cached stack info; recomputing")
@@ -74,15 +75,15 @@ def get_stack(stack=None):
                 if instance.state == 'running':
                     stack_name = instance.tags['stack']
                     
-                    node = utils.AttributeDict(dict(
+                    node = dict(
                         name=instance.tags['name'], 
                         stack=stack_name, 
                         roles=eval(instance.tags['roles']), 
-                        instance_id=instance.instance_id, 
+                        instance_id=instance.id, 
                         public_dns_name=instance.public_dns_name, 
                         private_dns_name=instance.private_dns_name, 
                         private_ip_address=instance.private_ip_address, 
-                    ))
+                    )
                     
                     stacks[stack_name].append(node)
                     
@@ -101,7 +102,10 @@ def get_stack(stack=None):
     f.write(json.dumps(info, indent=2))
     f.close()
     
-    return utils.AttributeDict(info)
+    info = utils.AttributeDict(info)
+    info.nodes = map(utils.AttributeDict, info.nodes)
+    
+    return info
 
 def get_elb(stack=None):
     stack = get_stack(stack)
