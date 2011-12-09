@@ -28,6 +28,7 @@ if utils.is_ec2():
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
 #BROKER_URL = "amqp://guest:guest@:5672/stampedvhost"
+utils.log('BROKER_URL: %s' % BROKER_URL)
 
 CELERYD_CONCURRENCY = 1
 
