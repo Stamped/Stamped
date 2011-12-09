@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import aws, os, time, utils
+import aws, json, os, time, utils
 
 from boto.exception         import EC2ResponseError
 from boto.ec2.connection    import EC2Connection
