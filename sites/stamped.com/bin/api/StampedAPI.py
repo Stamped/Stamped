@@ -2982,6 +2982,3 @@ class StampedAPI(AStampedAPI):
                     (stats_num_followers, num_followers))
                 self._userDB.updateUserStats(userId, 'num_followers', num_followers)
 
-
-
-
