@@ -10,7 +10,7 @@ import utils
 import libs.ec2_utils
 
 # List of modules to import when celery starts.
-CELERY_IMPORTS = ("tasks.APITasks", )
+CELERY_IMPORTS = ("tasks", )
 
 ## Result store settings.
 CELERY_RESULT_BACKEND = "amqp"
