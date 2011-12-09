@@ -54,7 +54,9 @@ def get_stack(stack=None):
                 f = open(path, 'r')
                 info = json.loads(f.read())
                 f.close()
-                return utils.AttributeDict(info)
+                info = utils.AttributeDict(info)
+                if info.instance is not None and len(info.nodes) > 0:
+                    return info
             except:
                 utils.log("error getting cached stack info; recomputing")
                 utils.printException()
