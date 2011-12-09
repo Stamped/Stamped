@@ -47,6 +47,7 @@ SERVER_EMAIL = "notifications@stamped.com"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_SSL = True
+EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "notifications@stamped.com"
 EMAIL_HOST_PASSWORD = "mariotennis"
 
