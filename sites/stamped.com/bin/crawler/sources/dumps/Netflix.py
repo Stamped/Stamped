@@ -4,7 +4,7 @@ __version__   = "$Rev$"
 __date_ = "$Date$"
 
 import Globals, utils
-import httplib, sys, os.path, re, simplejson, time
+import httplib, sys, os.path, re, json, time
 import oauth.oauth as oauth
 from urlparse import urlparse
 
@@ -67,7 +67,7 @@ class NetflixUser():
 
         requestUrl = '/users/%s' % (accessToken.key)
 
-        info = simplejson.loads( self.client._getResource( requestUrl, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, token=accessToken ) )
         self.data = info['user']
         return self.data
 
@@ -88,7 +88,7 @@ class NetflixUser():
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url,token=accessToken ))
+            info = json.loads(self.client._getResource( url,token=accessToken ))
         except :
             return []
         else:
@@ -109,7 +109,7 @@ class NetflixUser():
                 urls.append(discInfo['id'])
         parameters = { 'title_refs': ','.join(urls) }
 
-        info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
 
         ret = {}
         for title in info['ratings']['ratings_item']:
@@ -145,7 +145,7 @@ class NetflixUser():
             requestUrl = '/users/%s/rental_history/%s' % (accessToken.key,type)
 
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+            info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         except:
             return {}
 
@@ -162,7 +162,7 @@ class NetflixCatalog():
             parameters['start_index'] = startIndex
         if maxResults:
             parameters['max_results'] = maxResults
-        info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+        info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
 
         return info['catalog_titles']['catalog_title']
 
@@ -174,13 +174,13 @@ class NetflixCatalog():
         if maxResults:
             parameters['max_results'] = maxResults
 
-        info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
-        print simplejson.dumps(info)
+        info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
+        print json.dumps(info)
         return info['autocomplete']['autocomplete_item']
 
     def getTitle(self, url):
         requestUrl = url
-        info = simplejson.loads( self.client._getResource( requestUrl ))
+        info = json.loads( self.client._getResource( requestUrl ))
         return info
 
     def getIndex(self):
@@ -198,7 +198,7 @@ class NetflixCatalog():
             parameters['max_results'] = maxResults
 
         try:
-              info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+              info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
         except:
             return []
 
@@ -207,7 +207,7 @@ class NetflixCatalog():
     def getPerson(self,url):
         requestUrl = url
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl ))
+            info = json.loads( self.client._getResource( requestUrl ))
         except:
             return {}
         return info          
@@ -231,7 +231,7 @@ class NetflixUserQueue:
 
         requestUrl = '/users/%s/queues' % (self.user.accessToken.key)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -250,7 +250,7 @@ class NetflixUserQueue:
 
         requestUrl = '/users/%s/queues/%s/available' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -269,7 +269,7 @@ class NetflixUserQueue:
 
         requestUrl = '/users/%s/queues/%s/saved' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -292,7 +292,7 @@ class NetflixUserQueue:
 
         if not self.tag:
             response = self.client._getResource( requestUrl, token=accessToken )
-            response = simplejson.loads(response)
+            response = json.loads(response)
             self.tag = response["queue"]["etag"]
         parameters['etag'] = self.tag
         response = self.client._postResource( requestUrl, token=accessToken, parameters=parameters )
@@ -310,7 +310,7 @@ class NetflixUserQueue:
         requestUrl = '/users/%s/queues/disc' % (accessToken.key)
         response = self.client._getResource( requestUrl, token=accessToken,parameters=queueparams )
         print "Response is " + response
-        response = simplejson.loads(response)
+        response = json.loads(response)
         titles = response["queue"]["queue_item"]
 
         for disc in titles:
@@ -341,7 +341,7 @@ class NetflixDisc:
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url ))
+            info = json.loads(self.client._getResource( url ))
         except :
             return []
         else:
