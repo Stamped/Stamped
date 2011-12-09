@@ -15,7 +15,7 @@ def add(x, y):
     msg = ("Executing task id %r, args: %r kwargs: %r" % (
             add.request.id, add.request.args, add.request.kwargs))
     utils.log(msg)
-    add.logger.info(msg)
+    #add.logger.info(msg)
     
     return x + y
 
