@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
+import tasks.APITasks
 
 from pprint          import pprint, pformat
 from datetime        import datetime
@@ -35,7 +36,6 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
-from tasks.APITasks  import APITasks
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -1442,7 +1442,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
         # Asynchronously add references to the stamp in follower's inboxes
-        APITasks.addStamp.delay(user.user_id, stamp.stamp_id)
+        tasks.APITasks.addStamp.delay(user.user_id, stamp.stamp_id)
         
         # Add a reference to the stamp in the user's inbox
         followers = [ user.user_id ]
