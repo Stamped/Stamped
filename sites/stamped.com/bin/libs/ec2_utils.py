@@ -87,7 +87,7 @@ def get_stack(stack=None):
                     
                     stacks[stack_name].append(node)
                     
-                    if stack is None and node.instance_id == instance_id:
+                    if stack is None and instance.id == instance_id:
                         stack = stack_name
                         cur_instance = node
             except:
