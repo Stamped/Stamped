@@ -23,7 +23,7 @@ import sources
 
 # import all databases
 import api.db
-from api.MongoStampedAPI import MongoStampedAPI
+from MongoStampedAPI import MongoStampedAPI
 
 #-----------------------------------------------------------
 
