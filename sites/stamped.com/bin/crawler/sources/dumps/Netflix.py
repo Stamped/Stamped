@@ -5,8 +5,12 @@ __date_ = "$Date$"
 
 import Globals, utils
 import httplib, sys, os.path, re, json, time
-import oauth.oauth as oauth
-from urlparse import urlparse
+
+try:
+    import oauth.oauth as oauth
+    from urlparse import urlparse
+except ImportError:
+    utils.printException()
 
 HOST               = 'api.netflix.com'
 PORT              = '80'
