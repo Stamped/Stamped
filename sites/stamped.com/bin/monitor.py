@@ -137,7 +137,7 @@ class Monitor(object):
         raise MonitorException(error, email=True, sms=True)
     
     def _try_ping_apiServer(self, node):
-        url = 'https://%s/v0/ping.json' % node.public_dns
+        url = 'https://%s/v0/ping.json' % node.public_dns_name
         retries = 0
         
         while retries < 5:
@@ -165,7 +165,7 @@ class Monitor(object):
         ]
         
         for mongo_cmd in mongo_cmds:
-            dns = node.private_dns if is_ec2 else node.public_dns
+            dns = node.private_ip_address if is_ec2 else node.public_dns_name
             cmd = cmd_template % (dns, mongo_cmd)
             
             retries = 0
