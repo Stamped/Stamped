@@ -24,6 +24,7 @@ class StatsDSink(AStatsSink):
             self._pool.spawn(self._init)
     
     def _init(self):
+        time.sleep(15)
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         

@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
+import datetime, gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
 import aws, logs, math, random, boto
 
@@ -748,4 +748,7 @@ def round_float(f, n):
         return str(f)[:slen]
     except:
         return 0
+
+def get_modified_time(filename):
+    return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 
