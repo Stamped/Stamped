@@ -272,7 +272,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                 images = self.conn.get_all_images(image_ids=[ ami_id ])
                 image  = images[0]
             except:
-                time.sleep(0)
+                time.sleep(1)
         
         success = False
         

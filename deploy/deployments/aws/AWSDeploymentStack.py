@@ -402,7 +402,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         # check if replica set needs to be initialized
         if initialize or ('startupStatus' in status and 3 == status['startupStatus']):
-            utils.log("[%s] initializing empty replica set")
+            utils.log("[%s] initializing empty replica set" % self)
             
             # initialize the replica set with a default configuration
             config = self._get_initial_replica_set_config()
