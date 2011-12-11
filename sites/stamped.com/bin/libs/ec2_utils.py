@@ -109,7 +109,7 @@ def get_stack(stack=None):
 
 def get_elb(stack=None):
     stack = get_stack(stack)
-    instance_ids = (instance.id for instance in stack.nodes)
+    instance_ids = (instance.instance_id for instance in stack.nodes)
     
     # get all ELBs
     conn = ELBConnection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)

@@ -113,6 +113,7 @@ class MongoDBConfig(Singleton):
                                                                 slave_okay=True, 
                                                                 read_preference=pymongo.ReadPreference.SECONDARY, 
                                                                 replicaset=replicaset)
+                
                 #self._connection.stamped.read_preference = ReadPreference.SECONDARY
                 return self._connection
             except AutoReconnect as e:
