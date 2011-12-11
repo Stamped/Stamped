@@ -31,9 +31,8 @@ _baseurl   = "http://localhost:18000/v0"
 #_baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
 
 if utils.is_ec2():
-    from libs.EC2Utils import EC2Utils
-    ec2_utils = EC2Utils()
-    elb = ec2_utils.get_elb()
+    import libs.ec2_utils
+    elb = libs.ec2_utils.get_elb()
     
     if elb is not None:
         _baseurl = "https://%s/v0" % elb.dns_name
