@@ -242,8 +242,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Update the modified timestamp
         self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
             {'$set': {'timestamp.modified': datetime.utcnow()}})
-
-        
+    
     def removeLike(self, userId, stampId):
         # Remove a reference to the user in the stamp's 'like' collection
         stampLike = self.stamp_likes_collection.removeStampLike(stampId, userId)
