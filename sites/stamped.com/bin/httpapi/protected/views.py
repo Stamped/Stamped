@@ -6,17 +6,17 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import init
+import Globals
 import os, json, utils, random, time, hashlib, logs
-
-from errors import *
-from auth import convertPasswordForStorage
-from api.HTTPSchemas import *
-from api.MongoStampedAPI import MongoStampedAPI
-from api.MongoStampedAuth import MongoStampedAuth
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response
 import datetime
+
+from errors             import *
+from auth               import convertPasswordForStorage
+from HTTPSchemas        import *
+from MongoStampedAPI    import MongoStampedAPI
+from MongoStampedAuth   import MongoStampedAuth
+from django.http        import HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts   import render_to_response
 
 stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()

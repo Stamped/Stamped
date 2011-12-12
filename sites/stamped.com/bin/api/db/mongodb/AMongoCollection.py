@@ -90,8 +90,8 @@ class MongoDBConfig(Singleton):
         #    logs.debug(line)
         
         reinitialized = False
-        delay = 1
         max_delay = 16
+        delay = 1
         
         if utils.is_ec2():
             replicaset = 'stamped-dev-01'

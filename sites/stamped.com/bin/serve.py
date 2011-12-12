@@ -12,8 +12,8 @@ from functools import wraps
 from Schemas import *
 from HTTPSchemas import *
 
-from api.MongoStampedAPI import MongoStampedAPI
-from api.MongoStampedAuth import MongoStampedAuth
+from MongoStampedAPI import MongoStampedAPI
+from MongoStampedAuth import MongoStampedAuth
 from utils import AttributeDict
 from errors import *
 

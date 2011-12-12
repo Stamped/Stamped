@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from api.MongoStampedAPI    import MongoStampedAPI
-from celery.task            import task
+from MongoStampedAPI    import MongoStampedAPI
+from celery.task        import task
 
 __stampedapi__ = None
 
