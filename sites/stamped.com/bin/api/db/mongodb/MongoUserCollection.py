@@ -127,8 +127,9 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         raise NotImplementedError
     
     def updateUserStats(self, userId, stat, value=None, increment=1):
-        key = 'stats.%s' % (stat)
-        if value != None:
+        key = 'stats.%s' % stat
+        
+        if value is not None:
             self._collection.update(
                 {'_id': self._getObjectIdFromString(userId)}, 
                 {'$set': {key: value}},
@@ -139,8 +140,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 {'$inc': {key: increment}},
                 upsert=True)
         
-        return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
-
+        #return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
+    
     def findUsersByEmail(self, emails, limit=0):
         queryEmails = []
         for email in emails:
