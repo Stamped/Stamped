@@ -150,7 +150,7 @@ class StampedAPI(AStampedAPI):
         # Set default stamp colors
         account.color_primary   = '004AB2'
         account.color_secondary = '0057D1'
-
+        
         # Set default alerts
         account.ios_alert_credit       = False
         account.ios_alert_like         = False
@@ -186,7 +186,7 @@ class StampedAPI(AStampedAPI):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Add image timestamp if exists
         if imageData:
             account.image_cache = datetime.utcnow()
@@ -218,7 +218,7 @@ class StampedAPI(AStampedAPI):
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([account.user_id], activity)
-                
+            
             # Increment activity count
             self._userDB.updateUserStats(account.user_id, 'num_unread_news', increment=1)
         
@@ -509,12 +509,11 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeLinkedAccount(self, authUserId, linkedAccount):
-
         if linkedAccount not in ['facebook', 'twitter']:
             msg = "Invalid linked account: %s" % linkedAccount
             logs.warning(msg)
             raise Exception(msg)
-
+        
         self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
         
         return True
@@ -547,22 +546,22 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateAccount(account)
         
         return True
-
+    
     @API_CALL
     def alertFollowersFromFacebook(self, authUserId, facebookIds):
         account = self._accountDB.getAccount(authUserId)
         if account.facebook_alerts_sent == True or not account.facebook_name:
             return False
-
+        
         users = self._userDB.findUsersByFacebook(facebookIds)
-
+        
         followers = self._friendshipDB.getFollowers(authUserId)
         
         userIds = []
         for user in users:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
-
+        
         activity                    = Activity()
         activity.genre              = 'friend'
         activity.subject            = 'Your Facebook friend %s' % account.facebook_name
@@ -571,29 +570,29 @@ class StampedAPI(AStampedAPI):
         activity.timestamp.created  = datetime.utcnow()
         
         self._activityDB.addActivity(userIds, activity, checkExists=True)
-
+        
         account.facebook_alerts_sent = True
         self._accountDB.updateAccount(account)
         
         return True
-
+    
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
         if isinstance(alerts, SchemaElement):
             alerts = alerts.value
-
+        
         account = self._accountDB.getAccount(authUserId)
-
+        
         for k, v in alerts.iteritems():
             if v:
                 account['alerts'][k] = True
             else:
                 account['alerts'][k] = False
-
+        
         self._accountDB.updateAccount(account)
-
+        
         return account
-
+    
     @API_CALL
     def updateAPNSToken(self, authUserId, token):
         self._accountDB.updateAPNSToken(authUserId, token)
@@ -607,7 +606,7 @@ class StampedAPI(AStampedAPI):
             and not account.ios_alert_comment \
             and not account.ios_alert_reply \
             and not account.ios_alert_follow:
-
+            
             account.ios_alert_credit       = True
             account.ios_alert_like         = True
             account.ios_alert_fav          = True
@@ -615,16 +614,15 @@ class StampedAPI(AStampedAPI):
             account.ios_alert_comment      = True
             account.ios_alert_reply        = True
             account.ios_alert_follow       = True
-
+            
             self._accountDB.updateAccount(account)
-
+        
         return True
-
+    
     @API_CALL
     def removeAPNSToken(self, authUserId, token):
         self._accountDB.removeAPNSToken(authUserId, token)
         return True
-    
     
     """
     #     #                             
@@ -641,18 +639,20 @@ class StampedAPI(AStampedAPI):
     def _getUserFromIdOrScreenName(self, userRequest):
         if isinstance(userRequest, SchemaElement):
             userRequest = userRequest.value
+        
         user_id         = userRequest.pop('user_id', None)
         screen_name     = userRequest.pop('screen_name', None)
-
-        if user_id == None and screen_name == None:
+        
+        if user_idis== None and screen_name is None:
             msg = "Required field missing (user id or screen name)"
             logs.warning(msg)
             raise InputError(msg)
-
-        if user_id != None:
+        
+        if user_id is not None:
             return self._userDB.getUser(user_id)
+        
         return self._userDB.getUserByScreenName(screen_name)
-
+    
     ### PUBLIC
     
     @API_CALL
@@ -679,11 +679,10 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getUsers(self, userIds, screenNames, authUserId):
-
         ### TODO: Add check for privacy settings
-
+        
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
-
+        
         return users
     
     @API_CALL
@@ -696,7 +695,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def findUsersByEmail(self, authUserId, emails):
-        
         ### TODO: Add check for privacy settings?
         
         users = self._userDB.findUsersByEmail(emails, limit=100)
@@ -705,7 +703,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def findUsersByPhone(self, authUserId, phone):
-        
         ### TODO: Add check for privacy settings?
         
         users = self._userDB.findUsersByPhone(phone, limit=100)
@@ -714,33 +711,29 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def findUsersByTwitter(self, authUserId, twitterIds):
-
         ### TODO: Add check for privacy settings?
-
+        
         users = self._userDB.findUsersByTwitter(twitterIds, limit=100)
         
         return users
     
     @API_CALL
     def findUsersByFacebook(self, authUserId, facebookIds):
-
         ### TODO: Add check for privacy settings?
-
+        
         users = self._userDB.findUsersByFacebook(facebookIds, limit=100)
         
         return users
     
     @API_CALL
     def searchUsers(self, query, limit, authUserId):
-
         limit = self._setLimit(limit, cap=10)
-
+        
         ### TODO: Add check for privacy settings
         
         users = self._userDB.searchUsers(query, limit)
-
+        
         return users
-
     
     """
     #######                                      
@@ -2168,14 +2161,14 @@ class StampedAPI(AStampedAPI):
     def addLike(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Verify user has the ability to 'like' the stamp
         if stamp.user_id != authUserId:
             friendship = Friendship({
                 'user_id':      stamp.user_id,
                 'friend_id':    authUserId,
             })
-
+            
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
@@ -2187,7 +2180,7 @@ class StampedAPI(AStampedAPI):
             if self._friendshipDB.blockExists(friendship) == True:
                 logs.info("Block exists")
                 raise Exception("Block exists")
-
+        
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
             msg = "'Like' exists for user (%s) on stamp (%s)" \
@@ -2254,48 +2247,46 @@ class StampedAPI(AStampedAPI):
                 % (authUserId, stampId)
             logs.warning(msg)
             raise IllegalActionError(msg)
-
+        
         # Get stamp object
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Increment user stats by one
-        self._userDB.updateUserStats( \
-            stamp.user_id, 'num_likes', increment=-1)
-        self._userDB.updateUserStats( \
-            authUserId, 'num_likes_given', increment=-1)
-
+        self._userDB.updateUserStats(stamp.user_id, 'num_likes', increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
+        
         # Increment stamp stats by one
-        self._stampDB.updateStampStats( \
-            stamp.stamp_id, 'num_likes', increment=-1)
-        if stamp.num_likes == None:
+        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
+        if stamp.num_likes is None:
             stamp.num_likes = 0
+        
         stamp.num_likes -= 1
-
+        
         # Remove activity
         self._activityDB.removeActivity('like', authUserId, stampId=stampId)
-
+        
         return stamp
 
     @API_CALL
     def getLikes(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Verify user has the ability to view the stamp's likes
         if stamp.user_id != authUserId:
             friendship = Friendship({
                 'user_id':      stamp.user_id,
                 'friend_id':    authUserId,
             })
-
+            
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
                     msg = "Insufficient privileges to add comment"
                     logs.warning(msg)
                     raise InsufficientPrivilegesError(msg)
-
+            
             # Check if block exists between user and stamp owner
             if self._friendshipDB.blockExists(friendship) == True:
                 logs.info("Block exists")
@@ -2303,15 +2294,13 @@ class StampedAPI(AStampedAPI):
         
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
-
+        
         # Get users
         ### TODO: Return user ids instead so there's no limit? Or allow paging?
         users = self._userDB.lookupUsers(userIds, None, limit=100)
-
+        
         return users
-
     
-
     """
      #####                                                                  
     #     #  ####  #      #      ######  ####  ##### #  ####  #    #  ####  
@@ -2321,7 +2310,7 @@ class StampedAPI(AStampedAPI):
     #     # #    # #      #      #      #    #   #   # #    # #   ## #    # 
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
-
+    
     def _setSliceParams(self, data, default_limit=20, default_sort=None):
         # Since
         try: 
