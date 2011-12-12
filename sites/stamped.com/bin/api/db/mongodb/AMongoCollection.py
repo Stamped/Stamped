@@ -102,17 +102,14 @@ class MongoDBConfig(Singleton):
             try:
                 logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
                 
-                """
-                self._connection = pymongo.Connection(self.host, 
-                                                      self.port, 
-                                                      slave_okay=True, 
-                                                      replicaset=replicaset)
-                """
-                self._connection = pymongo.ReplicaSetConnection(self.host, 
-                                                                self.port, 
-                                                                slave_okay=True, 
-                                                                read_preference=pymongo.ReadPreference.SECONDARY, 
-                                                                replicaset=replicaset)
+                if replicaset:
+                    self._connection = pymongo.ReplicaSetConnection(self.host, 
+                                                                    self.port, 
+                                                                    slave_okay=True, 
+                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
+                                                                    replicaset=replicaset)
+                else:
+                    self._connection = pymongo.Connection(self.host, self.port)
                 
                 #self._connection.stamped.read_preference = ReadPreference.SECONDARY
                 return self._connection
