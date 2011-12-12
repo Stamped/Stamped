@@ -177,8 +177,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
         
-        return self._collection.find_one({'_id': \
-            self._getObjectIdFromString(stampId)})['stats'][stat]
+        #return self._collection.find_one({'_id': self._getObjectIdFromString(stampId)})['stats'][stat]
 
     def getStampFromUserEntity(self, userId, entityId):
         try:
