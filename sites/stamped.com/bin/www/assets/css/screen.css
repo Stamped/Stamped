@@ -518,6 +518,73 @@ left:0;
 bottom:120px;
 }
 
+#press { 
+width:820px; 
+margin:0 auto 34px; 
+}
+
+#press h3 { 
+border-bottom: 1px solid #e5e5e5; 
+color:#9b9b9b; 
+font-size:12px; 
+padding:0 0 6px; 
+}
+
+#press ul { 
+list-style-type: none; 
+height:32px; 
+padding:0; 
+margin: 37px 0 0; 
+}
+
+#press ul + ul { 
+margin-top: 39px; 
+}
+
+#press a { 
+height:32px; 
+background-position: left top; 
+display:block; 
+background-repeat:no-repeat; 
+}
+
+#press a.techcrunch { 
+width:198px; 
+background-image:url('http://static.stamped.com/assets/img/press-techcrunch-sprite.png'); 
+float:left; 
+}
+
+#press a.wsj { 
+width:279px; 
+background-image:url('http://static.stamped.com/assets/img/press-wsj-sprite.png'); 
+float:left; 
+margin-left:75px; 
+}
+
+#press a.daringfireball { 
+width:194px; 
+background-image:url('http://static.stamped.com/assets/img/press-daringfireball-sprite.png'); 
+float:right; 
+}
+
+#press a.mashable { 
+width:130px; 
+background-image:url('http://static.stamped.com/assets/img/press-mashable-sprite.png'); 
+float:left; 
+margin-left:166px; 
+}
+
+#press a.gigaom { 
+width:157px; 
+background-image:url('http://static.stamped.com/assets/img/press-gigaom-sprite.png'); 
+float:right; 
+margin-right:160px;
+}
+
+#press a:hover { 
+background-position:left bottom;
+}
+
 /* ENTITY */
 #entity .wrap{
 background:none
