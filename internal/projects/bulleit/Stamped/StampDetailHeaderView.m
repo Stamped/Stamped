@@ -143,7 +143,7 @@
     [stamp_ release];
     stamp_ = [stamp retain];
     if (stamp) {
-      self.stampImage = [stamp_.user stampImageWithSize:StampImageSize60];
+      self.stampImage = [stamp_.user stampImageWithSize:StampImageSize46];
       self.stampImageInverted = [Util whiteMaskedImageUsingImage:self.stampImage];
       self.title = stamp.entityObject.title;
       subtitleLabel_.text = stamp_.entityObject.subtitle;
