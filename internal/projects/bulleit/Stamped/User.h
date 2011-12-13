@@ -23,7 +23,6 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSString* location;
 @property (nonatomic, retain) NSString* secondaryColor;
 @property (nonatomic, retain) NSString* screenName;
-@property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, retain) NSSet* stamps;
 @property (nonatomic, retain) NSSet* comments;
 @property (nonatomic, retain) NSSet* events;
@@ -36,6 +35,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSNumber* numStamps;
 @property (nonatomic, retain) NSNumber* numStampsLeft;
 
+@property (nonatomic, readonly) UIImage* stampImage;
 @property (nonatomic, readonly) NSString* profileImageURL;
 @property (nonatomic, readonly) NSString* largeProfileImageURL;
 @end

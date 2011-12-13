@@ -155,7 +155,7 @@ NSString* const kStampColors[7][2] = {
   user.secondaryColor = secondary;
   UIImage* stampImage = [Util stampImageForUser:user];
   self.userStampImageView.image = stampImage;
-  user.stampImage = stampImage;
+  //user.stampImage = stampImage;
   [user.managedObjectContext save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];

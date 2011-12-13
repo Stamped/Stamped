@@ -27,7 +27,6 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic largeProfileImageURL;
 @dynamic location;
 @dynamic screenName;
-@dynamic stampImage;
 @dynamic stamps;
 @dynamic events;
 @dynamic comments;
@@ -66,7 +65,11 @@ const CGFloat kMediumUserImageSize = 41.0;
   if (!self.primaryColor)
     return;
 
-  self.stampImage = [Util stampImageForUser:self];
+//  self.stampImage = [Util stampImageForUser:self];
+}
+
+- (UIImage*)stampImage {
+  return nil;
 }
 
 - (NSString*)largeProfileImageURL {
