@@ -70,8 +70,8 @@
   NSString* title = event.stamp.entityObject.title;
   entityTitleLabel_.text = title;
   User* currentUser = [[AccountManager sharedManager] currentUser];
-  firstStampLayer_.contents = (id)currentUser.stampImage.CGImage;
-  secondStampLayer_.contents = (id)event.user.stampImage.CGImage;
+  firstStampLayer_.contents = (id)[currentUser stampImageWithSize:StampImageSize12].CGImage;
+  secondStampLayer_.contents = (id)[event.user stampImageWithSize:StampImageSize12].CGImage;
   
 
   CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24]

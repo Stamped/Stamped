@@ -12,10 +12,6 @@
 
 const CGFloat kMediumUserImageSize = 41.0;
 
-@interface User ()
-- (void)refreshStampImage;
-@end
-
 @implementation User
 @dynamic bio;
 @dynamic primaryColor;
@@ -41,35 +37,14 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic imageURL;
 @dynamic identifier;
 
-- (void)setPrimaryColor:(NSString*)primaryColor {
-  [self willChangeValueForKey:@"primaryColor"];
-  BOOL refreshImage = ![self.primaryColor isEqualToString:primaryColor];
-  [self setPrimitiveValue:primaryColor forKey:@"primaryColor"];
-  if (refreshImage)
-    [self refreshStampImage];
-
-  [self didChangeValueForKey:@"primaryColor"];
+- (UIImage*)stampImageWithSize:(StampImageSize)size {
+  return [Util gradientImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]
+            withPrimaryColor:self.primaryColor
+                   secondary:self.secondaryColor];
 }
 
-- (void)setSecondaryColor:(NSString*)secondaryColor {
-  [self willChangeValueForKey:@"secondaryColor"];
-  BOOL refreshImage = ![self.secondaryColor isEqualToString:secondaryColor];
-  [self setPrimitiveValue:secondaryColor forKey:@"secondaryColor"];
-  if (refreshImage)
-    [self refreshStampImage];
-
-  [self didChangeValueForKey:@"secondaryColor"];
-}
-
-- (void)refreshStampImage {
-  if (!self.primaryColor)
-    return;
-
-//  self.stampImage = [Util stampImageForUser:self];
-}
-
-- (UIImage*)stampImage {
-  return nil;
+- (UIImage*)invertedStampImageWithSize:(StampImageSize)size {
+  return [Util whiteMaskedImageUsingImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]];
 }
 
 - (NSString*)largeProfileImageURL {

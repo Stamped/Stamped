@@ -11,6 +11,18 @@
 
 extern const CGFloat kMediumUserImageSize;
 
+typedef enum {
+  StampImageSize12 = 12,
+  StampImageSize14 = 14,
+  StampImageSize18 = 18,
+  StampImageSize28 = 28,
+  StampImageSize32 = 32,
+  StampImageSize42 = 42,
+  StampImageSize46 = 46,
+  StampImageSize60 = 60,
+  StampImageSize270 = 270
+} StampImageSize;
+
 @interface User : NSManagedObject
 
 @property (nonatomic, retain) NSString* bio;
@@ -35,9 +47,11 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSNumber* numStamps;
 @property (nonatomic, retain) NSNumber* numStampsLeft;
 
-@property (nonatomic, readonly) UIImage* stampImage;
 @property (nonatomic, readonly) NSString* profileImageURL;
 @property (nonatomic, readonly) NSString* largeProfileImageURL;
+
+- (UIImage*)invertedStampImageWithSize:(StampImageSize)size;
+- (UIImage*)stampImageWithSize:(StampImageSize)size;
 @end
 
 @interface User (CoreDataGeneratedAccessors)

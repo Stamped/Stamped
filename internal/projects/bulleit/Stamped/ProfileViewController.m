@@ -111,9 +111,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
            forControlEvents:UIControlEventTouchUpInside];
 
   stampLayer_ = [[CALayer alloc] init];
-  stampLayer_.frame = CGRectMake(57, -10, 61, 61);
+  stampLayer_.frame = CGRectMake(58, -10, 60, 60);
   stampLayer_.opacity = 0.95;
-  stampLayer_.contents = (id)user_.stampImage.CGImage;
+  stampLayer_.contents = (id)[user_ stampImageWithSize:StampImageSize60].CGImage;
   [userImageView_.superview.layer insertSublayer:stampLayer_ above:userImageView_.layer];
   [stampLayer_ release];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
@@ -693,7 +693,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
-  stampLayer_.contents = (id)user_.stampImage.CGImage;
+  stampLayer_.contents = (id)[user_ stampImageWithSize:StampImageSize60].CGImage;
   [self updateStampCounterLayer];
 }
 

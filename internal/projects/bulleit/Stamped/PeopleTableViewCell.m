@@ -113,7 +113,7 @@ static const CGFloat kUserImageSize = 41.0;
 
   if (user) {
     customView_.userImageView.imageURL = user.profileImageURL;
-    customView_.stampImageView.image = user.stampImage;
+    customView_.stampImageView.image = [user stampImageWithSize:StampImageSize14];
     customView_.usernameLabel.text = user.screenName;
     customView_.fullNameLabel.text = user.name;
   }

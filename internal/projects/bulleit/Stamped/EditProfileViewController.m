@@ -88,7 +88,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.stampImageView.image = user_.stampImage;
+  self.stampImageView.image = [user_ stampImageWithSize:StampImageSize46];
   self.userImageView.userInteractionEnabled = NO;
   self.userImageView.layer.shadowOpacity = 0;
   self.userImageView.imageURL = user_.profileImageURL;
@@ -283,7 +283,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   User* user = [AccountManager sharedManager].currentUser;
   user.primaryColor = primary;
   user.secondaryColor = secondary;
-  self.stampImageView.image = user.stampImage;
+  self.stampImageView.image = [user stampImageWithSize:StampImageSize46];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];
 

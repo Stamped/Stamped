@@ -67,7 +67,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
   CTLineRef ellipsisLine_;
-  UIImage* stampImageInverted_;
 }
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
@@ -83,6 +82,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @property (nonatomic, assign) BOOL hidePhotos;
 @property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
+@property (nonatomic, retain) UIImage* stampImageInverted;
 @property (nonatomic, copy) NSString* title;
 @property (nonatomic, copy) NSArray* stamps;
 
@@ -97,6 +97,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize selected = selected_;
 @synthesize numComments = numComments_;
 @synthesize stampImage = stampImage_;
+@synthesize stampImageInverted = stampImageInverted_;
 @synthesize title = title_;
 @synthesize stamps = stamps_;
 @synthesize hidePhotos = hidePhotos_;
@@ -233,8 +234,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     topUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
     [self addSubview:topUserImageView_];
     [topUserImageView_ release];
-    
-    stampImageInverted_ = [[Util stampImageWithPrimaryColor:@"FFFFFF" secondary:@"FFFFFF"] retain];
   }
   return self;
 }
@@ -242,16 +241,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.stampImage = nil;
+  self.stampImageInverted = nil;
   self.stamps = nil;
   [titleAttributes_ release];
   [titleLayer_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   CFRelease(ellipsisLine_);
-  if (stampImageInverted_) {
-    [stampImageInverted_ release];
-    stampImageInverted_ = nil;
-  }
   [super dealloc];
 }
 
@@ -364,7 +360,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
       titleLayer_.string = attrString;
       CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
       CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, ellipsisLine_);
-      
       CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
       CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
       CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
@@ -415,7 +410,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     cameraImageView_.hidden = stamp.imageURL ? NO : YES;
     disclosureImageView_.hidden = !cameraImageView_.hidden;
 
-    self.stampImage = stamp.user.stampImage;
+    self.stampImage = [stamp.user stampImageWithSize:StampImageSize18];
+    if (!self.stampImageInverted)
+      self.stampImageInverted = [stamp.user invertedStampImageWithSize:StampImageSize18];
+    
     userNameLabel_.text = stamp.user.screenName;
     [userNameLabel_ sizeToFit];
 

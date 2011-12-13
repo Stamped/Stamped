@@ -594,13 +594,13 @@ typedef enum {
 
   User* creditedUser = [stamp_.credits anyObject];
   CALayer* firstStampLayer = [[CALayer alloc] init];
-  firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
+  firstStampLayer.contents = (id)[creditedUser stampImageWithSize:StampImageSize12].CGImage;
   firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentContainer_.frame) - 29, 12, 12);
   [mainCommentContainer_.layer addSublayer:firstStampLayer];
   [firstStampLayer release];
   
   CALayer* secondStampLayer = [[CALayer alloc] init];
-  secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
+  secondStampLayer.contents = (id)[stamp_.user stampImageWithSize:StampImageSize12].CGImage;
   secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
   [mainCommentContainer_.layer addSublayer:secondStampLayer];
   [secondStampLayer release];

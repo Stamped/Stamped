@@ -12,6 +12,7 @@
 
 #import "Stamp.h"
 #import "Entity.h"
+#import "User.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
@@ -142,8 +143,8 @@
     [stamp_ release];
     stamp_ = [stamp retain];
     if (stamp) {
-      self.stampImage = [Util stampImageForUser:stamp_.user];
-      self.stampImageInverted = [Util stampImageWithPrimaryColor:@"ffffff" secondary:@"ffffff"];
+      self.stampImage = [stamp_.user stampImageWithSize:StampImageSize60];
+      self.stampImageInverted = [Util whiteMaskedImageUsingImage:self.stampImage];
       self.title = stamp.entityObject.title;
       subtitleLabel_.text = stamp_.entityObject.subtitle;
       categoryImageView_.image = stamp_.entityObject.stampDetailCategoryImage;

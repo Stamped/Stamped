@@ -107,8 +107,8 @@
 
     entityTitleLabel_.text = title;
     // TODO(andybons): compositing layers. stacks.
-    firstStampLayer_.contents = (id)((User*)[stamp.credits anyObject]).stampImage.CGImage;
-    secondStampLayer_.contents = (id)stamp.user.stampImage.CGImage;
+    firstStampLayer_.contents = (id)[((User*)[stamp.credits anyObject]) stampImageWithSize:StampImageSize18].CGImage;
+    secondStampLayer_.contents = (id)[stamp.user stampImageWithSize:StampImageSize18].CGImage;
     
     CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24]
                                   forWidth:200
@@ -129,7 +129,7 @@
 - (void)setCreditedUser:(User *)creditedUser {
   [creditedUser_ release];
   creditedUser_ = [creditedUser retain];
-  firstStampLayer_.contents = (id)creditedUser_.stampImage.CGImage;
+  firstStampLayer_.contents = (id)[creditedUser_ stampImageWithSize:StampImageSize18].CGImage;
 }
 
 - (void)invertColors:(BOOL)inverted {
