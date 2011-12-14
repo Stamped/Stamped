@@ -8,7 +8,6 @@ __license__   = "TODO"
 import Globals, utils
 
 from match.EntityMatcher    import EntityMatcher
-from MongoStampedAPI        import MongoStampedAPI
 from AEntitySink            import AEntitySink
 from Schemas                import Entity
 from pprint                 import pprint

@@ -144,20 +144,23 @@ def get_prod_stack():
         if len(name) > 1:
             return name
     
-    conn = Route53Connection()
-    name = None
-    
+    conn  = Route53Connection()
     zones = conn.get_all_hosted_zones()
+    name  = None
+    host  = None
+    
     for zone in zones['ListHostedZonesResponse']['HostedZones']:
         if zone['Name'] == u'stamped.com.':
-            stamped_com = zone
+            host = zone
             break
     
-    records = conn.get_all_rrsets(stamped_com['Id'][12:])
-    for record in records:
-        if record.name == 'api.stamped.com.':
-            name = record.alias_dns_name.split('-')[0].strip()
-            break
+    if host is not None:
+        records = conn.get_all_rrsets(host['Id'][12:])
+        
+        for record in records:
+            if record.name == 'api.stamped.com.':
+                name = record.alias_dns_name.split('-')[0].strip()
+                break
     
     if name is not None:
         f = open(path, 'w')
