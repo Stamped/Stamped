@@ -188,12 +188,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             # Add token reference
             self.alert_apns_collection.addToken(token, userId)
 
-    def removeAPNSToken(self, userId, token):
+    def removeAPNSTokenForUser(self, userId, token):
         current = self.alert_apns_collection.getToken(token)
         if current == userId:
             self.alert_apns_collection.removeToken(token)
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
+            {'$pull': {'devices.ios_device_tokens': token}}
+        )
+
+    def removeAPNSToken(self, token):
+        self.alert_apns_collection.removeToken(token)
+        self._collection.update(
+            {'devices.ios_device_tokens': token},
             {'$pull': {'devices.ios_device_tokens': token}}
         )
 

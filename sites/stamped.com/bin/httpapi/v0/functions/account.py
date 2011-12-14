@@ -290,6 +290,6 @@ def remove_apns(request):
     if len(schema.token) != 64:
         raise InputError('Invalid token length')
     
-    stampedAPI.removeAPNSToken(authUserId, schema.token)
+    stampedAPI.removeAPNSTokenForUser(authUserId, schema.token)
     return transformOutput(True)
 
