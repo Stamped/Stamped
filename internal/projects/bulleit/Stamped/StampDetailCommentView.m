@@ -55,7 +55,7 @@
 }
 
 - (void)initViews {
-  userImage_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 34, 34)];
+  userImage_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 31, 31)];
   userImage_.imageURL = [comment_.user profileImageURLForSize:ProfileImageSize31];
   userImage_.enabled = YES;
   [userImage_ addTarget:self

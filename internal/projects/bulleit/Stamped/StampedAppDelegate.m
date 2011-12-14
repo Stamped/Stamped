@@ -64,11 +64,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
   gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
-  gridView_.userInteractionEnabled = YES;
+  //gridView_.userInteractionEnabled = YES;
   gridView_.alpha = 0;
-  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGridTap:)];
-  [gridView_ addGestureRecognizer:recognizer];
-  [recognizer release];
+//  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGridTap:)];
+//  [gridView_ addGestureRecognizer:recognizer];
+//  [recognizer release];
   [window_ addSubview:gridView_];
   [gridView_ release];
   [self.window makeKeyAndVisible];
