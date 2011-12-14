@@ -270,8 +270,7 @@ typedef enum {
   self.alsoStampedByContainer = nil;
   self.alsoStampedByLabel = nil;
   self.alsoStampedByScrollView = nil;
-  if (headerView_)
-    headerView_.delegate = nil;
+  self.headerView.delegate = nil;
   self.headerView = nil;
 }
 
