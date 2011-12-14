@@ -247,10 +247,8 @@
     self.imageView.delegate = self;
     self.imageView.hidden = NO;
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-    self.imageView.layer.cornerRadius = 18.0;
-    self.imageView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
-    self.imageView.layer.shouldRasterize = YES;
     self.imageView.layer.masksToBounds = YES;
+    self.imageView.layer.cornerRadius = 18.0;
   }
 }
 
@@ -263,8 +261,7 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.appActionsView.hidden = NO;
-  }
-  else {
+  } else {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.appActionsView.frame));
   }
   
@@ -302,7 +299,7 @@
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL: [NSURL URLWithString:detailedEntity_.itunesShortURL]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesShortURL]];
 }
 
 - (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
