@@ -1,4 +1,7 @@
 
+* look into renaming terminal title when ./connect'ing into a machine
+    * setting hostname of remote instance should do the trick
+
 * app companies being returned as 'artist'
 * go through StampedAPI and audit async priorities
 * debug distributing reads to secondaries
@@ -68,7 +71,6 @@ OLD:
     * rewrite node initialization logic
         * remove dependency on ganglia
         * instance-specific means of saying whether or not a node is up?
-    * look into renaming terminal title when ./connect'ing into a machine
     * API fixes for incremental loading
         * credit
         * comments
@@ -162,4 +164,6 @@ db.logstats.group({
 db.logstats.group({ reduce: function(obj,prev) { prev.users[obj.uid] = 1; }, cond:{uid: {$exists: true}, bgn: {$gte: new Date(new Date() - 24 * 60 * 60000)}}, initial: {users:{}, }, key:{}, });
 
 db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, cond:{stamp_id: {$exists: true} }, initial: {count: 0, }, key:{stamp_id:1}, });
+
+rabbitmqctl list_queues name messages consumers
 
