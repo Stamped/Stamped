@@ -36,7 +36,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
-- (void)handleTitleTap:(UIGestureRecognizer*)recognizer;
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, retain) UIImageView* gridView;
@@ -64,11 +63,14 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
   gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
-  //gridView_.userInteractionEnabled = YES;
   gridView_.alpha = 0;
-//  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGridTap:)];
-//  [gridView_ addGestureRecognizer:recognizer];
-//  [recognizer release];
+  
+  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                               action:@selector(handleGridTap:)];
+  recognizer.numberOfTapsRequired = 3;
+  recognizer.numberOfTouchesRequired = 3;
+  [self.window addGestureRecognizer:recognizer];
+  [recognizer release];
   [window_ addSubview:gridView_];
   [gridView_ release];
   [self.window makeKeyAndVisible];
@@ -88,22 +90,18 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 #pragma mark - Gesture Recognizers.
 
-- (void)handleTitleTap:(UIGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
-  gridView_.alpha = 1;
-}
-
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  recognizer.view.alpha = 0;
+  [UIView animateWithDuration:0.2 animations:^{
+    gridView_.alpha = gridView_.alpha == 1 ? 0 : 1;
+  }];
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {
   [[UserImageDownloadManager sharedManager] purgeCache];
+  gridView_.alpha = 0;
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication*)application {
@@ -135,15 +133,20 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   NSLog(@"Error in registration. Error: %@", err);
 }
 
-- (void)applicationDidEnterBackground:(UIApplication*)application {}
+- (void)applicationDidEnterBackground:(UIApplication*)application {
+  gridView_.alpha = 0;
+}
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {}
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {}
 
-- (void)applicationWillTerminate:(UIApplication*)application {}
+- (void)applicationWillTerminate:(UIApplication*)application {
+  gridView_.alpha = 0;
+}
 
 - (void)dealloc {
+  gridView_ = nil;
   [window_ release];
   [navigationController_ release];
   [super dealloc];
