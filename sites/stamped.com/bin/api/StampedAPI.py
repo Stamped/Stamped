@@ -620,8 +620,8 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def removeAPNSToken(self, authUserId, token):
-        self._accountDB.removeAPNSToken(authUserId, token)
+    def removeAPNSTokenForUser(self, authUserId, token):
+        self._accountDB.removeAPNSTokenForUser(authUserId, token)
         return True
     
     """

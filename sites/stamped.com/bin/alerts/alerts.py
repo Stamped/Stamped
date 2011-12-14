@@ -614,6 +614,22 @@ def sendPushNotifications(queue, options):
     
     return
 
+def removeAPNSTokens():
+    # Only run this on prod
+    if not IS_PROD or not USE_PROD_CERT:
+        print "NOT PROD!"
+        raise 
+
+    feedback = APNSFeedbackWrapper(pem, not USE_PROD_CERT)
+
+    for d, t in feedback.tuples():
+        token = binascii.hexlify(t)
+        try:
+            accountDB.removeAPNSToken(token)
+            print "REVMOED TOKEN: %s" % token
+        except:
+            print "FAILED TO REMOVE TOKEN: %s" % token
+
 
 if __name__ == '__main__':
     main()
