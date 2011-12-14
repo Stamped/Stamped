@@ -17,16 +17,21 @@ from django.http import HttpResponse
 from django.utils.functional import wraps
 from django.views.decorators.http import require_http_methods
 
+t1 = time.time()
+
 stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
+
+t2 = time.time()
+logs.info("INIT: %s sec" % ((t2 - t1) * 1.0))
+
+if (t2 - t1) > 2:
+    logs.warning("LONG INIT: %s sec" % ((t2 - t1) * 1.0))
 
 def handleHTTPRequest(fn):
     @wraps(fn)
     def handleHTTPRequest(request, *args, **kwargs):
         try:
-            print
-            print
-            
             logs.begin(
                 addLog=stampedAPI._logsDB.addLog, 
                 saveLog=stampedAPI._logsDB.saveLog,
@@ -39,49 +44,49 @@ def handleHTTPRequest(fn):
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
             return ret
-        
+            
         except StampedHTTPError as e:
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
             response = HttpResponse(e.msg, status=e.code)
             logs.error(response.status_code)
             return response
-        
+            
         except AuthError as e:
             logs.warning("401 Error: %s" % (e.msg))
             response = HttpResponse(e.msg, status=401)
             logs.auth(e.msg)
             return response
-        
+            
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
             response = HttpResponse("invalid_request", status=400)
             logs.error(response.status_code)
             return response
-        
+            
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("illegal_action", status=403)
             logs.error(response.status_code)
             return response
-        
+            
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("insufficient_privileges", status=403)
             logs.error(response.status_code)
             return response
-        
+            
         except Unavailable as e:
             logs.warning("404 Error: %s" % (e.msg))
             response = HttpResponse("not_found", status=404)
             logs.error(response.status_code)
             return response
-        
+            
         except Exception as e:
             logs.warning("500 Error: %s" % e)
             response = HttpResponse("internal server error", status=500)
             logs.error(response.status_code)
             return response
-        
+            
         finally:
             try:
                 logs.save()

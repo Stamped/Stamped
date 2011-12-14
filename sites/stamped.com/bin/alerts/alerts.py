@@ -172,6 +172,9 @@ def runAlerts(options):
             elif alert.genre == 'follower':
                 send_push   = recipient.alerts.ios_alert_follow
                 send_email  = recipient.alerts.email_alert_follow
+            elif alert.genre == 'friend':
+                send_push   = recipient.alerts.ios_alert_follow
+                send_email  = None
             else:
                 send_push   = None
                 send_email  = None
@@ -614,6 +617,22 @@ def sendPushNotifications(queue, options):
             apns_wrapper.notify()
     
     return
+
+def removeAPNSTokens():
+    # Only run this on prod
+    if not IS_PROD or not USE_PROD_CERT:
+        print "NOT PROD!"
+        raise 
+
+    feedback = APNSFeedbackWrapper(pem, not USE_PROD_CERT)
+
+    for d, t in feedback.tuples():
+        token = binascii.hexlify(t)
+        try:
+            accountDB.removeAPNSToken(token)
+            print "REVMOED TOKEN: %s" % token
+        except:
+            print "FAILED TO REMOVE TOKEN: %s" % token
 
 
 if __name__ == '__main__':

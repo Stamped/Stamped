@@ -88,10 +88,10 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.stampImageView.image = user_.stampImage;
+  self.stampImageView.image = [user_ stampImageWithSize:StampImageSize46];
   self.userImageView.userInteractionEnabled = NO;
   self.userImageView.layer.shadowOpacity = 0;
-  self.userImageView.imageURL = user_.profileImageURL;
+  self.userImageView.imageURL = [user_ profileImageURLForSize:ProfileImageSize55];
   self.nameTextField.text = user_.name;
   self.locationTextField.text = user_.location;
   self.aboutTextField.text = user_.bio;
@@ -205,7 +205,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
     userImageView_.image = self.profilePic;
     userImageView_.hidden = NO;
     [[UserImageDownloadManager sharedManager] setImage:self.profilePic
-                                                forURL:user_.profileImageURL];
+                                                forURL:[user_ profileImageURLForSize:ProfileImageSize55]];
   }
 }
 
@@ -283,7 +283,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   User* user = [AccountManager sharedManager].currentUser;
   user.primaryColor = primary;
   user.secondaryColor = secondary;
-  self.stampImageView.image = user.stampImage;
+  self.stampImageView.image = [user stampImageWithSize:StampImageSize46];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];
 

@@ -212,7 +212,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [backButton release];
   
   User* currentUser = [AccountManager sharedManager].currentUser;
-  self.userImageView.imageURL = currentUser.profileImageURL;
+  self.userImageView.imageURL = [currentUser profileImageURLForSize:ProfileImageSize55];
   scrollView_.contentSize = self.view.bounds.size;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
@@ -309,14 +309,13 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   disclosureButton_.hidden = YES;
   
   stampLayer_ = [[CALayer alloc] init];
-  stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
+  stampLayer_.contents = (id)[[AccountManager sharedManager].currentUser stampImageWithSize:StampImageSize46].CGImage;
   stampLayer_.opacity = 0.0;
   [scrollView_.layer insertSublayer:stampLayer_ below:headerView_.layer];
   [stampLayer_ release];
 
   detailLabel_.textColor = [UIColor stampedGrayColor];
 
-  
   // Place the reasoning label (fake placeholder) within the TextView.
   reasoningLabel_.textColor = [UIColor stampedGrayColor];
   CGRect reasoningFrame = reasoningLabel_.frame;

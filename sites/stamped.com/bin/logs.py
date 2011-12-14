@@ -57,7 +57,7 @@ def _log(level, msg, *args, **kwargs):
         localData.log[level] = True
 
     # else:
-    msg = "%s | %-25s | %s" % (localData.logId[:6], fnc, msg)
+    msg = "%s | %s | %-25s | %s" % (os.getpid(), localData.logId[:6], fnc, msg)
     if level == 'warning':
         log.warning(msg, *args, **kwargs)
     elif level == 'info':

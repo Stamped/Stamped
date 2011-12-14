@@ -620,8 +620,8 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def removeAPNSToken(self, authUserId, token):
-        self._accountDB.removeAPNSToken(authUserId, token)
+    def removeAPNSTokenForUser(self, authUserId, token):
+        self._accountDB.removeAPNSTokenForUser(authUserId, token)
         return True
     
     """
@@ -643,7 +643,7 @@ class StampedAPI(AStampedAPI):
         user_id         = userRequest.pop('user_id', None)
         screen_name     = userRequest.pop('screen_name', None)
         
-        if user_idis== None and screen_name is None:
+        if user_id is None and screen_name is None:
             msg = "Required field missing (user id or screen name)"
             logs.warning(msg)
             raise InputError(msg)

@@ -83,7 +83,7 @@
   User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", username]];
   pill.textLabel.text = username;
   if (user)
-    pill.stampImageView.image = user.stampImage;
+    pill.stampImageView.image = [user stampImageWithSize:StampImageSize14];
 
   [pill sizeToFit];
   [creditTextField_ addSubview:pill];

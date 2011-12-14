@@ -637,7 +637,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [userImageView addTarget:self
                     action:@selector(mapUserTapped:)
           forControlEvents:UIControlEventTouchUpInside];
-  userImageView.imageURL = [(STPlaceAnnotation*)annotation stamp].user.profileImageURL;
+  userImageView.imageURL = [[(STPlaceAnnotation*)annotation stamp].user profileImageURLForSize:ProfileImageSize37];
   pinView.leftCalloutAccessoryView = userImageView;
   [userImageView release];
   pinView.pinColor = MKPinAnnotationColorRed;

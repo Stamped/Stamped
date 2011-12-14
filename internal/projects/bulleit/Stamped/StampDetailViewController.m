@@ -232,7 +232,7 @@ typedef enum {
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
 
-  currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+  currentUserImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
   
   [self setupAlsoStampedBy];
   [self setUpMainContentView];
@@ -414,7 +414,7 @@ typedef enum {
 
     userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
     userImage.contentMode = UIViewContentModeCenter;
-    userImage.imageURL = s.user.profileImageURL;
+    userImage.imageURL = [s.user profileImageURLForSize:ProfileImageSize46];
     userImage.enabled = YES;
     [userImage addTarget:self
                   action:@selector(alsoStampedByUserImageTapped:)
@@ -441,7 +441,7 @@ typedef enum {
 }
 
 - (void)setUpMainContentView {
-  commenterImageView_.imageURL = stamp_.user.profileImageURL;
+  commenterImageView_.imageURL = [stamp_.user profileImageURLForSize:ProfileImageSize55];
   commenterImageView_.enabled = YES;
   [commenterImageView_ addTarget:self 
                           action:@selector(handleUserImageViewTap:)
@@ -594,13 +594,13 @@ typedef enum {
 
   User* creditedUser = [stamp_.credits anyObject];
   CALayer* firstStampLayer = [[CALayer alloc] init];
-  firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
+  firstStampLayer.contents = (id)[creditedUser stampImageWithSize:StampImageSize12].CGImage;
   firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentContainer_.frame) - 29, 12, 12);
   [mainCommentContainer_.layer addSublayer:firstStampLayer];
   [firstStampLayer release];
   
   CALayer* secondStampLayer = [[CALayer alloc] init];
-  secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
+  secondStampLayer.contents = (id)[stamp_.user stampImageWithSize:StampImageSize12].CGImage;
   secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
   [mainCommentContainer_.layer addSublayer:secondStampLayer];
   [secondStampLayer release];
