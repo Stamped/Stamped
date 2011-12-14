@@ -116,7 +116,7 @@ NSString* const kStampColors[7][2] = {
                              forState:UIControlStateNormal];
   }
   User* currentUser = [AccountManager sharedManager].currentUser;
-  self.userImageView.imageURL = currentUser.profileImageURL;
+  self.userImageView.imageURL = [currentUser profileImageURLForSize:ProfileImageSize72];
   self.largeStampColorImageView.image = [Util gradientImage:largeStampColorImageView_.image
                                            withPrimaryColor:currentUser.primaryColor
                                                   secondary:currentUser.secondaryColor];

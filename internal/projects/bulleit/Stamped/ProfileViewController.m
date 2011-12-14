@@ -104,7 +104,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  userImageView_.imageURL = user_.profileImageURL;
+  userImageView_.imageURL = [user_ profileImageURLForSize:ProfileImageSize72];
   userImageView_.enabled = YES;
   [userImageView_ addTarget:self
                      action:@selector(userImageTapped:)

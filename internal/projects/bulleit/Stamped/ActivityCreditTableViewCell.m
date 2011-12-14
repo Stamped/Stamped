@@ -67,6 +67,7 @@
   if (!event)
     return;
 
+  userImageView_.imageURL = [event.user profileImageURLForSize:ProfileImageSize37];
   NSString* title = event.stamp.entityObject.title;
   entityTitleLabel_.text = title;
   User* currentUser = [[AccountManager sharedManager] currentUser];

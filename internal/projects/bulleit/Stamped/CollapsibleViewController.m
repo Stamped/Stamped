@@ -321,7 +321,7 @@ static const NSUInteger kSpaceHeight = 10;
     
     userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
     userImage.contentMode = UIViewContentModeCenter;
-    userImage.imageURL = s.user.profileImageURL;
+    userImage.imageURL = [s.user profileImageURLForSize:ProfileImageSize46];
     userImage.enabled = YES;
     [userImage addTarget:self
                   action:@selector(userImageTapped:)

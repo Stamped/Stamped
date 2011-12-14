@@ -212,7 +212,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [backButton release];
   
   User* currentUser = [AccountManager sharedManager].currentUser;
-  self.userImageView.imageURL = currentUser.profileImageURL;
+  self.userImageView.imageURL = [currentUser profileImageURLForSize:ProfileImageSize55];
   scrollView_.contentSize = self.view.bounds.size;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;

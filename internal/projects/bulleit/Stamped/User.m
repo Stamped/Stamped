@@ -10,8 +10,6 @@
 
 #import "Util.h"
 
-const CGFloat kMediumUserImageSize = 41.0;
-
 @implementation User
 @dynamic bio;
 @dynamic primaryColor;
@@ -19,7 +17,6 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic userID;
 @dynamic website;
 @dynamic secondaryColor;
-@dynamic profileImageURL;
 @dynamic largeProfileImageURL;
 @dynamic location;
 @dynamic screenName;
@@ -47,24 +44,26 @@ const CGFloat kMediumUserImageSize = 41.0;
   return [Util whiteMaskedImageUsingImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]];
 }
 
+- (NSString*)profileImageURLForSize:(ProfileImageSize)size {
+  CGFloat imageSize = size * [UIScreen mainScreen].scale;
+  if (self.imageURL) {
+    NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", self.screenName.lowercaseString];
+    NSString* replacement =
+        [NSString stringWithFormat:@"/users/%@-%.0fx%.0f.jpg",
+            self.screenName.lowercaseString, imageSize, imageSize];
+    NSString* URL = [self.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
+    return URL;
+  }
+
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
+          self.screenName.lowercaseString];
+}
+
 - (NSString*)largeProfileImageURL {
   if (self.imageURL)
     return self.imageURL;
 
   return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", self.screenName.lowercaseString];
 }
-
-- (NSString*)profileImageURL {
-  if (self.imageURL) {
-    NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", self.screenName.lowercaseString];
-    NSString* replacement = [NSString stringWithFormat:@"/users/%@-144x144.jpg", self.screenName.lowercaseString];
-    NSString* URL = [self.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
-    return URL;
-  }
-  
-  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
-      self.screenName.lowercaseString];
-}
-
 
 @end

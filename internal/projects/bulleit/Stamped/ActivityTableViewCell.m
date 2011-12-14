@@ -104,7 +104,7 @@ static const CGFloat kActivityBadgeSize = 21.0;
   }
 
   if (event) {
-    userImageView_.imageURL = event.user.profileImageURL;
+    userImageView_.imageURL = [event.user profileImageURLForSize:ProfileImageSize31];
     timestampLabel_.text = [Util userReadableTimeSinceDate:event.created];
     [timestampLabel_ sizeToFit];
     NSInteger benefit = event.benefit.integerValue;

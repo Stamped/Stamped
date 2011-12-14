@@ -9,8 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-extern const CGFloat kMediumUserImageSize;
-
+// All sizes are expressed in points.
 typedef enum {
   StampImageSize12 = 12,
   StampImageSize14 = 14,
@@ -22,6 +21,16 @@ typedef enum {
   StampImageSize60 = 60,
   StampImageSize270 = 270
 } StampImageSize;
+
+// These are represented using points, but downscaling is handled for
+// non-retina displays.
+typedef enum {
+  ProfileImageSize31 = 31,
+  ProfileImageSize37 = 37,
+  ProfileImageSize46 = 46,
+  ProfileImageSize55 = 55,
+  ProfileImageSize72 = 72
+} ProfileImageSize;
 
 @interface User : NSManagedObject
 
@@ -47,11 +56,11 @@ typedef enum {
 @property (nonatomic, retain) NSNumber* numStamps;
 @property (nonatomic, retain) NSNumber* numStampsLeft;
 
-@property (nonatomic, readonly) NSString* profileImageURL;
 @property (nonatomic, readonly) NSString* largeProfileImageURL;
 
 - (UIImage*)invertedStampImageWithSize:(StampImageSize)size;
 - (UIImage*)stampImageWithSize:(StampImageSize)size;
+- (NSString*)profileImageURLForSize:(ProfileImageSize)size;
 @end
 
 @interface User (CoreDataGeneratedAccessors)

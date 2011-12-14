@@ -115,7 +115,7 @@ static const CGFloat kUserImageSize = 50.0;
   }
 
   if (user) {
-    userImageView_.imageURL = user.profileImageURL;
+    userImageView_.imageURL = [user profileImageURLForSize:ProfileImageSize46];
     stampImageView_.image = [user stampImageWithSize:StampImageSize46];
     usernameLabel_.text = user.screenName;
     fullNameLabel_.text = user.name;

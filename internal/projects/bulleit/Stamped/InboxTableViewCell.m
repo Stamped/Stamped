@@ -450,18 +450,18 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     i = stamps_.count - 2;
     stamp = [stamps_ objectAtIndex:i];
     middleUserImageView_.hidden = NO;
-    middleUserImageView_.imageURL = stamp.user.profileImageURL;
+    middleUserImageView_.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
     middleUserImageView_.transform = [self transformForUserImageAtIndex:i];
   }
   if (stamps_.count > 2) {
     i = stamps_.count - 3;
     stamp = [stamps_ objectAtIndex:i];
     bottomUserImageView_.hidden = NO;
-    bottomUserImageView_.imageURL = stamp.user.profileImageURL;
+    bottomUserImageView_.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
     bottomUserImageView_.transform = [self transformForUserImageAtIndex:i];
   }
   stamp = [stamps_ lastObject];
-  topUserImageView_.imageURL = stamp.user.profileImageURL;
+  topUserImageView_.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
   topUserImageView_.hidden = NO;
 }
 
@@ -780,7 +780,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     userImageButton.layer.shadowRadius = 1.0;
     userImageButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:
         CGRectMake(2, 2, CGRectGetWidth(userImgFrame), CGRectGetHeight(userImgFrame))].CGPath;
-    userImageButton.imageURL = s.user.profileImageURL;
+    userImageButton.imageURL = [s.user profileImageURLForSize:ProfileImageSize37];
     
     [userImageButton addTarget:self
                         action:@selector(userImageTapped:)

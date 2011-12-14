@@ -103,7 +103,7 @@
   if (stamp_) {
     NSString* title = stamp_.entityObject.title;
 
-    userImageView_.imageURL = stamp.user.profileImageURL;
+    userImageView_.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize31];
 
     entityTitleLabel_.text = title;
     // TODO(andybons): compositing layers. stacks.
