@@ -1,0 +1,3 @@
+#find . \( -name "*.cpp" -or -name "*.h" -or -name "*.py" -or -name "*.m" \) | xargs wc -l | sort
+find . \( -name "*.html"  \) | xargs wc -l | sort
+

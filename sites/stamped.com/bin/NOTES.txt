@@ -1,0 +1,165 @@
+
+* app companies being returned as 'artist'
+* go through StampedAPI and audit async priorities
+* debug distributing reads to secondaries
+
+* cleanup invocation on ./deploy.py, supporting suboptions and subcommands
+    * possibly write separate optparse?
+    * remove stale / deprecated deploy code
+
+* continuous integration
+    * how to see current revision in git?
+
+* refactor sites/stamped.com/bin layout
+* investigate autocomplete and add cron job
+
+* cap tempentities
+* remove iTunes affiliate search dependency
+* PROD tag on stack
+
+* move custom_entities cron job over to monitor instance and investigate why it's taking so long to run with high CPU (could just be since it was being run 9 separate times concurrently)
+* remove linked entity corruption from activity collection
+* improve monitoring notifications for prolonged outages
+* ELB cloudwatch metrics => monitoring solution
+* amazon product API
+* twitter/fb integration on the backend
+
+* async task queue for bottlenecks (e.g., NYMag stamping something => writing to all followers' inboxes synchronously before stamp completes)
+
+each system:
+    * zero or more stacks
+    * access credentials
+
+each stack:
+    * autoscale groups
+    * each group:
+        * a group is a subclass of a node that adds ability to control all subnodes
+        * load balancer?
+        * autoscale?
+        * add node
+        * security group
+    
+    each node:
+        * initialization
+        * cron jobs
+        * daemons
+        * monitoring & reporting
+
+Look into Whirr docs, ep.io, boto, etc.
+
+ADeploymentSystem
+ADeploymentStack
+ADeploymentGroup
+ADeploymentNode
+ADeploymentInstance
+
+AContinuousDeploymentSystem?
+
+rename deployments => platforms
+
+OLD:
+    * 6 API instances - 3 per AZ
+    * cleanup django / gunicorn www and httpapi layout
+    * add iTunes apps to entity db
+    * cycle DB nodes in replica set
+    * investigate entity shifting
+    * investigate custom AMI to reduce deploy time / errors
+    * make nginx and gunicorn daemons
+    * rewrite node initialization logic
+        * remove dependency on ganglia
+        * instance-specific means of saying whether or not a node is up?
+    * look into renaming terminal title when ./connect'ing into a machine
+    * API fixes for incremental loading
+        * credit
+        * comments
+        * already implemented: TODO, inbox, news, profile
+        * don't touch: followers, friends
+    * audit cron jobs
+        * bootstrap/bin/update_db.py
+        * update_apple -- should NOT be on api instances
+    * switch opentable links with new mobile versions
+    * unable to find primary? try a different node...
+
+    34.026401,-118.38947899
+
+gman () {
+    man -t "${1}" | open -f -a /Applications/gvim
+}
+
+db.users.group({ reduce: function(obj,prev) { prev.count = obj.stats.num_stamps_left }, %sinitial: {count: 0, }, key:{_id:1}, finalize: function(obj) { return { "count" : obj.count }}})
+
+db.stamps.group({ reduce: function(obj,prev) { prev.count += 1; }, initial: { count : 0 }, key:{"entity.category" : 1}, })
+
+db.logstats.group({ reduce: function(obj,prev) { prev.users[obj.uid] = 1; }, cond:{uid: {$exists: true}, bgn: {$gte: new Date(new Date() - 1 * 60 * 60000)}}, initial: {users:{}, }, key:{}, })
+
+db.stamps.group({ reduce: function(obj,prev) { prev.count += 1; }, initial: { count:0 }, key:{"entity.entity_id":1}})
+
+db.users.find({}, {"_id" : 0, "screen_name" : 1, "stats.num_followers" : 1}).sort({"stats.num_followers" : -1}).limit(20)
+
+map = function() {
+  emit({day: day, user_id: this.user_id}, {count: 1});
+}
+
+
+db.users.group({ reduce: function(obj,prev) { if (obj.stats.hasOwnProperty("num_followers")) {prev.count += obj.stats.num_followers; } }, initial: { count:0 }, key:{}})
+
+
+
+db.users.group({ reduce: function(obj,prev) { prev.count += 1; n = 0; if (obj.stats.hasOwnProperty("num_followers")) {n = obj.stats.num_followers; prev.sum += n; } if (n > prev.max) { prev.max = n; } if (n < prev.min) { prev.min = n}}, initial: { count : 0, sum : 0, max : -1, min : 9999 }, key:{}, finalize : function(obj) { return { "avg" : obj.sum / obj.count, "min" : obj.min, "max" : obj.max, }}})
+
+db.users.group({ reduce: function(obj,prev) { prev.count += 1; if (obj.stats.hasOwnProperty("num_followers")) { prev.sum += obj.stats.} }, initial: { count : 0, sum : 0 }, key:{}, })
+
+
+script to find false positives from google places
+
+Average # of daily News items per user
+Breakdown in terms of frequency of various new items (comments, likes, to-dos, follow)
+# of affiliate links pressed
+# of user actions broken down by type (stamp, like, comment, todo, purchase, etc.)
+Average time spent per session over time
+Average # of sessions per user per week/month
+# of requests to third party APIs (Google, Apple, AMZN)
+
+Breakdown of stamps by category
+
+Distribution of items on todo list per user
+Distribution of followers/following per user
+
+Distribution of stamps with credit versus without
+Distribution of stamps with photos versus without
+
+# of daily active users (had at least one session in a day)
+# of weekly active users (had at least one session in a week)
+# of monthly active users (had at least 1 session in a month)
+
+Distribution of comments per stamp
+Distribution of comments per user
+Distribution of stamps per user         (total, daily, weekly, monthly)
+Distribution of stamps left per user
+Distribution of likes per stamp         (total, daily, weekly, monthly)
+Distribution of likes per user
+
+# of stamps created per day (over time)
+
+# URI STATS
+db.logstats.group({reduce: function(obj,prev) { prev.csum += 1; },initial: {csum:0}, key:{uri:1}})
+
+# USERS / ACTIONS PER HOUR
+db.logstats.group({reduce: function(obj,prev) { prev.users[obj.uid] = 1; prev.count += 1; },cond:{uid: {$exists: true}}, initial: {users:{}, count:0}, $keyf: function(obj) { var a = {}; d = obj.bgn.toLocaleDateString(); a['date'] = d; h = obj.bgn.getHours(); a['hour'] = h; return a;}});
+
+# QPS / UNIQUE USER COUNT PER 5 MINUTES
+
+db.logstats.group({reduce: function(obj,prev) { prev.users[obj.uid] = 1; prev.count += 1; }, cond:{uid: {$exists: true}, bgn: {$gte: new Date(new Date() - 120 * 60000)}}, initial: {users:{}, count:0}, $keyf: function(obj) { var a = {}; bgn = new Date(obj.bgn.getFullYear(), obj.bgn.getMonth(), obj.bgn.getDate(), obj.bgn.getHours(), (Math.round(obj.bgn.getMinutes() / 5) * 5), 0, 0); a['date'] = bgn; return a;}, finalize: function(obj) {var out = {}; out['date'] = obj.date; out['qps'] = obj.count / 5.0 / 60; out['users'] = 0; for (var i in obj.users) { if (obj.users.hasOwnProperty(i)) out['users']++;} return out}});
+
+db.logstats.group({
+    reduce: function(obj,prev) { prev.users[obj.uid] = 1; prev.count += 1; }, 
+    cond:{uid: {$exists: true}, bgn: {$gte: new Date(new Date() - 120 * 60000)}}, 
+    initial: {users:{}, count:0}, 
+    $keyf: function(obj) { var a = {}; bgn = new Date(obj.bgn.getFullYear(), obj.bgn.getMonth(), obj.bgn.getDate(), obj.bgn.getHours(), (Math.round(obj.bgn.getMinutes() / 5) * 5), 0, 0); a['date'] = bgn; return a;}, 
+    finalize: function(obj) {var out = {}; out['date'] = obj.date; out['qps'] = obj.count / 5.0 / 60; out['users'] = 0; for (var i in obj.users) { if (obj.users.hasOwnProperty(i)) out['users']++;} return out}
+});
+
+db.logstats.group({ reduce: function(obj,prev) { prev.users[obj.uid] = 1; }, cond:{uid: {$exists: true}, bgn: {$gte: new Date(new Date() - 24 * 60 * 60000)}}, initial: {users:{}, }, key:{}, });
+
+db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, cond:{stamp_id: {$exists: true} }, initial: {count: 0, }, key:{stamp_id:1}, });
+

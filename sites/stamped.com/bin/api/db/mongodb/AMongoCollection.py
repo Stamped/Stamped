@@ -50,7 +50,7 @@ class MongoDBConfig(Singleton):
                        }
                     })
                     
-                    if node.name.endswith('.db0'):
+                    if node.name.endswith('db0'):
                         break
         
         if not 'mongodb' in self.config:

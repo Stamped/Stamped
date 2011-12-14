@@ -36,7 +36,7 @@ class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
     def test_update(self):
         path = "entities/update.json"
         desc = "Gastropub in the West Village, NYC"
-        data = { 
+        data = {
             "oauth_token": self.token['access_token'],
             "entity_id": self.entity['entity_id'],
             # "category": '',
@@ -60,7 +60,7 @@ class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
 class StampedAPIEntitiesSearch(StampedAPIEntityTest):
     def test_search(self):
         path = "entities/search.json"
-        data = { 
+        data = {
             "oauth_token": self.token['access_token'],
             "q": self.entity['title'][:3], 
         }

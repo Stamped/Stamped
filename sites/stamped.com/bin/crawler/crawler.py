@@ -23,7 +23,7 @@ import sources
 
 # import all databases
 import api.db
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 
 #-----------------------------------------------------------
 
@@ -179,11 +179,5 @@ def main():
     Crawler(options).run()
 
 if __name__ == '__main__':
-    """
-    from sources.services.FandangoFeed import FandangoFeed
-    c=FandangoFeed()
-    c.start()
-    c.join()
-    """
     main()
 

@@ -8,11 +8,12 @@ __license__   = "TODO"
 import Globals
 import aws, datetime, json, os, time, utils
 
-from boto.exception         import EC2ResponseError
-from boto.ec2.connection    import EC2Connection
-from boto.ec2.elb           import ELBConnection
-from collections            import defaultdict
-from subprocess             import Popen, PIPE
+from boto.route53.connection    import Route53Connection
+from boto.exception             import EC2ResponseError
+from boto.ec2.connection        import EC2Connection
+from boto.ec2.elb               import ELBConnection
+from collections                import defaultdict
+from subprocess                 import Popen, PIPE
 
 def get_local_instance_id():
     # cache instance id locally
@@ -122,6 +123,51 @@ def get_elb(stack=None):
                 return elb
     
     return None
+
+def is_prod_stack():
+    stack = get_stack()
+    prod  = get_prod_stack()
+    
+    if stack is not None and prod is not None:
+        return stack.instance.stack == prod
+    
+    return None
+
+def get_prod_stack():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.prod_stack.txt')
+    
+    if os.path.exists(path):
+        f = open(path, 'r')
+        name = f.read()
+        f.close()
+        
+        if len(name) > 1:
+            return name
+    
+    conn  = Route53Connection()
+    zones = conn.get_all_hosted_zones()
+    name  = None
+    host  = None
+    
+    for zone in zones['ListHostedZonesResponse']['HostedZones']:
+        if zone['Name'] == u'stamped.com.':
+            host = zone
+            break
+    
+    if host is not None:
+        records = conn.get_all_rrsets(host['Id'][12:])
+        
+        for record in records:
+            if record.name == 'api.stamped.com.':
+                name = record.alias_dns_name.split('-')[0].strip()
+                break
+    
+    if name is not None:
+        f = open(path, 'w')
+        f.write(name)
+        f.close()
+    
+    return name
 
 def _shell(cmd, env=None):
     utils.log(cmd)
