@@ -171,6 +171,9 @@ def runAlerts(options):
             elif alert.genre == 'follower':
                 send_push   = recipient.alerts.ios_alert_follow
                 send_email  = recipient.alerts.email_alert_follow
+            elif alert.genre == 'friend':
+                send_push   = recipient.alerts.ios_alert_follow
+                send_email  = None
             else:
                 send_push   = None
                 send_email  = None
