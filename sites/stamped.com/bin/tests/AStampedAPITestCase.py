@@ -30,6 +30,9 @@ _baseurl   = "http://localhost:18000/v0"
 #_baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
 #_baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
 
+class StampedAPIException(Exception):
+    pass
+
 if utils.is_ec2():
     import libs.ec2_utils
     elb = libs.ec2_utils.get_elb()
@@ -51,25 +54,18 @@ class AStampedAPITestCase(AStampedTestCase):
         'client_secret': 'august1ftw'
     }
 
-    detailedLog = True
-    if _baseurl == 'http://localhost:18000/v0':
-        detailedLog = False
-    
     def handleGET(self, path, data):
         global _baseurl
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (_baseurl, path, params)
         
-        if self.detailedLog:
-            utils.log("GET:  %s" % url)
+        #utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
         
         try:
             result = json.loads(raw)
         except:
-            if self.detailedLog:
-                utils.log(raw)
-            raise
+            raise StampedAPIException(raw)
         
         return result
     
@@ -78,18 +74,15 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (_baseurl, path)
         
-        if self.detailedLog:
-            utils.log("POST: %s" % url)
-            pprint(params)
+        #utils.log("POST: %s" % url)
+        #pprint(params)
         
         raw = self._opener.open(url, params).read()
         
         try:
             result = json.loads(raw)
         except:
-            if self.detailedLog:
-                utils.log(raw)
-            raise
+            raise StampedAPIException(raw)
         
         return result
     
