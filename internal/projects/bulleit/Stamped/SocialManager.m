@@ -69,9 +69,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
 
-
 @end
-
 
 @implementation SocialManager
 
