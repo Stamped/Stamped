@@ -630,7 +630,7 @@ def removeAPNSTokens():
         token = binascii.hexlify(t)
         try:
             accountDB.removeAPNSToken(token)
-            print "REVMOED TOKEN: %s" % token
+            print "REMOVED TOKEN: %s" % token
         except:
             print "FAILED TO REMOVE TOKEN: %s" % token
 
