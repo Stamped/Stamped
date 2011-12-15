@@ -1072,8 +1072,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   deletePhotoButton_.frame = CGRectMake(CGRectGetMaxX(stampPhotoView_.frame) - 18,
                                         CGRectGetMinY(stampPhotoView_.frame) - 12,
                                         31, 31);
-
-  // TODO(andybons): This doesn't appear to be working when a memory warning is called.
   [self adjustTextViewContentSize];
 
   [deletePhotoButton_ addTarget:self
@@ -1084,10 +1082,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   takePhotoButton_.enabled = NO;
   [stampPhotoView_ release];
 }
-
-
-
-
 
 #pragma mark - UIImagePickerControllerDelegate methods.
 
