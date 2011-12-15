@@ -890,6 +890,9 @@ class StampedAPI(AStampedAPI):
 
         friends = self._friendshipDB.getFriends(user['user_id'])
 
+        # Return data in reverse-chronological order
+        friends.reverse()
+
         return friends
     
     @API_CALL
@@ -899,6 +902,9 @@ class StampedAPI(AStampedAPI):
         # Note: This function returns data even if user is private
 
         followers = self._friendshipDB.getFollowers(user['user_id'])
+
+        # Return data in reverse-chronological order
+        followers.reverse()
 
         return followers
     
@@ -2400,7 +2406,10 @@ class StampedAPI(AStampedAPI):
             if len(deleted) > 0:
                 stamps = stamps + deleted
 
-        stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+        if params['sort'] == 'modified':
+            stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+        else:
+            stamps.sort(key=lambda k:k.timestamp.created, reverse=True)
         
         return stamps[:params['limit']]
     
