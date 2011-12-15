@@ -395,6 +395,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                                   target:nil
                                                                   action:nil];
     [[vc navigationItem] setBackBarButtonItem:backButton];
+    [backButton release];
     [self.navigationController pushViewController:vc animated:YES];
     [vc release];
     return;

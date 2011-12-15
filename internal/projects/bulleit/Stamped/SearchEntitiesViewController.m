@@ -703,7 +703,7 @@ typedef enum {
   gradientLayer.colors =
       [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.69 alpha:0.9].CGColor,
                                 (id)[UIColor colorWithWhite:0.75 alpha:0.9].CGColor, nil];
-  id layerToReplace;
+  id layerToReplace = nil;
   for (CALayer* layer in view.layer.sublayers) {
     if ([layer isKindOfClass:[CAGradientLayer class]]) {
       layerToReplace = layer;

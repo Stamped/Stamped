@@ -98,12 +98,12 @@
   return textField_.text;
 }
 
-- (void)becomeFirstResponder {
-  [textField_ becomeFirstResponder];
+- (BOOL)becomeFirstResponder {
+  return [textField_ becomeFirstResponder];
 }
 
-- (void)resignFirstResponder {
-  [textField_ resignFirstResponder];
+- (BOOL)resignFirstResponder {
+  return [textField_ resignFirstResponder];
 }
 
 - (CGPoint)originOfCursorInSize:(CGSize)size {

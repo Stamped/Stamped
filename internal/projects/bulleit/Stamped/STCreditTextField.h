@@ -10,8 +10,8 @@
 
 @interface STCreditTextField : UIView <UITextFieldDelegate>
 
-- (void)becomeFirstResponder;
-- (void)resignFirstResponder;
+- (BOOL)becomeFirstResponder;
+- (BOOL)resignFirstResponder;
 
 @property (nonatomic, assign) id<UITextFieldDelegate> delegate;
 @property (nonatomic, copy) NSString* text;
