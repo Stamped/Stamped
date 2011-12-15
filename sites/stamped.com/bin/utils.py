@@ -512,12 +512,7 @@ def getInstance(name):
 def is_ec2():
     """ returns whether or not this python program is running on EC2 """
     
-    if not os.path.exists("/proc/xen"):
-        return False
-    if os.path.exists("/etc/ec2_version"):
-        return True
-    
-    return False
+    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
 def init_db_config(conf):
     """ initializes MongoDB with proper host configuration """

@@ -42,6 +42,9 @@ class MongoDBConfig(Singleton):
             self.config = None
             
             for node in stack_info.nodes:
+                # TODO: need way of dynamically determining which db node is primary
+                # TODO: does replicasetconnection allow more than one host:port pair?
+                
                 if 'db' in node.roles:
                     self.config = AttributeDict({
                        "mongodb" : {

@@ -16,6 +16,9 @@ from collections                import defaultdict
 from subprocess                 import Popen, PIPE
 
 def get_local_instance_id():
+    if not is_ec2():
+        return None
+    
     # cache instance id locally
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.instance.id.txt')
     
@@ -39,6 +42,9 @@ def get_local_instance_id():
         return ret[0]
 
 def get_stack(stack=None):
+    if not is_ec2():
+        return None
+    
     if stack is not None:
         stack = stack.lower()
     
@@ -109,6 +115,9 @@ def get_stack(stack=None):
     return info
 
 def get_elb(stack=None):
+    if not is_ec2():
+        return None
+    
     stack = get_stack(stack)
     instance_ids = (instance.instance_id for instance in stack.nodes)
     
@@ -125,6 +134,9 @@ def get_elb(stack=None):
     return None
 
 def is_prod_stack():
+    if not is_ec2():
+        return None
+    
     stack = get_stack()
     prod  = get_prod_stack()
     
@@ -134,6 +146,9 @@ def is_prod_stack():
     return None
 
 def get_prod_stack():
+    if not is_ec2():
+        return None
+    
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.prod_stack.txt')
     
     if os.path.exists(path):
@@ -144,7 +159,7 @@ def get_prod_stack():
         if len(name) > 1:
             return name
     
-    conn  = Route53Connection()
+    conn  = Route53Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
     zones = conn.get_all_hosted_zones()
     name  = None
     host  = None
@@ -168,6 +183,11 @@ def get_prod_stack():
         f.close()
     
     return name
+
+def is_ec2():
+    """ returns whether or not this python program is running on EC2 """
+    
+    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
 def _shell(cmd, env=None):
     utils.log(cmd)
