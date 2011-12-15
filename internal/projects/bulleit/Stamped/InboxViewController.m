@@ -72,6 +72,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.selectedIndexPath = nil;
+  mapView_ = nil;
   [super dealloc];
 }
 
@@ -182,6 +183,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  mapView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
