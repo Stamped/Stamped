@@ -2406,7 +2406,10 @@ class StampedAPI(AStampedAPI):
             if len(deleted) > 0:
                 stamps = stamps + deleted
 
-        stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+        if params['sort'] == 'modified':
+            stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+        else:
+            stamps.sort(key=lambda k:k.timestamp.created, reverse=True)
         
         return stamps[:params['limit']]
     
