@@ -43,6 +43,8 @@ def invoke(task, args=None, kwargs=None, **options):
                 # clear built-up errors now that we've successfully reestablished 
                 # our connection with the message broker
                 __broker_status__['errors'] = []
+                
+                return retval
             except Exception, e:
                 retries += 1
                 

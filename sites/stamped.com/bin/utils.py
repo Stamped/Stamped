@@ -660,7 +660,7 @@ def sendEmail(msg, **kwargs):
     except Exception as e:
         logs.warning('EMAIL FAILED: %s' % msg)
         logs.warning(e)
-
+    
     return True
 
 def parseTemplate(src, params):
