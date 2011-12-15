@@ -69,9 +69,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
 
-
 @end
-
 
 @implementation SocialManager
 
@@ -301,7 +299,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 #pragma mark - Facebook.
 
 - (void)signInToFacebook {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.facebookClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
     self.facebookClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
@@ -309,7 +307,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if (!self.facebookClient.isSessionValid) {
     self.facebookClient.sessionDelegate = self;
     isSigningInToFacebook_ = YES;
-    [self.facebookClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
+    [self.facebookClient authorize:[NSArray arrayWithObjects:@"offline_access", @"publish_stream", nil]];
   }
 }
 
@@ -388,7 +386,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 // FBRequestDelegate methods.
 
 - (void)request:(FBRequest*)request didLoad:(id)result {
-  NSArray* resultData;
+  NSArray* resultData = nil;
   
   if ([result isKindOfClass:[NSArray class]])
     result = [result objectAtIndex:0];

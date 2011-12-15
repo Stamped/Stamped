@@ -32,8 +32,8 @@ class MongoFollowersCollection(AMongoCollection):
     def removeFollower(self, userId, followerId):
         return self._removeRelationship(keyId=userId, refId=followerId)
             
-    def getFollowers(self, userId):
-        return self._getRelationships(userId)
+    def getFollowers(self, userId, limit=None):
+        return self._getRelationships(userId, limit)
 
     def removeAllFollowers(self, userId):
         return self._removeAllRelationships(userId)

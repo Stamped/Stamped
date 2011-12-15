@@ -56,11 +56,12 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   [self loadRelationshipsFromNetwork];
-  NSString* title;
+  NSString* title = nil;
   if (relationshipType_ == RelationshipTypeFollowers)
     title = @"Followers";
   else if (relationshipType_ == RelationshipTypeFriends)
     title = @"Following";
+
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:title
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil

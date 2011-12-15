@@ -630,12 +630,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)imageViewTapped {
   ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
-  if (self.imageView.image)
+  if (self.imageView.image) {
     controller.image = self.imageView.image;
-  else if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""])
+  } else if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
     controller.imageURL = detailedEntity_.image;
-  else
+  } else {
+    [controller release];
     return;
+  }
   [self.navigationController pushViewController:controller animated:YES];
   [controller release];
 }

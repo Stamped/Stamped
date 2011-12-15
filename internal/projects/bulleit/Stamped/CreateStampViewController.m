@@ -1067,14 +1067,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   stampPhotoView_.frame = CGRectMake(8, 30, 200, 200 * (height / width));
   stampPhotoView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:stampPhotoView_.bounds].CGPath;
   [reasoningTextView_ addSubview:stampPhotoView_];
-  [stampPhotoView_ release];
   self.deletePhotoButton = [UIButton buttonWithType:UIButtonTypeCustom];
   [deletePhotoButton_ setImage:[UIImage imageNamed:@"delete_circle"] forState:UIControlStateNormal];
   deletePhotoButton_.frame = CGRectMake(CGRectGetMaxX(stampPhotoView_.frame) - 18,
                                         CGRectGetMinY(stampPhotoView_.frame) - 12,
                                         31, 31);
-
-  // TODO(andybons): This doesn't appear to be working when a memory warning is called.
   [self adjustTextViewContentSize];
 
   [deletePhotoButton_ addTarget:self
@@ -1083,11 +1080,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   deletePhotoButton_.alpha = [reasoningTextView_ isFirstResponder] ? 1.0 : 0.0;
   [reasoningTextView_ addSubview:deletePhotoButton_];
   takePhotoButton_.enabled = NO;
+  [stampPhotoView_ release];
 }
-
-
-
-
 
 #pragma mark - UIImagePickerControllerDelegate methods.
 

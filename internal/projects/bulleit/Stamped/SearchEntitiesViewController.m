@@ -354,7 +354,8 @@ typedef enum {
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
-  if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+  if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+      [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
     UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
                                                      message:@"Location services aren't available to Stamped. You can enable them within the Settings app."
                                                     delegate:nil
@@ -703,7 +704,7 @@ typedef enum {
   gradientLayer.colors =
       [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.69 alpha:0.9].CGColor,
                                 (id)[UIColor colorWithWhite:0.75 alpha:0.9].CGColor, nil];
-  id layerToReplace;
+  id layerToReplace = nil;
   for (CALayer* layer in view.layer.sublayers) {
     if ([layer isKindOfClass:[CAGradientLayer class]]) {
       layerToReplace = layer;

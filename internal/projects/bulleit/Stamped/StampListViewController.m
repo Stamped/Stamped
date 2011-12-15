@@ -68,6 +68,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.searchQuery = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  mapView_ = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
@@ -129,6 +130,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  mapView_ = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

@@ -45,7 +45,7 @@ static const CGFloat kActivityBadgeSize = 21.0;
     headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
     headerTextLayer_.fontSize = 12.0;
     headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
-    headerTextLayer_.frame = CGRectMake(70, 15, 210, 16);
+    headerTextLayer_.frame = CGRectMake(69, 15, 210, 16);
     headerTextLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
                                                            forKey:@"contents"];
     [self.contentView.layer addSublayer:headerTextLayer_];
@@ -68,7 +68,7 @@ static const CGFloat kActivityBadgeSize = 21.0;
     [self.contentView addSubview:timestampLabel_];
     [timestampLabel_ release];
     
-    addedStampsLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 58, 200, 12)];
+    addedStampsLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(69, 58, 200, 12)];
     addedStampsLabel_.textColor = [UIColor stampedLightGrayColor];
     addedStampsLabel_.highlightedTextColor = [UIColor whiteColor];
     addedStampsLabel_.backgroundColor = [UIColor clearColor];
@@ -87,7 +87,7 @@ static const CGFloat kActivityBadgeSize = 21.0;
                      (CGRectGetHeight(disclosureArrowImageView_.frame) / 2) - 1,
                  8, 11);
   timestampLabel_.frame =
-      CGRectMake(70,
+      CGRectMake(69,
                  CGRectGetHeight(self.frame) - CGRectGetHeight(timestampLabel_.frame) - 12,
                  CGRectGetWidth(timestampLabel_.frame),
                  CGRectGetHeight(timestampLabel_.frame));

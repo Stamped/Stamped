@@ -31,7 +31,7 @@
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithReuseIdentifier:reuseIdentifier];
   if (self) {
-    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 29, 210, 20)];
+    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(69, 29, 210, 20)];
     textLabel_.numberOfLines = 0;
     textLabel_.backgroundColor = [UIColor clearColor];
     textLabel_.textColor = [UIColor colorWithWhite:0.15 alpha:1.0];

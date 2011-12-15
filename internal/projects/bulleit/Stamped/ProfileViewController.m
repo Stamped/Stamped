@@ -97,6 +97,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.unfollowButton = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  stampLayer_ = nil;
+  stampCounterLayer_ = nil;
   [super dealloc];
 }
 
@@ -120,8 +122,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
   bioLabel_.textColor = [UIColor stampedGrayColor];
-  if (user_.name)
-    [self fillInUserData];
 
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:user_.screenName]
                                                                  style:UIBarButtonItemStyleBordered
@@ -148,7 +148,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       self.stampsAreTemporary = YES;
     }
   }
-  
+
+  if (user_.name)
+    [self fillInUserData];
+
   self.highlightView.backgroundColor = [UIColor whiteColor];
   CAGradientLayer* highlightGradientLayer = [[CAGradientLayer alloc] init];
   highlightGradientLayer.frame = CGRectMake(0, 0, 320, 20);
@@ -206,6 +209,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.unfollowButton = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  stampLayer_ = nil;
+  stampCounterLayer_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -390,6 +395,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                                   target:nil
                                                                   action:nil];
     [[vc navigationItem] setBackBarButtonItem:backButton];
+    [backButton release];
     [self.navigationController pushViewController:vc animated:YES];
     [vc release];
     return;

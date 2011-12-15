@@ -32,8 +32,8 @@ class MongoFriendsCollection(AMongoCollection):
     def removeFriend(self, userId, friendId):
         return self._removeRelationship(keyId=userId, refId=friendId)
             
-    def getFriends(self, userId):
-        return self._getRelationships(userId)
+    def getFriends(self, userId, limit=None):
+        return self._getRelationships(userId, limit)
 
     def removeAllFriends(self, userId):
         return self._removeAllRelationships(userId)

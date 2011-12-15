@@ -41,7 +41,7 @@
     
     headerTextLayer_.frame = CGRectOffset(headerTextLayer_.frame, 0, -3);
 
-    entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 200, 40)];
+    entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(69, 25, 200, 40)];
     entityTitleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
     entityTitleLabel_.textColor = [UIColor stampedBlackColor];
     entityTitleLabel_.highlightedTextColor = [UIColor whiteColor];
@@ -50,7 +50,7 @@
     [entityTitleLabel_ release];
     
     firstStampLayer_ = [[CALayer alloc] init];
-    firstStampLayer_.frame = CGRectMake(70, 28, 18, 18);
+    firstStampLayer_.frame = CGRectMake(69, 28, 18, 18);
     [self.contentView.layer addSublayer:firstStampLayer_];
     [firstStampLayer_ release];
     

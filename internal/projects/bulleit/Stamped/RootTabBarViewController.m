@@ -55,16 +55,17 @@
   [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
-  self.tabBarItems = nil;
-  self.viewControllers = nil;
+  self.tabBar.delegate = nil;
   self.tabBar = nil;
+  self.tabBarItems = nil;
+  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
+  self.viewControllers = nil;
   self.stampsTabBarItem = nil;
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
   tooltipImageView_ = nil;
-  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
   [super dealloc];
 }
 
@@ -206,18 +207,18 @@
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [AccountManager sharedManager].delegate = nil;
+  self.tabBar.delegate = nil;
+  self.tabBar = nil;
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
-  self.viewControllers = nil;
+  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
   self.tabBarItems = nil;
-  self.tabBar = nil;
   self.stampsTabBarItem = nil;
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
   tooltipImageView_ = nil;
-  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -230,7 +231,6 @@
   [self.selectedViewController viewDidAppear:animated];
 
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstStamp"]) {
-    
     UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
     overlayContainer.backgroundColor = [UIColor clearColor];
     overlayContainer.alpha = 0;
