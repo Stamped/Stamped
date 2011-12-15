@@ -84,7 +84,7 @@ static const CGFloat kSubstringFontSize = 12.0;
 - (void)layoutSubviews {
   [super layoutSubviews];
   CGSize imageSize = typeImageView_.image.size;
-  typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame), 58, imageSize.width, imageSize.height);
+  typeImageView_.frame = CGRectMake(CGRectGetMinX(titleLayer_.frame) + 1, 58, imageSize.width, imageSize.height);
   CGSize descriptionSize = [descriptionLabel_ sizeThatFits:CGSizeMake(200, MAXFLOAT)];
   descriptionLabel_.frame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
                                        CGRectGetMinY(typeImageView_.frame) - 2,
@@ -184,7 +184,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
   titleLayer_.font = CTFontCreateWithName((CFStringRef)kEllipsisFontString, 0, NULL);  // So the ellipsis draws the way we like it.
   titleLayer_.fontSize = 24.0;
-  titleLayer_.frame = CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15,
+  titleLayer_.frame = CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 14,
                                  10, kTitleMaxWidth, kTitleFontSize);
   titleLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
                                                     forKey:@"contents"];
