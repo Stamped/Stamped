@@ -354,7 +354,8 @@ typedef enum {
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
-  if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+  if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+      [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
     UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
                                                      message:@"Location services aren't available to Stamped. You can enable them within the Settings app."
                                                     delegate:nil
