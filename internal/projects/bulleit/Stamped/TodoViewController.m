@@ -322,7 +322,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     addLabel.highlightedTextColor = [UIColor whiteColor];
     addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
     [addLabel sizeToFit];
-    addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 23, 22);
+    addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 22, 22);
     [cell.contentView addSubview:addLabel];
     [addLabel release];
 
