@@ -6,7 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, types, unittest
+import os, time, types, unittest, utils
+
+from pprint import pprint
 
 class AStampedTestCase(unittest.TestCase):
     """
@@ -21,6 +23,26 @@ class AStampedTestCase(unittest.TestCase):
     
     def assertLength(self, a, size):
         self.assertEqual(len(a), size)
+    
+    def async(self, func, assertions, retries=5, delay=0.5):
+        while True:
+            try:
+                result = func()
+                
+                if not isinstance(assertions, (list, tuple)):
+                    assertions = [ assertions ]
+                
+                for assertion in assertions:
+                    assertion(result)
+                
+                break
+            except:
+                retries -= 1
+                if retries < 0:
+                    pprint(result)
+                    raise
+                
+                time.sleep(delay)
 
 class StampedTestRunner(object):
     """

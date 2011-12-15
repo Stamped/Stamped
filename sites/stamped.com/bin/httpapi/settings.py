@@ -1,9 +1,8 @@
 # Django settings for httpapi project.
 
 import Globals, utils
-import libs.ec2_utils
 
-DEBUG = (not libs.ec2_utils.is_prod_stack())
+DEBUG = (not utils.is_ec2())
 TEMPLATE_DEBUG = DEBUG
 
 utils.log("Django DEBUG=%s" % DEBUG)

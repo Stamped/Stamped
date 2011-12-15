@@ -207,6 +207,7 @@ class StampedAPI(AStampedAPI):
         # Add activity if invitations were sent
         invites = self._inviteDB.getInvitations(account.email)
         invitedBy = {}
+        
         for invite in invites:
             invitedBy[invite['user_id']] = 1
             
@@ -231,13 +232,13 @@ class StampedAPI(AStampedAPI):
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity(invitedBy.keys(), activity)
-                
+            
             # Increment activity count
             for user_id in invitedBy.keys():
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
         
         self._inviteDB.join(account.email)
-
+        
         # Send welcome email
         domain = str(account.email).split('@')[1]
         if domain != 'stamped.com':
@@ -245,7 +246,7 @@ class StampedAPI(AStampedAPI):
             msg['to'] = account.email
             msg['from'] = 'Stamped <noreply@stamped.com>'
             msg['subject'] = 'Welcome to Stamped!'
-
+            
             try:
                 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
@@ -256,9 +257,9 @@ class StampedAPI(AStampedAPI):
             
             params = {'screen_name': account.screen_name, 'email_address': account.email}
             msg['body'] = utils.parseTemplate(template, params)
-
+            
             utils.sendEmail(msg, format='html')
-
+        
         return account
     
     @API_CALL
@@ -377,7 +378,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Verify that email address is unique, confirm it
         
         account = self._accountDB.getAccount(authUserId)
-
+        
         old_screen_name = account['screen_name']
         
         # Import each item
@@ -398,21 +399,21 @@ class StampedAPI(AStampedAPI):
             msg = "Blacklisted screen name"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Validate email address
         account.email = str(account.email).lower().strip()
         if not utils.validate_email(account.email):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         self._accountDB.updateAccount(account)
-
+        
         # Update profile picture link if screen name has changed
         if account.screen_name.lower() != old_screen_name.lower():
             self._imageDB.changeProfileImageName(old_screen_name.lower(), \
                                                  account.screen_name.lower())
-
+        
         return account
     
     @API_CALL
@@ -2932,7 +2933,7 @@ class StampedAPI(AStampedAPI):
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()
             # don't let error propagate
-
+    
     def _updateUserStats(self):
         userIds = self._userDB._getAllUserIds()
         for userId in userIds:
@@ -2940,6 +2941,7 @@ class StampedAPI(AStampedAPI):
             userData = user.exportSparse()
             if 'stats' not in userData:
                 continue
+            
             stats = userData['stats']
             
             stats_num_stamps        = stats.pop('num_stamps', 0)
