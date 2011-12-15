@@ -27,7 +27,6 @@ if utils.is_ec2():
 
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
-#BROKER_URL = "amqp://guest:guest@:5672/stampedvhost"
 utils.log('BROKER_URL: %s' % BROKER_URL)
 
 CELERYD_CONCURRENCY = 1
@@ -50,4 +49,6 @@ EMAIL_USE_SSL = True
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "notifications@stamped.com"
 EMAIL_HOST_PASSWORD = "mariotennis"
+
+#CELERY_ALWAYS_EAGER = True
 

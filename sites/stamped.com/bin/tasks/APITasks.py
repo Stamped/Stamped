@@ -8,18 +8,20 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from celery.task import task
+from celery.task    import task
 
-__stampedapi__ = None
+__stamped_api__     = None
 
 def getStampedAPI():
+    """ hack to ensure that tasks only instantiate the Stamped API once """
+    
     from MongoStampedAPI import MongoStampedAPI
-    global __stampedapi__
+    global __stamped_api__
     
-    if __stampedapi__ is None:
-        __stampedapi__ = MongoStampedAPI()
+    if __stamped_api__ is None:
+        __stamped_api__ = MongoStampedAPI()
     
-    return __stampedapi__
+    return __stamped_api__
 
 @task
 def add(x, y):
@@ -33,5 +35,6 @@ def add(x, y):
 def addStamp(user_id, stamp_id):
     stampedAPI = getStampedAPI()
     followers  = stampedAPI._friendshipDB.getFollowers(user_id)
+    
     stampedAPI._stampDB.addInboxStampReference(followers, stamp_id)
 

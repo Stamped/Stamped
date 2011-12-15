@@ -97,7 +97,6 @@ def warning(msg, *args, **kwargs):
 def warn(msg, *args, **kwargs):
     _log('warning', msg, *args, **kwargs)
 
-
 # HTTP Log Requests
 def begin(**kwargs):
     addLog      = kwargs.pop('addLog', None)

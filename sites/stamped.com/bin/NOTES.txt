@@ -2,6 +2,14 @@
 * look into renaming terminal title when ./connect'ing into a machine
     * setting hostname of remote instance should do the trick
 
+* @cache decorator
+    * pickler
+    * in-memory vs disk
+    * expiration
+    * reading cached value directly
+    * clear cached value
+    * clear entire cache
+
 * app companies being returned as 'artist'
 * go through StampedAPI and audit async priorities
 * debug distributing reads to secondaries
