@@ -890,6 +890,9 @@ class StampedAPI(AStampedAPI):
 
         friends = self._friendshipDB.getFriends(user['user_id'])
 
+        # Return data in reverse-chronological order
+        friends.reverse()
+
         return friends
     
     @API_CALL
@@ -899,6 +902,9 @@ class StampedAPI(AStampedAPI):
         # Note: This function returns data even if user is private
 
         followers = self._friendshipDB.getFollowers(user['user_id'])
+
+        # Return data in reverse-chronological order
+        followers.reverse()
 
         return followers
     
