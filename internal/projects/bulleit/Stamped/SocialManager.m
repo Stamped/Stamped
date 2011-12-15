@@ -162,7 +162,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 #pragma mark - Twitter.
 
 - (void)signInToTwitter:(UINavigationController*)navigationController {
-  GTMOAuthAuthentication *auth = [self createAuthentication];
+  GTMOAuthAuthentication* auth = [self createAuthentication];
   if (auth == nil) {
     NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
   }
@@ -170,15 +170,15 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   isSigningInToTwitter_ = YES;
   
   STOAuthViewController* authVC =
-  [[STOAuthViewController alloc] initWithScope:kTwitterScope
-                                      language:nil
-                               requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
-                             authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
-                                accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
-                                authentication:auth
-                                appServiceName:kKeychainTwitterToken
-                                     delegate:self
-                              finishedSelector:@selector(viewController:finishedWithAuth:error:)];
+      [[STOAuthViewController alloc] initWithScope:kTwitterScope
+                                          language:nil
+                                   requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
+                                 authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
+                                    accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
+                                    authentication:auth
+                                    appServiceName:kKeychainTwitterToken
+                                         delegate:self
+                                  finishedSelector:@selector(viewController:finishedWithAuth:error:)];
   [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
   
   [navigationController pushViewController:authVC animated:YES];
@@ -268,6 +268,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestTwitterUser {
   if (!self.twitterClient)
     self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
+
   RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:self];
   request.cachePolicy = RKRequestCachePolicyNone;
   [request prepareURLRequest];
@@ -278,8 +279,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestTwitterFollowers:(NSString*)userIDString {
   if (!self.twitterClient)
     self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
+
   NSString* path =
-  [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+      [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
   RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
@@ -300,8 +302,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (void)signInToFacebook {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"] 
-      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+  if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.facebookClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
     self.facebookClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
