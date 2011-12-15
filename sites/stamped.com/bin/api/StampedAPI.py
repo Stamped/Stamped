@@ -1437,7 +1437,7 @@ class StampedAPI(AStampedAPI):
         # Asynchronously add references to the stamp in follower's inboxes
         task = tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
-        # note: if isinstance(task, celery.result.EagerResult), task was run locally / synchronously
+        # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
         logs.debug("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
         
         # Add a reference to the stamp in the user's inbox

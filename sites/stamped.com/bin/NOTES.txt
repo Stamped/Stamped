@@ -1,7 +1,4 @@
 
-* look into renaming terminal title when ./connect'ing into a machine
-    * setting hostname of remote instance should do the trick
-
 * @cache decorator
     * pickler
     * in-memory vs disk
@@ -36,6 +33,7 @@
 * twitter/fb integration on the backend
 
 * async task queue for bottlenecks (e.g., NYMag stamping something => writing to all followers' inboxes synchronously before stamp completes)
+    * local / synchronous fallback if async message broker is unavailable
 
 each system:
     * zero or more stacks
@@ -89,7 +87,9 @@ OLD:
         * update_apple -- should NOT be on api instances
     * switch opentable links with new mobile versions
     * unable to find primary? try a different node...
-
+    * look into renaming terminal title when ./connect'ing into a machine
+        * setting hostname of remote instance should do the trick
+    
     34.026401,-118.38947899
 
 gman () {

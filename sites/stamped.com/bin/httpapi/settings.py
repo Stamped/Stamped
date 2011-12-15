@@ -1,7 +1,12 @@
 # Django settings for httpapi project.
 
-DEBUG = False
+import Globals, utils
+import libs.ec2_utils
+
+DEBUG = (not libs.ec2_utils.is_prod_stack())
 TEMPLATE_DEBUG = DEBUG
+
+utils.log("Django DEBUG=%s" % DEBUG)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
