@@ -93,7 +93,6 @@ class S3ImageDB(AImageDB):
         }
 
         return maxSize, sizes
-
     
     def addProfileImage(self, screenName, image):
         assert isinstance(image, Image.Image)
@@ -116,12 +115,12 @@ class S3ImageDB(AImageDB):
         else:
             # image is already square
             square = image
-
+        
         maxSize, sizes = self.profileImageSizes
-
+        
         # Add images in all sizes
         self._addImageSizes(prefix, image, maxSize, sizes)
-
+    
     def removeProfileImage(self, screenName):
         prefix = 'users/%s' % screenName
         suffix = '.jpg'
@@ -172,18 +171,17 @@ class S3ImageDB(AImageDB):
         oldPrefix = 'users/%s' % oldScreenName
         newPrefix = 'users/%s' % newScreenName
         suffix = '.jpg'
-
+        
         maxSize, sizes = self.profileImageSizes
-
+        
         old = '%s%s' % (oldPrefix, suffix)
         new = '%s%s' % (newPrefix, suffix)
         self._copyInS3(old, new)
-
+        
         for size in sizes:
             old = '%s-%s%s' % (oldPrefix, size, suffix)
             new = '%s-%s%s' % (newPrefix, size, suffix)
             self._copyInS3(old, new)
-
     
     def _addImageSizes(self, prefix, image, maxSize, sizes=None):
         assert isinstance(image, Image.Image)

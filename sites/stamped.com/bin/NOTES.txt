@@ -175,3 +175,31 @@ db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, cond:{stamp_
 
 rabbitmqctl list_queues name messages consumers
 
+
+StampedAPI:
+    * TESTING
+        * need to add comprehensive StampedAPI function-specific unit tests
+            * would ideally target both httpapi and StampedAPI versions
+        * 
+    * CLEANUP
+        * regexes being recompiled in several places: should only be compiled once
+        * revisit schema import/export
+        * rollback, especially in addStamp needs to be reassessed
+            * once stamp is committed, everything else should be async and isolated from the core stamp transaction
+        * move _convertSearchId to separate location, possibly in entity matcher
+        * rename favorites todos
+        * validateAccount helper => updateAccountSettings (checking account validity appears several times)
+        * cleanup checkAccount exception handling
+    * ASYNC
+        * updating all stats (small writes, but totally async / isolated / low priority)
+    * CACHE
+        * 
+    * _enrichStampObjects should be filled in LAZILY!
+        * lots of enriched info is never used for many API calls..
+        * horribly unoptimized; querying all favorites & likes for a user
+        * e.g., removeLike goes through _enrichStampObjects
+    * _getStampCollection
+        * currently retrieving *all* stamps in the collection and then slicing API-side; must do this on DB side
+    * reusable cursor pattern for generic retrieval of unbounded lists (e.g., collections, friends, comments, credit, etc.)
+        * replace current slicing strategy
+
