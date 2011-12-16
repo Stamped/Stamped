@@ -494,6 +494,10 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [self.navigationController setNavigationBarHidden:NO animated:YES];
 
   CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
+  CGRect picFrame = stampPhotoView_.frame;
+  picFrame.origin.y = fmaxf(35, contentSize.height + 1);
+  stampPhotoView_.frame = picFrame;
+
   contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
   contentSize.height = fmaxf(104, contentSize.height);
 
