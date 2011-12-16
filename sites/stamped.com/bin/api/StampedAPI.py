@@ -240,9 +240,12 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         # ASYNC: Send welcome email
 =======
+=======
+>>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
         
         # Send welcome email
 >>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
@@ -418,8 +421,11 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateAccount(account)
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         # ASYNC: Update profile picture link if screen name has changed
 =======
+=======
+>>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
         # Update profile picture link if screen name has changed
 >>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
         if account.screen_name.lower() != old_screen_name.lower():
