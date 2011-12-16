@@ -69,20 +69,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         screen_name_query = {"screen_name_lower": {"$in": queryScreenNames}}
         
         if len(queryUserIDs) > 0 and len(queryScreenNames) > 0:
-<<<<<<< HEAD
-<<<<<<< HEAD
             query = { "$or": [user_id_query, screen_name_query]}
-=======
-=======
->>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
-            query = { "$or": [
-                user_id_query, 
-                screen_name_query, 
-            ]}
-<<<<<<< HEAD
->>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
-=======
->>>>>>> 5af83edab41c6468be835cdcea3fd3705c089e11
         elif len(queryUserIDs) > 0:
             query = user_id_query
         elif len(queryScreenNames) > 0:
