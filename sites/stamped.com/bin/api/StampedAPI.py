@@ -240,7 +240,7 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
         
-        # Send welcome email
+        # ASYNC: Send welcome email
         domain = str(account.email).split('@')[1]
         if domain != 'stamped.com':
             msg = {}
@@ -412,7 +412,7 @@ class StampedAPI(AStampedAPI):
         
         self._accountDB.updateAccount(account)
         
-        # Update profile picture link if screen name has changed
+        # ASYNC: Update profile picture link if screen name has changed
         if account.screen_name.lower() != old_screen_name.lower():
             self._imageDB.changeProfileImageName(old_screen_name.lower(), \
                                                  account.screen_name.lower())
