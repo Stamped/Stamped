@@ -195,7 +195,6 @@ typedef enum {
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   stampPhotoView_.imageURL = stamp_.imageURL;
-
 }
 
 - (void)viewDidLoad {
@@ -514,8 +513,8 @@ typedef enum {
     stampPhotoView_.frame = CGRectMake(leftPadding,
                                        CGRectGetMaxY(commentLabel.frame) + 8,
                                        200, floorf(200 * (height / width)));
-    CGFloat addedHeight = CGRectGetHeight(stampPhotoView_.bounds);
-    mainCommentFrame.size.height += addedHeight;
+    //CGFloat addedHeight = CGRectGetHeight(stampPhotoView_.frame);
+    mainCommentFrame.size.height = CGRectGetMaxY(stampPhotoView_.frame) + 12;
     UITapGestureRecognizer* recognizer =
         [[UITapGestureRecognizer alloc] initWithTarget:self
                                                 action:@selector(handlePhotoTap:)];
@@ -528,7 +527,7 @@ typedef enum {
 
   User* creditedUser = [stamp_.credits anyObject];
   if (creditedUser)
-    mainCommentFrame.size.height += 33;
+    mainCommentFrame.size.height += 27;
 
   numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   numLikesLabel_.text = [stamp_.numLikes stringValue];
