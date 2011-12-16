@@ -152,13 +152,13 @@ class StampedAPI(AStampedAPI):
         account.color_secondary = '0057D1'
         
         # Set default alerts
-        account.ios_alert_credit       = False
-        account.ios_alert_like         = False
-        account.ios_alert_fav          = False
-        account.ios_alert_mention      = False
-        account.ios_alert_comment      = False
-        account.ios_alert_reply        = False
-        account.ios_alert_follow       = False
+        account.ios_alert_credit       = True
+        account.ios_alert_like         = True
+        account.ios_alert_fav          = True
+        account.ios_alert_mention      = True
+        account.ios_alert_comment      = True
+        account.ios_alert_reply        = True
+        account.ios_alert_follow       = True
         account.email_alert_credit     = True
         account.email_alert_like       = False
         account.email_alert_fav        = False
@@ -192,6 +192,7 @@ class StampedAPI(AStampedAPI):
             account.image_cache = datetime.utcnow()
         
         # Create account
+        ### TODO: Add intelligent error message
         account = self._accountDB.addAccount(account)
         self._rollback.append((self._accountDB.removeAccount, [account.user_id]))
         
@@ -204,9 +205,10 @@ class StampedAPI(AStampedAPI):
             ### TODO: Rollback: Delete image
             self._imageDB.addProfileImage(account.screen_name.lower(), image)
         
-        # Add activity if invitations were sent
+        # ASYNC: Add activity if invitations were sent
         invites = self._inviteDB.getInvitations(account.email)
         invitedBy = {}
+        
         for invite in invites:
             invitedBy[invite['user_id']] = 1
             
@@ -231,21 +233,21 @@ class StampedAPI(AStampedAPI):
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity(invitedBy.keys(), activity)
-                
+            
             # Increment activity count
             for user_id in invitedBy.keys():
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
         
         self._inviteDB.join(account.email)
-
-        # Send welcome email
+        
+        # ASYNC: Send welcome email
         domain = str(account.email).split('@')[1]
         if domain != 'stamped.com':
             msg = {}
             msg['to'] = account.email
             msg['from'] = 'Stamped <noreply@stamped.com>'
             msg['subject'] = 'Welcome to Stamped!'
-
+            
             try:
                 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
@@ -256,9 +258,9 @@ class StampedAPI(AStampedAPI):
             
             params = {'screen_name': account.screen_name, 'email_address': account.email}
             msg['body'] = utils.parseTemplate(template, params)
-
+            
             utils.sendEmail(msg, format='html')
-
+        
         return account
     
     @API_CALL
@@ -266,16 +268,16 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         
         ### TODO: Verify w/ password
-
+        
         stampIds    = self._collectionDB.getUserStampIds(account.user_id)
         friendIds   = self._friendshipDB.getFriends(account.user_id)
         followerIds = self._friendshipDB.getFollowers(account.user_id)
-
+        
         # Remove tokens
         self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
         self._accessTokenDB.removeAccessTokensForUser(account.user_id)
         self._emailAlertDB.removeTokenForUser(account.user_id)
-
+        
         # Remove friends / followers
         for followerId in followerIds:
             friendship              = Friendship()
@@ -290,7 +292,7 @@ class StampedAPI(AStampedAPI):
             
             # Remove stamps from Inbox
             self._stampDB.removeInboxStampReferencesForUser(followerId, stampIds)
-
+        
         for friendId in friendIds:
             friendship              = Friendship()
             friendship.user_id      = account.user_id
@@ -301,12 +303,12 @@ class StampedAPI(AStampedAPI):
             # Increment stats 
             self._userDB.updateUserStats(friendId, 'num_followers', \
                         None, increment=-1)
-
+        
         # Remove favorites
         favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
         for entityId in favEntityIds:
             self._favoriteDB.removeFavorite(account.user_id, entityId)
-
+        
         # Remove stamps / collections
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         for stamp in stamps:
@@ -320,7 +322,7 @@ class StampedAPI(AStampedAPI):
 
             # Remove activity on stamp
             self._activityDB.removeActivityForStamp(stamp.stamp_id)
-
+        
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
@@ -331,13 +333,13 @@ class StampedAPI(AStampedAPI):
         for comment in comments:
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
-
+            
             # Decrement comment count on stamp
             if comment.stamp_id not in stampIds:
                 logs.info('STAMP ID: %s' % comment.stamp_id)
                 self._stampDB.updateStampStats( \
                     comment.stamp_id, 'num_comments', increment=-1)
-
+        
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
         likedStamps = self._stampDB.getStamps(likedStampIds, \
@@ -377,7 +379,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Verify that email address is unique, confirm it
         
         account = self._accountDB.getAccount(authUserId)
-
+        
         old_screen_name = account['screen_name']
         
         # Import each item
@@ -386,6 +388,8 @@ class StampedAPI(AStampedAPI):
                 v = convertPasswordForStorage(v)
             account[k] = v
         
+        ### TODO: Carve out "validate account" function
+
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
         if not utils.validate_screen_name(account.screen_name):
@@ -398,21 +402,21 @@ class StampedAPI(AStampedAPI):
             msg = "Blacklisted screen name"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Validate email address
         account.email = str(account.email).lower().strip()
         if not utils.validate_email(account.email):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         self._accountDB.updateAccount(account)
-
-        # Update profile picture link if screen name has changed
+        
+        # ASYNC: Update profile picture link if screen name has changed
         if account.screen_name.lower() != old_screen_name.lower():
             self._imageDB.changeProfileImageName(old_screen_name.lower(), \
                                                  account.screen_name.lower())
-
+        
         return account
     
     @API_CALL
@@ -457,7 +461,7 @@ class StampedAPI(AStampedAPI):
 
         self._accountDB.updateAccount(account)
 
-        # Generate file
+        # ASYNC: Generate file
         self._imageDB.generateStamp(primary, secondary)
 
         return account
@@ -476,6 +480,7 @@ class StampedAPI(AStampedAPI):
         return user
     
     def checkAccount(self, login):
+        ### TODO: Clean this up (along with HTTP API function)
         valid = False
         try:
             # Email
@@ -520,6 +525,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitter(self, authUserId, twitterIds):
+        # ASYNC
         account = self._accountDB.getAccount(authUserId)
         if account.twitter_alerts_sent == True or not account.twitter_screen_name:
             return False
@@ -549,6 +555,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def alertFollowersFromFacebook(self, authUserId, facebookIds):
+        # ASYNC
         account = self._accountDB.getAccount(authUserId)
         if account.facebook_alerts_sent == True or not account.facebook_name:
             return False
@@ -596,27 +603,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateAPNSToken(self, authUserId, token):
         self._accountDB.updateAPNSToken(authUserId, token)
-
-        ### TEMP: Update alert settings with first token
-        account = self._accountDB.getAccount(authUserId)
-        if not account.ios_alert_credit \
-            and not account.ios_alert_like \
-            and not account.ios_alert_fav \
-            and not account.ios_alert_mention \
-            and not account.ios_alert_comment \
-            and not account.ios_alert_reply \
-            and not account.ios_alert_follow:
-            
-            account.ios_alert_credit       = True
-            account.ios_alert_like         = True
-            account.ios_alert_fav          = True
-            account.ios_alert_mention      = True
-            account.ios_alert_comment      = True
-            account.ios_alert_reply        = True
-            account.ios_alert_follow       = True
-            
-            self._accountDB.updateAccount(account)
-        
         return True
     
     @API_CALL
@@ -695,6 +681,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def findUsersByEmail(self, authUserId, emails):
+        ### TODO: Condense with the other "findUsersBy" functions
         ### TODO: Add check for privacy settings?
         
         users = self._userDB.findUsersByEmail(emails, limit=100)
@@ -777,7 +764,7 @@ class StampedAPI(AStampedAPI):
         # Create friendship
         self._friendshipDB.addFriendship(friendship)
         
-        # Add activity for followed user
+        # ASYNC: Add activity for followed user
         if self._activity == True:
             activity                    = Activity()
             activity.genre              = 'follower'
@@ -793,11 +780,11 @@ class StampedAPI(AStampedAPI):
             # Increment activity count
             self._userDB.updateUserStats(user.user_id, 'num_unread_news', increment=1)
         
-        # Add stamps to Inbox
+        # ASYNC: Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         self._stampDB.addInboxStampReferencesForUser(authUserId, stampIds)
         
-        # Increment stats for both users
+        # ASYNC: Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', increment=1)
         self._userDB.updateUserStats(user.user_id, 'num_followers', increment=1)
         
@@ -822,13 +809,13 @@ class StampedAPI(AStampedAPI):
             
         self._friendshipDB.removeFriendship(friendship)
         
-        # Increment stats for both users
+        # ASYNC: Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', \
                     None, increment=-1)
         self._userDB.updateUserStats(user.user_id, 'num_followers', \
                     None, increment=-1)
         
-        # Remove stamps from Inbox
+        # ASYNC: Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
 
@@ -885,14 +872,14 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getFriends(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
-
+        
         # Note: This function returns data even if user is private
-
+        
         friends = self._friendshipDB.getFriends(user['user_id'])
-
+        
         # Return data in reverse-chronological order
         friends.reverse()
-
+        
         return friends
     
     @API_CALL
@@ -984,12 +971,11 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InputError(msg)
 
-        # Store email address linked to auth user id
+        # ASYNC: Store email address linked to auth user id
         self._inviteDB.inviteUser(email, authUserId)
 
         return True
     
-
     """
     #######                                      
     #       #    # ##### # ##### # ######  ####  
@@ -1161,40 +1147,44 @@ class StampedAPI(AStampedAPI):
             data = {}
             data['indices'] = [(reply.start()), reply.end()]
             data['screen_name'] = reply.group(0)[1:]
+            
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
+            
             screenNames.append(data['screen_name'])
             mentions.append(data)
-            
+        
         # Run through and grab mentions
         for user in user_regex.finditer(text):
             data = {}
             data['indices'] = [(user.start()+1), user.end()]
             data['screen_name'] = user.group(0)[2:]
+            
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
+            
             if data['screen_name'] not in screenNames:
                 screenNames.append(data['screen_name'])
                 mentions.append(data)
         
         if len(mentions) > 0:
             return mentions
+        
         return None
-
     
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
-
+        
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
@@ -1231,9 +1221,11 @@ class StampedAPI(AStampedAPI):
                 entityIds[entity.entity_id] = entity.exportSchema(EntityMini())
         
         if authUserId:
+            ### TODO: Intelligent matching with stampId
             # Favorites
             favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
             
+            ### TODO: Intelligent matching with stampId
             # Likes
             likes = self._stampDB.getUserLikes(authUserId)
         
@@ -1314,11 +1306,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
-        # notes: 
-            # 1) checking stamp db
-            # 2) call to _enrichStampObjects
-            # 3) _stampDB.addStamp itself
-        
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
         
@@ -1443,7 +1430,7 @@ class StampedAPI(AStampedAPI):
         # Asynchronously add references to the stamp in follower's inboxes
         task = tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
-        # note: if isinstance(task, celery.result.EagerResult), task was run locally / synchronously
+        # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
         logs.debug("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
         
         # Add a reference to the stamp in the user's inbox
@@ -1994,9 +1981,9 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for stamp owner
         commentedUserIds = []
-        if stamp.user.user_id not in mentionedUserIds \
-            and stamp.user.user_id != user.user_id:
+        if stamp.user.user_id not in mentionedUserIds and stamp.user.user_id != user.user_id:
             commentedUserIds.append(stamp.user.user_id)
+        
         if len(commentedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'comment'
@@ -2242,7 +2229,7 @@ class StampedAPI(AStampedAPI):
                 activity.benefit        = LIKE_BENEFIT
             
             self._activityDB.addActivity([stamp.user_id], activity)
-                
+            
             # Increment activity count
             self._userDB.updateUserStats(stamp.user_id, 'num_unread_news', increment=1)
         
@@ -2276,7 +2263,7 @@ class StampedAPI(AStampedAPI):
         self._activityDB.removeActivity('like', authUserId, stampId=stampId)
         
         return stamp
-
+    
     @API_CALL
     def getLikes(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
@@ -2932,7 +2919,7 @@ class StampedAPI(AStampedAPI):
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()
             # don't let error propagate
-
+    
     def _updateUserStats(self):
         userIds = self._userDB._getAllUserIds()
         for userId in userIds:
@@ -2940,6 +2927,7 @@ class StampedAPI(AStampedAPI):
             userData = user.exportSparse()
             if 'stats' not in userData:
                 continue
+            
             stats = userData['stats']
             
             stats_num_stamps        = stats.pop('num_stamps', 0)

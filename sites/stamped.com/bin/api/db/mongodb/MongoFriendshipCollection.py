@@ -70,7 +70,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     def getFollowers(self, userId):
         # TODO: Remove limit, add cursor instead
         followers = self.followers_collection.getFollowers(userId)
-        return followers[:-10000]
+        return followers[-10000:]
             
     def countFriends(self, userId):
         return len(self.friends_collection.getFriends(userId))

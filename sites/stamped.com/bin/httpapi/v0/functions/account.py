@@ -57,13 +57,12 @@ def settings(request):
 
         ### TODO: Verify email is valid
         account     = stampedAPI.updateAccountSettings(authUserId, data)
-
     else:
         schema      = parseRequest(None, request)
         account     = stampedAPI.getAccount(authUserId)
-
+    
     account     = HTTPAccount().importSchema(account)
-
+    
     return transformOutput(account.exportSparse())
 
 

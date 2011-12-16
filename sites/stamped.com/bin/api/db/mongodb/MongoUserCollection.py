@@ -59,26 +59,27 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             return False
     
     def lookupUsers(self, userIDs, screenNames, limit=0):
-        queryUserIDs = []
-        if isinstance(userIDs, list):
-            for userID in userIDs:
-                queryUserIDs.append(self._getObjectIdFromString(userID))
+        assert userIDs is None or isinstance(userIDs, list)
+        assert screenNames is None or isinstance(screenNames, list)
         
-        queryScreenNames = []
-        if isinstance(screenNames, list):
-            for screenName in screenNames:
-                queryScreenNames.append(str(screenName).lower())
-
-        data = self._collection.find({"$or": [
-            {"_id": {"$in": queryUserIDs}}, 
-            {"screen_name_lower": {"$in": queryScreenNames}}
-            ]}).limit(limit)
-            
-        result = []
-        for item in data:
-            result.append(self._convertFromMongo(item))
-        return result
-
+        queryUserIDs = map(self._getObjectIdFromString, userIds) if userIDs else []
+        queryScreenNames = map(lambda s: str(s).lower(), screenNames) if screenNames else []
+        
+        user_id_query = {"_id": {"$in": queryUserIDs}}
+        screen_name_query = {"screen_name_lower": {"$in": queryScreenNames}}
+        
+        if len(queryUserIDs) > 0 and len(queryScreenNames) > 0:
+            query = { "$or": [user_id_query, screen_name_query]}
+        elif len(queryUserIDs) > 0:
+            query = user_id_query
+        elif len(queryScreenNames) > 0:
+            query = screen_name_query
+        else:
+            return []
+        
+        data = self._collection.find(query).limit(limit)
+        return map(self._convertFromMongo, data)
+    
     def searchUsers(self, query, limit=0):
         query = query.lower()
 
@@ -88,6 +89,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if len(query) == 0:
             return []
 
+        ### TODO: Do sorting on Mongo as a custom sort function?
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
         data = self._collection.find(user_query).limit(min(50, limit*4))

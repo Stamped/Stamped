@@ -1,7 +1,11 @@
 # Django settings for www project.
 
-DEBUG = False
+import Globals, utils
+
+DEBUG = (not utils.is_ec2())
 TEMPLATE_DEBUG = DEBUG
+
+utils.log("Django DEBUG=%s" % DEBUG)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

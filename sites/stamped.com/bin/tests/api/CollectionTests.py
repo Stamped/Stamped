@@ -175,10 +175,10 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
             if stamp['stamp_id'] == self.stampA['stamp_id']:
                 self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
                 self.assertTrue(stamp['is_liked'] == False)
-
+    
     def test_fav(self):
         favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
-
+        
         # User B should have "is_fav=True" 
         path = "collections/inbox.json"
         data = {
@@ -186,6 +186,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 3)
+        
         for stamp in result:
             if stamp['stamp_id'] == self.stampA['stamp_id']:
                 self.assertTrue(stamp['blurb'] == self.stampA['blurb'])

@@ -18,7 +18,7 @@ class StampedAPIFriendshipTest(AStampedAPITestCase):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenA, self.userB)
-
+    
     def tearDown(self):
         self.deleteFriendship(self.tokenA, self.userB)
         self.deleteAccount(self.tokenA)
@@ -70,8 +70,9 @@ class StampedAPIFriends(StampedAPIFriendshipTest):
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userA['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result['user_ids']), 1)
+        
+        self.async(lambda: self.handleGET(path, data), 
+                   lambda x: self.assertEqual(len(x['user_ids']), 1))
 
 class StampedAPIFollowers(StampedAPIFriendshipTest):
     def test_show_followers(self):
@@ -80,8 +81,9 @@ class StampedAPIFollowers(StampedAPIFriendshipTest):
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userB['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result['user_ids']), 1)
+        
+        self.async(lambda: self.handleGET(path, data), 
+                   lambda x: self.assertEqual(len(x['user_ids']), 1))
 
 class StampedAPIInviteFriend(StampedAPIFriendshipTest):
     def test_invite_friend(self):

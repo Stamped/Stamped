@@ -33,7 +33,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['privacy'], False)
         self.privacy = result['privacy']
-
+    
     def test_get(self):
         path = "account/settings.json"
         data = {
