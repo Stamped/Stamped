@@ -13,6 +13,7 @@
 typedef enum {
   StampImageSize12 = 12,
   StampImageSize14 = 14,
+  StampImageSize16 = 16,
   StampImageSize18 = 18,
   StampImageSize28 = 28,
   StampImageSize32 = 32,

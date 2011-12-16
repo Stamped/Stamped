@@ -148,7 +148,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  
+  NSLog(@"Nav controller on load: %@", self.navigationController);
   requestQueue_ = [[RKRequestQueue alloc] init];
   requestQueue_.requestTimeout = 30;
   requestQueue_.delegate = self;
@@ -189,6 +189,7 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   [activityIndicator_ stopAnimating];
   if (signInScrollView_.superview) {
     [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
@@ -202,7 +203,6 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
                               signUpEmailTextField_.text.length &&
                               signUpPasswordTextField_.text.length );
   }
-  [super viewDidAppear:animated];
 }
 
 - (void)viewDidUnload {
@@ -280,7 +280,8 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
   }
 }
 
-- (void)signUpSucess {
+- (void)signUpSuccess {
+  NSLog(@"Navigation controller on signup success: %@", self.navigationController);
   WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
   [self.navigationController pushViewController:welcomeVC animated:YES];
   [welcomeVC release];
@@ -833,15 +834,12 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
     NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
     
     if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) {
-      
       if (self.validationStampView.hidden == YES) {
         self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
         self.validationStampView.alpha = 0.0;
         self.validationStampView.hidden = NO;
         [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
-      }
-      
-      else {
+      } else {
         self.validationStamp2ImageView.alpha = 0.0;
         self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
         self.validationStamp2ImageView.hidden = NO;

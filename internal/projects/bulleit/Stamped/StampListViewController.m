@@ -359,7 +359,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    self.oldestInBatch = [objects.lastObject modified];
+    self.oldestInBatch = [objects.lastObject created];
 
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
     if (objects.count < 10 || !self.oldestInBatch) {

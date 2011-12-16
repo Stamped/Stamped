@@ -49,11 +49,12 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userIDsToBeFetched = nil;
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 
@@ -90,6 +91,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;

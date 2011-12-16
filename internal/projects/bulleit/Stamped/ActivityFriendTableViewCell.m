@@ -15,7 +15,7 @@
 #import "User.h"
 #import "UIColor+Stamped.h"
 
-static const CGFloat kActivityStampSize = 14.0;
+static const CGFloat kActivityStampSize = 16.0;
 
 @interface ActivityFriendTableViewCell ()
 @property (nonatomic, readonly) TTTAttributedLabel* textLabel;
@@ -81,7 +81,7 @@ static const CGFloat kActivityStampSize = 14.0;
   textFrame.size = stringSize;
   textLabel_.frame = textFrame;
   
-  stampImageView_.image = [event.user stampImageWithSize:StampImageSize14];
+  stampImageView_.image = [event.user stampImageWithSize:StampImageSize16];
   [self.contentView setNeedsDisplay];
 }
 

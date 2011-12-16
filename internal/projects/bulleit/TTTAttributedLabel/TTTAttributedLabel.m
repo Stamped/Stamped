@@ -425,7 +425,7 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 #pragma mark - UIControl
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *touch = [touches anyObject];	
+	UITouch* touch = [touches anyObject];	
 	NSTextCheckingResult *result = [self linkAtPoint:[touch locationInView:self]];
     
     if (result && self.delegate) {

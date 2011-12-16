@@ -75,7 +75,7 @@ willCreateUserWithName:(NSString*)name
 - (IBAction)textFieldEditingChanged:(id)sender;
 
 - (void)signInFailed:(NSString*)reason;
-- (void)signUpSucess;
+- (void)signUpSuccess;
 - (void)signUpFailed:(NSString*)reason;
 - (void)validateUsername;
 

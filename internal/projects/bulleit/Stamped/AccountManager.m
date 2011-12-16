@@ -122,8 +122,7 @@ static AccountManager* sharedAccountManager_ = nil;
   self.navController.navigationBarHidden = YES;
 
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  self.navController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-  [delegate.navigationController presentModalViewController:self.navController animated:YES];
+  [delegate.navigationController presentModalViewController:self.navController animated:NO];
 
   [self.navController release];
   [self.firstRunViewController release];
@@ -204,7 +203,7 @@ static AccountManager* sharedAccountManager_ = nil;
   if ([object isKindOfClass:[User class]]) {
     [self storeCurrentUser:object];
     if (firstInstall_) {
-      [self.firstRunViewController signUpSucess];
+      [self.firstRunViewController signUpSuccess];
       firstInstall_ = NO;
     }
     return;
