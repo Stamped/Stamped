@@ -59,6 +59,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             return False
     
     def lookupUsers(self, userIDs, screenNames, limit=0):
+        ### TODO: Use "map" function instead of three lines of code
         queryUserIDs = []
         if isinstance(userIDs, list):
             for userID in userIDs:
@@ -88,6 +89,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if len(query) == 0:
             return []
 
+        ### TODO: Do sorting on Mongo as a custom sort function?
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
         data = self._collection.find(user_query).limit(min(50, limit*4))
