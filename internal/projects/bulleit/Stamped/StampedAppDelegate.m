@@ -73,6 +73,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [recognizer release];
   [window_ addSubview:gridView_];
   [gridView_ release];
+  
+  UIImageView* corners = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corners_full"]];
+  [self.window addSubview:corners];
+  [corners release];
   [self.window makeKeyAndVisible];
 
   NSDictionary* userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
