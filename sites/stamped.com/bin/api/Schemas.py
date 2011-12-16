@@ -79,6 +79,7 @@ class TwitterAccountSchema(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
+        self.twitter_token          = SchemaElement(basestring)
         self.twitter_alerts_sent    = SchemaElement(bool)
 
 class FacebookAccountSchema(Schema):
@@ -86,6 +87,7 @@ class FacebookAccountSchema(Schema):
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
+        self.facebook_token         = SchemaElement(basestring)
         self.facebook_alerts_sent   = SchemaElement(bool)
 
 class DevicesSchema(Schema):

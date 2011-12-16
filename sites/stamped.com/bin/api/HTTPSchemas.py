@@ -193,17 +193,21 @@ class HTTPLinkedAccounts(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
+        self.twitter_token          = SchemaElement(basestring)
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
+        self.facebook_token         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
             schema.twitter_id           = self.twitter_id
             schema.twitter_screen_name  = self.twitter_screen_name
+            schema.twitter_token        = self.twitter_token
             schema.facebook_id          = self.facebook_id
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
+            schema.facebook_token       = self.facebook_token
         else:
             raise NotImplementedError
         return schema

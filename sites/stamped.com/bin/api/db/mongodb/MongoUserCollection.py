@@ -58,19 +58,19 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         except:
             return False
     
-    def lookupUsers(self, userIDs, screenNames, limit=0):
-        assert userIDs is None or isinstance(userIDs, list)
+    def lookupUsers(self, userIds, screenNames, limit=0):
+        assert userIds is None or isinstance(userIds, list)
         assert screenNames is None or isinstance(screenNames, list)
         
-        queryUserIDs = map(self._getObjectIdFromString, userIds) if userIDs else []
+        queryUserIds = map(self._getObjectIdFromString, userIds) if userIds else []
         queryScreenNames = map(lambda s: str(s).lower(), screenNames) if screenNames else []
         
-        user_id_query = {"_id": {"$in": queryUserIDs}}
+        user_id_query = {"_id": {"$in": queryUserIds}}
         screen_name_query = {"screen_name_lower": {"$in": queryScreenNames}}
         
-        if len(queryUserIDs) > 0 and len(queryScreenNames) > 0:
+        if len(queryUserIds) > 0 and len(queryScreenNames) > 0:
             query = { "$or": [user_id_query, screen_name_query]}
-        elif len(queryUserIDs) > 0:
+        elif len(queryUserIds) > 0:
             query = user_id_query
         elif len(queryScreenNames) > 0:
             query = screen_name_query

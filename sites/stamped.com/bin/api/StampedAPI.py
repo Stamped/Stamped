@@ -508,6 +508,52 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, linkedAccounts):
+
+        if linkedAccounts.facebook_token:
+            token = linkedAccounts.facebook_token
+
+            def getFacebook(accessToken, path, params={}):
+                baseurl = 'https://graph.facebook.com'
+                params['access_token'] = accessToken
+                params  = urllib.urlencode(params)
+                url     = "%s%s?%s" % (baseurl, path, params)
+                result  = json.load(urllib2.urlopen(url))
+
+                if 'error' in result:
+                    if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
+                        # OAuth exception
+                        raise
+                    raise
+
+            # Set user details
+            fbUser = getFacebook(token, '/me')
+            if 'name' not in fbUser or 'id' not in fbUser:
+                raise
+
+            linkedAccounts.facebook_name = fbUser['name']
+            linkedAccounts.facebook_id = fbUser['id']
+            linkedAccounts.facebook_screen_name = fbUser.pop('username', None)
+
+            # Alert Facebook followers
+            fbFriends = []
+            fbFriendIds = []
+            params = {}
+
+            while True:
+                result = getFacebook(token, '/me/friends', params)
+                fbFriends = fbFriends + result['data']
+                if 'paging' in result and 'next' in result['paging']:
+                    url = urlparse.urlparse(result['paging']['next'])
+                    params = dict([part.split('=') for part in url[4].split('&')])
+                    if 'offset' in params and int(params['offset']) == len(fbFriends):
+                        continue
+                break
+
+            for fbFriend in fbFriends:
+                fbFriendIds.append(fbFriend['id'])
+            
+            self.alertFollowersFromFacebook(authUserId, fbFriendIds)
+
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
         
         return True
@@ -2826,7 +2872,8 @@ class StampedAPI(AStampedAPI):
                     entity = entity2
                     self._googlePlaces.parseEntityDetail(details, entity)
                 elif entity is None:
-                    logs.warn("_convertSearchId: unable to find search_id in tempentities (%s) and unable to convert google places reference" % search_id)
+                    logs.warn("_convertSearchId: unable to find search_id in tempentities (%s) " \
+                                "and unable to convert google places reference" % search_id)
                 elif entity2 is None:
                     logs.warn("_convertSearchId: unable to convert google places reference (%s)" % search_id)
                 else:
