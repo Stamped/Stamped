@@ -110,28 +110,34 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
             "oauth_token": self.tokenB['access_token'],
             "quality": 1
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[0]['comment_preview']), 11)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertEqual(len(x[0]['comment_preview']), 11), 
+        ])
+        
         path = "collections/inbox.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "quality": 2
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[0]['comment_preview']), 10)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertEqual(len(x[0]['comment_preview']), 10), 
+        ])
+        
         path = "collections/inbox.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "quality": 3
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[0]['comment_preview']), 4)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertEqual(len(x[0]['comment_preview']), 4), 
+        ])
+        
         self.deleteComment(self.tokenA, self.commentC['comment_id'])
         self.deleteComment(self.tokenA, self.commentD['comment_id'])
         self.deleteComment(self.tokenA, self.commentE['comment_id'])
@@ -157,24 +163,32 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         data = {
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        for stamp in result:
-            if stamp['stamp_id'] == self.stampA['stamp_id']:
-                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue(stamp['is_liked'])
-
+        
+        def _validate_result(result):
+            self.assertEqual(len(result), 3)
+            
+            for stamp in result:
+                if stamp['stamp_id'] == self.stampA['stamp_id']:
+                    self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                    self.assertTrue(stamp['is_liked'])
+        
+        self.async(lambda: self.handleGET(path, data), _validate_result)
+        
         # User A should not have "is_liked"
         path = "collections/inbox.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        for stamp in result:
-            if stamp['stamp_id'] == self.stampA['stamp_id']:
-                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue(stamp['is_liked'] == False)
+        
+        def _validate_result2(result):
+            self.assertEqual(len(result), 3)
+            
+            for stamp in result:
+                if stamp['stamp_id'] == self.stampA['stamp_id']:
+                    self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                    self.assertTrue(stamp['is_liked'] == False)
+        
+        self.async(lambda: self.handleGET(path, data), _validate_result2)
     
     def test_fav(self):
         favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
@@ -184,26 +198,32 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         data = {
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
         
-        for stamp in result:
-            if stamp['stamp_id'] == self.stampA['stamp_id']:
-                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue(stamp['is_fav'])
-
+        def _validate_result(result):
+            self.assertEqual(len(result), 3)
+            
+            for stamp in result:
+                if stamp['stamp_id'] == self.stampA['stamp_id']:
+                    self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                    self.assertTrue(stamp['is_fav'])
+        
+        self.async(lambda: self.handleGET(path, data), _validate_result)
+        
         # User A should not have "is_fav"
         path = "collections/inbox.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        for stamp in result:
-            if stamp['stamp_id'] == self.stampA['stamp_id']:
-                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue(stamp['is_fav'] == False)
-
+        
+        def _validate_result2(result):
+            self.assertEqual(len(result), 3)
+            
+            for stamp in result:
+                if stamp['stamp_id'] == self.stampA['stamp_id']:
+                    self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                    self.assertTrue(stamp['is_fav'] == False)
+        
+        self.async(lambda: self.handleGET(path, data), _validate_result2)
         self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
 

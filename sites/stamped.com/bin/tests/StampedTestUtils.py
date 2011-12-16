@@ -25,12 +25,12 @@ class AStampedTestCase(unittest.TestCase):
         self.assertEqual(len(a), size)
     
     def async(self, func, assertions, retries=5, delay=0.5):
+        if not isinstance(assertions, (list, tuple)):
+            assertions = [ assertions ]
+        
         while True:
             try:
                 result = func()
-                
-                if not isinstance(assertions, (list, tuple)):
-                    assertions = [ assertions ]
                 
                 for assertion in assertions:
                     assertion(result)
