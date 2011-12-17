@@ -36,6 +36,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
+- (void)userSwipedRightOnNavBar:(UISwipeGestureRecognizer*)recognizer;
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, retain) UIImageView* gridView;
@@ -61,6 +62,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [BWQuincyManager sharedQuincyManager].autoSubmitCrashReport = YES;
   [self performRestKitMappings];
   [self customizeAppearance];
+  
+  UISwipeGestureRecognizer* swipeRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self
+                                                                                        action:@selector(userSwipedRightOnNavBar:)];
+  [self.navigationController.navigationBar addGestureRecognizer:swipeRecognizer];
+  [swipeRecognizer release];
   self.window.rootViewController = self.navigationController;
   gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
   gridView_.alpha = 0;
@@ -93,6 +99,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 #pragma mark - Gesture Recognizers.
+
+- (void)userSwipedRightOnNavBar:(UISwipeGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  [self.navigationController popToRootViewControllerAnimated:YES];
+}
 
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
