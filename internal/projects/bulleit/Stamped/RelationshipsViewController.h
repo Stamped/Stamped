@@ -19,6 +19,7 @@ typedef enum {
 } RelationshipType;
 
 @interface RelationshipsViewController : STViewController <RKObjectLoaderDelegate,
+                                                           RKRequestDelegate,
                                                            UITableViewDelegate,
                                                            UITableViewDataSource> {
  @private

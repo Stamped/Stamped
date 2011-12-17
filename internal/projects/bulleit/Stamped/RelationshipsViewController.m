@@ -15,17 +15,21 @@
 #import "ProfileViewController.h"
 #import "Util.h"
 
-
-static NSString* const kFriendsPath = @"/temp/friends.json";
-static NSString* const kFollowersPath = @"/temp/followers.json";
+static NSString* const kFriendIDsPath = @"/friendships/friends.json";
+static NSString* const kFollowerIDsPath = @"/friendships/followers.json";
+static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @interface RelationshipsViewController()
 - (void)loadRelationshipsFromNetwork;
+- (void)loadUserDataFromNetwork;
+
+@property (nonatomic, copy) NSArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* peopleArray;
 @end
 
 @implementation RelationshipsViewController
 
+@synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize peopleArray = peopleArray_;
 @synthesize user = user_;
 @synthesize tableView = tableView_;
@@ -39,6 +43,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 }
 
 - (void)dealloc {
+  self.userIDsToBeFetched = nil;
   self.peopleArray = nil;
   self.user = nil;
   self.tableView = nil;
@@ -72,10 +77,11 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  self.userIDsToBeFetched = nil;
   self.peopleArray = nil;
   self.user = nil;
   self.tableView = nil;
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -115,14 +121,42 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   return cell;
 }
 
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if (!response.isOK)
+    return;
+  
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser)
+    return;
+
+  if ([request.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kFollowerIDsPath].location != NSNotFound) {
+    NSError* error = NULL;
+    id responseObj = [response parsedBody:&error];
+    if (error) {
+      NSLog(@"Problem parsing response JSON: %@", error);
+    } else {
+      self.userIDsToBeFetched = (NSArray*)[responseObj objectForKey:@"user_ids"];
+      if (userIDsToBeFetched_.count > 0) {
+        [self loadUserDataFromNetwork];
+      } else {
+        self.userIDsToBeFetched = nil;
+      }
+    }
+  }
+}
+
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  self.peopleArray = nil;
-  NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
-                                                                   ascending:YES 
-                                                                    selector:@selector(localizedCaseInsensitiveCompare:)];
-  self.peopleArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser || [objectLoader.resourcePath rangeOfString:kUserLookupPath].location == NSNotFound)
+    return;
+  
+  self.userIDsToBeFetched = nil;
+  self.peopleArray = objects;
   [self.tableView reloadData];
 }
 
@@ -146,16 +180,27 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 #pragma mark - People
 
-- (void)loadRelationshipsFromNetwork {
-  NSString* path = relationshipType_ == RelationshipTypeFollowers ? kFollowersPath : kFriendsPath;
-  
+- (void)loadUserDataFromNetwork {
+  if (!userIDsToBeFetched_ || userIDsToBeFetched_.count == 0)
+    return;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
-  NSString* userID = user_.userID;
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
-  objectLoader.objectMapping = userMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"user_id", nil];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  NSUInteger userIDCount = userIDsToBeFetched_.count;
+  NSArray* subArray = [userIDsToBeFetched_ subarrayWithRange:NSMakeRange(0, MIN(100, userIDCount))];
+  objectLoader.params = [NSDictionary dictionaryWithObject:[subArray componentsJoinedByString:@","]
+                                                    forKey:@"user_ids"];
+  objectLoader.method = RKRequestMethodPOST;
   [objectLoader send];
+}
+
+- (void)loadRelationshipsFromNetwork {
+  NSString* path = relationshipType_ == RelationshipTypeFollowers ? kFollowerIDsPath : kFriendIDsPath;
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:path delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:user_.userID forKey:@"user_id"];
+  [request send];
 }
 
 @end
