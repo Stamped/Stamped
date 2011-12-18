@@ -107,7 +107,6 @@ typedef enum {
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
 @synthesize timestampLabel = timestampLabel_;
-@synthesize titleLabel = titleLabel_;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize subtitleLabel = subtitleLabel_;
 @synthesize currentUserImageView = currentUserImageView_;
@@ -134,7 +133,6 @@ typedef enum {
 - (void)dealloc {
   [stamp_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.titleLabel = nil;
   self.categoryImageView = nil;
   self.subtitleLabel = nil;
   self.bottomToolbar = nil;
@@ -161,8 +159,7 @@ typedef enum {
   self.alsoStampedByContainer = nil;
   self.alsoStampedByLabel = nil;
   self.alsoStampedByScrollView = nil;
-  if (headerView_)
-    headerView_.delegate = nil;
+  self.headerView.delegate = nil;
   self.headerView = nil;
   [super dealloc];
 }
@@ -187,8 +184,7 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  if (headerView_.inverted)
-    headerView_.inverted = NO;
+  headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
 }
 
@@ -242,7 +238,6 @@ typedef enum {
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.titleLabel = nil;
   self.categoryImageView = nil;
   self.subtitleLabel = nil;
   self.bottomToolbar = nil;
@@ -274,13 +269,6 @@ typedef enum {
 }
 
 - (void)setUpHeader {
-  NSString* fontString = @"TitlingGothicFBComp-Regular";
-  CGFloat fontSize = 36.0;
-
-  titleLabel_.font = [UIFont fontWithName:fontString size:fontSize];
-  titleLabel_.text = stamp_.entityObject.title;
-  titleLabel_.textColor = [UIColor stampedDarkGrayColor];
-  titleLabel_.hidden = YES;
   subtitleLabel_.hidden = YES;
   categoryImageView_.hidden = YES;
   

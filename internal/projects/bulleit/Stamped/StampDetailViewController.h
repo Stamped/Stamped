@@ -39,7 +39,6 @@ extern NSString* const kRemoveStampPath;
 - (IBAction)handleTodoButtonTap:(id)sender;
 - (IBAction)handleShareButtonTap:(id)sender;
 - (IBAction)handleLikeButtonTap:(id)sender;
-- (IBAction)handleEntityTap:(id)sender;
 - (IBAction)sendButtonPressed:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -58,7 +57,6 @@ extern NSString* const kRemoveStampPath;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* stampButton;
 @property (nonatomic, retain) IBOutlet UILabel* stampLabel;
-@property (nonatomic, retain) IBOutlet UILabel* titleLabel;
 @property (nonatomic, retain) IBOutlet UILabel* subtitleLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
