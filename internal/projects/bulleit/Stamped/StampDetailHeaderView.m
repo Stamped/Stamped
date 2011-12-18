@@ -17,6 +17,7 @@
 #import "UIColor+Stamped.h"
 
 @interface StampDetailHeaderView ()
+- (void)commonInit;
 
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, retain) UIImage* stampImageInverted;
@@ -53,59 +54,71 @@
 
 - (id)initWithFrame:(CGRect)aFrame {
   self = [super initWithFrame:aFrame];
-  if (self) {
-    inverted_ = NO;
-    self.backgroundColor = [UIColor clearColor];
-    CGColorRef color1 = [UIColor colorWithRed:0.02 green:0.55 blue:0.96 alpha:1.0].CGColor;
-    CGColorRef color2 = [UIColor colorWithRed:0.0  green:0.37 blue:0.91 alpha:1.0].CGColor;
-    CGFloat locations[] = {0, 1};
-    self.gradientRef = CGGradientRetain(CGGradientCreateWithColors(CGColorSpaceCreateDeviceRGB(), 
-                                                                   (CFArrayRef)[NSArray arrayWithObjects:(id)color1, (id)color2, nil], 
-                                                                   locations));
-    self.gradientLayer = [CAGradientLayer layer];
-    gradientLayer_.colors = [NSArray arrayWithObjects:(id)color1, (id)color2, nil];
-    gradientLayer_.frame = self.bounds;
-    gradientLayer_.hidden = YES;
-    
-    titleLayer_ = [[CATextLayer alloc] init];
-    titleLayer_.truncationMode = kCATruncationEnd;
-    titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
-    // So the ellipsis draws the way we like it.
-    titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);
-    titleLayer_.fontSize = 24;
-    titleLayer_.hidden = YES;
-    
-    CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
-    CGRect frame = CGRectMake(15, ascender, aFrame.size.width - 50, 56);
+  if (self)
+    [self commonInit];
 
-    titleLayer_.frame = frame;
-    NSDictionary* newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
-    titleLayer_.actions = newActions;
-    [newActions release];
-    
-    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
-    categoryImageView_.contentMode = UIViewContentModeLeft;
-    categoryImageView_.backgroundColor = [UIColor clearColor];
-    
-    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-    subtitleLabel_.backgroundColor = [UIColor clearColor];
-    subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
-    subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
-    subtitleLabel_.textColor = [UIColor stampedGrayColor];
-    subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
-    
-    self.arrowLayer = [CALayer layer];
-    [arrowLayer_ setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
-    [arrowLayer_ setFrame:CGRectMake(287, 20, 23, 23)];
-    
-    [self.layer addSublayer:gradientLayer_];
-    [self.layer addSublayer:titleLayer_];
-    [self.layer addSublayer:arrowLayer_];
-    [self addSubview:categoryImageView_];
-    [self addSubview:subtitleLabel_];
-  }
   return self;
+}
+
+- (id)initWithCoder:(NSCoder*)aDecoder {
+  self = [super initWithCoder:aDecoder];
+  if (self)
+    [self commonInit];
+
+  return self;
+}
+
+- (void)commonInit {
+  inverted_ = NO;
+  self.backgroundColor = [UIColor clearColor];
+  CGColorRef color1 = [UIColor colorWithRed:0.02 green:0.55 blue:0.96 alpha:1.0].CGColor;
+  CGColorRef color2 = [UIColor colorWithRed:0.0  green:0.37 blue:0.91 alpha:1.0].CGColor;
+  CGFloat locations[] = {0, 1};
+  self.gradientRef = CGGradientRetain(CGGradientCreateWithColors(CGColorSpaceCreateDeviceRGB(), 
+                                                                 (CFArrayRef)[NSArray arrayWithObjects:(id)color1, (id)color2, nil], 
+                                                                 locations));
+  self.gradientLayer = [CAGradientLayer layer];
+  gradientLayer_.colors = [NSArray arrayWithObjects:(id)color1, (id)color2, nil];
+  gradientLayer_.frame = self.bounds;
+  gradientLayer_.hidden = YES;
+  
+  titleLayer_ = [[CATextLayer alloc] init];
+  titleLayer_.truncationMode = kCATruncationEnd;
+  titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
+  titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+  // So the ellipsis draws the way we like it.
+  titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);
+  titleLayer_.fontSize = 24;
+  titleLayer_.hidden = YES;
+
+  CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
+  CGRect frame = CGRectMake(15, ascender, self.frame.size.width - 50, 56);
+
+  titleLayer_.frame = frame;
+  NSDictionary* newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
+  titleLayer_.actions = newActions;
+  [newActions release];
+  
+  categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
+  categoryImageView_.contentMode = UIViewContentModeLeft;
+  categoryImageView_.backgroundColor = [UIColor clearColor];
+  
+  subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  subtitleLabel_.backgroundColor = [UIColor clearColor];
+  subtitleLabel_.lineBreakMode = UILineBreakModeTailTruncation;
+  subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
+  subtitleLabel_.textColor = [UIColor stampedGrayColor];
+  subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
+  
+  self.arrowLayer = [CALayer layer];
+  [arrowLayer_ setContents:(id)[UIImage imageNamed:@"gray_disclosure_arrow"].CGImage];
+  [arrowLayer_ setFrame:CGRectMake(287, 20, 23, 23)];
+  
+  [self.layer addSublayer:gradientLayer_];
+  [self.layer addSublayer:titleLayer_];
+  [self.layer addSublayer:arrowLayer_];
+  [self addSubview:categoryImageView_];
+  [self addSubview:subtitleLabel_];
 }
 
 - (void)dealloc {
@@ -142,7 +155,7 @@
     stamp_ = [stamp retain];
     if (stamp) {
       self.stampImage = [stamp_.user stampImageWithSize:StampImageSize46];
-      self.stampImageInverted = [Util whiteMaskedImageUsingImage:self.stampImage];
+      self.stampImageInverted = [stamp_.user invertedStampImageWithSize:StampImageSize46];
       self.title = stamp.entityObject.title;
       subtitleLabel_.text = stamp_.entityObject.subtitle;
       categoryImageView_.image = stamp_.entityObject.stampDetailCategoryImage;
