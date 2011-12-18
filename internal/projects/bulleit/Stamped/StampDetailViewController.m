@@ -108,7 +108,6 @@ typedef enum {
 @synthesize numLikes = numLikes_;
 @synthesize timestampLabel = timestampLabel_;
 @synthesize categoryImageView = categoryImageView_;
-@synthesize subtitleLabel = subtitleLabel_;
 @synthesize currentUserImageView = currentUserImageView_;
 @synthesize commentTextField = commentTextField_;
 @synthesize sendButton = sendButton_;
@@ -134,7 +133,6 @@ typedef enum {
   [stamp_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.categoryImageView = nil;
-  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -239,7 +237,6 @@ typedef enum {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.categoryImageView = nil;
-  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -269,7 +266,6 @@ typedef enum {
 }
 
 - (void)setUpHeader {
-  subtitleLabel_.hidden = YES;
   categoryImageView_.hidden = YES;
   
   CGRect frame = CGRectMake(0, 0, scrollView_.frame.size.width, 68);

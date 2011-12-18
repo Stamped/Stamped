@@ -57,7 +57,6 @@ extern NSString* const kRemoveStampPath;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* stampButton;
 @property (nonatomic, retain) IBOutlet UILabel* stampLabel;
-@property (nonatomic, retain) IBOutlet UILabel* subtitleLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
 @property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
