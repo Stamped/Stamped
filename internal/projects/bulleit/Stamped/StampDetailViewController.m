@@ -52,7 +52,6 @@ typedef enum {
 
 
 @interface StampDetailViewController ()
-- (void)setUpHeader;
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)addUserGradientBackground;
@@ -81,7 +80,7 @@ typedef enum {
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
 @property (nonatomic, retain) NSMutableArray* commentViews;
-@property (nonatomic, retain) StampDetailHeaderView* headerView;
+@property (nonatomic, retain) Stamp* stamp;
 @end
 
 @implementation StampDetailViewController
@@ -107,7 +106,6 @@ typedef enum {
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
 @synthesize timestampLabel = timestampLabel_;
-@synthesize categoryImageView = categoryImageView_;
 @synthesize currentUserImageView = currentUserImageView_;
 @synthesize commentTextField = commentTextField_;
 @synthesize sendButton = sendButton_;
@@ -118,21 +116,20 @@ typedef enum {
 @synthesize alsoStampedByContainer = alsoStampedByContainer_;
 @synthesize alsoStampedByScrollView = alsoStampedByScrollView_;
 @synthesize headerView = headerView_;
-
+@synthesize stamp = stamp_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
-    stamp_ = [stamp retain];
+    self.stamp = stamp;
     self.commentViews = [NSMutableArray array];
   }
   return self;
 }
 
 - (void)dealloc {
-  [stamp_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.categoryImageView = nil;
+  self.stamp = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -195,7 +192,6 @@ typedef enum {
   [super viewDidLoad];
 
   [self setUpToolbar];
-  [self setUpHeader];
 
   if ([[AccountManager sharedManager].currentUser.userID isEqualToString:stamp_.user.userID]) {
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
@@ -206,13 +202,14 @@ typedef enum {
     [rightButton release];
   }
 
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:
-                                                                        stamp_.entityObject.title]
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:stamp_.entityObject.title]
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
+
+  headerView_.stamp = stamp_;
 
   activityView_.layer.shadowOpacity = 0.1;
   activityView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -236,7 +233,6 @@ typedef enum {
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.categoryImageView = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -264,18 +260,6 @@ typedef enum {
   self.headerView.delegate = nil;
   self.headerView = nil;
 }
-
-- (void)setUpHeader {
-  categoryImageView_.hidden = YES;
-  
-  CGRect frame = CGRectMake(0, 0, scrollView_.frame.size.width, 68);
-  headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
-  headerView_.stamp = stamp_;
-  headerView_.delegate = self;
-  
-  [scrollView_ insertSubview:headerView_ belowSubview:activityView_];
-}
-
 
 - (void)setUpToolbar {
   if (stamp_.entityObject.favorite) {

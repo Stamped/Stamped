@@ -32,7 +32,6 @@
 
 @end
 
-
 @implementation StampDetailHeaderView
 
 @synthesize inverted = inverted_;
@@ -51,7 +50,6 @@
 @synthesize delegate = delegate_;
 @synthesize arrowLayer = arrowLayer_;
 @synthesize hideArrow = hideArrow_;
-
 
 - (id)initWithFrame:(CGRect)aFrame {
   self = [super initWithFrame:aFrame];

@@ -12,16 +12,16 @@
 @class Stamp;
 @class Entity;
 
-@protocol StampDetailHeaderViewDelegate <NSObject>
+@protocol StampDetailHeaderViewDelegate
 - (IBAction)handleEntityTap:(id)sender;
 @end
 
 @interface StampDetailHeaderView : UIView
 
+@property (nonatomic, assign) IBOutlet id<StampDetailHeaderViewDelegate> delegate;
 @property (nonatomic, assign) BOOL inverted;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, copy) NSString* title;
-@property (nonatomic, assign) id<StampDetailHeaderViewDelegate> delegate;
 @property (nonatomic, assign) BOOL hideArrow;
 
 - (void)setEntity:(Entity*)entity;

@@ -65,16 +65,21 @@
 						<int key="NSvFlags">319</int>
 						<object class="NSMutableArray" key="NSSubviews">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUIImageView" id="43189682">
+							<object class="IBUIView" id="895070888">
 								<reference key="NSNextResponder" ref="490942180"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{17, 46}, {15, 12}}</string>
+								<string key="NSFrameSize">{320, 68}</string>
 								<reference key="NSSuperview" ref="490942180"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
-								<string key="NSReuseIdentifierKey">_NS:363</string>
-								<int key="IBUIContentMode">1</int>
-								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<reference key="NSNextKeyView" ref="749710472"/>
+								<string key="NSReuseIdentifierKey">_NS:196</string>
+								<object class="NSColor" key="IBUIBackgroundColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MQA</bytes>
+									<object class="NSColorSpace" key="NSCustomColorSpace" id="66764138">
+										<int key="NSID">2</int>
+									</object>
+								</object>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
 							<object class="IBUIView" id="749710472">
@@ -124,9 +129,7 @@
 										<object class="NSColor" key="IBUIBackgroundColor">
 											<int key="NSColorSpace">3</int>
 											<bytes key="NSWhite">MQA</bytes>
-											<object class="NSColorSpace" key="NSCustomColorSpace" id="66764138">
-												<int key="NSID">2</int>
-											</object>
+											<reference key="NSCustomColorSpace" ref="66764138"/>
 										</object>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 									</object>
@@ -178,7 +181,7 @@
 													<int key="traits">0</int>
 													<double key="pointSize">14</double>
 												</object>
-												<object class="NSFont" key="IBUIFont" id="6319153">
+												<object class="NSFont" key="IBUIFont" id="928154640">
 													<string key="NSName">Helvetica</string>
 													<double key="NSSize">14</double>
 													<int key="NSfFlags">16</int>
@@ -312,7 +315,7 @@
 															<int key="type">1</int>
 															<double key="pointSize">14</double>
 														</object>
-														<reference key="IBUIFont" ref="6319153"/>
+														<reference key="IBUIFont" ref="928154640"/>
 													</object>
 													<object class="IBUIView" id="592749099">
 														<reference key="NSNextResponder" ref="264081461"/>
@@ -507,7 +510,7 @@
 						<string key="NSFrame">{{0, 4}, {320, 363}}</string>
 						<reference key="NSSuperview" ref="880728759"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="43189682"/>
+						<reference key="NSNextKeyView" ref="895070888"/>
 						<reference key="IBUIBackgroundColor" ref="124712397"/>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -948,14 +951,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">categoryImageView</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="43189682"/>
-					</object>
-					<int key="connectionID">97</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">commentTextField</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="28390604"/>
@@ -1028,6 +1023,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">headerView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="895070888"/>
+					</object>
+					<int key="connectionID">129</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="490942180"/>
 						<reference key="destination" ref="372490531"/>
@@ -1086,6 +1089,14 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">110</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="895070888"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">130</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1157,8 +1168,8 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="749710472"/>
-							<reference ref="43189682"/>
 							<reference ref="194365560"/>
+							<reference ref="895070888"/>
 						</object>
 						<reference key="parent" ref="880728759"/>
 					</object>
@@ -1293,12 +1304,6 @@
 						<string key="objectName">Timestamp Label</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">94</int>
-						<reference key="object" ref="43189682"/>
-						<reference key="parent" ref="490942180"/>
-						<string key="objectName">Category Image</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">48</int>
 						<reference key="object" ref="288918524"/>
 						<reference key="parent" ref="749710472"/>
@@ -1384,6 +1389,12 @@
 						<reference key="parent" ref="749710472"/>
 						<string key="objectName">White top border</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">128</int>
+						<reference key="object" ref="895070888"/>
+						<reference key="parent" ref="490942180"/>
+						<string key="objectName">Header View</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1411,6 +1422,8 @@
 					<string>122.IBPluginDependency</string>
 					<string>124.IBPluginDependency</string>
 					<string>125.IBPluginDependency</string>
+					<string>128.CustomClassName</string>
+					<string>128.IBPluginDependency</string>
 					<string>14.IBPluginDependency</string>
 					<string>14.IBUserGuides</string>
 					<string>15.CustomClassName</string>
@@ -1446,7 +1459,6 @@
 					<string>78.IBPluginDependency</string>
 					<string>87.IBPluginDependency</string>
 					<string>91.IBPluginDependency</string>
-					<string>94.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1472,6 +1484,8 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>StampDetailHeaderView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
@@ -1512,7 +1526,6 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1527,7 +1540,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">127</int>
+			<int key="maxID">130</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1565,6 +1578,25 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/STViewController.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">StampDetailHeaderView</string>
+					<string key="superclassName">UIView</string>
+					<object class="NSMutableDictionary" key="outlets">
+						<string key="NS.key.0">delegate</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<string key="NS.key.0">delegate</string>
+						<object class="IBToOneOutletInfo" key="NS.object.0">
+							<string key="name">delegate</string>
+							<string key="candidateClassName">id</string>
+						</object>
+					</object>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/StampDetailHeaderView.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -1634,12 +1666,12 @@
 							<string>alsoStampedByLabel</string>
 							<string>alsoStampedByScrollView</string>
 							<string>bottomToolbar</string>
-							<string>categoryImageView</string>
 							<string>commentTextField</string>
 							<string>commenterImageView</string>
 							<string>commenterNameLabel</string>
 							<string>commentsView</string>
 							<string>currentUserImageView</string>
+							<string>headerView</string>
 							<string>likeButton</string>
 							<string>likeLabel</string>
 							<string>mainCommentContainer</string>
@@ -1651,7 +1683,6 @@
 							<string>stampButton</string>
 							<string>stampLabel</string>
 							<string>stampedLabel</string>
-							<string>subtitleLabel</string>
 							<string>timestampLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -1663,12 +1694,12 @@
 							<string>UILabel</string>
 							<string>UIScrollView</string>
 							<string>UIView</string>
-							<string>UIImageView</string>
 							<string>UITextField</string>
 							<string>UserImageView</string>
 							<string>UILabel</string>
 							<string>UIView</string>
 							<string>UserImageView</string>
+							<string>StampDetailHeaderView</string>
 							<string>UIButton</string>
 							<string>UILabel</string>
 							<string>UIView</string>
@@ -1678,7 +1709,6 @@
 							<string>UIButton</string>
 							<string>UILabel</string>
 							<string>UIButton</string>
-							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
@@ -1695,12 +1725,12 @@
 							<string>alsoStampedByLabel</string>
 							<string>alsoStampedByScrollView</string>
 							<string>bottomToolbar</string>
-							<string>categoryImageView</string>
 							<string>commentTextField</string>
 							<string>commenterImageView</string>
 							<string>commenterNameLabel</string>
 							<string>commentsView</string>
 							<string>currentUserImageView</string>
+							<string>headerView</string>
 							<string>likeButton</string>
 							<string>likeLabel</string>
 							<string>mainCommentContainer</string>
@@ -1712,7 +1742,6 @@
 							<string>stampButton</string>
 							<string>stampLabel</string>
 							<string>stampedLabel</string>
-							<string>subtitleLabel</string>
 							<string>timestampLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -1746,10 +1775,6 @@
 								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">categoryImageView</string>
-								<string key="candidateClassName">UIImageView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">commentTextField</string>
 								<string key="candidateClassName">UITextField</string>
 							</object>
@@ -1768,6 +1793,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">currentUserImageView</string>
 								<string key="candidateClassName">UserImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">headerView</string>
+								<string key="candidateClassName">StampDetailHeaderView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">likeButton</string>
@@ -1811,10 +1840,6 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">stampedLabel</string>
-								<string key="candidateClassName">UILabel</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">subtitleLabel</string>
 								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
