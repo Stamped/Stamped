@@ -6,6 +6,8 @@
 //  Copyright (c) 2011 Stamped. All rights reserved.
 //
 
+#import <Twitter/Twitter.h>
+
 #import "SocialManager.h"
 #import "GTMOAuthAuthentication.h"
 #import "STOAuthViewController.h"

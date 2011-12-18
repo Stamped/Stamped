@@ -8,11 +8,6 @@
 
 #import "LearnMoreView.h"
 
-@interface LearnMoreView ()
-
-
-@end
-
 static CGFloat const kSlide0X = 0;
 static CGFloat const kSlide1X = 380;
 static CGFloat const kSlide2X = 760;
@@ -22,24 +17,14 @@ static CGFloat const kSlideWidth = 380;
 
 @implementation LearnMoreView
 
-
 @synthesize scrollView;
-
-
-- (id)initWithFrame:(CGRect)frame
-{
-  self = [super initWithFrame:frame];
-  if (self) { }
-  return self;
-}
 
 - (void)dealloc {
   self.scrollView.delegate = nil;
+  [super dealloc];
 }
 
 - (void)awakeFromNib {
-  
-  
   NSArray* bgImages = [NSArray arrayWithObjects:[UIImage imageNamed:@"learnmore_00"],
                        [UIImage imageNamed:@"learnmore_01_stars"],
                        [UIImage imageNamed:@"learnmore_02_stamp"],
@@ -59,15 +44,9 @@ static CGFloat const kSlideWidth = 380;
     
     [subview release];
   }
-  
+
   self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame) * bgImages.count,
-                                           CGRectGetHeight(self.scrollView.frame)); 
-  
-  
+                                           CGRectGetHeight(self.scrollView.frame));
 }
-
-
-
-
 
 @end

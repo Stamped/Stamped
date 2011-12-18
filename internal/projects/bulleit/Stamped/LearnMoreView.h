@@ -7,12 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <QuartzCore/QuartzCore.h>
 
-@class LearnMoreChoreographer;
-
-@interface LearnMoreView : UIView {
-}
+@interface LearnMoreView : UIView
 
 @property (nonatomic, retain) IBOutlet UIScrollView*  scrollView;
 
