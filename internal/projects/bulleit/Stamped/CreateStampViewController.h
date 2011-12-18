@@ -37,11 +37,9 @@
 @property (nonatomic, retain) User* creditedUser;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UILabel* titleLabel;
-@property (nonatomic, retain) IBOutlet UILabel* detailLabel;
+@property (nonatomic, retain) IBOutlet StampDetailHeaderView* headerView;
 @property (nonatomic, retain) IBOutlet UILabel* reasoningLabel;
 @property (nonatomic, retain) IBOutlet UITextView* reasoningTextView;
-@property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UIView* ribbonedContainerView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
@@ -54,11 +52,9 @@
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
 @property (nonatomic, retain) IBOutlet UIButton* fbButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
-@property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 
-- (IBAction)handleEntityTap:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;
 - (IBAction)fbButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;

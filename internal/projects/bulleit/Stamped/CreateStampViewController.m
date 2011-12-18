@@ -69,7 +69,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
 @property (nonatomic, assign) BOOL isSigningInToFB; // Used to handle edge case wherein user doesn't complete fb login.
-@property (nonatomic, retain) StampDetailHeaderView* headerView;
 @end
 
 @implementation CreateStampViewController
@@ -78,12 +77,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize creditedUser = creditedUser_;
 @synthesize newEntity = newEntity_;
 @synthesize detailedEntity = detailedEntity_;
-
 @synthesize scrollView = scrollView_;
-@synthesize titleLabel = titleLabel_;
-@synthesize detailLabel = detailLabel_;
 @synthesize reasoningLabel = reasoningLabel_;
-@synthesize categoryImageView = categoryImageView_;
 @synthesize userImageView = userImageView_;
 @synthesize ribbonedContainerView = ribbonedContainerView_;
 @synthesize reasoningTextView = reasoningTextView_;
@@ -92,7 +87,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize stampItButton = stampItButton_;
 @synthesize creditTextField = creditTextField_;
 @synthesize editButton = editButton_;
-@synthesize disclosureButton = disclosureButton_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize backgroundImageView = backgroundImageView_;
 @synthesize stampPhoto = stampPhoto_;
@@ -164,9 +158,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.firstResponder = nil;
   self.objectToStamp = nil;
   self.scrollView = nil;
-  self.titleLabel = nil;
-  self.detailLabel = nil;
-  self.categoryImageView = nil;
   self.reasoningLabel = nil;
   self.userImageView = nil;
   self.reasoningTextView = nil;
@@ -181,7 +172,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
-  self.disclosureButton = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
   self.detailedEntity = nil;
@@ -288,33 +278,20 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
   self.reasoningTextView.inputAccessoryView = accessoryView;
   [accessoryView release];
-  
-  
-  CGRect frame = CGRectMake(0, 4, scrollView_.frame.size.width, 68);
-  if (newEntity_)
-    frame.size.width -= 40; // Make room for edit button.
-  headerView_ = [[StampDetailHeaderView alloc] initWithFrame:frame];
-  [headerView_ setEntity:objectToStamp_];
-  headerView_.delegate = self;
-  [scrollView_ insertSubview:headerView_ belowSubview:titleLabel_];
-  
+
+   // Make room for edit button.
+  //if (newEntity_)
+
+  //  headerView_.frame = CGRectOffset(CGRectInset(headerView_.frame, -40, 0), 40, 0);
   editButton_.hidden = !newEntity_;
   headerView_.hideArrow = newEntity_;
-
-  titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
-  titleLabel_.textColor = [UIColor stampedDarkGrayColor];
-  titleLabel_.hidden = YES;
-  detailLabel_.hidden = YES;
-  categoryImageView_.hidden = YES;
-  disclosureButton_.hidden = YES;
+  [headerView_ setEntity:objectToStamp_];
   
   stampLayer_ = [[CALayer alloc] init];
   stampLayer_.contents = (id)[[AccountManager sharedManager].currentUser stampImageWithSize:StampImageSize46].CGImage;
   stampLayer_.opacity = 0.0;
   [scrollView_.layer insertSublayer:stampLayer_ below:headerView_.layer];
   [stampLayer_ release];
-
-  detailLabel_.textColor = [UIColor stampedGrayColor];
 
   // Place the reasoning label (fake placeholder) within the TextView.
   reasoningLabel_.textColor = [UIColor stampedGrayColor];
@@ -403,13 +380,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)viewDidUnload {
   self.reasoningText = reasoningTextView_.text;
   self.creditedUserText = [creditPickerController_.usersSeparatedByCommas stringByReplacingOccurrencesOfString:@"," withString:@" "];
-  [[NSNotificationCenter defaultCenter] removeObserver:self]; 
-  [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.scrollView = nil;
-  self.titleLabel = nil;
-  self.detailLabel = nil;
-  self.categoryImageView = nil;
   self.reasoningLabel = nil;
   self.userImageView = nil;
   self.reasoningTextView = nil;
@@ -424,23 +397,19 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
-  self.disclosureButton = nil;
   stampsRemainingLayer_ = nil;
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  [super viewDidUnload];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
-  detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
-
+  // In case there were edits.
   [headerView_ setEntity:objectToStamp_];
-
-  if (headerView_.inverted)
-    headerView_.inverted = NO;
+  headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
   
   CGRect stampFrame = [headerView_ stampFrame];

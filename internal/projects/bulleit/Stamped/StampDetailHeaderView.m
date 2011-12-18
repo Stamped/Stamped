@@ -89,11 +89,9 @@
   // So the ellipsis draws the way we like it.
   titleLayer_.font = CTFontCreateWithName((CFStringRef)@"TitlingGothicFBComp-Regular", 0, NULL);
   titleLayer_.fontSize = 24;
-  titleLayer_.hidden = YES;
 
   CGFloat ascender = ceilf(CTFontGetAscent(titleLayer_.font)) + 1;
   CGRect frame = CGRectMake(15, ascender, self.frame.size.width - 50, 56);
-
   titleLayer_.frame = frame;
   NSDictionary* newActions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
   titleLayer_.actions = newActions;
@@ -115,7 +113,6 @@
   [arrowLayer_ setFrame:CGRectMake(287, 20, 23, 23)];
   
   [self.layer addSublayer:gradientLayer_];
-  [self.layer addSublayer:titleLayer_];
   [self.layer addSublayer:arrowLayer_];
   [self addSubview:categoryImageView_];
   [self addSubview:subtitleLabel_];
@@ -169,6 +166,12 @@
 - (void)setEntity:(Entity*)entity {
   self.stampImage = nil;
   self.stampImageInverted = nil;
+  if (hideArrow_) {
+    CGRect titleFrame = titleLayer_.frame;
+    titleFrame.size.width = 250;
+    titleLayer_.frame = titleFrame;
+  }
+
   self.title = [entity valueForKey:@"title"];
   subtitleLabel_.text = [entity valueForKey:@"subtitle"];
   categoryImageView_.image = [entity valueForKey:@"stampDetailCategoryImage"];
@@ -204,8 +207,7 @@
       titleAttrStringInverted_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
       
       self.titleLayer.string = self.titleAttrString;
-      
-      
+
       CTFontRef ellipsisFont = CTFontCreateWithName((CFStringRef)fontString, 24, NULL);
       NSMutableDictionary* ellipsisAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                                  (id)ellipsisFont, (id)kCTFontAttributeName,
@@ -216,7 +218,7 @@
                                                                                                                        attributes:ellipsisAttributes] autorelease]);
       
       CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self.titleAttrString);
-      CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, 270, kCTLineTruncationEnd, ellipsisLine);
+      CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, CGRectGetWidth(titleLayer_.frame), kCTLineTruncationEnd, ellipsisLine);
       
       CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
       CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
@@ -225,7 +227,7 @@
       if (ligatureCt > 0)
         lastCharIndex += ligatureCt;
       CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
-      CGFloat width = fmin(self.frame.size.width - 56, offset);
+      CGFloat width = fmin(CGRectGetWidth(self.frame) - 65, offset);
       
       // Subtitle.
       CFRelease(line);
@@ -248,12 +250,14 @@
   if (!title_) 
     return;
   
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+
   if (inverted_) {
     CGPoint top = CGPointMake(160, 0);
     CGPoint bottom = CGPointMake(160, self.bounds.size.height);
-    
+
     CGContextDrawLinearGradient(UIGraphicsGetCurrentContext(), gradientRef_, top, bottom, 0);
-    
+
     [CATransaction begin];
     [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
       [titleLayer_ setString:titleAttrStringInverted_];
@@ -263,10 +267,10 @@
       subtitleLabel_.highlighted = YES;
     [CATransaction commit];
     
-    CGContextSaveGState(UIGraphicsGetCurrentContext());
-    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
-    [titleLayer_ drawInContext:UIGraphicsGetCurrentContext()];
-    CGContextRestoreGState(UIGraphicsGetCurrentContext());
+    CGContextSaveGState(ctx);
+    CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
+    [titleLayer_ drawInContext:ctx];
+    CGContextRestoreGState(ctx);
     [stampImageInverted_ drawInRect:stampFrame_];
   } else {
     [CATransaction begin];
@@ -278,20 +282,18 @@
       subtitleLabel_.highlighted = NO;
     [CATransaction commit];
     
-    CGContextSaveGState(UIGraphicsGetCurrentContext());
-    CGContextTranslateCTM(UIGraphicsGetCurrentContext(), titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
-    [titleLayer_ drawInContext:UIGraphicsGetCurrentContext()];
-    CGContextRestoreGState(UIGraphicsGetCurrentContext());
+    CGContextSaveGState(ctx);
+    CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
+    [titleLayer_ drawInContext:ctx];
+    CGContextRestoreGState(ctx);
     [stampImage_ drawInRect:stampFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
   }
 }
 
 - (void)setHideArrow:(BOOL)hideArrow {
   hideArrow_ = hideArrow;
-  if (hideArrow_)
-    arrowLayer_.hidden = YES;
-  else
-    arrowLayer_.hidden = NO;
+
+  arrowLayer_.hidden = hideArrow;
 }
 
 
