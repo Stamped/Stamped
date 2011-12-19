@@ -1199,6 +1199,7 @@
 		7ECF3DB0145EF47800A1CF38 /* tab_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3DAF145EF47700A1CF38 /* tab_bar_bg@2x.png */; };
 		7ED043E5149FC9E500E46284 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF9EACF149FC5B900E5A13C /* libRestKit.a */; };
 		7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
+		7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
 		7ED2824714914ABA0086FF18 /* BWQuincyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2824314914ABA0086FF18 /* BWQuincyManager.m */; };
 		7ED2824814914ABA0086FF18 /* BWQuincyManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2824314914ABA0086FF18 /* BWQuincyManager.m */; };
 		7ED2824914914ABA0086FF18 /* CrashReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED2824414914ABA0086FF18 /* CrashReporter.framework */; };
@@ -1277,8 +1278,6 @@
 		7EF25E3F148EE0C3004E4F11 /* column-grid@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */; };
 		7EF49996140418E20071871D /* gray_disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */; };
 		7EF9EAD8149FC7FC00E5A13C /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF9EACF149FC5B900E5A13C /* libRestKit.a */; };
-		7EF9EAD9149FC7FC00E5A13C /* RestKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF9EAD3149FC5B900E5A13C /* RestKit.framework */; };
-		7EF9EADC149FC81000E5A13C /* GTMOAuth in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFC1141D29EC00772F11 /* GTMOAuth */; };
 		7EFA58331413E39B007ADA64 /* delete_circle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA58321413E39B007ADA64 /* delete_circle@2x.png */; };
 		7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A013F865C600589E11 /* PeopleViewController.m */; };
 		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
@@ -2354,9 +2353,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EF9EADC149FC81000E5A13C /* GTMOAuth in Frameworks */,
+				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
 				7EF9EAD8149FC7FC00E5A13C /* libRestKit.a in Frameworks */,
-				7EF9EAD9149FC7FC00E5A13C /* RestKit.framework in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
 				7E589422147C468B002268C4 /* MessageUI.framework in Frameworks */,
 				7E589423147C468B002268C4 /* Twitter.framework in Frameworks */,
@@ -3165,7 +3163,6 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				7ED043E6149FCA3E00E46284 /* libxml2.dylib */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -3187,6 +3184,7 @@
 		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7ED043E6149FCA3E00E46284 /* libxml2.dylib */,
 				7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */,
 				7EB03FD314672B40004F7A1C /* MessageUI.framework */,
 				7E99C9B81458B4E000B116AC /* Twitter.framework */,
