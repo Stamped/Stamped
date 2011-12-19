@@ -8,8 +8,6 @@
 
 #import "CreditsViewController.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "AccountManager.h"
 #import "CreditTableViewCell.h"
 #import "Entity.h"

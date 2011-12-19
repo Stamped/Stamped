@@ -8,8 +8,6 @@
 
 #import "FriendshipManager.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "AccountManager.h"
 #import "Stamp.h"
 #import "User.h"

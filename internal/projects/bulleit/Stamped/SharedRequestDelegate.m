@@ -8,8 +8,6 @@
 
 #import "SharedRequestDelegate.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "AccountManager.h"
 #import "Comment.h"
 #import "Stamp.h"

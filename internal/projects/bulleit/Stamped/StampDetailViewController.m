@@ -10,7 +10,6 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 #import <Twitter/Twitter.h>
 
 #import "AccountManager.h"

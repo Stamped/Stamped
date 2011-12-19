@@ -9,7 +9,6 @@
 #import "TodoTableViewCell.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "Entity.h"

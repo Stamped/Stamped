@@ -10,7 +10,6 @@
 
 #import <CoreText/CoreText.h>
 #import <MobileCoreServices/UTCoreTypes.h>
-#import <RestKit/CoreData/CoreData.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"

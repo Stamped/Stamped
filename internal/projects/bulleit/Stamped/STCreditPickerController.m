@@ -8,8 +8,6 @@
 
 #import "STCreditPickerController.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
 #import "STCreditPill.h"

@@ -8,8 +8,6 @@
 
 #import "AccountManager.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "GTMOAuthViewControllerTouch.h"
 #import "StampedAppDelegate.h"
 #import "FirstRunViewController.h"

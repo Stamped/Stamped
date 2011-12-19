@@ -9,7 +9,6 @@
 #import "FindFriendsViewController.h"
 
 #import <AddressBook/AddressBook.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "STSectionHeaderView.h"

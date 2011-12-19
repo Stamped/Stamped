@@ -12,7 +12,6 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "Entity.h"
 #import "Stamp.h"

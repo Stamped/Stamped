@@ -9,7 +9,6 @@
 #import "PeopleViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"

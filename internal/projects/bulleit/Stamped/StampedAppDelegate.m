@@ -8,8 +8,6 @@
 
 #import "StampedAppDelegate.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "BWQuincyManager.h"
 
 #import "AccountManager.h"

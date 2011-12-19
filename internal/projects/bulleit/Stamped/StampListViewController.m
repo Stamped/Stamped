@@ -8,8 +8,6 @@
 
 #import "StampListViewController.h"
 
-#import <RestKit/CoreData/CoreData.h>
-
 #import "Entity.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"

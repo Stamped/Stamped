@@ -499,7 +499,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (void)signOutOfFacebook:(BOOL)unlink {
   isSigningInToFacebook_ = NO;
-  [self.facebookClient logout:self];
+  [self.facebookClient logout];
   [self removeFacebookCredentials];
   if (unlink)
     [self requestStampedUnlinkFacebook];
