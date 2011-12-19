@@ -97,6 +97,12 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     NSFetchRequest* request = [Event fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    NSArray* genres = [NSArray arrayWithObjects:@"comment", @"reply", @"mention", @"like", @"favorite", @"follower", @"friend", nil];
+    NSMutableArray* preds = [NSMutableArray array];
+    for (NSString* genre in genres)
+      [preds addObject:[NSString stringWithFormat:@"genre == '%@'", genre]];
+
+    [request setPredicate:[NSPredicate predicateWithFormat:[preds componentsJoinedByString:@" OR "]]];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Event managedObjectContext]
