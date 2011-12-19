@@ -64,6 +64,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)storeMainTwitterAccountAs:(ACAccount*)account;
 - (void)didReceiveTwitterFollowers:(NSDictionary*)followers;
 - (void)didReceiveTwitterFriends:(NSDictionary*)friends;
+- (void)displayNoAccountsAlert;
 
 - (void)checkForEndlessSignIn:(NSNotification*)note;
 - (void)requestTwitterUser;
@@ -196,7 +197,11 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                withCompletionHandler:^(BOOL granted, NSError* error) {
                                  if (granted) {
                                    NSArray* accounts = [accountStore_ accountsWithAccountType:accountType];
-                                   if (accounts.count == 1) {
+                                   if (accounts.count == 0) {
+                                     [manager performSelectorOnMainThread:@selector(displayNoAccountsAlert)
+                                                               withObject:nil
+                                                            waitUntilDone:NO];
+                                   } else if (accounts.count == 1) {
                                      ACAccount* account = accounts.lastObject;
                                      [manager performSelectorOnMainThread:@selector(accountWasAuthorized:)
                                                                withObject:account
@@ -231,6 +236,24 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [navigationController pushViewController:authVC animated:YES];
     [authVC release];
   }
+}
+
+- (void)displayNoAccountsAlert {
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"No Twitter Accounts Found"
+                                                   message:@"Log in or create an account in the Settings app"
+                                                  delegate:self
+                                         cancelButtonTitle:@"Cancel"
+                                         otherButtonTitles:@"Settings", nil] autorelease];
+  [alert show];
+}
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == alertView.cancelButtonIndex)
+    return;
+
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"prefs:root=TWITTER"]];
 }
 
 - (void)accountWasAuthorized:(ACAccount*)account {
@@ -400,7 +423,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
     NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", nil];
     NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/followers/ids.json"];
-    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];    
+    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];
     request.account = account;
     
     [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {

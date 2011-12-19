@@ -22,7 +22,8 @@ extern NSString* const kStampedFindTwitterFriendsPath;
                                      RKRequestDelegate,
                                      FBSessionDelegate,
                                      FBRequestDelegate,
-                                     UIActionSheetDelegate>
+                                     UIActionSheetDelegate,
+                                     UIAlertViewDelegate>
 
 + (SocialManager*)sharedManager;
 - (BOOL)hasiOS5Twitter;
