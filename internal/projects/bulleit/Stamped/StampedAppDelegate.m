@@ -227,7 +227,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)performRestKitMappings {
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;
