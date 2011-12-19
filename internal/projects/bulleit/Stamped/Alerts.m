@@ -20,7 +20,7 @@
                                    otherButtonTitles:nil] autorelease];
     case AlertTemplateNoInternet:
       return [[[UIAlertView alloc] initWithTitle:@"No Connection"
-                                         message:@"Stamped is unable to connect to the internet."
+                                         message:@"Stamped is unable to connect to the Internet."
                                         delegate:aDelegate
                                cancelButtonTitle:@"OK"
                                otherButtonTitles:nil] autorelease];
