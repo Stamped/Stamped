@@ -6,6 +6,7 @@
 //  Copyright (c) 2011 Stamped. All rights reserved.
 //
 
+#import <Accounts/Accounts.h>
 #import <Twitter/Twitter.h>
 
 #import "SocialManager.h"
@@ -18,6 +19,8 @@
 #import "User.h"
 
 static SocialManager* sharedManager_ = nil;
+
+static NSString* const kiOS5TwitterAccountIdentifier = @"kiOS5TwitterAccountIdentifier";
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
@@ -43,6 +46,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 @interface SocialManager ()
 
+// iOS5 Accounts manager.
+@property (nonatomic, retain) ACAccountStore* accountStore;
+
 @property (nonatomic, retain) Facebook* facebookClient;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
 @property (nonatomic, retain) RKClient* twitterClient;
@@ -50,6 +56,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, assign) BOOL isSigningInToTwitter;
 @property (nonatomic, assign) BOOL isSigningInToFacebook;
+
+- (void)showTwitterAccountChoices:(NSArray*)accounts;
+- (void)storeMainTwitterAccountAs:(ACAccount*)account;
 
 - (void)checkForEndlessSignIn:(NSNotification*)note;
 - (void)requestTwitterUser;
@@ -75,6 +84,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 @implementation SocialManager
 
+@synthesize accountStore = accountStore_;
 @synthesize facebookClient = facebookClient_;
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
@@ -119,6 +129,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (id)init {
   self = [super init];
   if (self) {
+    self.accountStore = [[ACAccountStore alloc] init];
     self.facebookClient = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
     self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -131,7 +142,15 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 #pragma mark - Public.
 
+- (BOOL)hasiOS5Twitter {
+  return (accountStore_ != nil);
+}
+
 - (BOOL)isSignedInToTwitter {
+  if (accountStore_) {
+    return [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier] != nil;
+  }
+
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
                                                  authentication:auth]) {
@@ -162,27 +181,90 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 #pragma mark - Twitter.
 
 - (void)signInToTwitter:(UINavigationController*)navigationController {
-  GTMOAuthAuthentication* auth = [self createAuthentication];
-  if (auth == nil) {
-    NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
+  if (accountStore_) {
+    ACAccountType* accountType = [accountStore_ accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    if (YES || ![self isSignedInToTwitter] || !accountType.accessGranted) {
+      SocialManager* manager = self;
+      [accountStore_ requestAccessToAccountsWithType:accountType
+                               withCompletionHandler:^(BOOL granted, NSError* error) {
+                                 if (granted && !error) {
+                                   NSArray* accounts = [accountStore_ accountsWithAccountType:accountType];
+                                   if (accounts.count == 1) {
+                                     ACAccount* account = accounts.lastObject;
+                                     [manager storeMainTwitterAccountAs:account];
+                                   } else if (accounts.count > 1) {
+                                     [manager performSelectorOnMainThread:@selector(showTwitterAccountChoices:)
+                                                               withObject:accounts
+                                                            waitUntilDone:NO];
+                                   }
+                                 }
+                               }];
+    }
+  } else {
+    GTMOAuthAuthentication* auth = [self createAuthentication];
+    if (auth == nil)
+      NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
+
+    isSigningInToTwitter_ = YES;
+
+    STOAuthViewController* authVC =
+        [[STOAuthViewController alloc] initWithScope:kTwitterScope
+                                            language:nil
+                                     requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
+                                   authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
+                                      accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
+                                      authentication:auth
+                                      appServiceName:kKeychainTwitterToken
+                                           delegate:self
+                                    finishedSelector:@selector(viewController:finishedWithAuth:error:)];
+    [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
+    
+    [navigationController pushViewController:authVC animated:YES];
+    [authVC release];
   }
-  
-  isSigningInToTwitter_ = YES;
-  
-  STOAuthViewController* authVC =
-      [[STOAuthViewController alloc] initWithScope:kTwitterScope
-                                          language:nil
-                                   requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
-                                 authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
-                                    accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
-                                    authentication:auth
-                                    appServiceName:kKeychainTwitterToken
-                                         delegate:self
-                                  finishedSelector:@selector(viewController:finishedWithAuth:error:)];
-  [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
-  
-  [navigationController pushViewController:authVC animated:YES];
-  [authVC release];
+}
+
+- (void)storeMainTwitterAccountAs:(ACAccount*)account {
+  [[NSUserDefaults standardUserDefaults] setObject:account.identifier forKey:kiOS5TwitterAccountIdentifier];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  NSLog(@"Stored account: %@", [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier]);
+}
+
+- (void)showTwitterAccountChoices:(NSArray*)accounts {
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Please select which Twitter account you would like to use:"
+                                                      delegate:self
+                                             cancelButtonTitle:nil
+                                        destructiveButtonTitle:nil
+                                             otherButtonTitles:nil] autorelease];
+  for (ACAccount* account in accounts)
+    [sheet addButtonWithTitle:account.username];
+
+  sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  UIWindow* win = [(StampedAppDelegate*)[[UIApplication sharedApplication] delegate] window];
+  [sheet showInView:win];
+}
+
+#pragma mark - UIActionSheetDelegate methods.
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == actionSheet.cancelButtonIndex) {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:nil];
+    return;
+  }
+
+  NSString* username = [actionSheet buttonTitleAtIndex:buttonIndex];
+  ACAccountType* accountType = [accountStore_ accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+  NSArray* accounts = [accountStore_ accountsWithAccountType:accountType];
+  ACAccount* account = nil;
+  for (ACAccount* a in accounts) {
+    if ([a.username isEqualToString:username]) {
+      account = a;
+      break;
+    }
+  }
+  [self storeMainTwitterAccountAs:account];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:nil];
 }
 
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
@@ -199,7 +281,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   // Signed in, but the process isn't complete until we link the user on the backend.
   [self requestTwitterUser];  
 }
-
 
 - (void)signOutOfTwitter:(BOOL)unlink {
   isSigningInToTwitter_ = NO;
@@ -291,7 +372,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if (!self.twitterClient)
     self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   NSString* path =
-  [kTwitterFriendsURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+      [kTwitterFriendsURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
   RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
@@ -413,7 +494,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
 }
 
-- (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
+- (void)request:(FBRequest*)request didFailWithError:(NSError*)error {
 //  NSLog(@"FB err code: %d", [error code]);
 //  NSLog(@"FB err message: %@", [error description]);
   if (isSigningInToFacebook_)
@@ -512,21 +593,10 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       [self signOutOfTwitter:YES];
     if (isSigningInToFacebook_)
       [self signOutOfFacebook:YES];
-//    if (response.statusCode == 2)  // Don't sign out just because we aren't connected to the internet.
-//      return;
-//    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-//        [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
-//        [request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound ||
-//        [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-//        [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
-//      [self signOutOfTwitter:YES];
-//    if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-//        [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
-//      [self signOutOfFacebook:YES];
-//    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
+
     return;
-    }
-  
+  }
+
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
     return;
   }
@@ -586,7 +656,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 
-- (void)requestDidTimeout:(RKRequest *)request {
+- (void)requestDidTimeout:(RKRequest*)request {
   if (isSigningInToTwitter_)
     [self signOutOfTwitter:YES];
   if (isSigningInToFacebook_)
@@ -594,18 +664,17 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 
-- (void)requestDidCancelLoad:(RKRequest *)request {
+- (void)requestDidCancelLoad:(RKRequest*)request {
   if (isSigningInToTwitter_)
     [self signOutOfTwitter:YES];
   if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
-
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
-- (void)objectLoader:(RKObjectLoader *)objectLoader didLoadObjects:(NSArray *)objects {
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
                                                                    ascending:YES 
                                                                     selector:@selector(localizedCaseInsensitiveCompare:)];
@@ -620,7 +689,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
 }
 
-- (void)objectLoader:(RKObjectLoader *)objectLoader didFailWithError:(NSError *)error {
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.resourcePath rangeOfString:kStampedFindTwitterFriendsPath].location != NSNotFound)
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:nil];
   if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound)
@@ -633,7 +702,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 // This gets called when the app comes to the foreground, taking care of the case wherein
 // the user returns from facebook and hasn't completed – or cancelled – the login process.
-- (void)checkForEndlessSignIn:(NSNotification *)note {
+- (void)checkForEndlessSignIn:(NSNotification*)note {
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 

@@ -1175,6 +1175,8 @@
 		7EC30B651401BBC50047D773 /* stamp_46pt_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B4F1401BBC50047D773 /* stamp_46pt_texture@2x.png */; };
 		7EC30B661401BBC50047D773 /* stamp_60pt_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B501401BBC50047D773 /* stamp_60pt_texture.png */; };
 		7EC30B671401BBC50047D773 /* stamp_60pt_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B511401BBC50047D773 /* stamp_60pt_texture@2x.png */; };
+		7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7ECF3D7E145DE99F00A1CF38 /* invite_friend_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */; };
 		7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */; };
 		7ECF3D99145E26C900A1CF38 /* tab_news_button_active.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D83145E26C900A1CF38 /* tab_news_button_active.png */; };
@@ -2126,6 +2128,7 @@
 		7EC30B501401BBC50047D773 /* stamp_60pt_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stamp_60pt_texture.png; sourceTree = "<group>"; };
 		7EC30B511401BBC50047D773 /* stamp_60pt_texture@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_60pt_texture@2x.png"; sourceTree = "<group>"; };
 		7EC4325A1496CE3D00BDBC6B /* StampedModel 17.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 17.xcdatamodel"; sourceTree = "<group>"; };
+		7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_friend_button_bg@2x.png"; sourceTree = "<group>"; };
 		7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuggestedUserTableViewCell.h; sourceTree = "<group>"; };
 		7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuggestedUserTableViewCell.m; sourceTree = "<group>"; };
@@ -2404,6 +2407,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
 				7E589422147C468B002268C4 /* MessageUI.framework in Frameworks */,
 				7E589423147C468B002268C4 /* Twitter.framework in Frameworks */,
 				7E589424147C468B002268C4 /* AddressBook.framework in Frameworks */,
@@ -2433,6 +2437,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */,
 				7EB03FD414672B40004F7A1C /* MessageUI.framework in Frameworks */,
 				7E99C9B91458B4E000B116AC /* Twitter.framework in Frameworks */,
 				7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */,
@@ -3218,6 +3223,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -5541,8 +5547,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5562,8 +5568,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "412A1F71-167A-44B9-8511-B70381F4683F";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "412A1F71-167A-44B9-8511-B70381F4683F";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5584,8 +5590,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5604,8 +5610,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "412A1F71-167A-44B9-8511-B70381F4683F";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "412A1F71-167A-44B9-8511-B70381F4683F";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5627,8 +5633,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5647,8 +5653,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "412A1F71-167A-44B9-8511-B70381F4683F";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "412A1F71-167A-44B9-8511-B70381F4683F";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5662,8 +5668,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -5681,8 +5687,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "95141734-444D-470E-BD2D-DEA6241E66BE";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -5701,8 +5707,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5720,8 +5726,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5756,8 +5762,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -5777,8 +5783,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "95141734-444D-470E-BD2D-DEA6241E66BE";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -5789,8 +5795,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -5808,8 +5814,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "95141734-444D-470E-BD2D-DEA6241E66BE";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "95141734-444D-470E-BD2D-DEA6241E66BE";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -5828,8 +5834,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5848,8 +5854,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -5869,8 +5875,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -5888,8 +5894,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
+				PROVISIONING_PROFILE = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D8EB99C9-CF11-49C9-BD6E-C4ACEB471431";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

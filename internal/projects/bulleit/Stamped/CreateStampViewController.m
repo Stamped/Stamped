@@ -279,10 +279,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.reasoningTextView.inputAccessoryView = accessoryView;
   [accessoryView release];
 
-   // Make room for edit button.
-  //if (newEntity_)
-
-  //  headerView_.frame = CGRectOffset(CGRectInset(headerView_.frame, -40, 0), 40, 0);
   editButton_.hidden = !newEntity_;
   headerView_.hideArrow = newEntity_;
   [headerView_ setEntity:objectToStamp_];
@@ -669,17 +665,23 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 }
 
 - (IBAction)tweetButtonPressed:(id)sender {
-  if (tweetButton_.selected == NO &&
-      ![[SocialManager sharedManager] isSignedInToTwitter]) {
-    // I take a sheet in objective-C.
-    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Twitter."
-                                                        delegate:self
-                                               cancelButtonTitle:@"Cancel"
-                                          destructiveButtonTitle:nil
-                                               otherButtonTitles:@"Connect…", nil] autorelease];
-    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
-    [sheet showInView:self.view];
-    return;
+  SocialManager* manager = [SocialManager sharedManager];
+  if (tweetButton_.selected == NO && ![manager isSignedInToTwitter]) {
+    if ([manager hasiOS5Twitter]) {
+      [manager signInToTwitter:nil];
+      tweetButton_.enabled = NO;
+      [signInTwitterActivityIndicator_ startAnimating];
+      return;
+    } else {
+      UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Twitter."
+                                                          delegate:self
+                                                 cancelButtonTitle:@"Cancel"
+                                            destructiveButtonTitle:nil
+                                                 otherButtonTitles:@"Connect...", nil] autorelease];
+      sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+      [sheet showInView:self.view];
+      return;
+    }
   }
   tweetButton_.selected = !tweetButton_.selected;
 }
@@ -690,7 +692,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                                                         delegate:self
                                                cancelButtonTitle:@"Cancel"
                                           destructiveButtonTitle:nil
-                                               otherButtonTitles:@"Connect…", nil] autorelease];
+                                               otherButtonTitles:@"Connect...", nil] autorelease];
     sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     [sheet showInView:self.view];
     return;
@@ -825,19 +827,19 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     if (signInTwitterActivityIndicator_.isAnimating)
       tweetButton_.selected = YES;
-  }
-  else
+  } else {
     tweetButton_.selected = NO;
+  }
 
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     if (isSigningInToFB_) {
       fbButton_.selected = YES;
       isSigningInToFB_ = NO;
     }
-  }
-  else
+  } else {
     fbButton_.selected = NO;
-  
+  }
+
   [signInTwitterActivityIndicator_ stopAnimating];
   [signInFacebookActivityIndicator_ stopAnimating];
   tweetButton_.enabled = YES;

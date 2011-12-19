@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1280</int>
 		<string key="IBDocument.SystemVersion">11C74</string>
-		<string key="IBDocument.InterfaceBuilderVersion">1938</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2148</string>
 		<string key="IBDocument.AppKitVersion">1138.23</string>
 		<string key="IBDocument.HIToolboxVersion">567.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-			<string key="NS.object.0">933</string>
+			<string key="NS.object.0">1145</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -414,7 +414,6 @@
 								</object>
 								<string key="IBUIShadowOffset">{0, 1}</string>
 								<int key="IBUIBaselineAdjustment">1</int>
-								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 								<float key="IBUIMinimumFontSize">10</float>
 								<object class="IBUIFontDescription" key="IBUIFontDescription">
 									<string key="name">Helvetica-Bold</string>
@@ -514,7 +513,6 @@
 								</object>
 								<string key="IBUIShadowOffset">{0, 1}</string>
 								<int key="IBUIBaselineAdjustment">1</int>
-								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 								<float key="IBUIMinimumFontSize">10</float>
 								<object class="IBUIFontDescription" key="IBUIFontDescription">
 									<string key="name">Helvetica</string>
@@ -1153,7 +1151,7 @@
 					<string>81.IBPluginDependency</string>
 					<string>96.IBPluginDependency</string>
 				</object>
-				<object class="NSMutableArray" key="dict.values">
+				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>CreateStampViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1225,13 +1223,11 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>editButtonPressed:</string>
 							<string>fbButtonPressed:</string>
-							<string>handleEntityTap:</string>
 							<string>saveStampButtonPressed:</string>
 							<string>tweetButtonPressed:</string>
 						</object>
-						<object class="NSMutableArray" key="dict.values">
+						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1244,11 +1240,10 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>editButtonPressed:</string>
 							<string>fbButtonPressed:</string>
-							<string>handleEntityTap:</string>
 							<string>saveStampButtonPressed:</string>
 							<string>tweetButtonPressed:</string>
 						</object>
-						<object class="NSMutableArray" key="dict.values">
+						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">editButtonPressed:</string>
@@ -1256,10 +1251,6 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">fbButtonPressed:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">handleEntityTap:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -1279,7 +1270,6 @@
 							<string>backgroundImageView</string>
 							<string>bottomToolbar</string>
 							<string>creditTextField</string>
-							<string>disclosureButton</string>
 							<string>editButton</string>
 							<string>fbButton</string>
 							<string>headerView</string>
@@ -1296,12 +1286,11 @@
 							<string>tweetButton</string>
 							<string>userImageView</string>
 						</object>
-						<object class="NSMutableArray" key="dict.values">
+						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIImageView</string>
 							<string>UIView</string>
 							<string>STCreditTextField</string>
-							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>StampDetailHeaderView</string>
@@ -1326,7 +1315,6 @@
 							<string>backgroundImageView</string>
 							<string>bottomToolbar</string>
 							<string>creditTextField</string>
-							<string>disclosureButton</string>
 							<string>editButton</string>
 							<string>fbButton</string>
 							<string>headerView</string>
@@ -1343,7 +1331,7 @@
 							<string>tweetButton</string>
 							<string>userImageView</string>
 						</object>
-						<object class="NSMutableArray" key="dict.values">
+						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBToOneOutletInfo">
 								<string key="name">backgroundImageView</string>
@@ -1356,10 +1344,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">creditTextField</string>
 								<string key="candidateClassName">STCreditTextField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">disclosureButton</string>
-								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">editButton</string>
@@ -1511,7 +1495,7 @@
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
 			</object>
-			<object class="NSMutableArray" key="dict.values">
+			<object class="NSArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
@@ -1529,6 +1513,6 @@
 				<string>{16, 16}</string>
 			</object>
 		</object>
-		<string key="IBCocoaTouchPluginVersion">933</string>
+		<string key="IBCocoaTouchPluginVersion">1145</string>
 	</data>
 </archive>

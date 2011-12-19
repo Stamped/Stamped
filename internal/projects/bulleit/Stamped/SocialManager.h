@@ -18,9 +18,14 @@ extern NSString* const kFacebookFriendsChangedNotification;
 extern NSString* const kStampedFindFacebookFriendsPath;
 extern NSString* const kStampedFindTwitterFriendsPath;
 
-@interface SocialManager : NSObject <RKObjectLoaderDelegate, RKRequestDelegate, FBSessionDelegate, FBRequestDelegate>
+@interface SocialManager : NSObject <RKObjectLoaderDelegate,
+                                     RKRequestDelegate,
+                                     FBSessionDelegate,
+                                     FBRequestDelegate,
+                                     UIActionSheetDelegate>
 
 + (SocialManager*)sharedManager;
+- (BOOL)hasiOS5Twitter;
 - (void)signInToTwitter:(UINavigationController*)navigationController;
 - (void)signInToFacebook;
 - (void)signOutOfTwitter:(BOOL)unlink;
