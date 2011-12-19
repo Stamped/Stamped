@@ -41,8 +41,7 @@
   self.descriptionLabel.text = detailedEntity_.subtitle;
   if ([detailedEntity_.subcategory.lowercaseString isEqualToString:@"app"]) {
     [self loadAppImage];
-  }
-  else {
+  } else {
     [self setupMainActionsContainer];
     [self setupMapView];
     [self setupSectionViews];
@@ -175,7 +174,7 @@
   MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
   mapContainerView_.hidden = NO;
   [self.mapView setRegion:region animated:YES];
-  
+
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
 }

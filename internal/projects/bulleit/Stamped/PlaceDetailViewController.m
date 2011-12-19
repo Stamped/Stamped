@@ -56,7 +56,6 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-
   if (dataLoaded_ && !annotation_)
     [self addAnnotation];
 }
