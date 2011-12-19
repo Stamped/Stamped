@@ -204,6 +204,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)mapButtonWasPressed:(NSNotification*)notification {
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
+  [self.stampFilterBar.searchField resignFirstResponder];
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
   NSArray* stampsArray = [sectionInfo objects];
   [UIView animateWithDuration:0.5
