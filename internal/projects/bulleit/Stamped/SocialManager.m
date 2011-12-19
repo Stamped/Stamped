@@ -60,6 +60,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, assign) BOOL isSigningInToFacebook;
 
 - (void)showTwitterAccountChoices:(NSArray*)accounts;
+- (void)accountWasAuthorized:(ACAccount*)account;
 - (void)storeMainTwitterAccountAs:(ACAccount*)account;
 - (void)didReceiveTwitterFollowers:(NSDictionary*)followers;
 - (void)didReceiveTwitterFriends:(NSDictionary*)friends;
@@ -152,7 +153,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (BOOL)isSignedInToTwitter {
   if (accountStore_) {
-    return [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier] != nil;
+    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
+    return account != nil;
   }
 
   GTMOAuthAuthentication* auth = [self createAuthentication];
@@ -195,7 +198,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                    NSArray* accounts = [accountStore_ accountsWithAccountType:accountType];
                                    if (accounts.count == 1) {
                                      ACAccount* account = accounts.lastObject;
-                                     [manager storeMainTwitterAccountAs:account];
+                                     [manager performSelectorOnMainThread:@selector(accountWasAuthorized:)
+                                                               withObject:account
+                                                            waitUntilDone:NO];
                                    } else if (accounts.count > 1) {
                                      [manager performSelectorOnMainThread:@selector(showTwitterAccountChoices:)
                                                                withObject:accounts
@@ -226,6 +231,12 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [navigationController pushViewController:authVC animated:YES];
     [authVC release];
   }
+}
+
+- (void)accountWasAuthorized:(ACAccount*)account {
+  [self storeMainTwitterAccountAs:account];
+  [self requestTwitterUser];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:nil];
 }
 
 - (void)storeMainTwitterAccountAs:(ACAccount*)account {
