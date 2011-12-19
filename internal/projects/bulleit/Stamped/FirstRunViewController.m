@@ -148,7 +148,6 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  NSLog(@"Nav controller on load: %@", self.navigationController);
   requestQueue_ = [[RKRequestQueue alloc] init];
   requestQueue_.requestTimeout = 30;
   requestQueue_.delegate = self;
@@ -281,7 +280,6 @@ static NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/setti
 }
 
 - (void)signUpSuccess {
-  NSLog(@"Navigation controller on signup success: %@", self.navigationController);
   WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
   [self.navigationController pushViewController:welcomeVC animated:YES];
   [welcomeVC release];
