@@ -57,6 +57,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
 #endif
 
+  RKLogConfigureByName("RestKit*", RKLogLevelError);
+  RKLogSetAppLoggingLevel(RKLogLevelError);
   [BWQuincyManager sharedQuincyManager].autoSubmitCrashReport = YES;
   [self performRestKitMappings];
   [self customizeAppearance];
