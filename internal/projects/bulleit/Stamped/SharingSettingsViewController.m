@@ -92,8 +92,7 @@
                                                otherButtonTitles:@"Disconnect", nil] autorelease];
     sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     [sheet showInView:self.view];
-  } 
-  else {
+  } else {
     [[SocialManager sharedManager] signInToTwitter:self.navigationController];
   }
 }
@@ -107,8 +106,7 @@
                                                otherButtonTitles:@"Disconnect", nil] autorelease];
     sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     [sheet showInView:self.view];
-  } 
-  else {
+  } else {
     [[SocialManager sharedManager] signInToFacebook];
   }
 }
@@ -124,6 +122,8 @@
     CGRect frame = self.twitterConnectButton.frame;
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
       self.twitterConnectButton.selected = YES;
+      [self.twitterConnectButton setImage:[UIImage imageNamed:@"settings_sharing_button_disconnect"]
+                                 forState:UIControlStateNormal];
       self.twitterConnectButton.frame = CGRectMake(210, frame.origin.y, 90, frame.size.height);
       self.twitterIconView.image = [UIImage imageNamed:@"settings_sharing_twitter_on"];
       NSString* name = [[NSUserDefaults standardUserDefaults] objectForKey:@"TwitterUsername"];
@@ -135,11 +135,12 @@
       }
     }
     completion:nil];
-  } 
-  else {
+  } else {
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
       CGRect frame = self.twitterConnectButton.frame;
       self.twitterConnectButton.selected = NO;
+      [self.twitterConnectButton setImage:[UIImage imageNamed:@"settings_sharing_button_connect"]
+                                 forState:UIControlStateNormal];
       self.twitterLabel.frame = CGRectMake(53, 37, 138, 21);
       self.twitterNameLabel.alpha = 0.0;
       self.twitterConnectButton.frame = CGRectMake(225, frame.origin.y, 75, frame.size.height);
@@ -148,11 +149,12 @@
     completion:nil];
   }
 
-  
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
       CGRect frame = self.fbConnectButton.frame;
       self.fbConnectButton.selected = YES;
+      [self.fbConnectButton setImage:[UIImage imageNamed:@"settings_sharing_button_disconnect"]
+                            forState:UIControlStateNormal];
       self.fbConnectButton.frame = CGRectMake(210, frame.origin.y, 90, frame.size.height);
       self.fbIconView.image = [UIImage imageNamed:@"settings_sharing_facebook_on"];
       NSString* name = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBName"];
@@ -164,11 +166,12 @@
       }
     }
     completion:nil];
-  }
-  else {    
+  } else {    
     [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
       CGRect frame = self.fbConnectButton.frame;
       self.fbConnectButton.selected = NO;
+      [self.fbConnectButton setImage:[UIImage imageNamed:@"settings_sharing_button_connect"]
+                            forState:UIControlStateNormal];
       self.fbConnectButton.frame = CGRectMake(225, frame.origin.y, 75, frame.size.height);
       self.fbIconView.image = [UIImage imageNamed:@"settings_sharing_facebook_off"];
       self.fbLabel.frame = CGRectMake(53, 110, 138, 21);
@@ -176,7 +179,6 @@
     }
     completion:nil];
   }
-  
 }
 
 #pragma mark - UIActionSheetDelegate methods
