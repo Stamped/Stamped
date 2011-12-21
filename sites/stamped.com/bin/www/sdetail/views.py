@@ -8,8 +8,8 @@ __license__   = "TODO"
 
 import Globals
 import os, json, utils, random, time, hashlib, logs
-import datetime
 
+from datetime           import *
 from errors             import *
 from HTTPSchemas        import *
 from MongoStampedAPI    import MongoStampedAPI
@@ -45,7 +45,7 @@ def show(request, **kwargs):
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
 
         response = render_to_response(template, params)
-        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
 
         return response
