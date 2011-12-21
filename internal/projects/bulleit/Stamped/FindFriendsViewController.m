@@ -598,7 +598,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                               lineBreakMode:UILineBreakModeWordWrap];
     return bioSize.height + 83;
   }
-  return 51.0;
+  return 52.0;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {

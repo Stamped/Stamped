@@ -317,14 +317,14 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     addFriendsLabel.highlightedTextColor = [UIColor whiteColor];
     addFriendsLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
     [addFriendsLabel sizeToFit];
-    addFriendsLabel.frame = CGRectOffset(addFriendsLabel.frame, CGRectGetMaxX(addFriendsImageView.frame) + 18, 15);
+    addFriendsLabel.frame = CGRectOffset(addFriendsLabel.frame, CGRectGetMaxX(addFriendsImageView.frame) + 18, 16);
     [cell.contentView addSubview:addFriendsLabel];
     [addFriendsLabel release];
     UIImage* friendIcons = [UIImage imageNamed:@"addFriends_icons"];
     UIImage* highlightedFriendIcons = [Util whiteMaskedImageUsingImage:friendIcons];
     UIImageView* iconsImageView = [[UIImageView alloc] initWithImage:friendIcons
                                                     highlightedImage:highlightedFriendIcons];
-    iconsImageView.frame = CGRectOffset(iconsImageView.frame, 320 - CGRectGetWidth(iconsImageView.frame) - 18, 19);
+    iconsImageView.frame = CGRectOffset(iconsImageView.frame, 320 - CGRectGetWidth(iconsImageView.frame) - 18, 20);
     [cell.contentView addSubview:iconsImageView];
     [iconsImageView release];
     return cell;
@@ -350,7 +350,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - Table view delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
-  return 25;
+  return 24;
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {

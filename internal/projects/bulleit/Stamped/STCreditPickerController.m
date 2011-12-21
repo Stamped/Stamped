@@ -200,7 +200,7 @@
   if (!creditTableView_) {
     creditTableView_ = [[UITableView alloc] initWithFrame:CGRectZero
                                                     style:UITableViewStylePlain];
-    creditTableView_.rowHeight = 51.0;
+    creditTableView_.rowHeight = 52.0;
     creditTableView_.delegate = self;
     creditTableView_.dataSource = self;
     creditTableView_.alpha = 0.0;

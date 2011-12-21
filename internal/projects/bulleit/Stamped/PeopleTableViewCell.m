@@ -43,12 +43,12 @@ static const CGFloat kUserImageSize = 41.0;
     [userImageView_ release];
     
     stampImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(
-        CGRectGetMaxX(userImageView_.frame) + 16, 11, 14, 14)];
+        CGRectGetMaxX(userImageView_.frame) + 16, 10, 14, 14)];
     [self addSubview:stampImageView_];
     [stampImageView_ release];
     
     fullNameLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(
-        CGRectGetMaxX(stampImageView_.frame) + 6, 8, 181, 21)];
+        CGRectGetMaxX(stampImageView_.frame) + 7, 7, 181, 21)];
     fullNameLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
     fullNameLabel_.highlightedTextColor = [UIColor whiteColor];
     fullNameLabel_.textColor = [UIColor stampedBlackColor];
