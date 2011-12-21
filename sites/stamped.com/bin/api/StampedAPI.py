@@ -1473,11 +1473,20 @@ class StampedAPI(AStampedAPI):
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
+        """
+        ### TEMPORARILY DISABLED
+
         # Asynchronously add references to the stamp in follower's inboxes
         task = tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
         # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
         logs.debug("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
+        """
+
+        followers  = self._friendshipDB.getFollowers(user.user_id)
+        self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+
+
         
         # Add a reference to the stamp in the user's inbox
         followers = [ user.user_id ]
