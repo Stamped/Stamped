@@ -766,6 +766,8 @@
 		7E5EB270140C5832007D164F /* plus_icon_small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5EB26E140C5832007D164F /* plus_icon_small@2x.png */; };
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E605899142CFBDB00303991 /* small_like_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E605898142CFBDB00303991 /* small_like_icon@2x.png */; };
+		7E6318DF14A2900700B591E6 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6318DE14A2900700B591E6 /* credit_icon@2x.png */; };
+		7E6318E014A2900700B591E6 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6318DE14A2900700B591E6 /* credit_icon@2x.png */; };
 		7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */; };
 		7E684AAF140DE32F00394A70 /* big_blue_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E684AAE140DE32F00394A70 /* big_blue_button_bg@2x.png */; };
 		7E68B919141AA51200D55021 /* ShowImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E68B917141AA51100D55021 /* ShowImageViewController.m */; };
@@ -1618,6 +1620,7 @@
 		7E5EB26E140C5832007D164F /* plus_icon_small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "plus_icon_small@2x.png"; sourceTree = "<group>"; };
 		7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
 		7E605898142CFBDB00303991 /* small_like_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_like_icon@2x.png"; sourceTree = "<group>"; };
+		7E6318DE14A2900700B591E6 /* credit_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_icon@2x.png"; sourceTree = "<group>"; };
 		7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailCommentView.h; sourceTree = "<group>"; };
 		7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailCommentView.m; sourceTree = "<group>"; };
 		7E684AAE140DE32F00394A70 /* big_blue_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "big_blue_button_bg@2x.png"; sourceTree = "<group>"; };
@@ -2526,6 +2529,7 @@
 				7E52B53F1412DD0500B46A55 /* take_photo_button_large@2x.png */,
 				7E52B53C1412CAA600B46A55 /* done_button@2x.png */,
 				7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */,
+				7E6318DE14A2900700B591E6 /* credit_icon@2x.png */,
 				7E35A72013DB847F008F856F /* cancel_pressed_background@2x.png */,
 			);
 			name = "Create Stamp";
@@ -4276,6 +4280,7 @@
 				7ED043EB149FEEB100E46284 /* segmentedControl_div_uns_uns@2x.png in Resources */,
 				7ED043EC149FEEB100E46284 /* segmentedControl_sel@2x.png in Resources */,
 				7ED043ED149FEEB100E46284 /* segmentedControl_uns@2x.png in Resources */,
+				7E6318E014A2900700B591E6 /* credit_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4811,6 +4816,7 @@
 				7E7496F4149BD6AC009FC963 /* stamp_16pt_texture@2x.png in Resources */,
 				7E39ADC6149C02D400122B7C /* corners_full.png in Resources */,
 				7E39ADC8149C02D400122B7C /* corners_full@2x.png in Resources */,
+				7E6318DF14A2900700B591E6 /* credit_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
