@@ -108,7 +108,6 @@ class MongoDBConfig(Singleton):
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(self.host, 
                                                                     self.port, 
-                                                                    slave_okay=True, 
                                                                     read_preference=pymongo.ReadPreference.PRIMARY, 
                                                                     replicaset=replicaset)
                 else:
