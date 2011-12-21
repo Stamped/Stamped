@@ -89,7 +89,7 @@ subcategories = {
     'video_game'        : 'other', 
 }
 
-city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
+city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
 
 def setSubtitle(entity):
     entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
