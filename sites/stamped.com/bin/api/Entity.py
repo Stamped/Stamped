@@ -185,6 +185,13 @@ def setFields(entity, detailed=False):
     elif entity.category == 'other':
         if entity.subcategory == 'app' and entity.artist_display_name is not None:
             entity.subtitle = 'App (%s)' % entity.artist_display_name
+        elif entity.address is not None:
+            match = city_state_re.match(entity.address)
+            if match is not None:
+                # city, state
+                entity.subtitle = "%s, %s" % match.groups()
+            else:
+                setSubtitle(entity)
         elif entity.subtitle is None:
             setSubtitle(entity)
     

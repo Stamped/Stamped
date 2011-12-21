@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
-import tasks.APITasks
+# import tasks.APITasks
 
 from pprint          import pprint, pformat
 from datetime        import datetime
@@ -714,8 +714,35 @@ class StampedAPI(AStampedAPI):
         ### TODO: Add check for privacy settings
         
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
+
+
+        ### TEMP: Sort result based on user request. This should happen client-side.
+        usersByUserIds = {}
+        usersByScreenNames = {}
+        result = []
+
+        for user in users:
+            usersByUserIds[user.user_id] = user
+            usersByScreenNames[user.screen_name] = user
+
+        if isinstance(userIds, list):
+            for userId in userIds:
+                try:
+                    result.append(usersByUserIds[userId])
+                except:
+                    pass
+
+        if isinstance(screenNames, list):
+            for screenName in screenNames:
+                try:
+                    result.append(usersByScreenNames[screenName])
+                except:
+                    pass
         
-        return users
+        if len(result) != len(users):
+            result = users
+
+        return result
     
     @API_CALL
     def getPrivacy(self, userRequest):
@@ -1473,11 +1500,20 @@ class StampedAPI(AStampedAPI):
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
+        """
+        ### TEMPORARILY DISABLED
+
         # Asynchronously add references to the stamp in follower's inboxes
         task = tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
         # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
         logs.debug("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
+        """
+
+        followers  = self._friendshipDB.getFollowers(user.user_id)
+        self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+
+
         
         # Add a reference to the stamp in the user's inbox
         followers = [ user.user_id ]
