@@ -300,7 +300,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   if (indexPath.row == 0)
     return 64.0;
   else 
-    return 82.0;
+    return 84.0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -319,7 +319,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     addLabel.text = @"Add a to-do";
     addLabel.textColor = [UIColor stampedLightGrayColor];
     addLabel.highlightedTextColor = [UIColor whiteColor];
-    addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
     [addLabel sizeToFit];
     addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 22, 22);
     [cell.contentView addSubview:addLabel];
