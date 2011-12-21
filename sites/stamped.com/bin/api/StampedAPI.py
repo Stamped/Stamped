@@ -714,8 +714,35 @@ class StampedAPI(AStampedAPI):
         ### TODO: Add check for privacy settings
         
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
+
+
+        ### TEMP: Sort result based on user request. This should happen client-side.
+        usersByUserIds = {}
+        usersByScreenNames = {}
+        result = []
+
+        for user in users:
+            usersByUserIds[user.user_id] = user
+            usersByScreenNames[user.screen_name] = user
+
+        if isinstance(userIds, list):
+            for userId in userIds:
+                try:
+                    result.append(usersByUserIds[userId])
+                except:
+                    pass
+
+        if isinstance(screenNames, list):
+            for screenName in screenNames:
+                try:
+                    result.append(usersByScreenNames[screenName])
+                except:
+                    pass
         
-        return users
+        if len(result) != len(users):
+            result = users
+
+        return result
     
     @API_CALL
     def getPrivacy(self, userRequest):
