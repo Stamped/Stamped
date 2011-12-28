@@ -127,7 +127,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
     return;
 
   [userToRequestDictionary_ removeObjectForKey:userID];
-  NSDate* oldestInBatch = [objects.lastObject modified];
+  NSDate* oldestInBatch = [objects.lastObject created];
   
   for (Stamp* s in objects)
     s.temporary = [NSNumber numberWithBool:NO];
