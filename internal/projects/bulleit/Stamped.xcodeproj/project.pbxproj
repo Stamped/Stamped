@@ -1129,7 +1129,6 @@
 		7ECF3DAD145E26C900A1CF38 /* tab_todo_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D97145E26C900A1CF38 /* tab_todo_button.png */; };
 		7ECF3DAE145E26C900A1CF38 /* tab_todo_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D98145E26C900A1CF38 /* tab_todo_button@2x.png */; };
 		7ECF3DB0145EF47800A1CF38 /* tab_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3DAF145EF47700A1CF38 /* tab_bar_bg@2x.png */; };
-		7ED043E5149FC9E500E46284 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF9EACF149FC5B900E5A13C /* libRestKit.a */; };
 		7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
 		7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
 		7ED043E9149FEEB100E46284 /* segmentedControl_div_uns_sel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBA06B61148429AE00CA06BF /* segmentedControl_div_uns_sel@2x.png */; };
@@ -1210,7 +1209,6 @@
 		7EF1F71B142FE25E00233835 /* ActivityTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1F71A142FE25E00233835 /* ActivityTableViewCell.m */; };
 		7EF25E3F148EE0C3004E4F11 /* column-grid@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */; };
 		7EF49996140418E20071871D /* gray_disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */; };
-		7EF9EAD8149FC7FC00E5A13C /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF9EACF149FC5B900E5A13C /* libRestKit.a */; };
 		7EFA58331413E39B007ADA64 /* delete_circle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA58321413E39B007ADA64 /* delete_circle@2x.png */; };
 		7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A013F865C600589E11 /* PeopleViewController.m */; };
 		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
@@ -1374,6 +1372,34 @@
 			remoteGlobalIDString = 4F35138613EA1FF500E12259;
 			remoteInfo = OAuthTouchNonGoogleStaticLib;
 		};
+		7EB7E31314AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D1614564E810060A5C5;
+			remoteInfo = RestKit;
+		};
+		7EB7E31514AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D2614564E820060A5C5;
+			remoteInfo = RestKitTests;
+		};
+		7EB7E31714AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E62145651060060A5C5;
+			remoteInfo = RestKitFramework;
+		};
+		7EB7E31914AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E78145651060060A5C5;
+			remoteInfo = RestKitFrameworkTests;
+		};
 		7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7EC0176813C3754300ABE6E2 /* Project object */;
@@ -1387,34 +1413,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 25160D1514564E810060A5C5;
 			remoteInfo = RestKit;
-		};
-		7EF9EACE149FC5B900E5A13C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D1614564E810060A5C5;
-			remoteInfo = RestKit;
-		};
-		7EF9EAD0149FC5B900E5A13C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D2614564E820060A5C5;
-			remoteInfo = RestKitTests;
-		};
-		7EF9EAD2149FC5B900E5A13C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E62145651060060A5C5;
-			remoteInfo = RestKitFramework;
-		};
-		7EF9EAD4149FC5B900E5A13C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E78145651060060A5C5;
-			remoteInfo = RestKitFrameworkTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -2215,7 +2213,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
-				7EF9EAD8149FC7FC00E5A13C /* libRestKit.a in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
 				7E589422147C468B002268C4 /* MessageUI.framework in Frameworks */,
 				7E589423147C468B002268C4 /* Twitter.framework in Frameworks */,
@@ -2242,7 +2239,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */,
-				7ED043E5149FC9E500E46284 /* libRestKit.a in Frameworks */,
 				7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */,
 				7EB03FD414672B40004F7A1C /* MessageUI.framework in Frameworks */,
 				7E99C9B91458B4E000B116AC /* Twitter.framework in Frameworks */,
@@ -3400,10 +3396,10 @@
 		7EE1190C13CE0C4100378139 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7EF9EACF149FC5B900E5A13C /* libRestKit.a */,
-				7EF9EAD1149FC5B900E5A13C /* RestKitTests.octest */,
-				7EF9EAD3149FC5B900E5A13C /* RestKit.framework */,
-				7EF9EAD5149FC5B900E5A13C /* RestKitFrameworkTests.octest */,
+				7EB7E31414AB9A5D00DBED08 /* libRestKit.a */,
+				7EB7E31614AB9A5D00DBED08 /* RestKitTests.octest */,
+				7EB7E31814AB9A5D00DBED08 /* RestKit.framework */,
+				7EB7E31A14AB9A5D00DBED08 /* RestKitFrameworkTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3718,32 +3714,32 @@
 			remoteRef = 1E5AFFC2141D29EC00772F11 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EF9EACF149FC5B900E5A13C /* libRestKit.a */ = {
+		7EB7E31414AB9A5D00DBED08 /* libRestKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRestKit.a;
-			remoteRef = 7EF9EACE149FC5B900E5A13C /* PBXContainerItemProxy */;
+			remoteRef = 7EB7E31314AB9A5D00DBED08 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EF9EAD1149FC5B900E5A13C /* RestKitTests.octest */ = {
+		7EB7E31614AB9A5D00DBED08 /* RestKitTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitTests.octest;
-			remoteRef = 7EF9EAD0149FC5B900E5A13C /* PBXContainerItemProxy */;
+			remoteRef = 7EB7E31514AB9A5D00DBED08 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EF9EAD3149FC5B900E5A13C /* RestKit.framework */ = {
+		7EB7E31814AB9A5D00DBED08 /* RestKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = RestKit.framework;
-			remoteRef = 7EF9EAD2149FC5B900E5A13C /* PBXContainerItemProxy */;
+			remoteRef = 7EB7E31714AB9A5D00DBED08 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EF9EAD5149FC5B900E5A13C /* RestKitFrameworkTests.octest */ = {
+		7EB7E31A14AB9A5D00DBED08 /* RestKitFrameworkTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitFrameworkTests.octest;
-			remoteRef = 7EF9EAD4149FC5B900E5A13C /* PBXContainerItemProxy */;
+			remoteRef = 7EB7E31914AB9A5D00DBED08 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
