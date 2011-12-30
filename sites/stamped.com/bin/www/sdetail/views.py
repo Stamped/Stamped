@@ -56,11 +56,13 @@ def show(request, **kwargs):
                 raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
 
         entity = stampedAPI.getEntity({'entity_id': stamp.entity_id})
+        entity = HTTPEntity().importSchema(entity)
 
         params = HTTPStamp().importSchema(stamp).value
-        params['entity'] = HTTPEntity().importSchema(entity).value
+        params['entity'] = entity.value
 
-        params['entity']['duration'] = utils.formatDuration(entity.length)
+        if entity.genre == 'film' and entity.length:
+            params['entity']['duration'] = formatDuration(entity.length)
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
 
         response = render_to_response(template, params)
