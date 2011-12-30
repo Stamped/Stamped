@@ -18,6 +18,20 @@ from django.shortcuts   import render_to_response
 
 stampedAPI  = MongoStampedAPI()
 
+def formatDuration(length):
+    try:
+        hours = math.floor(length / 60.0 / 60.0)
+        if hours > 0:
+            minutes = math.floor(length % (hours * 60.0 * 60.0) / 60.0)
+            result = "%i hr %i min" % (int(hours), int(minutes))
+        else:
+            minutes = math.floor(length / 60.0)
+            result = "%i min" % int(minutes)
+        return result
+    except:
+        return None
+
+
 def show(request, **kwargs):
     screenName  = kwargs.pop('screen_name', None)
     stampNum    = kwargs.pop('stamp_num', None)
@@ -41,7 +55,12 @@ def show(request, **kwargs):
             if encodedStampTitle != stampTitle:
                 raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
 
+        entity = stampedAPI.getEntity({'entity_id': stamp.entity_id})
+
         params = HTTPStamp().importSchema(stamp).value
+        params['entity'] = HTTPEntity().importSchema(entity).value
+
+        params['entity']['duration'] = utils.formatDuration(entity.length)
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
 
         response = render_to_response(template, params)
