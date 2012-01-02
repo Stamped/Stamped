@@ -2530,15 +2530,18 @@ class StampedAPI(AStampedAPI):
         # of "created" as 'before' param. This attempts to identify those situations on 
         # the second pass and returns the next segment of stamps.
         if len(result) >= 10 and 'before' in kwargs:
-            from datetime import timedelta
             try:
                 before = datetime.utcfromtimestamp(int(kwargsCopy.pop('before', None)))
+                from datetime import timedelta
+                import calendar
                 if result[-1].timestamp.modified.replace(microsecond=0) == before \
                     and result[-1].timestamp.created + timedelta(hours=1) < before:
-                    kwargsCopy['before'] = int(time.mktime(result[-1].timestamp.created.timetuple()))
+                    kwargsCopy['before'] = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
                     result = self._getStampCollection(authUserId, stampIds, **kwargsCopy)
-            except:
+            except Exception as e:
+                logs.warning(e)
                 pass
+
 
         return result
     
