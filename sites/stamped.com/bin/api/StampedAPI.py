@@ -2534,7 +2534,8 @@ class StampedAPI(AStampedAPI):
                 before = datetime.utcfromtimestamp(int(kwargsCopy.pop('before', None)))
                 from datetime import timedelta
                 import calendar
-                if result[-1].timestamp.modified.replace(microsecond=0) == before \
+                modified = result[-1].timestamp.modified
+                if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
                     and result[-1].timestamp.created + timedelta(hours=1) < before:
                     kwargsCopy['before'] = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
                     result = self._getStampCollection(authUserId, stampIds, **kwargsCopy)
