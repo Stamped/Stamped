@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
-# import tasks.APITasks
+import tasks.APITasks
 
 from pprint          import pprint, pformat
 from datetime        import datetime
@@ -201,9 +201,8 @@ class StampedAPI(AStampedAPI):
         
         # Add profile image
         if imageData:
-            image   = self._imageDB.getImage(imageData)
             ### TODO: Rollback: Delete image
-            self._imageDB.addProfileImage(account.screen_name.lower(), image)
+            self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
         
         # ASYNC: Add activity if invitations were sent
         invites = self._inviteDB.getInvitations(account.email)
@@ -426,57 +425,67 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateProfile(self, authUserId, data):
-        
         ### TODO: Reexamine how updates are done
-
+        
         account = self._accountDB.getAccount(authUserId)
-
+        
         # Import each item
         for k, v in data.iteritems():
             account[k] = v
-
+        
         self._accountDB.updateAccount(account)
-
         return account
     
     @API_CALL
     def customizeStamp(self, authUserId, data):
         ### TODO: Reexamine how updates are done
-
-        primary = data['color_primary'].upper()
+        
+        primary   = data['color_primary'].upper()
         secondary = data['color_secondary'].upper()
-
+        
         # Validate inputs
-        if not utils.validate_hex_color(primary) or \
-            not utils.validate_hex_color(secondary):
+        if not utils.validate_hex_color(primary) or not utils.validate_hex_color(secondary):
             msg = "Invalid format for colors"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         account = self._accountDB.getAccount(authUserId)
-
+        
         # Import each item
         account.color_primary   = primary
         account.color_secondary = secondary
-
+        
         self._accountDB.updateAccount(account)
-
+        
         # ASYNC: Generate file
         self._imageDB.generateStamp(primary, secondary)
-
         return account
     
     @API_CALL
     def updateProfileImage(self, authUserId, data):
-        image   = self._imageDB.getImage(data)
-        user    = self._userDB.getUser(authUserId)
-        self._imageDB.addProfileImage(user.screen_name.lower(), image)
-
-        image_cache = datetime.utcnow()
-        user.image_cache = image_cache
-        self._accountDB.updateUserTimestamp(authUserId, 'image_cache', \
-            image_cache)
+        return self._addProfileImage(data, user_id=authUserId)
+    
+    @API_CALL
+    def updateProfileImageAsync(self, screen_name):
+        self._imageDB.addResizedProfileImages(screen_name)
+    
+    def _addProfileImage(self, data, user_id=None, screen_name=None):
+        assert user_id is not None or screen_name is not None
+        user = None
         
+        if user_id is not None:
+            user = self._userDB.getUser(user_id)
+            screen_name = user.screen_name
+        
+        image = self._imageDB.getImage(data)
+        self._imageDB.addProfileImage(screen_name.lower(), image)
+        
+        if user is not None:
+            image_cache = datetime.utcnow()
+            user.image_cache = image_cache
+            self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
+        
+        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name])
         return user
     
     def checkAccount(self, login):
@@ -1500,20 +1509,8 @@ class StampedAPI(AStampedAPI):
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
-        """
-        ### TEMPORARILY DISABLED
-
         # Asynchronously add references to the stamp in follower's inboxes
-        task = tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
-        
-        # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
-        logs.debug("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
-        """
-
-        followers  = self._friendshipDB.getFollowers(user.user_id)
-        self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
-
-
+        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
         # Add a reference to the stamp in the user's inbox
         followers = [ user.user_id ]
@@ -1649,6 +1646,11 @@ class StampedAPI(AStampedAPI):
                 self._statsSink.increment('stamped.api.stamps.mentions')
         
         return stamp
+    
+    @API_CALL
+    def addStampAsync(self, user_id, stamp_id):
+        followers = self._friendshipDB.getFollowers(user_id)
+        self._stampDB.addInboxStampReference(followers, stamp_id)
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):        

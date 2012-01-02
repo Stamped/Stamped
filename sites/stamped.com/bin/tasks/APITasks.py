@@ -32,9 +32,10 @@ def add(x, y):
     return x + y
 
 @task(ignore_result=True)
-def addStamp(user_id, stamp_id):
-    stampedAPI = getStampedAPI()
-    followers  = stampedAPI._friendshipDB.getFollowers(user_id)
-    
-    stampedAPI._stampDB.addInboxStampReference(followers, stamp_id)
+def addStamp(*args, **kwargs):
+    getStampedAPI().addStampAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def updateProfileImage(*args, **kwargs):
+    getStampedAPI().updateProfileImageAsync(*args, **kwargs)
 

@@ -82,6 +82,10 @@ def _formatLog(s):
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
+def logTask(task):
+    # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
+    log("ASYNC: '%s' '%s' '%s' '%s'" % (type(task), task.ready(), task.successful(), task))
+
 def write(filename, content):
     f = open(filename, "w")
     f.write(content)

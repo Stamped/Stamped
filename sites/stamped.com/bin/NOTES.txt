@@ -1,4 +1,8 @@
 
+* sell alienware
+* sell buddha
+
+
 * @cache decorator
     * pickler
     * in-memory vs disk
@@ -8,7 +12,6 @@
     * clear entire cache
 
 * app companies being returned as 'artist'
-* go through StampedAPI and audit async priorities
 * debug distributing reads to secondaries
 
 * cleanup invocation on ./deploy.py, supporting suboptions and subcommands
