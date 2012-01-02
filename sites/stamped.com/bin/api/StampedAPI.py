@@ -2517,7 +2517,27 @@ class StampedAPI(AStampedAPI):
 
         kwargs['comments'] = True
 
-        return self._getStampCollection(authUserId, stampIds, **kwargs)
+        ### TEMP
+        import copy
+        kwargsCopy = copy.deepcopy(kwargs)
+
+        result = self._getStampCollection(authUserId, stampIds, **kwargs)
+
+        ### TEMP
+        # Fixes infinite loop where client (1.0.3) mistakenly passes "modified" instead
+        # of "created" as 'before' param. This attempts to identify those situations on 
+        # the second pass and returns the next segment of stamps.
+        if len(result) >= 10 and 'before' in kwargs:
+            try:
+                before = datetime.utcfromtimestamp(int(kwargs.pop('before', None)))
+                if result[-1].modified.replace(microsecond=0) == before \
+                    and result[-1].created + datetime.timedelta(hours=1) < before:
+                    kwargsCopy['before'] = int(time.mktime(result[-1].created.timetuple()))
+                    result = self._getStampCollection(authUserId, stampIds, **kwargsCopy)
+            except:
+                pass
+
+        return result
     
     @API_CALL
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
