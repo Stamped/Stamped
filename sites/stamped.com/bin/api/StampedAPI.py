@@ -2529,7 +2529,7 @@ class StampedAPI(AStampedAPI):
         # the second pass and returns the next segment of stamps.
         if len(result) >= 10 and 'before' in kwargs:
             try:
-                before = datetime.utcfromtimestamp(int(kwargs.pop('before', None)))
+                before = datetime.utcfromtimestamp(int(kwargsCopy.pop('before', None)))
                 if result[-1].modified.replace(microsecond=0) == before \
                     and result[-1].created + datetime.timedelta(hours=1) < before:
                     kwargsCopy['before'] = int(time.mktime(result[-1].created.timetuple()))
