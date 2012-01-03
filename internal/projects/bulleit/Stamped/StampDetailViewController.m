@@ -436,9 +436,9 @@ typedef enum {
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.dataDetectorTypes = UIDataDetectorTypeLink;
   NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 14, NULL);
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 14, NULL);
   [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
-  [linkAttributes setValue:(id)[UIColor stampedBlackColor].CGColor
+  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
                     forKey:(NSString*)kCTForegroundColorAttributeName];
   CFRelease(font);
   commentLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
