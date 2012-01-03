@@ -57,6 +57,7 @@ typedef enum {
     NSDictionary *_linkAttributes;
     TTTAttributedLabelVerticalAlignment _verticalAlignment;
     BOOL _userInteractionDisabled;
+  NSRange _selectedRange;
 }
 
 @property (nonatomic, assign) id <TTTAttributedLabelDelegate> delegate;

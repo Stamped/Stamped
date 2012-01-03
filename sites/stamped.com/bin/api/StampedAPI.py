@@ -2509,11 +2509,15 @@ class StampedAPI(AStampedAPI):
         if len(result) >= 10 and 'before' in kwargs:
             try:
                 before = datetime.utcfromtimestamp(int(kwargsCopy.pop('before', None)))
-                if result[-1].modified.replace(microsecond=0) == before \
-                    and result[-1].created + datetime.timedelta(hours=1) < before:
-                    kwargsCopy['before'] = int(time.mktime(result[-1].created.timetuple()))
+                from datetime import timedelta
+                import calendar
+                modified = result[-1].timestamp.modified
+                if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
+                    and result[-1].timestamp.created + timedelta(hours=1) < before:
+                    kwargsCopy['before'] = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
                     result = self._getStampCollection(authUserId, stampIds, **kwargsCopy)
-            except:
+            except Exception as e:
+                logs.warning(e)
                 pass
 
         return result

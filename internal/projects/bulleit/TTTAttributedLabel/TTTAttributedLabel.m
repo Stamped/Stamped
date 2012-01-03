@@ -266,41 +266,43 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
     return [self linkAtCharacterIndex:idx];
 }
 
+
 - (NSUInteger)characterIndexAtPoint:(CGPoint)p {
-    if (!CGRectContainsPoint(self.bounds, p)) {
-        return NSNotFound;
-    }
-    
-    // Convert tap coordinates (start at top left) to CT coordinates (start at bottom left)
-    p = CGPointMake(p.x, self.bounds.size.height - p.y);
+  if (!CGRectContainsPoint(self.bounds, p))
+    return NSNotFound;
 
-    CFIndex idx = NSNotFound;
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, self.bounds);
-    CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, [self.attributedText length]), path, NULL);
-    CFArrayRef lines = CTFrameGetLines(frame);
-    NSUInteger numberOfLines = CFArrayGetCount(lines);
-    CGPoint lineOrigins[numberOfLines];
-    CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), lineOrigins);
-    NSUInteger lineIndex;
+  // Convert tap coordinates (start at top left) to CT coordinates (start at bottom left)
+  p = CGPointMake(p.x, self.bounds.size.height - p.y);
 
-    for (lineIndex = 0; lineIndex < (numberOfLines - 1); lineIndex++) {
-        CGPoint lineOrigin = lineOrigins[lineIndex];
-        if (lineOrigin.y < p.y) {
-            break;
-        }
+  CFIndex index = NSNotFound;
+  CGMutablePathRef path = CGPathCreateMutable();
+  CGPathAddRect(path, NULL, self.bounds);
+  CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, [self.attributedText length]), path, NULL);
+  NSArray* lines = (NSArray*)CTFrameGetLines(frame);
+  CFIndex numLines = lines.count;
+  CGPoint lineOrigins[numLines];
+  CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), lineOrigins);
+  
+  for (CFIndex i = 0; i < numLines; ++i) {
+    CTLineRef line = (CTLineRef)[lines objectAtIndex:i];
+    CGFloat ascent, descent;
+    double lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+    if (lineWidth == 0)
+      return NSNotFound;
+
+    CGPoint lineOrigin = lineOrigins[i];
+    if ((p.y > (floor(lineOrigin.y) - floor(descent))) && (p.y < (ceil(lineOrigin.y) + ceil(ascent)))) {
+      p.x -= lineOrigin.x;
+      p.y -= lineOrigin.y;
+      index = CTLineGetStringIndexForPosition(line, p);
+		  break;
     }
-    
-    CGPoint lineOrigin = lineOrigins[lineIndex];
-    CTLineRef line = CFArrayGetValueAtIndex(lines, lineIndex);
-    // Convert CT coordinates to line-relative coordinates
-    CGPoint relativePoint = CGPointMake(p.x - lineOrigin.x, p.y - lineOrigin.y);
-    idx = CTLineGetStringIndexForPosition(line, relativePoint);
-    
-    CFRelease(frame);
-    CFRelease(path);
-        
-    return idx;
+  }
+  
+  CFRelease(frame);
+  CFRelease(path);
+      
+  return index;
 }
 
 - (void)drawFramesetter:(CTFramesetterRef)framesetter textRange:(CFRange)textRange inRect:(CGRect)rect context:(CGContextRef)c {
@@ -424,11 +426,12 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 
 #pragma mark - UIControl
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
 	UITouch* touch = [touches anyObject];	
-	NSTextCheckingResult *result = [self linkAtPoint:[touch locationInView:self]];
+	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
     
     if (result && self.delegate) {
+      _selectedRange = result.range;
         switch (result.resultType) {
             case NSTextCheckingTypeLink:
                 if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithURL:)]) {
@@ -457,6 +460,10 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
         [self.nextResponder touchesBegan:touches withEvent:event];
     }
 }
+
+//- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+  //if (_selectedRange != )
+//}
 
 #pragma mark - UIView
 
