@@ -64,7 +64,7 @@ static inline NSTextCheckingType NSTextCheckingTypeFromUIDataDetectorType(UIData
     return textCheckingType;
 }
 
-static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *label) {
+static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label) {
     NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionary]; 
     
     CTFontRef font = CTFontCreateWithName((CFStringRef)label.font.fontName, label.font.pointSize, NULL);
@@ -83,15 +83,16 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 	[mutableAttributes setObject:(id)paragraphStyle forKey:(NSString*)kCTParagraphStyleAttributeName];
 	CFRelease(paragraphStyle);
     
-    return [NSDictionary dictionaryWithDictionary:mutableAttributes];
+  return [NSDictionary dictionaryWithDictionary:mutableAttributes];
 }
 
 @interface TTTAttributedLabel ()
-@property (readwrite, nonatomic, copy) NSAttributedString *attributedText;
+@property (readwrite, nonatomic, copy) NSAttributedString* attributedText;
 @property (readwrite, nonatomic, assign) CTFramesetterRef framesetter;
 @property (readwrite, nonatomic, assign) CTFramesetterRef shadowFramesetter;
 @property (readwrite, nonatomic, assign) CTFramesetterRef highlightFramesetter;
-@property (readwrite, nonatomic, retain) NSArray *links;
+@property (readwrite, nonatomic, retain) NSArray* links;
+@property (nonatomic, assign) NSRange selectedRange;
 
 - (id)initCommon;
 - (NSArray *)detectedLinksInString:(NSString *)string range:(NSRange)range error:(NSError **)error;
@@ -107,6 +108,7 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 @synthesize framesetter = _framesetter;
 @synthesize shadowFramesetter = _shadowFramesetter;
 @synthesize highlightFramesetter = _highlightFramesetter;
+@synthesize selectedRange = _selectedRange;
 
 @synthesize delegate = _delegate;
 @synthesize dataDetectorTypes = _dataDetectorTypes;
@@ -306,14 +308,14 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 }
 
 - (void)drawFramesetter:(CTFramesetterRef)framesetter textRange:(CFRange)textRange inRect:(CGRect)rect context:(CGContextRef)c {
-    CGMutablePathRef path = CGPathCreateMutable();
-    
-    CGPathAddRect(path, NULL, rect);
-    CTFrameRef frame = CTFramesetterCreateFrame(framesetter, textRange, path, NULL);
-    CTFrameDraw(frame, c);
-    
-    CFRelease(frame);
-    CFRelease(path);
+  CGMutablePathRef path = CGPathCreateMutable();
+  
+  CGPathAddRect(path, NULL, rect);
+  CTFrameRef frame = CTFramesetterCreateFrame(framesetter, textRange, path, NULL);
+  CTFrameDraw(frame, c);
+  
+  CFRelease(frame);
+  CFRelease(path);
 }
 
 #pragma mark - TTTAttributedLabel
@@ -358,123 +360,146 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 }
 
 - (void)drawTextInRect:(CGRect)rect {
-    if (!self.attributedText) {
-        [super drawTextInRect:rect];
-        return;
+  if (!self.attributedText) {
+    [super drawTextInRect:rect];
+    return;
+  }
+  
+  CGContextRef c = UIGraphicsGetCurrentContext();
+  CGContextSetTextMatrix(c, CGAffineTransformIdentity);
+
+  // Inverts the CTM to match iOS coordinates (otherwise text draws upside-down; Mac OS's system is different)
+  CGContextTranslateCTM(c, 0.0f, self.bounds.size.height);
+  CGContextScaleCTM(c, 1.0f, -1.0f);
+  
+  CGRect textRect = rect;
+  CFRange textRange = CFRangeMake(0, self.attributedText.length);
+  CFRange fitRange;
+  
+  // First, adjust the text to be in the center vertically, if the text size is smaller than the drawing rect
+  CGSize textSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, textRange, NULL, textRect.size, &fitRange);
+  
+  if (textSize.height < textRect.size.height) {
+    CGFloat yOffset = 0.0f;
+    switch (self.verticalAlignment) {
+      case TTTAttributedLabelVerticalAlignmentTop:
+        break;
+      case TTTAttributedLabelVerticalAlignmentCenter:
+        yOffset = floorf((textRect.size.height - textSize.height) / 2.0f);
+        break;
+      case TTTAttributedLabelVerticalAlignmentBottom:
+        yOffset = (textRect.size.height - textSize.height);
+        break;
     }
     
-    CGContextRef c = UIGraphicsGetCurrentContext();
-    CGContextSetTextMatrix(c, CGAffineTransformIdentity);
-
-    // Inverts the CTM to match iOS coordinates (otherwise text draws upside-down; Mac OS's system is different)
-    CGContextTranslateCTM(c, 0.0f, self.bounds.size.height);
-    CGContextScaleCTM(c, 1.0f, -1.0f);
+    textRect.origin = CGPointMake(textRect.origin.x, textRect.origin.y + yOffset);
+    textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - yOffset);
+  }
+  
+  // Second, trace the shadow before the actual text, if we have one
+  if (self.shadowColor && !self.highlighted) {
+    CGRect shadowRect = textRect;
+    // We subtract the height, not add it, because the whole scene is inverted.
+    shadowRect.origin = CGPointMake(shadowRect.origin.x + self.shadowOffset.width, shadowRect.origin.y - self.shadowOffset.height);
     
-    CGRect textRect = rect;
-    CFRange textRange = CFRangeMake(0, [self.attributedText length]);
-    CFRange fitRange;
-
-    // First, adjust the text to be in the center vertically, if the text size is smaller than the drawing rect
-    CGSize textSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, textRange, NULL, textRect.size, &fitRange);
-    
-    if (textSize.height < textRect.size.height) {
-        CGFloat yOffset = 0.0f;
-        switch (self.verticalAlignment) {
-            case TTTAttributedLabelVerticalAlignmentTop:
-                break;
-            case TTTAttributedLabelVerticalAlignmentCenter:
-                yOffset = floorf((textRect.size.height - textSize.height) / 2.0f);
-                break;
-            case TTTAttributedLabelVerticalAlignmentBottom:
-                yOffset = (textRect.size.height - textSize.height);
-                break;
-        }
-        
-        textRect.origin = CGPointMake(textRect.origin.x, textRect.origin.y + yOffset);
-        textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - yOffset);
-    }
-
-    // Second, trace the shadow before the actual text, if we have one
-    if (self.shadowColor && !self.highlighted) {
-        CGRect shadowRect = textRect;
-        // We subtract the height, not add it, because the whole scene is inverted.
-        shadowRect.origin = CGPointMake(shadowRect.origin.x + self.shadowOffset.width, shadowRect.origin.y - self.shadowOffset.height);
-        
-        // Override the text's color attribute to whatever the shadow color is
-        if (!self.shadowFramesetter) {
-            NSMutableAttributedString *shadowAttrString = [[self.attributedText mutableCopy] autorelease];
-            [shadowAttrString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)[self.shadowColor CGColor] range:NSMakeRange(0, [self.attributedText length])];
-            self.shadowFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)shadowAttrString);
-        }
-                
-        [self drawFramesetter:self.shadowFramesetter textRange:textRange inRect:shadowRect context:c];
+    // Override the text's color attribute to whatever the shadow color is
+    if (!self.shadowFramesetter) {
+      NSMutableAttributedString *shadowAttrString = [[self.attributedText mutableCopy] autorelease];
+      [shadowAttrString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)[self.shadowColor CGColor] range:NSMakeRange(0, [self.attributedText length])];
+      self.shadowFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)shadowAttrString);
     }
     
-    // Finally, draw the text or highlighted text itself (on top of the shadow, if there is one)
-    if (self.highlightedTextColor && self.highlighted) {
-        if (!self.highlightFramesetter) {
-            NSMutableAttributedString *mutableAttributedString = [[self.attributedText mutableCopy] autorelease];
-            [mutableAttributedString addAttribute:(NSString *)kCTForegroundColorAttributeName value:(id)[self.highlightedTextColor CGColor] range:NSMakeRange(0, mutableAttributedString.length)];
-            self.highlightFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)mutableAttributedString);
-        }
-        
-        [self drawFramesetter:self.highlightFramesetter textRange:textRange inRect:textRect context:c];
-    } else {
-        [self drawFramesetter:self.framesetter textRange:textRange inRect:textRect context:c];
-    }  
+    [self drawFramesetter:self.shadowFramesetter textRange:textRange inRect:shadowRect context:c];
+  }
+  
+  // Finally, draw the text or highlighted text itself (on top of the shadow, if there is one)
+  if (self.highlightedTextColor && self.highlighted) {
+    if (!self.highlightFramesetter) {
+      NSMutableAttributedString *mutableAttributedString = [[self.attributedText mutableCopy] autorelease];
+      [mutableAttributedString addAttribute:(NSString *)kCTForegroundColorAttributeName value:(id)[self.highlightedTextColor CGColor] range:NSMakeRange(0, mutableAttributedString.length)];
+      self.highlightFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)mutableAttributedString);
+    }
+    
+    [self drawFramesetter:self.highlightFramesetter textRange:textRange inRect:textRect context:c];
+  } else {
+    [self drawFramesetter:self.framesetter textRange:textRange inRect:textRect context:c];
+  }  
 }
 
 #pragma mark - UIControl
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-	UITouch* touch = [touches anyObject];	
+  UITouch* touch = [touches anyObject];	
 	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
-    
-    if (result && self.delegate) {
-      _selectedRange = result.range;
-        switch (result.resultType) {
-            case NSTextCheckingTypeLink:
-                if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithURL:)]) {
-                    [self.delegate attributedLabel:self didSelectLinkWithURL:result.URL];
-                }
-                break;
-            case NSTextCheckingTypeAddress:
-                if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithAddress:)]) {
-                    [self.delegate attributedLabel:self didSelectLinkWithAddress:result.addressComponents];
-                }
-                break;
-            case NSTextCheckingTypePhoneNumber:
-                if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithPhoneNumber:)]) {
-                    [self.delegate attributedLabel:self didSelectLinkWithPhoneNumber:result.phoneNumber];
-                }
-                break;
-            case NSTextCheckingTypeDate:
-                if (result.timeZone && [self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithDate:timeZone:duration:)]) {
-                    [self.delegate attributedLabel:self didSelectLinkWithDate:result.date timeZone:result.timeZone duration:result.duration];
-                } else if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithDate:)]) {
-                    [self.delegate attributedLabel:self didSelectLinkWithDate:result.date];
-                }
-                break;
-        }
-    } else {
-        [self.nextResponder touchesBegan:touches withEvent:event];
-    }
+  if (result && self.delegate) {
+    self.selectedRange = result.range;
+    [self setNeedsDisplay];
+  }
+
+  [super touchesBegan:touches withEvent:event];
 }
 
-//- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-  //if (_selectedRange != )
-//}
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+  self.selectedRange = NSMakeRange(0, 0);
+
+  [super touchesCancelled:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+  UITouch* touch = [touches anyObject];	
+	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
+  
+  if (result && self.delegate) {
+    self.selectedRange = NSMakeRange(0, 0);
+    [self setNeedsDisplay];
+    switch (result.resultType) {
+      case NSTextCheckingTypeLink:
+        if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithURL:)]) {
+          [self.delegate attributedLabel:self didSelectLinkWithURL:result.URL];
+        }
+        break;
+      case NSTextCheckingTypeAddress:
+        if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithAddress:)]) {
+          [self.delegate attributedLabel:self didSelectLinkWithAddress:result.addressComponents];
+        }
+        break;
+      case NSTextCheckingTypePhoneNumber:
+        if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithPhoneNumber:)]) {
+          [self.delegate attributedLabel:self didSelectLinkWithPhoneNumber:result.phoneNumber];
+        }
+        break;
+      case NSTextCheckingTypeDate:
+        if (result.timeZone && [self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithDate:timeZone:duration:)]) {
+          [self.delegate attributedLabel:self didSelectLinkWithDate:result.date timeZone:result.timeZone duration:result.duration];
+        } else if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithDate:)]) {
+          [self.delegate attributedLabel:self didSelectLinkWithDate:result.date];
+        }
+        break;
+    }
+    return;
+  }
+
+  [super touchesEnded:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  UITouch* touch = [touches anyObject];	
+	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
+  if (result && self.delegate) {
+    self.selectedRange = NSMakeRange(0, 0);
+    [self setNeedsDisplay];
+  }
+  [super touchesMoved:touches withEvent:event];
+}
 
 #pragma mark - UIView
 
 - (CGSize)sizeThatFits:(CGSize)size {
-    if (!self.attributedText) {
-        return [super sizeThatFits:size];
-    }
-    
-    CGSize suggestedSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, CFRangeMake(0, [self.attributedText length]), NULL, CGSizeMake(size.width, CGFLOAT_MAX), NULL);
-        
-    return CGSizeMake(ceilf(suggestedSize.width), ceilf(suggestedSize.height));
+  if (!self.attributedText)
+    return [super sizeThatFits:size];
+  
+  CGSize suggestedSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, CFRangeMake(0, [self.attributedText length]), NULL, CGSizeMake(size.width, CGFLOAT_MAX), NULL);
+  return CGSizeMake(ceilf(suggestedSize.width), ceilf(suggestedSize.height));
 }
 
 @end

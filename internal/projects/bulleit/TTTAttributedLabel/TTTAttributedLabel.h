@@ -24,9 +24,9 @@
 #import <CoreText/CoreText.h>
 
 typedef enum {
-    TTTAttributedLabelVerticalAlignmentCenter   = 0,
-    TTTAttributedLabelVerticalAlignmentTop      = 1,
-    TTTAttributedLabelVerticalAlignmentBottom   = 2,
+    TTTAttributedLabelVerticalAlignmentCenter = 0,
+    TTTAttributedLabelVerticalAlignmentTop = 1,
+    TTTAttributedLabelVerticalAlignmentBottom = 2,
 } TTTAttributedLabelVerticalAlignment;
 
 @class TTTAttributedLabel;
@@ -46,17 +46,17 @@ typedef enum {
 @end
 
 @interface TTTAttributedLabel : UILabel <TTTAttributedLabel> {
-@private
-    NSAttributedString *_attributedText;
-    CTFramesetterRef _framesetter;
-    BOOL _needsFramesetter;
-    
-    id _delegate;
-    UIDataDetectorTypes _dataDetectorTypes;
-    NSArray *_links;
-    NSDictionary *_linkAttributes;
-    TTTAttributedLabelVerticalAlignment _verticalAlignment;
-    BOOL _userInteractionDisabled;
+ @private
+  NSAttributedString *_attributedText;
+  CTFramesetterRef _framesetter;
+  BOOL _needsFramesetter;
+  
+  id _delegate;
+  UIDataDetectorTypes _dataDetectorTypes;
+  NSArray* _links;
+  NSDictionary* _linkAttributes;
+  TTTAttributedLabelVerticalAlignment _verticalAlignment;
+  BOOL _userInteractionDisabled;
   NSRange _selectedRange;
 }
 
