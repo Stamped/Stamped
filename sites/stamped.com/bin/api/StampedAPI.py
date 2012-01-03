@@ -40,6 +40,9 @@ from libs.TheTVDB    import TheTVDB
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
 
+# TODO NOTES:
+#   * dedupe activity creation code for mentions in addStamp, addComment, updateStamp, etc.
+
 class StampedAPI(AStampedAPI):
     """
         Database-agnostic implementation of the internal API for accessing 
@@ -1504,22 +1507,22 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def addStampAsync(self, user_id, stamp_id):
+    def addStampAsync(self, authUserId, stamp_id):
         stamp = self._stampDB.getStamp(stamp_id)
         
         # Add references to the stamp in all relevant inboxes
-        followers = self._friendshipDB.getFollowers(user_id)
-        followers.append(user_id)
+        followers = self._friendshipDB.getFollowers(authUserId)
+        followers.append(authUserId)
         self._stampDB.addInboxStampReference(followers, stamp_id)
         
         # Update user stats 
-        self._userDB.updateUserStats(user_id, 'num_stamps',       None, increment=1)
-        self._userDB.updateUserStats(user_id, 'num_stamps_left',  None, increment=-1)
-        self._userDB.updateUserStats(user_id, 'num_stamps_total', None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps',       None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_total', None, increment=1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
-            self._favoriteDB.completeFavorite(entity.entity_id, user_id)
+            self._favoriteDB.completeFavorite(entity.entity_id, authUserId)
         except:
             pass
         
@@ -1528,11 +1531,11 @@ class StampedAPI(AStampedAPI):
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
             for item in stamp.credit:
-                if item.user_id == user_id:
+                if item.user_id == authUserId:
                     continue
                 
                 friendship = Friendship({
-                    'user_id':      user_id,
+                    'user_id':      authUserId,
                     'friend_id':    item.user_id,
                 })
                 
@@ -1580,7 +1583,7 @@ class StampedAPI(AStampedAPI):
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'restamp'
-            activity.user.user_id       = user_id
+            activity.user.user_id       = authUserId
             activity.subject            = stamp.entity.title
             activity.blurb              = stamp.blurb
             activity.linked_stamp_id    = stamp.stamp_id
@@ -1595,26 +1598,26 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
-            mentionedUserIds = []
+            mentionedUserIds = set()
             
             for mention in stamp.mentions:
                 if 'user_id' in mention \
                     and mention['user_id'] not in creditedUserIds \
-                    and mention['user_id'] != user_id:
+                    and mention['user_id'] != authUserId:
                     
                     friendship = Friendship({
-                        'user_id':      user_id,
+                        'user_id':      authUserId,
                         'friend_id':    mention['user_id'],
                     })
                     
                     # Check if block exists between user and mentioned user
                     if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.append(mention['user_id'])
+                        mentionedUserIds.add(mention['user_id'])
             
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
-                activity.user.user_id       = user_id
+                activity.user.user_id       = authUserId
                 activity.subject            = stamp.entity.title
                 activity.blurb              = stamp.blurb
                 activity.linked_stamp_id    = stamp.stamp_id
@@ -1633,27 +1636,28 @@ class StampedAPI(AStampedAPI):
     def updateStamp(self, authUserId, stampId, data):        
         stamp       = self._stampDB.getStamp(stampId)       
         user        = self._userDB.getUser(authUserId)
-
+        
         blurbData   = data.pop('blurb', stamp.blurb)
         creditData  = data.pop('credit', None)
-
+        
         # Verify user can modify the stamp
         if authUserId != stamp.user_id:
             msg = "Insufficient privileges to modify stamp"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
+        
         # Collect user ids
         userIds = {}
         userIds[user.user_id] = user.exportSchema(UserMini())
-
+        
         # Blurb & Mentions
         mentionedUsers = []
+        
         if blurbData == None:
             stamp.blurb = None
         elif blurbData.strip() != stamp.blurb:
             stamp.blurb = blurbData.strip()
-
+            
             previouslyMentioned = []
             if stamp.mentions != None:
                 for mention in stamp.mentions:
@@ -1670,7 +1674,8 @@ class StampedAPI(AStampedAPI):
         # Credit
         credit = []
         creditedUserIds = []
-        if creditData == None or not isinstance(creditData, list):
+        
+        if creditData is None or not isinstance(creditData, list):
             stamp.credit = None
         else:
             previouslyCredited = []
@@ -1717,34 +1722,33 @@ class StampedAPI(AStampedAPI):
                 if self._friendshipDB.blockExists(friendship) == True:
                     logs.debug("Block exists")
                     continue
-
+                
                 ### NOTE:
                 # For now, if a block exists then no comment or activity is
                 # created. This may change ultimately (i.e. we create the
                 # 'comment' and hide it from the recipient until they're
                 # unblocked), but for now we're not going to do anything.
-
+                
                 creditedUserIds.append(result.user_id)
-
+            
             ### TODO: How do we handle credited users that have not yet joined?
             stamp.credit = credit
-
+        
         stamp.timestamp.modified = datetime.utcnow()
             
         # Update the stamp data in the database
         stamp = self._stampDB.updateStamp(stamp)
-
+        
         # Add user objects back into stamp
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
-
+        
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
             for item in credit:
-
                 # Only run if user is flagged as credited
                 if item.user_id not in creditedUserIds:
                     continue
-
+                
                 # Assign credit
                 self._stampDB.giveCredit(item.user_id, stamp)
                 
@@ -1761,15 +1765,15 @@ class StampedAPI(AStampedAPI):
                     
                 #     # Add the comment data to the database
                 #     self._commentDB.addComment(comment)
-
+                
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user_id, 'num_credits', \
                     None, increment=1)
                 self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
                     None, increment=CREDIT_BENEFIT)
-
+        
         # Note: No activity should be generated for the user creating the stamp
-
+        
         # Add activity for credited users
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
@@ -1782,7 +1786,7 @@ class StampedAPI(AStampedAPI):
             activity.benefit            = CREDIT_BENEFIT
             
             self._activityDB.addActivity(creditedUserIds, activity)
-
+            
             # Increment activity count
             for user_id in creditedUserIds:
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
@@ -1791,6 +1795,7 @@ class StampedAPI(AStampedAPI):
         if self._activity == True and stamp.mentions != None \
             and len(stamp.mentions) > 0:
             mentionedUserIds = []
+            
             for mention in stamp.mentions:
                 if 'user_id' in mention \
                     and mention['user_id'] not in creditedUserIds \
@@ -1800,8 +1805,10 @@ class StampedAPI(AStampedAPI):
                         'user_id':      user.user_id,
                         'friend_id':    mention['user_id'],
                     })
+                    
                     if self._friendshipDB.blockExists(friendship) == False:
                         mentionedUserIds.append(mention['user_id'])
+            
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
@@ -1810,29 +1817,29 @@ class StampedAPI(AStampedAPI):
                 activity.blurb              = stamp.blurb
                 activity.linked_stamp_id    = stamp.stamp_id
                 activity.timestamp.created  = datetime.utcnow()
-
+                
                 self._activityDB.addActivity(mentionedUserIds, activity)
-
+                
                 # Increment activity count
                 for user_id in mentionedUserIds:
                     self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
-
+        
         return stamp
     
     @API_CALL
     def removeStamp(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
             msg = "Insufficient privileges to remove stamp"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
+        
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
-
+        
         # Remove from user collection
         # self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
         
@@ -1840,32 +1847,32 @@ class StampedAPI(AStampedAPI):
         # followers = self._friendshipDB.getFollowers(authUserId)
         # followers.append(authUserId)
         # self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
-
+        
         ### NOTE: 
         # This only removes the stamp from people who follow the user.
         # If we allow for an "opt in" method of users adding individual
         # stamps to their inbox, we'll have to account for that here.
-
+        
         ### TODO: If restamp, remove from credited stamps' comment list
-
+        
         ### TODO: Remove from activity? To do? Anything else?
-
+        
         # Remove comments
         ### TODO: Make this more efficient?
         comments = self._commentDB.getComments(stampId)
         for comment in comments:
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
-
+        
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
-
+        
         # Remove as favorite if necessary
         try:
             self._favoriteDB.completeFavorite(stamp.entity_id, authUserId, complete=False)
         except:
             pass
-
+        
         ### TODO: Remove reference in other people's favorites
 
         # Update user stats 
@@ -1874,43 +1881,43 @@ class StampedAPI(AStampedAPI):
                     None, increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
                     None, increment=1)
-
+        
         # Update credit stats if credit given
         if stamp.credit != None and len(stamp.credit) > 0:
             for item in stamp.credit:
                 # Only run if user is flagged as credited
                 if 'user_id' not in item or item.user_id == None:
                     continue
-
+                
                 # Assign credit
                 self._stampDB.removeCredit(item.user_id, stamp)
-
+                
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user_id, 'num_credits', \
                     None, increment=-1)
-
+        
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
-
+        
         return stamp
     
     @API_CALL
     def getStamp(self, stampId, authUserId=None):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Check privacy of stamp
         if stamp.user_id != authUserId and stamp.user.privacy == True:
             friendship = Friendship({
                 'user_id':      user.user_id,
                 'friend_id':    authUserId,
             })
-
+            
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to view stamp"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-      
+        
         return stamp
     
     @API_CALL
@@ -1931,7 +1938,7 @@ class StampedAPI(AStampedAPI):
     def updateStampImage(self, authUserId, stampId, data):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Verify user has permission to add image
         if stamp.user_id != authUserId:
             msg = "Insufficient privileges to update stamp image"
@@ -1940,7 +1947,7 @@ class StampedAPI(AStampedAPI):
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
-
+        
         # Add image dimensions to stamp object (width,height)
         width, height           = image.size
         stamp.image_dimensions  = "%s,%s" % (width, height)
@@ -1948,7 +1955,7 @@ class StampedAPI(AStampedAPI):
         
         return stamp
     
-
+    
     """
      #####                                                  
     #     #  ####  #    # #    # ###### #    # #####  ####  
@@ -1958,37 +1965,37 @@ class StampedAPI(AStampedAPI):
     #     # #    # #    # #    # #      #   ##   #   #    # 
      #####   ####  #    # #    # ###### #    #   #    ####  
     """
-
+    
     @API_CALL
     @HandleRollback
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
         stamp   = self._stampDB.getStamp(stampId)
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
-
+        
         # Verify user has the ability to comment on the stamp
         friendship = Friendship({
             'user_id':      stamp.user.user_id,
             'friend_id':    user.user_id,
         })
-
+        
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to add comment"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+        
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
             logs.info("Block exists")
             raise Exception("Block exists")
-
+        
         # Extract mentions
         mentions = None
         if blurb != None:
             mentions = self._extractMentions(blurb)
-
+        
         # Build comment
         comment                     = Comment()
         comment.user_id             = user.user_id
@@ -1997,42 +2004,53 @@ class StampedAPI(AStampedAPI):
         comment.timestamp.created   = datetime.utcnow()
         if mentions != None:
             comment.mentions = mentions
-            
+        
         # Add the comment data to the database
         comment = self._commentDB.addComment(comment)
         self._rollback.append((self._commentDB.removeComment, \
             {'commentId': comment.comment_id}))
-
+        
         # Add full user object back
         comment.user = user.exportSchema(UserMini())
-
+        
+        tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
+        
+        return comment
+    
+    @API_CALL
+    def addCommentAsync(self, authUserId, stampId, comment_id):
         # Note: No activity should be generated for the user creating the comment
-
+        comment = self._commentDB.getComment(comment_id)
+        stamp   = self._stampDB.getStamp(stampId)
+        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+        
         # Add activity for mentioned users
-        mentionedUserIds = []
-        if self._activity == True and mentions != None and len(mentions) > 0:
-            for mention in mentions:
-                if 'user_id' in mention and mention['user_id'] != user.user_id:
+        mentionedUserIds = set()
+        if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
+            for mention in stamp.mentions:
+                if 'user_id' in mention and mention['user_id'] != authUserId:
                     # Check if block exists between user and mentioned user
                     friendship = Friendship({
-                        'user_id':      user.user_id,
+                        'user_id':      authUserId,
                         'friend_id':    mention['user_id'],
                     })
+                    
                     if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.append(mention['user_id'])
+                        mentionedUserIds.add(mention['user_id'])
+            
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
-                activity.user.user_id       = user.user_id
+                activity.user.user_id       = authUserId
                 activity.subject            = stamp.entity.title
                 activity.blurb              = comment.blurb
                 activity.linked_stamp_id    = stamp.stamp_id
                 activity.linked_comment_id  = comment.comment_id
                 activity.timestamp.created  = datetime.utcnow()
-
+                
                 ### TODO: Rollback: Remove Activity
                 self._activityDB.addActivity(mentionedUserIds, activity)
-
+                
                 # Increment activity count
                 for user_id in mentionedUserIds:
                     self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
@@ -2041,14 +2059,14 @@ class StampedAPI(AStampedAPI):
                 self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
         
         # Add activity for stamp owner
-        commentedUserIds = []
-        if stamp.user.user_id not in mentionedUserIds and stamp.user.user_id != user.user_id:
-            commentedUserIds.append(stamp.user.user_id)
+        commentedUserIds = set()
+        if stamp.user.user_id not in mentionedUserIds and stamp.user.user_id != authUserId:
+            commentedUserIds.add(stamp.user.user_id)
         
         if len(commentedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'comment'
-            activity.user.user_id       = user.user_id
+            activity.user.user_id       = authUserId
             activity.subject            = stamp.entity.title
             activity.blurb              = comment.blurb
             activity.linked_stamp_id    = stamp.stamp_id
@@ -2057,7 +2075,7 @@ class StampedAPI(AStampedAPI):
             
             ### TODO: Rollback: Remove Activity
             self._activityDB.addActivity(commentedUserIds, activity)
-                
+            
             # Increment activity count
             for user_id in commentedUserIds:
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
@@ -2065,54 +2083,50 @@ class StampedAPI(AStampedAPI):
             # Increment comment metric
             self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
         
+        repliedUserIds = []
+        
         # Add activity for previous commenters
         ### TODO: Limit this to the last 20 comments or so
-        repliedUsersDict = {}
         for prevComment in self._commentDB.getComments(stamp.stamp_id):
             # Skip if it was generated from a restamp
             if prevComment.restamp_id:
                 continue
-
+            
             repliedUserId = prevComment['user']['user_id']
             if repliedUserId not in commentedUserIds \
                 and repliedUserId not in mentionedUserIds \
-                and repliedUserId != user.user_id:
-                repliedUsersDict[prevComment['user']['user_id']] = 1 
-        
-        repliedUserIds = []
-        for repliedUserId in repliedUsersDict.keys():
-            # Check if block exists between user and previous commenter
-            friendship = Friendship({
-                'user_id':      user.user_id,
-                'friend_id':    repliedUserId,
-            })
-            if self._friendshipDB.blockExists(friendship) == False:
-                repliedUserIds.append(repliedUserId)
+                and repliedUserId != authUserId:
+                
+                replied_user_id = prevComment['user']['user_id']
+                
+                # Check if block exists between user and previous commenter
+                friendship = Friendship({
+                    'user_id':      authUserId,
+                    'friend_id':    replied_user_id,
+                })
+                
+                if self._friendshipDB.blockExists(friendship) == False:
+                    repliedUserIds.append(replied_user_id)
         
         if len(repliedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'reply'
-            activity.user.user_id       = user.user_id
+            activity.user.user_id       = authUserId
             activity.subject            = stamp.entity.title
             activity.blurb              = comment.blurb
             activity.linked_stamp_id    = stamp.stamp_id
             activity.linked_comment_id  = comment.comment_id
             activity.timestamp.created  = datetime.utcnow()
-
+            
             ### TODO: Rollback: Remove Activity
             self._activityDB.addActivity(repliedUserIds, activity)
-                
+            
             # Increment activity count
             for user_id in repliedUserIds:
                 self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
         
         # Increment comment count on stamp
-        self._stampDB.updateStampStats( \
-            stamp.stamp_id, 'num_comments', increment=1)
-        self._rollback.append((self._stampDB.updateStampStats, \
-            {'stampId': stamp.stamp_id, 'stat': 'num_comments', 'increment': -1}))
-
-        return comment
+        self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
     
     @API_CALL
     def removeComment(self, authUserId, commentId):

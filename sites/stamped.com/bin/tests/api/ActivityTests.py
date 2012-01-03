@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, pprint
 from AStampedAPITestCase import *
 
 # ######## #
@@ -87,6 +87,7 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
+        #utils.log(pprint.pformat(result))
         self.assertEqual(len(result), 2)
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])

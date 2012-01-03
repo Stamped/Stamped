@@ -33,8 +33,9 @@ class StampedAPIUserTest(StampedAPITest):
             '@ab\ncd'                : [ 'ab', ], 
             '@@'                     : [], 
             '@1234567890123456789'   : [ '1234567890123456789', ], 
-            '@123456789012345678901' : [], # too long
+            '@123456789012345678901' : [], # invalid; too long
             '@ab_cd a@ef @gh'        : [ 'ab_cd', 'gh', ], 
+            '@ab123cd'               : [ 'ab123cd', ], 
         }
         
         for test in tests:

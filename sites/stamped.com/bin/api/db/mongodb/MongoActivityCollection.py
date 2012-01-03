@@ -81,14 +81,14 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     def addActivity(self, recipientIds, activityItem, **kwargs):
         sendAlert   = kwargs.pop('sendAlert', True)
         checkExists = kwargs.pop('checkExists', False)
-
+        
         alerts = []
-
+        
         for recipientId in recipientIds:
             activityId = None
             activity = activityItem.value
             activity['recipient_id'] = recipientId
-
+            
             if checkExists:
                 try:
                     document = self._collection.find_one({
@@ -102,11 +102,11 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                     pass
             else:
                 activityId = self._collection.insert_one(activity)
-
+            
             if sendAlert:
                 if not activityId:
                     continue
-
+                
                 alert = Alert()
                 alert.activity_id   = activityId
                 alert.recipient_id  = recipientId
@@ -114,7 +114,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                 alert.genre         = activity['genre']
                 alert.created       = activity['timestamp']['created']
                 alerts.append(alert)
-
+        
         if len(alerts):        
             self.alerts_collection.addAlerts(alerts)
     

@@ -71,3 +71,7 @@ def removeFriendship(*args, **kwargs):
 def inviteFriend(*args, **kwargs):
     getStampedAPI().inviteFriendAsync(*args, **kwargs)
 
+@task(ignore_result=True)
+def addComment(*args, **kwargs):
+    getStampedAPI().addCommentAsync(*args, **kwargs)
+
