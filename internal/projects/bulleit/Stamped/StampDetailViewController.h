@@ -48,7 +48,7 @@ extern NSString* const kRemoveStampPath;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
-@property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
+@property (nonatomic, retain) IBOutlet TTTAttributedLabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
 @property (nonatomic, retain) IBOutlet UILabel* addFavoriteLabel;
