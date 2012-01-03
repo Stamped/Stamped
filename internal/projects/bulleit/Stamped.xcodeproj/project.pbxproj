@@ -755,6 +755,8 @@
 		7E589644147C468B002268C4 /* icon_dev.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5893AD147C4620002268C4 /* icon_dev.png */; };
 		7E589645147C468B002268C4 /* icon_dev@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5893AF147C4628002268C4 /* icon_dev@2x.png */; };
 		7E5CB2CB1406EC9C00D0352D /* plus_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5CB2CA1406EC9C00D0352D /* plus_icon@2x.png */; };
+		7E5D9E9814B3C0DD00C340CA /* STScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5D9E9714B3C0DD00C340CA /* STScrollView.m */; };
+		7E5D9E9914B3C0DD00C340CA /* STScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5D9E9714B3C0DD00C340CA /* STScrollView.m */; };
 		7E5DF6CC13DA0D2A00B63039 /* badge_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */; };
 		7E5EB263140C0535007D164F /* STTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB262140C0535007D164F /* STTextField.m */; };
 		7E5EB266140C166A007D164F /* STCategoryDropdownTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB265140C1669007D164F /* STCategoryDropdownTableView.m */; };
@@ -1606,6 +1608,8 @@
 		7E58964A147C468B002268C4 /* Stamped copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Stamped copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E58964C147C468C002268C4 /* Stamped copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Stamped copy-Info.plist"; path = "/Users/andybons/Dev/Stamped/internal/projects/bulleit/Stamped copy-Info.plist"; sourceTree = "<absolute>"; };
 		7E5CB2CA1406EC9C00D0352D /* plus_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "plus_icon@2x.png"; sourceTree = "<group>"; };
+		7E5D9E9614B3C0DC00C340CA /* STScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollView.h; sourceTree = "<group>"; };
+		7E5D9E9714B3C0DD00C340CA /* STScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollView.m; sourceTree = "<group>"; };
 		7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "badge_background@2x.png"; sourceTree = "<group>"; };
 		7E5EB261140C0535007D164F /* STTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTextField.h; sourceTree = "<group>"; };
 		7E5EB262140C0535007D164F /* STTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTextField.m; sourceTree = "<group>"; };
@@ -3547,6 +3551,8 @@
 				7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */,
 				7ED69D4414693BA100964B3A /* FriendshipManager.h */,
 				7ED69D4514693BA100964B3A /* FriendshipManager.m */,
+				7E5D9E9614B3C0DC00C340CA /* STScrollView.h */,
+				7E5D9E9714B3C0DD00C340CA /* STScrollView.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -4952,6 +4958,7 @@
 				7E58941F147C468B002268C4 /* SocialManager.m in Sources */,
 				7E589420147C468B002268C4 /* StampDetailHeaderView.m in Sources */,
 				7ED2824814914ABA0086FF18 /* BWQuincyManager.m in Sources */,
+				7E5D9E9914B3C0DD00C340CA /* STScrollView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5065,6 +5072,7 @@
 				CB6556271471C56600865AAE /* SocialManager.m in Sources */,
 				CB9C0909147B19D50007D9A6 /* StampDetailHeaderView.m in Sources */,
 				7ED2824714914ABA0086FF18 /* BWQuincyManager.m in Sources */,
+				7E5D9E9814B3C0DD00C340CA /* STScrollView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
