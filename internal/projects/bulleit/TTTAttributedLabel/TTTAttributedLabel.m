@@ -431,6 +431,7 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
 	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
     
     if (result && self.delegate) {
+      _selectedRange = result.range;
         switch (result.resultType) {
             case NSTextCheckingTypeLink:
                 if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithURL:)]) {
@@ -459,6 +460,10 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
         [self.nextResponder touchesBegan:touches withEvent:event];
     }
 }
+
+//- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+  //if (_selectedRange != )
+//}
 
 #pragma mark - UIView
 
