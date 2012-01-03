@@ -410,7 +410,7 @@ typedef enum {
 - (void)setUpMainContentView {
   commenterImageView_.imageURL = [stamp_.user profileImageURLForSize:ProfileImageSize55];
   commenterImageView_.enabled = YES;
-  [commenterImageView_ addTarget:self 
+  [commenterImageView_ addTarget:self
                           action:@selector(handleUserImageViewTap:)
                 forControlEvents:UIControlEventTouchUpInside];
 
