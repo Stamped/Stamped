@@ -98,6 +98,7 @@ class StampedAPIInviteFriend(StampedAPIFriendshipTest):
         # Subsequent attempts should fail
         with expected_exception():
             result = self.handlePOST(path, data)
+            print result
         
         (userC, tokenC) = self.createAccount('sample123')
         self.deleteAccount(tokenC)

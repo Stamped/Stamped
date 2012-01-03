@@ -26,7 +26,7 @@ class MongoInvitationCollection(AMongoCollection):
     def invite_queue(self):
         return MongoInviteQueueCollection()
 
-    def inviteUser(self, email, userId):
+    def checkInviteExists(self, email, userId):
         try:
             document = self._collection.find_one({
                 '_id': email, 
@@ -38,11 +38,9 @@ class MongoInvitationCollection(AMongoCollection):
         except:
             exists = False
         
-        if exists == True:
-            msg = "Invite already exists"
-            logs.warning(msg)
-            raise InputError(msg)
-
+        return exists
+    
+    def inviteUser(self, email, userId):
         data = {
             'user_id': userId, 
             'timestamp': datetime.utcnow(),
@@ -53,16 +51,16 @@ class MongoInvitationCollection(AMongoCollection):
             {'$addToSet': {'invited_by': data}},
             upsert=True
         )
-
+        
         # Queue email to be sent
         invite = Invite()
         invite.recipient_email = email
         invite.user_id = userId
         invite.created = datetime.utcnow()
         self.invite_queue.addInvite(invite)
-
+        
         return True
-
+    
     def getInvitations(self, email):
         document = self._collection.find_one({'_id': email})
         if document and 'invited_by' in document \

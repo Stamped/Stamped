@@ -751,3 +751,18 @@ def round_float(f, n):
 def get_modified_time(filename):
     return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 
+def getFacebook(accessToken, path, params={}):
+    baseurl = 'https://graph.facebook.com'
+    params['access_token'] = accessToken
+    params  = urllib.urlencode(params)
+    url     = "%s%s?%s" % (baseurl, path, params)
+    result  = json.load(urllib2.urlopen(url))
+    
+    if 'error' in result:
+        if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
+            # OAuth exception
+            raise
+        raise
+    
+    return result
+

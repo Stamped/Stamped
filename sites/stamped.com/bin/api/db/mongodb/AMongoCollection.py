@@ -243,6 +243,8 @@ class AMongoCollection(object):
             return document
         except Exception as e:
             logs.warning("Unable to add document: %s" % e)
+            #for line in traceback.format_stack():
+            #    utils.log(line)
             raise
     
     def _addMongoDocuments(self, documents):

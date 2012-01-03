@@ -81,14 +81,14 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
             "credit": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-
+        
         path = "activity/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 2)
-
+        
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 

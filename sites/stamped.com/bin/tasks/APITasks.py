@@ -36,6 +36,38 @@ def addStamp(*args, **kwargs):
     getStampedAPI().addStampAsync(*args, **kwargs)
 
 @task(ignore_result=True)
+def customizeStamp(*args, **kwargs):
+    getStampedAPI().customizeStampAsync(*args, **kwargs)
+
+@task(ignore_result=True)
 def updateProfileImage(*args, **kwargs):
     getStampedAPI().updateProfileImageAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addAccount(*args, **kwargs):
+    getStampedAPI().addAccountAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def updateAccountSettings(*args, **kwargs):
+    getStampedAPI().updateAccountSettingsAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def alertFollowersFromTwitter(*args, **kwargs):
+    getStampedAPI().alertFollowersFromTwitterAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def alertFollowersFromFacebook(*args, **kwargs):
+    getStampedAPI().alertFollowersFromFacebookAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addFriendship(*args, **kwargs):
+    getStampedAPI().addFriendshipAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def removeFriendship(*args, **kwargs):
+    getStampedAPI().removeFriendshipAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def inviteFriend(*args, **kwargs):
+    getStampedAPI().inviteFriendAsync(*args, **kwargs)
 

@@ -150,6 +150,7 @@ class expected_exception:
         sys.exc_clear()
     
     def __exit__(self, t, v, tb):
-        assert t is not None, "expected {0:s} to have been thrown".format(self._t.__name__)
+        assert t is not None, "expected %s to have been thrown" % self._t.__name__
+        
         return issubclass(t, self._t) and (self._v is None or str(v).startswith(self._v))
 
