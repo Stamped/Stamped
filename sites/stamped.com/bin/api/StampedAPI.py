@@ -1237,7 +1237,7 @@ class StampedAPI(AStampedAPI):
     
     @lazyProperty
     def _user_regex(self):
-        return re.compile(r'[^a-zA-Z0-9_]?@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
     
     def _extractMentions(self, text):
         screenNames = set()

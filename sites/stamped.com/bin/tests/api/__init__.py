@@ -9,6 +9,7 @@ import FavoriteTests
 import FriendshipTests
 import OAuthTests
 import PlaceEntityTests
+import StampedAPITests
 import StampPlaceTests
 import StampTests
 import UserTests
