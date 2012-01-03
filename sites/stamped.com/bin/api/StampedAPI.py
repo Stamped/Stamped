@@ -2543,7 +2543,6 @@ class StampedAPI(AStampedAPI):
                 logs.warning(e)
                 pass
 
-
         return result
     
     @API_CALL
