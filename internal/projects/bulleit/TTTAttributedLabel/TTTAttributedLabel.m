@@ -22,6 +22,8 @@
 
 #import "TTTAttributedLabel.h"
 
+#include <QuartzCore/QuartzCore.h>
+
 static inline CTTextAlignment CTTextAlignmentFromUITextAlignment(UITextAlignment alignment) {
 	switch (alignment) {
 		case UITextAlignmentLeft: return kCTLeftTextAlignment;
@@ -95,10 +97,13 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 @property (nonatomic, assign) NSRange selectedRange;
 
 - (id)initCommon;
-- (NSArray *)detectedLinksInString:(NSString *)string range:(NSRange)range error:(NSError **)error;
-- (NSTextCheckingResult *)linkAtCharacterIndex:(CFIndex)idx;
-- (NSTextCheckingResult *)linkAtPoint:(CGPoint)p;
+- (NSArray*)detectedLinksInString:(NSString*)string range:(NSRange)range error:(NSError**)error;
+- (NSTextCheckingResult*)linkAtCharacterIndex:(CFIndex)idx;
+- (NSTextCheckingResult*)linkAtPoint:(CGPoint)p;
 - (NSUInteger)characterIndexAtPoint:(CGPoint)p;
+- (NSRange)rangeIntersection:(NSRange)first withSecond:(NSRange)second;
+- (void)drawSelectionWithRange:(NSRange)selectionRange;
+- (void)clearSelection;
 - (void)drawFramesetter:(CTFramesetterRef)framesetter textRange:(CFRange)textRange inRect:(CGRect)rect context:(CGContextRef)c;
 @end
 
@@ -117,49 +122,49 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 @synthesize verticalAlignment = _verticalAlignment;
 
 - (id)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (!self) {
-        return nil;
-    }
-    
-    return [self initCommon];
+  self = [super initWithFrame:frame];
+  if (!self) {
+    return nil;
+  }
+  
+  return [self initCommon];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    self = [super initWithCoder:coder];
-    if (!self) {
-        return nil;
-    }
-    
-    return [self initCommon];
+  self = [super initWithCoder:coder];
+  if (!self) {
+    return nil;
+  }
+  
+  return [self initCommon];
 }
 
 - (id)initCommon {
-    self.dataDetectorTypes = UIDataDetectorTypeNone;
-    self.links = [NSArray array];
-    
-    NSMutableDictionary *mutableLinkAttributes = [NSMutableDictionary dictionary];
-    [mutableLinkAttributes setValue:(id)[[UIColor blueColor] CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
-    [mutableLinkAttributes setValue:[NSNumber numberWithBool:YES] forKey:(NSString *)kCTUnderlineStyleAttributeName];
-    self.linkAttributes = [NSDictionary dictionaryWithDictionary:mutableLinkAttributes];
-    
-    return self;
+  self.dataDetectorTypes = UIDataDetectorTypeNone;
+  self.links = [NSArray array];
+  
+  NSMutableDictionary *mutableLinkAttributes = [NSMutableDictionary dictionary];
+  [mutableLinkAttributes setValue:(id)[[UIColor blueColor] CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
+  [mutableLinkAttributes setValue:[NSNumber numberWithBool:YES] forKey:(NSString *)kCTUnderlineStyleAttributeName];
+  self.linkAttributes = [NSDictionary dictionaryWithDictionary:mutableLinkAttributes];
+  
+  return self;
 }
 
 - (void)dealloc {
-    if (_framesetter) CFRelease(_framesetter);
-    if (_shadowFramesetter) CFRelease(_shadowFramesetter);
-    if (_highlightFramesetter) CFRelease(_highlightFramesetter);
-    
-    [_attributedText release];
-    [_links release];
-    [_linkAttributes release];
-    [super dealloc];
+  if (_framesetter) CFRelease(_framesetter);
+  if (_shadowFramesetter) CFRelease(_shadowFramesetter);
+  if (_highlightFramesetter) CFRelease(_highlightFramesetter);
+  
+  [_attributedText release];
+  [_links release];
+  [_linkAttributes release];
+  [super dealloc];
 }
 
 #pragma mark -
 
-- (void)setAttributedText:(NSAttributedString *)text {
+- (void)setAttributedText:(NSAttributedString*)text {
     if ([text isEqualToAttributedString:self.attributedText]) {
         return;
     }
@@ -263,11 +268,10 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
     return nil;
 }
 
-- (NSTextCheckingResult *)linkAtPoint:(CGPoint)p {
-    CFIndex idx = [self characterIndexAtPoint:p];
-    return [self linkAtCharacterIndex:idx];
+- (NSTextCheckingResult*)linkAtPoint:(CGPoint)p {
+  CFIndex index = [self characterIndexAtPoint:p];
+  return [self linkAtCharacterIndex:index];
 }
-
 
 - (NSUInteger)characterIndexAtPoint:(CGPoint)p {
   if (!CGRectContainsPoint(self.bounds, p))
@@ -279,7 +283,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   CFIndex index = NSNotFound;
   CGMutablePathRef path = CGPathCreateMutable();
   CGPathAddRect(path, NULL, self.bounds);
-  CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, [self.attributedText length]), path, NULL);
+  CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, self.attributedText.length), path, NULL);
   NSArray* lines = (NSArray*)CTFrameGetLines(frame);
   CFIndex numLines = lines.count;
   CGPoint lineOrigins[numLines];
@@ -309,11 +313,11 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 
 - (void)drawFramesetter:(CTFramesetterRef)framesetter textRange:(CFRange)textRange inRect:(CGRect)rect context:(CGContextRef)c {
   CGMutablePathRef path = CGPathCreateMutable();
-  
+
   CGPathAddRect(path, NULL, rect);
   CTFrameRef frame = CTFramesetterCreateFrame(framesetter, textRange, path, NULL);
   CTFrameDraw(frame, c);
-  
+
   CFRelease(frame);
   CFRelease(path);
 }
@@ -321,42 +325,108 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 #pragma mark - TTTAttributedLabel
 
 - (void)setText:(id)text {
-    if ([text isKindOfClass:[NSString class]]) {
-        [self setText:text afterInheritingLabelAttributesAndConfiguringWithBlock:nil];
-    } else {
-        self.attributedText = text;
+  if ([text isKindOfClass:[NSString class]]) {
+    [self setText:text afterInheritingLabelAttributesAndConfiguringWithBlock:nil];
+  } else {
+    self.attributedText = text;
+  }
+  
+  self.links = [NSArray array];
+  if (self.dataDetectorTypes != UIDataDetectorTypeNone) {
+    for (NSTextCheckingResult* result in [self detectedLinksInString:[self.attributedText string] range:NSMakeRange(0, [text length]) error:nil]) {
+      [self addLinkWithTextCheckingResult:result];
     }
-
-    self.links = [NSArray array];
-    if (self.dataDetectorTypes != UIDataDetectorTypeNone) {
-        for (NSTextCheckingResult *result in [self detectedLinksInString:[self.attributedText string] range:NSMakeRange(0, [text length]) error:nil]) {
-            [self addLinkWithTextCheckingResult:result];
-        }
-    }
-        
-    [super setText:[self.attributedText string]];
+  }
+  
+  [super setText:[self.attributedText string]];
 }
 
-- (void)setText:(id)text afterInheritingLabelAttributesAndConfiguringWithBlock:(NSMutableAttributedString *(^)(NSMutableAttributedString *mutableAttributedString))block {
-    if ([text isKindOfClass:[NSString class]]) {
-        self.attributedText = [[[NSAttributedString alloc] initWithString:text] autorelease];
+- (void)setText:(id)text afterInheritingLabelAttributesAndConfiguringWithBlock:(NSMutableAttributedString*(^)(NSMutableAttributedString* mutableAttributedString))block {
+  if ([text isKindOfClass:[NSString class]]) {
+    self.attributedText = [[[NSAttributedString alloc] initWithString:text] autorelease];
+  }
+  
+  NSMutableAttributedString* mutableAttributedString = [[[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText] autorelease];
+  [mutableAttributedString addAttributes:NSAttributedStringAttributesFromLabel(self) range:NSMakeRange(0, mutableAttributedString.length)];
+
+  if (block) {
+    [self setText:block(mutableAttributedString)];
+  } else {
+    [self setText:mutableAttributedString];
+  }
+}
+
+// Helper method for obtaining the intersection of two ranges (for handling
+// selection range across multiple line ranges in drawRangeAsSelection below)
+- (NSRange)rangeIntersection:(NSRange)first withSecond:(NSRange)second {
+  NSRange result = NSMakeRange(NSNotFound, 0);
+  
+  // Ensure first range does not start after second range
+  if (first.location > second.location) {
+    NSRange tmp = first;
+    first = second;
+    second = tmp;
+  }
+  
+  // Find the overlap intersection range between first and second
+  if (second.location < first.location + first.length) {
+    result.location = second.location;
+    NSUInteger end = MIN(first.location + first.length, second.location + second.length);
+    result.length = end - result.location;
+  }
+  
+  return result;    
+}
+
+- (void)drawSelectionWithRange:(NSRange)selectionRange {
+  // If selection range empty, do not draw
+  if (self.selectedRange.length == 0 || self.selectedRange.location == NSNotFound)
+    return;
+  
+  // set the fill color to the selection color
+  [[UIColor colorWithRed:0.92 green:0.94 blue:0.97 alpha:1.0] setFill];
+
+  // Iterate over the lines in our CTFrame, looking for lines that intersect
+  // with the given selection range, and draw a selection rect for each intersection
+  CGMutablePathRef path = CGPathCreateMutable();
+  CGPathAddRect(path, NULL, self.bounds);
+  CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, self.attributedText.length), path, NULL);
+  NSArray* lines = (NSArray*)CTFrameGetLines(frame);
+  CGPoint origins[lines.count];
+  // Get coordinate and bounds information for the intersection text range
+  CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), origins);
+  for (int i = 0; i < lines.count; ++i) {
+    CTLineRef line = (CTLineRef)[lines objectAtIndex:i];
+    CFRange lineRange = CTLineGetStringRange(line);
+    NSRange range = NSMakeRange(lineRange.location, lineRange.length);
+    NSRange intersection = [self rangeIntersection:range withSecond:selectionRange];
+    if (intersection.location != NSNotFound && intersection.length > 0) {
+      // The text range for this line intersects our selection range
+      CGFloat xStart = CTLineGetOffsetForStringIndex(line, intersection.location, NULL);
+      CGFloat xEnd = CTLineGetOffsetForStringIndex(line, intersection.location + intersection.length, NULL);
+      CGFloat ascent, descent;
+      CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+      // Create a rect for the intersection and draw it with selection color
+      CGPoint origin = origins[i];
+      CGRect selectionRect = CGRectMake(xStart, origin.y - descent, xEnd - xStart, ascent + descent);
+      selectionRect = CGRectInset(selectionRect, -2, -2);
+      [[UIBezierPath bezierPathWithRoundedRect:selectionRect cornerRadius:2] fill];
     }
-    
-    NSMutableAttributedString *mutableAttributedString = [[[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText] autorelease];
-    [mutableAttributedString addAttributes:NSAttributedStringAttributesFromLabel(self) range:NSMakeRange(0, [mutableAttributedString length])];
-    
-    if (block) {
-        [self setText:block(mutableAttributedString)];
-    } else {
-        [self setText:mutableAttributedString];
-    }
+  }
+  CFRelease(frame);
+  CFRelease(path);
+}
+
+- (void)clearSelection {
+  self.selectedRange = NSMakeRange(0, 0);
+  [self setNeedsDisplay];
 }
 
 #pragma mark - UILabel
 
 - (void)setHighlighted:(BOOL)highlighted {
-    [super setHighlighted:highlighted];
-    [self setNeedsDisplay];
+  [super setHighlighted:highlighted];
+  [self setNeedsDisplay];
 }
 
 - (void)drawTextInRect:(CGRect)rect {
@@ -375,7 +445,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   CGRect textRect = rect;
   CFRange textRange = CFRangeMake(0, self.attributedText.length);
   CFRange fitRange;
-  
+
   // First, adjust the text to be in the center vertically, if the text size is smaller than the drawing rect
   CGSize textSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, textRange, NULL, textRect.size, &fitRange);
   
@@ -391,7 +461,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
         yOffset = (textRect.size.height - textSize.height);
         break;
     }
-    
+
     textRect.origin = CGPointMake(textRect.origin.x, textRect.origin.y + yOffset);
     textRect.size = CGSizeMake(textRect.size.width, textRect.size.height - yOffset);
   }
@@ -404,8 +474,8 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
     
     // Override the text's color attribute to whatever the shadow color is
     if (!self.shadowFramesetter) {
-      NSMutableAttributedString *shadowAttrString = [[self.attributedText mutableCopy] autorelease];
-      [shadowAttrString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)[self.shadowColor CGColor] range:NSMakeRange(0, [self.attributedText length])];
+      NSMutableAttributedString* shadowAttrString = [[self.attributedText mutableCopy] autorelease];
+      [shadowAttrString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)[self.shadowColor CGColor] range:NSMakeRange(0, self.attributedText.length)];
       self.shadowFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)shadowAttrString);
     }
     
@@ -415,12 +485,19 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   // Finally, draw the text or highlighted text itself (on top of the shadow, if there is one)
   if (self.highlightedTextColor && self.highlighted) {
     if (!self.highlightFramesetter) {
-      NSMutableAttributedString *mutableAttributedString = [[self.attributedText mutableCopy] autorelease];
-      [mutableAttributedString addAttribute:(NSString *)kCTForegroundColorAttributeName value:(id)[self.highlightedTextColor CGColor] range:NSMakeRange(0, mutableAttributedString.length)];
+      NSMutableAttributedString* mutableAttributedString = [[self.attributedText mutableCopy] autorelease];
+      [mutableAttributedString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)[self.highlightedTextColor CGColor] range:NSMakeRange(0, mutableAttributedString.length)];
       self.highlightFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)mutableAttributedString);
     }
-    
     [self drawFramesetter:self.highlightFramesetter textRange:textRange inRect:textRect context:c];
+  } else if (self.selectedRange.length > 0) {
+    [self drawSelectionWithRange:self.selectedRange];
+    CGColorRef textColor = [UIColor colorWithRed:0.48 green:0.61 blue:0.8 alpha:1.0].CGColor;
+    NSMutableAttributedString* mutableAttributedString = [[self.attributedText mutableCopy] autorelease];
+    [mutableAttributedString addAttribute:(NSString*)kCTForegroundColorAttributeName value:(id)textColor range:self.selectedRange];
+    CTFramesetterRef selectionFrame = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)mutableAttributedString);
+    [self drawFramesetter:selectionFrame textRange:textRange inRect:textRect context:c];
+    CFRelease(selectionFrame);
   } else {
     [self drawFramesetter:self.framesetter textRange:textRange inRect:textRect context:c];
   }  
@@ -434,13 +511,18 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   if (result && self.delegate) {
     self.selectedRange = result.range;
     [self setNeedsDisplay];
+    return;
   }
 
   [super touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  self.selectedRange = NSMakeRange(0, 0);
+  if (self.selectedRange.length > 0) {
+    self.selectedRange = NSMakeRange(0, 0);
+    [self setNeedsDisplay];
+    return;
+  }
 
   [super touchesCancelled:touches withEvent:event];
 }
@@ -450,8 +532,6 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
   
   if (result && self.delegate) {
-    self.selectedRange = NSMakeRange(0, 0);
-    [self setNeedsDisplay];
     switch (result.resultType) {
       case NSTextCheckingTypeLink:
         if ([self.delegate respondsToSelector:@selector(attributedLabel:didSelectLinkWithURL:)]) {
@@ -476,6 +556,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
         }
         break;
     }
+    [self performSelector:@selector(clearSelection) withObject:nil afterDelay:0.2];
     return;
   }
 
@@ -488,6 +569,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   if (result && self.delegate) {
     self.selectedRange = NSMakeRange(0, 0);
     [self setNeedsDisplay];
+    return;
   }
   [super touchesMoved:touches withEvent:event];
 }
@@ -497,7 +579,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 - (CGSize)sizeThatFits:(CGSize)size {
   if (!self.attributedText)
     return [super sizeThatFits:size];
-  
+
   CGSize suggestedSize = CTFramesetterSuggestFrameSizeWithConstraints(self.framesetter, CFRangeMake(0, [self.attributedText length]), NULL, CGSizeMake(size.width, CGFLOAT_MAX), NULL);
   return CGSizeMake(ceilf(suggestedSize.width), ceilf(suggestedSize.height));
 }
