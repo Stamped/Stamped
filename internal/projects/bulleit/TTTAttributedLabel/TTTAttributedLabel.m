@@ -560,17 +560,17 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
     return;
   }
 
+  [self clearSelection];
   [super touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
   UITouch* touch = [touches anyObject];	
 	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
-  if (result && self.delegate) {
-    self.selectedRange = NSMakeRange(0, 0);
-    [self setNeedsDisplay];
+  if (result && self.delegate)
     return;
-  }
+
+  [self clearSelection];
   [super touchesMoved:touches withEvent:event];
 }
 
