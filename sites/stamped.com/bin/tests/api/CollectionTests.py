@@ -249,10 +249,12 @@ class StampedAPICollectionsDeleted(StampedAPICollectionTest):
         data = {
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 4)
-        self.assertTrue(result[-1]['blurb'] == self.stampA['blurb'])
-        self.assertTrue('deleted' in result[0])
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 4), 
+                   lambda x: self.assertTrue(x[-1]['blurb'] == self.stampA['blurb']), 
+                   lambda x: self.assertTrue('deleted' in x[0]), 
+        ])
 
 if __name__ == '__main__':
     main()

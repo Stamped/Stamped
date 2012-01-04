@@ -88,6 +88,7 @@ class FacebookAccountSchema(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
+        self.facebook_expire        = SchemaElement(basestring)
         self.facebook_alerts_sent   = SchemaElement(bool)
 
 class DevicesSchema(Schema):
@@ -305,6 +306,7 @@ class Comment(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 
+
 # ######## #
 # Activity #
 # ######## #
@@ -342,7 +344,7 @@ class Alert(Schema):
         self.user_id            = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
-        
+
 
 # ######## #
 # Entities #

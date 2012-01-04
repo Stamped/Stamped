@@ -128,19 +128,20 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         ### TODO
         raise NotImplementedError
     
-    def updateUserStats(self, userId, stat, value=None, increment=1):
+    def updateUserStats(self, userIdOrIds, stat, value=None, increment=1):
         key = 'stats.%s' % stat
         
-        if value is not None:
-            self._collection.update(
-                {'_id': self._getObjectIdFromString(userId)}, 
-                {'$set': {key: value}},
-                upsert=True)
+        if isinstance(userIdOrIds, (list, tuple)):
+            # updating statistic for multiple users at once
+            query = {'_id': { "$in" : map(self._getObjectIdFromString, userIdOrIds) } }
         else:
-            self._collection.update(
-                {'_id': self._getObjectIdFromString(userId)}, 
-                {'$inc': {key: increment}},
-                upsert=True)
+            # updating statistic for a single user
+            query = {'_id': self._getObjectIdFromString(userIdOrIds) }
+        
+        if value is not None:
+            self._collection.update(query, {'$set': {key: value}}, upsert=True)
+        else:
+            self._collection.update(query, {'$inc': {key: increment}}, upsert=True)
         
         #return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
     
