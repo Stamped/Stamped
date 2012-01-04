@@ -34,7 +34,7 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
         }
         result = self.handleGET(path, data)
         self.assertTrue(result)
-
+    
     def test_check_friendship_fail(self):
         path = "friendships/check.json"
         data = { 
@@ -44,24 +44,28 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
         }
         result = self.handleGET(path, data)
         self.assertFalse(result)
-
+    
     def test_check_friendship_count(self):
         path = "users/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "user_id": self.userA['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['num_friends'], 1)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(x['num_friends'], 1), 
+        ])
+    
     def test_check_follower_count(self):
         path = "users/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "user_id": self.userB['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['num_followers'], 1)
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(x['num_followers'], 1), 
+        ])
 
 class StampedAPIFriends(StampedAPIFriendshipTest):
     def test_show_friends(self):

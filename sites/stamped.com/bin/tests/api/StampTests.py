@@ -170,9 +170,11 @@ class StampedAPIStampsLimits(StampedAPIStampTest):
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userA['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['num_stamps_left'], self.userA['num_stamps_left']-1)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(x['num_stamps_left'], self.userA['num_stamps_left'] - 1), 
+        ])
+    
     def test_max_limit(self):
         entity_ids = []
         stamp_ids = []
@@ -200,10 +202,12 @@ class StampedAPIStampsLimits(StampedAPIStampTest):
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userA['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['num_stamps_left'], 0)
-        self.assertEqual(result['num_stamps'], self.userA['num_stamps_left'])
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(x['num_stamps_left'], 0), 
+                   lambda x: self.assertEqual(x['num_stamps'], self.userA['num_stamps_left']), 
+        ])
+        
         # User should now be over their limit
         with expected_exception():
             data = {

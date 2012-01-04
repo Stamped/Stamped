@@ -206,7 +206,7 @@ class StampedAPI(AStampedAPI):
         if imageData:
             self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
         
-        # Asynchronously send welcome email and activity items
+        # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
         
         return account
@@ -2166,33 +2166,33 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getComments(self, stampId, authUserId, **kwargs): 
         stamp = self._stampDB.getStamp(stampId)
-
+        
         ### TODO: Add slicing (before, since, limit, quality)
-
+        
         # Check privacy of stamp
         if stamp.user.privacy == True:
             friendship = Friendship({
                 'user_id':      stamp.user.user_id,
                 'friend_id':    authUserId,
             })
-
+            
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to view stamp"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
               
         commentData = self._commentDB.getComments(stamp.stamp_id)
-
+        
         # Get user objects
         userIds = {}
         for comment in commentData:
             userIds[comment.user.user_id] = 1
-
+        
         users = self._userDB.lookupUsers(userIds.keys(), None)
-
+        
         for user in users:
             userIds[user.user_id] = user.exportSchema(UserMini())
-
+        
         comments = []
         for comment in commentData:
             if userIds[comment.user_id] == 1:
@@ -2202,21 +2202,21 @@ class StampedAPI(AStampedAPI):
             else:
                 comment.user = userIds[comment.user_id]
                 comments.append(comment)
-
+        
         comments = sorted(comments, key=lambda k: k['timestamp']['created'])
-            
+        
         return comments
     
     ### TEMP: Remove after switching to new activity
     def _getComment(self, commentId, **kwargs): 
         comment = self._commentDB.getComment(commentId)
-
+        
         # Get user objects
         user            = self._userDB.getUser(comment.user.user_id)
         comment.user    = user.exportSchema(UserMini())
-
+        
         return comment
-
+    
     
     """
     #                              
@@ -2227,7 +2227,7 @@ class StampedAPI(AStampedAPI):
     #       # #   #  #      #    # 
     ####### # #    # ######  ####  
     """
-
+    
     @API_CALL
     def addLike(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
@@ -2278,7 +2278,7 @@ class StampedAPI(AStampedAPI):
         stamp.num_likes += 1
         stamp.is_liked = True
         
-        # Give credit once at five likes
+        # Give credit once a given threshold is hit
         benefit = False
         if stamp.num_likes >= 3 and not stamp.like_threshold_hit:
             benefit = True
@@ -2460,14 +2460,14 @@ class StampedAPI(AStampedAPI):
             if stamp.stamp_id in commentPreviews:
                 stamp.comment_preview = commentPreviews[stamp.stamp_id]
             stamps.append(stamp)
-
+        
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-
+        
         if kwargs.pop('deleted', False):
             deleted = self._stampDB.getDeletedStamps(stampIds, **params)
             if len(deleted) > 0:
                 stamps = stamps + deleted
-
+        
         if params['sort'] == 'modified':
             stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
         else:
@@ -2488,28 +2488,28 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getUserStamps(self, userRequest, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName(userRequest)
-
+        
         # Check privacy
         if user.privacy == True:
             if authUserId == None:
                 msg = "Must be logged in to view account"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+            
             friendship = Friendship({
                 'user_id':      authUserId,
                 'friend_id':    user['user_id']
             })
-
+            
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to view user"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
-
+        
         kwargs['comments'] = True
-
+        
         ### TEMP
         import copy
         kwargsCopy = copy.deepcopy(kwargs)
@@ -2567,7 +2567,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Implement
         raise NotImplementedError
         return self._collectionDB.getUserMentions(userID, limit)
-
+    
     
     """
     #######                             
@@ -2578,20 +2578,20 @@ class StampedAPI(AStampedAPI):
     #       #    #  #  #  #      #    # 
     #       #    #   ##   ######  ####  
     """
-
+    
     @API_CALL
     def addFavorite(self, authUserId, entityRequest, stampId=None):
         entity      = self._getEntityFromRequest(entityRequest)
-
+        
         favorite = Favorite({
             'entity': entity.exportSchema(EntityMini()),
             'user_id': authUserId,
         })
         favorite.timestamp.created = datetime.utcnow()
-
+        
         if stampId != None:
             favorite.stamp = self._stampDB.getStamp(stampId)
-
+        
         # Check to verify that user hasn't already favorited entity
         try:
             fav = self._favoriteDB.getFavorite(authUserId, entity.entity_id)
@@ -2600,12 +2600,12 @@ class StampedAPI(AStampedAPI):
             exists = True
         except:
             exists = False
-
+        
         if exists:
             msg = "Favorite already exists"
             logs.warning(msg)
             raise IllegalActionError(msg)
-
+        
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
             favorite.complete = True
@@ -2635,7 +2635,7 @@ class StampedAPI(AStampedAPI):
             activity.subject            = favorite.stamp.entity.title
             activity.linked_stamp_id    = favorite.stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
-
+            
             self._activityDB.addActivity([favorite.stamp.user_id], activity)
                 
             # Increment activity count

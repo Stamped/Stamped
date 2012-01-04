@@ -48,49 +48,55 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertTrue(x[0]['blurb'] == self.stampA['blurb']), 
+        ])
+    
     def test_user_screen_name(self):
         path = "collections/user.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "screen_name": self.userA['screen_name']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertTrue(x[0]['blurb'] == self.stampA['blurb']), 
+    
     def test_user_user_id(self):
         path = "collections/user.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "user_id": self.userA['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+                   lambda x: self.assertTrue(x[0]['blurb'] == self.stampA['blurb']), 
+    
     def test_credit_user_screen_name(self):
         path = "collections/credit.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "screen_name": self.userB['screen_name']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 1)
-        self.assertTrue(result[0]['blurb'] == self.stampC['blurb'])
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 1), 
+                   lambda x: self.assertTrue(x[0]['blurb'] == self.stampC['blurb']), 
+    
     def test_credit_user_id(self):
         path = "collections/credit.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userB['user_id']
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 1)
-        self.assertTrue(result[0]['blurb'] == self.stampC['blurb'])
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 1), 
+                   lambda x: self.assertTrue(x[0]['blurb'] == self.stampC['blurb']), 
 
 
 class StampedAPICollectionsQuality(StampedAPICollectionTest):
