@@ -1841,6 +1841,14 @@ class StampedAPI(AStampedAPI):
         
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
+            
+            utils.log()
+            utils.log()
+            utils.log("HERE")
+            utils.log(friendship.user_id)
+            utils.log(friendship.friend_id)
+            utils.log()
+            utils.log()
             raise IllegalActionError("Block exists")
         
         # Extract mentions
@@ -2573,7 +2581,7 @@ class StampedAPI(AStampedAPI):
     #       #    # #   ##   #    #   #   ###### 
     """
     
-    def _addActivity(self, genre, user_id, recipient_ids, **kwargs)
+    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
         if not self._activity or len(recipient_ids) <= 0:
             return
         
