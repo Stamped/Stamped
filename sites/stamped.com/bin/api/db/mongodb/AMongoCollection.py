@@ -150,7 +150,7 @@ class AMongoCollection(object):
     
     def _validateUpdate(self, result):
         try:
-            if result['ok'] == 1 and result['err'] == None:
+            if result['ok'] == 1 and result['err'] is None:
                 return True
         except:
             return False
@@ -166,8 +166,7 @@ class AMongoCollection(object):
         try:
             return bson.objectid.ObjectId(string)
         except:
-            logs.warning("Invalid ObjectID (%s)" % string)
-            raise InputError
+            raise InputError("Invalid ObjectID (%s)" % string)
     
     def _convertToMongo(self, obj):
         if obj is None:
@@ -262,9 +261,9 @@ class AMongoCollection(object):
     
     def _getMongoDocumentFromId(self, documentId):
         document = self._collection.find_one(documentId)
-        if document == None:
-            logs.warning("Unable to find document (id = %s)" % documentId)
-            raise Unavailable("Document not found")
+        if document is None:
+            raise UnavailableError("Unable to find document (id = %s)" % documentId)
+        
         return document
     
     def update(self, obj):
@@ -301,14 +300,14 @@ class AMongoCollection(object):
 
         params = {'_id': {'$in': documentIds}}
         
-        if since != None and before != None:
+        if since is not None and before is not None:
             params[sort] = {'$gte': since, '$lte': before}
-        elif since != None:
+        elif since is not None:
             params[sort] = {'$gte': since}
-        elif before != None:
+        elif before is not None:
             params[sort] = {'$lte': before}
         
-        if sort != None:
+        if sort is not None:
             documents = self._collection.find(params).sort(sort, \
                 order).limit(limit)
         else:
@@ -323,7 +322,7 @@ class AMongoCollection(object):
         overflow = self._collection.find_one({'_id': objId}, \
                                                 fields={'overflow': 1})
         
-        if overflow == None or 'overflow' not in overflow:
+        if overflow is None or 'overflow' not in overflow:
             return objId            
         else:
             # Do something to manage overflow conditions?
@@ -342,7 +341,7 @@ class AMongoCollection(object):
     def _removeRelationship(self, keyId, refId):
         doc = self._collection.find_one({'_id': keyId})
         
-        if doc == None:
+        if doc is None:
             return False
             
         elif refId in doc['ref_ids']:
@@ -369,7 +368,7 @@ class AMongoCollection(object):
     def _checkRelationship(self, keyId, refId):
         doc = self._collection.find_one({'_id': keyId})
         
-        if doc == None:
+        if doc is None:
             return False
             
         elif refId in doc['ref_ids']:
@@ -392,11 +391,11 @@ class AMongoCollection(object):
     def _getRelationships(self, keyId, limit=None):
         doc = self._collection.find_one({'_id': keyId})
         
-        if doc == None:
+        if doc is None:
             return []
         else:
             ids = doc['ref_ids']
-            if limit != None and len(ids) > limit:
+            if limit is not None and len(ids) > limit:
                 return ids[:limit]
             if 'overflow' in doc:
                 # Check other buckets
@@ -406,13 +405,14 @@ class AMongoCollection(object):
                     
                 for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
                     ids = ids + moreDocs['ref_ids']
-                    if limit != None and len(ids) > limit:
+                    if limit is not None and len(ids) > limit:
                         return ids[:limit]
             return ids
     
     def _getRelationshipsAcrossKeys(self, keyIds, limit=4):
         if not isinstance(keyIds, list) or not isinstance(limit, int):
             raise Fail("Warning: Invalid input")
+        
         if limit > 20:
             limit = 20
             

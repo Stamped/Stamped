@@ -523,6 +523,9 @@ class Schema(SchemaElement):
         SchemaElement.__init__(self, dict, **kwargs)
         self._elements = {}
         
+        if data is None:
+            data = kwargs
+        
         self.setSchema()
         self.importData(data)
     
