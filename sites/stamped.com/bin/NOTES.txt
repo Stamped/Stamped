@@ -1,4 +1,10 @@
 
+
+Bieber:
+    * limit activity notifications to last N or so
+    * collapse adjacent activity items into each other
+
+
 * sell alienware
 * sell buddha
 
