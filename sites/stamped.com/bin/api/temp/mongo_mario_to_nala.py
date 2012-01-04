@@ -28,10 +28,6 @@ def main():
         
         if collection in ignore:
             print 'PASS'
-        
-        if collection == 'logs':
-            print 'PASS'
-        
         else:
             ret = mongoExportImport(collection)
             
