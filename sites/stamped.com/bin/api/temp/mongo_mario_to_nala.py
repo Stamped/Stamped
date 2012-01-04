@@ -19,15 +19,15 @@ def main():
     if not os.path.isdir('/stamped/tmp/stamped/'):
        os.makedirs('/stamped/tmp/stamped')
     
+    ignore = set([
+        'tempentities', 'logs', 'logstats', 
+    ])
+    
     for collection in collections:
         print 'RUN %s' % collection
         
-        if collection == 'tempentities':
+        if collection in ignore:
             print 'PASS'
-        
-        if collection == 'logs':
-            print 'PASS'
-        
         else:
             ret = mongoExportImport(collection)
             
