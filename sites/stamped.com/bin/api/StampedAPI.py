@@ -1417,12 +1417,13 @@ class StampedAPI(AStampedAPI):
         
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
-        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
+        #tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
-        return stamp
-    
-    @API_CALL
-    def addStampAsync(self, authUserId, stamp_id):
+        #return stamp
+        
+    #@API_CALL
+    #def addStampAsync(self, authUserId, stamp_id):
+        stamp_id = stamp.stamp_id
         stamp = self._stampDB.getStamp(stamp_id)
         
         # Add references to the stamp in all relevant inboxes
