@@ -532,9 +532,38 @@ class StampedAPI(AStampedAPI):
                 msg = "Invalid input"
                 logs.warning(msg)
                 raise InputError(msg)
+
+    def _getFacebookFriends(self, authUserId, token=None):
+        # if token is None:
+        #     account = self._accountDB.getAccount(authUserId)
+        #     token = account.linked_accounts.facebook_token
+        # assert token is not None
+
+        # fbFriends = []
+        # fbFriendIds = []
+        # params = {}
+        
+        # while True:
+        #     result = utils.getFacebook(token, '/me/friends', params)
+        #     fbFriends = fbFriends + result['data']
+            
+        #     if 'paging' in result and 'next' in result['paging']:
+        #         url = urlparse.urlparse(result['paging']['next'])
+        #         params = dict([part.split('=') for part in url[4].split('&')])
+                
+        #         if 'offset' in params and int(params['offset']) == len(fbFriends):
+        #             continue
+                
+        #     break
+        
+        # for fbFriend in fbFriends:
+        #     fbFriendIds.append(fbFriend['id'])
+
+        pass
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, linkedAccounts):
+        # Update Facebook account info
         if linkedAccounts.facebook_token:
             token = linkedAccounts.facebook_token
             
@@ -548,12 +577,14 @@ class StampedAPI(AStampedAPI):
             linkedAccounts.facebook_id = fbUser['id']
             linkedAccounts.facebook_screen_name = fbUser.pop('username', None)
             
-            # Alert Facebook followers
+        self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
+
+        # ASYNC TODO: Alert Facebook followers
+        if linkedAccounts.facebook_token:
             fbFriends = []
             fbFriendIds = []
             params = {}
             
-            # ASYNC TODO: make this potentially huge while loop
             while True:
                 result = utils.getFacebook(token, '/me/friends', params)
                 fbFriends = fbFriends + result['data']
@@ -572,7 +603,6 @@ class StampedAPI(AStampedAPI):
             
             self.alertFollowersFromFacebook(authUserId, fbFriendIds)
         
-        self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
         return True
     
     @API_CALL
@@ -745,6 +775,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Add check for privacy settings
         
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
+        return users
         
         ### TEMP: Sort result based on user request. This should happen client-side.
         usersByUserIds = {}
