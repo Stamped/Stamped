@@ -621,7 +621,7 @@ class StampedAPI(AStampedAPI):
         else:
             ### DEPRECATED
             users = self._userDB.findUsersByFacebook(facebookIds)
-            
+        
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
