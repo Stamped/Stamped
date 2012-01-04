@@ -88,6 +88,7 @@ class FacebookAccountSchema(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
+        self.facebook_expire        = SchemaElement(basestring)
         self.facebook_alerts_sent   = SchemaElement(bool)
 
 class DevicesSchema(Schema):

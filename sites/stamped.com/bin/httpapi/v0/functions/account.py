@@ -144,8 +144,11 @@ def linked_accounts(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPLinkedAccounts(), request)
     linked      = schema.exportSchema(LinkedAccounts())
-    
-    result      = stampedAPI.updateLinkedAccounts(authUserId, linked)
+    data = {
+        'twitter': linked.twitter,
+        'facebook': linked.facebook,
+    }
+    stampedAPI.updateLinkedAccounts(authUserId, **data)
     
     return transformOutput(True)
 

@@ -198,6 +198,7 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
+        self.facebook_expire        = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
@@ -208,6 +209,7 @@ class HTTPLinkedAccounts(Schema):
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
             schema.facebook_token       = self.facebook_token
+            schema.facebook_expire      = self.facebook_expire
         else:
             raise NotImplementedError
         return schema

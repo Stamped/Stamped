@@ -23,12 +23,14 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, retain) NSMutableArray* peopleArray;
+@property (nonatomic, assign) BOOL loadingNextChunk;
 @end
 
 @implementation RelationshipsViewController
 
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize peopleArray = peopleArray_;
+@synthesize loadingNextChunk = loadingNextChunk_;
 @synthesize user = user_;
 @synthesize tableView = tableView_;
 
@@ -102,13 +104,21 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.peopleArray.count;
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  NSInteger count = self.peopleArray.count;
+  if (self.userIDsToBeFetched.count > 0)
+    ++count;
+
+  return count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"Cell";
+  if (indexPath.row == self.peopleArray.count) {
+    
+    loadingNextChunk_ = YES;
+  }
   
+  static NSString* CellIdentifier = @"Cell";
   PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
@@ -166,6 +176,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [self.userIDsToBeFetched removeObjectsInArray:[objects valueForKeyPath:@"userID"]];
   NSLog(@"New user IDs count: %d", self.userIDsToBeFetched.count);
   [self.tableView reloadData];
+  loadingNextChunk_ = NO;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {

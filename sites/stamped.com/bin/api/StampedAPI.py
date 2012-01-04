@@ -522,24 +522,27 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByFacebook(facebookIds)
     
     @API_CALL
-    def updateLinkedAccounts(self, authUserId, linkedAccounts):
+    def updateLinkedAccounts(self, authUserId, **kwargs):
+        twitter = kwargs.pop('twitter', None)
+        facebook = kwargs.pop('facebook', None)
+
         # Update Facebook account info
-        if linkedAccounts.facebook_token:
-            token = linkedAccounts.facebook_token
+        if facebook.facebook_token:
+            token = facebook.facebook_token
             
             # Set user details
             fbUser = utils.getFacebook(token, '/me')
             if 'name' not in fbUser or 'id' not in fbUser:
                 raise UnavailableError("problem connecting to facebook account")
             
-            linkedAccounts.facebook_name = fbUser['name']
-            linkedAccounts.facebook_id = fbUser['id']
-            linkedAccounts.facebook_screen_name = fbUser.pop('username', None)
-        
-        self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
+            facebook.facebook_name = fbUser['name']
+            facebook.facebook_id = fbUser['id']
+            facebook.facebook_screen_name = fbUser.pop('username', None)
+            
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
 
         # Alert Facebook asynchronously
-        if linkedAccounts.facebook_token:
+        if facebook.facebook_token:
             ### TODO: Remove second param "facebookIds"
             tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, None])
         
@@ -589,6 +592,7 @@ class StampedAPI(AStampedAPI):
         
         return True
     
+    ### DEPRECATED
     @API_CALL
     def alertFollowersFromFacebook(self, authUserId, facebookIds):
         account = self._accountDB.getAccount(authUserId)
