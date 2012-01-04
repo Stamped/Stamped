@@ -36,6 +36,9 @@ class StampedAPIUserTest(StampedAPITest):
             '@123456789012345678901' : [], # invalid; too long
             '@ab_cd a@ef @gh'        : [ 'ab_cd', 'gh', ], 
             '@ab123cd'               : [ 'ab123cd', ], 
+            'devbot@stamped.com'     : [], # invalid: email address
+            'Here.@you.'             : ['you', ],
+            'Well--@you--why w..'    : ['you', ],
         }
         
         for test in tests:
