@@ -56,7 +56,12 @@ def show(request, **kwargs):
                 raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
 
         entity = stampedAPI.getEntity({'entity_id': stamp.entity_id})
+        opentable_url = None
+        if entity.rid is not None:
+            opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % entity.rid
         entity = HTTPEntity().importSchema(entity)
+        if entity.opentable_url and opentable_url is not None:
+            entity.opentable_url = opentable_url
 
         params = HTTPStamp().importSchema(stamp).value
         params['entity'] = entity.value

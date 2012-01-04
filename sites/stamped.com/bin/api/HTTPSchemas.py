@@ -418,6 +418,7 @@ class HTTPEntity(Schema):
         
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
+        self.opentable_m_url    = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
         self.itunes_short_url   = SchemaElement(basestring)
         self.netflix_url        = SchemaElement(basestring)
@@ -439,7 +440,8 @@ class HTTPEntity(Schema):
             
             # Place
             self.address        = schema.address
-            self.neighborhood   = schema.neighborhood
+            ### TEMP: Remove this until we get good neighborhood data
+            # self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
             
             if len(schema.address_components) > 0:
@@ -541,9 +543,11 @@ class HTTPEntity(Schema):
             
             # Affiliates
             if schema.rid is not None:
-                self.opentable_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+                self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
                                       schema.rid
-            elif schema.reserveURL is not None:
+                self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+                                      schema.rid
+            if schema.reserveURL is not None:
                 self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                       schema.reserveURL
             
