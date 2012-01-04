@@ -21,8 +21,8 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)loadRelationshipsFromNetwork;
 - (void)loadUserDataFromNetwork;
 
-@property (nonatomic, copy) NSArray* userIDsToBeFetched;
-@property (nonatomic, copy) NSArray* peopleArray;
+@property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
+@property (nonatomic, retain) NSMutableArray* peopleArray;
 @end
 
 @implementation RelationshipsViewController
@@ -136,7 +136,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     if (error) {
       NSLog(@"Problem parsing response JSON: %@", error);
     } else {
-      self.userIDsToBeFetched = (NSArray*)[responseObj objectForKey:@"user_ids"];
+      self.userIDsToBeFetched = [NSMutableArray arrayWithArray:[responseObj objectForKey:@"user_ids"]];
       if (userIDsToBeFetched_.count > 0) {
         [self loadUserDataFromNetwork];
       } else {
@@ -152,9 +152,19 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser || [objectLoader.resourcePath rangeOfString:kUserLookupPath].location == NSNotFound)
     return;
+
+  if (!self.peopleArray)
+    self.peopleArray = [NSMutableArray array];
   
-  self.userIDsToBeFetched = nil;
-  self.peopleArray = objects;
+  NSArray* sortedArray = [objects sortedArrayUsingComparator:(NSComparator)^(id a, id b) {
+    NSNumber* first = [NSNumber numberWithUnsignedInteger:[self.userIDsToBeFetched indexOfObject:[(User*)a userID]]];
+    NSNumber* second = [NSNumber numberWithUnsignedInteger:[self.userIDsToBeFetched indexOfObject:[(User*)b userID]]];
+    return [first compare:second];
+  }];
+  [self.peopleArray addObjectsFromArray:sortedArray];
+  NSLog(@"People array: %@", [self.peopleArray valueForKeyPath:@"userID"]);
+  [self.userIDsToBeFetched removeObjectsInArray:[objects valueForKeyPath:@"userID"]];
+  NSLog(@"New user IDs count: %d", self.userIDsToBeFetched.count);
   [self.tableView reloadData];
 }
 

@@ -306,6 +306,7 @@ class Comment(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 
+
 # ######## #
 # Activity #
 # ######## #
@@ -343,7 +344,7 @@ class Alert(Schema):
         self.user_id            = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
-        
+
 
 # ######## #
 # Entities #
