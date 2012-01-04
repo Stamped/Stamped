@@ -41,8 +41,8 @@ class InsufficientPrivilegesError(Exception):
 		self.msg = msg
 		self.desc = desc
         
-        if msg is not None:
-            logs.warning(msg)
+        if self.msg is not None:
+            logs.warning(self.msg)
 
 class IllegalActionError(Exception):
 	def __init__(self, msg=None, desc=None):
@@ -50,8 +50,8 @@ class IllegalActionError(Exception):
 		self.msg = msg
 		self.desc = desc
         
-        if msg is not None:
-            logs.warning(msg)
+        if self.msg is not None:
+            logs.warning(self.msg)
 
 class InputError(Exception):
 	def __init__(self, msg=None, desc=None):
@@ -59,8 +59,8 @@ class InputError(Exception):
 		self.msg = msg
 		self.desc = desc
         
-        if msg is not None:
-            logs.warning(msg)
+        if self.msg is not None:
+            logs.warning(self.msg)
 
 class UnavailableError(Exception):
 	def __init__(self, msg=None, desc=None):
@@ -68,8 +68,8 @@ class UnavailableError(Exception):
 		self.msg = msg
 		self.desc = desc
         
-        if msg is not None:
-            logs.warning(msg)
+        if self.msg is not None:
+            logs.warning(self.msg)
 
 class AuthError(Exception):
 	def __init__(self, msg=None, desc=None):
