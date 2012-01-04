@@ -64,6 +64,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 3), 
                    lambda x: self.assertTrue(x[0]['blurb'] == self.stampA['blurb']), 
+        ])
     
     def test_user_user_id(self):
         path = "collections/user.json"
@@ -75,6 +76,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 3), 
                    lambda x: self.assertTrue(x[0]['blurb'] == self.stampA['blurb']), 
+        ])
     
     def test_credit_user_screen_name(self):
         path = "collections/credit.json"
@@ -86,6 +88,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 1), 
                    lambda x: self.assertTrue(x[0]['blurb'] == self.stampC['blurb']), 
+        ])
     
     def test_credit_user_id(self):
         path = "collections/credit.json"
@@ -97,6 +100,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 1), 
                    lambda x: self.assertTrue(x[0]['blurb'] == self.stampC['blurb']), 
+        ])
 
 
 class StampedAPICollectionsQuality(StampedAPICollectionTest):
