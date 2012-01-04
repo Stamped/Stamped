@@ -534,32 +534,31 @@ class StampedAPI(AStampedAPI):
                 raise InputError(msg)
 
     def _getFacebookFriends(self, authUserId, token=None):
-        # if token is None:
-        #     account = self._accountDB.getAccount(authUserId)
-        #     token = account.linked_accounts.facebook_token
-        # assert token is not None
+        if token is None:
+            account = self._accountDB.getAccount(authUserId)
+            token = account.facebook_token
+        assert token is not None
 
-        # fbFriends = []
-        # fbFriendIds = []
-        # params = {}
+        friends = []
+        facbookIds = []
+        params = {}
         
-        # while True:
-        #     result = utils.getFacebook(token, '/me/friends', params)
-        #     fbFriends = fbFriends + result['data']
+        while True:
+            result = utils.getFacebook(token, '/me/friends', params)
+            friends = friends + result['data']
             
-        #     if 'paging' in result and 'next' in result['paging']:
-        #         url = urlparse.urlparse(result['paging']['next'])
-        #         params = dict([part.split('=') for part in url[4].split('&')])
+            if 'paging' in result and 'next' in result['paging']:
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
                 
-        #         if 'offset' in params and int(params['offset']) == len(fbFriends):
-        #             continue
-                
-        #     break
+                if 'offset' in params and int(params['offset']) == len(friends):
+                    continue
+            break
         
-        # for fbFriend in fbFriends:
-        #     fbFriendIds.append(fbFriend['id'])
+        for friend in friends:
+            facbookIds.append(friend['id'])
 
-        pass
+        return self._userDB.findUsersByFacebook(facebookIds)
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, linkedAccounts):
@@ -579,29 +578,10 @@ class StampedAPI(AStampedAPI):
             
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
 
-        # ASYNC TODO: Alert Facebook followers
+        # Alert Facebook asynchronously
         if linkedAccounts.facebook_token:
-            fbFriends = []
-            fbFriendIds = []
-            params = {}
-            
-            while True:
-                result = utils.getFacebook(token, '/me/friends', params)
-                fbFriends = fbFriends + result['data']
-                
-                if 'paging' in result and 'next' in result['paging']:
-                    url = urlparse.urlparse(result['paging']['next'])
-                    params = dict([part.split('=') for part in url[4].split('&')])
-                    
-                    if 'offset' in params and int(params['offset']) == len(fbFriends):
-                        continue
-                    
-                break
-            
-            for fbFriend in fbFriends:
-                fbFriendIds.append(fbFriend['id'])
-            
-            self.alertFollowersFromFacebook(authUserId, fbFriendIds)
+            ### TODO: Remove second param "facebookIds"
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, None])
         
         return True
     
@@ -666,19 +646,31 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds):
+    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds=None):
+        
+        ### TODO: Deprecate passing parameter "facebookIds"
+        
         account   = self._accountDB.getAccount(authUserId)
+        
+        # Only send alert once (when the user initially connects to Facebook)
         if account.facebook_alerts_sent == True or not account.facebook_name:
             return
         
-        users     = self._userDB.findUsersByFacebook(facebookIds)
+        # Grab friend list from Facebook API
+        if account.facebook_token is not None:
+            users = self._getFacebookFriends(authUserId, account.facebook_token)
+        else:
+            ### DEPRECATED
+            users = self._userDB.findUsersByFacebook(facebookIds)
+            
+        # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
-        
         userIds = []
         for user in users:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
         
+        # Generate activity item
         activity                    = Activity()
         activity.genre              = 'friend'
         activity.subject            = 'Your Facebook friend %s' % account.facebook_name
@@ -688,6 +680,7 @@ class StampedAPI(AStampedAPI):
         
         self._activityDB.addActivity(userIds, activity, checkExists=True)
         
+        ### TODO: Make this update robust for async request
         account.facebook_alerts_sent = True
         self._accountDB.updateAccount(account)
     
@@ -833,10 +826,19 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByTwitter(twitterIds, limit=100)
     
     @API_CALL
-    def findUsersByFacebook(self, authUserId, facebookIds):
+    def findUsersByFacebook(self, authUserId, facebookIds=None):
         ### TODO: Add check for privacy settings?
         
-        return self._userDB.findUsersByFacebook(facebookIds, limit=100)
+        account   = self._accountDB.getAccount(authUserId)
+        
+        # Grab friend list from Facebook API
+        if account.facebook_token is not None:
+            users = self._getFacebookFriends(authUserId, account.facebook_token)
+        else:
+            ### DEPRECATED
+            users = self._userDB.findUsersByFacebook(facebookIds, limit=100)
+        
+        return users
     
     @API_CALL
     def searchUsers(self, query, limit, authUserId):
