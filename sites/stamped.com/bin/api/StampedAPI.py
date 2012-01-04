@@ -223,30 +223,15 @@ class StampedAPI(AStampedAPI):
             invitedBy[invite['user_id']] = 1
             
             ### TODO: What genre are we picking for this activity item?
-            activity                    = Activity()
-            activity.genre              = 'invite_sent'
-            activity.user.user_id       = invite['user_id']
-            activity.linked_user_id     = invite['user_id']
-            activity.timestamp.created  = datetime.utcnow()
-            
-            self._activityDB.addActivity([account.user_id], activity)
-            
-            # Increment activity count
-            self._userDB.updateUserStats(account.user_id, 'num_unread_news', increment=1)
+            self._addActivity(genre='invite_sent', 
+                              user_id=invite['user_id'], 
+                              recipient_ids=[ account.user_id ])
         
         if len(invitedBy) > 0:
             ### TODO: What genre are we picking for this activity item?
-            activity                    = Activity()
-            activity.genre              = 'invite_received'
-            activity.user.user_id       = account.user_id
-            activity.linked_user_id     = account.user_id
-            activity.timestamp.created  = datetime.utcnow()
-            
-            self._activityDB.addActivity(invitedBy.keys(), activity)
-            
-            # Increment activity count
-            for user_id in invitedBy.keys():
-                self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+            self._addActivity(genre='invite_received', 
+                              user_id=account.user_id, 
+                              recipient_ids=invitedBy.keys())
         
         self._inviteDB.join(account.email)
         
@@ -293,9 +278,8 @@ class StampedAPI(AStampedAPI):
             
             self._friendshipDB.removeFriendship(friendship)
             
-            # Increment stats 
-            self._userDB.updateUserStats(followerId, 'num_friends', \
-                        None, increment=-1)
+            # Decrement number of friends
+            self._userDB.updateUserStats(followerId, 'num_friends', increment=-1)
             
             # Remove stamps from Inbox
             self._stampDB.removeInboxStampReferencesForUser(followerId, stampIds)
@@ -307,9 +291,8 @@ class StampedAPI(AStampedAPI):
             
             self._friendshipDB.removeFriendship(friendship)
             
-            # Increment stats 
-            self._userDB.updateUserStats(friendId, 'num_followers', \
-                        None, increment=-1)
+            # Decrement number of followers 
+            self._userDB.updateUserStats(friendId, 'num_followers', increment=-1)
         
         # Remove favorites
         favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
@@ -322,10 +305,9 @@ class StampedAPI(AStampedAPI):
             if len(stamp.credit) > 0:
                 for creditedUser in stamp.credit:
                     self._stampDB.removeCredit(creditedUser['user_id'], stamp)
-
+                    
                     # Decrement user stats by one
-                    self._userDB.updateUserStats( \
-                        creditedUser['user_id'], 'num_credits', increment=-1)
+                    self._userDB.updateUserStats(creditedUser['user_id'], 'num_credits', increment=-1)
 
             # Remove activity on stamp
             self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -349,25 +331,23 @@ class StampedAPI(AStampedAPI):
         
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
-        likedStamps = self._stampDB.getStamps(likedStampIds, \
-            limit=len(likedStampIds))
+        likedStamps = self._stampDB.getStamps(likedStampIds, limit=len(likedStampIds))
+        
         for stamp in likedStamps:
             self._stampDB.removeLike(account.user_id, stamp.stamp_id)
-
+            
             # Decrement user stats by one
-            self._userDB.updateUserStats( \
-                stamp.user_id, 'num_likes', increment=-1)
-
+            self._userDB.updateUserStats(stamp.user_id, 'num_likes', increment=-1)
+            
             # Decrement stamp stats by one
-            self._stampDB.updateStampStats( \
-                stamp.stamp_id, 'num_likes', increment=-1)
-
+            self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
+        
         # Remove activity items
         self._activityDB.removeUserActivity(account.user_id)
-
+        
         # Remove custom entities
         ### TODO: Do this?
-
+        
         # Remove profile image
         self._imageDB.removeProfileImage(account.screen_name.lower())
         
@@ -620,14 +600,11 @@ class StampedAPI(AStampedAPI):
             if user.user_id not in followers:
                 userIds.append(user.user_id)
         
-        activity                    = Activity()
-        activity.genre              = 'friend'
-        activity.subject            = 'Your Twitter friend %s' % account.twitter_screen_name
-        activity.user.user_id       = authUserId
-        activity.linked_user_id     = authUserId
-        activity.timestamp.created  = datetime.utcnow()
         
-        self._activityDB.addActivity(userIds, activity, checkExists=True)
+        self._addActivity(genre='friend', 
+                          user_id=authUserId, 
+                          recipient_ids=userIds, 
+                          subject='Your Twitter friend %s' % account.twitter_screen_name)
         
         account.twitter_alerts_sent = True
         self._accountDB.updateAccount(account)
@@ -671,14 +648,11 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        activity                    = Activity()
-        activity.genre              = 'friend'
-        activity.subject            = 'Your Facebook friend %s' % account.facebook_name
-        activity.user.user_id       = authUserId
-        activity.linked_user_id     = authUserId
-        activity.timestamp.created  = datetime.utcnow()
-        
-        self._activityDB.addActivity(userIds, activity, checkExists=True)
+        self._addActivity(genre='friend', 
+                          user_id=authUserId, 
+                          recipient_ids=userIds, 
+                          subject='Your Facebook friend %s' % account.facebook_name, 
+                          checkExists=True)
         
         ### TODO: Make this update robust for async request
         account.facebook_alerts_sent = True
@@ -901,21 +875,14 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addFriendshipAsync(self, authUserId, user_id):
-        # Add activity for followed user
-        if self._activity == True:
-            activity                    = Activity()
-            activity.genre              = 'follower'
-            activity.user.user_id       = authUserId
-            activity.linked_user_id     = authUserId
-            activity.timestamp.created  = datetime.utcnow()
-            
-            self._activityDB.addActivity([user_id], activity)
+        if self._activity:
+            # Add activity for followed user
+            self._addActivity(genre='follower', 
+                              user_id=authUserId, 
+                              recipient_ids=[ user_id ])
             
             # Remove 'friend' activity item
             self._activityDB.removeActivity('friend', authUserId, recipientId=user_id)
-            
-            # Increment activity count
-            self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
         
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user_id)
@@ -949,15 +916,14 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeFriendshipAsync(self, authUserId, user_id):
         # Increment stats for both users
-        self._userDB.updateUserStats(authUserId, 'num_friends', None, increment=-1)
-        self._userDB.updateUserStats(user_id,  'num_followers', None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_friends', increment=-1)
+        self._userDB.updateUserStats(user_id,  'num_followers', increment=-1)
         
         # Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(user_id)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
         
         # Remove activity
-        ### TODO: Don't remove this?
         self._activityDB.removeActivity(genre='follower', userId=authUserId, recipientId=user_id)
     
     @API_CALL
@@ -1549,9 +1515,9 @@ class StampedAPI(AStampedAPI):
         self._stampDB.addInboxStampReference(followers, stamp_id)
         
         # Update user stats 
-        self._userDB.updateUserStats(authUserId, 'num_stamps',       None, increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  None, increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_total', None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -1607,27 +1573,19 @@ class StampedAPI(AStampedAPI):
                 self._statsSink.increment('stamped.api.stamps.credit')
                 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits',     None, increment=1)
-                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', None, increment=CREDIT_BENEFIT)
+                self._userDB.updateUserStats(item.user_id, 'num_credits',     increment=1)
+                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
         
         # Note: No activity should be generated for the user creating the stamp
         
         # Add activity for credited users
-        if self._activity == True and len(creditedUserIds) > 0:
-            activity                    = Activity()
-            activity.genre              = 'restamp'
-            activity.user.user_id       = authUserId
-            activity.subject            = stamp.entity.title
-            activity.blurb              = stamp.blurb
-            activity.linked_stamp_id    = stamp.stamp_id
-            activity.timestamp.created  = datetime.utcnow()
-            activity.benefit            = CREDIT_BENEFIT
-            
-            self._activityDB.addActivity(creditedUserIds, activity)
-            
-            # Increment activity count
-            for user_id in creditedUserIds:
-                self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+        self._addActivity(genre='restamp', 
+                          user_id=authUserId, 
+                          recipient_ids=creditedUserIds, 
+                          subject=stamp.entity.title, 
+                          blurb=stamp.blurb, 
+                          linked_stamp_id=stamp.stamp_id, 
+                          benefit=CREDIT_BENEFIT)
         
         # Add activity for mentioned users
         if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
@@ -1648,22 +1606,15 @@ class StampedAPI(AStampedAPI):
                         mentionedUserIds.add(mention['user_id'])
             
             if len(mentionedUserIds) > 0:
-                activity                    = Activity()
-                activity.genre              = 'mention'
-                activity.user.user_id       = authUserId
-                activity.subject            = stamp.entity.title
-                activity.blurb              = stamp.blurb
-                activity.linked_stamp_id    = stamp.stamp_id
-                activity.timestamp.created  = datetime.utcnow()
-                
-                self._activityDB.addActivity(mentionedUserIds, activity)
-                
-                # Increment activity count
-                for user_id in mentionedUserIds:
-                    self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+                self._addActivity(genre='mention', 
+                                  user_id=authUserId, 
+                                  recipient_ids=mentionedUserIds, 
+                                  subject=stamp.entity.title, 
+                                  blurb=stamp.blurb, 
+                                  linked_stamp_id=stamp.stamp_id)
                 
                 # Increment mentions metric
-                self._statsSink.increment('stamped.api.stamps.mentions')
+                self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):        
@@ -1800,33 +1751,22 @@ class StampedAPI(AStampedAPI):
                 #     self._commentDB.addComment(comment)
                 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits', \
-                    None, increment=1)
-                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
-                    None, increment=CREDIT_BENEFIT)
+                self._userDB.updateUserStats(item.user_id, 'num_credits',     increment=1)
+                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
         
         # Note: No activity should be generated for the user creating the stamp
         
         # Add activity for credited users
-        if self._activity == True and len(creditedUserIds) > 0:
-            activity                    = Activity()
-            activity.genre              = 'restamp'
-            activity.user.user_id       = user.user_id
-            activity.subject            = stamp.entity.title
-            activity.blurb              = stamp.blurb
-            activity.linked_stamp_id    = stamp.stamp_id
-            activity.timestamp.created  = datetime.utcnow()
-            activity.benefit            = CREDIT_BENEFIT
-            
-            self._activityDB.addActivity(creditedUserIds, activity)
-            
-            # Increment activity count
-            for user_id in creditedUserIds:
-                self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+        self._addActivity(genre='restamp', 
+                          user_id=user.user_id, 
+                          recipient_ids=creditedUserIds, 
+                          subject=stamp.entity.title, 
+                          blurb=stamp.blurb, 
+                          linked_stamp_id=stamp.stamp_id, 
+                          benefit=CREDIT_BENEFIT)
         
         # Add activity for mentioned users
-        if self._activity == True and stamp.mentions != None \
-            and len(stamp.mentions) > 0:
+        if self._activity == True and stamp.mentions is not None and len(stamp.mentions) > 0:
             mentionedUserIds = []
             
             for mention in stamp.mentions:
@@ -1842,20 +1782,12 @@ class StampedAPI(AStampedAPI):
                     if self._friendshipDB.blockExists(friendship) == False:
                         mentionedUserIds.append(mention['user_id'])
             
-            if len(mentionedUserIds) > 0:
-                activity                    = Activity()
-                activity.genre              = 'mention'
-                activity.user.user_id       = user.user_id
-                activity.subject            = stamp.entity.title
-                activity.blurb              = stamp.blurb
-                activity.linked_stamp_id    = stamp.stamp_id
-                activity.timestamp.created  = datetime.utcnow()
-                
-                self._activityDB.addActivity(mentionedUserIds, activity)
-                
-                # Increment activity count
-                for user_id in mentionedUserIds:
-                    self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+            self._addActivity(genre='mention', 
+                              user_id=user.user_id, 
+                              recipient_ids=mentionedUserIds, 
+                              subject=stamp.entity.title, 
+                              blurb=stamp.blurb, 
+                              linked_stamp_id=stamp.stamp_id)
         
         return stamp
     
@@ -1910,10 +1842,8 @@ class StampedAPI(AStampedAPI):
 
         # Update user stats 
         ### TODO: Do an actual count / update?
-        self._userDB.updateUserStats(authUserId, 'num_stamps', \
-                    None, increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
-                    None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps',      increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left', increment=1)
         
         # Update credit stats if credit given
         if stamp.credit != None and len(stamp.credit) > 0:
@@ -1926,8 +1856,7 @@ class StampedAPI(AStampedAPI):
                 self._stampDB.removeCredit(item.user_id, stamp)
                 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits', \
-                    None, increment=-1)
+                self._userDB.updateUserStats(item.user_id, 'num_credits', increment=-1)
         
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
@@ -2071,50 +2000,32 @@ class StampedAPI(AStampedAPI):
                     if self._friendshipDB.blockExists(friendship) == False:
                         mentionedUserIds.add(mention['user_id'])
             
-            if len(mentionedUserIds) > 0:
-                activity                    = Activity()
-                activity.genre              = 'mention'
-                activity.user.user_id       = authUserId
-                activity.subject            = stamp.entity.title
-                activity.blurb              = comment.blurb
-                activity.linked_stamp_id    = stamp.stamp_id
-                activity.linked_comment_id  = comment.comment_id
-                activity.timestamp.created  = datetime.utcnow()
-                
-                ### TODO: Rollback: Remove Activity
-                self._activityDB.addActivity(mentionedUserIds, activity)
-                
-                # Increment activity count
-                for user_id in mentionedUserIds:
-                    self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
-                
-                # Increment mentions metric
-                self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
+            self._addActivity(genre='mention', 
+                              user_id=authUserId, 
+                              recipient_ids=mentionedUserIds, 
+                              subject=stamp.entity.title, 
+                              blurb=comment.blurb, 
+                              linked_stamp_id=stamp.stamp_id, 
+                              linked_comment_id=comment.comment_id)
+            
+            # Increment mentions metric
+            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
         
         # Add activity for stamp owner
         commentedUserIds = set()
         if stamp.user.user_id not in mentionedUserIds and stamp.user.user_id != authUserId:
             commentedUserIds.add(stamp.user.user_id)
         
-        if len(commentedUserIds) > 0:
-            activity                    = Activity()
-            activity.genre              = 'comment'
-            activity.user.user_id       = authUserId
-            activity.subject            = stamp.entity.title
-            activity.blurb              = comment.blurb
-            activity.linked_stamp_id    = stamp.stamp_id
-            activity.linked_comment_id  = comment.comment_id
-            activity.timestamp.created  = datetime.utcnow()
-            
-            ### TODO: Rollback: Remove Activity
-            self._activityDB.addActivity(commentedUserIds, activity)
-            
-            # Increment activity count
-            for user_id in commentedUserIds:
-                self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
-            
-            # Increment comment metric
-            self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
+        self._addActivity(genre='comment', 
+                          user_id=authUserId, 
+                          recipient_ids=commentedUserIds, 
+                          subject=stamp.entity.title, 
+                          blurb=comment.blurb, 
+                          linked_stamp_id=stamp.stamp_id, 
+                          linked_comment_id=comment.comment_id)
+        
+        # Increment comment metric
+        self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
         
         repliedUserIds = []
         
@@ -2141,22 +2052,13 @@ class StampedAPI(AStampedAPI):
                 if self._friendshipDB.blockExists(friendship) == False:
                     repliedUserIds.append(replied_user_id)
         
-        if len(repliedUserIds) > 0:
-            activity                    = Activity()
-            activity.genre              = 'reply'
-            activity.user.user_id       = authUserId
-            activity.subject            = stamp.entity.title
-            activity.blurb              = comment.blurb
-            activity.linked_stamp_id    = stamp.stamp_id
-            activity.linked_comment_id  = comment.comment_id
-            activity.timestamp.created  = datetime.utcnow()
-            
-            ### TODO: Rollback: Remove Activity
-            self._activityDB.addActivity(repliedUserIds, activity)
-            
-            # Increment activity count
-            for user_id in repliedUserIds:
-                self._userDB.updateUserStats(user_id, 'num_unread_news', increment=1)
+        self._addActivity(genre='reply', 
+                          user_id=authUserId, 
+                          recipient_ids=repliedUserIds, 
+                          subject=stamp.entity.title, 
+                          blurb=comment.blurb, 
+                          linked_stamp_id=stamp.stamp_id, 
+                          linked_comment_id=comment.comment_id)
         
         # Increment comment count on stamp
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
@@ -2299,7 +2201,7 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.likes')
         
         # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats(stamp.user_id, 'num_likes',    increment=1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
         
         # Increment stamp stats by one
@@ -2321,25 +2223,15 @@ class StampedAPI(AStampedAPI):
             stamp.like_threshold_hit = True
             
             # Update user stats with new credit
-            self._userDB.updateUserStats( \
-                stamp.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
+            self._userDB.updateUserStats(stamp.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
         
         # Add activity for stamp owner (if not self)
-        if self._activity == True and stamp.user_id != authUserId:
-            activity                    = Activity()
-            activity.genre              = 'like'
-            activity.user.user_id       = authUserId
-            activity.subject            = stamp.entity.title
-            activity.linked_stamp_id    = stamp.stamp_id
-            activity.timestamp.created  = datetime.utcnow()
-            
-            if benefit:
-                activity.benefit        = LIKE_BENEFIT
-            
-            self._activityDB.addActivity([stamp.user_id], activity)
-            
-            # Increment activity count
-            self._userDB.updateUserStats(stamp.user_id, 'num_unread_news', increment=1)
+        if stamp.user_id != authUserId:
+            self._addActivity(genre='like', 
+                              user_id=authUserId, 
+                              recipient_ids=[ stamp.user_id ], 
+                              subject=stamp.entity.title, 
+                              linked_stamp_id=stamp.stamp_id)
         
         return stamp
     
@@ -2356,12 +2248,13 @@ class StampedAPI(AStampedAPI):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
         
-        # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user_id, 'num_likes', increment=-1)
+        # Decrement user stats by one
+        self._userDB.updateUserStats(stamp.user_id, 'num_likes',    increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
         
-        # Increment stamp stats by one
+        # Decrement stamp stats by one
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
+        
         if stamp.num_likes is None:
             stamp.num_likes = 0
         
@@ -2655,24 +2548,16 @@ class StampedAPI(AStampedAPI):
                                 authUserId=authUserId, entityIds=entityIds)
         
         # Increment user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_faves', \
-                    None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_faves', increment=1)
         
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
-        if self._activity == True and stampId != None \
-            and favorite.stamp.user_id != authUserId:
-            activity                    = Activity()
-            activity.genre              = 'favorite'
-            activity.user.user_id       = authUserId
-            activity.subject            = favorite.stamp.entity.title
-            activity.linked_stamp_id    = favorite.stamp.stamp_id
-            activity.timestamp.created  = datetime.utcnow()
-            
-            self._activityDB.addActivity([favorite.stamp.user_id], activity)
-                
-            # Increment activity count
-            self._userDB.updateUserStats(favorite.stamp.user_id, 'num_unread_news', increment=1)
+        if stampId is not None and favorite.stamp.user_id != authUserId:
+            self._addActivity(genre='favorite', 
+                              user_id=authUserId, 
+                              recipient_ids=[ favorite.stamp.user_id ], 
+                              subject=favorite.stamp.entity.title, 
+                              linked_stamp_id=favorite.stamp.stamp_id)
         
         return favorite
     
@@ -2689,14 +2574,13 @@ class StampedAPI(AStampedAPI):
         self._favoriteDB.removeFavorite(authUserId, entityId)
 
         # Decrement user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_faves', \
-                    None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
 
         # Enrich stamp
         if favorite.stamp_id != None:
             stamp           = self._stampDB.getStamp(favorite.stamp_id)
-            favorite.stamp  = self._enrichStampObjects( \
-                                stamp, authUserId=authUserId)
+            favorite.stamp  = self._enrichStampObjects(stamp, authUserId=authUserId)
+            
             # Just in case...
             favorite.stamp.is_fav = False
 
@@ -2852,6 +2736,28 @@ class StampedAPI(AStampedAPI):
     #       #   #  #  #  #  #    #   #   #      
     #       #    # #   ##   #    #   #   ###### 
     """
+    
+    def _addActivity(self, genre, user_id, recipient_ids, **kwargs)
+        if not self._activity or len(recipient_ids) <= 0:
+            return
+        
+        sendAlert                   = kwargs.pop('sendAlert', True)
+        checkExists                 = kwargs.pop('checkExists', False)
+        
+        activity                    = Activity()
+        activity.genre              = genre
+        activity.user.user_id       = user_id
+        activity.linked_user_id     = user_id # TODO: should this always be set here? 
+        activity.timestamp.created  = datetime.utcnow()
+        
+        for k, v in kwargs.iteritems():
+            activity[k] = v
+        
+        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
+                                     checkExists=checkExists)
+        
+        # increment unread news for all recipients
+        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
     
     @lazyProperty
     def _googlePlaces(self):
@@ -3055,9 +2961,11 @@ class StampedAPI(AStampedAPI):
     
     def _updateUserStats(self):
         userIds = self._userDB._getAllUserIds()
+        
         for userId in userIds:
             user = userDB.getUser(userId)
             userData = user.exportSparse()
+            
             if 'stats' not in userData:
                 continue
             
@@ -3068,7 +2976,7 @@ class StampedAPI(AStampedAPI):
             stats_num_likes_given   = stats.pop('num_likes_given', 0)
             stats_num_friends       = stats.pop('num_friends', 0)
             stats_num_followers     = stats.pop('num_followers', 0)
-
+            
             num_stamps              = self._stampDB.countStamps(userId)
             num_credits             = self._stampDB.countCredits(userId)
             num_likes_given         = self._stampDB.countUserLikes(userId)
@@ -3077,31 +2985,31 @@ class StampedAPI(AStampedAPI):
             
             if num_stamps != stats_num_stamps:
                 logs.info('user id: %s' % userId)
-                logs.info('num_stamps: old (%s) new (%s)' % \
-                    (stats_num_stamps, num_stamps))
+                logs.info('num_stamps: old (%s) new (%s)' % (stats_num_stamps, num_stamps))
+                
                 self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
-
+            
             if num_credits != stats_num_credits:
                 logs.info('user id: %s' % userId)
-                logs.info('num_credits: old (%s) new (%s)' % \
-                    (stats_num_credits, num_credits))
+                logs.info('num_credits: old (%s) new (%s)' % (stats_num_credits, num_credits))
+                
                 self._userDB.updateUserStats(userId, 'num_credits', num_credits)
-
+            
             if num_likes_given != stats_num_likes_given:
                 logs.info('user id: %s' % userId)
-                logs.info('num_likes_given: old (%s) new (%s)' % \
-                    (stats_num_likes_given, num_likes_given))
+                logs.info('num_likes_given: old (%s) new (%s)' % (stats_num_likes_given, num_likes_given))
+                
                 self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
-
+            
             if num_friends != stats_num_friends:
                 logs.info('user id: %s' % userId)
-                logs.info('num_friends: old (%s) new (%s)' % \
-                    (stats_num_friends, num_friends))
+                logs.info('num_friends: old (%s) new (%s)' % (stats_num_friends, num_friends))
+                
                 self._userDB.updateUserStats(userId, 'num_friends', num_friends)
-
+            
             if num_followers != stats_num_followers:
                 logs.info('user id: %s' % userId)
-                logs.info('num_followers: old (%s) new (%s)' % \
-                    (stats_num_followers, num_followers))
+                logs.info('num_followers: old (%s) new (%s)' % (stats_num_followers, num_followers))
+                
                 self._userDB.updateUserStats(userId, 'num_followers', num_followers)
 
