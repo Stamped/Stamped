@@ -837,6 +837,8 @@ class HTTPStamp(Schema):
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
 
         else:
+            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
+            
             raise NotImplementedError
         return self
 
