@@ -1508,6 +1508,7 @@ class StampedAPI(AStampedAPI):
                                  subject=stamp.entity.title, 
                                  blurb=stamp.blurb, 
                                  linked_stamp_id=stamp.stamp_id)
+        return stamp
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):        
