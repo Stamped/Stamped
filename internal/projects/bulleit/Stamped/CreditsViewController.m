@@ -21,13 +21,17 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 - (void)loadStampsFromNetwork;
 - (void)reloadTableData;
 
-@property (nonatomic, copy) NSArray* stampsArray;
+@property (nonatomic, retain) NSMutableArray* stampsArray;
+@property (nonatomic, assign) BOOL loadingNextChunk;
+@property (nonatomic, assign) BOOL loadedAllCredits;
 @end
 
 @implementation CreditsViewController
 
 @synthesize tableView = tableView_;
 @synthesize stampsArray = stampsArray_;
+@synthesize loadingNextChunk = loadingNextChunk_;
+@synthesize loadedAllCredits = loadedAllCredits_;
 @synthesize screenName = screenName_;
 @synthesize user = user_;
 
@@ -50,6 +54,8 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 - (id)initWithUser:(User*)user {
   self.user = user;
   self.screenName = user.screenName;
+  self.stampsArray = [NSMutableArray array];
+
   return [self initWithNibName:@"CreditsViewController" bundle:nil];
 }
 
@@ -68,18 +74,16 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
     [self.view insertSubview:emptyView atIndex:0];
     [emptyView release];
   }
-  self.tableView.hidden = YES;
-  [self loadStampsFromNetwork];
+  if (stampsArray_.count == 0) {
+    self.tableView.hidden = YES;
+    [self loadStampsFromNetwork];
+  }
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.tableView = nil;
-  self.stampsArray = nil;
-  self.user = nil;
-  self.screenName = nil;
-  self.user = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -102,18 +106,38 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return stampsArray_.count;
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  NSInteger count = stampsArray_.count;
+  if (!loadedAllCredits_)
+    ++count;
+
+  return count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"Cell";
+  if (indexPath.row == self.stampsArray.count) {
+    UITableViewCell* loadingMoreCell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                                               reuseIdentifier:nil] autorelease];
+    loadingMoreCell.selectionStyle = UITableViewCellSelectionStyleNone;
+    UIActivityIndicatorView* spinner =
+    [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    spinner.center = loadingMoreCell.contentView.center;
+    [loadingMoreCell.contentView addSubview:spinner];
+    [spinner startAnimating];
+    [spinner release];
+    if (!loadingNextChunk_)
+      [self loadStampsFromNetwork];
+    
+    loadingNextChunk_ = YES;
+    return loadingMoreCell;
+  }
   
+  static NSString* CellIdentifier = @"Cell";
   CreditTableViewCell* cell = (CreditTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[CreditTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  
+
   cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
   cell.creditedUser = self.user;
   return cell;
@@ -135,15 +159,30 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreditsPath delegate:self];
   objectLoader.objectMapping = stampMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:screenName_, @"screen_name", nil];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:screenName_, @"screen_name", @"0", @"since", nil];
+  if (stampsArray_.count > 0) {
+    Stamp* oldestStamp = stampsArray_.lastObject;
+    NSString* dateString = [NSString stringWithFormat:@"%.0f", oldestStamp.created.timeIntervalSince1970];
+    [params setObject:dateString forKey:@"before"];
+  }
+  objectLoader.params = params;
   [objectLoader send];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if (objects.count < 20)
+    loadedAllCredits_ = YES;
+
+  loadingNextChunk_ = NO;
+
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  NSArray* sortedStamps = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  for (Stamp* s in sortedStamps) {
+    if (![stampsArray_ containsObject:s])
+      [stampsArray_ addObject:s];
+  }
   [self reloadTableData];
 }
 
