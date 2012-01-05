@@ -583,7 +583,8 @@ class StampedAPI(AStampedAPI):
         self._addActivity(genre='friend', 
                           user_id=authUserId, 
                           recipient_ids=userIds, 
-                          subject='Your Twitter friend %s' % account.twitter_screen_name)
+                          subject='Your Twitter friend %s' % account.twitter_screen_name,
+                          checkExists=True)
         
         account.twitter_alerts_sent = True
         self._accountDB.updateAccount(account)
