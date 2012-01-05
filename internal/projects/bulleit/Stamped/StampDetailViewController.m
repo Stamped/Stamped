@@ -910,7 +910,7 @@ typedef enum {
   User* user = nil;
   if ([urlString hasPrefix:@"@"]) {
     NSString* screenName = [urlString substringFromIndex:1];
-    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]]; 
+    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"ANY screenName LIKE[c] %@", screenName]]; 
   } else if (urlString.length == 24) {
     NSString* userID = url.absoluteString;
     user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
