@@ -586,12 +586,12 @@ def get_spherical_distance(latLng1, latLng2):
         return -1
 
 # email regex taken from Django validators.py
-__email_re = re.compile(
+__email_re       = re.compile(
     R"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"               # dot-atom
     R'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
     R')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)   # domain
 __screen_name_re = re.compile("^[\w-]{1,20}$", re.IGNORECASE)
-__color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
+__color_re       = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 
 def validate_email(email):
     try:
@@ -766,4 +766,51 @@ def getFacebook(accessToken, path, params={}):
         raise
     
     return result
+
+class HeadRequest(urllib2.Request):
+    def get_method(self):
+        return "HEAD"
+
+def getHeadRequest(url):
+    """ 
+        Robust HEAD request to ensure that the requested resource exists. Returns 
+        the response object if the resource is accessible or None otherwise.
+    """
+    
+    request  = HeadRequest(url)
+    maxDelay = 2
+    delay    = 0.5
+    
+    while True:
+        try:
+            response = urllib2.urlopen(request)
+            if content_type is not None:
+                actual_content_type = response.info().getheader('Content-Type')
+                
+                if actual_content_type != content_type:
+                    return None
+            
+            return response
+        except urllib2.HTTPError, e:
+            # reraise the exception if the request resulted in an HTTP client 4xx error code, 
+            # since it was a problem with the url / headers and retrying most likely won't 
+            # solve the problem.
+            if e.code >= 400 and e.code < 500:
+                return None
+        except (ValueError, IOError, httplib.BadStatusLine) as e:
+            pass
+        except Exception, e:
+            return None
+        
+        # if delay is already too large, request will likely not complete successfully, 
+        # so propagate the error and return.
+        if delay > maxDelay:
+            return None
+        
+        # put the current thread to sleep for a bit, increase the delay, and retry the request
+        time.sleep(delay)
+        delay *= 2
+
+def checkIfJpegResourceExists(url):
+    return checkIfResourceExists(url, content_type='image/jpeg')
 

@@ -1360,6 +1360,10 @@ class StampedAPI(AStampedAPI):
         creditData  = data.pop('credit', None)
         imageData   = data.pop('image',  None)
         
+        image_url    = data.pop('temp_image_url',    None)
+        image_width  = data.pop('temp_image_width',  None)
+        image_height = data.pop('temp_image_height', None)
+        
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
             raise IllegalActionError("No more stamps remaining")
@@ -1399,18 +1403,38 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
         
         # Add image to stamp
-        ### TODO: Unwind stamp if this fails
         if imageData is not None:
-            ### TODO: Rollback: Delete Image
-            image = self._imageDB.getImage(imageData)
-            self._imageDB.addStampImage(stamp.stamp_id, image)
+            if image_url is not None:
+                raise InputError("either an image may be uploaded with the stamp itself or an " + 
+                                 "external image may be referenced, but not both")
             
-            # Add image dimensions to stamp object (width,height)
-            width, height           = image.size
-            stamp.image_dimensions  = "%s,%s" % (width, height)
+            ### TODO: Rollback: Delete Image
+            image     = self._imageDB.getImage(imageData)
+            image_url = self._imageDB.addStampImage(stamp.stamp_id, image)
+            
+            image_width, image_height = image.size
+        elif image_url is not None:
+            # ensure external image exists
+            response = utils.checkIfJpegResourceExists(image_url)
+            
+            if response is None:
+                raise InputError("unable to access specified stamp image '%s'" % image_url)
+            else:
+                content_type = response.info().getheader('Content-Type')
+                
+                if content_type != "image/jpeg":
+                    raise InputError("invalid external image format; content-type must be image/jpeg")
+        
+        if image_url is not None:
+            if image_width is None or image_height is None:
+                raise InputError("invalid image dimensions")
+            
+            # Add image dimensions to stamp object
+            stamp.image_dimensions  = "%s,%s" % (image_width, image_height)
             stamp                   = self._stampDB.updateStamp(stamp)
             
             self._statsSink.increment('stamped.api.stamps.images')
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[stamp.stamp_id, image_url])
         
         # Enrich linked user, entity, favorites, etc. within the stamp
         entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
@@ -1516,8 +1540,14 @@ class StampedAPI(AStampedAPI):
                                  linked_stamp_id=stamp.stamp_id)
     
     @API_CALL
+    def addResizedStampImagesAsync(self, stamp_id, image_url):
+        assert image_url is not None, "stamp image url unavailable!"
+        
+        self._imageDB.addResizedStampImages(image_url, stamp_id)
+    
+    @API_CALL
     def updateStamp(self, authUserId, stampId, data):        
-        stamp       = self._stampDB.getStamp(stampId)       
+        stamp       = self._stampDB.getStamp(stampId)
         user        = self._userDB.getUser(authUserId)
         
         blurbData   = data.pop('blurb', stamp.blurb)

@@ -126,14 +126,14 @@ class S3ImageDB(AImageDB):
         try:
             f = utils.getFile(url)
         except HTTPError:
-            logs.warn("unable to download '%s'" % url)
+            logs.warn("unable to download profile image from '%s'" % url)
             raise
         
         image   = self.getImage(f)
         sizes   = self.profileImageSizes
         maxSize = self.profileImageMaxSize
         
-        self._addImageSizes(prefix, image, maxSize, sizes, saveOriginal=False)
+        self._addImageSizes(prefix, image, maxSize, sizes, original_url=url)
     
     def removeProfileImage(self, screenName):
         prefix = 'users/%s' % screenName
@@ -167,17 +167,32 @@ class S3ImageDB(AImageDB):
         assert isinstance(image, Image.Image)
         
         prefix  = 'stamps/%s' % stampId
+        url     = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
         maxSize = (960, 960)
         
-        sizes = {
-            'ios1x': (200, None),
-            'ios2x': (400, None),
-            'web': (580, None),
-            'mobile': (572, None),
+        # Add images in all sizes
+        self._addImageSizes(prefix, image, maxSize)
+        return url
+    
+    def addResizedStampImages(self, image_url, stampId):
+        try:
+            f = utils.getFile(image_url)
+        except HTTPError:
+            logs.warn("unable to download stamp image from '%s'" % image_url)
+            raise
+        
+        image   = self.getImage(f)
+        prefix  = 'stamps/%s' % stampId
+        maxSize = (960, 960)
+        
+        sizes   = {
+            'ios1x'  : (200, None),
+            'ios2x'  : (400, None),
+            'web'    : (580, None),
+            'mobile' : (572, None),
         }
         
-        # Add images in all sizes
-        self._addImageSizes(prefix, image, maxSize, sizes)
+        self._addImageSizes(prefix, image, maxSize, sizes, original_url=image_url)
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
         oldPrefix = 'users/%s' % oldScreenName
@@ -195,7 +210,7 @@ class S3ImageDB(AImageDB):
             new = '%s-%s%s' % (newPrefix, size, suffix)
             self._copyInS3(old, new)
     
-    def _addImageSizes(self, prefix, image, maxSize, sizes=None, saveOriginal=True):
+    def _addImageSizes(self, prefix, image, maxSize, sizes=None, original_url=None):
         assert isinstance(image, Image.Image)
         
         def resizeImage(image, size):
@@ -225,7 +240,7 @@ class S3ImageDB(AImageDB):
             return resized
         
         # Save original
-        if saveOriginal:
+        if original_url != "%s.jpg" % prefix:
             original = resizeImage(image, maxSize)
             self._addJPG(prefix, original)
         
