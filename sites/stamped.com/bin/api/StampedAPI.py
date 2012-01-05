@@ -494,14 +494,16 @@ class StampedAPI(AStampedAPI):
         if token is None:
             account = self._accountDB.getAccount(authUserId)
             token = account.facebook_token
-        assert token is not None
-
-        friends = []
+            
+            if token is None:
+                raise IllegalActionError("attempting to retrieve facebook friends requires a linked account")
+        
+        friends    = []
         facbookIds = []
-        params = {}
+        params     = {}
         
         while True:
-            result = utils.getFacebook(token, '/me/friends', params)
+            result  = utils.getFacebook(token, '/me/friends', params)
             friends = friends + result['data']
             
             if 'paging' in result and 'next' in result['paging']:
@@ -514,7 +516,7 @@ class StampedAPI(AStampedAPI):
         
         for friend in friends:
             facbookIds.append(friend['id'])
-
+        
         return self._userDB.findUsersByFacebook(facebookIds)
     
     @API_CALL
@@ -534,9 +536,9 @@ class StampedAPI(AStampedAPI):
             facebook.facebook_name = fbUser['name']
             facebook.facebook_id = fbUser['id']
             facebook.facebook_screen_name = fbUser.pop('username', None)
-            
+        
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
-
+        
         # Alert Facebook asynchronously
         if facebook.facebook_token:
             ### TODO: Remove second param "facebookIds"
@@ -1854,7 +1856,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addCommentAsync(self, authUserId, stampId, comment_id):
-        # Note: No activity should be generated for the user creating the comment
         comment = self._commentDB.getComment(comment_id)
         stamp   = self._stampDB.getStamp(stampId)
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
@@ -2200,7 +2201,7 @@ class StampedAPI(AStampedAPI):
             for stamp in stampData:
                 realizedStampIds.append(stamp.stamp_id)
             commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
-
+            
             # Group previews by stamp_id
             for comment in commentData:
                 if comment.stamp_id not in commentPreviews:
@@ -2568,6 +2569,7 @@ class StampedAPI(AStampedAPI):
         mentionedUserIds = set()
         
         if self._activity == True and mentions is not None and len(mentions) > 0:
+            # Note: No activity should be generated for the user initiating the mention
             for mention in mentions:
                 if 'user_id' in mention and mention.user_id != authUserId and \
                     (ignore is None or mention.user_id not in ignore):
