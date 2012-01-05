@@ -579,14 +579,14 @@ class StampedAPI(AStampedAPI):
             if user.user_id not in followers:
                 userIds.append(user.user_id)
         
-        
         self._addActivity(genre='friend', 
                           user_id=authUserId, 
                           recipient_ids=userIds, 
-                          subject='Your Twitter friend %s' % account.twitter_screen_name)
+                          subject='Your Twitter friend %s' % account.twitter_screen_name,
+                          checkExists=True)
         
-        account.twitter_alerts_sent = True
-        self._accountDB.updateAccount(account)
+        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
         
         return True
     
@@ -635,8 +635,8 @@ class StampedAPI(AStampedAPI):
                           checkExists=True)
         
         ### TODO: Make this update robust for async request
-        account.facebook_alerts_sent = True
-        self._accountDB.updateAccount(account)
+        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
+        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
     
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
