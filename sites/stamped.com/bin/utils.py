@@ -8,7 +8,7 @@ __license__   = "TODO"
 import datetime, gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
 import aws, logs, math, random, boto
-import libs.TwitterOAuth
+import libs.TwitterOAuth as TwitterOAuth
 
 from boto.ec2.connection import EC2Connection
 from subprocess          import Popen, PIPE
@@ -772,9 +772,9 @@ def getFacebook(accessToken, path, params={}):
     return result
 
 def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers=None):
-    consumer = oauth.Consumer(key=TWITTER_CONSUMER_KEY, secret=TWITTER_CONSUMER_SECRET)
-    token = oauth.Token(key=key, secret=secret)
-    client = oauth.Client(consumer, token)
+    consumer = TwitterOAuth.Consumer(key=TWITTER_CONSUMER_KEY, secret=TWITTER_CONSUMER_SECRET)
+    token = TwitterOAuth.Token(key=key, secret=secret)
+    client = TwitterOAuth.Client(consumer, token)
  
     resp, content = client.request(
         url,

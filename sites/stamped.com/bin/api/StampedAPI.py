@@ -489,154 +489,6 @@ class StampedAPI(AStampedAPI):
                 raise KeyError(msg)
             else:
                 raise InputError("Invalid input")
-
-    def _getFacebookFriends(self, authUserId, token=None):
-        if token is None:
-            account = self._accountDB.getAccount(authUserId)
-            token = account.facebook_token
-            
-            if token is None:
-                raise IllegalActionError("attempting to retrieve facebook friends requires a linked account")
-        
-        friends    = []
-        facbookIds = []
-        params     = {}
-        
-        while True:
-            result  = utils.getFacebook(token, '/me/friends', params)
-            friends = friends + result['data']
-            
-            if 'paging' in result and 'next' in result['paging']:
-                url = urlparse.urlparse(result['paging']['next'])
-                params = dict([part.split('=') for part in url[4].split('&')])
-                
-                if 'offset' in params and int(params['offset']) == len(friends):
-                    continue
-            break
-        
-        for friend in friends:
-            facbookIds.append(friend['id'])
-        
-        return self._userDB.findUsersByFacebook(facebookIds)
-    
-    @API_CALL
-    def updateLinkedAccounts(self, authUserId, **kwargs):
-        twitter = kwargs.pop('twitter', None)
-        facebook = kwargs.pop('facebook', None)
-
-        # Update Facebook account info
-        if facebook.facebook_token:
-            token = facebook.facebook_token
-            
-            # Set user details
-            fbUser = utils.getFacebook(token, '/me')
-            if 'name' not in fbUser or 'id' not in fbUser:
-                raise UnavailableError("problem connecting to facebook account")
-            
-            facebook.facebook_name = fbUser['name']
-            facebook.facebook_id = fbUser['id']
-            facebook.facebook_screen_name = fbUser.pop('username', None)
-        
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
-        
-        # Alert Facebook asynchronously
-        if facebook.facebook_token:
-            ### TODO: Remove second param "facebookIds"
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, None])
-        
-        return True
-    
-    @API_CALL
-    def removeLinkedAccount(self, authUserId, linkedAccount):
-        if linkedAccount not in ['facebook', 'twitter']:
-            raise IllegalActionError("Invalid linked account: %s" % linkedAccount)
-        
-        self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
-        return True
-    
-    @API_CALL
-    def alertFollowersFromTwitter(self, authUserId, twitterIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, twitterIds])
-        
-        return True
-    
-    @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId, twitterIds):
-        account   = self._accountDB.getAccount(authUserId)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
-            return False
-        
-        users     = self._userDB.findUsersByTwitter(twitterIds)
-        followers = self._friendshipDB.getFollowers(authUserId)
-        
-        userIds = []
-        for user in users:
-            if user.user_id not in followers:
-                userIds.append(user.user_id)
-        
-        self._addActivity(genre='friend', 
-                          user_id=authUserId, 
-                          recipient_ids=userIds, 
-                          subject='Your Twitter friend %s' % account.twitter_screen_name,
-                          checkExists=True)
-        
-        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
-        
-        return True
-    
-    ### DEPRECATED
-    @API_CALL
-    def alertFollowersFromFacebook(self, authUserId, facebookIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, facebookIds])
-        
-        return True
-    
-    @API_CALL
-    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds=None):
-        
-        ### TODO: Deprecate passing parameter "facebookIds"
-        
-        account   = self._accountDB.getAccount(authUserId)
-        
-        # Only send alert once (when the user initially connects to Facebook)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return
-        
-        # Grab friend list from Facebook API
-        if account.facebook_token is not None:
-            users = self._getFacebookFriends(authUserId, account.facebook_token)
-        else:
-            ### DEPRECATED
-            users = self._userDB.findUsersByFacebook(facebookIds)
-        
-        # Send alert to people not already following the user
-        followers = self._friendshipDB.getFollowers(authUserId)
-        userIds = []
-        for user in users:
-            if user.user_id not in followers:
-                userIds.append(user.user_id)
-        
-        # Generate activity item
-        self._addActivity(genre='friend', 
-                          user_id=authUserId, 
-                          recipient_ids=userIds, 
-                          subject='Your Facebook friend %s' % account.facebook_name, 
-                          checkExists=True)
-        
-        ### TODO: Make this update robust for async request
-        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
     
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
@@ -663,6 +515,185 @@ class StampedAPI(AStampedAPI):
     def removeAPNSTokenForUser(self, authUserId, token):
         self._accountDB.removeAPNSTokenForUser(authUserId, token)
         return True
+
+
+    def _getTwitterFriends(self, key, secret, followers=False):
+        if key is None or secret is None:
+            raise IllegalActionError("Connecting to Twitter requires a valid key / secret")
+
+        baseurl = 'https://api.twitter.com/1/friends/ids.json'
+        if followers:
+            baseurl = 'https://api.twitter.com/1/followers/ids.json'
+
+        twitterIds = []
+        cursor = -1
+
+        while True:
+            url = '%s?cursor=%s' % (baseurl, cursor)
+            result = getTwitter(url, key, secret)
+            twitterIds = twitterIds + result['ids']
+
+            # Break if no cursor
+            if result['next_cursor'] == 0:
+                break
+            cursor = result['next_cursor']
+
+        return self._userDB.findUsersByTwitter(twitterIds)
+
+    def _getFacebookFriends(self, token):
+        if token is None:
+            raise IllegalActionError("Connecting to Facebook requires a valid token")
+        
+        friends    = []
+        facbookIds = []
+        params     = {}
+        
+        while True:
+            result  = utils.getFacebook(token, '/me/friends', params)
+            friends = friends + result['data']
+            
+            if 'paging' in result and 'next' in result['paging']:
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
+                
+                if 'offset' in params and int(params['offset']) == len(friends):
+                    continue
+            break
+        
+        for friend in friends:
+            facbookIds.append(friend['id'])
+        
+        return self._userDB.findUsersByFacebook(facebookIds)
+    
+    @API_CALL
+    def updateLinkedAccounts(self, authUserId, **kwargs):
+        twitter         = kwargs.pop('twitter', None)
+        twitterAuth     = kwargs.pop('twitter_auth', None)
+        facebook        = kwargs.pop('facebook', None)
+        facebookAuth    = kwargs.pop('facebook_auth', None)
+        
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
+        
+        # Alert Facebook asynchronously
+        if facebookAuth is not None:
+            kwargs = {'facebookToken': facebookAuth.token}
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, kwargs])
+        
+        # Alert Twitter asynchronously
+        if twitterAuth is not None:
+            kwargs = {'twitterKey': twitterAuth.key, 'twitterSecret': twitterAuth.secret}
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, kwargs])
+        
+        return True
+    
+    @API_CALL
+    def removeLinkedAccount(self, authUserId, linkedAccount):
+        if linkedAccount not in ['facebook', 'twitter']:
+            raise IllegalActionError("Invalid linked account: %s" % linkedAccount)
+        
+        self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
+        return True
+    
+    ### DEPRECATED
+    @API_CALL
+    def alertFollowersFromTwitter(self, authUserId, twitterIds):
+        account = self._accountDB.getAccount(authUserId)
+        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+            return False
+        
+        # Perform the actual alerts asynchronously
+        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, twitterIds])
+        
+        return True
+    
+    @API_CALL
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
+        
+        ### TODO: Deprecate passing parameter "twitterIds"
+        
+        account   = self._accountDB.getAccount(authUserId)
+
+        # Only send alert once (when the user initially connects to Twitter)
+        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+            return False
+        
+        users = []
+
+        # Grab friend list from Twitter API
+        if twitterKey is not None and twitterSecret is not None:
+            users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
+        elif twitterIds is not None:
+            ### DEPRECATED
+            users = self._userDB.findUsersByTwitter(twitterIds)
+        
+        # Send alert to people not already following the user
+        followers = self._friendshipDB.getFollowers(authUserId)
+        userIds = []
+        for user in users:
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
+        
+        # Generate activity item
+        self._addActivity(genre='friend', 
+                          user_id=authUserId, 
+                          recipient_ids=userIds, 
+                          subject='Your Twitter friend %s' % account.twitter_screen_name,
+                          checkExists=True)
+        
+        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
+        
+        return True
+    
+    ### DEPRECATED
+    @API_CALL
+    def alertFollowersFromFacebook(self, authUserId, facebookIds):
+        account = self._accountDB.getAccount(authUserId)
+        if account.facebook_alerts_sent == True or not account.facebook_name:
+            return False
+        
+        # Perform the actual alerts asynchronously
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, facebookIds])
+        
+        return True
+    
+    @API_CALL
+    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds=None, facebookToken=None):
+        
+        ### TODO: Deprecate passing parameter "facebookIds"
+        
+        account   = self._accountDB.getAccount(authUserId)
+        
+        # Only send alert once (when the user initially connects to Facebook)
+        if account.facebook_alerts_sent == True or not account.facebook_name:
+            return
+        
+        users = []
+
+        # Grab friend list from Facebook API
+        if facebookToken is not None:
+            users = self._getFacebookFriends(facebookToken)
+        elif facebookIds is not None:
+            ### DEPRECATED
+            users = self._userDB.findUsersByFacebook(facebookIds)
+        
+        # Send alert to people not already following the user
+        followers = self._friendshipDB.getFollowers(authUserId)
+        userIds = []
+        for user in users:
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
+        
+        # Generate activity item
+        self._addActivity(genre='friend', 
+                          user_id=authUserId, 
+                          recipient_ids=userIds, 
+                          subject='Your Facebook friend %s' % account.facebook_name, 
+                          checkExists=True)
+        
+        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
+        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+
     
     """
     #     #                             
@@ -763,21 +794,30 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByPhone(phone, limit=100)
     
     @API_CALL
-    def findUsersByTwitter(self, authUserId, twitterIds):
+    def findUsersByTwitter(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
         ### TODO: Add check for privacy settings?
         
-        return self._userDB.findUsersByTwitter(twitterIds, limit=100)
+        users = []
+
+        # Grab friend list from Facebook API
+        if twitterKey is not None and twitterSecret is not None:
+            users = self._getTwitterFriends(twitterKey, twitterSecret)
+        elif twitterIds is not None:
+            ### DEPRECATED
+            users = self._userDB.findUsersByTwitter(twitterIds, limit=100)
+        
+        return users
     
     @API_CALL
-    def findUsersByFacebook(self, authUserId, facebookIds=None):
+    def findUsersByFacebook(self, authUserId, facebookIds=None, facebookToken=None):
         ### TODO: Add check for privacy settings?
         
-        account   = self._accountDB.getAccount(authUserId)
-        
+        users = []
+
         # Grab friend list from Facebook API
-        if account.facebook_token is not None:
-            users = self._getFacebookFriends(authUserId, account.facebook_token)
-        else:
+        if facebookToken is not None:
+            users = self._getFacebookFriends(facebookToken)
+        elif facebookIds is not None:
             ### DEPRECATED
             users = self._userDB.findUsersByFacebook(facebookIds, limit=100)
         

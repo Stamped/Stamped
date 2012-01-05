@@ -141,12 +141,18 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def linked_accounts(request):
-    authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPLinkedAccounts(), request)
-    linked      = schema.exportSchema(LinkedAccounts())
+    authUserId      = checkOAuth(request)
+    schema          = parseRequest(HTTPLinkedAccounts(), request)
+
+    linked          = schema.exportSchema(LinkedAccounts())
+    twitterAuth     = schema.exportSchema(TwitterAuthSchema())
+    facebookAuth    = schema.exportSchema(FacebookAuthSchema())
+
     data = {
         'twitter': linked.twitter,
         'facebook': linked.facebook,
+        'twitterAuth': twitterAuth,
+        'facebookAuth': facebookAuth,
     }
     stampedAPI.updateLinkedAccounts(authUserId, **data)
     
