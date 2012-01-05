@@ -11,6 +11,7 @@
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
+#import "STLoadingMoreTableViewCell.h"
 #import "Util.h"
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
@@ -113,20 +114,11 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == self.peopleArray.count) {
-    UITableViewCell* loadingMoreCell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                                               reuseIdentifier:nil] autorelease];
-    loadingMoreCell.selectionStyle = UITableViewCellSelectionStyleNone;
-    UIActivityIndicatorView* spinner =
-        [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    spinner.center = loadingMoreCell.contentView.center;
-    [loadingMoreCell.contentView addSubview:spinner];
-    [spinner startAnimating];
-    [spinner release];
     if (!loadingNextChunk_)
       [self loadUserDataFromNetwork];
 
     loadingNextChunk_ = YES;
-    return loadingMoreCell;
+    return [STLoadingMoreTableViewCell cell];
   }
   
   static NSString* CellIdentifier = @"Cell";

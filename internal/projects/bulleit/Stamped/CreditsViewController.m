@@ -14,6 +14,7 @@
 #import "Stamp.h"
 #import "User.h"
 #import "StampDetailViewController.h"
+#import "STLoadingMoreTableViewCell.h"
 
 static NSString* const kCreditsPath = @"/collections/credit.json";
 
@@ -116,20 +117,11 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == self.stampsArray.count) {
-    UITableViewCell* loadingMoreCell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                                               reuseIdentifier:nil] autorelease];
-    loadingMoreCell.selectionStyle = UITableViewCellSelectionStyleNone;
-    UIActivityIndicatorView* spinner =
-    [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    spinner.center = loadingMoreCell.contentView.center;
-    [loadingMoreCell.contentView addSubview:spinner];
-    [spinner startAnimating];
-    [spinner release];
     if (!loadingNextChunk_)
       [self loadStampsFromNetwork];
     
     loadingNextChunk_ = YES;
-    return loadingMoreCell;
+    return [STLoadingMoreTableViewCell cell];
   }
   
   static NSString* CellIdentifier = @"Cell";
