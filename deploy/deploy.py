@@ -38,11 +38,11 @@ def parseCommandLine():
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
-    parser.add_option("-i", "--ip", action="store_true", dest="ip", 
-        default=False, help="Associate elastic ip address with instance (for 'init' method)")
+    parser.add_option("-v", "--verbose", action="store_true", default=False, 
+                      help="enable verbose logging")
     
-    parser.add_option("-r", "--restore", action="store", dest="restore", 
-        default=None, type="string", help="Instance ID to restore snapshot from")
+    parser.add_option("-n", "--noop", action="store_true", default=False, 
+                      help="enable dry run noop mode, where no actual action will be taken (useful to test & debug commands before running them for real)")
     
     (options, args) = parser.parse_args()
     args = map(lambda arg: arg.lower(), args)
