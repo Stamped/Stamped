@@ -489,6 +489,33 @@ class StampedAPI(AStampedAPI):
                 raise KeyError(msg)
             else:
                 raise InputError("Invalid input")
+
+    def _getFacebookFriends(self, authUserId, token=None):
+        if token is None:
+            account = self._accountDB.getAccount(authUserId)
+            token = account.facebook_token
+        assert token is not None
+
+        friends = []
+        facbookIds = []
+        params = {}
+        
+        while True:
+            result = utils.getFacebook(token, '/me/friends', params)
+            friends = friends + result['data']
+            
+            if 'paging' in result and 'next' in result['paging']:
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
+                
+                if 'offset' in params and int(params['offset']) == len(friends):
+                    continue
+            break
+        
+        for friend in friends:
+            facbookIds.append(friend['id'])
+
+        return self._userDB.findUsersByFacebook(facebookIds)
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, **kwargs):
@@ -1390,13 +1417,12 @@ class StampedAPI(AStampedAPI):
         
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
-        #tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
+        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
         
-        #return stamp
-        
-    #@API_CALL
-    #def addStampAsync(self, authUserId, stamp_id):
-        stamp_id = stamp.stamp_id
+        return stamp
+    
+    @API_CALL
+    def addStampAsync(self, authUserId, stamp_id):
         stamp = self._stampDB.getStamp(stamp_id)
         
         # Add references to the stamp in all relevant inboxes
@@ -1481,7 +1507,6 @@ class StampedAPI(AStampedAPI):
                                  subject=stamp.entity.title, 
                                  blurb=stamp.blurb, 
                                  linked_stamp_id=stamp.stamp_id)
-        return stamp
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):        
@@ -2531,34 +2556,6 @@ class StampedAPI(AStampedAPI):
         
         # increment unread news for all recipients
         self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
-
-    def _getFacebookFriends(self, authUserId, token=None):
-        if token is None:
-            account = self._accountDB.getAccount(authUserId)
-            token = account.facebook_token
-        if token is None:
-            raise InputError("Facebook token required")
-
-        friends = []
-        facbookIds = []
-        params = {}
-        
-        while True:
-            result = utils.getFacebook(token, '/me/friends', params)
-            friends = friends + result['data']
-            
-            if 'paging' in result and 'next' in result['paging']:
-                url = urlparse.urlparse(result['paging']['next'])
-                params = dict([part.split('=') for part in url[4].split('&')])
-                
-                if 'offset' in params and int(params['offset']) == len(friends):
-                    continue
-            break
-        
-        for friend in friends:
-            facbookIds.append(friend['id'])
-
-        return self._userDB.findUsersByFacebook(facebookIds)
     
     def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
         mentionedUserIds = set()
