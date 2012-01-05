@@ -849,6 +849,11 @@ class HTTPStampNew(Schema):
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
 
 class HTTPStampEdit(Schema):
     def setSchema(self):

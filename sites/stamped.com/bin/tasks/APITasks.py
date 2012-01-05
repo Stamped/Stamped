@@ -36,6 +36,10 @@ def addStamp(*args, **kwargs):
     getStampedAPI().addStampAsync(*args, **kwargs)
 
 @task(ignore_result=True)
+def addResizedStampImages(*args, **kwargs):
+    getStampedAPI().addResizedStampImagesAsync(*args, **kwargs)
+
+@task(ignore_result=True)
 def customizeStamp(*args, **kwargs):
     getStampedAPI().customizeStampAsync(*args, **kwargs)
 

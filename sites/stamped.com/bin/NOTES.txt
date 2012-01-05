@@ -5,6 +5,10 @@ Bieber:
     * collapse adjacent activity items into each other
 
 
+* stamp image async resizing
+* update API
+* memcached
+
 * sell alienware
 * sell buddha
 
