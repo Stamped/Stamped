@@ -1190,6 +1190,45 @@ class StampedAPI(AStampedAPI):
         
         return None
     
+    def _extractCredit(self, creditData, user_id, entity_id, userIds):
+        creditedUserIds = set()
+        credit = []
+        
+        if creditData is not None and isinstance(creditData, list):
+            ### TODO: Filter out non-ASCII data for credit
+            creditedScreenNames = []
+            for creditedScreenName in creditData:
+                if utils.validate_screen_name(creditedScreenName):
+                    creditedScreenNames.append(creditedScreenName)
+            
+            creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
+            
+            for creditedUser in creditedUsers:
+                userId = creditedUser['user_id']
+                if userId == user_id or userId in creditedUserIds:
+                    continue
+                
+                result = CreditSchema()
+                result.user_id      = creditedUser['user_id']
+                result.screen_name  = creditedUser['screen_name']
+                
+                # Add to user ids
+                userIds[userId] = creditedUser.exportSchema(UserMini())
+                
+                # Assign credit
+                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity_id)
+                if creditedStamp is not None:
+                    result.stamp_id = creditedStamp.stamp_id
+                
+                credit.append(result)
+                creditedUserIds.add(result.user_id)
+        
+        ### TODO: How do we handle credited users that have not yet joined?
+        if len(credit) > 0:
+            return credit
+        
+        return None
+    
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
@@ -1317,9 +1356,9 @@ class StampedAPI(AStampedAPI):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
         
-        blurbData   = data.pop('blurb', None)
+        blurbData   = data.pop('blurb',  None)
         creditData  = data.pop('credit', None)
-        imageData   = data.pop('image', None)
+        imageData   = data.pop('image',  None)
         
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
@@ -1343,44 +1382,12 @@ class StampedAPI(AStampedAPI):
         
         # Extract mentions
         if blurbData is not None:
-            stamp.blurb = blurbData.strip()
+            stamp.blurb    = blurbData.strip()
             stamp.mentions = self._extractMentions(blurbData)
         
         # Extract credit
-        credit = []
-        creditedUserIds = set()
-        
-        if creditData is not None and isinstance(creditData, list):
-            ### TODO: Filter out non-ASCII data for credit
-            creditedScreenNames = []
-            for creditedScreenName in creditData:
-                if utils.validate_screen_name(creditedScreenName):
-                    creditedScreenNames.append(creditedScreenName)
-            
-            creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
-            
-            for creditedUser in creditedUsers:
-                userId = creditedUser['user_id']
-                if userId == user.user_id or userId in creditedUserIds:
-                    continue
-                
-                result = CreditSchema()
-                result.user_id      = creditedUser['user_id']
-                result.screen_name  = creditedUser['screen_name']
-                
-                # Add to user ids
-                userIds[userId] = creditedUser.exportSchema(UserMini())
-                
-                # Assign credit
-                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity.entity_id)
-                if creditedStamp is not None:
-                    result.stamp_id = creditedStamp.stamp_id
-                
-                credit.append(result)
-                creditedUserIds.add(result.user_id)
-            
-            ### TODO: How do we handle credited users that have not yet joined?
-            stamp.credit = credit
+        if creditData is not None:
+            stamp.credit = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
         
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
