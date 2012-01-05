@@ -1,4 +1,10 @@
 
+brew install memcached libmemcached
+ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
+
+apt-get install memcached
+wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install
+pip install pylibmc
 
 Bieber:
     * limit activity notifications to last N or so
@@ -6,7 +12,7 @@ Bieber:
 
 
 * stamp image async resizing
-* update API
+* update stamps/create API for async image uploads
 * memcached
 
 * sell alienware
