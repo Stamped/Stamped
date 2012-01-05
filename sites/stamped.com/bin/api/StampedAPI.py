@@ -719,18 +719,18 @@ class StampedAPI(AStampedAPI):
         usersByUserIds = {}
         usersByScreenNames = {}
         result = []
-
+        
         for user in users:
             usersByUserIds[user.user_id] = user
             usersByScreenNames[user.screen_name] = user
-
+        
         if isinstance(userIds, list):
             for userId in userIds:
                 try:
                     result.append(usersByUserIds[userId])
                 except:
                     pass
-
+        
         if isinstance(screenNames, list):
             for screenName in screenNames:
                 try:
@@ -747,9 +747,7 @@ class StampedAPI(AStampedAPI):
     def getPrivacy(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
-        if user.privacy == True:
-            return True
-        return False
+        return (user.privacy == True)
     
     @API_CALL
     def findUsersByEmail(self, authUserId, emails):

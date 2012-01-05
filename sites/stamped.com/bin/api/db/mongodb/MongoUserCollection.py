@@ -6,12 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, re
-from datetime import datetime
-from math import log10
 
-from Schemas import *
-from AMongoCollection import AMongoCollection
-from api.AUserDB import AUserDB
+from datetime           import datetime
+from math               import log10
+from utils              import lazyProperty
+
+from Schemas            import *
+from AMongoCollection   import AMongoCollection
+from api.AUserDB        import AUserDB
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
@@ -80,11 +82,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         data = self._collection.find(query).limit(limit)
         return map(self._convertFromMongo, data)
     
+    @lazyProperty
+    def _valid_re(self):
+        return re.compile("[^\s\w-]+", re.IGNORECASE)
+    
     def searchUsers(self, query, limit=0):
         query = query.lower()
-
-        valid_re = re.compile("[^\s\w-]+", re.IGNORECASE)
-        query = valid_re.sub('', query)
+        query = self._valid_re.sub('', query)
         
         if len(query) == 0:
             return []

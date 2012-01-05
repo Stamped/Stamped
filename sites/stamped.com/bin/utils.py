@@ -585,46 +585,47 @@ def get_spherical_distance(latLng1, latLng2):
     except:
         return -1
 
-def validate_email(email):
-    # Taken from Django validators.py
-    email_re = re.compile(
-        R"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"  # dot-atom
-        R'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
-        R')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)  # domain
+# email regex taken from Django validators.py
+__email_re = re.compile(
+    R"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"               # dot-atom
+    R'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
+    R')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)   # domain
+__screen_name_re = re.compile("^[\w-]{1,20}$", re.IGNORECASE)
+__color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 
+def validate_email(email):
     try:
-        if email_re.match(email):
+        if __email_re.match(email):
             return True
-        raise
     except:
-        return False
+        pass
+    
+    return False
 
 def validate_screen_name(screen_name):
-    screen_name_re = re.compile("^[\w-]{1,20}$", re.IGNORECASE)
-    
     try:
-        if screen_name_re.match(screen_name):
+        if __screen_name_re.match(screen_name):
             return True
-        raise
     except:
-        return False
+        pass
+    
+    return False
 
 def validate_hex_color(color):
-    color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
-    
     try:
-        if color_re.match(color):
+        if __color_re.match(color):
             return True
-        raise
     except:
-        return False
+        pass
+    
+    return False
 
 def getNumLines(f):
-    numLines = 0
     bufferSize = 1024 * 1024
-    read_f = f.read # loop optimization
+    numLines   = 0
+    read_f     = f.read # loop optimization
+    buf        = read_f(bufferSize)
     
-    buf = read_f(bufferSize)
     while buf:
         numLines += buf.count('\n')
         buf = read_f(bufferSize)
