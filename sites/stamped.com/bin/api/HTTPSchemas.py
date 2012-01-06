@@ -193,23 +193,25 @@ class HTTPLinkedAccounts(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
-        self.twitter_token          = SchemaElement(basestring)
+        self.twitter_key            = SchemaElement(basestring)
+        self.twitter_secret         = SchemaElement(basestring)
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
-        self.facebook_expire        = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
             schema.twitter_id           = self.twitter_id
             schema.twitter_screen_name  = self.twitter_screen_name
-            schema.twitter_token        = self.twitter_token
             schema.facebook_id          = self.facebook_id
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
+        elif schema.__class__.__name__ == 'TwitterAuthSchema':
+            schema.twitter_key          = self.twitter_key
+            schema.twitter_secret       = self.twitter_secret
+        elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
-            schema.facebook_expire      = self.facebook_expire
         else:
             raise NotImplementedError
         return schema
@@ -344,6 +346,13 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     def setSchema(self):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class HTTPFindTwitterUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
 
 # ####### #
 # Invites #

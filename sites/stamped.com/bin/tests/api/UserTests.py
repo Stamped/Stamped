@@ -203,16 +203,22 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
 class StampedAPIUsersFindTwitter(StampedAPIUserTest):
     def test_find_by_twitter(self):
-        ids = ['1235551111','1235551112']
+        ids = ['11131112','814122']
         path = "account/linked/twitter/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "twitter_id": ids[0],
+            "twitter_screen_name": 'user_a',
+            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
+            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
         data = {
             "oauth_token": self.tokenB['access_token'],
             "twitter_id": ids[1],
+            "twitter_screen_name": 'user_b',
+            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
+            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
 
@@ -226,6 +232,18 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)
+
+        # path = "users/find/twitter.json"
+        # data = { 
+        #     "oauth_token": self.tokenC['access_token'],
+        #     "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
+        #     "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
+        # }
+        # result = self.handlePOST(path, data)
+        # self.assertLength(result, 2)
+        # for user in result:
+        #     self.assertIn(user['screen_name'], self.screen_names)
+        #     self.assertIn(user['identifier'], ids)
 
 
 class StampedAPIUsersFindFacebook(StampedAPIUserTest):

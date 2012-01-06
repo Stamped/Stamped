@@ -144,20 +144,27 @@ def findPhone(request):
 @require_http_methods(["POST"])
 def findTwitter(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
+    schema      = parseRequest(HTTPFindTwitterUser(), request, obfuscate=['q'])
 
-    q = schema.q.value
-    twitterIds = []
+    users = []
 
-    for item in q:
-        try:
-            number = int(item)
-            twitterIds.append(item)
-        except:
-            msg = 'Invalid twitter id: %s' % item
-            logs.warning(msg)
+    if schema.twitter_key is not None and schema.twitter_secret is not None:
+        users = stampedAPI.findUsersByTwitter(authUserId, twitterKey=schema.twitter_key, twitterSecret=schema.twitter_secret)
 
-    users       = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
+    elif schema.q is not None:
+        q = schema.q.value
+
+        twitterIds = []
+
+        for item in q:
+            try:
+                number = int(item)
+                twitterIds.append(item)
+            except:
+                msg = 'Invalid twitter id: %s' % item
+                logs.warning(msg)
+
+        users = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
 
     output = []
     for user in users:
