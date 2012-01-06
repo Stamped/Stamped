@@ -45,7 +45,7 @@ class Memcache(object):
             return eval("self._client.%s" % key)
     
     def __setitem__(self, name, value):
-        return self._client[name] = value
+        self._client[name] = value
     
     def __getitem__(self, name):
         return self._client[name]
