@@ -69,7 +69,16 @@ def getInstances():
         # worker nodes handle stateless, asynchronous tasks
         'work' : {
             'template' : {
-                'roles' : [ 'work', ], 
+                'roles' : [ 'work', 'mem', ], 
+            }, 
+        }, 
+        
+        # dedicated memcached nodes
+        'work' : {
+            'count' : 0, 
+            
+            'template' : {
+                'roles' : [ 'work', 'mem', ], 
             }, 
         }, 
     }
