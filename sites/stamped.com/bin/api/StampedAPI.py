@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
+import libs.Memcache
 import tasks.APITasks
 
 from pprint          import pprint, pformat
@@ -48,6 +49,8 @@ class StampedAPI(AStampedAPI):
     
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
+        self.lite_mode = kwargs.pop('lite_mode', False)
+        self._cache    = libs.Memcache.StampedMemcache()
         
         # Enable / Disable Functionality
         self._activity = True
@@ -693,7 +696,7 @@ class StampedAPI(AStampedAPI):
         
         facebook = FacebookAccountSchema(facebook_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
-
+    
     
     """
     #     #                             
@@ -2422,7 +2425,7 @@ class StampedAPI(AStampedAPI):
         # Enrich stamp
         if stampId is not None:
             entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
-            favorite.stamp  = self._enrichStampObjects(favorite.stamp, \
+            favorite.stamp = self._enrichStampObjects(favorite.stamp, \
                                 authUserId=authUserId, entityIds=entityIds)
         
         # Increment user stats by one
