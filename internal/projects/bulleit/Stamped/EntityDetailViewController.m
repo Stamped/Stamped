@@ -30,6 +30,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
+static const CGFloat kTodoBarHeight = 44.0;
 
 @interface EntityDetailViewController ()
 
@@ -161,39 +162,42 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidLayoutSubviews {
-  if (titleLabel_.text.length > 60) {
-    self.titleLabel.text = [self.titleLabel.text substringToIndex:55];
-    self.titleLabel.text = [self.titleLabel.text stringByAppendingString:@"…"];
-  }
-
   CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(275, MAXFLOAT)];
-  titleLabel_.frame = CGRectMake(15, 10,
+  CGFloat todoBarPadding = entityObject_.favorite.stamp != nil ? kTodoBarHeight : 0;
+  titleLabel_.frame = CGRectMake(15, 10 + todoBarPadding,
                                  titleSize.width,
                                  titleSize.height);
 
   [categoryImageView_ sizeToFit];
   categoryImageView_.frame = CGRectMake(305 - CGRectGetWidth(categoryImageView_.frame),
-                                        16,
+                                        16 + todoBarPadding,
                                         CGRectGetWidth(categoryImageView_.frame),
                                         CGRectGetHeight(categoryImageView_.frame));
 
-  CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(290, MAXFLOAT)];
+  CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(190, MAXFLOAT)];
   descriptionLabel_.frame = CGRectMake(15, CGRectGetMaxY(titleLabel_.frame) - 1,
                                        size.width, size.height);
   
-  CGRect frame = self.mainActionsView.frame;
+  CGRect frame = imageView_.frame;
+  frame.origin.y = CGRectGetMinY(descriptionLabel_.frame) + 3;
+  imageView_.frame = frame;
+  
+  frame = self.mainActionsView.frame;
   CGFloat originalY = frame.origin.y;
   frame.origin.y = CGRectGetMaxY(descriptionLabel_.frame) + 8;
   self.mainActionsView.frame = frame;
   CGFloat delta = frame.origin.y - originalY;
 
   self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
-  if ([self isKindOfClass:[PlaceDetailViewController class]]) {
+  if ([self isKindOfClass:[PlaceDetailViewController class]] || [self isKindOfClass:[OtherDetailViewController class]]) {
+    // Casting to either class doesn't matter since they will both respond to the message without throwing
+    // an exception.
     PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
     vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
-  } else if ([self isKindOfClass:[OtherDetailViewController class]]) {
+  }
+
+  if ([self isKindOfClass:[OtherDetailViewController class]]) {
     OtherDetailViewController* vc = (OtherDetailViewController*)self;
-    vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
     vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
   }
 }
@@ -243,7 +247,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_notConnected"]];
     CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
     CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);
-    iv.frame = CGRectMake(floorf(xOffset/2), floorf(0.95 * yOffset/2), iv.bounds.size.width, iv.bounds.size.height);
+    iv.frame = CGRectMake(floorf(xOffset / 2), floorf(0.95 * yOffset / 2), iv.bounds.size.width, iv.bounds.size.height);
     [self.scrollView addSubview:iv];
     [iv release];
   }
@@ -254,10 +258,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     if (view == shelfImageView_)
       continue;
 
-    view.frame = CGRectOffset(view.frame, 0, 44);
+    view.frame = CGRectOffset(view.frame, 0, kTodoBarHeight);
   }
 
-  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, kTodoBarHeight)];
   bar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:.1];
   CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
   gradient.frame = bar.bounds;
@@ -560,9 +564,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
-      [UIView animateWithDuration:0.25 animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
-                                                     if (self.imageView != nil && self.imageView.hidden == NO)                                        
-                                                         [vc moveArrowViewIfBehindImageView:self.imageView];}];
+      [UIView animateWithDuration:0.25 animations:^{
+        vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
+        if (self.imageView != nil && self.imageView.hidden == NO)                                        
+          [vc moveArrowViewIfBehindImageView:self.imageView];
+      }];
     }
   }
   
@@ -612,18 +618,16 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   NSString* key = @"entity_id";
   id objectForKey = nil;
-  if (entityObject_) 
+  if (entityObject_) {
     objectForKey = entityObject_.entityID;
-  else if (searchResult_) {
+  } else if (searchResult_) {
     if (searchResult_.entityID) {
       objectForKey = searchResult_.entityID;
-    } 
-    else if (searchResult_.searchID) {
+    } else if (searchResult_.searchID) {
       key = @"search_id";
       objectForKey = searchResult_.searchID;
     }
   }
-
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
@@ -650,7 +654,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
   if (self.imageView.image) {
     controller.image = self.imageView.image;
-  } else if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  } else if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     controller.imageURL = detailedEntity_.image;
   } else {
     [controller release];

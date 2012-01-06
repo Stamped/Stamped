@@ -180,7 +180,7 @@
   frame.origin = self.gradientView.frame.origin;
   CGFloat xOffset = self.gradientView.frame.size.width - frame.size.width;
   CGFloat yOffset = self.gradientView.frame.size.height - frame.size.height;
-  frame.origin = CGPointMake(frame.origin.x + xOffset/2, frame.origin.y + yOffset/2);
+  frame.origin = CGPointMake(frame.origin.x + xOffset / 2, frame.origin.y + yOffset / 2);
   self.gradientView.frame = frame;
   self.gradientView.hidden = NO;
   self.imageView.hidden = NO;
