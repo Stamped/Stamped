@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals
 import config, json, pickle, os, re, string, utils
@@ -78,6 +78,10 @@ class AWSDeploymentStack(ADeploymentStack):
     @property
     def work_server_instances(self):
         return self._getInstancesByRole('work')
+    
+    @property
+    def mem_server_instances(self):
+        return self._getInstancesByRole('mem')
     
     def create(self):
         utils.log("[%s] creating %d instances" % (self, len(self.instances)))
@@ -363,7 +367,7 @@ class AWSDeploymentStack(ADeploymentStack):
         conf = self._get_replset_conf()
         index = -1
         
-        # find highest existing priority in replica set config
+        # find node to remove in replica set's config
         for i in xrange(len(conf.members)):
             node = conf.members[i]
             ip = node.host.split(':')[0].lower()
@@ -398,7 +402,9 @@ class AWSDeploymentStack(ADeploymentStack):
         
         try:
             status = self._get_replset_status()
-            initialize = (status is not None)
+            utils.log(status)
+            
+            initialize = (status is None)
         except Fail:
             initialize = True
         
@@ -433,9 +439,25 @@ class AWSDeploymentStack(ADeploymentStack):
         
         # group replica set members by state
         node_state = defaultdict(list)
+        
+        # replica set member state reference
+        # ----------------------------------
+        #   0 => Starting up, phase 1 (parsing configuration)
+        #   1 => Primary
+        #   2 => Secondary
+        #   3 => Recovering (initial syncing, post-rollback, stale members)
+        #   4 => Fatal error
+        #   5 => Starting up, phase 2 (forking threads)
+        #   6 => Unknown state (member has never been reached)
+        #   7 => Arbiter
+        #   8 => Down
+        #   9 => Rollback
+        # 
+        # (http://www.mongodb.org/display/DOCS/Replica+Set+Commands)
+        
         for node in status.members:
             if node.state == 0 or node.state == 5 or \
-                (node.state == 8 and 'errmsg' in node and node.errmsg == u'still initializing'):
+                ((node.state == 8 or node.state == 6) and 'errmsg' in node and node.errmsg == u'still initializing'):
                 node_state['initializing'].append(node)
             elif node.state == 1:
                 node_state['primary'].append(node)
@@ -602,7 +624,7 @@ class AWSDeploymentStack(ADeploymentStack):
         return filter(lambda instance: role in instance.roles, self.instances)
     
     def add(self, *args):
-        types = [ 'db', 'api', 'web', 'work' ]
+        types = [ 'db', 'api', 'web', 'work', 'mem' ]
         if 0 == len(args) or args[0] not in types:
             raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         
@@ -642,12 +664,11 @@ class AWSDeploymentStack(ADeploymentStack):
         #assert len(sim) == top
         
         if 0 == len(sim):
-            instances = config.getInstances()
-            for instance in instances:
-                if instance['name'].startswith(add):
-                    sim.append(utils.AttributeDict({
-                        'config' : instance, 
-                    }))
+            instance = config.getInstance(add)
+            
+            sim.append(utils.AttributeDict({
+                'config' : instance, 
+            }))
         
         conf = dict(sim[0].config).copy()
         
@@ -658,7 +679,7 @@ class AWSDeploymentStack(ADeploymentStack):
         # placing this new node into the AZ which has the minimum number of 
         # existing nodes
         placements = sorted(placements.iteritems(), key=lambda p: (p[1], p[0]))
-        pprint(placements)
+        #pprint(placements)
         
         pool = Pool(8)
         instances = []
@@ -667,6 +688,8 @@ class AWSDeploymentStack(ADeploymentStack):
             cur_conf = conf.copy()
             cur_conf['name'] = '%s%d' % (add, top + i)
             
+            # TODO: this assumes nodes were previously evenly distributed
+            # instead, calculate minimal placement each iteration
             placement = placements[i % len(placements)][0]
             cur_conf['placement'] = placement
             
@@ -747,6 +770,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 
                 for node in status.members:
                     ip = node.name.split(':')[0].lower()
+                    
                     if ip == instance.private_ip_address:
                         found = True
                         break
