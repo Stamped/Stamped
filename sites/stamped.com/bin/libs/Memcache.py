@@ -5,7 +5,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import os, ec2_utils, pylibmc
+import Globals
+import utils, ec2_utils, pylibmc
 
 class Memcache(object):
     """
@@ -19,7 +20,7 @@ class Memcache(object):
     def init(self, binary=False, behaviors=None):
         memcached_nodes = []
         
-        if is_ec2():
+        if utils.is_ec2():
             stack = ec2_utils.get_stack()
             
             for node in stack.nodes:
@@ -27,15 +28,13 @@ class Memcache(object):
                     memcached_nodes.append(node.private_ip_address)
             
             if 0 == len(memcached_nodes):
-                print "[%s] unable to any find memcached servers" % self
+                utils.log("[%s] unable to any find memcached servers" % self)
                 return False
         else:
             # running locally so default to localhost
             memcached_nodes.append('127.0.0.1')
         
-        self._client = pylibmc.Client(memcached_nodes)
-        #, binary, behaviors)
-        
+        self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
         return True
     
     def __getattr__(self, key):
@@ -44,11 +43,14 @@ class Memcache(object):
         except:
             return eval("self._client.%s" % key)
     
-    def __setitem__(self, name, value):
-        self._client[name] = value
+    def __setitem__(self, key, value):
+        self._client[key] = value
     
-    def __getitem__(self, name):
-        return self._client[name]
+    def __getitem__(self, key):
+        return self._client[key]
+    
+    def __contains__(self, key):
+        return key in self._client
     
     def __str__(self):
         return self.__class__.__name__
@@ -62,10 +64,4 @@ class StampedMemcache(Memcache):
             'no_block'      : True, 
             'ketama'        : True, 
         })
-
-def is_ec2():
-    """ returns whether or not this python program is running on EC2 """
-    
-    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
-
 
