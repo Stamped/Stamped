@@ -16,7 +16,7 @@ from functools           import wraps
 from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 
-TWITTER_CONSUMER_KEY = 'kn1DLi7xqC6mb5PPwyXw'
+TWITTER_CONSUMER_KEY    = 'kn1DLi7xqC6mb5PPwyXw'
 TWITTER_CONSUMER_SECRET = 'AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU'
 
 def shell(cmd, customEnv=None):
@@ -773,9 +773,9 @@ def getFacebook(accessToken, path, params={}):
 
 def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers=None):
     consumer = TwitterOAuth.Consumer(key=TWITTER_CONSUMER_KEY, secret=TWITTER_CONSUMER_SECRET)
-    token = TwitterOAuth.Token(key=key, secret=secret)
+    token  = TwitterOAuth.Token(key=key, secret=secret)
     client = TwitterOAuth.Client(consumer, token)
- 
+    
     resp, content = client.request(
         url,
         method=http_method,
