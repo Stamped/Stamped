@@ -8,6 +8,11 @@ __license__   = "TODO"
 import Globals
 import utils, ec2_utils, pylibmc
 
+# TODO: Manipulating cache items via subscript-style syntax (e.g., cache[key]) 
+# is currently the only way pickling import/export conversion will take place 
+# for Schema objects. Depending on our needs in the future, we may need expand 
+# support for these conversions to the entire pylibmc.Client interface.
+
 class Memcache(object):
     """
         Lightweight wrapper around pylibmc memcached client which handles client 
@@ -38,27 +43,51 @@ class Memcache(object):
         return True
     
     def __getattr__(self, key):
-        try:
-            return object.__getattr__(self, key)
-        except:
-            return eval("self._client.%s" % key)
+        # proxy any attribute lookups to the underlying pylibmc client
+        return self._client.__getattribute__(key)
     
     def __setitem__(self, key, value):
-        self._client[key] = value
+        self._client[key] = self._import_value(value)
     
     def __getitem__(self, key):
-        return self._client[key]
+        return self._export_value(self._client[key])
     
     def __contains__(self, key):
         return key in self._client
     
+    def _import_value(self, value):
+        """
+            returns a custom, pickleable version of the given value for storage 
+            within memcached.
+        """
+        
+        if isinstance(value, Schema):
+            return {
+                "__schema__" : value.__class__, 
+                "__value__"  : value.value, 
+            }
+        
+        return value
+    
+    def _export_value(self, value):
+        """
+            converts the custom, pickleable version of the given value stored 
+            within memcached into our own, pythonic version that is returned.
+        """
+        
+        if isinstance(value, dict) and '__schema__' in value and '__value__' in value:
+            # reinstantiate the Schema subclass with its prior data
+            return value['__schema__'](value['__value__'])
+        
+        return value
+    
     def __str__(self):
-        return self.__class__.__name__
+        return "%s(%s)" % (str(self._client), self.__class__.__name__)
 
 class StampedMemcache(Memcache):
     
     def __init__(self):
-        # TODO: revisit the default behavior options
+        # TODO: revisit these behavior options
         Memcache.__init__(self, binary=True, behaviors={
             'remove_failed' : 5, 
             'no_block'      : True, 

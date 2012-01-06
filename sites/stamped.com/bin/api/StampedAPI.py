@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
+import libs.Memcache
 import tasks.APITasks
 
 from pprint          import pprint, pformat
@@ -48,6 +49,8 @@ class StampedAPI(AStampedAPI):
     
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
+        self.lite_mode = kwargs.pop('lite_mode', False)
+        self._cache    = Memcache.StampedMemcache()
         
         # Enable / Disable Functionality
         self._activity = True
