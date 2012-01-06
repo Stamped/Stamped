@@ -21,11 +21,11 @@
 @implementation FilmDetailViewController
 
 @synthesize affiliateLogoView = affiliateLogoView_;
-@synthesize ratingView = ratingView_;
+@synthesize ratingImageView = ratingImageView_;
 
 - (void)dealloc {
   self.affiliateLogoView = nil;
-  self.ratingView = nil;
+  self.ratingImageView = nil;
   [super dealloc];
 }
 
@@ -39,10 +39,9 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) 
+  if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) {
     self.descriptionLabel.text = detailedEntity_.subtitle;
-
-  else {
+  } else {
     NSNumber*  hours = [NSNumber numberWithFloat: detailedEntity_.length.floatValue / 3600.f];
     CGFloat fMinutes = hours.floatValue;
     hours = [NSNumber numberWithInt:floor(hours.floatValue)];
@@ -53,34 +52,21 @@
     
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
-  
+
   if (!detailedEntity_.rating || [detailedEntity_.rating isEqualToString:@"UR"]) {
     CGRect frame = self.descriptionLabel.frame;
     frame.origin.x = self.titleLabel.frame.origin.x;
     self.descriptionLabel.frame = frame;
-  }
-  
-  else {
-    if ([detailedEntity_.rating isEqualToString:@"G"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_G"];
-    if ([detailedEntity_.rating isEqualToString:@"PG"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_PG"];
-    if ([detailedEntity_.rating isEqualToString:@"PG-13"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_PG-13"];
-    if ([detailedEntity_.rating isEqualToString:@"R"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_R"];
-    if ([detailedEntity_.rating isEqualToString:@"NC-17"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_NC-17"];
-    
-    [self.ratingView sizeToFit];
-    
+  } else {
+    self.ratingImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"rating_%@", detailedEntity_.rating]];    
+    [self.ratingImageView sizeToFit];
+
     CGRect frame = self.descriptionLabel.frame;
-    frame.origin.x = CGRectGetMaxX(self.ratingView.frame) + 6.f;
+    frame.origin.x = CGRectGetMaxX(self.ratingImageView.frame) + 6.f;
     self.descriptionLabel.frame = frame;
-
   }
 
-  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     self.imageView.imageURL = detailedEntity_.image;
     self.imageView.delegate = self;
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
@@ -103,7 +89,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.affiliateLogoView = nil;
-  self.ratingView = nil;
+  self.ratingImageView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
