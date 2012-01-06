@@ -36,6 +36,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @property (nonatomic, retain) UIButton* addFavoriteButton;
 @property (nonatomic, retain) UIActivityIndicatorView* spinner;
 
+- (void)commonInit;
 - (void)addTodoBar;
 - (NSAttributedString*)todoAttributedString:(User*)user;
 - (void)todoBarTapped:(UITapGestureRecognizer*)recognizer;
@@ -44,7 +45,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)setupSectionViews;
 - (void)addSelfAsFavorite;
 - (void)dismissSelf;
-- (void)ensureTitleLabelHeight;
 @end
 
 @implementation EntityDetailViewController
@@ -68,8 +68,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     entityObject_ = [entity retain];
-    [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary alloc] init];
+    [self commonInit];
   }
   return self;
 }
@@ -78,10 +77,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     searchResult_ = [searchResult retain];
-    [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary alloc] init];
+    [self commonInit];
   }
   return self;
+}
+
+- (void)commonInit {
+  [self loadEntityDataFromServer];
+  sectionsDict_ = [[NSMutableDictionary alloc] init];
 }
 
 - (void)dealloc {
@@ -157,28 +160,41 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   // Default does nothing. Override in subclasses.
 }
 
-- (void)ensureTitleLabelHeight {
-  if ([self lineCountOfLabel:self.titleLabel] > 1) {
-    CGFloat newHeight = self.titleLabel.font.lineHeight * 2 + 8;
-    CGFloat delta = newHeight - self.titleLabel.frame.size.height;
-    self.titleLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, self.titleLabel.frame.origin.y,
-                                       self.titleLabel.frame.size.width, newHeight);
-    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0.0, delta);
-    self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0.0, delta);
-    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
-    if ([self isKindOfClass:[PlaceDetailViewController class]]) {
-      PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
-      vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
-    }
-    if ([self isKindOfClass:[OtherDetailViewController class]]) {
-      OtherDetailViewController* vc = (OtherDetailViewController*)self;
-      vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
-      vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
-    }
-  }
+- (void)viewDidLayoutSubviews {
   if (titleLabel_.text.length > 60) {
     self.titleLabel.text = [self.titleLabel.text substringToIndex:55];
     self.titleLabel.text = [self.titleLabel.text stringByAppendingString:@"…"];
+  }
+
+  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(275, MAXFLOAT)];
+  titleLabel_.frame = CGRectMake(15, 10,
+                                 titleSize.width,
+                                 titleSize.height);
+
+  [categoryImageView_ sizeToFit];
+  categoryImageView_.frame = CGRectMake(305 - CGRectGetWidth(categoryImageView_.frame),
+                                        16,
+                                        CGRectGetWidth(categoryImageView_.frame),
+                                        CGRectGetHeight(categoryImageView_.frame));
+
+  CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(290, MAXFLOAT)];
+  descriptionLabel_.frame = CGRectMake(15, CGRectGetMaxY(titleLabel_.frame) - 1,
+                                       size.width, size.height);
+  
+  CGRect frame = self.mainActionsView.frame;
+  CGFloat originalY = frame.origin.y;
+  frame.origin.y = CGRectGetMaxY(descriptionLabel_.frame) + 8;
+  self.mainActionsView.frame = frame;
+  CGFloat delta = frame.origin.y - originalY;
+
+  self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
+  if ([self isKindOfClass:[PlaceDetailViewController class]]) {
+    PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
+    vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+  } else if ([self isKindOfClass:[OtherDetailViewController class]]) {
+    OtherDetailViewController* vc = (OtherDetailViewController*)self;
+    vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+    vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
   }
 }
 
@@ -201,6 +217,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [self.view.layer insertSublayer:backgroundGradient atIndex:0];
   [backgroundGradient release];
 
+  titleLabel_.numberOfLines = 0;
+  titleLabel_.adjustsFontSizeToFitWidth = NO;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   if (entityObject_) {
@@ -208,6 +226,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   } else if (searchResult_) {
     titleLabel_.text = searchResult_.title;
   }
+
+  descriptionLabel_.numberOfLines = 0;
+  descriptionLabel_.adjustsFontSizeToFitWidth = NO;
   descriptionLabel_.text = nil;
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   mainActionButton_.layer.masksToBounds = YES;
@@ -216,8 +237,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   if (entityObject_.favorite.stamp)
     [self addTodoBar];
-  
-  [self ensureTitleLabelHeight];
   
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
