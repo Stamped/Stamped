@@ -180,7 +180,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return result
 
     def findUsersByTwitter(self, twitterIds, limit=0):
-        ### TODO: Add Index
+        twitterIds = map(str, twitterIds)
+
         data = self._collection.find(
             {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
         ).limit(limit)
@@ -193,7 +194,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return result
 
     def findUsersByFacebook(self, facebookIds, limit=0):
-        ### TODO: Add Index
+        facebookIds = map(str, facebookIds)
+
         data = self._collection.find(
             {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
         ).limit(limit)

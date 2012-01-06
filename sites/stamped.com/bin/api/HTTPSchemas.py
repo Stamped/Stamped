@@ -352,6 +352,11 @@ class HTTPFindTwitterUser(Schema):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
         self.twitter_key        = SchemaElement(basestring)
         self.twitter_secret     = SchemaElement(basestring)
+
+class HTTPFindFacebookUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+        self.facebook_token     = SchemaElement(basestring)
         
 
 # ####### #

@@ -233,17 +233,17 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)
 
-        # path = "users/find/twitter.json"
-        # data = { 
-        #     "oauth_token": self.tokenC['access_token'],
-        #     "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-        #     "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
-        # }
-        # result = self.handlePOST(path, data)
-        # self.assertLength(result, 2)
-        # for user in result:
-        #     self.assertIn(user['screen_name'], self.screen_names)
-        #     self.assertIn(user['identifier'], ids)
+        path = "users/find/twitter.json"
+        data = { 
+            "oauth_token": self.tokenC['access_token'],
+            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
+            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result) >= 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], ids)
 
 
 class StampedAPIUsersFindFacebook(StampedAPIUserTest):
