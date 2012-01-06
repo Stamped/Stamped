@@ -520,7 +520,7 @@ class StampedAPI(AStampedAPI):
     def _getTwitterFriends(self, key, secret, followers=False):
         if key is None or secret is None:
             raise IllegalActionError("Connecting to Twitter requires a valid key / secret")
-
+        
         baseurl = 'https://api.twitter.com/1/friends/ids.json'
         if followers:
             baseurl = 'https://api.twitter.com/1/followers/ids.json'
@@ -530,7 +530,7 @@ class StampedAPI(AStampedAPI):
 
         while True:
             url = '%s?cursor=%s' % (baseurl, cursor)
-            result = getTwitter(url, key, secret)
+            result = utils.getTwitter(url, key, secret)
             twitterIds = twitterIds + result['ids']
 
             # Break if no cursor
@@ -568,21 +568,21 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateLinkedAccounts(self, authUserId, **kwargs):
         twitter         = kwargs.pop('twitter', None)
-        twitterAuth     = kwargs.pop('twitter_auth', None)
+        twitterAuth     = kwargs.pop('twitterAuth', None)
         facebook        = kwargs.pop('facebook', None)
-        facebookAuth    = kwargs.pop('facebook_auth', None)
+        facebookAuth    = kwargs.pop('facebookAuth', None)
         
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
-        
+
         # Alert Facebook asynchronously
-        if facebookAuth is not None:
-            kwargs = {'facebookToken': facebookAuth.token}
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, kwargs])
+        if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
+            kwargs = {'facebookToken': facebookAuth.facebook_token}
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId], kwargs=kwargs)
         
         # Alert Twitter asynchronously
-        if twitterAuth is not None:
-            kwargs = {'twitterKey': twitterAuth.key, 'twitterSecret': twitterAuth.secret}
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, kwargs])
+        if isinstance(twitterAuth, Schema) and twitterAuth.twitter_key is not None:
+            kwargs = {'twitterKey': twitterAuth.twitter_key, 'twitterSecret': twitterAuth.twitter_secret}
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId], kwargs=kwargs)
         
         return True
     
@@ -608,7 +608,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
-        
+
         ### TODO: Deprecate passing parameter "twitterIds"
         
         account   = self._accountDB.getAccount(authUserId)
