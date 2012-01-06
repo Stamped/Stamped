@@ -37,7 +37,7 @@
 
 - (void)showContents {
   self.descriptionLabel.text = [detailedEntity_.address stringByReplacingOccurrencesOfString:@", "
-                                                                                withString:@"\n"];
+                                                                                  withString:@"\n"];
   [self setupMainActionsContainer];
   [self setupMapView];
   [self setupSectionViews];

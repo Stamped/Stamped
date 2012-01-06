@@ -38,32 +38,35 @@
 
 #pragma mark - View lifecycle
 
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  if (self.ratingImageView.image)
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame,
+                                               CGRectGetWidth(self.ratingImageView.frame) + 8, 0);
+}
+
 - (void)showContents {
   if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) {
     self.descriptionLabel.text = detailedEntity_.subtitle;
   } else {
-    NSNumber*  hours = [NSNumber numberWithFloat: detailedEntity_.length.floatValue / 3600.f];
+    NSNumber*  hours = [NSNumber numberWithFloat:detailedEntity_.length.floatValue / 3600.f];
     CGFloat fMinutes = hours.floatValue;
     hours = [NSNumber numberWithInt:floor(hours.floatValue)];
     
     while (fMinutes > 1)
       fMinutes -= 1.f;
+
     NSNumber* minutes = [NSNumber numberWithFloat:fMinutes * 60.f];
     
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
 
-  if (!detailedEntity_.rating || [detailedEntity_.rating isEqualToString:@"UR"]) {
-    CGRect frame = self.descriptionLabel.frame;
-    frame.origin.x = self.titleLabel.frame.origin.x;
-    self.descriptionLabel.frame = frame;
-  } else {
-    self.ratingImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"rating_%@", detailedEntity_.rating]];    
+  if (detailedEntity_.rating && ![detailedEntity_.rating isEqualToString:@"UR"]) {
+    self.ratingImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"rating_%@", detailedEntity_.rating]];
     [self.ratingImageView sizeToFit];
-
-    CGRect frame = self.descriptionLabel.frame;
-    frame.origin.x = CGRectGetMaxX(self.ratingImageView.frame) + 6.f;
-    self.descriptionLabel.frame = frame;
+    CGRect frame = ratingImageView_.frame;
+    frame.origin.y = CGRectGetMaxY(self.titleLabel.frame);
+    ratingImageView_.frame = frame;
   }
 
   if (detailedEntity_.image && detailedEntity_.image.length > 0) {
@@ -76,6 +79,7 @@
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
+  [self.view setNeedsLayout];
 }
 
 - (void)viewDidLoad {
@@ -119,8 +123,8 @@
 - (void)setupMainActionsContainer {
   if (detailedEntity_.fandangoURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
   } else if (detailedEntity_.itunesURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;

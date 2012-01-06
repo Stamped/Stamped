@@ -31,18 +31,16 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if ([detailedEntity_.subcategory isEqualToString:@"artist"])
-      self.descriptionLabel.text = detailedEntity_.subcategory;
-
-  if ([detailedEntity_.subcategory isEqualToString:@"album"]
-      || [detailedEntity_.subcategory isEqualToString:@"song"]) {
+  if ([detailedEntity_.subcategory isEqualToString:@"artist"]) {
+    self.descriptionLabel.text = detailedEntity_.subcategory;
+  } else if ([detailedEntity_.subcategory isEqualToString:@"album"] || [detailedEntity_.subcategory isEqualToString:@"song"]) {
     if (!detailedEntity_.artist)
       self.descriptionLabel.text = detailedEntity_.subcategory;
     else
       self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", detailedEntity_.artist];
   }
 
-  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     self.imageView.imageURL = detailedEntity_.image;
     self.imageView.delegate = self;
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
@@ -58,8 +56,8 @@
   [super viewDidLoad];
   self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, 480);
   self.mainActionButton.hidden = YES;
-  self.mainActionLabel.hidden  = YES;
-  self.mainActionsView.hidden  = YES;
+  self.mainActionLabel.hidden = YES;
+  self.mainActionsView.hidden = YES;
 }
 
 - (void)viewDidUnload {

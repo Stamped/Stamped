@@ -54,6 +54,7 @@
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
+  [super viewDidLayoutSubviews];
 }
 
 - (void)viewDidLoad {

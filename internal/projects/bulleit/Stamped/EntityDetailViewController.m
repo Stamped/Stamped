@@ -36,6 +36,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @property (nonatomic, retain) UIButton* addFavoriteButton;
 @property (nonatomic, retain) UIActivityIndicatorView* spinner;
 
+- (void)commonInit;
 - (void)addTodoBar;
 - (NSAttributedString*)todoAttributedString:(User*)user;
 - (void)todoBarTapped:(UITapGestureRecognizer*)recognizer;
@@ -68,8 +69,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     entityObject_ = [entity retain];
-    [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary alloc] init];
+
+    [self commonInit];
   }
   return self;
 }
@@ -78,10 +79,15 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     searchResult_ = [searchResult retain];
-    [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary alloc] init];
+    [self commonInit];
   }
   return self;
+}
+
+- (void)commonInit {
+  [self loadEntityDataFromServer];
+  sectionsDict_ = [[NSMutableDictionary alloc] init];
+  
 }
 
 - (void)dealloc {
@@ -157,7 +163,34 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   // Default does nothing. Override in subclasses.
 }
 
+- (void)viewDidLayoutSubviews {
+  if (titleLabel_.text.length > 60) {
+    self.titleLabel.text = [self.titleLabel.text substringToIndex:55];
+    self.titleLabel.text = [self.titleLabel.text stringByAppendingString:@"…"];
+  }
+
+  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(270, MAXFLOAT)];
+  titleLabel_.frame = CGRectMake(15, 10,
+                                 titleSize.width,
+                                 titleSize.height);
+  
+  [categoryImageView_ sizeToFit];
+  categoryImageView_.frame = CGRectMake(305 - CGRectGetWidth(categoryImageView_.frame),
+                                        16,
+                                        CGRectGetWidth(categoryImageView_.frame),
+                                        CGRectGetHeight(categoryImageView_.frame));
+
+  CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(150, MAXFLOAT)];
+  descriptionLabel_.frame = CGRectMake(15, CGRectGetMaxY(titleLabel_.frame) - 1,
+                                       size.width, size.height);
+}
+
 - (void)ensureTitleLabelHeight {
+
+  return;
+  
+  
+  
   if ([self lineCountOfLabel:self.titleLabel] > 1) {
     CGFloat newHeight = self.titleLabel.font.lineHeight * 2 + 8;
     CGFloat delta = newHeight - self.titleLabel.frame.size.height;
@@ -201,6 +234,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [self.view.layer insertSublayer:backgroundGradient atIndex:0];
   [backgroundGradient release];
 
+  titleLabel_.numberOfLines = 0;
+  titleLabel_.adjustsFontSizeToFitWidth = NO;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   if (entityObject_) {
@@ -208,6 +243,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   } else if (searchResult_) {
     titleLabel_.text = searchResult_.title;
   }
+
+  descriptionLabel_.numberOfLines = 0;
+  descriptionLabel_.adjustsFontSizeToFitWidth = NO;
   descriptionLabel_.text = nil;
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   mainActionButton_.layer.masksToBounds = YES;
