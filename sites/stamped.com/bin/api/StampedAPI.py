@@ -696,7 +696,7 @@ class StampedAPI(AStampedAPI):
         
         facebook = FacebookAccountSchema(facebook_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
-
+    
     
     """
     #     #                             
@@ -2425,7 +2425,7 @@ class StampedAPI(AStampedAPI):
         # Enrich stamp
         if stampId is not None:
             entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
-            favorite.stamp  = self._enrichStampObjects(favorite.stamp, \
+            favorite.stamp = self._enrichStampObjects(favorite.stamp, \
                                 authUserId=authUserId, entityIds=entityIds)
         
         # Increment user stats by one

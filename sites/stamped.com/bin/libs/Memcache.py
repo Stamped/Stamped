@@ -18,6 +18,8 @@ class Memcache(object):
     """
         Lightweight wrapper around pylibmc memcached client which handles client 
         initialization by obtaining the list of memcached servers from EC2 tags.
+        Also handles importing / exporting from / to our ORM, Schema, and 
+        pylibmc's basic, pickleable data types.
     """
     
     def __init__(self, binary=False, behaviors=None):
