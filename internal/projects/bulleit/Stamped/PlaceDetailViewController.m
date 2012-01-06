@@ -41,6 +41,7 @@
   [self setupMainActionsContainer];
   [self setupMapView];
   [self setupSectionViews];
+  [self.view setNeedsLayout];
 }
 
 - (void)viewDidLoad {
