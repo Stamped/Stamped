@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import utils, ec2_utils, pylibmc
-from schemas import Schema
+from schema import Schema
 
 # TODO: Manipulating cache items via subscript-style syntax (e.g., cache[key]) 
 # is currently the only way pickling import/export conversion will take place 
