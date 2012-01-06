@@ -465,14 +465,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">ratingView</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="541365456"/>
-					</object>
-					<int key="connectionID">37</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">shelfImageView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="51401604"/>
@@ -486,6 +478,14 @@
 						<reference key="destination" ref="947342865"/>
 					</object>
 					<int key="connectionID">43</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">ratingImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="541365456"/>
+					</object>
+					<int key="connectionID">44</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -631,7 +631,7 @@
 						<int key="objectID">36</int>
 						<reference key="object" ref="541365456"/>
 						<reference key="parent" ref="582508261"/>
-						<string key="objectName">Affiliate Logo Image</string>
+						<string key="objectName">Rating Image</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">39</int>
@@ -741,7 +741,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">43</int>
+			<int key="maxID">44</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -857,7 +857,7 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>affiliateLogoView</string>
-							<string>ratingView</string>
+							<string>ratingImageView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -870,7 +870,7 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>affiliateLogoView</string>
-							<string>ratingView</string>
+							<string>ratingImageView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -879,7 +879,7 @@
 								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">ratingView</string>
+								<string key="name">ratingImageView</string>
 								<string key="candidateClassName">UIImageView</string>
 							</object>
 						</object>
