@@ -564,9 +564,11 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
-      [UIView animateWithDuration:0.25 animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
-                                                     if (self.imageView != nil && self.imageView.hidden == NO)                                        
-                                                         [vc moveArrowViewIfBehindImageView:self.imageView];}];
+      [UIView animateWithDuration:0.25 animations:^{
+        vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
+        if (self.imageView != nil && self.imageView.hidden == NO)                                        
+          [vc moveArrowViewIfBehindImageView:self.imageView];
+      }];
     }
   }
   
@@ -616,13 +618,12 @@ static const CGFloat kTodoBarHeight = 44.0;
   
   NSString* key = @"entity_id";
   id objectForKey = nil;
-  if (entityObject_) 
+  if (entityObject_) {
     objectForKey = entityObject_.entityID;
-  else if (searchResult_) {
+  } else if (searchResult_) {
     if (searchResult_.entityID) {
       objectForKey = searchResult_.entityID;
-    } 
-    else if (searchResult_.searchID) {
+    } else if (searchResult_.searchID) {
       key = @"search_id";
       objectForKey = searchResult_.searchID;
     }
@@ -653,7 +654,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
   if (self.imageView.image) {
     controller.image = self.imageView.image;
-  } else if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  } else if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     controller.imageURL = detailedEntity_.image;
   } else {
     [controller release];
