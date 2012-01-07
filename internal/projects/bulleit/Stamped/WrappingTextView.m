@@ -66,7 +66,6 @@
   CGPathAddRect(path, NULL, topRect);
 
   NSAttributedString* string = [self attributedStringForText];
-  NSLog(@"string: %@", string);
 
   // Determine how much of the string fits in the top rect.
   CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);  
