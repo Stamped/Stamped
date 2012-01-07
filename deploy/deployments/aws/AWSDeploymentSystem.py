@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals
 import re, os, time, utils
@@ -118,15 +118,12 @@ class AWSDeploymentSystem(DeploymentSystem):
             {
                 'name' : 'work', 
                 'desc' : 'Work security group', 
-                'rules' : [
-                    #{
-                    #    'ip_protocol' : 'tcp', 
-                    #    'from_port'   : 5672, 
-                    #    'to_port'     : 5672, 
-                    #    'cidr_ip'     : '0.0.0.0/0', 
-                    # TODO: cidr_ip is a security group
-                    #}, 
-                ], 
+                'rules' : [ ], 
+            }, 
+            {
+                'name' : 'mem', 
+                'desc' : 'Memcached security group', 
+                'rules' : [ ], 
             }, 
             {
                 'name' : 'temp', 
