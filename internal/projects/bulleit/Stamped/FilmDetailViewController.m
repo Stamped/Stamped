@@ -57,7 +57,6 @@
       fMinutes -= 1.f;
 
     NSNumber* minutes = [NSNumber numberWithFloat:fMinutes * 60.f];
-    
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
 
@@ -147,7 +146,7 @@
 
 - (void)setupSectionViews {
   // Synopsis
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
@@ -209,13 +208,13 @@
   self.imageView.contentMode = UIViewContentModeScaleAspectFit;
   self.imageView.layer.backgroundColor = [UIColor clearColor].CGColor;
   self.imageView.hidden = NO;
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius = 4.0;
+  self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
   CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
   self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
-  
+
   [self setupMainActionsContainer];
   [self setupSectionViews];
 }

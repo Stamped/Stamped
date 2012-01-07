@@ -130,7 +130,7 @@ static const NSUInteger kSpaceHeight = 10;
 - (void)expand {
   CGFloat newHeight = 40.f + [self contentHeight] + kSpaceHeight;
   if (self.footerView)
-    newHeight += self.footerView.frame.size.height - kSpaceHeight;
+    newHeight += self.footerView.frame.size.height - (kSpaceHeight * 2);
   if (!self.isSilent)
     [self.delegate collapsibleViewController:self willChangeHeightBy:newHeight - self.view.bounds.size.height];
   self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
@@ -276,7 +276,7 @@ static const NSUInteger kSpaceHeight = 10;
   
   if (self.imageView && self.imageView.hidden == NO) {
     CGRect imageViewFrame = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
-    previewRectSize = CGSizeMake(CGRectGetMinX(self.imageView.frame) - 25.0, CGRectGetMaxY(imageViewFrame) + 12.0);
+    previewRectSize = CGSizeMake(CGRectGetMinX(self.imageView.frame) - 20.0, CGRectGetMaxY(imageViewFrame) + 10.0);
   }
   
   WrappingTextView* wrapText = [[WrappingTextView alloc] initWithFrame:frame text:text];
@@ -374,8 +374,8 @@ static const NSUInteger kSpaceHeight = 10;
   }
 }
 
-- (float)contentHeight {
-  float contentHeight = 0.f;
+- (CGFloat)contentHeight {
+  CGFloat contentHeight = 0.0f;
   
   if (!contentDict_ || contentDict_.count == 0)
     return 0.f;

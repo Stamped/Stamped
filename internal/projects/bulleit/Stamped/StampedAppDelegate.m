@@ -69,7 +69,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [swipeRecognizer release];
   self.window.rootViewController = self.navigationController;
   gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
-  gridView_.alpha = 1;
+  gridView_.alpha = 0;
   
   UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                action:@selector(handleGridTap:)];

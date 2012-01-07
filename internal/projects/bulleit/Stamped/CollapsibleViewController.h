@@ -29,7 +29,6 @@
   NSMutableArray* stamps;
 }
 
-//- (void)setIsCollapsed:(BOOL)collapsed;
 - (void)collapse;
 - (void)expand;
 - (void)collapseAnimated;
@@ -45,7 +44,7 @@
 - (void)addNumberedListWithValues:(NSArray*)values;
 - (void)addImagesForStamps:(NSSet*)stamps;
 - (void)addContent:(id)content forKey:(NSString*)key;
-- (float)contentHeight;
+- (CGFloat)contentHeight;
 
 @property (nonatomic, retain) IBOutlet UIView* headerView;
 @property (nonatomic, retain) IBOutlet UIView* footerView;
