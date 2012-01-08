@@ -46,7 +46,6 @@
 						<string key="NSFrame">{{0, 44}, {320, 416}}</string>
 						<reference key="NSSuperview" ref="380805490"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<object class="NSColor" key="IBUIBackgroundColor" id="806478777">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
@@ -300,7 +299,6 @@
 						<string key="NSFrame">{{38, 21}, {262, 21}}</string>
 						<reference key="NSSuperview" ref="419510210"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:311</string>
 						<reference key="IBUIBackgroundColor" ref="806478777"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -367,7 +365,6 @@
 						<string key="NSFrame">{{38, 29}, {267, 21}}</string>
 						<reference key="NSSuperview" ref="732810004"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:311</string>
 						<reference key="IBUIBackgroundColor" ref="806478777"/>
 						<bool key="IBUIOpaque">NO</bool>

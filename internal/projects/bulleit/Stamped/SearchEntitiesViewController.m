@@ -767,6 +767,7 @@ typedef enum {
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   if (currentResultType_ == ResultTypeFast) {
     self.searchField.text = [(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row] title];
+    self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
     [self sendSearchRequest];
     return;
   }
