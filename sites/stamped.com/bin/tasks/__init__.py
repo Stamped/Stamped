@@ -21,6 +21,14 @@ def invoke(task, args=None, kwargs=None, **options):
         into problems contacting the Celery task broker.
     """
     
+    #msg = "INVOKE: %s" % task
+    #utils.log()
+    #utils.log()
+    #utils.log(msg)
+    #utils.log()
+    #utils.log()
+    #logs.debug(msg)
+    
     assert isinstance(task, BaseTask)
     global __broker_status__
     

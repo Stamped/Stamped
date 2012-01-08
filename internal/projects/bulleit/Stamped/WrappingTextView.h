@@ -10,10 +10,6 @@
 #import <CoreText/CoreText.h>
 
 @interface WrappingTextView : UIView {
-  CGSize previewRectSize;
-  NSUInteger frameCount;
-  NSString* text;
-  CGFloat contentHeight;
   CGPathRef textPath_;
 }
 

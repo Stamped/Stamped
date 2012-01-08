@@ -2,27 +2,25 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, logs, re
 import pymongo
 
-from datetime import datetime
-from utils import lazyProperty
+from datetime                       import datetime
+from utils                          import lazyProperty
+from Schemas                        import *
 
-from Schemas import *
-
-from AMongoCollection import AMongoCollection
-from MongoUserLikesCollection import MongoUserLikesCollection
-from MongoStampLikesCollection import MongoStampLikesCollection
-from MongoUserStampsCollection import MongoUserStampsCollection
-from MongoInboxStampsCollection import MongoInboxStampsCollection
-from MongoDeletedStampCollection import MongoDeletedStampCollection
-from MongoCreditGiversCollection import MongoCreditGiversCollection
-from MongoCreditReceivedCollection import MongoCreditReceivedCollection
-
-from api.AStampDB import AStampDB
+from api.AStampDB                   import AStampDB
+from AMongoCollection               import AMongoCollection
+from MongoUserLikesCollection       import MongoUserLikesCollection
+from MongoStampLikesCollection      import MongoStampLikesCollection
+from MongoUserStampsCollection      import MongoUserStampsCollection
+from MongoInboxStampsCollection     import MongoInboxStampsCollection
+from MongoDeletedStampCollection    import MongoDeletedStampCollection
+from MongoCreditGiversCollection    import MongoCreditGiversCollection
+from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
 
 class MongoStampCollection(AMongoCollection, AStampDB):
     
@@ -35,10 +33,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                         ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('stats.stamp_num', pymongo.ASCENDING)])
-
-        # Define patterns
-        self.user_regex  = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-        self.reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
     
     ### PUBLIC
     
@@ -280,6 +274,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         for stampId in stampIds:
             documentIds.append(self._getObjectIdFromString(stampId))
         result = self._removeMongoDocuments(documentIds)
-
+        
         return result     
 

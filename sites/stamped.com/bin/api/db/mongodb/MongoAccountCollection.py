@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, auth, utils, logs
@@ -96,23 +96,44 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document = self._collection.find_one({"screen_name_lower": screenName})
         return self._convertFromMongo(document)
 
-    def updateLinkedAccounts(self, userId, data):
-        logs.debug('DATA: %s' % data)
-        fields = {}
-        if 'twitter_id' in data and data['twitter_id']:
-            fields['linked_accounts.twitter.twitter_id'] = data['twitter_id']
-        if 'twitter_screen_name' in data and data['twitter_screen_name']:
-            fields['linked_accounts.twitter.twitter_screen_name'] =\
-                data['twitter_screen_name']
-        if 'facebook_id' in data and data['facebook_id']:
-            fields['linked_accounts.facebook.facebook_id'] = data['facebook_id']
-        if 'facebook_name' in data and data['facebook_name']:
-            fields['linked_accounts.facebook.facebook_name'] = \
-            data['facebook_name']
-        if 'facebook_screen_name' in data and data['facebook_screen_name']:
-            fields['linked_accounts.facebook.facebook_screen_name'] = \
-                data['facebook_screen_name']
+    def updateLinkedAccounts(self, userId, twitter=None, facebook=None):
         
+        if twitter is not None:
+            twitter_data = twitter.value
+        
+        if facebook is not None:
+            facebook_data = facebook.value
+
+        ### TODO: Derive valid_twitter/facebook from schema
+
+        valid_twitter = [
+            'twitter_id',
+            'twitter_screen_name',
+            'twitter_token',
+            'twitter_alerts_sent',
+        ]
+
+        valid_facebook = [
+            'facebook_id',
+            'facebook_name',
+            'facebook_screen_name',
+            'facebook_token',
+            'facebook_expire',
+            'facebook_alerts_sent',
+        ]
+        
+        fields = {}
+
+        # Twitter
+        for k, v in twitter_data.iteritems():
+            if k in valid_twitter and v is not None:
+                fields['linked_accounts.twitter.%s' % k] = v
+            
+        # Facebook
+        for k, v in facebook_data.iteritems():
+            if k in valid_facebook and v is not None:
+                fields['linked_accounts.facebook.%s' % k] = v
+            
         if len(fields) > 0:
             self._collection.update(
                 {'_id': self._getObjectIdFromString(userId)},
@@ -127,14 +148,17 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 'linked_accounts.facebook.facebook_id': 1,
                 'linked_accounts.facebook.facebook_name': 1,
                 'linked_accounts.facebook.facebook_screen_name': 1,
-                'linked_accounts.facebook.facebook_alerts_sent': 1,
+                'linked_accounts.facebook.facebook_token': 1,
+                'linked_accounts.facebook.facebook_expire': 1,
+                # 'linked_accounts.facebook.facebook_alerts_sent': 1,
             }
 
         if linkedAccount == 'twitter':
             fields = {
                 'linked_accounts.twitter.twitter_id': 1,
                 'linked_accounts.twitter.twitter_screen_name': 1,
-                'linked_accounts.twitter.twitter_alerts_sent': 1,
+                'linked_accounts.twitter.twitter_token': 1,
+                # 'linked_accounts.twitter.twitter_alerts_sent': 1,
             }
 
         self._collection.update(

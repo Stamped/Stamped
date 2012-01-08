@@ -3,7 +3,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 from httpapi.v0.helpers import *
@@ -141,11 +141,20 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def linked_accounts(request):
-    authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPLinkedAccounts(), request)
-    linked      = schema.exportSchema(LinkedAccounts())
-    
-    result      = stampedAPI.updateLinkedAccounts(authUserId, linked)
+    authUserId      = checkOAuth(request)
+    schema          = parseRequest(HTTPLinkedAccounts(), request)
+
+    linked          = schema.exportSchema(LinkedAccounts())
+    twitterAuth     = schema.exportSchema(TwitterAuthSchema())
+    facebookAuth    = schema.exportSchema(FacebookAuthSchema())
+
+    data = {
+        'twitter': linked.twitter,
+        'facebook': linked.facebook,
+        'twitterAuth': twitterAuth,
+        'facebookAuth': facebookAuth,
+    }
+    stampedAPI.updateLinkedAccounts(authUserId, **data)
     
     return transformOutput(True)
 

@@ -1,4 +1,24 @@
 
+brew install memcached libmemcached
+ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
+
+apt-get install memcached
+wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install
+pip install pylibmc
+
+Bieber:
+    * limit activity notifications to last N or so
+    * collapse adjacent activity items into each other
+
+
+* stamp image async resizing
+* update stamps/create API for async image uploads
+* memcached
+
+* sell alienware
+* sell buddha
+
+
 * @cache decorator
     * pickler
     * in-memory vs disk
@@ -8,7 +28,6 @@
     * clear entire cache
 
 * app companies being returned as 'artist'
-* go through StampedAPI and audit async priorities
 * debug distributing reads to secondaries
 
 * cleanup invocation on ./deploy.py, supporting suboptions and subcommands

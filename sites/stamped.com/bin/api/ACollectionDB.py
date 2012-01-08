@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@Stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped, Inc."
+__copyright__ = "Copyright (c) 2012 Stamped, Inc."
 __license__   = "TODO"
 
 import Globals

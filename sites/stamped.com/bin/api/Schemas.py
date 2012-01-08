@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import copy
@@ -79,16 +79,23 @@ class TwitterAccountSchema(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
-        self.twitter_token          = SchemaElement(basestring)
         self.twitter_alerts_sent    = SchemaElement(bool)
+
+class TwitterAuthSchema(Schema):
+    def setSchema(self):
+        self.twitter_key            = SchemaElement(basestring)
+        self.twitter_secret         = SchemaElement(basestring)
 
 class FacebookAccountSchema(Schema):
     def setSchema(self):
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
-        self.facebook_token         = SchemaElement(basestring)
         self.facebook_alerts_sent   = SchemaElement(bool)
+
+class FacebookAuthSchema(Schema):
+    def setSchema(self):
+        self.facebook_token         = SchemaElement(basestring)
 
 class DevicesSchema(Schema):
     def setSchema(self):
@@ -305,6 +312,7 @@ class Comment(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 
+
 # ######## #
 # Activity #
 # ######## #
@@ -342,7 +350,7 @@ class Alert(Schema):
         self.user_id            = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
-        
+
 
 # ######## #
 # Entities #

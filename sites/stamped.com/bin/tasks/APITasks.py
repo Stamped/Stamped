@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
@@ -32,9 +32,50 @@ def add(x, y):
     return x + y
 
 @task(ignore_result=True)
-def addStamp(user_id, stamp_id):
-    stampedAPI = getStampedAPI()
-    followers  = stampedAPI._friendshipDB.getFollowers(user_id)
-    
-    stampedAPI._stampDB.addInboxStampReference(followers, stamp_id)
+def addStamp(*args, **kwargs):
+    getStampedAPI().addStampAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addResizedStampImages(*args, **kwargs):
+    getStampedAPI().addResizedStampImagesAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def customizeStamp(*args, **kwargs):
+    getStampedAPI().customizeStampAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def updateProfileImage(*args, **kwargs):
+    getStampedAPI().updateProfileImageAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addAccount(*args, **kwargs):
+    getStampedAPI().addAccountAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def updateAccountSettings(*args, **kwargs):
+    getStampedAPI().updateAccountSettingsAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def alertFollowersFromTwitter(*args, **kwargs):
+    getStampedAPI().alertFollowersFromTwitterAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def alertFollowersFromFacebook(*args, **kwargs):
+    getStampedAPI().alertFollowersFromFacebookAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addFriendship(*args, **kwargs):
+    getStampedAPI().addFriendshipAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def removeFriendship(*args, **kwargs):
+    getStampedAPI().removeFriendshipAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def inviteFriend(*args, **kwargs):
+    getStampedAPI().inviteFriendAsync(*args, **kwargs)
+
+@task(ignore_result=True)
+def addComment(*args, **kwargs):
+    getStampedAPI().addCommentAsync(*args, **kwargs)
 

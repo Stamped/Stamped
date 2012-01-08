@@ -11,6 +11,7 @@
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
+#import "STLoadingMoreTableViewCell.h"
 #import "Util.h"
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
@@ -21,14 +22,16 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)loadRelationshipsFromNetwork;
 - (void)loadUserDataFromNetwork;
 
-@property (nonatomic, copy) NSArray* userIDsToBeFetched;
-@property (nonatomic, copy) NSArray* peopleArray;
+@property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
+@property (nonatomic, retain) NSMutableArray* peopleArray;
+@property (nonatomic, assign) BOOL loadingNextChunk;
 @end
 
 @implementation RelationshipsViewController
 
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize peopleArray = peopleArray_;
+@synthesize loadingNextChunk = loadingNextChunk_;
 @synthesize user = user_;
 @synthesize tableView = tableView_;
 
@@ -41,11 +44,11 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userIDsToBeFetched = nil;
   self.peopleArray = nil;
   self.user = nil;
   self.tableView = nil;
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super dealloc];
 }
 
@@ -74,12 +77,11 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)viewDidUnload {
-  [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userIDsToBeFetched = nil;
   self.peopleArray = nil;
-  self.user = nil;
   self.tableView = nil;
+  [super viewDidUnload];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -102,13 +104,24 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.peopleArray.count;
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  NSInteger count = self.peopleArray.count;
+  if (self.userIDsToBeFetched.count > 0)
+    ++count;
+
+  return count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"Cell";
+  if (indexPath.row == self.peopleArray.count) {
+    if (!loadingNextChunk_)
+      [self loadUserDataFromNetwork];
+
+    loadingNextChunk_ = YES;
+    return [STLoadingMoreTableViewCell cell];
+  }
   
+  static NSString* CellIdentifier = @"Cell";
   PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
@@ -136,7 +149,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     if (error) {
       NSLog(@"Problem parsing response JSON: %@", error);
     } else {
-      self.userIDsToBeFetched = (NSArray*)[responseObj objectForKey:@"user_ids"];
+      self.userIDsToBeFetched = [NSMutableArray arrayWithArray:[responseObj objectForKey:@"user_ids"]];
       if (userIDsToBeFetched_.count > 0) {
         [self loadUserDataFromNetwork];
       } else {
@@ -152,10 +165,21 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser || [objectLoader.resourcePath rangeOfString:kUserLookupPath].location == NSNotFound)
     return;
+
+  if (!self.peopleArray)
+    self.peopleArray = [NSMutableArray array];
   
-  self.userIDsToBeFetched = nil;
-  self.peopleArray = objects;
+  NSArray* sortedArray = [objects sortedArrayUsingComparator:(NSComparator)^(id a, id b) {
+    NSNumber* first = [NSNumber numberWithUnsignedInteger:[self.userIDsToBeFetched indexOfObject:[(User*)a userID]]];
+    NSNumber* second = [NSNumber numberWithUnsignedInteger:[self.userIDsToBeFetched indexOfObject:[(User*)b userID]]];
+    return [first compare:second];
+  }];
+  [self.peopleArray addObjectsFromArray:sortedArray];
+  NSUInteger userIDCount = userIDsToBeFetched_.count;
+  NSArray* subArray = [userIDsToBeFetched_ subarrayWithRange:NSMakeRange(0, MIN(100, userIDCount))];
+  [self.userIDsToBeFetched removeObjectsInArray:subArray];
   [self.tableView reloadData];
+  loadingNextChunk_ = NO;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -170,6 +194,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row >= self.peopleArray.count)
+    return;
+
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = [self.peopleArray objectAtIndex:indexPath.row];
   [self.navigationController pushViewController:profileViewController animated:YES];

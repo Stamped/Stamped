@@ -3,10 +3,10 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, pprint
 from AStampedAPITestCase import *
 
 # ######## #
@@ -48,8 +48,10 @@ class StampedAPIActivityShow(StampedAPIActivityTest):
         data = { 
             "oauth_token": self.tokenA['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 2)
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 2), 
+        ])
 
 class StampedAPIActivityMentions(StampedAPIActivityTest):
     def test_show_stamp_mention(self):
@@ -65,9 +67,11 @@ class StampedAPIActivityMentions(StampedAPIActivityTest):
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 2)
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 2), 
+        ])
+        
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
@@ -81,14 +85,17 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
             "credit": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-
+        
         path = "activity/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 2)
-
+        #utils.log(pprint.pformat(result))
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 2), 
+        ])
+        
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
@@ -102,15 +109,17 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             "credit": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-
+        
         path = "activity/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 2)
-        self.assertTrue(result[0]['genre'] == 'restamp')
-
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 2), 
+                   lambda x: self.assertTrue(x[0]['genre'] == 'restamp'), 
+        ])
+        
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 

@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
@@ -64,10 +64,16 @@ class StatsDSink(AStatsSink):
     def increment(self, name, sample_rate=1):
         logs.debug("[%s-%s:%d] increment: %s" % (self, self.statsd.addr[0], self.statsd.addr[1], name))
         
+        if 0 == sample_rate:
+            return
+        
         return self.statsd.increment(name, sample_rate)
     
     def decrement(self, name, sample_rate=1):
         logs.debug("[%s-%s:%d] decrement: %s" % (self, self.statsd.addr[0], self.statsd.addr[1], name))
+        
+        if 0 == sample_rate:
+            return
         
         return self.statsd.decrement(name, sample_rate)
 

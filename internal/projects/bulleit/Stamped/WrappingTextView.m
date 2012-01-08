@@ -11,7 +11,7 @@
 
 @interface WrappingTextView () 
 
-- (CGPathRef)createPath;
+- (CGMutablePathRef)createPath;
 - (CGRect)resizeBottomRect:(CGRect)bottomRect topRect:(CGRect)topRect;
 - (NSAttributedString*)attributedStringForText;
   
@@ -25,10 +25,7 @@
 - (id)initWithFrame:(CGRect)aRect text:(NSString*)newText {
   self = [super initWithFrame:aRect];
   if (self) {
-    previewRectSize_ = CGSizeMake(0, 0);
-    frameCount = 1;
     self.backgroundColor = [UIColor clearColor];
-    contentHeight = 0.f;
     text_ = newText;
   }
   return self;
@@ -39,7 +36,7 @@
   [super dealloc];
 }
 
-- (CGPathRef)createPath {
+- (CGMutablePathRef)createPath {
   // Drawing origin is at bottom left.
   CGMutablePathRef path = CGPathCreateMutable();
   CGRect topRect = CGRectMake(0, self.frame.size.height - self.previewRectSize.height,
@@ -50,8 +47,7 @@
   
   topRect = CGRectMake(0, self.frame.size.height - self.previewRectSize.height,
                        self.previewRectSize.width, self.previewRectSize.height);
-  
-  
+
   // Draw the path clockwise starting from upper left.
   CGPathMoveToPoint(path, NULL, CGRectGetMinX(botRect), CGRectGetMaxY(topRect));
   CGPathAddLineToPoint(path, NULL, CGRectGetMaxX(topRect), CGRectGetMaxY(topRect));
@@ -61,7 +57,7 @@
   CGPathAddLineToPoint(path, NULL, CGRectGetMinX(botRect), CGRectGetMinY(botRect));
   CGPathAddLineToPoint(path, NULL, CGRectGetMinX(botRect), CGRectGetMaxY(topRect));
   CGPathCloseSubpath(path);
-  
+
   return path;
 }
 
@@ -81,18 +77,17 @@
   CGPathRelease(path);
   CFRange fitRange;
   CFRange botRange = CFRangeMake(topRectRange.length, 0);
-  
+
   CGSize suggestedSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, 
                                                                       botRange,
-                                                                      nil,
-                                                                      CGSizeMake(botRect.size.width, HUGE_VAL),
+                                                                      NULL,
+                                                                      CGSizeMake(botRect.size.width, CGFLOAT_MAX),
                                                                       &fitRange);
   CFRelease(framesetter);
 
   CGRect resizedBottomRect = botRect;
   resizedBottomRect.size.height = ceilf(suggestedSize.height);
-  resizedBottomRect.size.height += resizedBottomRect.size.height * 0.1;
-  
+
   CGFloat newHeight = topRect.size.height + resizedBottomRect.size.height;
   CGRect newFrame = self.frame;
   newFrame.size.height = newHeight;
@@ -127,12 +122,12 @@
 	CGContextScaleCTM(ctx, 1.0, -1.0);
 
   // Create a framesetter and resize the frame to fit the text.
-  NSAttributedString* string = [self attributedStringForText]; 
+  NSAttributedString* string = [self attributedStringForText];
   CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);  
 
   // Finally, draw.
   CTFrameRef theFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, string.length), textPath_, NULL);     
-  CTFrameDraw(theFrame, ctx); 
+  CTFrameDraw(theFrame, ctx);
   
   CFRelease(framesetter); 
   CFRelease(theFrame);

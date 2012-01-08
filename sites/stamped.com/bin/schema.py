@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import copy, logs
@@ -107,7 +107,7 @@ class SchemaElement(object):
         
         if self._default != None:
             self.setElement('[default]', self._default)
-
+        
         self._setDerivative(kwargs.pop('derivedFrom', None), \
                             kwargs.pop('derivedFn', None))
     
@@ -522,6 +522,18 @@ class Schema(SchemaElement):
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
         self._elements = {}
+        
+        if data is None and kwargs is not None:
+            kwargs.pop('required', False)
+            kwargs.pop('overflow', False)
+            kwargs.pop('default', None)
+            kwargs.pop('case', None)
+            kwargs.pop('normalize', True)
+            kwargs.pop('derivedFrom', None)
+            kwargs.pop('derivedFn', None)
+            
+            if len(kwargs) > 0:
+                data = kwargs
         
         self.setSchema()
         self.importData(data)

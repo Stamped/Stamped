@@ -3,7 +3,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
@@ -19,17 +19,17 @@ class StampedAPIBlockTest(AStampedAPITestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
         self.createFriendship(self.tokenA, self.userB)
-
+        
         path = "friendships/blocks/create.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "user_id": self.userB['user_id']
         }
         friend = self.handlePOST(path, data)
-
+        
         self.assertIn('user_id', friend)
         self.assertValidKey(friend['user_id'])
-
+    
     def tearDown(self):
         path = "friendships/blocks/remove.json"
         data = {
@@ -37,10 +37,10 @@ class StampedAPIBlockTest(AStampedAPITestCase):
             "user_id": self.userB['user_id']
         }
         friend = self.handlePOST(path, data)
-
+        
         self.assertIn('user_id', friend)
         self.assertValidKey(friend['user_id'])
-
+        
         self.deleteFriendship(self.tokenA, self.userB)
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
@@ -56,7 +56,7 @@ class StampedAPICheckBlocks(StampedAPIBlockTest):
         }
         result = self.handleGET(path, data)
         self.assertTrue(result)
-
+    
     def test_check_block_fail(self):
         path = "friendships/blocks/check.json"
         data = { 
@@ -65,6 +65,8 @@ class StampedAPICheckBlocks(StampedAPIBlockTest):
         }
         result = self.handleGET(path, data)
         self.assertFalse(result)
+
+"""
 
 class StampedAPIBlocking(StampedAPIBlockTest):
     def test_show_blocks(self):
@@ -85,38 +87,39 @@ class StampedAPIBlockedStamp(StampedAPIBlockTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result['user_ids']), 1)
 
+"""
 
 class StampedAPIBlockComments(StampedAPIBlockTest):
     # A comments on B's stamp
     def test_a_comment_b(self):
         entity = self.createEntity(self.tokenB)
         stamp = self.createStamp(self.tokenB, entity['entity_id'])
-
+        
         with expected_exception():
             self.createComment(self.tokenA, stamp['stamp_id'], "test")
-
+        
         self.deleteStamp(self.tokenB, stamp['stamp_id'])
         self.deleteEntity(self.tokenB, entity['entity_id'])
-        
+    
     # B comments on A's stamp
     def test_b_comment_a(self):
         entity = self.createEntity(self.tokenA)
         stamp = self.createStamp(self.tokenA, entity['entity_id'])
-
+        
         with expected_exception():
             self.createComment(self.tokenB, stamp['stamp_id'], "test")
-
+        
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
-        
+    
     # A mentions B in comment
     def test_a_mentions_b_in_comment(self):
         entity = self.createEntity(self.tokenC)
         stamp = self.createStamp(self.tokenC, entity['entity_id'])
-
+        
         blurb = "Thanks @%s" % self.userB['screen_name']
         comment = self.createComment(self.tokenA, stamp['stamp_id'], blurb)
-
+        
         path = "activity/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
@@ -193,6 +196,7 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
         self.deleteStamp(self.tokenC, stamp['stamp_id'])
         self.deleteEntity(self.tokenC, entity['entity_id'])
 
+"""
 
 class StampedAPIBlockFriendships(StampedAPIBlockTest):
     # A friends B
@@ -340,6 +344,7 @@ class StampedAPIBlockStamps(StampedAPIBlockTest):
         self.deleteStamp(self.tokenB, stamp['stamp_id'])
         self.deleteEntity(self.tokenB, entity['entity_id'])
 
+"""
 
 if __name__ == '__main__':
     main()

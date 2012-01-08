@@ -4,21 +4,21 @@ import Globals
 import pymongo, json, codecs, os, sys, bson, utils, unicodedata
 from subprocess import Popen, PIPE
 
-OLD_HOST        = "ec2-67-202-60-185.compute-1.amazonaws.com"
-NEW_HOST        = "ec2-50-17-151-43.compute-1.amazonaws.com"
-
-old_connection  = pymongo.Connection(OLD_HOST, 27017)
-new_connection  = pymongo.Connection(NEW_HOST, 27017)
-
-old_database    = old_connection['stamped']
-new_database    = new_connection['stamped']
-
-collections     = old_database.collection_names()
-
-if not os.path.isdir('/stamped/tmp/stamped/'):
-   os.makedirs('/stamped/tmp/stamped')
+OLD_HOST            = "10.8.197.216"
+NEW_HOST            = "10.104.7.184"
 
 def main():
+    old_connection  = pymongo.Connection(OLD_HOST, 27017)
+    new_connection  = pymongo.Connection(NEW_HOST, 27017)
+    
+    old_database    = old_connection['stamped']
+    new_database    = new_connection['stamped']
+    
+    collections     = old_database.collection_names()
+    
+    if not os.path.isdir('/stamped/tmp/stamped/'):
+       os.makedirs('/stamped/tmp/stamped')
+    
     for collection in collections:
         print 'RUN %s' % collection
         

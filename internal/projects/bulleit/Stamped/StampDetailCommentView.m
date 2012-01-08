@@ -21,7 +21,7 @@
 - (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UserImageView* userImage;
-@property (nonatomic, readonly) UILabel* nameLabel;
+@property (nonatomic, readonly) TTTAttributedLabel* nameLabel;
 @property (nonatomic, readonly) TTTAttributedLabel* commentLabel;
 @property (nonatomic, readonly) UIButton* deleteButton;
 
@@ -49,6 +49,12 @@
 }
 
 - (void)dealloc {
+  nameLabel_.delegate = nil;
+  nameLabel_ = nil;
+  commentLabel_.delegate = nil;
+  commentLabel_ = nil;
+  deleteButton_ = nil;
+  userImage_ = nil;
   self.delegate = nil;
   self.comment = nil;
   [super dealloc];
@@ -66,9 +72,23 @@
 
   CGFloat minHeight = CGRectGetMaxY(userImage_.frame) + 8;
 
-  nameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  nameLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  nameLabel_.delegate = self;
+  nameLabel_.userInteractionEnabled = YES;
+  nameLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
+  
+  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  [linkAttributes setValue:(id)font
+                    forKey:(NSString*)kCTFontAttributeName];
+  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+                    forKey:(NSString*)kCTForegroundColorAttributeName];
+  CFRelease(font);
+  nameLabel_.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
   nameLabel_.textColor = [UIColor stampedGrayColor];
   nameLabel_.text = comment_.user.screenName;
+  [nameLabel_ addLinkToURL:[NSURL URLWithString:comment_.user.userID]
+                 withRange:NSMakeRange(0, [nameLabel_.text length])];
   nameLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   CGSize stringSize = [nameLabel_ sizeThatFits:CGSizeMake(260, MAXFLOAT)];
   const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
@@ -80,13 +100,6 @@
   commentLabel_.delegate = self;
   commentLabel_.userInteractionEnabled = YES;
   commentLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
-  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 12, NULL);
-  [linkAttributes setValue:(id)font
-                    forKey:(NSString*)kCTFontAttributeName];
-  [linkAttributes setValue:(id)[UIColor stampedBlackColor].CGColor
-                    forKey:(NSString*)kCTForegroundColorAttributeName];
-  CFRelease(font);
   commentLabel_.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
   commentLabel_.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];

@@ -2,7 +2,7 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
+__copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import copy, urllib, urlparse, re, logs, string, time, utils
@@ -193,7 +193,8 @@ class HTTPLinkedAccounts(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
-        self.twitter_token          = SchemaElement(basestring)
+        self.twitter_key            = SchemaElement(basestring)
+        self.twitter_secret         = SchemaElement(basestring)
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
@@ -203,10 +204,13 @@ class HTTPLinkedAccounts(Schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
             schema.twitter_id           = self.twitter_id
             schema.twitter_screen_name  = self.twitter_screen_name
-            schema.twitter_token        = self.twitter_token
             schema.facebook_id          = self.facebook_id
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
+        elif schema.__class__.__name__ == 'TwitterAuthSchema':
+            schema.twitter_key          = self.twitter_key
+            schema.twitter_secret       = self.twitter_secret
+        elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
         else:
             raise NotImplementedError
@@ -343,6 +347,18 @@ class HTTPFindUser(Schema):
     def setSchema(self):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
 
+class HTTPFindTwitterUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+
+class HTTPFindFacebookUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+        self.facebook_token     = SchemaElement(basestring)
+        
+
 # ####### #
 # Invites #
 # ####### #
@@ -418,6 +434,7 @@ class HTTPEntity(Schema):
         
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
+        self.opentable_m_url    = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
         self.itunes_short_url   = SchemaElement(basestring)
         self.netflix_url        = SchemaElement(basestring)
@@ -439,7 +456,8 @@ class HTTPEntity(Schema):
             
             # Place
             self.address        = schema.address
-            self.neighborhood   = schema.neighborhood
+            ### TEMP: Remove this until we get good neighborhood data
+            # self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
             
             if len(schema.address_components) > 0:
@@ -541,9 +559,11 @@ class HTTPEntity(Schema):
             
             # Affiliates
             if schema.rid is not None:
-                self.opentable_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+                self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
                                       schema.rid
-            elif schema.reserveURL is not None:
+                self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+                                      schema.rid
+            if schema.reserveURL is not None:
                 self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                       schema.reserveURL
             
@@ -831,6 +851,8 @@ class HTTPStamp(Schema):
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
 
         else:
+            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
+            
             raise NotImplementedError
         return self
 
@@ -841,6 +863,11 @@ class HTTPStampNew(Schema):
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
 
 class HTTPStampEdit(Schema):
     def setSchema(self):

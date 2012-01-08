@@ -21,11 +21,11 @@
 @implementation FilmDetailViewController
 
 @synthesize affiliateLogoView = affiliateLogoView_;
-@synthesize ratingView = ratingView_;
+@synthesize ratingImageView = ratingImageView_;
 
 - (void)dealloc {
   self.affiliateLogoView = nil;
-  self.ratingView = nil;
+  self.ratingImageView = nil;
   [super dealloc];
 }
 
@@ -38,49 +38,37 @@
 
 #pragma mark - View lifecycle
 
-- (void)showContents {
-  if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) 
-    self.descriptionLabel.text = detailedEntity_.subtitle;
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  if (self.ratingImageView.image)
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame,
+                                               CGRectGetWidth(self.ratingImageView.frame) + 8, 0);
+}
 
-  else {
-    NSNumber*  hours = [NSNumber numberWithFloat: detailedEntity_.length.floatValue / 3600.f];
+- (void)showContents {
+  if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) {
+    self.descriptionLabel.text = detailedEntity_.subtitle;
+  } else {
+    NSNumber*  hours = [NSNumber numberWithFloat:detailedEntity_.length.floatValue / 3600.f];
     CGFloat fMinutes = hours.floatValue;
     hours = [NSNumber numberWithInt:floor(hours.floatValue)];
     
     while (fMinutes > 1)
       fMinutes -= 1.f;
+
     NSNumber* minutes = [NSNumber numberWithFloat:fMinutes * 60.f];
-    
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
-  
-  if (!detailedEntity_.rating || [detailedEntity_.rating isEqualToString:@"UR"]) {
-    CGRect frame = self.descriptionLabel.frame;
-    frame.origin.x = self.titleLabel.frame.origin.x;
-    self.descriptionLabel.frame = frame;
-  }
-  
-  else {
-    if ([detailedEntity_.rating isEqualToString:@"G"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_G"];
-    if ([detailedEntity_.rating isEqualToString:@"PG"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_PG"];
-    if ([detailedEntity_.rating isEqualToString:@"PG-13"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_PG-13"];
-    if ([detailedEntity_.rating isEqualToString:@"R"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_R"];
-    if ([detailedEntity_.rating isEqualToString:@"NC-17"]) 
-      self.ratingView.image = [UIImage imageNamed:@"rating_NC-17"];
-    
-    [self.ratingView sizeToFit];
-    
-    CGRect frame = self.descriptionLabel.frame;
-    frame.origin.x = CGRectGetMaxX(self.ratingView.frame) + 6.f;
-    self.descriptionLabel.frame = frame;
 
+  if (detailedEntity_.rating && ![detailedEntity_.rating isEqualToString:@"UR"]) {
+    self.ratingImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"rating_%@", detailedEntity_.rating]];
+    [self.ratingImageView sizeToFit];
+    CGRect frame = ratingImageView_.frame;
+    frame.origin.y = CGRectGetMaxY(self.titleLabel.frame);
+    ratingImageView_.frame = frame;
   }
 
-  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+  if (detailedEntity_.image && detailedEntity_.image.length > 0) {
     self.imageView.imageURL = detailedEntity_.image;
     self.imageView.delegate = self;
     UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
@@ -90,6 +78,7 @@
     [self setupMainActionsContainer];
     [self setupSectionViews];
   }
+  [self.view setNeedsLayout];
 }
 
 - (void)viewDidLoad {
@@ -103,7 +92,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.affiliateLogoView = nil;
-  self.ratingView = nil;
+  self.ratingImageView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -133,8 +122,8 @@
 - (void)setupMainActionsContainer {
   if (detailedEntity_.fandangoURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
   } else if (detailedEntity_.itunesURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
@@ -157,7 +146,7 @@
 
 - (void)setupSectionViews {
   // Synopsis
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc && detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
@@ -219,13 +208,13 @@
   self.imageView.contentMode = UIViewContentModeScaleAspectFit;
   self.imageView.layer.backgroundColor = [UIColor clearColor].CGColor;
   self.imageView.hidden = NO;
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius = 4.0;
+  self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
   CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
   self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
-  
+
   [self setupMainActionsContainer];
   [self setupSectionViews];
 }

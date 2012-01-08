@@ -11,6 +11,6 @@
 @interface FilmDetailViewController : EntityDetailViewController
 
 @property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
-@property (nonatomic, retain) IBOutlet UIImageView* ratingView;
+@property (nonatomic, retain) IBOutlet UIImageView* ratingImageView;
 
 @end

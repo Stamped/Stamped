@@ -15,5 +15,6 @@
 
 @property (nonatomic, assign) id<UITextFieldDelegate> delegate;
 @property (nonatomic, copy) NSString* text;
+@property (nonatomic, readonly) UILabel* titleLabel;
 
 @end
