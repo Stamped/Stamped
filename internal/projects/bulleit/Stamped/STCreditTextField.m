@@ -15,7 +15,6 @@
   
 @interface STCreditTextField ()
 - (void)commonInit;
-- (CGPoint)originOfCursorInSize:(CGSize)size;
 
 @property (nonatomic, readonly) UITextField* textField;
 @end
@@ -23,6 +22,7 @@
 @implementation STCreditTextField
 
 @synthesize textField = textField_;
+@synthesize titleLabel = titleLabel_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -41,6 +41,7 @@
 }
 
 - (void)dealloc {
+  titleLabel_ = nil;
   textField_.delegate = nil;
   textField_ = nil;
   [super dealloc];
@@ -52,16 +53,16 @@
   [self addSubview:creditIcon];
   [creditIcon release];
   
-  UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  titleLabel.textColor = [UIColor stampedGrayColor];
-  titleLabel.text = @"Credit to?";
-  titleLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
-  [titleLabel sizeToFit];
-  titleLabel.frame = CGRectOffset(titleLabel.frame,
-                                  CGRectGetMaxX(creditIcon.frame) + 3,
-                                  CGRectGetMinY(creditIcon.frame) - 2);
-  [self addSubview:titleLabel];
-  [titleLabel release];
+  titleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  titleLabel_.textColor = [UIColor stampedGrayColor];
+  titleLabel_.text = @"Who deserves credit?";
+  titleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
+  [titleLabel_ sizeToFit];
+  titleLabel_.frame = CGRectOffset(titleLabel_.frame,
+                                   CGRectGetMaxX(creditIcon.frame) + 3,
+                                   CGRectGetMinY(creditIcon.frame) - 2);
+  [self addSubview:titleLabel_];
+  [titleLabel_ release];
   self.backgroundColor = [UIColor whiteColor];
   self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
   self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
@@ -106,28 +107,10 @@
   return [textField_ resignFirstResponder];
 }
 
-- (CGPoint)originOfCursorInSize:(CGSize)size {
-  CGFloat yPos = 12.0;
-  CGFloat xPos = 83.0;
-  for (UIView* view in self.subviews) {
-    if (![view isMemberOfClass:[STCreditPill class]])
-      continue;
-    
-    STCreditPill* pill = (STCreditPill*)view;
-    CGFloat widthNeeded = CGRectGetWidth(pill.frame) + 5;
-    if (xPos + widthNeeded > size.width) {
-      yPos += 30.0;
-      xPos = 10.0;
-    }
-    xPos += widthNeeded;
-  }
-  
-  return CGPointMake(xPos, yPos);
-}
-
 - (void)layoutSubviews {
   CGFloat yPos = 12.0;
-  CGFloat xPos = 83.0;
+  [titleLabel_ sizeToFit];
+  CGFloat xPos = CGRectGetMaxX(titleLabel_.frame) + 4;
   for (UIView* view in self.subviews) {
     if (![view isMemberOfClass:[STCreditPill class]])
       continue;

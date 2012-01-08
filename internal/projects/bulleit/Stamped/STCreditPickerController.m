@@ -132,6 +132,8 @@
     
     [self addPerson:username];
   }
+
+  creditTextField_.titleLabel.text = pills_.count > 0 ? @"Credit to" : @"Who deserves credit?";
   creditTextField_.text = @"\u200b";
 }
 
@@ -196,6 +198,7 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
+  creditTextField_.titleLabel.text = @"Credit to";
   [delegate_ creditTextFieldDidBeginEditing:creditTextField_];
   if (!creditTableView_) {
     creditTableView_ = [[UITableView alloc] initWithFrame:CGRectZero
