@@ -63,6 +63,7 @@ typedef enum {
 - (void)reloadTableData;
 
 @property (nonatomic, copy) NSArray* resultsArray;
+@property (nonatomic, copy) NSArray* cachedAutocompleteResults;
 @property (nonatomic, retain) CLLocationManager* locationManager;
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, retain) RKRequest* currentRequest;
@@ -77,6 +78,7 @@ typedef enum {
 @implementation SearchEntitiesViewController
 
 @synthesize resultsArray = resultsArray_;
+@synthesize cachedAutocompleteResults = cachedAutocompleteResults_;
 @synthesize searchField = searchField_;
 @synthesize locationButton = locationButton_;
 @synthesize locationManager = locationManager_;
@@ -100,6 +102,7 @@ typedef enum {
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.resultsArray = nil;
+  self.cachedAutocompleteResults = nil;
   self.searchField = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
@@ -647,9 +650,11 @@ typedef enum {
     } else {
       self.resultsArray = array;
     }
+    self.cachedAutocompleteResults = self.resultsArray;
     [self reloadTableData];
-  } else if (response.isNotFound) {
-    self.resultsArray = nil;
+  } else if (response.isForbidden || response.isNotFound) {
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
+    self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
     [self reloadTableData];
   }
 }
