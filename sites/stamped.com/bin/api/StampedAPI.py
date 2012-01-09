@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, urlparse
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
 import libs.Memcache
@@ -534,10 +534,11 @@ class StampedAPI(AStampedAPI):
         while True:
             url = '%s?cursor=%s' % (baseurl, cursor)
             result = utils.getTwitter(url, key, secret)
-            twitterIds = twitterIds + result['ids']
+            if 'ids' in result:
+                twitterIds = twitterIds + result['ids']
 
             # Break if no cursor
-            if result['next_cursor'] == 0:
+            if 'next_cursor' not in result or result['next_cursor'] == 0:
                 break
             cursor = result['next_cursor']
 
@@ -547,9 +548,9 @@ class StampedAPI(AStampedAPI):
         if token is None:
             raise IllegalActionError("Connecting to Facebook requires a valid token")
         
-        friends    = []
-        facbookIds = []
-        params     = {}
+        friends     = []
+        facebookIds = []
+        params      = {}
         
         while True:
             result  = utils.getFacebook(token, '/me/friends', params)
@@ -564,7 +565,7 @@ class StampedAPI(AStampedAPI):
             break
         
         for friend in friends:
-            facbookIds.append(friend['id'])
+            facebookIds.append(friend['id'])
         
         return self._userDB.findUsersByFacebook(facebookIds)
     
@@ -1307,6 +1308,7 @@ class StampedAPI(AStampedAPI):
                 # Grab entity_id from stamp
                 entityIds[stamp.entity_id] = 1
             
+            # TODO: don't fetch entity if it's already filled in
             entities = self._entityDB.getEntities(entityIds.keys())
             
             for entity in entities:
@@ -1346,13 +1348,13 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 for i in xrange(len(stamp.credit)):
                     creditedUser = userIds[stamp.credit[i].user_id]
-
+                    
                     if creditedUser == 1:
                         msg = 'Unable to match user_id %s for credit on stamp id %s' % \
                             (stamp.credit[i].user_id, stamp.stamp_id)
                         logs.warning(msg)
                         continue
-
+                    
                     credit = CreditSchema()
                     credit.user_id          = stamp.credit[i].user_id
                     credit.stamp_id         = stamp.credit[i].stamp_id

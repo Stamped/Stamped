@@ -90,10 +90,12 @@ class Memcache(object):
 class StampedMemcache(Memcache):
     
     def __init__(self):
-        # TODO: revisit these behavior options
-        Memcache.__init__(self, binary=True, behaviors={
+        # TODO: revisit these options
+        Memcache.__init__(self, binary=True)
+        """, behaviors={
             'remove_failed' : 5, 
             'no_block'      : True, 
             'ketama'        : True, 
         })
+        """
 

@@ -1,6 +1,7 @@
 
 brew install memcached libmemcached
 ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
+pylibmc==1.2.2
 
 apt-get install memcached
 wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install

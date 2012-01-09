@@ -12,23 +12,16 @@ import atexit, urllib, json, unittest, mimetools, urllib2
 from pprint           import pprint
 from StampedTestUtils import *
 
-CLIENT_ID     = "stampedtest"
-CLIENT_SECRET = "august1ftw"
+CLIENT_ID       = "stampedtest"
+CLIENT_SECRET   = "august1ftw"
+TWITTER_KEY     = "322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U"
+TWITTER_SECRET  = "FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ"
+FB_TOKEN        = "AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZD"
 
 _accounts  = []
 _test_case = None
 _baseurl   = "http://localhost:18000/v0"
-# _baseurl   = "http://ec2-107-22-68-117.compute-1.amazonaws.com:5000/v0"
-# _baseurl   = "https://elb-mario-312027982.us-east-1.elb.amazonaws.com/v0"
-
-# _baseurl = "http://107.20.179.250:5000/v0"
-#_baseurl = "http://ec2-50-17-69-169.compute-1.amazonaws.com:5000/v0"
-#_baseurl = "https://myloadbalancer-2126199649.us-east-1.elb.amazonaws.com/v0"
-#_baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
 # _baseurl = "https://dev.stamped.com/v0"
-#_baseurl = "http://dev.stamped.com:5000/v0"
-#_baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
-#_baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
 
 class StampedAPIException(Exception):
     pass
