@@ -1307,6 +1307,7 @@ class StampedAPI(AStampedAPI):
                 # Grab entity_id from stamp
                 entityIds[stamp.entity_id] = 1
             
+            # TODO: don't fetch entity if it's already filled in
             entities = self._entityDB.getEntities(entityIds.keys())
             
             for entity in entities:
@@ -1346,13 +1347,13 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 for i in xrange(len(stamp.credit)):
                     creditedUser = userIds[stamp.credit[i].user_id]
-
+                    
                     if creditedUser == 1:
                         msg = 'Unable to match user_id %s for credit on stamp id %s' % \
                             (stamp.credit[i].user_id, stamp.stamp_id)
                         logs.warning(msg)
                         continue
-
+                    
                     credit = CreditSchema()
                     credit.user_id          = stamp.credit[i].user_id
                     credit.stamp_id         = stamp.credit[i].stamp_id
