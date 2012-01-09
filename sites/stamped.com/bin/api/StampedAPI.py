@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, urlparse
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
 import libs.Memcache
@@ -547,9 +547,9 @@ class StampedAPI(AStampedAPI):
         if token is None:
             raise IllegalActionError("Connecting to Facebook requires a valid token")
         
-        friends    = []
-        facbookIds = []
-        params     = {}
+        friends     = []
+        facebookIds = []
+        params      = {}
         
         while True:
             result  = utils.getFacebook(token, '/me/friends', params)
@@ -564,7 +564,7 @@ class StampedAPI(AStampedAPI):
             break
         
         for friend in friends:
-            facbookIds.append(friend['id'])
+            facebookIds.append(friend['id'])
         
         return self._userDB.findUsersByFacebook(facebookIds)
     
