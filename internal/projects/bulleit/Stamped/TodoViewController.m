@@ -425,7 +425,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - TodoTableViewCellDelegate Methods.
 
 - (void)todoTableViewCell:(TodoTableViewCell*)cell shouldStampEntity:(Entity*)entity {
-  CreateStampViewController* detailViewController = [[CreateStampViewController alloc] initWithEntityObject:entity];
+  CreateStampViewController* detailViewController =
+      [[CreateStampViewController alloc] initWithEntityObject:entity creditedTo:cell.favorite.stamp.user];
   
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
