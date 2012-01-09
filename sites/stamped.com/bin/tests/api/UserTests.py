@@ -248,16 +248,18 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
 
 class StampedAPIUsersFindFacebook(StampedAPIUserTest):
     def test_find_by_facebook(self):
-        ids = ['1235551111','1235551112']
+        ids = ['100003002012425','2400157'] # andybons, robbystein
         path = "account/linked/facebook/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "facebook_id": ids[0],
+            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
         }
         result = self.handlePOST(path, data)
         data = {
             "oauth_token": self.tokenB['access_token'],
             "facebook_id": ids[1],
+            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
         }
         result = self.handlePOST(path, data)
 
@@ -268,6 +270,17 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
         }
         result = self.handlePOST(path, data)
         self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], ids)
+
+        path = "users/find/facebook.json"
+        data = { 
+            "oauth_token": self.tokenC['access_token'],
+            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result) >= 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)
