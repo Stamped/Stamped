@@ -534,10 +534,11 @@ class StampedAPI(AStampedAPI):
         while True:
             url = '%s?cursor=%s' % (baseurl, cursor)
             result = utils.getTwitter(url, key, secret)
-            twitterIds = twitterIds + result['ids']
+            if 'ids' in result:
+                twitterIds = twitterIds + result['ids']
 
             # Break if no cursor
-            if result['next_cursor'] == 0:
+            if 'next_cursor' not in result or result['next_cursor'] == 0:
                 break
             cursor = result['next_cursor']
 

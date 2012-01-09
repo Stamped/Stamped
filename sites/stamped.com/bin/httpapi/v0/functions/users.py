@@ -144,7 +144,7 @@ def findPhone(request):
 @require_http_methods(["POST"])
 def findTwitter(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPFindTwitterUser(), request, obfuscate=['q'])
+    schema      = parseRequest(HTTPFindTwitterUser(), request, obfuscate=['q', 'twitter_key', 'twitter_secret'])
 
     users = []
 
@@ -180,7 +180,7 @@ def findTwitter(request):
 @require_http_methods(["POST"])
 def findFacebook(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPFindFacebookUser(), request, obfuscate=['q'])
+    schema      = parseRequest(HTTPFindFacebookUser(), request, obfuscate=['q', 'facebook_token'])
 
     users = []
 

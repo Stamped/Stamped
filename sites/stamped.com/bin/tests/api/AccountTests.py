@@ -168,8 +168,9 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
     def test_twitter_followers(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         
-        ids = ['1235551111','1235551112']
+        ids = ['11131112','814122']
         path = "account/linked/twitter/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
@@ -184,22 +185,36 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         }
         result = self.handlePOST(path, data)
 
-        path = "account/linked/twitter/followers.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "q": ids[0]
+        # Log in with credentials to post alert to followers
+        data = {
+            "oauth_token": self.tokenC['access_token'],
+            "twitter_id": '0000',
+            "twitter_screen_name": 'userc',
+            "twitter_key": TWITTER_KEY,
+            "twitter_secret": TWITTER_SECRET,
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+
+        # Check activity for userA to verify activity item was created
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 1), 
+        ])
         
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
     def test_facebook_followers(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         
-        ids = ['1235551111','1235551112']
+        ids = ['100003002012425','2400157'] # andybons, robbystein
         path = "account/linked/facebook/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
@@ -214,16 +229,28 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         }
         result = self.handlePOST(path, data)
 
-        path = "account/linked/facebook/followers.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "q": ids[0]
+        # Log in with credentials to post alert to followers
+        data = {
+            "oauth_token": self.tokenC['access_token'],
+            "facebook_id": '0000',
+            "facebook_name": 'userc',
+            "facebook_token": FB_TOKEN,
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-        
+
+        # Check activity for userA to verify activity item was created
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 1), 
+        ])
+
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
 class StampedAPIAccountChangePassword(StampedAPIAccountTest):
     def test_change_password(self):

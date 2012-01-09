@@ -209,16 +209,12 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "twitter_id": ids[0],
             "twitter_screen_name": 'user_a',
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
         data = {
             "oauth_token": self.tokenB['access_token'],
             "twitter_id": ids[1],
             "twitter_screen_name": 'user_b',
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
 
@@ -236,8 +232,8 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
         path = "users/find/twitter.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
+            "twitter_key": TWITTER_KEY,
+            "twitter_secret": TWITTER_SECRET,
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 2)
@@ -253,13 +249,11 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
         data = {
             "oauth_token": self.tokenA['access_token'],
             "facebook_id": ids[0],
-            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
         }
         result = self.handlePOST(path, data)
         data = {
             "oauth_token": self.tokenB['access_token'],
             "facebook_id": ids[1],
-            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
         }
         result = self.handlePOST(path, data)
 
@@ -277,7 +271,7 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
         path = "users/find/facebook.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "facebook_token": 'AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZDa',
+            "facebook_token": FB_TOKEN,
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 2)
