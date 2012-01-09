@@ -9,6 +9,7 @@
 #import "SuggestedUserTableViewCell.h"
 
 #import "UserImageView.h"
+#import "UIButton+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "User.h"
 #import "Util.h"
@@ -93,16 +94,16 @@ static const CGFloat kUserImageSize = 50.0;
     [self.contentView addSubview:bioLabel_];
     [bioLabel_ release];
     
-    followButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-    [followButton_ setImage:[UIImage imageNamed:@"add_friends_follow_button"]
-                   forState:UIControlStateNormal];
-    followButton_.frame = CGRectMake(320 - 54 - 10, 20, 54, 30);
+    followButton_ = [UIButton stampedFollowButton];
+    [followButton_ sizeToFit];
+    followButton_.frame = CGRectMake(320 - CGRectGetWidth(followButton_.frame) - 40, 20,
+                                     CGRectGetWidth(followButton_.frame) + 30, 29);
     [self.contentView addSubview:followButton_];
     
-    unfollowButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-    [unfollowButton_ setImage:[UIImage imageNamed:@"add_friends_unfollow_button"]
-                     forState:UIControlStateNormal];
-    unfollowButton_.frame = CGRectMake(320 - 66 - 10, 20, 66, 30);
+    unfollowButton_ = [UIButton stampedFollowingButton];
+    [unfollowButton_ sizeToFit];
+    unfollowButton_.frame = CGRectMake(320 - CGRectGetWidth(unfollowButton_.frame) - 25, 20,
+                                       CGRectGetWidth(unfollowButton_.frame) + 15, 29);
     [self.contentView addSubview:unfollowButton_];
   }
   return self;

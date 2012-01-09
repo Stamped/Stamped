@@ -8,17 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@class PeopleCellView;
 @class User;
 
-@interface PeopleTableViewCell : UITableViewCell {
- @protected
-  PeopleCellView* customView_;
-}
+@interface PeopleTableViewCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) User* user;
-@property (nonatomic, assign) BOOL disclosureArrowHidden;
+@property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
 
 @end

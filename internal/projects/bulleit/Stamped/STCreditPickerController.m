@@ -254,7 +254,7 @@
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
   
-  cell.disclosureArrowHidden = YES;
+  cell.disclosureArrowImageView.hidden = YES;
   cell.user = [self.filteredPeopleArray objectAtIndex:indexPath.row];
 
   return cell;
