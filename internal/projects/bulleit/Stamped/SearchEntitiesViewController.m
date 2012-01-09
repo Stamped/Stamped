@@ -652,7 +652,7 @@ typedef enum {
     }
     self.cachedAutocompleteResults = self.resultsArray;
     [self reloadTableData];
-  } else if (response.isForbidden || response.isNotFound) {
+  } else if (response.statusCode >= 400 && response.statusCode < 500) {
     NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
     self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
     [self reloadTableData];

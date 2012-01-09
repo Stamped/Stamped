@@ -92,6 +92,8 @@
 		7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */; };
 		7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */; };
 		7E22D6B013DDA34100C4005E /* CreateStampViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */; };
+		7E260F3F14BB535200D9F7F0 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB7E31414AB9A5D00DBED08 /* libRestKit.a */; };
+		7E260F4014BB535800D9F7F0 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB7E31414AB9A5D00DBED08 /* libRestKit.a */; };
 		7E29C874141D5D51005D60CE /* inbox_chat_bubble@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */; };
 		7E29FF911441095A004DBD33 /* eDetail_todo_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E29FF8F1441095A004DBD33 /* eDetail_todo_arrow@2x.png */; };
 		7E29FF921441095A004DBD33 /* eDetail_todo_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E29FF901441095A004DBD33 /* eDetail_todo_icon@2x.png */; };
@@ -2218,6 +2220,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E260F4014BB535800D9F7F0 /* libRestKit.a in Frameworks */,
 				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
 				7E589422147C468B002268C4 /* MessageUI.framework in Frameworks */,
@@ -2244,6 +2247,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E260F3F14BB535200D9F7F0 /* libRestKit.a in Frameworks */,
 				7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */,
 				7EB03FD414672B40004F7A1C /* MessageUI.framework in Frameworks */,
