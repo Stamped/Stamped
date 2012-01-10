@@ -30,7 +30,7 @@
   return button;
 }
 
-+ (UIButton*)stampedFollowingButton {
++ (UIButton*)stampedunfollowButton {
   UIImage* bg = [UIImage imageNamed:@"buttonBG_white_hilited"];
   UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg

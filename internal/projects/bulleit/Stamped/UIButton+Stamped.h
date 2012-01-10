@@ -11,6 +11,6 @@
 @interface UIButton (Stamped)
 
 + (UIButton*)stampedFollowButton;
-+ (UIButton*)stampedFollowingButton;
++ (UIButton*)stampedunfollowButton;
 
 @end

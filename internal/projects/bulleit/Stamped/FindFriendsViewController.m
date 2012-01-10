@@ -14,9 +14,9 @@
 #import "STSectionHeaderView.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
-#import "FriendshipTableViewCell.h"
 #import "FriendshipManager.h"
 #import "InviteFriendTableViewCell.h"
+#import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "SuggestedUserTableViewCell.h"
@@ -407,7 +407,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (UITableViewCell*)cellFromSubview:(UIView*)view {
   UIView* superview = view.superview;
-  while (superview && (![superview isMemberOfClass:[FriendshipTableViewCell class]] &&
+  while (superview && (![superview isMemberOfClass:[PeopleTableViewCell class]] &&
                        ![superview isMemberOfClass:[SuggestedUserTableViewCell class]] &&
                        ![superview isMemberOfClass:[InviteFriendTableViewCell class]])) {
     superview = superview.superview;
@@ -633,11 +633,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                                   action:@selector(inviteButtonPressed:)
                         forControlEvents:UIControlEventTouchUpInside];
     } else {
-      if (findSource_ == FindFriendsSourceSuggested)
+      if (findSource_ == FindFriendsSourceSuggested) {
         cell = [[[SuggestedUserTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-      else
-        cell = [[[FriendshipTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-
+      } else {
+        cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+        [(PeopleTableViewCell*)cell disclosureArrowImageView].hidden = YES;
+      }
       [[(id)cell followButton] addTarget:self
                                   action:@selector(followButtonPressed:)
                         forControlEvents:UIControlEventTouchUpInside];
@@ -767,7 +768,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   UITableViewCell* cell = [tableView_ cellForRowAtIndexPath:indexPath];
-  if ([cell isMemberOfClass:[FriendshipTableViewCell class]] ||
+  if ([cell isMemberOfClass:[PeopleTableViewCell class]] ||
       [cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
     User* user = (User*)[(id)cell user];
     ProfileViewController* vc = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController"
@@ -932,17 +933,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       [[FriendshipManager sharedManager] unfollowUser:user];
 
     for (UITableViewCell* cell in tableView_.visibleCells) {
-      if (![cell isMemberOfClass:[FriendshipTableViewCell class]] &&
+      if (![cell isMemberOfClass:[PeopleTableViewCell class]] &&
           ![cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
         continue;
       }
-      FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
+      PeopleTableViewCell* friendCell = (PeopleTableViewCell*)cell;
       if (friendCell.user == user) {
         [friendCell.indicator stopAnimating];
         if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
           friendCell.unfollowButton.hidden = NO;
-        } 
-        else {
+        } else {
           friendCell.followButton.hidden = NO;
         }
       }
@@ -976,12 +976,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     User* currentUser = [AccountManager sharedManager].currentUser;
     for (UITableViewCell* cell in tableView_.visibleCells) {
-      if (![cell isMemberOfClass:[FriendshipTableViewCell class]] &&
+      if (![cell isMemberOfClass:[PeopleTableViewCell class]] &&
           ![cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
         continue;
       }
 
-      FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
+      PeopleTableViewCell* friendCell = (PeopleTableViewCell*)cell;
       if (friendCell.indicator.isAnimating) {
         [friendCell.indicator stopAnimating];
         if ([currentUser.following containsObject:friendCell.user]) {

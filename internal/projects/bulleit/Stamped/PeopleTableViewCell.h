@@ -16,5 +16,8 @@
 
 @property (nonatomic, retain) User* user;
 @property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
+@property (nonatomic, readonly) UIActivityIndicatorView* indicator;
+@property (nonatomic, readonly) UIButton* followButton;
+@property (nonatomic, readonly) UIButton* unfollowButton;
 
 @end

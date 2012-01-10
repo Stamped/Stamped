@@ -100,7 +100,7 @@ static const CGFloat kUserImageSize = 50.0;
                                      CGRectGetWidth(followButton_.frame) + 30, 29);
     [self.contentView addSubview:followButton_];
     
-    unfollowButton_ = [UIButton stampedFollowingButton];
+    unfollowButton_ = [UIButton stampedunfollowButton];
     [unfollowButton_ sizeToFit];
     unfollowButton_.frame = CGRectMake(320 - CGRectGetWidth(unfollowButton_.frame) - 25, 20,
                                        CGRectGetWidth(unfollowButton_.frame) + 15, 29);
