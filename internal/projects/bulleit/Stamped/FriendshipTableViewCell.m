@@ -8,6 +8,8 @@
 
 #import "FriendshipTableViewCell.h"
 
+#import "UIButton+Stamped.h"
+
 @implementation FriendshipTableViewCell
 
 @synthesize indicator = indicator_;
@@ -17,26 +19,33 @@
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithReuseIdentifier:reuseIdentifier];
   if (self) {
-    self.disclosureArrowHidden = YES;
+    self.disclosureArrowImageView.hidden = YES;
     indicator_ = [[UIActivityIndicatorView alloc]
         initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     indicator_.hidesWhenStopped = YES;
-    [customView_ addSubview:indicator_];
+    [self.contentView addSubview:indicator_];
     [indicator_ release];
     
-    followButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-    [followButton_ setImage:[UIImage imageNamed:@"add_friends_follow_button"]
-                   forState:UIControlStateNormal];
-    followButton_.frame = CGRectMake(320 - 54 - 5, 10, 54, 30);
-    [customView_ addSubview:followButton_];
+    followButton_ = [UIButton stampedFollowButton];
+    [followButton_ sizeToFit];
+    followButton_.frame = CGRectMake(320 - CGRectGetWidth(followButton_.frame) - 35, 10,
+                                     CGRectGetWidth(followButton_.frame) + 30, 29);
+    [self.contentView addSubview:followButton_];
     
-    unfollowButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-    [unfollowButton_ setImage:[UIImage imageNamed:@"add_friends_unfollow_button"]
-                     forState:UIControlStateNormal];
-    unfollowButton_.frame = CGRectMake(320 - 66 - 5, 10, 66, 30);
-    [customView_ addSubview:unfollowButton_];
+    unfollowButton_ = [UIButton stampedFollowingButton];
+    [unfollowButton_ sizeToFit];
+    unfollowButton_.frame = CGRectMake(320 - CGRectGetWidth(unfollowButton_.frame) - 20, 10,
+                                       CGRectGetWidth(unfollowButton_.frame) + 15, 29);
+    [self.contentView addSubview:unfollowButton_];
   }
   return self;
+}
+
+- (void)dealloc {
+  indicator_ = nil;
+  followButton_ = nil;
+  unfollowButton_ = nil;
+  [super dealloc];
 }
 
 @end

@@ -829,11 +829,17 @@ class HTTPStamp(Schema):
             self.importData(data, overflow=True)
             self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
             self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
-            self.num_comments           = schema.num_comments
-            self.num_likes              = schema.num_likes
             self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
+
+            self.num_comments = 0
+            if schema.num_comments > 0:
+                self.num_comments       = schema.num_comments
+            
+            self.num_likes = 0
+            if schema.num_likes > 0:
+                self.num_likes          = schema.num_likes
 
             self.is_liked = False
             if schema.is_liked:

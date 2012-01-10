@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, urlparse
 import os, logs, re, time, Blacklist, auth
 import libs.ec2_utils
 import libs.Memcache
@@ -534,10 +534,11 @@ class StampedAPI(AStampedAPI):
         while True:
             url = '%s?cursor=%s' % (baseurl, cursor)
             result = utils.getTwitter(url, key, secret)
-            twitterIds = twitterIds + result['ids']
+            if 'ids' in result:
+                twitterIds = twitterIds + result['ids']
 
             # Break if no cursor
-            if result['next_cursor'] == 0:
+            if 'next_cursor' not in result or result['next_cursor'] == 0:
                 break
             cursor = result['next_cursor']
 
@@ -547,9 +548,9 @@ class StampedAPI(AStampedAPI):
         if token is None:
             raise IllegalActionError("Connecting to Facebook requires a valid token")
         
-        friends    = []
-        facbookIds = []
-        params     = {}
+        friends     = []
+        facebookIds = []
+        params      = {}
         
         while True:
             result  = utils.getFacebook(token, '/me/friends', params)
@@ -564,7 +565,7 @@ class StampedAPI(AStampedAPI):
             break
         
         for friend in friends:
-            facbookIds.append(friend['id'])
+            facebookIds.append(friend['id'])
         
         return self._userDB.findUsersByFacebook(facebookIds)
     

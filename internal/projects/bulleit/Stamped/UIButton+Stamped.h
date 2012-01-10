@@ -1,0 +1,16 @@
+//
+//  UIButton+Stamped.h
+//  Stamped
+//
+//  Created by Andrew Bonventre on 1/9/12.
+//  Copyright (c) 2012 Stamped, Inc. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface UIButton (Stamped)
+
++ (UIButton*)stampedFollowButton;
++ (UIButton*)stampedFollowingButton;
+
+@end

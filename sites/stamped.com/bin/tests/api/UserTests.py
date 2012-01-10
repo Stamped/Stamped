@@ -209,16 +209,12 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "twitter_id": ids[0],
             "twitter_screen_name": 'user_a',
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
         data = {
             "oauth_token": self.tokenB['access_token'],
             "twitter_id": ids[1],
             "twitter_screen_name": 'user_b',
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
         }
         result = self.handlePOST(path, data)
 
@@ -236,8 +232,8 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
         path = "users/find/twitter.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "twitter_key": '322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U',
-            "twitter_secret": 'FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ',
+            "twitter_key": TWITTER_KEY,
+            "twitter_secret": TWITTER_SECRET,
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 2)
@@ -248,7 +244,7 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
 
 class StampedAPIUsersFindFacebook(StampedAPIUserTest):
     def test_find_by_facebook(self):
-        ids = ['1235551111','1235551112']
+        ids = ['100003002012425','2400157'] # andybons, robbystein
         path = "account/linked/facebook/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
@@ -268,6 +264,17 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
         }
         result = self.handlePOST(path, data)
         self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], ids)
+
+        path = "users/find/facebook.json"
+        data = { 
+            "oauth_token": self.tokenC['access_token'],
+            "facebook_token": FB_TOKEN,
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result) >= 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)

@@ -10,6 +10,7 @@ import htmlentitydefs, traceback, urllib, urllib2
 import aws, logs, math, random, boto
 import libs.TwitterOAuth as TwitterOAuth
 
+from errors              import *
 from boto.ec2.connection import EC2Connection
 from subprocess          import Popen, PIPE
 from functools           import wraps
@@ -757,19 +758,26 @@ def get_modified_time(filename):
     return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 
 def getFacebook(accessToken, path, params={}):
-    baseurl = 'https://graph.facebook.com'
-    params['access_token'] = accessToken
-    params  = urllib.urlencode(params)
-    url     = "%s%s?%s" % (baseurl, path, params)
-    result  = json.load(urllib2.urlopen(url))
-    
-    if 'error' in result:
-        if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
-            # OAuth exception
+    try:
+        baseurl = 'https://graph.facebook.com'
+        params['access_token'] = accessToken
+        params  = urllib.urlencode(params)
+        url     = "%s%s?%s" % (baseurl, path, params)
+        result  = json.load(urllib2.urlopen(url))
+        
+        if 'error' in result:
+            if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
+                # OAuth exception
+                raise
             raise
-        raise
-    
-    return result
+        
+        return result
+    except urllib2.HTTPError as e:
+        if e.code == 400:
+            raise InputError('FACEBOOK API 400 ERROR: %s' % e)
+        raise UnavailableError('FACEBOOK API ERROR: %s' % e)
+    except:
+        raise Exception
 
 def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers=None):
     consumer = TwitterOAuth.Consumer(key=TWITTER_CONSUMER_KEY, secret=TWITTER_CONSUMER_SECRET)
