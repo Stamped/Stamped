@@ -14,6 +14,7 @@
 #import "STSectionHeaderView.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
+#import "FindFriendsToolbar.h"
 #import "FriendshipManager.h"
 #import "InviteFriendTableViewCell.h"
 #import "PeopleTableViewCell.h"
@@ -34,9 +35,9 @@ static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 static NSString* const kInvitePath = @"/friendships/invite.json";
 
-@interface FindFriendsViewController () 
+@interface FindFriendsViewController ()
+
 - (void)adjustNippleToView:(UIView*)view;
-- (void)setSearchFieldHidden:(BOOL)hidden animated:(BOOL)animated;
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
 - (void)followButtonPressed:(id)sender;
 - (void)unfollowButtonPressed:(id)sender;
@@ -59,6 +60,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @property (nonatomic, retain) NSMutableArray* contactsNotUsingStamped;
 @property (nonatomic, retain) NSMutableArray* invitedContacts;
 @property (nonatomic, assign) BOOL searchFieldHidden;
+@property (nonatomic, assign) BOOL showToolbar;
+@property (nonatomic, readonly) FindFriendsToolbar* toolbar;
+
 @end
 
 @implementation FindFriendsViewController
@@ -79,13 +83,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @synthesize nipple = nipple_;
 @synthesize tableView = tableView_;
 @synthesize searchFieldHidden = searchFieldHidden_;
+@synthesize showToolbar = showToolbar_;
+@synthesize toolbar = toolbar_;
 @synthesize signInTwitterView = signInTwitterView_;
 @synthesize signInFacebookView = signInFacebookView_;
 @synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize signInTwitterConnectButton = signinTwitterConnectButton_;
 @synthesize signInFacebookConnectButton = signInFacebookConnectButton_;
-@synthesize inviteViaEmailButton = inviteViaEmailButton_;
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -114,7 +119,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
-  self.inviteViaEmailButton = nil;
+  toolbar_ = nil;
   
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
@@ -134,11 +139,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)didDisplayAsModal {
-//  [self socialNetworksDidChange:nil];
   if (self.findSource == FindFriendsSourceTwitter)
     [self findFromTwitter:self];
   else if (self.findSource == FindFriendsSourceFacebook)
     [self findFromFacebook:self];
+
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
@@ -172,6 +177,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
     [self loadSuggestedUsers];
 
+  toolbar_ = [[FindFriendsToolbar alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.frame),
+                                                                  CGRectGetWidth(self.view.frame), 49)];
+  [self.view addSubview:toolbar_];
+  [toolbar_ release];
+  
   if (self.findSource == FindFriendsSourceStamped)
     [self findFromStamped:self];
   else if (self.findSource == FindFriendsSourceContacts)
@@ -182,8 +192,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     [self findFromFacebook:self];
   else
     [self findFromStamped:self];
-  
-  inviteViaEmailButton_.enabled = [MFMailComposeViewController canSendMail];
 }
 
 - (void)viewDidUnload {
@@ -207,31 +215,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
-  self.inviteViaEmailButton = nil;
+  toolbar_ = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
 
   [super viewDidUnload];
 }
 
-#pragma mark - MFMailComposeViewControllerDelegate methods.
-
-- (void)mailComposeController:(MFMailComposeViewController*)controller
-          didFinishWithResult:(MFMailComposeResult)result
-                        error:(NSError*)error {
-  [self dismissModalViewControllerAnimated:YES];
-}
-
 #pragma mark - Actions
-
-- (IBAction)inviteFriendViaEmail:(id)sender {
-  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
-  vc.mailComposeDelegate = self;
-  [vc setSubject:@"Check out Stamped."];
-  [vc setMessageBody:@"I'm using Stamped, a new way to recommend only what you like best. You should check it out by downloading the iPhone app here:<br/><br/><a href=\"http://stamped.com/download\">stamped.com/download</a>" isHTML:YES];
-  [self presentModalViewController:vc animated:YES];
-  [vc release];
-}
 
 - (IBAction)done:(id)sender {
   UIViewController* vc = nil;
@@ -245,7 +236,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromStamped:(id)sender {
   self.findSource = FindFriendsSourceSuggested;
-  [self setSearchFieldHidden:NO animated:NO];
+  self.searchFieldHidden = NO;
   [self adjustNippleToView:self.stampedButton];
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
@@ -260,16 +251,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
-  stampedButton_.selected = YES;
-  
+  stampedButton_.selected = YES;  
   [tableView_ reloadData];
+  self.showToolbar = NO;
 }
 
 - (IBAction)findFromContacts:(id)sender {
   self.findSource = FindFriendsSourceContacts;
   [self adjustNippleToView:self.contactsButton];
   [searchField_ resignFirstResponder];
-  [self setSearchFieldHidden:YES animated:NO];
+  self.searchFieldHidden = YES;
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
   tableView_.hidden = NO;
@@ -277,6 +268,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
+  self.showToolbar = YES;
   if (contactFriends_) {
     [self.tableView reloadData];
     return;
@@ -324,7 +316,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   [self adjustNippleToView:self.twitterButton];
   [searchField_ resignFirstResponder];
-  [self setSearchFieldHidden:YES animated:NO];
+  self.searchFieldHidden = YES;
   [self.tableView reloadData];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
@@ -335,8 +327,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];
-  } 
-  else {
+    self.showToolbar = YES;
+  } else {
+    self.showToolbar = NO;
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = YES;
     self.signInTwitterView.hidden = NO;
@@ -347,7 +340,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceFacebook;
   [self adjustNippleToView:facebookButton_];
   [searchField_ resignFirstResponder];
-  [self setSearchFieldHidden:YES animated:NO];
+  self.searchFieldHidden = YES;
   [self.tableView reloadData];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
@@ -358,8 +351,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     self.signInFacebookView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromFacebook];
-  }
-  else {
+    self.showToolbar = YES;
+  } else {
+    self.showToolbar = NO;
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = NO;
     self.signInTwitterView.hidden = YES;
@@ -376,7 +370,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [loader send];
 }
 
-- (void)setSearchFieldHidden:(BOOL)hidden animated:(BOOL)animated {
+- (void)setSearchFieldHidden:(BOOL)hidden {
   if (hidden == searchFieldHidden_)
     return;
 
@@ -388,21 +382,30 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     searchField_.text = nil;
   }
 
-  if (animated) {
+  tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, yOffset), 0, yOffset);
+  searchField_.text = nil;
+}
+
+- (void)setShowToolbar:(BOOL)showToolbar {
+  if (showToolbar_ == showToolbar)
+    return;
+
+  showToolbar_ = showToolbar;
+  
+  CGFloat yOffset = CGRectGetHeight(toolbar_.frame);
+  if (showToolbar)
+    yOffset *= -1;
+  
   [UIView animateWithDuration:0.2
                         delay:0
-                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                      options:(UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState)
                    animations:^{
-                     tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, yOffset), 0, yOffset);
+                     toolbar_.frame = CGRectOffset(toolbar_.frame, 0, yOffset);
+                     CGRect tableFrame = tableView_.frame;
+                     tableFrame.size.height += yOffset;
+                     tableView_.frame = tableFrame;
                    }
-                   completion:^(BOOL finished){
-                     searchField_.text = nil;
-                   }];
-  }
-  else {
-    tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, yOffset), 0, yOffset);
-    searchField_.text = nil;
-  }
+                   completion:nil];
 }
 
 - (UITableViewCell*)cellFromSubview:(UIView*)view {
@@ -487,7 +490,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     // If we're watching, fade in the table.
     if (self.findSource == FindFriendsSourceTwitter && !self.signInTwitterView.hidden
         && twitterFriends_) {
-      [self setSearchFieldHidden:YES animated:NO];
+      self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
       [UIView animateWithDuration:0.4
@@ -531,7 +534,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     if (self.findSource == FindFriendsSourceFacebook && !self.signInFacebookView.hidden
         && facebookFriends_) {
-      [self setSearchFieldHidden:YES animated:NO];
+      self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
       [UIView animateWithDuration:0.4

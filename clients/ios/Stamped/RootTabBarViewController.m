@@ -18,6 +18,9 @@
 #import "STSearchField.h"
 #import "Util.h"
 
+#warning remove
+#import "FindFriendsViewController.h"
+
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -150,6 +153,11 @@
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
     [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   }
+
+#warning remove
+  FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsSourceSuggested];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {

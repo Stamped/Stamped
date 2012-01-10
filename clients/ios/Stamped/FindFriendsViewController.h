@@ -6,7 +6,6 @@
 //  Copyright 2011 Stamped. All rights reserved.
 //
 
-#import <MessageUI/MFMailComposeViewController.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
@@ -26,7 +25,6 @@ typedef enum {
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
                                                         UITextFieldDelegate,
-                                                        MFMailComposeViewControllerDelegate,
                                                         UINavigationControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
@@ -42,13 +40,11 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIButton* signInTwitterConnectButton;
 @property (nonatomic, retain) IBOutlet UIButton* signInFacebookConnectButton;
-@property (nonatomic, retain) IBOutlet UIButton* inviteViaEmailButton;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 
 - (IBAction)done:(id)sender;
 
-- (IBAction)inviteFriendViaEmail:(id)sender;
 - (IBAction)findFromContacts:(id)sender;
 - (IBAction)findFromTwitter:(id)sender;
 - (IBAction)findFromStamped:(id)sender;
