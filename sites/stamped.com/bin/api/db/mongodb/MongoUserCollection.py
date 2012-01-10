@@ -136,7 +136,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query})
 
-        data = result[-1]['value']['data']
+        try:
+            data = result[-1]['value']['data']
+        except:
+            return []
 
         users = []
         for i in data:
