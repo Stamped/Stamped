@@ -85,8 +85,66 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     @lazyProperty
     def _valid_re(self):
         return re.compile("[^\s\w-]+", re.IGNORECASE)
-    
+
     def searchUsers(self, query, limit=0):
+        query = query.lower()
+        query = self._valid_re.sub('', query)
+        
+        if len(query) == 0:
+            return []
+
+        m = bson.code.Code("""function () {
+            var score = 0.0;
+            score = (20.0 - this.screen_name.length) / 40.0;
+            if (this.stats.num_stamps > 0) {
+                score = score + Math.log(this.stats.num_stamps) / 4.0;
+            }
+            if (this.stats.num_followers > 0) {
+                score = score + Math.log(this.stats.num_followers) / 8.0;
+            }
+            if (this.screen_name_lower == queryString) {
+                score = score + 10.0;
+            }
+            emit('query', {user: this, score:score});
+        }""")
+
+        r = bson.code.Code("""function(key, values) {
+            var out = [];
+            var min = 0.0;
+            function sortOut(a, b) {
+                return b.score - a.score;
+            }
+            values.forEach(function(v) {
+                if (out.length < 10) {
+                    out[out.length] = {score:v.score, user:v.user}
+                    if (v.score < min) { min = v.score; }
+                } else {
+                    if (v.score > min) {
+                        out[out.length] = {score:v.score, user:v.user}
+                        out.sort(sortOut);
+                        out.pop()
+                    }
+                }
+            });
+            var obj = new Object();
+            obj.data = out
+            return obj;
+        }""")
+
+        user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
+                              {"name_lower": {"$regex": query}}]}
+
+        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':q})
+
+        data = result[-1]['value']['data']
+
+        users = []
+        for user in data:
+            users.append(self._convertFromMongo(user))
+
+        return users
+    
+    def searchUsersOld(self, query, limit=0):
         query = query.lower()
         query = self._valid_re.sub('', query)
         
