@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import re, utils
@@ -11,11 +11,11 @@ import re, utils
 from utils import abstract
 from errors import Fail
 
-from ADeploymentSystem import ADeploymentSystem
+from ADeploymentPlatform import ADeploymentPlatform
 
-class DeploymentSystem(ADeploymentSystem):
-    def __init__(self, name, options, stack_class):
-        ADeploymentSystem.__init__(self, name, options)
+class DeploymentPlatform(ADeploymentPlatform):
+    def __init__(self, stack_class):
+        ADeploymentPlatform.__init__(self)
         
         self.stack_class = stack_class
         self._stacks = { }

@@ -2,13 +2,13 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
 import re, os, time, utils
 
-from ..DeploymentSystem     import DeploymentSystem
+from ..DeploymentPlatform     import DeploymentPlatform
 from errors                 import Fail
 
 from datetime               import datetime
@@ -21,10 +21,11 @@ AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY    = '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'
 AWS_AMI_USER_ID   = '688550672341'
 
-class AWSDeploymentSystem(DeploymentSystem):
-    def __init__(self, name, options):
+class AWSDeploymentPlatform(DeploymentPlatform):
+    def __init__(self, options):
         self.commonOptions = '--headers'
-        DeploymentSystem.__init__(self, name, options, AWSDeploymentStack)
+        DeploymentPlatform.__init__(self, AWSDeploymentStack)
+        self.options = options
         self._ami_re = re.compile('.*stamped\.base\.ami \(([0-9]+)-([0-9]+)-([0-9]+) +([0-9]+)\.([0-9]+)\.([0-9]+)\).*')
     
     def _get_security_group(self, name):
@@ -224,7 +225,6 @@ class AWSDeploymentSystem(DeploymentSystem):
         for i in xrange(len(images)):
             try:
                 image = images[-(i + 1)]
-                
                 # stamped.base.ami (2011-12-7 22.47.9)
                 
                 if image.state == u'available':

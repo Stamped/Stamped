@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import os, sys, utils
-from optparse import OptionParser
 
-from deployments import AWSDeploymentSystem, LocalDeploymentSystem
-from errors import Fail
+from optparse   import OptionParser
+from platforms  import AWSDeploymentPlatform
+from errors     import Fail
 
 available_commands = set([
     # crud
@@ -61,7 +61,7 @@ def main():
     # parse commandline
     (options, args) = parseCommandLine()
     
-    deploymentSystem = AWSDeploymentSystem(AWSDeploymentSystem.__name__, options)
+    deploymentSystem = AWSDeploymentPlatform(options)
     command = args[0]
     
     func = getattr(deploymentSystem, command, None)

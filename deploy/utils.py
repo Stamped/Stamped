@@ -1,14 +1,15 @@
 #!/usr/bin/python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import os, pickle, sys, threading, traceback
+
 from subprocess import Popen, PIPE
-from functools import wraps
+from functools  import wraps
 
 def shell(cmd, customEnv=None):
     if customEnv:
@@ -241,12 +242,12 @@ class OrderedDict(dict, MutableMapping):
         inst_dict.pop('_keys', None)
         return (self.__class__, (items,), inst_dict)
 
-    setdefault = MutableMapping.setdefault
-    update = MutableMapping.update
-    pop = MutableMapping.pop
-    keys = MutableMapping.keys
-    values = MutableMapping.values
-    items = MutableMapping.items
+    setdefault  = MutableMapping.setdefault
+    update      = MutableMapping.update
+    pop         = MutableMapping.pop
+    keys        = MutableMapping.keys
+    values      = MutableMapping.values
+    items       = MutableMapping.items
 
     def __repr__(self):
         if not self:
@@ -269,6 +270,8 @@ class OrderedDict(dict, MutableMapping):
         return dict.__eq__(self, other)
 
 def abstract(func):
+    """ marks the target function as abstract """
+    
     def wrapper(*__args, **__kwargs):
         raise NotImplementedError('Missing required %s() method' % func.__name__)
     
