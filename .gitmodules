@@ -5,5 +5,5 @@
 	path = clients/ios/Twitter-OAuth-iPhone
 	url = git://github.com/bengottlieb/Twitter-OAuth-iPhone.git
 [submodule "clients/ios/Facebook-SDK"]
-	path = /clients/ios/Facebook-SDK
+	path = clients/ios/Facebook-SDK
 	url = git://github.com/facebook/facebook-ios-sdk.git
