@@ -2,12 +2,12 @@
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
 import config, json, pickle, os, re, string, utils
-import AWSDeploymentSystem
+import AWSDeploymentPlatform
 
 from ADeploymentStack       import ADeploymentStack
 from AWSInstance            import AWSInstance
@@ -24,8 +24,6 @@ from pprint                 import pprint
 from fabric.operations      import *
 from fabric.api             import *
 import fabric.contrib.files as fabricfiles
-
-ELASTIC_IP_ADDRESS = '184.73.229.100'
 
 class AWSDeploymentStack(ADeploymentStack):
     def __init__(self, name, system, instances=None):
@@ -720,8 +718,8 @@ class AWSDeploymentStack(ADeploymentStack):
             utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
             
             # get all ELBs
-            conn = ELBConnection(AWSDeploymentSystem.AWS_ACCESS_KEY_ID, 
-                                 AWSDeploymentSystem.AWS_SECRET_KEY)
+            conn = ELBConnection(AWSDeploymentPlatform.AWS_ACCESS_KEY_ID, 
+                                 AWSDeploymentPlatform.AWS_SECRET_KEY)
             elbs = conn.get_all_load_balancers()
             the_elb = None
             

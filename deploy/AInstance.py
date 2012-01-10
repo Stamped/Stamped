@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import time, utils
 
-from pprint import pprint
-from errors import *
 from utils  import abstract
+from errors import *
 
 class AInstance(object):
     def __init__(self, stack, config):
@@ -119,19 +118,9 @@ class AInstance(object):
     
     def __str__(self):
         if self.stack is not None:
-            stack_name = self.stack.name
+            stack_name = "%s." % self.stack.name
         else:
-            stack_name = 'null'
+            stack_name = ""
         
-        name = "%s(%s.%s)" % (self.__class__.__name__, stack_name, self.name)
-        
-        #if self.state == 'running':
-        #    try:
-        #        public_dns_name = self.public_dns_name
-        #        if public_dns_name != None and len(public_dns_name) > 0:
-        #            return "%s %s" % (name, public_dns_name)
-        #    except NotInitializedError:
-        #        pass
-        
-        return name
+        return "%s(%s%s)" % (self.__class__.__name__, stack_name, self.name)
 

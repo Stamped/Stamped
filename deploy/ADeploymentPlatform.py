@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2012 Stamped.com"
-__license__ = "TODO"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import utils
 from utils import abstract
 
-class ADeploymentSystem(object):
-    def __init__(self, name, options):
-        self.name = name
-        self.options = options
+class ADeploymentPlatform(object):
+    def __init__(self):
+        pass
     
     @abstract
     def bootstrap(self, *args):
@@ -78,5 +77,5 @@ class ADeploymentSystem(object):
         return utils.shell3(cmd, env)
     
     def __str__(self):
-        return self.name
+        return self.__class__.__name__
 
