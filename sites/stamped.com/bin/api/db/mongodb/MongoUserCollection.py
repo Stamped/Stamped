@@ -89,9 +89,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def searchUsers(self, query, limit=0):
         query = query.lower()
         query = self._valid_re.sub('', query)
-        
+
         if len(query) == 0:
             return []
+        
+        users = []
+        
+        try:
+            users.append(self.getUserByScreenName(query))
+        except:
+            pass
 
         m = bson.code.Code("""function () {
             var score = 0.0;
@@ -112,7 +119,9 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             var out = [];
             var min = 0.0;
             function sortOut(a, b) {
-                return b.score - a.score;
+                if (a.score > 0) { scoreA = a.score } else { scoreA = 0 }
+                if (b.score > 0) { scoreB = b.score } else { scoreB = 0 }
+                return scoreB - scoreA;
             }
             values.forEach(function(v) {
                 if (out.length < 20) {
@@ -126,6 +135,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                     }
                 }
             });
+            out.sort(sortOut);
             var obj = new Object();
             obj.data = out
             return obj;
@@ -134,18 +144,23 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
 
-        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query})
+        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query}, limit=1000)
 
         try:
             data = result[-1]['value']['data']
+            assert(isinstance(data, list))
         except:
             return []
 
-        users = []
         for i in data:
-            users.append(self._convertFromMongo(i['user']))
+            try:
+                user = self._convertFromMongo(i['user'])
+                if user.screen_name.lower() != query:
+                    users.append(user)
+            except:
+                continue
 
-        return users
+        return users[:20]
     
     def searchUsersOld(self, query, limit=0):
         query = query.lower()
