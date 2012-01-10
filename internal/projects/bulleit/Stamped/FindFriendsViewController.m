@@ -60,6 +60,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @property (nonatomic, retain) NSMutableArray* contactsNotUsingStamped;
 @property (nonatomic, retain) NSMutableArray* invitedContacts;
 @property (nonatomic, assign) BOOL searchFieldHidden;
+@property (nonatomic, assign) BOOL showToolbar;
 @property (nonatomic, readonly) FindFriendsToolbar* toolbar;
 
 @end
@@ -82,6 +83,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @synthesize nipple = nipple_;
 @synthesize tableView = tableView_;
 @synthesize searchFieldHidden = searchFieldHidden_;
+@synthesize showToolbar = showToolbar_;
 @synthesize toolbar = toolbar_;
 @synthesize signInTwitterView = signInTwitterView_;
 @synthesize signInFacebookView = signInFacebookView_;
@@ -249,9 +251,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
-  stampedButton_.selected = YES;
-  
+  stampedButton_.selected = YES;  
   [tableView_ reloadData];
+  self.showToolbar = NO;
 }
 
 - (IBAction)findFromContacts:(id)sender {
@@ -266,6 +268,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
+  self.showToolbar = YES;
   if (contactFriends_) {
     [self.tableView reloadData];
     return;
@@ -324,8 +327,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];
-  } 
-  else {
+    self.showToolbar = YES;
+  } else {
+    self.showToolbar = NO;
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = YES;
     self.signInTwitterView.hidden = NO;
@@ -347,8 +351,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     self.signInFacebookView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromFacebook];
-  }
-  else {
+    self.showToolbar = YES;
+  } else {
+    self.showToolbar = NO;
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = NO;
     self.signInTwitterView.hidden = YES;
@@ -379,6 +384,28 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
   tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, yOffset), 0, yOffset);
   searchField_.text = nil;
+}
+
+- (void)setShowToolbar:(BOOL)showToolbar {
+  if (showToolbar_ == showToolbar)
+    return;
+
+  showToolbar_ = showToolbar;
+  
+  CGFloat yOffset = CGRectGetHeight(toolbar_.frame);
+  if (showToolbar)
+    yOffset *= -1;
+  
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:(UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState)
+                   animations:^{
+                     toolbar_.frame = CGRectOffset(toolbar_.frame, 0, yOffset);
+                     CGRect tableFrame = tableView_.frame;
+                     tableFrame.size.height += yOffset;
+                     tableView_.frame = tableFrame;
+                   }
+                   completion:nil];
 }
 
 - (UITableViewCell*)cellFromSubview:(UIView*)view {
