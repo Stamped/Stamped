@@ -243,7 +243,7 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying ensure_index (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
 
-    def inline_map_reduce(m, r, full_response=False, **kwargs):
+    def inline_map_reduce(self, m, r, full_response=False, **kwargs):
         num_retries = 0
         max_retries = 5
         

@@ -134,13 +134,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
 
-        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':q})
+        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query})
 
         data = result[-1]['value']['data']
 
         users = []
-        for user in data:
-            users.append(self._convertFromMongo(user))
+        for i in data:
+            users.append(self._convertFromMongo(i['user']))
 
         return users
     
