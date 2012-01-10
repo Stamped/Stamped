@@ -225,8 +225,7 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying remove (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
     
-    def ensure_index(self, key_or_list, deprecated_unique=None,
-                     ttl=300, **kwargs):
+    def ensure_index(self, key_or_list, deprecated_unique=None, ttl=300, **kwargs):
         num_retries = 0
         max_retries = 5
         
@@ -243,6 +242,25 @@ class MongoCollectionProxy(object):
                     raise
                 logs.info("Retrying ensure_index (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
+
+    def inline_map_reduce(m, r, full_response=False, **kwargs):
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                ret = self._collection.inline_map_reduce(m, r, full_response=False, **kwargs)
+                return ret
+            except AutoReconnect as e:
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect after %d retries (%s)" % \
+                        (max_retries, self._parent.__class__.__name__)
+                    logs.warning(msg)
+                    raise
+                logs.info("Retrying inline_map_reduce (%s)" % (self._parent.__class__.__name__))
+                time.sleep(0.25)
+
     
     def __str__(self):
         return self.__class__.__name__
