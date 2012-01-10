@@ -115,7 +115,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 return b.score - a.score;
             }
             values.forEach(function(v) {
-                if (out.length < 10) {
+                if (out.length < 20) {
                     out[out.length] = {score:v.score, user:v.user}
                     if (v.score < min) { min = v.score; }
                 } else {
