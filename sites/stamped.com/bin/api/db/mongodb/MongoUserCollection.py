@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, re
+import Globals, re, bson
 
 from datetime           import datetime
 from math               import log10
