@@ -17,7 +17,8 @@ try:
 except ImportError:
     raise Exception("required import gevent not found! have you activated the required virtualenv?")
 
-import sys
+import os, sys
+
 # note: celeryd does not seem to work woth monkey patching enabled...
 if not 'celery' in sys.modules and not 'celery.task' in sys.modules:
     # note: in order for gevent to work properly, this *must* be the first module 
@@ -30,13 +31,7 @@ if not 'celery' in sys.modules and not 'celery.task' in sys.modules:
     # patches stdlib (including socket and ssl modules) to cooperate with other greenlets
     monkey.patch_all()
 
-# patch pymongo to be gevent async compatible 
-# note: the pymongo patch appears to not play well with too many open connections
-#import patch_pymongo
-
 #-----------------------------------------------------------
-
-import os, sys
 
 base = os.path.dirname(os.path.abspath(__file__))
 
