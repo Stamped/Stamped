@@ -28,6 +28,7 @@ from libs.TheTVDB   import TheTVDB
 
 from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
+from Memcache       import memcached_function
 
 # Stamped coords: '40.736006685255155,-73.98884296417236'
 
@@ -1085,7 +1086,7 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     @lru_cache(maxsize=64)
-    @cached_function('_get_cache')
+    @memcached_function('_get_cache')
     def _find_apple(self, input_query, subcategory_filter):
         output = []
         
@@ -1146,7 +1147,7 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     @lru_cache(maxsize=64)
-    @cached_function('_get_cache')
+    @memcached_function('_get_cache')
     def _find_amazon(self, input_query):
         output = []
         
@@ -1172,7 +1173,7 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     @lru_cache(maxsize=64)
-    @cached_function('_get_cache')
+    @memcached_function('_get_cache')
     def _find_tv(self, input_query):
         output = []
         
@@ -1192,7 +1193,7 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     @lru_cache(maxsize=64)
-    @cached_function('_get_cache')
+    @memcached_function('_get_cache')
     def _find_google_national(self, input_query):
         output = []
         
