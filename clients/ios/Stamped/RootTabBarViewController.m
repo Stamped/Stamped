@@ -125,6 +125,13 @@
   [self setTabBarIcons];
 }
 
+- (void)showFriendFinder {
+#warning remove
+  FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsSourceSuggested];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
+}
+
 - (void)finishViewInit {
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
@@ -153,12 +160,11 @@
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
     [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   }
-
 #warning remove
-  FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsSourceSuggested];
-  [self presentModalViewController:vc animated:YES];
-  [vc release];
+  [self performSelector:@selector(showFriendFinder) withObject:nil afterDelay:0];
 }
+
+
 
 - (void)ensureCorrectHeightOfViewControllers {
   for (UIViewController* controller in self.viewControllers) {

@@ -8,11 +8,20 @@
 
 #import "STToolbar.h"
 
+@class FindFriendsToolbar;
+
+@protocol FindFriendsToolbarDelegate
+@required
+- (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button;
+@end
+
 @interface FindFriendsToolbar : STToolbar
 
 @property (nonatomic, readonly) UIButton* previewButton;
 @property (nonatomic, readonly) UIButton* mainActionButton;
 @property (nonatomic, readonly) UIButton* addEmailsButton;
 @property (nonatomic, readonly) UIButton* centerButton;
+
+@property (nonatomic, assign) id<FindFriendsToolbarDelegate> delegate;
 
 @end

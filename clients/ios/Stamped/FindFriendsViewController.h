@@ -9,6 +9,8 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "FindFriendsToolbar.h"
+
 @class STSearchField;
 
 typedef enum {
@@ -22,6 +24,7 @@ typedef enum {
 
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
+                                                        FindFriendsToolbarDelegate,
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
                                                         UITextFieldDelegate,

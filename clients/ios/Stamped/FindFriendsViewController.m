@@ -14,7 +14,6 @@
 #import "STSectionHeaderView.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
-#import "FindFriendsToolbar.h"
 #import "FriendshipManager.h"
 #import "InviteFriendTableViewCell.h"
 #import "PeopleTableViewCell.h"
@@ -122,6 +121,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  toolbar_.delegate = nil;
   toolbar_ = nil;
   
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -182,6 +182,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
   toolbar_ = [[FindFriendsToolbar alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.frame),
                                                                   CGRectGetWidth(self.view.frame), 49)];
+  toolbar_.delegate = self;
   [self.view addSubview:toolbar_];
   [toolbar_ release];
   
@@ -219,6 +220,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  toolbar_.delegate = nil;
   toolbar_ = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
@@ -928,6 +930,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self removeUsersToInviteWithIdentifers:[objects valueForKeyPath:@"@distinctUnionOfObjects.identifier"]];
     [self.tableView reloadData];
+    toolbar_.centerButton.enabled = (contactsNotUsingStamped_.count > 0);
   }
   
   else if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
@@ -1105,6 +1108,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [searchField_ resignFirstResponder];
+}
+
+#pragma FindFriendsToolbarDelegate methods.
+
+- (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button {
+  [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
+                        atScrollPosition:UITableViewScrollPositionTop
+                                animated:YES];
 }
 
 @end

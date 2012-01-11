@@ -10,12 +10,17 @@
 
 #import "UIButton+Stamped.h"
 
+@interface FindFriendsToolbar ()
+- (void)buttonPressed:(id)sender;
+@end
+
 @implementation FindFriendsToolbar
 
 @synthesize mainActionButton = mainActionButton_;
 @synthesize previewButton = previewButton_;
 @synthesize addEmailsButton = addEmailsButton_;
 @synthesize centerButton = centerButton_;
+@synthesize delegate = delegate_;
 
 - (void)commonInit {
   [super commonInit];
@@ -34,6 +39,9 @@
   addEmailsButton_ = [UIButton stampedToolbarButton];
   [self addSubview:addEmailsButton_];
   addEmailsButton_.hidden = YES;
+
+  for (UIButton* b in [NSArray arrayWithObjects:mainActionButton_, previewButton_, centerButton_, addEmailsButton_, nil])
+    [b addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)dealloc {
@@ -41,6 +49,7 @@
   previewButton_ = nil;
   addEmailsButton_ = nil;
   centerButton_ = nil;
+  delegate_ = nil;
   [super dealloc];
 }
 
@@ -58,6 +67,14 @@
   [centerButton_ sizeToFit];
   width = CGRectGetWidth(centerButton_.frame) + 15;
   centerButton_.frame = CGRectMake(160 - ceilf(width / 2), 10, width, 29);
+}
+
+#pragma mark - Private methods.
+
+- (void)buttonPressed:(id)sender {
+  if (sender == centerButton_) {
+    [delegate_ toolbar:self centerButtonPressed:centerButton_];
+  }
 }
 
 @end

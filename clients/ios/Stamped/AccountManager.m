@@ -133,7 +133,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [[UIApplication sharedApplication] unregisterForRemoteNotifications];
     [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
     [passwordKeychainItem_ resetKeychainItem];
-    [self showFirstRunViewController];
+    [self performSelector:@selector(showFirstRunViewController) withObject:nil afterDelay:0];
     return;
   }
 
@@ -141,7 +141,7 @@ static AccountManager* sharedAccountManager_ = nil;
   if (screenName.length > 0) {
     self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
   } else {
-    [self showFirstRunViewController];
+    [self performSelector:@selector(showFirstRunViewController) withObject:nil afterDelay:0];
     return;
   }
   NSString* accessToken = [accessTokenKeychainItem_ objectForKey:(id)kSecValueData];
