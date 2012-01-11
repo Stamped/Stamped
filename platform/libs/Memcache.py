@@ -149,10 +149,9 @@ class InvalidatingMemcache(Memcache):
 # object_id => [ dependencies ]
 # 
 
-def cached_function(key_prefix=None, get_cache_client=StampedMemcache):
+def cached_function(get_cache_client, key_prefix=None):
     
     def decorating_function(user_function):
-        cache = get_cache_client()
         kwd_mark = object() # separate positional and keyword args
         
         if key_prefix is None:
@@ -160,6 +159,7 @@ def cached_function(key_prefix=None, get_cache_client=StampedMemcache):
         
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
+            cache = getattr(args[0], get_cache_client)()
             # cache key records both positional and keyword args
             key = "%s:%s" % (key_prefix, args)
             

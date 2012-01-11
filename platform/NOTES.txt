@@ -1,8 +1,4 @@
 
-
-Bieber:
-    * limit activity notifications to last N or so
-    * collapse adjacent activity items into each other
     * ensure async tasks are logged and accessible from logger
     * refactor repo layout and, in particular, web stuff
     * alerts => async tasks
@@ -11,21 +7,12 @@ Bieber:
     * integrity checking daemon
     * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
 
-* stamp image async resizing
-* update stamps/create API for async image uploads
-* memcached
+Bieber:
+    * limit activity notifications to last N or so
+    * collapse adjacent activity items into each other
 
 * sell alienware
 * sell buddha
-
-
-* @cache decorator
-    * pickler
-    * in-memory vs disk
-    * expiration
-    * reading cached value directly
-    * clear cached value
-    * clear entire cache
 
 * app companies being returned as 'artist'
 * debug distributing reads to secondaries
@@ -44,15 +31,7 @@ Bieber:
 * remove iTunes affiliate search dependency
 * PROD tag on stack
 
-* move custom_entities cron job over to monitor instance and investigate why it's taking so long to run with high CPU (could just be since it was being run 9 separate times concurrently)
 * remove linked entity corruption from activity collection
-* improve monitoring notifications for prolonged outages
-* ELB cloudwatch metrics => monitoring solution
-* amazon product API
-* twitter/fb integration on the backend
-
-* async task queue for bottlenecks (e.g., NYMag stamping something => writing to all followers' inboxes synchronously before stamp completes)
-    * local / synchronous fallback if async message broker is unavailable
 
 each system:
     * zero or more stacks
@@ -86,6 +65,9 @@ AContinuousDeploymentSystem?
 rename deployments => platforms
 
 OLD:
+    * stamp image async resizing
+    * update stamps/create API for async image uploads
+    * memcached
     * 6 API instances - 3 per AZ
     * cleanup django / gunicorn www and httpapi layout
     * add iTunes apps to entity db
@@ -108,6 +90,14 @@ OLD:
     * unable to find primary? try a different node...
     * look into renaming terminal title when ./connect'ing into a machine
         * setting hostname of remote instance should do the trick
+    * improve monitoring notifications for prolonged outages
+    * ELB cloudwatch metrics => monitoring solution
+    * move custom_entities cron job over to monitor instance and investigate why it's taking so long to run with high CPU (could just be since it was being run 9 separate times concurrently)
+    * amazon product API
+    * twitter/fb integration on the backend
+    
+    * async task queue for bottlenecks (e.g., NYMag stamping something => writing to all followers' inboxes synchronously before stamp completes)
+        * local / synchronous fallback if async message broker is unavailable
     
     34.026401,-118.38947899
 
@@ -141,34 +131,6 @@ db.users.group({ reduce: function(obj,prev) { prev.count += 1; if (obj.stats.has
 
 script to find false positives from google places
 
-Average # of daily News items per user
-Breakdown in terms of frequency of various new items (comments, likes, to-dos, follow)
-# of affiliate links pressed
-# of user actions broken down by type (stamp, like, comment, todo, purchase, etc.)
-Average time spent per session over time
-Average # of sessions per user per week/month
-# of requests to third party APIs (Google, Apple, AMZN)
-
-Breakdown of stamps by category
-
-Distribution of items on todo list per user
-Distribution of followers/following per user
-
-Distribution of stamps with credit versus without
-Distribution of stamps with photos versus without
-
-# of daily active users (had at least one session in a day)
-# of weekly active users (had at least one session in a week)
-# of monthly active users (had at least 1 session in a month)
-
-Distribution of comments per stamp
-Distribution of comments per user
-Distribution of stamps per user         (total, daily, weekly, monthly)
-Distribution of stamps left per user
-Distribution of likes per stamp         (total, daily, weekly, monthly)
-Distribution of likes per user
-
-# of stamps created per day (over time)
 
 # URI STATS
 db.logstats.group({reduce: function(obj,prev) { prev.csum += 1; },initial: {csum:0}, key:{uri:1}})

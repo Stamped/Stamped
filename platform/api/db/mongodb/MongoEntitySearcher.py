@@ -257,6 +257,9 @@ class MongoEntitySearcher(EntitySearcher):
     def _theTVDB(self):
         return TheTVDB()
     
+    def _get_cache(self):
+        return self.api._cache
+    
     @lru_cache(maxsize=128)
     def getSearchResults(self, 
                          query, 
@@ -632,7 +635,7 @@ class MongoEntitySearcher(EntitySearcher):
         # filter and rank results #
         # ----------------------- #
         
-        results = results.values()
+        results   = results.values()
         converted = False
         
         def _convert(r):
@@ -1081,7 +1084,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @cached_function('_get_cache')
     def _find_apple(self, input_query, subcategory_filter):
         output = []
         
@@ -1141,7 +1145,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @cached_function('_get_cache')
     def _find_amazon(self, input_query):
         output = []
         
@@ -1166,7 +1171,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @cached_function('_get_cache')
     def _find_tv(self, input_query):
         output = []
         
@@ -1185,7 +1191,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @cached_function('_get_cache')
     def _find_google_national(self, input_query):
         output = []
         
