@@ -332,8 +332,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [searchResultMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", @"search_id", @"searchID", nil];
   [searchResultMapping mapAttributes:@"category", @"title", @"subtitle", @"distance", nil];
   
-  // Example date string: 2011-07-19 20:49:42.037000
+  // Example date string: 2011-07-19 20:49:42.037000 OR 2011-07-19 20:49:42
   [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
+  [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss" inTimeZone:nil];
   
   [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setMapping:stampMapping forKeyPath:@"Stamp"];

@@ -9,7 +9,10 @@
 #import "UIButton+Stamped.h"
 
 @interface UIButton (StampedInternal)
-+ (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg highlightedBackgroundImage:(UIImage*)highlightedBg disabledBackgroundImage:(UIImage*)disabledBg;
++ (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg
+                   highlightedBackgroundImage:(UIImage*)highlightedBg
+                      selectedBackgroundImage:(UIImage*)selectedBg
+                      disabledBackgroundImage:(UIImage*)disabledBg;
 @end
 
 @implementation UIButton (Stamped)
@@ -19,6 +22,7 @@
   UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_green_hilited"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
                                      highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:nil
                                         disabledBackgroundImage:nil];
 
   [button setTitle:@"Follow" forState:UIControlStateNormal];
@@ -35,6 +39,7 @@
   UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
                                      highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:nil
                                         disabledBackgroundImage:nil];
 
   [button setTitle:@"Following" forState:UIControlStateNormal];
@@ -52,6 +57,7 @@
   UIImage* disabledBg = [UIImage imageNamed:@"buttonBG_blue_disabled"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
                                      highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:nil
                                         disabledBackgroundImage:disabledBg];
   
   [button setTitle:@"Action Butten!" forState:UIControlStateNormal];
@@ -63,10 +69,29 @@
   return button;
 }
 
++ (UIButton*)stampedFlatToggleButton {
+  UIImage* bg = [UIImage imageNamed:@"buttonBG_blue"];
+  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_blue_hilited"];
+  UIImage* disabledBg = [UIImage imageNamed:@"buttonBG_blue_disabled"];
+  UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
+                                     highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:nil
+                                        disabledBackgroundImage:disabledBg];
+  
+  [button setTitle:@"Flat toggle!" forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+  [button setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.2] forState:UIControlStateNormal];
+  button.titleLabel.shadowOffset = CGSizeMake(0, -1);
+  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  
+  return button;
+}
+
 #pragma mark - Private methods.
 
 + (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg
                    highlightedBackgroundImage:(UIImage*)highlightedBg
+                      selectedBackgroundImage:(UIImage*)selectedBg
                       disabledBackgroundImage:(UIImage*)disabledBg {
   UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
   if ([bg respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
@@ -84,6 +109,7 @@
   
   [button setBackgroundImage:bg forState:UIControlStateNormal];
   [button setBackgroundImage:highlightedBg forState:UIControlStateHighlighted];
+  [button setBackgroundImage:selectedBg forState:UIControlStateSelected];
   [button setBackgroundImage:disabledBg forState:UIControlStateDisabled];
 
   return button;
