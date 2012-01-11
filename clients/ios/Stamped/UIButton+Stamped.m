@@ -46,6 +46,25 @@
   return button;
 }
 
++ (UIButton*)stampedBlueButton {
+  UIImage* bg = [UIImage imageNamed:@"buttonBG_blue"];
+  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_blue_hilited"];
+  UIImage* disabledBg = [UIImage imageNamed:@"buttonBG_blue_disabled"];
+  UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
+                                     highlightedBackgroundImage:highlightedBg
+                                        disabledBackgroundImage:disabledBg];
+  
+  [button setTitle:@"Action Butten!" forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+  [button setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.2] forState:UIControlStateNormal];
+  button.titleLabel.shadowOffset = CGSizeMake(0, -1);
+  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+
+  return button;
+}
+
+#pragma mark - Private methods.
+
 + (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg
                    highlightedBackgroundImage:(UIImage*)highlightedBg
                       disabledBackgroundImage:(UIImage*)disabledBg {

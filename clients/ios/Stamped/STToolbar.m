@@ -10,10 +10,6 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-@interface STToolbar ()
-- (void)commonInit;
-@end
-
 @implementation STToolbar
 
 - (id)initWithFrame:(CGRect)frame {

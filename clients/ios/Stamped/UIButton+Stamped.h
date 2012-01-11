@@ -12,5 +12,6 @@
 
 + (UIButton*)stampedFollowButton;
 + (UIButton*)stampedunfollowButton;
++ (UIButton*)stampedBlueButton;
 
 @end

@@ -488,8 +488,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   // Twitter
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     // If we're watching, fade in the table.
-    if (self.findSource == FindFriendsSourceTwitter && !self.signInTwitterView.hidden
-        && twitterFriends_) {
+    if (self.findSource == FindFriendsSourceTwitter && !self.signInTwitterView.hidden && twitterFriends_) {
+      self.showToolbar = YES;
       self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
@@ -500,20 +500,18 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          [self.signInTwitterActivityIndicator stopAnimating];
                          self.signInTwitterConnectButton.enabled = YES;
                        }];
-    }
-    // Otherwise, just make sure the table isn't hidden.
-    else if (!self.signInTwitterView.hidden && twitterFriends_) {
+    } else if (!self.signInTwitterView.hidden && twitterFriends_) {  // Otherwise, just make sure the table isn't hidden.
       self.signInTwitterView.hidden = YES;
       [self.signInTwitterActivityIndicator stopAnimating];
       self.signInTwitterConnectButton.enabled = YES;
     }
-  }
-  else {
+  } else {
     self.twitterFriends = nil;
     [self.signInTwitterActivityIndicator stopAnimating];
     self.signInTwitterConnectButton.enabled = YES;
     // If we're watching, fade out the table.
     if (self.findSource == FindFriendsSourceTwitter && self.tableView.hidden == NO) {
+      self.showToolbar = NO;
       self.searchFieldHidden = YES;
       self.signInTwitterView.hidden = NO;
       self.signInFacebookView.hidden = YES;
@@ -524,9 +522,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          self.tableView.alpha = 1.0;
                        }];
     }
-    // Otherwise, just make sure the table is hidden.
-//    else
-//      self.signInTwitterView.hidden = NO;
   }
 
   
@@ -535,6 +530,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     if (self.findSource == FindFriendsSourceFacebook && !self.signInFacebookView.hidden
         && facebookFriends_) {
       self.searchFieldHidden = YES;
+      self.showToolbar = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
       [UIView animateWithDuration:0.4
@@ -544,19 +540,18 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          [self.signInFacebookActivityIndicator stopAnimating];
                          self.signInFacebookConnectButton.enabled = YES;
                        }];
-    }
-    else if (!self.signInFacebookView.hidden && facebookFriends_) {
+    } else if (!self.signInFacebookView.hidden && facebookFriends_) {
       self.signInFacebookView.hidden = YES;
       [self.signInFacebookActivityIndicator stopAnimating];
       self.signInFacebookConnectButton.enabled = YES;
     }
-  }
-  else {
+  } else {
     self.facebookFriends = nil;
     [self.signInFacebookActivityIndicator stopAnimating];
     self.signInFacebookConnectButton.enabled = YES;
     if (self.findSource == FindFriendsSourceFacebook && self.tableView.hidden == NO) {
       self.searchFieldHidden = YES;
+      self.showToolbar = NO;
       self.signInFacebookView.hidden = NO;
       self.signInTwitterView.hidden = YES;
       [UIView animateWithDuration:0.4
@@ -566,8 +561,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          self.tableView.alpha = 1.0;
                        }];
     }
-//    else
-//      self.signInFacebookView.hidden = NO;
   }
 }
 

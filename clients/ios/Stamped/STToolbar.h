@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface STToolbar : UIView
-
+// NOT PUBLIC. Meant to be a protected method for subclasses.
+- (void)commonInit;
 @end

@@ -10,4 +10,9 @@
 
 @interface FindFriendsToolbar : STToolbar
 
+@property (nonatomic, readonly) UIButton* previewButton;
+@property (nonatomic, readonly) UIButton* mainActionButton;
+@property (nonatomic, readonly) UIButton* inviteButton;
+
+
 @end
