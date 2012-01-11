@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
-import datetime, logging, os, threading, hashlib, random, time
+import datetime, logging, logging.handlers, os, threading, hashlib, random, time
 import sys, traceback, string
 import inspect, pprint
 
@@ -26,7 +26,7 @@ log.addHandler(stream_handler)
 try:
     log_file = "/stamped/logs/wsgi.log"
     if os.path.exists(os.path.dirname(log_file)):
-        file_handler = logging.WatchedFileHandler(log_file)
+        file_handler = logging.handlers.WatchedFileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         log.addHandler(file_handler)
