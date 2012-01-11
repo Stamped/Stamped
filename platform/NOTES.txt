@@ -37,7 +37,7 @@ Bieber:
 * continuous integration
     * how to see current revision in git?
 
-* refactor sites/stamped.com/bin layout
+* refactor repository layout
 * investigate autocomplete and add cron job
 
 * cap tempentities

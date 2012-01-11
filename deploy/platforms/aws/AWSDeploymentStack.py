@@ -833,7 +833,7 @@ class AWSDeploymentStack(ADeploymentStack):
         # TODO: test just this portion
         
         for instance in test_instances:
-            test_cmd = "/stamped/stamped/sites/stamped.com/bin/tests/stampede/StressTests.py"
+            test_cmd = "/stamped/stamped/platform/tests/stampede/StressTests.py"
             log = "/stamped/logs/test.log"
             cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s >& %s < /dev/null' &" % \
                    (test_cmd, log)
