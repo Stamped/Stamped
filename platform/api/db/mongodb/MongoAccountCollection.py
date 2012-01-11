@@ -5,15 +5,15 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, auth, utils, logs
-from datetime import datetime
-from utils import lazyProperty
-from Schemas import *
+import Globals, utils, logs
 
-from AMongoCollection import AMongoCollection
-from MongoAlertAPNSCollection import MongoAlertAPNSCollection
+from datetime   import datetime
+from utils      import lazyProperty
+from Schemas    import *
 
-from AAccountDB import AAccountDB
+from AMongoCollection           import AMongoCollection
+from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
+from AAccountDB                 import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     

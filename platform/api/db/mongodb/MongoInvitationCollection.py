@@ -5,20 +5,18 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, auth, utils, logs
-from datetime import datetime
-from utils import lazyProperty
-from Schemas import *
+import Globals, utils, logs
+from datetime   import datetime
+from utils      import lazyProperty
+from Schemas    import *
 
-from AMongoCollection import AMongoCollection
+from AMongoCollection           import AMongoCollection
 from MongoInviteQueueCollection import MongoInviteQueueCollection
-# from AAccountDB import AAccountDB
 
 class MongoInvitationCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, 'invitations')
-        # AAccountDB.__init__(self)
     
     ### PUBLIC
     

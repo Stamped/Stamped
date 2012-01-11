@@ -5,8 +5,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
-import aws, copy, gevent, os, re, string, sys
+import Globals
+import keys.aws, utils
+import copy, gevent, os, re, string, sys
 
 from BeautifulSoup  import BeautifulSoup
 from optparse       import OptionParser
@@ -49,7 +50,7 @@ class AmazonAPI(object):
     }
     
     def __init__(self):
-        self.amazon = Amazon(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY, ASSOCIATE_ID)
+        self.amazon = Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID)
     
     def item_search(self, **kwargs):
         return self._item_helper(self.amazon.ItemSearch, **kwargs)

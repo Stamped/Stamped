@@ -23,7 +23,8 @@ if utils.is_ec2():
     
     for node in stack.nodes:
         if 'monitor' in node.roles:
-            host, port = node.private_ip_address, 5672
+            host = node.private_ip_address
+            break
 
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
@@ -33,7 +34,8 @@ utils.log('BROKER_URL: %s' % BROKER_URL)
 # (can be useful for debugging)
 #CELERYD_CONCURRENCY = 1
 
-# Enables error emails.
+"""
+# Enables error emails (note: haven't been able to get these error emails to actuall work).
 CELERY_SEND_TASK_ERROR_EMAILS = True
 
 # Name and email addresses of recipients
@@ -52,6 +54,7 @@ EMAIL_USE_SSL = True
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "notifications@stamped.com"
 EMAIL_HOST_PASSWORD = "mariotennis"
+"""
 
 # Always run tasks locally / synchronously, completely bypassing the async brokering / work queues
 # that Celery provides. Note that this can be extremely useful for debugging.

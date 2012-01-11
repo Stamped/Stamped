@@ -5,8 +5,10 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, urlparse
-import os, logs, re, time, Blacklist, auth
+import Globals, utils
+import os, logs, re, time, urlparse
+
+import Blacklist
 import libs.ec2_utils
 import libs.Memcache
 import tasks.APITasks

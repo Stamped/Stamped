@@ -43,8 +43,7 @@ class NetflixUser():
               http_url=self.authorizationUrl, parameters=params)
 
         return ( requestToken, oauthRequest.to_url() )
-
-
+    
     def getAccessToken(self, requestToken):
         client = self.client
 

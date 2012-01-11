@@ -6,8 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import aws, gzip, json, math, re, string, time, sys
-import unicodedata
+import gzip, json, math, re, string, time, sys, unicodedata
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
