@@ -7,11 +7,11 @@ __license__   = "TODO"
 
 import Globals, utils
 import os, sys, pymongo, json
-from optparse import OptionParser
-from utils import lazyProperty
-from datetime import *
 
-from errors import Fail
+from optparse   import OptionParser
+from utils      import lazyProperty
+from datetime   import *
+from errors     import Fail
 
 from db.mongodb.MongoLogsCollection import MongoLogsCollection
 
@@ -61,28 +61,28 @@ def main():
     # parse commandline
     options     = parseCommandLine()
     options     = options.__dict__
-
+    
     user_id     = options.pop('user_id', None)
     limit       = options.pop('limit', 10)
     errors      = options.pop('show_errors', False)
     path        = options.pop('path', False)
     severity    = options.pop('severity', None)
     verbose     = options.pop('verbose', False)
-
+    
     if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
         severity = None
-
+    
     if verbose:
         levels = ['debug', 'info', 'warning', 'error', 'critical']
     else:
         levels = ['info', 'warning', 'error', 'critical']
-
+    
     logs = MongoLogsCollection().getLogs(userId=user_id, limit=limit, errors=errors, \
                                             path=path, severity=severity)
     for i in xrange(len(logs)):
         print 
         print
-
+        
         if 'path' in logs[i] and 'method' in logs[i]:
             node = ''
             if 'node' in logs[i]:
@@ -90,49 +90,49 @@ def main():
             print '%-10s %s %s %s' % (i+1, logs[i]['method'], logs[i]['path'], node)
         else:
             print i+1
-
+        
         if 'result' in logs[i] and logs[i]['result'] != '200':
             print '%-10s %s ERROR' % ('', logs[i]['result'])
         print '-' * 40
-
+        
         if 'request_id' in logs[i]:
             print '%-10s %s' % ('ID:', logs[i]['request_id'])
-
+        
         if 'begin' in logs[i]:
             begin_utc = logs[i]['begin']
             begin_est = begin_utc - timedelta(hours=4)
             print '%-10s %s' % ('Begin:', begin_est.strftime("%a %b %d %H:%M:%S.%f"))
-
+            
             if 'finish' in logs[i]:
                 duration = logs[i]['finish'] - begin_utc
                 print '%-10s %s' % ('Duration:', duration)
-            
+        
         if 'token' in logs[i]:
             print '%-10s %s' % ('Token:', logs[i]['token'])
-            
+        
         if 'client_id' in logs[i]:
             print '%-10s %s' % ('Client:', logs[i]['client_id'])
-            
+        
         if 'user_id' in logs[i]:
             print '%-10s %s' % ('User:', logs[i]['user_id'])
-            
+        
         if 'headers' in logs[i] and options['show_headers']:
             print '%-10s %s' % ('Headers:', logs[i]['headers'])
-            
+        
         if 'form' in logs[i] and options['show_form']:
             j = json.dumps(logs[i]['form'], indent=4)
             prefix = 'Form:'
             for line in j.splitlines():
                 print '%-10s %s' % (prefix, line)
                 prefix = ''
-            
+        
         if 'output' in logs[i] and options['show_output']:
             j = json.dumps(json.loads(logs[i]['output']), indent=4)
             prefix = 'Output:'
             for line in j.splitlines():
                 print '%-10s %s' % (prefix, line)
                 prefix = ''
-
+        
         if 'log' in logs[i]:
             prefix = 'Logs:'
             for log in logs[i]['log']:
@@ -143,11 +143,11 @@ def main():
                         utils.printException()
                     
                     prefix = ''
-
+        
         if 'stack_trace' in logs[i]:
             print '-' * 40
             print logs[i]['stack_trace']
-
+    
     print
     
 
