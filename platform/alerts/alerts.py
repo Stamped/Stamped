@@ -23,8 +23,7 @@ from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 from MongoStampedAuth import MongoStampedAuth
 
-from APNSWrapper import APNSNotificationWrapper, APNSNotification
-import binascii
+from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackWrapper
 
 base = os.path.dirname(os.path.abspath(__file__))
 
