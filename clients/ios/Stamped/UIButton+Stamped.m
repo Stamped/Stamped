@@ -97,6 +97,7 @@
                                         disabledBackgroundImage:nil];
   
   [button setTitleColor:[UIColor colorWithRed:0.15 green:0.46 blue:0.89 alpha:1.0] forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor stampedLightGrayColor] forState:UIControlStateDisabled];
   [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.5] forState:UIControlStateNormal];
   button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];

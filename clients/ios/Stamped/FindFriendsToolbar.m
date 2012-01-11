@@ -21,12 +21,19 @@
   [super commonInit];
   mainActionButton_ = [UIButton stampedBlueButton];
   [self addSubview:mainActionButton_];
+  mainActionButton_.hidden = YES;
+
   previewButton_ = [UIButton stampedToolbarButton];
   [self addSubview:previewButton_];
+  previewButton_.hidden = YES;
+
   centerButton_ = [UIButton stampedBlueToolbarButton];
   [self addSubview:centerButton_];
-//  addEmailsButton_ = [UIButton stampedToolbarButton];
-//  [self addSubview:addEmailsButton_];
+  centerButton_.enabled = NO;
+
+  addEmailsButton_ = [UIButton stampedToolbarButton];
+  [self addSubview:addEmailsButton_];
+  addEmailsButton_.hidden = YES;
 }
 
 - (void)dealloc {

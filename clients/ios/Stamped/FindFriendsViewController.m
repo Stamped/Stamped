@@ -269,8 +269,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
   self.showToolbar = YES;
+  [toolbar_.centerButton setTitle:@"Invite via Email" forState:UIControlStateNormal];
+  [toolbar_ setNeedsLayout];
   if (contactFriends_) {
     [self.tableView reloadData];
+    [self.tableView setContentOffset:CGPointZero];
+    toolbar_.centerButton.enabled = contactsNotUsingStamped_.count > 0;
     return;
   }
   [tableView_ reloadData];
@@ -328,6 +332,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];
     self.showToolbar = YES;
+    [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
+    [toolbar_ setNeedsLayout];
   } else {
     self.showToolbar = NO;
     self.tableView.hidden = YES;
@@ -352,6 +358,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.signInFacebookView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromFacebook];
     self.showToolbar = YES;
+    [toolbar_.centerButton setTitle:@"Invite via Facebook" forState:UIControlStateNormal];
+    [toolbar_ setNeedsLayout];
   } else {
     self.showToolbar = NO;
     self.tableView.hidden = YES;
