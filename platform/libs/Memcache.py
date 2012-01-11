@@ -161,9 +161,12 @@ def memcached_function(get_cache_client):
         
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
+            # note: treat args[0] specially (self)
+            args2 = args[1:]
             cache = getattr(args[0], get_cache_client)()
+            
             # cache key records both positional and keyword args
-            key = "%s:%s" % (key_prefix, args)
+            key = "%s:%s" % (key_prefix, args2)
             
             if kwds:
                 key += (kwd_mark,) + tuple(sorted(kwds.items()))
