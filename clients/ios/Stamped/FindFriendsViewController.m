@@ -53,6 +53,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, copy) NSArray* twitterFriends;
+@property (nonatomic, retain) NSMutableArray* twitterFriendsNotUsingStamped;
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
@@ -69,6 +70,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 @synthesize findSource = findSource_;
 @synthesize twitterFriends = twitterFriends_;
+@synthesize twitterFriendsNotUsingStamped = twitterFriendsNotUsingStamped_;
 @synthesize contactFriends = contactFriends_;
 @synthesize stampedFriends = stampedFriends_;
 @synthesize suggestedFriends = suggestedFriends_;
@@ -102,6 +104,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.twitterFriends = nil;
+  self.twitterFriendsNotUsingStamped = nil;
   self.contactFriends = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
@@ -198,6 +201,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 
   self.twitterFriends = nil;
+  self.twitterFriendsNotUsingStamped = nil;
   self.contactFriends = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
@@ -589,8 +593,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 #pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  if (findSource_ == FindFriendsSourceContacts && contactsNotUsingStamped_.count > 0)
+  if ((findSource_ == FindFriendsSourceContacts && contactsNotUsingStamped_.count > 0) ||
+      (findSource_ == FindFriendsSourceTwitter && twitterFriendsNotUsingStamped_.count > 0)) {
     return 2;
+  }
+
   return 1;
 }
 
