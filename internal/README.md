@@ -1,4 +1,4 @@
-## internal
+## Internal
 
-stamped/internal holds internal projects and/or testing code.
+stamped/internal contains internal projects and/or testing code.
 
