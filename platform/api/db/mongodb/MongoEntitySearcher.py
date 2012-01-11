@@ -28,6 +28,7 @@ from libs.TheTVDB   import TheTVDB
 
 from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
+from Memcache       import memcached_function
 
 # Stamped coords: '40.736006685255155,-73.98884296417236'
 
@@ -256,6 +257,9 @@ class MongoEntitySearcher(EntitySearcher):
     @lazyProperty
     def _theTVDB(self):
         return TheTVDB()
+    
+    def _get_cache(self):
+        return self.api._cache
     
     @lru_cache(maxsize=128)
     def getSearchResults(self, 
@@ -632,7 +636,7 @@ class MongoEntitySearcher(EntitySearcher):
         # filter and rank results #
         # ----------------------- #
         
-        results = results.values()
+        results   = results.values()
         converted = False
         
         def _convert(r):
@@ -1081,7 +1085,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @memcached_function('_get_cache')
     def _find_apple(self, input_query, subcategory_filter):
         output = []
         
@@ -1141,7 +1146,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @memcached_function('_get_cache')
     def _find_amazon(self, input_query):
         output = []
         
@@ -1166,7 +1172,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @memcached_function('_get_cache')
     def _find_tv(self, input_query):
         output = []
         
@@ -1185,7 +1192,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=64)
+    @memcached_function('_get_cache')
     def _find_google_national(self, input_query):
         output = []
         

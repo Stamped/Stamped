@@ -5,10 +5,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import datetime, gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
-import htmlentitydefs, traceback, urllib, urllib2
+import datetime, gzip, httplib, json, logging, os, pickle, re, string, sys
+import htmlentitydefs, threading, time, traceback, urllib, urllib2
 import keys.aws, logs, math, random, boto
-import libs.TwitterOAuth as TwitterOAuth
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -16,9 +15,6 @@ from subprocess          import Popen, PIPE
 from functools           import wraps
 from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
-
-TWITTER_CONSUMER_KEY    = 'kn1DLi7xqC6mb5PPwyXw'
-TWITTER_CONSUMER_SECRET = 'AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU'
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -284,29 +280,29 @@ class OrderedDict(dict, MutableMapping):
         inst_dict = vars(self).copy()
         inst_dict.pop('_keys', None)
         return (self.__class__, (items,), inst_dict)
-
-    setdefault = MutableMapping.setdefault
-    update = MutableMapping.update
-    pop = MutableMapping.pop
-    keys = MutableMapping.keys
-    values = MutableMapping.values
-    items = MutableMapping.items
-
+    
+    setdefault  = MutableMapping.setdefault
+    update      = MutableMapping.update
+    pop         = MutableMapping.pop
+    keys        = MutableMapping.keys
+    values      = MutableMapping.values
+    items       = MutableMapping.items
+    
     def __repr__(self):
         if not self:
             return '%s()' % (self.__class__.__name__,)
         return '%s(%r)' % (self.__class__.__name__, list(self.items()))
-
+    
     def copy(self):
         return self.__class__(self)
-
+    
     @classmethod
     def fromkeys(cls, iterable, value=None):
         d = cls()
         for key in iterable:
             d[key] = value
         return d
-
+    
     def __eq__(self, other):
         if isinstance(other, OrderedDict):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
@@ -322,9 +318,9 @@ def getFile(url, request=None, params=None):
     """
     
     maxDelay = 64
-    delay = 0.5
-    data = None
-    request = None
+    delay    = 0.5
+    data     = None
+    request  = None
     
     if request is None:
         if params is not None and isinstance(params, dict):
@@ -780,9 +776,14 @@ def getFacebook(accessToken, path, params={}):
         raise Exception
 
 def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers=None):
+    import libs.TwitterOAuth as TwitterOAuth
+    
+    TWITTER_CONSUMER_KEY    = 'kn1DLi7xqC6mb5PPwyXw'
+    TWITTER_CONSUMER_SECRET = 'AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU'
+    
     consumer = TwitterOAuth.Consumer(key=TWITTER_CONSUMER_KEY, secret=TWITTER_CONSUMER_SECRET)
-    token  = TwitterOAuth.Token(key=key, secret=secret)
-    client = TwitterOAuth.Client(consumer, token)
+    token    = TwitterOAuth.Token(key=key, secret=secret)
+    client   = TwitterOAuth.Client(consumer, token)
     
     resp, content = client.request(
         url,
@@ -791,8 +792,8 @@ def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers
         headers=http_headers,
         force_auth_header=True
     )
-    data = json.loads(content)
-    return data
+    
+    return json.loads(content)
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
