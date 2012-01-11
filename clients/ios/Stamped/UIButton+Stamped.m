@@ -7,6 +7,7 @@
 //
 
 #import "UIButton+Stamped.h"
+#import "UIColor+Stamped.h"
 
 @interface UIButton (StampedInternal)
 + (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg
@@ -60,7 +61,6 @@
                                         selectedBackgroundImage:nil
                                         disabledBackgroundImage:disabledBg];
   
-  [button setTitle:@"Action Butten!" forState:UIControlStateNormal];
   [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
   [button setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.2] forState:UIControlStateNormal];
   button.titleLabel.shadowOffset = CGSizeMake(0, -1);
@@ -69,19 +69,36 @@
   return button;
 }
 
-+ (UIButton*)stampedFlatToggleButton {
-  UIImage* bg = [UIImage imageNamed:@"buttonBG_blue"];
-  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_blue_hilited"];
-  UIImage* disabledBg = [UIImage imageNamed:@"buttonBG_blue_disabled"];
++ (UIButton*)stampedToolbarButton {
+  UIImage* bg = [UIImage imageNamed:@"buttonBG_toolbar"];
+  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_hilited"];
+  UIImage* selectedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
+  UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
+                                     highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:selectedBg
+                                        disabledBackgroundImage:nil];
+  
+  [button setTitleColor:[UIColor stampedGrayColor] forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor stampedDarkGrayColor] forState:UIControlStateHighlighted];
+  [button setTitleColor:[UIColor colorWithRed:0.15 green:0.46 blue:0.89 alpha:1.0] forState:UIControlStateSelected];
+  [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.5] forState:UIControlStateNormal];
+  button.titleLabel.shadowOffset = CGSizeMake(0, 1);
+  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  
+  return button;
+}
+
++ (UIButton*)stampedBlueToolbarButton {
+  UIImage* bg = [UIImage imageNamed:@"buttonBG_toolbar"];
+  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_hilited"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
                                      highlightedBackgroundImage:highlightedBg
                                         selectedBackgroundImage:nil
-                                        disabledBackgroundImage:disabledBg];
+                                        disabledBackgroundImage:nil];
   
-  [button setTitle:@"Flat toggle!" forState:UIControlStateNormal];
-  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-  [button setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.2] forState:UIControlStateNormal];
-  button.titleLabel.shadowOffset = CGSizeMake(0, -1);
+  [button setTitleColor:[UIColor colorWithRed:0.15 green:0.46 blue:0.89 alpha:1.0] forState:UIControlStateNormal];
+  [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.5] forState:UIControlStateNormal];
+  button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   
   return button;
@@ -94,16 +111,20 @@
                       selectedBackgroundImage:(UIImage*)selectedBg
                       disabledBackgroundImage:(UIImage*)disabledBg {
   UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+  button.adjustsImageWhenHighlighted = NO;
+  button.adjustsImageWhenDisabled = NO;
   if ([bg respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
     // iOS 5
     UIEdgeInsets insets = UIEdgeInsetsMake(4, 4, 4, 4);
     bg = [bg resizableImageWithCapInsets:insets];
     highlightedBg = [highlightedBg resizableImageWithCapInsets:insets];
+    selectedBg = [selectedBg resizableImageWithCapInsets:insets];
     disabledBg = [disabledBg resizableImageWithCapInsets:insets];
   } else {
     // iOS 4
     bg = [bg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
     highlightedBg = [highlightedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
+    selectedBg = [selectedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
     disabledBg = [highlightedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
   }
   

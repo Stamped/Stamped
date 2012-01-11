@@ -13,6 +13,7 @@
 + (UIButton*)stampedFollowButton;
 + (UIButton*)stampedunfollowButton;
 + (UIButton*)stampedBlueButton;
-+ (UIButton*)stampedFlatToggleButton;
++ (UIButton*)stampedToolbarButton;
++ (UIButton*)stampedBlueToolbarButton;
 
 @end

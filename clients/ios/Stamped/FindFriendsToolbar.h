@@ -12,7 +12,7 @@
 
 @property (nonatomic, readonly) UIButton* previewButton;
 @property (nonatomic, readonly) UIButton* mainActionButton;
-@property (nonatomic, readonly) UIButton* inviteButton;
-
+@property (nonatomic, readonly) UIButton* addEmailsButton;
+@property (nonatomic, readonly) UIButton* centerButton;
 
 @end
