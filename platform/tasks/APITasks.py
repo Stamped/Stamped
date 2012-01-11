@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from celery.task    import task
+from celery.task import task
 
-__stamped_api__     = None
+__stamped_api__ = None
 
 def getStampedAPI():
     """ hack to ensure that tasks only instantiate the Stamped API once """

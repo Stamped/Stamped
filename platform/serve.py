@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import init
+import Globals
 import os, flask, json, utils, random, time, hashlib, logs
 from flask import request, render_template, Response, Flask
 from functools import wraps

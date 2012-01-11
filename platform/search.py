@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import init, utils
+import Globals, utils
 import sys, time
 
 from MongoStampedAPI import MongoStampedAPI
@@ -163,10 +163,10 @@ def parseCommandLine():
 
 def main():
     options, args = parseCommandLine()
-
+    
     api      = MongoStampedAPI(lite_mode=True)
     searcher = api._entitySearcher
-
+    
     for i in xrange(1):
         t1 = time.time()
         results  = searcher.getSearchResults(query=args[0], 

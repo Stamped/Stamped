@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import init
+import Globals
 import libs.ec2_utils, logs, re, sys, time, urllib2, utils
 
 from libs.notify    import StampedNotificationHandler

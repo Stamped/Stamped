@@ -5,8 +5,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import init, utils
-import json, re, sys, string, urllib2
+import Globals
+import json, re, sys, string, urllib2, utils
 
 from optparse import OptionParser
 from pprint   import pprint

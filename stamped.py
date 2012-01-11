@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+    Top-level module imported by all of the Stamped platform which accomplishes 
+    two main things, the first and most important of which is to enable 
+    otherwise isolated python modules to reference each other, and the second 
+    is to "monkey-patch" stdlib for use with gevent's cooperative multitasking.
+"""
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -32,8 +39,10 @@ if not 'celery' in sys.modules and not 'celery.task' in sys.modules:
 import os, sys
 
 base = os.path.dirname(os.path.abspath(__file__))
+platform = os.path.join(base, "platform")
 
-sys.path.insert(0, os.path.join(base, "crawler"))
-sys.path.insert(0, os.path.join(base, "api"))
+sys.path.insert(0, platform)
+sys.path.insert(0, os.path.join(platform, "crawler"))
+sys.path.insert(0, os.path.join(platform, "api"))
 sys.path.insert(0, base)
 
