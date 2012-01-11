@@ -18,7 +18,6 @@ import MongoFriendshipCollection
 import MongoInboxStampsCollection
 import MongoStampCollection
 import MongoStampCommentsCollection
-import MongoUserActivityCollection
 import MongoUserCollection
 import MongoUserFavEntitiesCollection
 import MongoUserStampsCollection
