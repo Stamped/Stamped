@@ -135,8 +135,5 @@ screen_names = set([
     "ads",
     "sales",
     "profile",
-    
-    
-    
 ])
 

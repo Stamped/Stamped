@@ -1,16 +1,15 @@
 
-brew install memcached libmemcached
-ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
-pylibmc==1.2.2
-
-apt-get install memcached
-wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install
-pip install pylibmc
 
 Bieber:
     * limit activity notifications to last N or so
     * collapse adjacent activity items into each other
-
+    * ensure async tasks are logged and accessible from logger
+    * refactor repo layout and, in particular, web stuff
+    * alerts => async tasks
+    * stable ids for merged entities
+    * look into integrating foursquare APIs
+    * integrity checking daemon
+    * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
 
 * stamp image async resizing
 * update stamps/create API for async image uploads
@@ -222,4 +221,12 @@ StampedAPI:
         * currently retrieving *all* stamps in the collection and then slicing API-side; must do this on DB side
     * reusable cursor pattern for generic retrieval of unbounded lists (e.g., collections, friends, comments, credit, etc.)
         * replace current slicing strategy
+
+# Mac OS X
+brew install memcached libmemcached
+ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0
+
+apt-get install memcached
+wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install
+pip install pylibmc
 

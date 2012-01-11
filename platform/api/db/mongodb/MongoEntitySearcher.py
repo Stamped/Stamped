@@ -257,7 +257,7 @@ class MongoEntitySearcher(EntitySearcher):
     def _theTVDB(self):
         return TheTVDB()
     
-    @lru_cache(maxsize=2048)
+    @lru_cache(maxsize=128)
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -415,7 +415,7 @@ class MongoEntitySearcher(EntitySearcher):
         def _find_tv():
             wrapper['tv_results'] = self._find_tv(input_query)
         
-        # (deprecated) google local search
+        # search google places autocomplete
         def _find_google_national():
             wrapper['google_national_results'] = self._find_google_national(national_query)
         
@@ -1141,7 +1141,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=512)
+    @lru_cache(maxsize=128)
     def _find_amazon(self, input_query):
         output = []
         
@@ -1166,7 +1166,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=512)
+    @lru_cache(maxsize=128)
     def _find_tv(self, input_query):
         output = []
         
@@ -1185,7 +1185,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=2048)
+    @lru_cache(maxsize=128)
     def _find_google_national(self, input_query):
         output = []
         

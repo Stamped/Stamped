@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils, ec2_utils, pylibmc
+import binascii, bson, ec2_utils, functools, utils, pylibmc
+
 from schema import Schema
 
 # TODO: Manipulating cache items via subscript-style syntax (e.g., cache[key]) 
@@ -98,4 +99,91 @@ class StampedMemcache(Memcache):
             'ketama'        : True, 
         })
         """
+
+class InvalidatingMemcache(Memcache):
+    
+    def _import_object_id(object_id):
+        return bson.objectid.ObjectId(object_id).binary
+    
+    def _export_object_id(binary_object_id):
+        return binascii.hexlify(binary_object_id)
+    
+    def _import_value(self, value):
+        dependencies = self._find_dependencies(values)
+        # TODO: store dependencies
+        
+        return super(InvalidatingMemcache, self)._import_value(value)
+    
+    def _get_object_id(self, value):
+        if isinstance(value, basestring) and 24 == len(value):
+            try:
+                return self._import_object_id(value)
+            except:
+                pass
+        
+        return None
+    
+    def _find_dependencies(self, value):
+        _get_object_id = self._get_object_id
+        dependencies   = []
+        
+        try:
+            for v in value:
+                object_id = _get_object_id(v)
+                
+                if object_id is not None:
+                    dependencies.append(object_id)
+                else:
+                    dependencies.extend(self._find_dependencies(v))
+        except TypeError:
+            object_id = _get_object_id(value)
+            
+            if object_id is not None:
+                dependencies.append(object_id)
+        except:
+            pass
+        
+        return dependencies
+
+# what keys are we using for memcached entries?
+# object_id => [ dependencies ]
+# 
+
+def cached_function(key_prefix=None, get_cache_client=StampedMemcache):
+    
+    def decorating_function(user_function):
+        cache = get_cache_client()
+        kwd_mark = object() # separate positional and keyword args
+        
+        if key_prefix is None:
+            key_prefix = user_function.func_name
+        
+        @functools.wraps(user_function)
+        def wrapper(*args, **kwds):
+            # cache key records both positional and keyword args
+            key = "%s:%s" % (key_prefix, args)
+            
+            if kwds:
+                key += (kwd_mark,) + tuple(sorted(kwds.items()))
+            
+            # get cache entry or compute if not found
+            try:
+                result = cache[key]
+                wrapper.hits += 1
+            except KeyError:
+                result = user_function(*args, **kwds)
+                cache[key] = result
+                wrapper.misses += 1
+            
+            return result
+        
+        def clear():
+            cache.flush_all()
+            wrapper.hits = wrapper.misses = 0
+        
+        wrapper.hits  = wrapper.misses = 0
+        wrapper.clear = clear
+        return wrapper
+    
+    return decorating_function
 
