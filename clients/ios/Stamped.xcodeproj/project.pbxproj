@@ -211,6 +211,14 @@
 		7E49683A1457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */; };
 		7E49683B1457654600ACD36B /* hdr_searchIconOnly_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */; };
 		7E49683C1457654600ACD36B /* hdr_searchIconOnly_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */; };
+		7E4A83EC14BE460000A700E9 /* tooltip_tapHere.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */; };
+		7E4A83ED14BE460000A700E9 /* tooltip_tapHere.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */; };
+		7E4A83EE14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */; };
+		7E4A83EF14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */; };
+		7E4A83F214BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83F014BE461100A700E9 /* buttonImg_addEmail_grey.png */; };
+		7E4A83F314BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83F014BE461100A700E9 /* buttonImg_addEmail_grey.png */; };
+		7E4A83F414BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83F114BE461100A700E9 /* buttonImg_addEmail_grey@2x.png */; };
+		7E4A83F514BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83F114BE461100A700E9 /* buttonImg_addEmail_grey@2x.png */; };
 		7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4B8E871468C310009A33DD /* ActivityFriendTableViewCell.m */; };
 		7E52A58B13FC7DB500209A95 /* camera_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58913FC7DB500209A95 /* camera_button@2x.png */; };
 		7E52A58C13FC7DB500209A95 /* profile_detail_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */; };
@@ -1661,6 +1669,10 @@
 		7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button_selected@2x.png"; sourceTree = "<group>"; };
 		7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hdr_searchIconOnly_button.png; sourceTree = "<group>"; };
 		7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button@2x.png"; sourceTree = "<group>"; };
+		7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tooltip_tapHere.png; sourceTree = "<group>"; };
+		7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tooltip_tapHere@2x.png"; sourceTree = "<group>"; };
+		7E4A83F014BE461100A700E9 /* buttonImg_addEmail_grey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = buttonImg_addEmail_grey.png; sourceTree = "<group>"; };
+		7E4A83F114BE461100A700E9 /* buttonImg_addEmail_grey@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "buttonImg_addEmail_grey@2x.png"; sourceTree = "<group>"; };
 		7E4B8E0C14687D42009A33DD /* StampedModel 13.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 13.xcdatamodel"; sourceTree = "<group>"; };
 		7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 14.xcdatamodel"; sourceTree = "<group>"; };
 		7E4B8E861468C310009A33DD /* ActivityFriendTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityFriendTableViewCell.h; sourceTree = "<group>"; };
@@ -2545,6 +2557,8 @@
 				7E260FA014BB89A400D9F7F0 /* buttonBG_white@2x.png */,
 				7E260FA114BB89A400D9F7F0 /* buttonImg_addEmail.png */,
 				7E260FA214BB89A400D9F7F0 /* buttonImg_addEmail@2x.png */,
+				7E4A83F014BE461100A700E9 /* buttonImg_addEmail_grey.png */,
+				7E4A83F114BE461100A700E9 /* buttonImg_addEmail_grey@2x.png */,
 				7E260FA314BB89A400D9F7F0 /* buttonImg_check.png */,
 				7E260FA414BB89A400D9F7F0 /* buttonImg_check@2x.png */,
 			);
@@ -3693,6 +3707,8 @@
 		CBA08CB714229A3B005F2D84 /* Tooltips */ = {
 			isa = PBXGroup;
 			children = (
+				7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */,
+				7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */,
 				CBA08CBB14229A5D005F2D84 /* tooltip_stampit@2x.png */,
 			);
 			name = Tooltips;
@@ -4409,6 +4425,10 @@
 				7E260FD014BB89A400D9F7F0 /* buttonImg_addEmail@2x.png in Resources */,
 				7E260FD214BB89A400D9F7F0 /* buttonImg_check.png in Resources */,
 				7E260FD414BB89A400D9F7F0 /* buttonImg_check@2x.png in Resources */,
+				7E4A83ED14BE460000A700E9 /* tooltip_tapHere.png in Resources */,
+				7E4A83EF14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */,
+				7E4A83F314BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */,
+				7E4A83F514BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4965,6 +4985,10 @@
 				7E260FCF14BB89A400D9F7F0 /* buttonImg_addEmail@2x.png in Resources */,
 				7E260FD114BB89A400D9F7F0 /* buttonImg_check.png in Resources */,
 				7E260FD314BB89A400D9F7F0 /* buttonImg_check@2x.png in Resources */,
+				7E4A83EC14BE460000A700E9 /* tooltip_tapHere.png in Resources */,
+				7E4A83EE14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */,
+				7E4A83F214BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */,
+				7E4A83F414BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

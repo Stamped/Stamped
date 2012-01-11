@@ -346,7 +346,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   NSString* blurb = [NSString stringWithFormat:@"%@. \u201c%@\u201d", stamp.entityObject.title, stamp.blurb];
   if (stamp.blurb.length == 0)
     blurb = [stamp.entityObject.title stringByAppendingString:@"."];
-  
+
   NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
   if (blurb.length > substring.length)
     blurb = [substring stringByAppendingString:@"..."];
