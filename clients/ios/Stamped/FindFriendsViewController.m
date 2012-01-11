@@ -504,6 +504,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     // If we're watching, fade in the table.
     if (self.findSource == FindFriendsSourceTwitter && !self.signInTwitterView.hidden && twitterFriends_) {
       self.showToolbar = YES;
+      [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
       self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
@@ -541,10 +542,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   // Facebook
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
-    if (self.findSource == FindFriendsSourceFacebook && !self.signInFacebookView.hidden
-        && facebookFriends_) {
+    if (self.findSource == FindFriendsSourceFacebook && !self.signInFacebookView.hidden && facebookFriends_) {
       self.searchFieldHidden = YES;
       self.showToolbar = YES;
+      [toolbar_.centerButton setTitle:@"Invite via Facebook" forState:UIControlStateNormal];
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
       [UIView animateWithDuration:0.4
