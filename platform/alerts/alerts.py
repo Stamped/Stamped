@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, auth
+import Globals, utils
 import os, sys, pymongo, json, struct, ssl, binascii
 import libs.ec2_utils
 import boto

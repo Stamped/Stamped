@@ -5,20 +5,18 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, time, hashlib, random, base64, struct, logs, auth, os
-from datetime import datetime, timedelta
+import Globals, utils
+import time, hashlib, random, base64, struct, logs, auth, os
 
-from errors import *
-from Schemas import *
-from auth import convertPasswordForStorage
+from datetime               import datetime, timedelta
+from errors                 import *
+from Schemas                import *
 
-from AStampedAuth import AStampedAuth
-
-from AAccountDB import AAccountDB
-from AAuthAccessTokenDB import AAuthAccessTokenDB
-from AAuthRefreshTokenDB import AAuthRefreshTokenDB
-from AAuthEmailAlertsDB import AAuthEmailAlertsDB
-
+from AStampedAuth           import AStampedAuth
+from AAccountDB             import AAccountDB
+from AAuthAccessTokenDB     import AAuthAccessTokenDB
+from AAuthRefreshTokenDB    import AAuthRefreshTokenDB
+from AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
 class StampedAuth(AStampedAuth):
     """
@@ -198,7 +196,7 @@ class StampedAuth(AStampedAuth):
         account = self._accountDB.getAccount(authUserId)
 
         # Convert and store new password
-        password = convertPasswordForStorage(password)
+        password = auth.convertPasswordForStorage(password)
         self._accountDB.updatePassword(authUserId, password)
 
         # Remove refresh / access tokens
