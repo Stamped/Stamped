@@ -20,17 +20,18 @@ formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%H:%M:%S')
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
+log.addHandler(stream_handler)
 
 # File handler
-log_file = "/stamped/logs/wsgi.log"
-if os.path.exists(os.path.dirname(log_file)):
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    log.addHandler(file_handler)
-
-# Add handler
-log.addHandler(stream_handler)
+try:
+    log_file = "/stamped/logs/wsgi.log"
+    if os.path.exists(os.path.dirname(log_file)):
+        file_handler = logging.WatchedFileHandler(log_file)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        log.addHandler(file_handler)
+except:
+    pass
 
 def _generateLogId():
     m = hashlib.md5(str(time.time()))
