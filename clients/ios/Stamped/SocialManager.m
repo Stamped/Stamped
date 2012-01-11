@@ -33,10 +33,9 @@ static NSString* const kFacebookFriendsURI = @"/me/friends";
 static NSString* const kFacebookAppID = @"297022226980395";
 static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
 static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
-static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";
+static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";  // DEPRECATED
 static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
 static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
-static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 static NSString* const kStampedLogoURLPath = @"http://static.stamped.com/logos/";
 
 NSString* const kStampedFindFacebookFriendsPath = @"/users/find/facebook.json";
@@ -76,9 +75,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedLinkTwitterFollowers:(NSArray*)followers;
 - (void)requestStampedUnlinkTwitter;
 - (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID;
-- (void)requestStampedLinkFacebookFriends:(NSArray*)friends;
 - (void)requestStampedUnlinkFacebook;
-- (void)requestStampedFriendsFromFacebook:(NSArray*)facebookIDs;
+- (void)requestStampedFriendsFromFacebook:(NSString*)accessToken;
 - (void)requestStampedFriendsFromTwitter:(NSArray*)twitterIDs;
 
 - (GTMOAuthAuthentication*)createAuthentication;
@@ -560,8 +558,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (void)fbDidLogin {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[self.facebookClient accessToken] forKey:@"FBAccessTokenKey"];
-  [defaults setObject:[self.facebookClient expirationDate] forKey:@"FBExpirationDateKey"];
+  [defaults setObject:self.facebookClient.accessToken forKey:@"FBAccessTokenKey"];
+  [defaults setObject:self.facebookClient.expirationDate forKey:@"FBExpirationDateKey"];
   [defaults synchronize];
   [self.facebookClient requestWithGraphPath:@"me" andDelegate:self];
 }
@@ -593,8 +591,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       [fbFriendIDs addObject:[dict objectForKey:@"id"]];
     }
 
-    [self requestStampedLinkFacebookFriends:fbFriendIDs];
-    [self requestStampedFriendsFromFacebook:fbFriendIDs];
+    [self requestStampedFriendsFromFacebook:self.facebookClient.accessToken];
   }
 }
 
@@ -607,15 +604,14 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 #pragma mark - Stamped.
 
-- (void)requestStampedFriendsFromFacebook:(NSArray*)facebookIDs {
-  // TODO: the server only supports 100 IDs at a time. need to chunk.
+- (void)requestStampedFriendsFromFacebook:(NSString*)accessToken {
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
-  
+
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFindFacebookFriendsPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;
-  loader.params = [NSDictionary dictionaryWithObject:[facebookIDs componentsJoinedByString:@","] forKey:@"q"];
+  loader.params = [NSDictionary dictionaryWithObject:accessToken forKey:@"facebook_token"];
   loader.objectMapping = mapping;
   [loader send];
 }
@@ -629,13 +625,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", 
                     name, @"facebook_name", nil];
-  request.method = RKRequestMethodPOST;
-  [request send];
-}
-
-- (void)requestStampedLinkFacebookFriends:(NSArray*)friends {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookFriendsPath delegate:self];
-  request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
   request.method = RKRequestMethodPOST;
   [request send];
 }
@@ -714,12 +703,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if ([request.resourcePath rangeOfString:kStampedFacebookRemovePath].location != NSNotFound) {
     return;
   }
-  // Response for requestStampedLinkFacebookFriends. End of Facebook signin.
-  if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
-    isSigningInToFacebook_ = NO;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
-    return;
-  }
   if ([request.resourcePath rangeOfString:kTwitterSignOutURI].location != NSNotFound) {
     return;
   }
@@ -781,8 +764,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if ([objectLoader.resourcePath rangeOfString:kStampedFindTwitterFriendsPath].location != NSNotFound) {
     NSArray* twitterFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:twitterFriends];
-  }
-  else if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound) {
+  } else if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound) {
+    isSigningInToFacebook_ = NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     NSArray* facebookFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFacebookFriendsChangedNotification object:facebookFriends];
   }
