@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import aws, time
+import keys.aws, time
 
 from gevent.pool        import Pool
 from optparse           import OptionParser
@@ -30,7 +30,7 @@ def main():
     options, args = parseCommandLine()
     
     bucket_name = 'stamped.com.static.images'
-    conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     rs = conn.get_all_buckets()
     rs = filter(lambda b: b.name == bucket_name, rs)
     

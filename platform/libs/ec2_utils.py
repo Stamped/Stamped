@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import aws, datetime, json, os, time, utils
+import keys.aws, utils
+import datetime, json, os, time
 
 from boto.route53.connection    import Route53Connection
 from boto.exception             import EC2ResponseError
@@ -69,7 +70,7 @@ def get_stack(stack=None):
                 utils.log("error getting cached stack info; recomputing")
                 utils.printException()
     
-    conn = EC2Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     
     reservations = conn.get_all_instances()
     instance_id  = get_local_instance_id()
@@ -122,7 +123,7 @@ def get_elb(stack=None):
     instance_ids = (instance.instance_id for instance in stack.nodes)
     
     # get all ELBs
-    conn = ELBConnection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    conn = ELBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     elbs = conn.get_all_load_balancers()
     
     # attempt to find the ELB belonging to this stack's set of API servers
@@ -159,7 +160,7 @@ def get_prod_stack():
         if len(name) > 1:
             return name
     
-    conn  = Route53Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    conn  = Route53Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     zones = conn.get_all_hosted_zones()
     name  = None
     host  = None

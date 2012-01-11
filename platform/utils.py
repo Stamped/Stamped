@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import datetime, gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
-import aws, logs, math, random, boto
+import keys.aws, logs, math, random, boto
 import libs.TwitterOAuth as TwitterOAuth
 
 from errors              import *
@@ -500,7 +500,7 @@ def getInstance(name):
     except ValueError:
         return None
     
-    conn = EC2Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     reservations = conn.get_all_instances()
     
     for reservation in reservations:
@@ -665,7 +665,7 @@ def sendEmail(msg, **kwargs):
     format = kwargs.pop('format', 'text')
     
     try:
-        ses = boto.connect_ses(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+        ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
     except Exception as e:
         logs.warning('EMAIL FAILED: %s' % msg)

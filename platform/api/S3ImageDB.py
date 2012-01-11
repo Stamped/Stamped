@@ -6,8 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import aws, logs, os, utils, time
-import zlib, struct, array, random
+import keys.aws, logs, utils
+import os, time, zlib, struct, array, random
 
 try:
     import Image, ImageFile
@@ -28,7 +28,7 @@ class S3ImageDB(AImageDB):
     def __init__(self, bucket_name='stamped.com.static.images'):
         # find or create bucket
         # ---------------------
-        conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+        conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 
         self.bucket = conn.lookup(bucket_name)
 
@@ -40,7 +40,7 @@ class S3ImageDB(AImageDB):
         # find or create distribution
         # ---------------------------
         """
-        cdn = CloudFrontConnection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+        cdn = CloudFrontConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         rs = cdn.get_all_distributions()
         self.distro = None
         
@@ -293,7 +293,7 @@ class S3ImageDB(AImageDB):
         while True:
             try:
                 logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
-                conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+                conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
                 bucket = conn.lookup(self.bucket_name)
 
                 logs.info('GET KEY')
@@ -359,7 +359,7 @@ class S3ImageDB(AImageDB):
         while True:
             try:
                 logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
-                conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+                conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
                 bucket = conn.lookup(self.bucket_name)
 
                 if not self.bucket.get_key(oldKey):
