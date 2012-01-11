@@ -5,4 +5,4 @@ sys.path.insert(0, base)
 
 sys.path.append(os.path.join(base, "api"))
 
-import init
+import stamped

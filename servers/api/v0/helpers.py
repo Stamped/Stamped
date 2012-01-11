@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import init
+import stamped
 import os, json, utils, random, time, hashlib, logs
 
 from errors import *
