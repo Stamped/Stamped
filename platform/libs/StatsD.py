@@ -67,7 +67,7 @@ class StatsD(object):
         else:
             sampled_data=data
         
-        from socket import *
+        from socket import socket, AF_INET, SOCK_DGRAM
         udp_sock = socket(AF_INET, SOCK_DGRAM)
         try:
             for stat in sampled_data.keys():
