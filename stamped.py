@@ -38,7 +38,7 @@ if not 'celery' in sys.modules and not 'celery.task' in sys.modules:
 
 import os, sys
 
-base = os.path.dirname(os.path.abspath(__file__))
+base     = os.path.dirname(os.path.abspath(__file__))
 platform = os.path.join(base, "platform")
 
 sys.path.insert(0, platform)
