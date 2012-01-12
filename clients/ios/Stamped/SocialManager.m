@@ -54,6 +54,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
+@property (nonatomic, retain) NSMutableSet* twitterIDsNotUsingStamped;
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, assign) BOOL isSigningInToTwitter;
 @property (nonatomic, assign) BOOL isSigningInToFacebook;
@@ -77,7 +78,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID;
 - (void)requestStampedUnlinkFacebook;
 - (void)requestStampedFriendsFromFacebook:(NSString*)accessToken;
-- (void)requestStampedFriendsFromTwitter:(NSArray*)twitterIDs;
+- (void)requestStampedFriendsFromTwitter;
 
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
@@ -93,6 +94,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
 @synthesize twitterFriends = twitterFriends_;
+@synthesize twitterIDsNotUsingStamped = twitterIDsNotUsingStamped_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize isSigningInToTwitter = isSigningInToTwitter_;
 @synthesize isSigningInToFacebook = isSigningInToFacebook_;
@@ -477,7 +479,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)didReceiveTwitterFriends:(NSDictionary*)friends {
-  [self requestStampedFriendsFromTwitter:[friends objectForKey:@"ids"]];
+  self.twitterIDsNotUsingStamped = [NSMutableSet setWithArray:[friends objectForKey:@"ids"]];
+  [self requestStampedFriendsFromTwitter];
 }
 
 #pragma mark - Facebook.
@@ -636,7 +639,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [request send];
 }
 
-- (void)requestStampedFriendsFromTwitter:(NSArray*)twitterIDs {
+- (void)requestStampedFriendsFromTwitter {
   // TODO: the server only supports 100 IDs at a time. need to chunk.
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
@@ -644,7 +647,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFindTwitterFriendsPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;
-  loader.params = [NSDictionary dictionaryWithObject:[twitterIDs componentsJoinedByString:@","] forKey:@"q"];
+  loader.params = [NSDictionary dictionaryWithObject:[self.twitterIDsNotUsingStamped.allObjects componentsJoinedByString:@","] forKey:@"q"];
   loader.objectMapping = mapping;
   [loader send];
 }
@@ -726,7 +729,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
   // Response for requestTwitterFriends. Send on to Stamped to find any Stamped friends.
   else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
-    [self requestStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
+    self.twitterIDsNotUsingStamped = [NSMutableSet setWithArray:[body objectForKey:@"ids"]];
+    [self requestStampedFriendsFromTwitter];
   }
 }
 
@@ -763,6 +767,11 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
   if ([objectLoader.resourcePath rangeOfString:kStampedFindTwitterFriendsPath].location != NSNotFound) {
     NSArray* twitterFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    NSArray* friendIDs = [twitterFriends valueForKeyPath:@"identifier"];
+    for (NSString* friendID in friendIDs) {
+      NSNumber* n = [NSNumber numberWithInteger:friendID.integerValue];
+      [twitterIDsNotUsingStamped_ removeObject:n];
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:twitterFriends];
   } else if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound) {
     isSigningInToFacebook_ = NO;
@@ -773,8 +782,10 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  if ([objectLoader.resourcePath rangeOfString:kStampedFindTwitterFriendsPath].location != NSNotFound)
+  if ([objectLoader.resourcePath rangeOfString:kStampedFindTwitterFriendsPath].location != NSNotFound) {
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:nil];
+    self.twitterIDsNotUsingStamped = nil;
+  }
   if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound)
     [[NSNotificationCenter defaultCenter] postNotificationName:kFacebookFriendsChangedNotification object:nil];
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
