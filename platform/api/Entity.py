@@ -243,6 +243,9 @@ def isEqual(entity1, entity2, prefix=False):
             if distance > 0.8 or distance < 0:
                 return False
             
+            # TODO: investigate libraries to determine similarity between two 
+            # addresses (e.g., converting to some standardized form and then 
+            # comparing)
             """
             is_junk = " \t-,".__contains__ # characters for SequenceMatcher to disregard
             

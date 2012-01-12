@@ -55,9 +55,9 @@ def passwordReset(request, **kwargs):
             # Display 'change password' form
             account = stampedAPI.getAccount(authUserId)
             params = {
-                'token': token,
-                'form': True,
-                }
+                'token' : token,
+                'form'  : True,
+            }
             response = render_to_response('password-reset.html', params)
 
         return response
@@ -183,10 +183,8 @@ def alertSettings(request, **kwargs):
             'action_token':     tokenId,
             'json_settings':    json.dumps(settings, sort_keys=True)
         }
-
-        response = render_to_response('notifications.html', params)
-
-        return response
+        
+        return render_to_response('notifications.html', params)
 
     except Exception as e:
         logs.begin(
@@ -235,9 +233,9 @@ def alertSettingsUpdate(request, **kwargs):
         
         output_json = json.dumps(alerts, sort_keys=True)
         output = HttpResponse(output_json, **params)
-
+        
         return output
-
+    
     except Exception as e:
         logs.begin(
             addLog=stampedAPI._logsDB.addLog, 
@@ -249,7 +247,6 @@ def alertSettingsUpdate(request, **kwargs):
         logs.warning("500 Error: %s" % e)
         logs.error(500)
         logs.save()
-
+        
         return HttpResponse("internal server error", status=500)
-
 
