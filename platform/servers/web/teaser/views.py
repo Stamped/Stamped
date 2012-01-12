@@ -81,33 +81,6 @@ def download(request):
     return HttpResponsePermanentRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
 
 
-
-### TEMP
-
-
-def aboutOld(request):
-    try:
-        response = render_to_response('about_old.html', None)
-
-        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
-        response['Cache-Control'] = 'max-age=600'
-
-        return response
-    except:
-        raise Http404
-
-def indexOld(request):
-    try:
-        response = render_to_response('index_old.html', None)
-
-        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
-        response['Cache-Control'] = 'max-age=600'
-
-        return response
-    except:
-        raise Http404
-
-
 ### MOBILE
 
 def mobileTerms(request):

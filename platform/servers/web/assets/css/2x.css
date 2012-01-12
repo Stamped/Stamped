@@ -1,0 +1,107 @@
+#mobile-entity .card .likes{
+background:url(http://static.stamped.com/assets/img/likes-icon-2x.png) 5px center no-repeat;
+padding-left:38px;
+line-height:20px;
+}
+
+
+#mobile-entity .mpaa-rating{
+height:22px;
+float:left;
+margin-right:10px;
+margin-top:1px;
+}
+
+#mobile-entity .rating-g{
+background:url(http://static.stamped.com/assets/img/mpaa-g-2x.png) left top no-repeat;
+width:26px;
+background-size: 13px 11px;
+}
+
+#mobile-entity .rating-pg{
+background:url(http://static.stamped.com/assets/img/mpaa-pg-2x.png) left top no-repeat;
+width:42px;
+background-size: 21px 11px;
+}
+
+#mobile-entity .rating-pg-13{
+background:url(http://static.stamped.com/assets/img/mpaa-pg13-2x.png) left top no-repeat;
+width:74px;
+background-size: 37px 11px;
+}
+
+#mobile-entity .rating-r{
+background:url(http://static.stamped.com/assets/img/mpaa-r-2x.png) left top no-repeat;
+width:26px;
+background-size: 13px 11px;
+}
+
+#mobile-entity .rating-nc-17{
+background:url(http://static.stamped.com/assets/img/mpaa-nc17-2x.png) left top no-repeat;
+width:66px;
+background-size: 33px 11px;
+}
+
+
+#mobile-entity .card .likes{
+background:url(http://static.stamped.com/assets/img/likes-icon-2x.png) 5px 2px no-repeat;
+background-size: 14px 14px;
+padding-left:25px;
+line-height:20px;
+}
+
+#mobile-entity .card .top-wave{
+background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_top.png) left bottom no-repeat;
+height:2px;
+background-size: 330px 4px;
+margin-top:2px;
+}
+
+#mobile-entity .card .bottom-wave{
+background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_bot.png) left top no-repeat;
+height:2px;
+margin-bottom:2px;
+background-size: 330px 4px;
+}
+
+#mobile-entity .card .meta .film{
+background:url(http://static.stamped.com/assets/img/entity-type-film-2x.png) left top no-repeat;
+padding-left: 16px;
+background-size: 9px 9px;
+}
+
+#mobile-entity .card .meta .food{
+background:url(http://static.stamped.com/assets/img/entity-type-food-2x.png) left center no-repeat;
+padding-left: 20px;
+background-size: 13px 9px;
+}
+
+#mobile-entity .card .meta .book{
+background:url(http://static.stamped.com/assets/img/entity-type-book-2x.png) left top no-repeat;
+padding-left: 18px;
+background-size: 11px 9px;
+}
+
+#mobile-entity .card .meta .music{
+background:url(http://static.stamped.com/assets/img/entity-type-music-2x.png) left top no-repeat;
+padding-left: 18px;
+background-size: 9px 9px;
+}
+
+#mobile-entity .card .meta .other{
+background:url(http://static.stamped.com/assets/img/entity-type-other-2x.png) left top no-repeat;
+padding-left: 15px;
+background-size: 7px 9px;
+}
+
+#mobile-entity .more .available-now{
+background:url(http://static.stamped.com/assets/img/available-now-2x.png) left top no-repeat;
+width:106px;
+height:32px;
+background-size:104px 30px;
+}
+
+/*
+- eDetail information and paragraphs should have the same right margin as the left. 
+- Credit and likes not on same baseline.
+*/
