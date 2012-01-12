@@ -90,6 +90,7 @@ subcategories = {
 }
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
+year_re = re.compile(r'([0-9]{4})')
 
 def setSubtitle(entity):
     entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
@@ -113,21 +114,6 @@ def setFields(entity, detailed=False):
             else:
                 setSubtitle(entity)
         else:
-            # address = {}
-            # if len(entity.address_components) > 0:
-            #     for component in entity.address_components:
-            #         for i in component['types']:
-            #             address[str(i)] = component['short_name']
-            
-            # if 'locality' in address and 'administrative_area_level_1' in address:
-            #     entity.subtitle = '%s, %s' % (address['locality'], \
-            #                                   address['administrative_area_level_1'])
-            # elif 'sublocality' in address and 'administrative_area_level_1' in address:
-            #     entity.subtitle = '%s, %s' % (address['sublocality'], \
-            #                                   address['administrative_area_level_1'])
-            # elif entity.neighborhood is not None:
-            #     entity.subtitle = entity.neighborhood
-            # else:
             address = entity.address
             is_set = False
             
@@ -152,15 +138,10 @@ def setFields(entity, detailed=False):
     
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
-            original_release_date = entity.original_release_date
-            if original_release_date is not None:
-                try:
-                    year = int(original_release_date[0:4])
-                except:
-                    year = original_release_date
-                
+            try:
+                year = year_re.search(entity.original_release_date).groups()[0]
                 entity.subtitle = 'Movie (%s)' % year
-            else:
+            except:
                 entity.subtitle = 'Movie'
         elif entity.subcategory == 'tv':
             if entity.network_name is not None:
