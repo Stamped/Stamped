@@ -37,8 +37,4 @@ urlpatterns = patterns('',
 
     # Index
     url(R'$',                               'teaser.views.index'), 
-
-    # OLD
-    # url(R'^about$',                         'teaser.views.aboutOld'),
-    # url(R'$',                               'teaser.views.indexOld'), 
 )

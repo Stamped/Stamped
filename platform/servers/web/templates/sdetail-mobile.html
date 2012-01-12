@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!doctype html> 
 <html lang="en" dir="ltr"> 
     <head> 
         <meta charset="utf-8"> 
@@ -10,13 +10,15 @@
         <meta name="author" content="Stamped, Inc."> 
         <meta name="copyright" content="Stamped, Inc."> 
         <meta name="robots" content="index,follow"> 
-        <meta name="viewport" content="width=620"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:image" content="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
         
         <!-- Style --> 
         <link href="http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css" rel="stylesheet" type="text/css" /> 
         <link rel="stylesheet" href="http://static.stamped.com/assets/css/normalize.css" type="text/css" media="screen" /> 
-        <link rel="stylesheet" href="http://stamped.com.static.images.s3.amazonaws.com/assets/css/screen.css" type="text/css" media="screen" /> 
+        <link rel="stylesheet" href="http://static.stamped.com/assets/css/styles.css" type="text/css" media="screen" />
+        
+        <link rel="stylesheet" type="text/css" href="http://static.stamped.com/assets/css/2x.css" media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
         
         <link rel="shortcut icon" href="http://static.stamped.com/assets/img/favicon.ico"/> 
         <link rel="apple-touch-icon" href="http://static.stamped.com/assets/img/apple-touch-icon.png"/> 
@@ -29,9 +31,7 @@
             background:-o-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
             background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
         }
-        #mobile-entity .brand {
-            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png') center center no-repeat;
-        }
+        
         {% if credit %}
         .stamp-1 {
             background:url('http://static.stamped.com/logos/{{ credit.0.color_primary }}-{{ credit.0.color_secondary }}-credit-18x18.png') left top no-repeat;
@@ -44,14 +44,16 @@
  
         <!-- Magic --> 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
-        <script type="text/javascript" src="http://stamped.com.static.images.s3.amazonaws.com/assets/js/magic.js"></script> 
+        <script type="text/javascript" src="http://static.stamped.com/assets/js/function.js"></script>
     </head> 
     <body>
         <div id="mobile-entity" class="flood">
             <div class="wrap">
-                <a href="/" class="brand replaced">Stamped</a>
+                <a href="/" class="brand">
+                    <img src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
+                </a>
                 <div class="message">
-                    <p><span class="user">{{ user.screen_name }}</span> is using Stamped, a new way to put your stamp of approval on the world.</p>
+                    <a href="http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8" class="button">Download the free app</a>
                 </div>
                 <div class="card">
                     <div class="top-wave"></div>
@@ -99,10 +101,354 @@
                     </div>
                     <div class="bottom-wave"></div>
                 </div>
+                {% if entity.category == "food" %}
+                <div class="capsule geo">
+                    <div class="what">
+                        <h3 class="name">{{ entity.title }}</h3>
+                        <address class="location">
+                            {% if entity.address %}<span>{{ entity.address }}</span>{% endif %}
+                            {% if entity.phone %}<span><a href="tel:{{ entity.phone }}">{{ entity.phone }}</a></span>{% endif %}
+                        </address>
+                    </div>
+                    {% if entity.opentable_url %}
+                    <div class="do-it">
+                        <a class="button" href="{{ entity.opentable_url }}">Make a reservation</a>
+                        <div class="logo"><img src="http://static.stamped.com/assets/img/brand-opentable.png"/></div>
+                    </div>
+                    {% endif %}
+                    {% if entity.coordinates %}
+                    <div class="feature">
+                        <a href="http://maps.google.com/?q={{entity.coordinates}}" class="map-wrapper" style="background:url(http://maps.googleapis.com/maps/api/staticmap?zoom=16&size=280x150&maptype=roadmap&&markers=color:red%7Ccolor:red%7C{{entity.coordinates}}&sensor=false) center center no-repeat;">
+                        </a>
+                        <!-- google maps -->
+                    </div> <!-- /feature -->
+                    {% endif %}
+                    <div class="what contd">
+                        {% if entity.cuisine %}
+                        <article type="detail">
+                            <span class="title">Cuisine:</span>
+                            <p>{{ entity.cuisine }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.price_scale %}
+                        <article type="detail">
+                            <span class="title">Price scale:</span>
+                            <p>{{ entity.price_scale }}</p>
+                        </article>
+                        {% endif %}
+                    
+                        {% if entity.neighborhood %}
+                        <article type="detail">
+                            <span class="title">Neighborhood:</span>
+                            <p>{{ entity.neighborhood }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.hours %}
+                        <article type="detail">
+                            <span class="title">Hours:</span>
+                            <p>{{ entity.hours }}</p>
+                        </article>
+                        {% endif %}
+                    
+                    </div> <!-- /what -->
+                </div> <!-- /capsule -->
+                {% endif %}
+                
+                {% if entity.category == "book" %}
+                <div class="capsule book">
+                    {% if entity.image %}
+                    <div class="feature">
+                        <a href="{{ entity.amazon_url }}">
+                            <img src="{{ entity.image }}" />
+                        </a>
+                    </div> <!-- /feature -->
+                    {% endif %}
+                    <div class="what">
+                        <h3 class="name">{{ entity.title }}</h3>
+                        {% if entity.author %}
+                        <span class="author">by {{ entity.author }}</span>
+                        {% endif %}
+                    </div>
+                    {% if entity.amazon_url %}
+                    <div class="do-it amazon">
+                        <a class="button" href="{{ entity.amazon_url }}">Buy now</a>
+                        <div class="logo"><img src="http://static.stamped.com/assets/img/brand-amazon.png"/></div>
+                    </div>
+                    {% endif %}
+                    <div class="what contd">
+                        {% if entity.desc %}
+                        <article type="detail">
+                            <span class="title">Description:</span>
+                            <p>{{ entity.desc }}</p>
+                        </article>
+                        {% endif %}
+                        {% if entity.isbn %}
+                        <article type="detail">
+                            <span class="title">ISBN:</span>
+                            <p>{{ entity.isbn }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.publisher %}
+                        <article type="detail">
+                            <span class="title">Publisher:</span>
+                            <p>{{ entity.publisher }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.format %}
+                        <article type="detail">
+                            <span class="title">Format:</span>
+                            <p>{{ entity.format }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.language %}
+                        <article type="detail">
+                            <span class="title">Language:</span>
+                            <p>{{ entity.language }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.edition %}
+                        <article type="detail">
+                            <span class="title">Edition:</span>
+                            <p>{{ entity.edition }}</p>
+                        </article>
+                        {% endif %}
+                        
+                    </div>
+                </div> <!-- /capsule -->
+                {% endif %}
+                
+                {% if entity.category == "music" %}
+                <div class="capsule music{% if entity.image %} indent{% endif %}">
+                    
+                    {% if entity.image %}
+                    <div class="feature">
+                        <a href="{{ entity.itunes_url }}">
+                            <img src="{{ entity.image }}" />
+                        </a>
+                    </div> <!-- /feature -->
+                    {% endif %}
+                    
+                    
+                    
+                    <div class="what">
+                        
+                        
+                        <h3 class="name">{{ entity.title }}</h3>
+                        <span class="author">{{ entity.subtitle }}</span>
+                    </div>
+                    {% if entity.itunes_url %}
+                        <div class="do-it itunes">
+                            <a class="button" href="{{ entity.itunes_url }}">Download</a>
+                            <div class="logo"><img src="http://static.stamped.com/assets/img/brand-itunes.png"/></div>
+                        </div>
+                        {% endif %}
+                        <div class="what contd"> 
+                        {% if entity.label %}
+                        <article type="detail">
+                            <span class="title">Label:</span>
+                            <p>{{ entity.label }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.albums %}
+                        <article type="detail">
+                            <span class="title">Albums:</span>
+                            <ol>
+                                {% for album in entity.albums %}
+                                <li>{{ album }}</li>
+                                {% empty %}
+                                <li>Sorry, no albums in this list!</li>
+                                {% endfor %}
+                            </ol>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.songs %}
+                        <article type="detail">
+                            <span class="title">Songs:</span>
+                            <ol>
+                                {% for song in entity.songs %}
+                                <li>{{ song }}</li>
+                                {% empty %}
+                                <li>Sorry, no songs in this list!</li>
+                                {% endfor %}
+                            </ol>
+                        </article>
+                        {% endif %}
+                        </div>
+                    </div> <!-- /what -->
+                </div> <!-- /capsule -->
+                {% endif %}
+                
+                {% if entity.category == "other" and entity.subcategory == "app" %}
+                <div class="capsule app">
+                    {% if entity.image %}
+                    <div class="feature">
+                        <a href="{{ entity.itunes_url }}">
+                            <img src="{{ entity.image }}" />
+                        </a>
+                    </div> <!-- /feature -->
+                    {% endif %}
+                    <div class="what">
+                        
+                        <h3 class="name">{{ entity.title }}</h3>
+                        <span class="author">{{ entity.subtitle }}</span>
+                    </div>
+                    {% if entity.itunes_url %}
+                        <div class="do-it itunes">
+                            <a class="button" href="{{ entity.itunes_url }}">Download</a>
+                            <div class="logo"><img src="http://static.stamped.com/assets/img/brand-itunes.png"/></div>
+                        </div>
+                        {% endif %}
+                    <div class="what contd">
+                        {% if entity.label %}
+                        <article type="detail">
+                            <span class="title">Label:</span>
+                            <p>{{ entity.label }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.desc %}
+                        <article type="detail">
+                            <span class="title">Description:</span>
+                            <p>{{ entity.desc }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.albums %}
+                        <article type="detail">
+                            <span class="title">Albums:</span>
+                            <ol>
+                                {% for album in entity.albums %}
+                                <li>{{ album }}</li>
+                                {% empty %}
+                                <li>Sorry, no albums in this list!</li>
+                                {% endfor %}
+                            </ol>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.songs %}
+                        <article type="detail">
+                            <span class="title">Songs:</span>
+                            <ol>
+                                {% for song in entity.songs %}
+                                <li>{{ song }}</li>
+                                {% empty %}
+                                <li>Sorry, no songs in this list!</li>
+                                {% endfor %}
+                            </ol>
+                        </article>
+                        {% endif %}
+                        
+                    </div> <!-- /what -->
+                </div> <!-- /capsule -->
+                {% endif %}
+                
+                {% if entity.category == "film" %}
+                {% if entity.subcategory == "tv" %}
+                <div class="capsule tv">
+                {% else %}
+                
+                <div class="capsule movie{% if entity.image %} indent{% endif %}">
+                {% endif %}
+                    {% if entity.subcategory == 'movie' and entity.image %}
+                    <div class="feature">
+                        <img src="{{ entity.image }}" />
+                    </div> <!-- /feature -->
+                    {% endif %}
+                    <div class="what">
+                        <h3 class="name">{{ entity.title }}</h3>
+                        <div class="meta">
+                            {% if entity.subtitle %}{{ entity.subtitle }} {% endif %}
+                            {% if entity.subcategory == 'movie' and entity.rating %}<span class="mpaa-rating rating-{{ entity.rating }} replaced">{{ entity.rating }}</span>{% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if entity.itunes_url %}
+                    <div class="do-it itunes">
+                        <a class="button" href="{{ entity.itunes_url }}">Download</a>
+                        <div class="logo"><img src="http://static.stamped.com/assets/img/brand-itunes.png"/></div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if entity.fandango_url %}
+                    <div class="do-it fandango">
+                        <a class="button" href="{{ entity.fandango_url }}">Find showtimes</a>
+                        <div class="logo"><img src="http://static.stamped.com/assets/img/brand-fandango.png"/></div>
+                    </div>
+                    {% endif %}
+                    
+                    
+                    <div class="what contd">
+                        
+                        {% if entity.desc %}
+                        <article type="detail">
+                            <span class="title">Synopsis</span>
+                            <p>{{ entity.desc }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.cast %}
+                        <article type="detail">
+                        <span class="title">Cast:</span>
+                        <p>{{ entity.cast }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.director %}
+                        <article type="detail">
+                        <span class="title">Director:</span>
+                        <p>{{ entity.director }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.network %}
+                        <article type="detail">
+                        <span class="title">Network:</span>
+                        <p>{{ entity.network }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.in_theaters %}
+                        <article type="detail">
+                        <span class="title">In Theaters:</span>
+                        <p>{{ entity.in_theaters }}</p>
+                        </article>
+                        {% endif %}
+                        
+                        {% if entity.language %}
+                        <article type="detail">
+                        <span class="title">Language</span>
+                        <p>{{ entity.language }}</p>
+                        </article>
+                        {% endif %}
+                                                    
+                        {% if entity.run_dates %}
+                        <article type="detail">
+                        <span class="title">Run dates</span>
+                        <p>{{ entity.run_dates }}</p>
+                        </article>
+                        {% endif %}
+                        
+                    </div> <!-- /what -->
+                </div> <!-- /capsule -->
+                {% endif %}
+                
+                
                 <div class="footer">
-                    <a href="http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8" class="available replaced">Available on the App Store</a>
                     <div class="more">
-                        <span>&copy;2011 Stamped Inc.</span>
+                        <div class="inner">
+                            <a href="http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8" class="available-now replaced">Available on the App Store</a>
+                            <p>Stamped is a new way to put your stamp of approval on the world.</p>
+                            <span>&copy;2012 Stamped, Inc.</span>
+                        </div>
                     </div> 
                 </div>
             </div> <!-- /wrap -->
