@@ -1161,6 +1161,8 @@
 		7EC30B651401BBC50047D773 /* stamp_46pt_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B4F1401BBC50047D773 /* stamp_46pt_texture@2x.png */; };
 		7EC30B661401BBC50047D773 /* stamp_60pt_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B501401BBC50047D773 /* stamp_60pt_texture.png */; };
 		7EC30B671401BBC50047D773 /* stamp_60pt_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC30B511401BBC50047D773 /* stamp_60pt_texture@2x.png */; };
+		7EC54DC514BFA9D900A5C9B5 /* TwitterUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC54DC414BFA9D900A5C9B5 /* TwitterUser.m */; };
+		7EC54DC614BFA9D900A5C9B5 /* TwitterUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC54DC414BFA9D900A5C9B5 /* TwitterUser.m */; };
 		7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */; };
@@ -2050,6 +2052,8 @@
 		7EC30B501401BBC50047D773 /* stamp_60pt_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stamp_60pt_texture.png; sourceTree = "<group>"; };
 		7EC30B511401BBC50047D773 /* stamp_60pt_texture@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_60pt_texture@2x.png"; sourceTree = "<group>"; };
 		7EC4325A1496CE3D00BDBC6B /* StampedModel 17.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 17.xcdatamodel"; sourceTree = "<group>"; };
+		7EC54DC314BFA9D900A5C9B5 /* TwitterUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwitterUser.h; sourceTree = "<group>"; };
+		7EC54DC414BFA9D900A5C9B5 /* TwitterUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TwitterUser.m; sourceTree = "<group>"; };
 		7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuggestedUserTableViewCell.h; sourceTree = "<group>"; };
 		7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuggestedUserTableViewCell.m; sourceTree = "<group>"; };
@@ -2528,6 +2532,8 @@
 				7E9EB0FB144CD12F006F887B /* Entity.m */,
 				7E8A87FF14240B5B00B0092C /* SearchResult.h */,
 				7E8A880014240B5B00B0092C /* SearchResult.m */,
+				7EC54DC314BFA9D900A5C9B5 /* TwitterUser.h */,
+				7EC54DC414BFA9D900A5C9B5 /* TwitterUser.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -5133,6 +5139,7 @@
 				7E05100514B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */,
 				7E260F8C14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */,
 				7E22F6B314BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */,
+				7EC54DC614BFA9D900A5C9B5 /* TwitterUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5249,6 +5256,7 @@
 				7E05100414B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */,
 				7E260F8B14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */,
 				7E22F6B214BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */,
+				7EC54DC514BFA9D900A5C9B5 /* TwitterUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -597,7 +597,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
   if ((findSource_ == FindFriendsSourceContacts && contactsNotUsingStamped_.count > 0) ||
-      (findSource_ == FindFriendsSourceTwitter && twitterFriendsNotUsingStamped_.count > 0)) {
+      (findSource_ == FindFriendsSourceTwitter && twitterFriendsNotUsingStamped_)) {
     return 2;
   }
 
@@ -875,7 +875,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       [[Alerts alertWithTemplate:AlertTemplateDefault] show];
       return;
     }
-    
+
     NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
     return;
   }

@@ -16,6 +16,7 @@
 #import "Util.h"
 #import "Stamp.h"
 #import "Entity.h"
+#import "TwitterUser.h"
 #import "User.h"
 
 static SocialManager* sharedManager_ = nil;
@@ -55,6 +56,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, retain) NSMutableSet* twitterIDsNotUsingStamped;
+@property (nonatomic, retain) NSMutableSet* twitterFriendsNotUsingStamped;
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, assign) BOOL isSigningInToTwitter;
 @property (nonatomic, assign) BOOL isSigningInToFacebook;
@@ -64,6 +66,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)storeMainTwitterAccountAs:(ACAccount*)account;
 - (void)didReceiveTwitterFollowers:(NSDictionary*)followers;
 - (void)didReceiveTwitterFriends:(NSDictionary*)friends;
+- (void)didReceiveTwitterFriendsNotUsingStamped:(NSArray*)friends;
 - (void)displayNoAccountsAlert;
 
 - (void)checkForEndlessSignIn:(NSNotification*)note;
@@ -80,6 +83,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedFriendsFromFacebook:(NSString*)accessToken;
 - (void)requestStampedFriendsFromTwitter;
 
+- (void)requestTwitterUsersNotUsingStamped;
+
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
@@ -94,6 +99,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
 @synthesize twitterFriends = twitterFriends_;
+@synthesize twitterFriendsNotUsingStamped = twitterFriendsNotUsingStamped_;
 @synthesize twitterIDsNotUsingStamped = twitterIDsNotUsingStamped_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize isSigningInToTwitter = isSigningInToTwitter_;
@@ -676,6 +682,64 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [unlinkRequest send];
 }
 
+- (void)requestTwitterUsersNotUsingStamped {
+  if (twitterIDsNotUsingStamped_.count == 0) {
+    if (twitterFriendsNotUsingStamped_.count > 0) {
+      NSLog(@"Number of twitter friends not using stamped: %d", twitterFriendsNotUsingStamped_.count);
+    }
+    return;
+  }
+
+  if ([self hasiOS5Twitter]) {
+    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
+    NSArray* friendIDs = [twitterIDsNotUsingStamped_.allObjects subarrayWithRange:NSMakeRange(0, MIN(twitterIDsNotUsingStamped_.count, 100))];
+    NSDictionary* params = [NSDictionary dictionaryWithObject:[friendIDs componentsJoinedByString:@","] forKey:@"user_id"];
+    NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/users/lookup.json"];
+    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];    
+    request.account = account;
+    
+    [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
+      if ([urlResponse statusCode] == 200) {
+        NSError* error = nil;
+        NSArray* friendsObject = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&error];
+        if (friendsObject)
+          [self performSelectorOnMainThread:@selector(didReceiveTwitterFriendsNotUsingStamped:) withObject:friendsObject waitUntilDone:NO];
+      }
+    }];
+  } else if (self.authentication) {
+//    RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
+//                                                            delegate:nil];
+//    request.method = RKRequestMethodPOST;
+//    [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+//    [request.URLRequest setHTTPMethod:@"POST"];
+//    tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//    tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
+//    NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
+//    [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
+//    [self.authentication authorizeRequest:request.URLRequest];
+//    [request send];
+  }
+}
+
+- (void)didReceiveTwitterFriendsNotUsingStamped:(NSArray*)friends {
+  if (!twitterFriendsNotUsingStamped_)
+    self.twitterFriendsNotUsingStamped = [NSMutableSet set];
+
+  for (NSDictionary* friend in friends) {
+    TwitterUser* user = [[TwitterUser alloc] init];
+    user.name = [friend objectForKey:@"name"];
+    user.screenName = [friend objectForKey:@"screen_name"];
+    user.profileImageURL = [friend objectForKey:@"profile_image_url"];
+    [twitterFriendsNotUsingStamped_ addObject:user];
+    [user release];
+    [twitterIDsNotUsingStamped_ removeObject:[friend objectForKey:@"id"]];
+  }
+
+  // Keep going since it chunks in 100-user bursts.
+  [self requestTwitterUsersNotUsingStamped];
+}
+
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
@@ -772,6 +836,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       NSNumber* n = [NSNumber numberWithInteger:friendID.integerValue];
       [twitterIDsNotUsingStamped_ removeObject:n];
     }
+
+    [self requestTwitterUsersNotUsingStamped];
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:twitterFriends];
   } else if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound) {
     isSigningInToFacebook_ = NO;
