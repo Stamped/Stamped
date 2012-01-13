@@ -46,13 +46,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)loadSuggestedUsers;
 - (void)removeUsersToInviteWithIdentifers:(NSArray*)identifiers;
 - (void)sendInviteRequestToEmail:(NSString*)email;
-- (void)socialNetworksDidChange:(NSNotification*)note;
-- (void)twitterFriendsDidChange:(NSNotification*)note;
-- (void)facebookFriendsDidChange:(NSNotification*)note;
+- (void)socialNetworksDidChange:(NSNotification*)notification;
+- (void)twitterFriendsDidChange:(NSNotification*)notification;
+- (void)facebookFriendsDidChange:(NSNotification*)notification;
+- (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, copy) NSArray* twitterFriends;
-@property (nonatomic, retain) NSMutableArray* twitterFriendsNotUsingStamped;
+@property (nonatomic, copy) NSArray* twitterFriendsNotUsingStamped;
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
@@ -175,6 +176,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(facebookFriendsDidChange:)
                                                name:kFacebookFriendsChangedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(twitterFriendsNotUsingStampedReceived:)
+                                               name:kTwitterFriendsNotOnStampedReceivedNotification
                                              object:nil];
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
@@ -497,7 +502,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [[SocialManager sharedManager] performSelector:@selector(signInToFacebook) withObject:nil afterDelay:0.35];
 }
 
-- (void)socialNetworksDidChange:(NSNotification*)note {
+- (void)socialNetworksDidChange:(NSNotification*)notification {
   [tableView_ reloadData];
   // Twitter
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
@@ -579,18 +584,28 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
 }
 
-- (void)twitterFriendsDidChange:(NSNotification*)note {
-  if (note.object && [note.object isKindOfClass:[NSArray class]])
-    self.twitterFriends = note.object;
+- (void)twitterFriendsDidChange:(NSNotification*)notification {
+  // TODO(andybons): This is wrong. The notification object should be the object sending the notification.
+  if (notification.object && [notification.object isKindOfClass:[NSArray class]])
+    self.twitterFriends = notification.object;
   [self.tableView reloadData];
   [self socialNetworksDidChange:nil];
 }
 
-- (void)facebookFriendsDidChange:(NSNotification*)note {
-  if (note.object && [note.object isKindOfClass:[NSArray class]])
-    self.facebookFriends = note.object;
+- (void)facebookFriendsDidChange:(NSNotification*)notification {
+  // TODO(andybons): This is wrong. The notification object should be the object sending the notification.
+  if (notification.object && [notification.object isKindOfClass:[NSArray class]])
+    self.facebookFriends = notification.object;
   [self.tableView reloadData];
   [self socialNetworksDidChange:nil];
+}
+
+- (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification {
+  NSLog(@"Twitter friends were received.");
+  self.twitterFriendsNotUsingStamped = [SocialManager sharedManager].twitterFriendsNotUsingStamped.allObjects;
+  NSArray* desc = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
+  self.twitterFriendsNotUsingStamped = [twitterFriendsNotUsingStamped_ sortedArrayUsingDescriptors:desc];
+  NSLog(@"Usernames: %@", [self.twitterFriendsNotUsingStamped valueForKeyPath:@"name"]);
 }
 
 #pragma mark - Table view data source.

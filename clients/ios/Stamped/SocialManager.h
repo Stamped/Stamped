@@ -14,6 +14,7 @@
 
 extern NSString* const kSocialNetworksChangedNotification;
 extern NSString* const kTwitterFriendsChangedNotification;
+extern NSString* const kTwitterFriendsNotOnStampedReceivedNotification;
 extern NSString* const kFacebookFriendsChangedNotification;
 extern NSString* const kStampedFindFacebookFriendsPath;
 extern NSString* const kStampedFindTwitterFriendsPath;
@@ -38,5 +39,8 @@ extern NSString* const kStampedFindTwitterFriendsPath;
 - (void)refreshStampedFriendsFromFacebook;
 - (void)refreshStampedFriendsFromTwitter;
 - (BOOL)handleOpenURLFromFacebook:(NSURL*)URL;
+
+// TODO(andybons): This should be readonly, not retain.
+@property (nonatomic, retain) NSMutableSet* twitterFriendsNotUsingStamped;
 
 @end

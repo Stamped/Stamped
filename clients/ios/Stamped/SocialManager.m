@@ -44,6 +44,7 @@ NSString* const kStampedFindFacebookFriendsPath = @"/users/find/facebook.json";
 NSString* const kStampedFindTwitterFriendsPath = @"/users/find/twitter.json";
 NSString* const kSocialNetworksChangedNotification = @"kSocialNetworksChangedNotification";
 NSString* const kTwitterFriendsChangedNotification = @"kTwitterFriendsChangedNotification";
+NSString* const kTwitterFriendsNotOnStampedReceivedNotification = @"kTwitterFriendsNotOnStampedReceivedNotification";
 NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedNotification"; 
 
 
@@ -57,7 +58,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, retain) NSMutableSet* twitterIDsNotUsingStamped;
-@property (nonatomic, retain) NSMutableSet* twitterFriendsNotUsingStamped;
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, assign) BOOL isSigningInToTwitter;
 @property (nonatomic, assign) BOOL isSigningInToFacebook;
@@ -441,7 +441,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
           [self performSelectorOnMainThread:@selector(didReceiveTwitterFollowers:) withObject:followersObject waitUntilDone:NO];
       }
     }];
-  } else {    
+  } else {
     if (!self.twitterClient)
       self.twitterClient = [RKClient clientWithBaseURL:kTwitterBaseURI];
 
@@ -687,6 +687,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if (twitterIDsNotUsingStamped_.count == 0) {
     if (twitterFriendsNotUsingStamped_.count > 0) {
       NSLog(@"Number of twitter friends not using stamped: %d", twitterFriendsNotUsingStamped_.count);
+      [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsNotOnStampedReceivedNotification object:self];
     }
     return;
   }
