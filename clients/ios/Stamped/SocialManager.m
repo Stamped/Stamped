@@ -30,6 +30,7 @@ static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
 static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kTwitterSignOutURI = @"/account/end_session.json";
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
+static NSString* const kTwitterUserLookupPath = @"/users/lookup.json";
 static NSString* const kFacebookFriendsURI = @"/me/friends";
 static NSString* const kFacebookAppID = @"297022226980395";
 static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
@@ -690,15 +691,17 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     return;
   }
 
+  NSArray* friendIDs = [twitterIDsNotUsingStamped_.allObjects subarrayWithRange:NSMakeRange(0, MIN(twitterIDsNotUsingStamped_.count, 100))];
+  NSDictionary* params = [NSDictionary dictionaryWithObject:[friendIDs componentsJoinedByString:@","] forKey:@"user_id"];
+  NSString* fullTwitterUserLookupPath = @"http://api.twitter.com/1/users/lookup.json";
+
   if ([self hasiOS5Twitter]) {
     NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
     ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
-    NSArray* friendIDs = [twitterIDsNotUsingStamped_.allObjects subarrayWithRange:NSMakeRange(0, MIN(twitterIDsNotUsingStamped_.count, 100))];
-    NSDictionary* params = [NSDictionary dictionaryWithObject:[friendIDs componentsJoinedByString:@","] forKey:@"user_id"];
+
     NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/users/lookup.json"];
     TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];    
-    request.account = account;
-    
+    request.account = account;    
     [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
       if ([urlResponse statusCode] == 200) {
         NSError* error = nil;
@@ -708,17 +711,12 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
       }
     }];
   } else if (self.authentication) {
-//    RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
-//                                                            delegate:nil];
-//    request.method = RKRequestMethodPOST;
-//    [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-//    [request.URLRequest setHTTPMethod:@"POST"];
-//    tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-//    tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
-//    NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
-//    [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
-//    [self.authentication authorizeRequest:request.URLRequest];
-//    [request send];
+    // A full NSURL object has to be created because otherwise it will fail to append the query params
+    // to the path. TODO(andybons): File a RestKit bug about this.
+    NSString* path = [fullTwitterUserLookupPath appendQueryParams:params];
+    RKRequest* request = [RKRequest requestWithURL:[NSURL URLWithString:path] delegate:self];
+    [self.authentication authorizeRequest:request.URLRequest];
+    [self.twitterClient.requestQueue addRequest:request];
   }
 }
 
@@ -752,6 +750,19 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     return;
   }
 
+  if (!request.resourcePath && [request.URL.path rangeOfString:kTwitterUserLookupPath].location != NSNotFound) {
+    // Fucking hell what a mess.
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for request %@ response %@: %@", request.resourcePath, response, err);
+      return;
+    }
+
+    [self didReceiveTwitterFriendsNotUsingStamped:body];
+    return;
+  }
+  
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
     return;
   }
@@ -773,26 +784,22 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if ([request.resourcePath rangeOfString:kTwitterSignOutURI].location != NSNotFound) {
     return;
   }
-  
+
   NSError* err = nil;
   id body = [response parsedBody:&err];
   if (err) {
     NSLog(@"Parse error for request %@ response %@: %@", request.resourcePath, response, err);
     return;
   }
-  
+
   // Response for requestTwitterUser.
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
     [self requestStampedLinkTwitter:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
     [self requestTwitterFollowers:[body objectForKey:@"id_str"]];
     [self requestTwitterFriends:[body objectForKey:@"id_str"]];
-  }
-  // Response for requestTwitterFollowers. 
-  else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
+  } else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
     [self requestStampedLinkTwitterFollowers:[body objectForKey:@"ids"]];
-  }
-  // Response for requestTwitterFriends. Send on to Stamped to find any Stamped friends.
-  else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
+  } else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     self.twitterIDsNotUsingStamped = [NSMutableSet setWithArray:[body objectForKey:@"ids"]];
     [self requestStampedFriendsFromTwitter];
   }
