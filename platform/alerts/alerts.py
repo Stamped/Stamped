@@ -8,35 +8,33 @@ __license__   = "TODO"
 
 import Globals, utils
 import os, sys, pymongo, json, struct, ssl, binascii
-import libs.ec2_utils
-import boto
+import binascii, boto, keys.aws, libs.ec2_utils
  
-from optparse import OptionParser
-from datetime import *
-from socket import socket
-from errors import Fail
-from HTTPSchemas import *
+from optparse       import OptionParser
+from datetime       import *
+from socket         import socket
+from errors         import Fail
+from HTTPSchemas    import *
 
-from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
-from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
-from db.mongodb.MongoActivityCollection import MongoActivityCollection
-from MongoStampedAuth import MongoStampedAuth
+from db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
+from db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
+from db.mongodb.MongoAccountCollection      import MongoAccountCollection
+from db.mongodb.MongoActivityCollection     import MongoActivityCollection
+from MongoStampedAuth                       import MongoStampedAuth
 
+<<<<<<< HEAD
+from APNSWrapper                            import APNSNotificationWrapper, APNSNotification
+=======
 from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackWrapper
+>>>>>>> 1288932558bec7cd6ceac5e170fbc3baa43101ea
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_SECRET_KEY = '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'
-
-IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
 IS_PROD       = libs.ec2_utils.is_prod_stack()
 USE_PROD_CERT = True
-
-### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
 
 admins = set(['kevin','robby','bart','travis','andybons','jake','edmuki'])
 admin_emails = set([
@@ -537,7 +535,7 @@ def buildPushNotification(user, activityItem, deviceId):
 
 
 def sendEmails(queue, options):
-    ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+    ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     
     # Apply rate limit
     limit = 8

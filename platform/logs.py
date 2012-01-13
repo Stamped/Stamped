@@ -107,12 +107,16 @@ def begin(**kwargs):
     nodeName    = kwargs.pop('nodeName', None)
 
     refresh(format='object')
-    localData.saveLog = saveLog
+    
+    localData.saveLog  = saveLog
     localData.saveStat = saveStat
+    
     if requestData:
         request(requestData)
+    
     if addLog:
         localData.log['_id'] = addLog(localData.log)
+    
     if nodeName:
         localData.log['node'] = nodeName
 

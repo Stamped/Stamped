@@ -15,10 +15,10 @@ import tasks.APITasks
 
 from pprint          import pprint, pformat
 from datetime        import datetime
-from errors          import *
 from auth            import convertPasswordForStorage
 from utils           import lazyProperty
 from functools       import wraps
+from errors          import *
 
 from AStampedAPI     import AStampedAPI
 from AAccountDB      import AAccountDB
@@ -31,7 +31,6 @@ from AFavoriteDB     import AFavoriteDB
 from ACollectionDB   import ACollectionDB
 from AFriendshipDB   import AFriendshipDB
 from AActivityDB     import AActivityDB
-
 from Schemas         import *
 
 # third-party search API wrappers

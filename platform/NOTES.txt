@@ -1,11 +1,16 @@
 
+platform:
     * ensure async tasks are logged and accessible from logger
-    * refactor repo layout and, in particular, web stuff
+    * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
-    * stable ids for merged entities
-    * look into integrating foursquare APIs
     * integrity checking daemon
-    * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
+    * look into integrating foursquare APIs
+    * stable ids for merged entities
+    * refactor repo layout and, in particular, web stuff
+
+web:
+    * web deployment script which compiles / optimizes all javascript, ensures assets are up-to-date, etc.
+    * take a look at stamped-web repository
 
 Bieber:
     * limit activity notifications to last N or so
@@ -98,6 +103,8 @@ OLD:
     
     * async task queue for bottlenecks (e.g., NYMag stamping something => writing to all followers' inboxes synchronously before stamp completes)
         * local / synchronous fallback if async message broker is unavailable
+    * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
+    * add cache expires control to memcached_function
     
     34.026401,-118.38947899
 

@@ -59,21 +59,22 @@ def show(request, **kwargs):
         opentable_url = None
         if entity.rid is not None:
             opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % entity.rid
+        
         entity = HTTPEntity().importSchema(entity)
         if entity.opentable_url and opentable_url is not None:
             entity.opentable_url = opentable_url
-
+        
         params = HTTPStamp().importSchema(stamp).value
         params['entity'] = entity.value
-
+        
         if entity.genre == 'film' and entity.length:
             params['entity']['duration'] = formatDuration(entity.length)
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
-
+        
         response = render_to_response(template, params)
         response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
-
+        
         return response
 
     except Exception as e:

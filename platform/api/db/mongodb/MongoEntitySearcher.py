@@ -30,7 +30,7 @@ from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
 
-# Stamped coords: '40.736006685255155,-73.98884296417236'
+# Stamped HQ coords: '40.736006685255155,-73.98884296417236'
 
 class MongoEntitySearcher(EntitySearcher):
     # subcategory weights for biasing search results towards entities that we're 
@@ -1085,8 +1085,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
     @lru_cache(maxsize=64)
-    @memcached_function('_get_cache')
+    @memcached_function('_get_cache', time=7*24*60*60)
     def _find_apple(self, input_query, subcategory_filter):
         output = []
         
@@ -1146,8 +1149,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
     @lru_cache(maxsize=64)
-    @memcached_function('_get_cache')
+    @memcached_function('_get_cache', time=7*24*60*60)
     def _find_amazon(self, input_query):
         output = []
         
@@ -1172,8 +1178,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
     @lru_cache(maxsize=64)
-    @memcached_function('_get_cache')
+    @memcached_function('_get_cache', time=7*24*60*60)
     def _find_tv(self, input_query):
         output = []
         
@@ -1192,8 +1201,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 28 days
     @lru_cache(maxsize=64)
-    @memcached_function('_get_cache')
+    @memcached_function('_get_cache', time=28*24*60*60)
     def _find_google_national(self, input_query):
         output = []
         

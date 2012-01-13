@@ -11,3 +11,4 @@ def load_from_search_strings_file():
     return [s.strip() for s in ss if not s.startswith('#')]
 
 search_strings = load_from_search_strings_file()
+

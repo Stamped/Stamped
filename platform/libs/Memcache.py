@@ -104,6 +104,9 @@ class StampedMemcache(Memcache):
         })
         """
 
+# what keys are we using for memcached entries?
+# object_id => [ dependencies ]
+
 class InvalidatingMemcache(Memcache):
     
     def _import_object_id(object_id):
@@ -149,11 +152,7 @@ class InvalidatingMemcache(Memcache):
         
         return dependencies
 
-# what keys are we using for memcached entries?
-# object_id => [ dependencies ]
-# 
-
-def memcached_function(get_cache_client):
+def memcached_function(get_cache_client, time=0, min_compress_len=0):
     
     def decorating_function(user_function):
         kwd_mark   = object() # separate positional and keyword args
@@ -189,7 +188,7 @@ def memcached_function(get_cache_client):
                 wrapper.misses += 1
             
             if store:
-                cache[key] = result
+                cache.set(key, result, time=time, min_compress_len=min_compress_len)
             
             return result
         
