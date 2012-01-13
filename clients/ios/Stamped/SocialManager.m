@@ -186,6 +186,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)refreshStampedFriendsFromTwitter {
+  self.twitterFriends = nil;
+  self.twitterIDsNotUsingStamped = nil;
+  self.twitterFriendsNotUsingStamped = nil;
   [self requestTwitterUser];
 }
 
@@ -463,7 +466,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
     NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/friends/ids.json"];
     NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", nil];
-    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];    
+    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];
     request.account = account;
 
     [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
@@ -728,8 +731,12 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   for (NSDictionary* friend in friends) {
     TwitterUser* user = [[TwitterUser alloc] init];
     user.name = [friend objectForKey:@"name"];
-    user.screenName = [friend objectForKey:@"screen_name"];
+    user.screenName = [NSString stringWithFormat:@"@%@", [friend objectForKey:@"screen_name"]];
     user.profileImageURL = [friend objectForKey:@"profile_image_url"];
+    user.profileImageURL  = [user.profileImageURL stringByReplacingOccurrencesOfString:@"_normal"
+                                                                            withString:@"_reasonably_small"
+                                                                               options:(NSCaseInsensitiveSearch | NSBackwardsSearch)
+                                                                                 range:NSMakeRange(0, user.profileImageURL.length)];
     [twitterFriendsNotUsingStamped_ addObject:user];
     [user release];
     [twitterIDsNotUsingStamped_ removeObject:[friend objectForKey:@"id"]];

@@ -20,6 +20,7 @@
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "SuggestedUserTableViewCell.h"
+#import "TwitterUser.h"
 #import "Util.h"
 #import "User.h"
 #import "UserImageView.h"
@@ -42,6 +43,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)unfollowButtonPressed:(id)sender;
 - (void)inviteButtonPressed:(id)sender;
 - (UITableViewCell*)cellFromSubview:(UIView*)view;
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
 - (void)loadSuggestedUsers;
 - (void)removeUsersToInviteWithIdentifers:(NSArray*)identifiers;
@@ -285,7 +287,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if (contactFriends_) {
     [self.tableView reloadData];
     [self.tableView setContentOffset:CGPointZero];
-    toolbar_.centerButton.enabled = contactsNotUsingStamped_.count > 0;
+    toolbar_.centerButton.enabled = contactFriends_.count > 0;
     return;
   }
   [tableView_ reloadData];
@@ -343,7 +345,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];
     self.showToolbar = YES;
-    [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
+    toolbar_.centerButton.enabled = NO;
+    [toolbar_.centerButton setTitle:@"Loading..." forState:UIControlStateNormal];
     [toolbar_ setNeedsLayout];
   } else {
     self.showToolbar = NO;
@@ -543,7 +546,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                        }];
     }
   }
-
   
   // Facebook
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
@@ -601,18 +603,20 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification {
-  NSLog(@"Twitter friends were received.");
   self.twitterFriendsNotUsingStamped = [SocialManager sharedManager].twitterFriendsNotUsingStamped.allObjects;
   NSArray* desc = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
   self.twitterFriendsNotUsingStamped = [twitterFriendsNotUsingStamped_ sortedArrayUsingDescriptors:desc];
-  NSLog(@"Usernames: %@", [self.twitterFriendsNotUsingStamped valueForKeyPath:@"name"]);
+  [tableView_ reloadData];
+  [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
+  toolbar_.centerButton.enabled = twitterFriendsNotUsingStamped_.count > 0;
+  [toolbar_ setNeedsLayout];
 }
 
 #pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  if ((findSource_ == FindFriendsSourceContacts && contactsNotUsingStamped_.count > 0) ||
-      (findSource_ == FindFriendsSourceTwitter && twitterFriendsNotUsingStamped_)) {
+  if ((findSource_ == FindFriendsSourceContacts && contactFriends_.count > 0) ||
+      (findSource_ == FindFriendsSourceTwitter && twitterFriends_.count > 0)) {
     return 2;
   }
 
@@ -636,27 +640,85 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       return self.contactFriends.count;
     else if (section == 1)
       return contactsNotUsingStamped_.count;
-  }
-  else if (self.findSource == FindFriendsSourceTwitter)
-    return self.twitterFriends.count;
-  else if (self.findSource == FindFriendsSourceStamped)
+  } else if (self.findSource == FindFriendsSourceTwitter) {
+    if (section == 0)
+      return self.twitterFriends.count;
+    else if (section == 1)
+      return self.twitterFriendsNotUsingStamped.count;
+  } else if (self.findSource == FindFriendsSourceStamped) {
     return self.stampedFriends.count;
-  else if (self.findSource == FindFriendsSourceSuggested)
+  } else if (self.findSource == FindFriendsSourceSuggested) {
     return self.suggestedFriends.count;
-  else if (self.findSource == FindFriendsSourceFacebook)
+  } else if (self.findSource == FindFriendsSourceFacebook) {
     return self.facebookFriends.count;
-
+  }
   return 0;
+}
+
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.section == 1) {
+    InviteFriendTableViewCell* inviteCell = (InviteFriendTableViewCell*)cell;
+    if (findSource_ == FindFriendsSourceContacts) {
+      ABRecordRef person = [contactsNotUsingStamped_ objectAtIndex:indexPath.row];
+      CFStringRef name = ABRecordCopyCompositeName(person);
+      if (name) {
+        inviteCell.nameLabel.text = (NSString*)name;
+        CFRelease(name);
+      } else {
+        inviteCell.nameLabel.text = nil;
+      }
+      
+      inviteCell.inviteButton.enabled = YES;
+      ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
+      NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
+      CFRelease(emailProperty);
+      if (emails.count > 0) {
+        NSString* email = [emails objectAtIndex:0];
+        inviteCell.emailLabel.text = email;
+        if ([invitedContacts_ containsObject:email])
+          inviteCell.inviteButton.enabled = NO;
+      }
+      [emails release];
+      if (ABPersonHasImageData(person)) {
+        CFDataRef imageData = ABPersonCopyImageData(person);
+        inviteCell.userImageView.imageView.image = [UIImage imageWithData:(NSData*)imageData];
+        CFRelease(imageData);
+      }
+    } else if (findSource_ == FindFriendsSourceTwitter) {
+      TwitterUser* user = [twitterFriendsNotUsingStamped_ objectAtIndex:indexPath.row];
+      inviteCell.nameLabel.text = user.name;
+      inviteCell.emailLabel.text = user.screenName;
+      inviteCell.userImageView.imageURL = user.profileImageURL;
+    }
+  } else {
+    NSArray* friends = nil;
+    if (self.findSource == FindFriendsSourceTwitter)
+      friends = self.twitterFriends;
+    else if (self.findSource == FindFriendsSourceContacts)
+      friends = self.contactFriends;
+    else if (self.findSource == FindFriendsSourceStamped)
+      friends = self.stampedFriends;
+    else if (self.findSource == FindFriendsSourceSuggested)
+      friends = self.suggestedFriends;
+    else if (self.findSource == FindFriendsSourceFacebook)
+      friends = self.facebookFriends;
+    
+    User* user = [friends objectAtIndex:indexPath.row];
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    [(id)cell followButton].hidden = [currentUser.following containsObject:user];
+    [(id)cell unfollowButton].hidden = ![(id)cell followButton].hidden;
+    [(id)cell setUser:user];
+  }
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   NSString* CellIdentifier = findSource_ == FindFriendsSourceSuggested ? @"SuggestedCell" : @"FriendshipCell";
-  if (findSource_ == FindFriendsSourceContacts && indexPath.section == 1)
+  if (indexPath.section == 1)
     CellIdentifier = @"InviteCell";
 
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    if (findSource_ == FindFriendsSourceContacts && indexPath.section == 1) {
+    if (indexPath.section == 1) {
       cell = [[[InviteFriendTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
       [[(id)cell inviteButton] addTarget:self
                                   action:@selector(inviteButtonPressed:)
@@ -677,52 +739,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     }
   }
 
-  if (findSource_ == FindFriendsSourceContacts && indexPath.section == 1) {
-    ABRecordRef person = [contactsNotUsingStamped_ objectAtIndex:indexPath.row];
-    InviteFriendTableViewCell* inviteCell = (InviteFriendTableViewCell*)cell;
-    CFStringRef name = ABRecordCopyCompositeName(person);
-    if (name) {
-      inviteCell.nameLabel.text = (NSString*)name;
-      CFRelease(name);
-    } else {
-      inviteCell.nameLabel.text = nil;
-    }
-
-    inviteCell.inviteButton.enabled = YES;
-    ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
-    NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
-    CFRelease(emailProperty);
-    if (emails.count > 0) {
-      NSString* email = [emails objectAtIndex:0];
-      inviteCell.emailLabel.text = email;
-      if ([invitedContacts_ containsObject:email])
-        inviteCell.inviteButton.enabled = NO;
-    }
-    [emails release];
-    if (ABPersonHasImageData(person)) {
-      CFDataRef imageData = ABPersonCopyImageData(person);
-      inviteCell.userImageView.imageView.image = [UIImage imageWithData:(NSData*)imageData];
-      CFRelease(imageData);
-    }
-  } else {
-    NSArray* friends = nil;
-    if (self.findSource == FindFriendsSourceTwitter)
-      friends = self.twitterFriends;
-    else if (self.findSource == FindFriendsSourceContacts)
-      friends = self.contactFriends;
-    else if (self.findSource == FindFriendsSourceStamped)
-      friends = self.stampedFriends;
-    else if (self.findSource == FindFriendsSourceSuggested)
-      friends = self.suggestedFriends;
-    else if (self.findSource == FindFriendsSourceFacebook)
-      friends = self.facebookFriends;
-
-    User* user = [friends objectAtIndex:indexPath.row];
-    User* currentUser = [AccountManager sharedManager].currentUser;
-    [(id)cell followButton].hidden = [currentUser.following containsObject:user];
-    [(id)cell unfollowButton].hidden = ![(id)cell followButton].hidden;
-    [(id)cell setUser:user];
-  }
+  [self configureCell:cell atIndexPath:indexPath];
   return cell;
 }
 
@@ -736,12 +753,25 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
 
   if (findSource_ == FindFriendsSourceTwitter && twitterFriends_) {
-    if (twitterFriends_.count == 0) {
-      view.leftLabel.text = @"No Twitter friends are using Stamped.";
-      view.rightLabel.text = @":(";
-    } else {
-      view.leftLabel.text = @"Twitter friends using Stamped";
-      view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
+    if (section == 0) {
+      if (twitterFriends_.count == 0) {
+        view.leftLabel.text = @"No Twitter friends are using Stamped.";
+        view.rightLabel.text = @":(";
+      } else {
+        view.leftLabel.text = @"Twitter friends using Stamped";
+        view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
+      }
+    } else if (section == 1) {
+      if (twitterFriendsNotUsingStamped_ == nil) {
+        view.leftLabel.text = @"Finding friends not using Stamped...";
+        view.rightLabel.text = nil;
+      } else if (twitterFriendsNotUsingStamped_.count > 0) {
+        view.leftLabel.text = @"Twitter friends not using Stamped";
+        view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriendsNotUsingStamped_.count];
+      } else if (twitterFriendsNotUsingStamped_.count == 0) {
+        view.leftLabel.text = @"All your Twitter friends are using Stamped.";
+        view.rightLabel.text = @":)";
+      }
     }
   } else if (findSource_ == FindFriendsSourceContacts && contactFriends_) {
     if (section == 0) {
@@ -787,7 +817,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       view.rightLabel.text = nil;
   } else if (findSource_ == FindFriendsSourceStamped) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
-      view.rightLabel.text = @"…";
+      view.rightLabel.text = nil;
   } else if (findSource_ == FindFriendsSourceSuggested) {
     view.leftLabel.text = @"Suggested Users";
     view.rightLabel.text = @"";
@@ -946,7 +976,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self removeUsersToInviteWithIdentifers:[objects valueForKeyPath:@"@distinctUnionOfObjects.identifier"]];
     [self.tableView reloadData];
-    toolbar_.centerButton.enabled = (contactsNotUsingStamped_.count > 0);
   }
   
   else if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
