@@ -79,6 +79,7 @@
                                         disabledBackgroundImage:nil];
   
   [button setTitleColor:[UIColor stampedGrayColor] forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor stampedLightGrayColor] forState:UIControlStateDisabled];
   [button setTitleColor:[UIColor stampedDarkGrayColor] forState:UIControlStateHighlighted];
   [button setTitleColor:[UIColor colorWithRed:0.15 green:0.46 blue:0.89 alpha:1.0] forState:UIControlStateSelected];
   [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.5] forState:UIControlStateNormal];

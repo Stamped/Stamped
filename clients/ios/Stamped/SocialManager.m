@@ -689,7 +689,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestTwitterUsersNotUsingStamped {
   if (twitterIDsNotUsingStamped_.count == 0) {
     if (twitterFriendsNotUsingStamped_.count > 0) {
-      NSLog(@"Number of twitter friends not using stamped: %d", twitterFriendsNotUsingStamped_.count);
       [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsNotOnStampedReceivedNotification object:self];
     }
     return;

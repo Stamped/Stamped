@@ -21,6 +21,7 @@
 @property (nonatomic, readonly) UIButton* mainActionButton;
 @property (nonatomic, readonly) UIButton* addEmailsButton;
 @property (nonatomic, readonly) UIButton* centerButton;
+@property (nonatomic, assign) BOOL inviteMode;
 
 @property (nonatomic, assign) id<FindFriendsToolbarDelegate> delegate;
 

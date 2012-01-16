@@ -47,6 +47,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
 - (void)loadSuggestedUsers;
 - (void)removeUsersToInviteWithIdentifers:(NSArray*)identifiers;
+- (void)inviteSetHasChanged;
 - (void)sendInviteRequestToEmail:(NSString*)email;
 - (void)socialNetworksDidChange:(NSNotification*)notification;
 - (void)twitterFriendsDidChange:(NSNotification*)notification;
@@ -61,7 +62,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, copy) NSArray* suggestedFriends;
 @property (nonatomic, retain) NSMutableArray* contactsNotUsingStamped;
-@property (nonatomic, retain) NSMutableArray* invitedContacts;
+@property (nonatomic, retain) NSMutableSet* inviteSet;
+@property (nonatomic, retain) NSMutableSet* invitedSet;
 @property (nonatomic, assign) BOOL searchFieldHidden;
 @property (nonatomic, assign) BOOL showToolbar;
 @property (nonatomic, readonly) FindFriendsToolbar* toolbar;
@@ -78,7 +80,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @synthesize suggestedFriends = suggestedFriends_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize contactsNotUsingStamped = contactsNotUsingStamped_;
-@synthesize invitedContacts = invitedContacts_;
+@synthesize inviteSet = inviteSet_;
+@synthesize invitedSet = invitedSet_;
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
 @synthesize facebookButton = facebookButton_;
@@ -110,7 +113,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.contactFriends = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
-  self.invitedContacts = nil;
+  self.inviteSet = nil;
+  self.invitedSet = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
   self.facebookButton = nil;
@@ -158,7 +162,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.invitedContacts = [NSMutableArray array];
+  self.inviteSet = [NSMutableSet set];
+  self.invitedSet = [NSMutableSet set];
+
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Add Friends"
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
@@ -217,7 +223,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.stampedButton = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
-  self.invitedContacts = nil;
+  self.inviteSet = nil;
+  self.invitedSet = nil;
   self.nipple = nil;
   self.searchField = nil;
   self.tableView = nil;
@@ -249,6 +256,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromStamped:(id)sender {
   self.findSource = FindFriendsSourceSuggested;
+  [inviteSet_ removeAllObjects];
+  [self inviteSetHasChanged];
   self.searchFieldHidden = NO;
   [self adjustNippleToView:self.stampedButton];
   RKClient* client = [RKClient sharedClient];
@@ -271,6 +280,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromContacts:(id)sender {
   self.findSource = FindFriendsSourceContacts;
+  [inviteSet_ removeAllObjects];
+  [self inviteSetHasChanged];
   [self adjustNippleToView:self.contactsButton];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
@@ -330,7 +341,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromTwitter:(id)sender {
   self.findSource = FindFriendsSourceTwitter;
-
+  [inviteSet_ removeAllObjects];
+  [self inviteSetHasChanged];
   [self adjustNippleToView:self.twitterButton];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
@@ -347,6 +359,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.showToolbar = YES;
     toolbar_.centerButton.enabled = NO;
     [toolbar_.centerButton setTitle:@"Loading..." forState:UIControlStateNormal];
+    [toolbar_.mainActionButton setTitle:@"Tweet" forState:UIControlStateNormal];
     [toolbar_ setNeedsLayout];
   } else {
     self.showToolbar = NO;
@@ -358,6 +371,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromFacebook:(id)sender {
   self.findSource = FindFriendsSourceFacebook;
+  [inviteSet_ removeAllObjects];
+  [self inviteSetHasChanged];
   [self adjustNippleToView:facebookButton_];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
@@ -440,6 +455,34 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   return (UITableViewCell*)superview;
 }
 
+- (void)inviteSetHasChanged {
+  toolbar_.previewButton.enabled = (inviteSet_.count > 0);
+  toolbar_.mainActionButton.enabled = (inviteSet_.count > 0);
+  NSString* title = nil;
+  switch (findSource_) {
+    case FindFriendsSourceTwitter:
+      title = @"Tweet";
+      break;
+    case FindFriendsSourceFacebook:
+      title = @"Post";
+      break;
+    case FindFriendsSourceContacts:
+      title = @"Send";
+      break;
+    default:
+      break;
+  }
+  if (inviteSet_.count > 0) {
+    if (findSource_ == FindFriendsSourceFacebook) {
+      title = [title stringByAppendingFormat:@" to walls (%d)", inviteSet_.count];
+    } else {
+      title = [title stringByAppendingFormat:@" (%d)", inviteSet_.count];
+    }
+  }
+  [toolbar_.mainActionButton setTitle:title forState:UIControlStateNormal];
+  [toolbar_ setNeedsLayout];
+}
+
 - (void)sendInviteRequestToEmail:(NSString*)email {
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kInvitePath delegate:nil];
   request.method = RKRequestMethodPOST;
@@ -483,12 +526,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)inviteButtonPressed:(id)sender {
   UIButton* button = sender;
 
-  button.enabled = NO;
+  BOOL selected = !button.selected;
+  button.selected = selected;
   InviteFriendTableViewCell* cell = (InviteFriendTableViewCell*)[self cellFromSubview:sender];
-  NSString* email = cell.emailLabel.text;
-  if (![invitedContacts_ containsObject:email])
-    [invitedContacts_ addObject:email];
-  [self sendInviteRequestToEmail:email];
+  NSString* handle = cell.emailLabel.text;
+  if (selected)
+    [inviteSet_ addObject:handle];
+  else
+    [inviteSet_ removeObject:handle];
+  
+  [self inviteSetHasChanged];
 }
 
 - (void)connectToTwitterButtonPressed:(id)sender {
@@ -675,8 +722,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       if (emails.count > 0) {
         NSString* email = [emails objectAtIndex:0];
         inviteCell.emailLabel.text = email;
-        if ([invitedContacts_ containsObject:email])
-          inviteCell.inviteButton.enabled = NO;
+        inviteCell.inviteButton.selected = [inviteSet_ containsObject:email];
       }
       [emails release];
       if (ABPersonHasImageData(person)) {
@@ -689,6 +735,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       inviteCell.nameLabel.text = user.name;
       inviteCell.emailLabel.text = user.screenName;
       inviteCell.userImageView.imageURL = user.profileImageURL;
+      inviteCell.inviteButton.selected = [inviteSet_ containsObject:user.screenName];
     }
   } else {
     NSArray* friends = nil;
@@ -1153,6 +1200,18 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [searchField_ resignFirstResponder];
+  if (inviteSet_.count > 0) {
+    toolbar_.inviteMode = YES;
+    return;
+  }
+
+  for (NSIndexPath* index in tableView_.indexPathsForVisibleRows) {
+    if (index.section == 1) {
+      toolbar_.inviteMode = YES;
+      return;
+    }
+  }
+  toolbar_.inviteMode = NO;
 }
 
 #pragma FindFriendsToolbarDelegate methods.
