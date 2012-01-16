@@ -110,11 +110,14 @@
   UIImage* bg = [UIImage imageNamed:@"buttonBG_white"];
   UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_hilited"];
   UIImage* selectedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
+  UIImage* disabledBg = [UIImage imageNamed:@"buttonBG_blue_hilited"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
                                      highlightedBackgroundImage:highlightedBg
                                         selectedBackgroundImage:selectedBg
-                                        disabledBackgroundImage:nil];
+                                        disabledBackgroundImage:disabledBg];
   [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.4] forState:UIControlStateNormal];
+  [button setTitleShadowColor:[UIColor colorWithWhite:0 alpha:0.2] forState:UIControlStateDisabled];
+  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateDisabled];
   button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   return button;
@@ -141,7 +144,7 @@
     bg = [bg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
     highlightedBg = [highlightedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
     selectedBg = [selectedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
-    disabledBg = [highlightedBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
+    disabledBg = [disabledBg stretchableImageWithLeftCapWidth:4 topCapHeight:4];
   }
   
   [button setBackgroundImage:bg forState:UIControlStateNormal];

@@ -93,6 +93,10 @@
 - (void)buttonPressed:(id)sender {
   if (sender == centerButton_) {
     [delegate_ toolbar:self centerButtonPressed:centerButton_];
+  } else if (sender == previewButton_) {
+    [delegate_ toolbar:self previewButtonPressed:previewButton_];
+  } else if (sender == mainActionButton_) {
+    [delegate_ toolbar:self mainActionButtonPressed:mainActionButton_];
   }
 }
 

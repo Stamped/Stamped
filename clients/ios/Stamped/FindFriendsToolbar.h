@@ -13,6 +13,8 @@
 @protocol FindFriendsToolbarDelegate
 @required
 - (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button;
+- (void)toolbar:(FindFriendsToolbar*)toolbar previewButtonPressed:(UIButton*)button;
+- (void)toolbar:(FindFriendsToolbar*)toolbar mainActionButtonPressed:(UIButton*)button;
 @end
 
 @interface FindFriendsToolbar : STToolbar

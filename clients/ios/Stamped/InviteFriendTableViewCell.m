@@ -53,6 +53,8 @@ static const CGFloat kUserImageSize = 41.0;
     [inviteButton_ setTitle:@"" forState:UIControlStateSelected];
     [inviteButton_ setImage:[UIImage imageNamed:@"buttonImg_check"] forState:UIControlStateSelected];
 
+    [inviteButton_ setTitle:@"Invited" forState:UIControlStateDisabled];
+
     [inviteButton_ sizeToFit];
     CGFloat width = CGRectGetWidth(inviteButton_.frame) + 25;
     inviteButton_.frame = CGRectMake(320 - width - 5, 10, width, 29);

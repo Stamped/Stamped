@@ -48,6 +48,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)loadSuggestedUsers;
 - (void)removeUsersToInviteWithIdentifers:(NSArray*)identifiers;
 - (void)inviteSetHasChanged;
+- (void)showPreviewModal;
+- (void)previewModalTapped:(UIGestureRecognizer*)recognizer;
 - (void)sendInviteRequestToEmail:(NSString*)email;
 - (void)socialNetworksDidChange:(NSNotification*)notification;
 - (void)twitterFriendsDidChange:(NSNotification*)notification;
@@ -258,6 +260,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceSuggested;
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
+  [invitedSet_ removeAllObjects];
   self.searchFieldHidden = NO;
   [self adjustNippleToView:self.stampedButton];
   RKClient* client = [RKClient sharedClient];
@@ -267,6 +270,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
 
   tableView_.hidden = NO;
+  tableView_.contentOffset = CGPointZero;
   signInTwitterView_.hidden = YES;
   signInFacebookView_.hidden = YES;
   self.stampedFriends = nil;
@@ -282,12 +286,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceContacts;
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
+  [invitedSet_ removeAllObjects];
   [self adjustNippleToView:self.contactsButton];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
   tableView_.hidden = NO;
+  tableView_.contentOffset = CGPointZero;
   contactsButton_.selected = YES;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
@@ -297,7 +303,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [toolbar_ setNeedsLayout];
   if (contactFriends_) {
     [self.tableView reloadData];
-    [self.tableView setContentOffset:CGPointZero];
     toolbar_.centerButton.enabled = contactFriends_.count > 0;
     return;
   }
@@ -343,11 +348,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceTwitter;
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
+  [invitedSet_ removeAllObjects];
   [self adjustNippleToView:self.twitterButton];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
   [self.tableView reloadData];
   tableView_.hidden = NO;
+  tableView_.contentOffset = CGPointZero;
   contactsButton_.selected = NO;
   twitterButton_.selected = YES;
   facebookButton_.selected = NO;
@@ -373,11 +380,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.findSource = FindFriendsSourceFacebook;
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
+  [invitedSet_ removeAllObjects];
   [self adjustNippleToView:facebookButton_];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
   [self.tableView reloadData];
   tableView_.hidden = NO;
+  tableView_.contentOffset = CGPointZero;
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = YES;
@@ -481,6 +490,39 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
   [toolbar_.mainActionButton setTitle:title forState:UIControlStateNormal];
   [toolbar_ setNeedsLayout];
+}
+
+- (void)showPreviewModal {
+  UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
+  overlayContainer.backgroundColor = [UIColor clearColor];
+  overlayContainer.alpha = 0;
+  UIView* black = [[UIView alloc] initWithFrame:overlayContainer.bounds];
+  black.backgroundColor = [UIColor blackColor];
+  black.alpha = 0.75;
+  [overlayContainer addSubview:black];
+  [black release];
+
+  UITapGestureRecognizer* recognizer =
+      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(previewModalTapped:)];
+  [overlayContainer addGestureRecognizer:recognizer];
+  [recognizer release];
+  [self.view.window addSubview:overlayContainer];
+  [UIView animateWithDuration:0.3 animations:^{
+    overlayContainer.alpha = 1;
+  }];
+  [overlayContainer release];
+}
+
+- (void)previewModalTapped:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+  
+  [UIView animateWithDuration:0.3 animations:^{
+    recognizer.view.alpha = 0.0;
+  } completion:^(BOOL finished) {
+    [recognizer.view removeFromSuperview];
+    toolbar_.previewButton.selected = NO;
+  }];
 }
 
 - (void)sendInviteRequestToEmail:(NSString*)email {
@@ -723,6 +765,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
         NSString* email = [emails objectAtIndex:0];
         inviteCell.emailLabel.text = email;
         inviteCell.inviteButton.selected = [inviteSet_ containsObject:email];
+        inviteCell.inviteButton.enabled = ![invitedSet_ containsObject:email];
       }
       [emails release];
       if (ABPersonHasImageData(person)) {
@@ -736,6 +779,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       inviteCell.emailLabel.text = user.screenName;
       inviteCell.userImageView.imageURL = user.profileImageURL;
       inviteCell.inviteButton.selected = [inviteSet_ containsObject:user.screenName];
+      inviteCell.inviteButton.enabled = ![invitedSet_ containsObject:user.screenName];
     }
   } else {
     NSArray* friends = nil;
@@ -749,7 +793,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       friends = self.suggestedFriends;
     else if (self.findSource == FindFriendsSourceFacebook)
       friends = self.facebookFriends;
-    
+
     User* user = [friends objectAtIndex:indexPath.row];
     User* currentUser = [AccountManager sharedManager].currentUser;
     [(id)cell followButton].hidden = [currentUser.following containsObject:user];
@@ -1220,6 +1264,34 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
                         atScrollPosition:UITableViewScrollPositionTop
                                 animated:YES];
+}
+
+- (void)toolbar:(FindFriendsToolbar*)toolbar previewButtonPressed:(UIButton*)button {
+  [self showPreviewModal];
+  button.selected = YES;
+}
+
+- (void)toolbar:(FindFriendsToolbar*)toolbar mainActionButtonPressed:(UIButton*)button {
+  for (NSString* handle in inviteSet_) {
+    switch (findSource_) {
+      case FindFriendsSourceContacts: {
+        [self sendInviteRequestToEmail:handle];
+        break;
+      }
+      case FindFriendsSourceTwitter: {
+        NSString* tweet = [NSString stringWithFormat:@"Hey %@, I'm using @stampedapp to share the restaurants, movies, books and music I like best. Join me at stamped.com.", handle];
+        [[SocialManager sharedManager] requestTwitterPostWithStatus:tweet];
+        break;
+      }
+      default:
+        break;
+    }
+
+    [invitedSet_ addObject:handle];
+  }
+  [inviteSet_ removeAllObjects];
+  [self inviteSetHasChanged];
+  [tableView_ reloadData];
 }
 
 @end

@@ -52,7 +52,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 // iOS5 Accounts manager.
 @property (nonatomic, retain) ACAccountStore* accountStore;
-
 @property (nonatomic, retain) Facebook* facebookClient;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
 @property (nonatomic, retain) RKClient* twitterClient;
@@ -365,15 +364,17 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   
   // Stamped: [blurb] [link]
   NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
+  [self requestTwitterPostWithStatus:tweet];
+}
 
+- (void)requestTwitterPostWithStatus:(NSString*)status {
   if ([self hasiOS5Twitter]) {
     NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
     ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
-    NSDictionary* params = [NSDictionary dictionaryWithObject:tweet forKey:@"status"];
+    NSDictionary* params = [NSDictionary dictionaryWithObject:status forKey:@"status"];
     NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"];
     TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];    
     request.account = account;
-
     [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {}];
   } else if (self.authentication) {
     RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
@@ -381,9 +382,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     request.method = RKRequestMethodPOST;
     [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request.URLRequest setHTTPMethod:@"POST"];
-    tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
-    NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
+    status = [status stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    status = [status stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
+    NSString* body = [NSString stringWithFormat:@"status=%@", status];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.authentication authorizeRequest:request.URLRequest];
     [request send];
