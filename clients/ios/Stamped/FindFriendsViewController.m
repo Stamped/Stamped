@@ -330,7 +330,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (IBAction)findFromTwitter:(id)sender {
   self.findSource = FindFriendsSourceTwitter;
-  
+
   [self adjustNippleToView:self.twitterButton];
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
@@ -340,7 +340,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   twitterButton_.selected = YES;
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
-    
+
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];

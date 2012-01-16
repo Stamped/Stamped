@@ -8,6 +8,7 @@
 
 #import "InviteFriendTableViewCell.h"
 
+#import "UIButton+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "UserImageView.h"
 
@@ -44,12 +45,17 @@ static const CGFloat kUserImageSize = 41.0;
     [self.contentView addSubview:emailLabel_];
     [emailLabel_ release];
     
-    inviteButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteButton_ setImage:[UIImage imageNamed:@"invite_button"]
-                   forState:UIControlStateNormal];
-    [inviteButton_ setImage:[UIImage imageNamed:@"invited_button"]
-                   forState:UIControlStateDisabled];
-    inviteButton_.frame = CGRectMake(320 - 54 - 5, 10, 54, 30);
+    inviteButton_ = [UIButton stampedWhiteButton];
+    [inviteButton_ setTitle:@"Invite" forState:UIControlStateNormal];
+    [inviteButton_ setTitleColor:[UIColor colorWithRed:0.2 green:0.45 blue:0.8 alpha:1.0]
+                        forState:UIControlStateNormal];
+
+    [inviteButton_ setTitle:@"" forState:UIControlStateSelected];
+    [inviteButton_ setImage:[UIImage imageNamed:@"buttonImg_check"] forState:UIControlStateSelected];
+
+    [inviteButton_ sizeToFit];
+    CGFloat width = CGRectGetWidth(inviteButton_.frame) + 25;
+    inviteButton_.frame = CGRectMake(320 - width - 5, 10, width, 29);
     [self.contentView addSubview:inviteButton_];
   }
   return self;

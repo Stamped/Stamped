@@ -35,7 +35,7 @@
   return button;
 }
 
-+ (UIButton*)stampedunfollowButton {
++ (UIButton*)stampedUnfollowButton {
   UIImage* bg = [UIImage imageNamed:@"buttonBG_white_hilited"];
   UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
   UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
@@ -102,6 +102,20 @@
   button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   
+  return button;
+}
+
++ (UIButton*)stampedWhiteButton {
+  UIImage* bg = [UIImage imageNamed:@"buttonBG_white"];
+  UIImage* highlightedBg = [UIImage imageNamed:@"buttonBG_white_hilited"];
+  UIImage* selectedBg = [UIImage imageNamed:@"buttonBG_white_pressed"];
+  UIButton* button = [UIButton stampedButtonWithBackgroundImage:bg
+                                     highlightedBackgroundImage:highlightedBg
+                                        selectedBackgroundImage:selectedBg
+                                        disabledBackgroundImage:nil];
+  [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.4] forState:UIControlStateNormal];
+  button.titleLabel.shadowOffset = CGSizeMake(0, 1);
+  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   return button;
 }
 
