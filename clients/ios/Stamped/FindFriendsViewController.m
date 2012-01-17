@@ -14,6 +14,7 @@
 #import "STSectionHeaderView.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
+#import "FacebookUser.h"
 #import "FriendshipManager.h"
 #import "InviteFriendTableViewCell.h"
 #import "PeopleTableViewCell.h"
@@ -62,6 +63,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
+@property (nonatomic, copy) NSArray* facebookFriendsNotUsingStamped;
 @property (nonatomic, copy) NSArray* suggestedFriends;
 @property (nonatomic, retain) NSMutableArray* contactsNotUsingStamped;
 @property (nonatomic, retain) NSMutableSet* inviteSet;
@@ -81,6 +83,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 @synthesize stampedFriends = stampedFriends_;
 @synthesize suggestedFriends = suggestedFriends_;
 @synthesize facebookFriends = facebookFriends_;
+@synthesize facebookFriendsNotUsingStamped = facebookFriendsNotUsingStamped_;
 @synthesize contactsNotUsingStamped = contactsNotUsingStamped_;
 @synthesize inviteSet = inviteSet_;
 @synthesize invitedSet = invitedSet_;
@@ -112,6 +115,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.twitterFriends = nil;
   self.twitterFriendsNotUsingStamped = nil;
+  self.facebookFriends = nil;
+  self.facebookFriendsNotUsingStamped = nil;
   self.contactFriends = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
@@ -218,6 +223,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
   self.twitterFriends = nil;
   self.twitterFriendsNotUsingStamped = nil;
+  self.facebookFriends = nil;
+  self.facebookFriendsNotUsingStamped = nil;
   self.contactFriends = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
@@ -307,6 +314,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     return;
   }
   [tableView_ reloadData];
+  [self scrollViewDidScroll:tableView_];
   // Fetch the address book 
   // Perform this on the next cycle to avoid a hang when tapping the Contacts button.
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_current_queue(), ^{
@@ -341,6 +349,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
       [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
     [tableView_ reloadData];
+    [self scrollViewDidScroll:tableView_];
   });
 }
 
@@ -355,6 +364,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self.tableView reloadData];
   tableView_.hidden = NO;
   tableView_.contentOffset = CGPointZero;
+  [self scrollViewDidScroll:tableView_];
   contactsButton_.selected = NO;
   twitterButton_.selected = YES;
   facebookButton_.selected = NO;
@@ -385,6 +395,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [searchField_ resignFirstResponder];
   self.searchFieldHidden = YES;
   [self.tableView reloadData];
+  [self scrollViewDidScroll:tableView_];
   tableView_.hidden = NO;
   tableView_.contentOffset = CGPointZero;
   contactsButton_.selected = NO;
@@ -483,7 +494,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
   if (inviteSet_.count > 0) {
     if (findSource_ == FindFriendsSourceFacebook) {
-      title = [title stringByAppendingFormat:@" to walls (%d)", inviteSet_.count];
+      if (inviteSet_.count == 1)
+        title = [title stringByAppendingString:@" to wall"];
+      else
+        title = [title stringByAppendingFormat:@" to walls (%d)", inviteSet_.count];
     } else {
       title = [title stringByAppendingFormat:@" (%d)", inviteSet_.count];
     }
@@ -596,6 +610,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)socialNetworksDidChange:(NSNotification*)notification {
   [tableView_ reloadData];
+  [self scrollViewDidScroll:tableView_];
   // Twitter
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     // If we're watching, fade in the table.
@@ -680,6 +695,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if (notification.object && [notification.object isKindOfClass:[NSArray class]])
     self.twitterFriends = notification.object;
   [self.tableView reloadData];
+  [self scrollViewDidScroll:tableView_];
   [self socialNetworksDidChange:nil];
 }
 
@@ -687,7 +703,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   // TODO(andybons): This is wrong. The notification object should be the object sending the notification.
   if (notification.object && [notification.object isKindOfClass:[NSArray class]])
     self.facebookFriends = notification.object;
+
+  self.facebookFriendsNotUsingStamped = [SocialManager sharedManager].facebookFriendsNotUsingStamped.allObjects;
+  NSArray* desc = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
+  self.facebookFriendsNotUsingStamped = [facebookFriendsNotUsingStamped_ sortedArrayUsingDescriptors:desc];
+  toolbar_.centerButton.enabled = facebookFriendsNotUsingStamped_.count > 0;
+  [toolbar_ setNeedsLayout];
   [self.tableView reloadData];
+  [self scrollViewDidScroll:tableView_];
   [self socialNetworksDidChange:nil];
 }
 
@@ -699,13 +722,15 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
   toolbar_.centerButton.enabled = twitterFriendsNotUsingStamped_.count > 0;
   [toolbar_ setNeedsLayout];
+  [self scrollViewDidScroll:tableView_];
 }
 
 #pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
   if ((findSource_ == FindFriendsSourceContacts && contactFriends_.count > 0) ||
-      (findSource_ == FindFriendsSourceTwitter && twitterFriends_.count > 0)) {
+      (findSource_ == FindFriendsSourceTwitter && (twitterFriends_.count > 0 || twitterFriendsNotUsingStamped_.count > 0)) ||
+      (findSource_ == FindFriendsSourceFacebook && (facebookFriends_.count > 0 || facebookFriendsNotUsingStamped_.count > 0))) {
     return 2;
   }
 
@@ -739,7 +764,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   } else if (self.findSource == FindFriendsSourceSuggested) {
     return self.suggestedFriends.count;
   } else if (self.findSource == FindFriendsSourceFacebook) {
-    return self.facebookFriends.count;
+    if (section == 0)
+      return self.facebookFriends.count;
+    else if (section == 1)
+      return self.facebookFriendsNotUsingStamped.count;
   }
   return 0;
 }
@@ -747,6 +775,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.section == 1) {
     InviteFriendTableViewCell* inviteCell = (InviteFriendTableViewCell*)cell;
+    inviteCell.emailLabel.hidden = (findSource_ == FindFriendsSourceFacebook);
     if (findSource_ == FindFriendsSourceContacts) {
       ABRecordRef person = [contactsNotUsingStamped_ objectAtIndex:indexPath.row];
       CFStringRef name = ABRecordCopyCompositeName(person);
@@ -780,6 +809,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       inviteCell.userImageView.imageURL = user.profileImageURL;
       inviteCell.inviteButton.selected = [inviteSet_ containsObject:user.screenName];
       inviteCell.inviteButton.enabled = ![invitedSet_ containsObject:user.screenName];
+    } else if (findSource_ == FindFriendsSourceFacebook) {
+      FacebookUser* user = [facebookFriendsNotUsingStamped_ objectAtIndex:indexPath.row];
+      inviteCell.nameLabel.text = user.name;
+      inviteCell.userImageView.imageURL = user.profileImageURL;
+      inviteCell.emailLabel.text = user.facebookID;
+      inviteCell.inviteButton.selected = [inviteSet_ containsObject:user.facebookID];
+      inviteCell.inviteButton.enabled = ![invitedSet_ containsObject:user.facebookID];
     }
   } else {
     NSArray* friends = nil;
@@ -890,12 +926,22 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", stampedFriends_.count];
     }
   } else if (findSource_ == FindFriendsSourceFacebook && facebookFriends_) {
-    if (facebookFriends_.count == 0) {
-      view.leftLabel.text = @"No Facebook friends are using Stamped.";
-      view.rightLabel.text = @":(";
-    } else {
-      view.leftLabel.text = @"Facebook friends using Stamped";
-      view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriends_.count];
+    if (section == 0) {
+      if (facebookFriends_.count == 0) {
+        view.leftLabel.text = @"No Facebook friends are using Stamped.";
+        view.rightLabel.text = @":(";
+      } else {
+        view.leftLabel.text = @"Facebook friends using Stamped";
+        view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriends_.count];
+      }
+    } else if (section == 1) {
+      if (facebookFriendsNotUsingStamped_.count == 0) {
+        view.leftLabel.text = @"All your Facebook friends are using Stamped!";
+        view.rightLabel.text = @":)";
+      } else {
+        view.leftLabel.text = @"Facebook friends not using Stamped";
+        view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriendsNotUsingStamped_.count];
+      }
     }
   } else if (findSource_ == FindFriendsSourceFacebook && !facebookFriends_) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
@@ -1059,8 +1105,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
     if (!self.contactFriends) {
       self.contactFriends = objects;
-    } 
-    else {
+    } else {
       self.contactFriends = [self.contactFriends arrayByAddingObjectsFromArray:objects];
       self.contactFriends = [[NSSet setWithArray:self.contactFriends] allObjects];
     }
@@ -1279,10 +1324,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
         break;
       }
       case FindFriendsSourceTwitter: {
-        NSString* tweet = [NSString stringWithFormat:@"Hey %@, I'm using @stampedapp to share the restaurants, movies, books and music I like best. Join me at stamped.com.", handle];
+        NSString* tweet = [NSString stringWithFormat:@"%@ Hey, I'm using @stampedapp to share the restaurants, movies, books and music I like best. Join me at stamped.com.", handle];
         [[SocialManager sharedManager] requestTwitterPostWithStatus:tweet];
         break;
       }
+      case FindFriendsSourceFacebook:
+        [[SocialManager sharedManager] requestFacebookPostInviteToFacebookID:handle];
+        break;
       default:
         break;
     }

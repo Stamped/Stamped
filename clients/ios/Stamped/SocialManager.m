@@ -9,6 +9,7 @@
 #import <Accounts/Accounts.h>
 #import <Twitter/Twitter.h>
 
+#import "AccountManager.h"
 #import "SocialManager.h"
 #import "GTMOAuthAuthentication.h"
 #import "STOAuthViewController.h"
@@ -562,6 +563,26 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                 andHttpMethod:@"POST"
                                   andDelegate:nil];
   }
+}
+
+- (void)requestFacebookPostInviteToFacebookID:(NSString*)facebookID {
+  if (!self.facebookClient.isSessionValid)
+    return;
+
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                    kFacebookAppID, @"app_id",
+                                    @"http://stamped.com", @"link",
+                                    @"Stamped", @"name", nil];
+  NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampedLogoURLPath, currentUser.primaryColor, currentUser.secondaryColor, @"-logo-195x195.png"];
+  [params setObject:photoURL forKey:@"picture"];
+  [params setObject:@"Hey, I'm using Stamped to share the restaurants, movies, books and music I like best. Join me."
+             forKey:@"message"];
+
+  [self.facebookClient requestWithGraphPath:[facebookID stringByAppendingString:@"/feed"]
+                                  andParams:params
+                              andHttpMethod:@"POST"
+                                andDelegate:nil];
 }
 
 - (BOOL)handleOpenURLFromFacebook:(NSURL*)URL {

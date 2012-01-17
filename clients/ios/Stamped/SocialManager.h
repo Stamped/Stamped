@@ -35,6 +35,7 @@ extern NSString* const kStampedFindTwitterFriendsPath;
 - (BOOL)isSignedInToTwitter;
 - (BOOL)isSignedInToFacebook;
 - (void)requestFacebookPostWithStamp:(Stamp*)stamp;
+- (void)requestFacebookPostInviteToFacebookID:(NSString*)facebookID;
 - (void)requestTwitterPostWithStamp:(Stamp*)stamp;
 - (void)requestTwitterPostWithStatus:(NSString*)status;
 - (void)refreshStampedFriendsFromFacebook;
