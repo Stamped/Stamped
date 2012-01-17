@@ -33,6 +33,7 @@ static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kTwitterSignOutURI = @"/account/end_session.json";
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kTwitterUserLookupPath = @"/users/lookup.json";
+
 static NSString* const kFacebookFriendsURI = @"/me/friends?limit=0";
 static NSString* const kFacebookAppID = @"297022226980395";
 static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
@@ -242,7 +243,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                       accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
                                       authentication:auth
                                       appServiceName:kKeychainTwitterToken
-                                           delegate:self
+                                            delegate:self
                                     finishedSelector:@selector(viewController:finishedWithAuth:error:)];
     [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
     
@@ -621,7 +622,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     }
     resultData = [result objectForKey:@"data"];
   }
-  
+
   // handle callback from request for user's friends.
   if (resultData) {
     self.facebookFriendsNotUsingStamped = [NSMutableSet set];
@@ -641,7 +642,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)request:(FBRequest*)request didFailWithError:(NSError*)error {
   if (isSigningInToFacebook_)
     [self signOutOfFacebook:YES];
-  if (error.code == 10000)
+  if (error.code == 10000)  // WTF? This doesn't necessarily mean it should log out.
     [self signOutOfFacebook:YES];
 }
 
@@ -678,17 +679,47 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)requestStampedFriendsFromTwitter {
-  // TODO: the server only supports 100 IDs at a time. need to chunk.
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
   
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFindTwitterFriendsPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;
-  loader.params = [NSDictionary dictionaryWithObject:[self.twitterIDsNotUsingStamped.allObjects componentsJoinedByString:@","] forKey:@"q"];
+  NSDictionary* params = nil;
+  if ([self hasiOS5Twitter]) {
+//    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+//    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
+//    NSURL* url = [NSURL URLWithString:kTwitterRequestTokenURL];
+//    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:kOAuthCallbackURL, @"oauth_callback", nil];
+//    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];
+//    request.account = account;
+//    NSMutableURLRequest* signedRequest = [[request signedURLRequest] mutableCopy];
+//    [signedRequest setValue:@"reverse_auth" forHTTPHeaderField:@"x_auth_mode"];
+//    NSLog(@"Signed request headers: %@", signedRequest.allHTTPHeaderFields);
+//    return;
+//  
+//    [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
+//      if ([urlResponse statusCode] == 200) {
+//        NSError* error = nil;
+//        NSDictionary* friendsObject = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&error];
+//        if (friendsObject)
+//          [self performSelectorOnMainThread:@selector(didReceiveTwitterFriends:) withObject:friendsObject waitUntilDone:NO];
+//      }
+//    }];
+    params = [NSDictionary dictionaryWithObject:[self.twitterIDsNotUsingStamped.allObjects componentsJoinedByString:@","] forKey:@"q"];
+  } else if (self.authentication) {
+    params = [NSDictionary dictionaryWithObjectsAndKeys:self.authentication.token, @"twitter_key",
+                                                        self.authentication.tokenSecret, @"twitter_secret", nil];
+  }
+
+  if (!params)
+    return;
+
+  loader.params = params;
   loader.objectMapping = mapping;
   [loader send];
 }
+
 
 - (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID {
   [[NSUserDefaults standardUserDefaults] setObject:username forKey:kTwitterUsername];
