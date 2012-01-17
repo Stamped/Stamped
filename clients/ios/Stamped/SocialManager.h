@@ -11,6 +11,8 @@
 #import "FBConnect.h"
 
 @class Stamp;
+@class FacebookUser;
+@class TwitterUser;
 
 extern NSString* const kSocialNetworksChangedNotification;
 extern NSString* const kTwitterFriendsChangedNotification;
@@ -45,5 +47,11 @@ extern NSString* const kStampedFindTwitterFriendsPath;
 // TODO(andybons): This should be readonly, not retain.
 @property (nonatomic, retain) NSMutableSet* twitterFriendsNotUsingStamped;
 @property (nonatomic, retain) NSMutableSet* facebookFriendsNotUsingStamped;
+
+@property (nonatomic, readonly) NSString* stampedLogoImageURL;
+@property (nonatomic, readonly) NSString* facebookName;
+@property (nonatomic, readonly) NSString* facebookProfileImageURL;
+@property (nonatomic, readonly) NSString* twitterUsername;
+@property (nonatomic, readonly) NSString* twitterProfileImageURL;
 
 @end

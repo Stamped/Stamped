@@ -13,7 +13,7 @@
 typedef enum {
   FindFriendsModalTypeTwitter,
   FindFriendsModalTypeFacebook,
-  FindfriendsModalTypeEmail
+  FindFriendsModalTypeEmail
 } FindFriendsModalType;
 
 @interface FindFriendsModalPreviewView : UIView

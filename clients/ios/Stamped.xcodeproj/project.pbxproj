@@ -1263,6 +1263,10 @@
 		7EE8E89014C4F4EC00BF1211 /* FacebookUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */; };
 		7EE8E89314C5F24100BF1211 /* FindFriendsModalPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE8E89214C5F24100BF1211 /* FindFriendsModalPreviewView.m */; };
 		7EE8E89414C5F24100BF1211 /* FindFriendsModalPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE8E89214C5F24100BF1211 /* FindFriendsModalPreviewView.m */; };
+		7EE8E89714C635EC00BF1211 /* invite_email_preview.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE8E89514C635EC00BF1211 /* invite_email_preview.png */; };
+		7EE8E89814C635EC00BF1211 /* invite_email_preview.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE8E89514C635EC00BF1211 /* invite_email_preview.png */; };
+		7EE8E89914C635EC00BF1211 /* invite_email_preview@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE8E89614C635EC00BF1211 /* invite_email_preview@2x.png */; };
+		7EE8E89A14C635EC00BF1211 /* invite_email_preview@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE8E89614C635EC00BF1211 /* invite_email_preview@2x.png */; };
 		7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
 		7EF1F71B142FE25E00233835 /* ActivityTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1F71A142FE25E00233835 /* ActivityTableViewCell.m */; };
@@ -2160,6 +2164,8 @@
 		7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookUser.m; sourceTree = "<group>"; };
 		7EE8E89114C5F24100BF1211 /* FindFriendsModalPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FindFriendsModalPreviewView.h; sourceTree = "<group>"; };
 		7EE8E89214C5F24100BF1211 /* FindFriendsModalPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FindFriendsModalPreviewView.m; sourceTree = "<group>"; };
+		7EE8E89514C635EC00BF1211 /* invite_email_preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = invite_email_preview.png; sourceTree = "<group>"; };
+		7EE8E89614C635EC00BF1211 /* invite_email_preview@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_email_preview@2x.png"; sourceTree = "<group>"; };
 		7EE9022B13E61BF0008BCDFB /* ActivityCommentTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityCommentTableViewCell.h; sourceTree = "<group>"; };
 		7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCommentTableViewCell.m; sourceTree = "<group>"; };
 		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
@@ -2545,6 +2551,8 @@
 		7E260F4114BB67EF00D9F7F0 /* v2 */ = {
 			isa = PBXGroup;
 			children = (
+				7EE8E89514C635EC00BF1211 /* invite_email_preview.png */,
+				7EE8E89614C635EC00BF1211 /* invite_email_preview@2x.png */,
 				7E260F8D14BB89A400D9F7F0 /* buttonBG_addEmail.png */,
 				7E260F8E14BB89A400D9F7F0 /* buttonBG_addEmail@2x.png */,
 				7E260F8F14BB89A400D9F7F0 /* buttonBG_blue_disabled.png */,
@@ -4437,6 +4445,8 @@
 				7E4A83EF14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */,
 				7E4A83F314BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */,
 				7E4A83F514BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */,
+				7EE8E89814C635EC00BF1211 /* invite_email_preview.png in Resources */,
+				7EE8E89A14C635EC00BF1211 /* invite_email_preview@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4995,6 +5005,8 @@
 				7E4A83EE14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */,
 				7E4A83F214BE461100A700E9 /* buttonImg_addEmail_grey.png in Resources */,
 				7E4A83F414BE461100A700E9 /* buttonImg_addEmail_grey@2x.png in Resources */,
+				7EE8E89714C635EC00BF1211 /* invite_email_preview.png in Resources */,
+				7EE8E89914C635EC00BF1211 /* invite_email_preview@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

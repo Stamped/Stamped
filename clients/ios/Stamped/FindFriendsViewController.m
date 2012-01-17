@@ -154,7 +154,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self showPreviewModal];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -521,13 +520,28 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   UIView* black = [[UIView alloc] initWithFrame:overlayContainer.bounds];
   black.backgroundColor = [UIColor blackColor];
-  black.alpha = 0.75;
-  //[overlayContainer addSubview:black];
+  black.alpha = 0.5;
+  [overlayContainer addSubview:black];
   [black release];
 
   FindFriendsModalPreviewView* previewView =
       [[FindFriendsModalPreviewView alloc] initWithFrame:CGRectMake(0, 0, 310, 165)];
+  switch (findSource_) {
+    case FindFriendsSourceFacebook:
+      previewView.modalType = FindFriendsModalTypeFacebook;
+      break;
+    case FindFriendsSourceTwitter:
+      previewView.modalType = FindFriendsModalTypeTwitter;
+      break;
+    case FindFriendsSourceContacts:
+      previewView.modalType = FindFriendsModalTypeEmail;
+      break;
+    default:
+      break;
+  }
   previewView.center = overlayContainer.center;
+  previewView.alpha = 0;
+  previewView.userInteractionEnabled = NO;
   [overlayContainer addSubview:previewView];
   [previewView release];
   
@@ -538,6 +552,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   [UIView animateWithDuration:0.3 animations:^{
     overlayContainer.alpha = 1;
+    previewView.alpha = 1;
   }];
 }
 
