@@ -577,7 +577,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                     @"Stamped", @"name", nil];
   NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampedLogoURLPath, currentUser.primaryColor, currentUser.secondaryColor, @"-logo-195x195.png"];
   [params setObject:photoURL forKey:@"picture"];
-  [params setObject:@"Hey, I'm using Stamped to share the restaurants, movies, books and music I like best. Join me."
+  [params setObject:@"Hey, I think you have great taste, so join me on Stamped and share the things you like best."
              forKey:@"message"];
 
   [self.facebookClient requestWithGraphPath:[facebookID stringByAppendingString:@"/feed"]
