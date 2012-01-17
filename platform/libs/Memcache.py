@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, utils, pylibmc
+import binascii, bson, ec2_utils, functools, logs, utils, pylibmc
 
 from schema import Schema
 
@@ -37,7 +37,7 @@ class Memcache(object):
                     memcached_nodes.append(node.private_ip_address)
             
             if 0 == len(memcached_nodes):
-                utils.log("[%s] unable to any find memcached servers" % self)
+                logs.error("[%s] unable to any find memcached servers" % self)
                 #return False
         else:
             # running locally so default to localhost
