@@ -1259,6 +1259,8 @@
 		7EE70C5213FC635D008CCC15 /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EE70C5013FC635D008CCC15 /* ProfileViewController.xib */; };
 		7EE7E35A13CCB2A800FA3B3A /* InboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */; };
 		7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */; };
+		7EE8E88F14C4F4EC00BF1211 /* FacebookUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */; };
+		7EE8E89014C4F4EC00BF1211 /* FacebookUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */; };
 		7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
 		7EF1F71B142FE25E00233835 /* ActivityTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1F71A142FE25E00233835 /* ActivityTableViewCell.m */; };
@@ -2152,6 +2154,8 @@
 		7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InboxTableViewCell.m; sourceTree = "<group>"; };
 		7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserImageView.h; sourceTree = "<group>"; };
 		7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageView.m; sourceTree = "<group>"; };
+		7EE8E88D14C4F4EC00BF1211 /* FacebookUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookUser.h; sourceTree = "<group>"; };
+		7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookUser.m; sourceTree = "<group>"; };
 		7EE9022B13E61BF0008BCDFB /* ActivityCommentTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityCommentTableViewCell.h; sourceTree = "<group>"; };
 		7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCommentTableViewCell.m; sourceTree = "<group>"; };
 		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
@@ -2528,6 +2532,8 @@
 				7E8A880014240B5B00B0092C /* SearchResult.m */,
 				7EC54DC314BFA9D900A5C9B5 /* TwitterUser.h */,
 				7EC54DC414BFA9D900A5C9B5 /* TwitterUser.m */,
+				7EE8E88D14C4F4EC00BF1211 /* FacebookUser.h */,
+				7EE8E88E14C4F4EC00BF1211 /* FacebookUser.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -5128,6 +5134,7 @@
 				7E260F8C14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */,
 				7E22F6B314BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */,
 				7EC54DC614BFA9D900A5C9B5 /* TwitterUser.m in Sources */,
+				7EE8E89014C4F4EC00BF1211 /* FacebookUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5245,6 +5252,7 @@
 				7E260F8B14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */,
 				7E22F6B214BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */,
 				7EC54DC514BFA9D900A5C9B5 /* TwitterUser.m in Sources */,
+				7EE8E88F14C4F4EC00BF1211 /* FacebookUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -43,5 +43,6 @@ extern NSString* const kStampedFindTwitterFriendsPath;
 
 // TODO(andybons): This should be readonly, not retain.
 @property (nonatomic, retain) NSMutableSet* twitterFriendsNotUsingStamped;
+@property (nonatomic, retain) NSMutableSet* facebookFriendsNotUsingStamped;
 
 @end

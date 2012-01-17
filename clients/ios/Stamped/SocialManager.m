@@ -16,6 +16,7 @@
 #import "Util.h"
 #import "Stamp.h"
 #import "Entity.h"
+#import "FacebookUser.h"
 #import "TwitterUser.h"
 #import "User.h"
 
@@ -31,7 +32,7 @@ static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kTwitterSignOutURI = @"/account/end_session.json";
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kTwitterUserLookupPath = @"/users/lookup.json";
-static NSString* const kFacebookFriendsURI = @"/me/friends";
+static NSString* const kFacebookFriendsURI = @"/me/friends?limit=0";
 static NSString* const kFacebookAppID = @"297022226980395";
 static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
 static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
@@ -84,6 +85,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedFriendsFromTwitter;
 
 - (void)requestTwitterUsersNotUsingStamped;
+- (void)requestFacebookUsersNotUsingStamped;
 
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
@@ -102,6 +104,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @synthesize twitterFriendsNotUsingStamped = twitterFriendsNotUsingStamped_;
 @synthesize twitterIDsNotUsingStamped = twitterIDsNotUsingStamped_;
 @synthesize facebookFriends = facebookFriends_;
+@synthesize facebookFriendsNotUsingStamped = facebookFriendsNotUsingStamped_;
 @synthesize isSigningInToTwitter = isSigningInToTwitter_;
 @synthesize isSigningInToFacebook = isSigningInToFacebook_;
 
@@ -600,9 +603,14 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   
   // handle callback from request for user's friends.
   if (resultData) {
-    NSMutableArray* fbFriendIDs = [NSMutableArray array];
-    for (NSDictionary* dict in resultData) {
-      [fbFriendIDs addObject:[dict objectForKey:@"id"]];
+    self.facebookFriendsNotUsingStamped = [NSMutableSet set];
+    for (NSDictionary* friend in resultData) {
+      FacebookUser* user = [[FacebookUser alloc] init];
+      user.name = [friend valueForKey:@"name"];
+      user.facebookID = [friend valueForKey:@"id"];
+      user.profileImageURL = [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture", user.facebookID];
+      [facebookFriendsNotUsingStamped_ addObject:user];
+      [user release];
     }
 
     [self requestStampedFriendsFromFacebook:self.facebookClient.accessToken];
@@ -746,6 +754,10 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [self requestTwitterUsersNotUsingStamped];
 }
 
+- (void)requestFacebookUsersNotUsingStamped {
+  
+}
+
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
@@ -858,6 +870,16 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     isSigningInToFacebook_ = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     NSArray* facebookFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    NSArray* friendIDs = [facebookFriends valueForKeyPath:@"identifier"];
+    NSMutableSet* friendSet = [NSMutableSet set];
+    for (NSString* friendID in friendIDs)
+      for (FacebookUser* user in facebookFriendsNotUsingStamped_)
+        if ([user.facebookID isEqualToString:friendID])
+          [friendSet addObject:user];
+
+    for (FacebookUser* user in friendSet)
+      [facebookFriendsNotUsingStamped_ removeObject:user];
+
     [[NSNotificationCenter defaultCenter] postNotificationName:kFacebookFriendsChangedNotification object:facebookFriends];
   }
 }
