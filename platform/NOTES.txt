@@ -191,6 +191,45 @@ StampedAPI:
     * reusable cursor pattern for generic retrieval of unbounded lists (e.g., collections, friends, comments, credit, etc.)
         * replace current slicing strategy
 
+note: if a native python dependency fails to compile, prefix it with ARCHFLAGS="-arch i386 -arch x86_64"
+    * e.g., ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
+python >= 2.5 or 2.6 (untested on more recent versions)
+gcc / g++ - you'll have to install xcode and the apple developer tools to install these
+homebrew - package manager for mac os x (optional but recommended to install other dependencies)
+virtualenv
+pip
+libevent
+mongodb (>= 2.0)
+brew install memcached libmemcached
+
+python packages (install with pip):
+python-dev
+fabric
+BeautifulSoup
+boto
+xlrd
+pymongo
+flask
+gunicorn
+feedparser
+greenlet
+gevent
+pil
+lxml
+django
+whisper
+celery
+httplib2
+pylibmc
+APNSWrapper
+boto
+ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0 (note: we've had problems with more recent versions of pylibmc)
+
+optional for getting up and running but required for full setup:
+rabbitmq
+Java JRE
+nginx
+
 # Mac OS X
 brew install memcached libmemcached
 ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0

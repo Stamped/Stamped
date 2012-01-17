@@ -38,7 +38,7 @@ class Memcache(object):
             
             if 0 == len(memcached_nodes):
                 utils.log("[%s] unable to any find memcached servers" % self)
-                return False
+                #return False
         else:
             # running locally so default to localhost
             memcached_nodes.append('127.0.0.1')
@@ -48,7 +48,10 @@ class Memcache(object):
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
-        return self._client.__getattribute__(key)
+        if self._client:
+            return self._client.__getattribute__(key)
+        
+        return None
     
     def __setitem__(self, key, value):
         self._client[key] = self._import_value(value)
