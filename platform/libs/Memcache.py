@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, utils, pylibmc
+import binascii, bson, ec2_utils, functools, logs, utils, pylibmc
 
 from schema import Schema
 
@@ -27,37 +27,46 @@ class Memcache(object):
         self.init(binary, behaviors)
     
     def init(self, binary=False, behaviors=None):
-        memcached_nodes = []
-        
-        if utils.is_ec2():
-            stack = ec2_utils.get_stack()
+        try:
+            memcached_nodes = []
             
-            for node in stack.nodes:
-                if 'mem' in node.roles:
-                    memcached_nodes.append(node.private_ip_address)
-            
-            if 0 == len(memcached_nodes):
-                utils.log("[%s] unable to any find memcached servers" % self)
-                return False
-        else:
-            # running locally so default to localhost
-            memcached_nodes.append('127.0.0.1')
+            if utils.is_ec2():
+                stack = ec2_utils.get_stack()
+                
+                for node in stack.nodes:
+                    if 'mem' in node.roles:
+                        memcached_nodes.append(node.private_ip_address)
+                
+                if 0 == len(memcached_nodes):
+                    raise Exception("[%s] unable to any find memcached servers" % self)
+            else:
+                # running locally so default to localhost
+                memcached_nodes.append('127.0.0.1')
         
-        self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+            self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+        except Exception, e:
+            logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
+            self._client = None
+            return False
+        
         return True
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
-        return self._client.__getattribute__(key)
+        if self._client:
+            return self._client.__getattribute__(key)
     
     def __setitem__(self, key, value):
-        self._client[key] = self._import_value(value)
+        if self._client:
+            self._client[key] = self._import_value(value)
     
     def __getitem__(self, key):
-        return self._export_value(self._client[key])
+        if self._client:
+            return self._export_value(self._client[key])
     
     def __contains__(self, key):
-        return key in self._client
+        if self._client:
+            return key in self._client
     
     def _import_value(self, value):
         """
@@ -90,7 +99,10 @@ class Memcache(object):
         return value
     
     def __str__(self):
-        return "%s(%s)" % (str(self._client), self.__class__.__name__)
+        if self._client:
+            return "%s(%s)" % (str(self._client), self.__class__.__name__)
+        else:
+            return "%s" % self.__class__.__name__
 
 class StampedMemcache(Memcache):
     

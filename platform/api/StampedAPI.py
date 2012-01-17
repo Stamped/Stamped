@@ -51,7 +51,7 @@ class StampedAPI(AStampedAPI):
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self.lite_mode = kwargs.pop('lite_mode', False)
-        self._cache    = libs.Memcache.StampedMemcache()
+        #self._cache    = libs.Memcache.StampedMemcache()
         
         # Enable / Disable Functionality
         self._activity = True
