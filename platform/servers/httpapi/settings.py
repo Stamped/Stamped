@@ -111,7 +111,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     "templates",
-    "/stamped/stamped/platform/httpapi/templates"
+    "/stamped/stamped/platform/servers/httpapi/templates"
 )
 
 INSTALLED_APPS = (
