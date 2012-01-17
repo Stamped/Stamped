@@ -48,18 +48,19 @@ class Memcache(object):
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
-        if self._client:
-            return self._client.__getattribute__(key)
-        
-        return None
+        assert self._client
+        return self._client.__getattribute__(key)
     
     def __setitem__(self, key, value):
+        assert self._client
         self._client[key] = self._import_value(value)
     
     def __getitem__(self, key):
+        assert self._client
         return self._export_value(self._client[key])
     
     def __contains__(self, key):
+        assert self._client
         return key in self._client
     
     def _import_value(self, value):
