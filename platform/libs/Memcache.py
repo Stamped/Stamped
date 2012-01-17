@@ -27,28 +27,27 @@ class Memcache(object):
         self.init(binary, behaviors)
     
     def init(self, binary=False, behaviors=None):
-        memcached_nodes = []
-        
-        if utils.is_ec2():
-            stack = ec2_utils.get_stack()
-            
-            for node in stack.nodes:
-                if 'mem' in node.roles:
-                    memcached_nodes.append(node.private_ip_address)
-            
-            if 0 == len(memcached_nodes):
-                logs.error("[%s] unable to any find memcached servers" % self)
-                self._client = None
-                return False
-        else:
-            # running locally so default to localhost
-            memcached_nodes.append('127.0.0.1')
-        
         try:
+            memcached_nodes = []
+            
+            if utils.is_ec2():
+                stack = ec2_utils.get_stack()
+                
+                for node in stack.nodes:
+                    if 'mem' in node.roles:
+                        memcached_nodes.append(node.private_ip_address)
+                
+                if 0 == len(memcached_nodes):
+                    raise Exception("[%s] unable to any find memcached servers" % self)
+            else:
+                # running locally so default to localhost
+                memcached_nodes.append('127.0.0.1')
+        
             self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
         except Exception, e:
             logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
             self._client = None
+            return False
         
         return True
     
