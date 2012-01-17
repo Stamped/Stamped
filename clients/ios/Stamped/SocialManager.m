@@ -664,10 +664,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [defaults setObject:name forKey:@"FBName"];
   [defaults setObject:userID forKey:@"FBID"];
   [defaults synchronize];
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
-                                                               delegate:self];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", 
-                    name, @"facebook_name", nil];
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
   request.method = RKRequestMethodPOST;
   [request send];
 }
