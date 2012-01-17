@@ -38,30 +38,36 @@ class Memcache(object):
             
             if 0 == len(memcached_nodes):
                 logs.error("[%s] unable to any find memcached servers" % self)
-                #return False
+                self._client = None
+                return False
         else:
             # running locally so default to localhost
             memcached_nodes.append('127.0.0.1')
         
-        self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+        try:
+            self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+        except Exception, e:
+            logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
+            self._client = None
+        
         return True
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
-        assert self._client
-        return self._client.__getattribute__(key)
+        if self._client:
+            return self._client.__getattribute__(key)
     
     def __setitem__(self, key, value):
-        assert self._client
-        self._client[key] = self._import_value(value)
+        if self._client:
+            self._client[key] = self._import_value(value)
     
     def __getitem__(self, key):
-        assert self._client
-        return self._export_value(self._client[key])
+        if self._client:
+            return self._export_value(self._client[key])
     
     def __contains__(self, key):
-        assert self._client
-        return key in self._client
+        if self._client:
+            return key in self._client
     
     def _import_value(self, value):
         """
@@ -94,7 +100,10 @@ class Memcache(object):
         return value
     
     def __str__(self):
-        return "%s(%s)" % (str(self._client), self.__class__.__name__)
+        if self._client:
+            return "%s(%s)" % (str(self._client), self.__class__.__name__)
+        else:
+            return "%s" % self.__class__.__name__
 
 class StampedMemcache(Memcache):
     
