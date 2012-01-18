@@ -57,6 +57,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)twitterFriendsDidChange:(NSNotification*)notification;
 - (void)facebookFriendsDidChange:(NSNotification*)notification;
 - (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification;
+- (void)dismissSelf;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, copy) NSArray* twitterFriends;
@@ -256,16 +257,30 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [super viewDidUnload];
 }
 
-#pragma mark - Actions
-
-- (IBAction)done:(id)sender {
+- (void)dismissSelf {
   UIViewController* vc = nil;
   if ([self respondsToSelector:@selector(presentingViewController)])
     vc = [(id)self presentingViewController];
   else
     vc = self.parentViewController;
-
+  
   [vc dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark - Actions
+
+- (IBAction)done:(id)sender {
+  if (inviteSet_.count > 0) {
+    UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Unsent Invitations"
+                                                         message:@"Are you sure you want to close this pane?"
+                                                        delegate:self
+                                               cancelButtonTitle:@"Review"
+                                               otherButtonTitles:@"Close", nil] autorelease];
+    [alertView show];
+  } else {
+    [invitedSet_ removeAllObjects];
+    [self dismissSelf];
+  }
 }
 
 - (IBAction)findFromStamped:(id)sender {
@@ -1369,6 +1384,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
   [tableView_ reloadData];
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  // Currently only used to alert the user that there are pending invitations.
+  if (alertView.cancelButtonIndex == buttonIndex)
+    return;
+  
+  [self dismissSelf];
 }
 
 @end
