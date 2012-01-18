@@ -372,7 +372,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         input_query = input_query.encode('utf-8')
         
-        """ """
+        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -382,6 +382,7 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
+        """
         
         results     = {}
         wrapper     = {}
