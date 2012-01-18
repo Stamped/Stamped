@@ -413,6 +413,17 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   return auth;
 }
 
+- (NSString*)twitterUsername {
+  return [[NSUserDefaults standardUserDefaults] objectForKey:kTwitterUsername];
+}
+
+- (NSString*)twitterProfileImageURL {
+  if (!self.twitterUsername)
+    return nil;
+  
+  return [NSString stringWithFormat:@"https://api.twitter.com/1/users/profile_image?screen_name=%@&size=bigger", self.twitterUsername];
+}
+
 - (void)requestTwitterUser {
   if ([self hasiOS5Twitter]) {
     NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
@@ -501,6 +512,17 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 #pragma mark - Facebook.
 
+- (NSString*)facebookProfileImageURL {
+  NSString* facebookID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
+  if (!facebookID)
+    return nil;
+  return [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture", facebookID];
+}
+
+- (NSString*)facebookName {
+  return [[NSUserDefaults standardUserDefaults] objectForKey:@"FBName"];
+}
+
 - (void)signInToFacebook {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
@@ -566,18 +588,21 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
 }
 
+- (NSString*)stampedLogoImageURL {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  return [NSString stringWithFormat:@"%@%@-%@%@", kStampedLogoURLPath, currentUser.primaryColor, currentUser.secondaryColor, @"-logo-195x195.png"];
+}
+
 - (void)requestFacebookPostInviteToFacebookID:(NSString*)facebookID {
   if (!self.facebookClient.isSessionValid)
     return;
 
-  User* currentUser = [AccountManager sharedManager].currentUser;
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                     kFacebookAppID, @"app_id",
                                     @"http://stamped.com", @"link",
                                     @"Stamped", @"name", nil];
-  NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampedLogoURLPath, currentUser.primaryColor, currentUser.secondaryColor, @"-logo-195x195.png"];
-  [params setObject:photoURL forKey:@"picture"];
-  [params setObject:@"Hey, I'm using Stamped to share the restaurants, movies, books and music I like best. Join me."
+  [params setObject:self.stampedLogoImageURL forKey:@"picture"];
+  [params setObject:@"Hey, I think you have great taste, so join me on Stamped and share the things you like best."
              forKey:@"message"];
 
   [self.facebookClient requestWithGraphPath:[facebookID stringByAppendingString:@"/feed"]

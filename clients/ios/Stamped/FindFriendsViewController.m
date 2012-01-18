@@ -16,6 +16,7 @@
 #import "STSearchField.h"
 #import "FacebookUser.h"
 #import "FriendshipManager.h"
+#import "FindFriendsModalPreviewView.h"
 #import "InviteFriendTableViewCell.h"
 #import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
@@ -56,6 +57,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)twitterFriendsDidChange:(NSNotification*)notification;
 - (void)facebookFriendsDidChange:(NSNotification*)notification;
 - (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification;
+- (void)dismissSelf;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, copy) NSArray* twitterFriends;
@@ -149,6 +151,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [super viewWillAppear:animated];
   [self.navigationController setNavigationBarHidden:YES animated:animated];
   [self.tableView reloadData];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -251,16 +257,30 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [super viewDidUnload];
 }
 
-#pragma mark - Actions
-
-- (IBAction)done:(id)sender {
+- (void)dismissSelf {
   UIViewController* vc = nil;
   if ([self respondsToSelector:@selector(presentingViewController)])
     vc = [(id)self presentingViewController];
   else
     vc = self.parentViewController;
-
+  
   [vc dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark - Actions
+
+- (IBAction)done:(id)sender {
+  if (inviteSet_.count > 0) {
+    UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Unsent Invitations"
+                                                         message:@"Are you sure you want to close this pane?"
+                                                        delegate:self
+                                               cancelButtonTitle:@"Review"
+                                               otherButtonTitles:@"Close", nil] autorelease];
+    [alertView show];
+  } else {
+    [invitedSet_ removeAllObjects];
+    [self dismissSelf];
+  }
 }
 
 - (IBAction)findFromStamped:(id)sender {
@@ -284,7 +304,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
-  stampedButton_.selected = YES;  
+  stampedButton_.selected = YES;
   [tableView_ reloadData];
   self.showToolbar = NO;
 }
@@ -510,21 +530,45 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
   overlayContainer.backgroundColor = [UIColor clearColor];
   overlayContainer.alpha = 0;
+  [self.view.window addSubview:overlayContainer];
+  [overlayContainer release];
+  
   UIView* black = [[UIView alloc] initWithFrame:overlayContainer.bounds];
   black.backgroundColor = [UIColor blackColor];
-  black.alpha = 0.75;
+  black.alpha = 0.5;
   [overlayContainer addSubview:black];
   [black release];
 
+  FindFriendsModalPreviewView* previewView =
+      [[FindFriendsModalPreviewView alloc] initWithFrame:CGRectMake(0, 0, 310, 165)];
+  switch (findSource_) {
+    case FindFriendsSourceFacebook:
+      previewView.modalType = FindFriendsModalTypeFacebook;
+      break;
+    case FindFriendsSourceTwitter:
+      previewView.modalType = FindFriendsModalTypeTwitter;
+      break;
+    case FindFriendsSourceContacts:
+      previewView.modalType = FindFriendsModalTypeEmail;
+      break;
+    default:
+      break;
+  }
+  previewView.center = overlayContainer.center;
+  previewView.alpha = 0;
+  previewView.userInteractionEnabled = NO;
+  [overlayContainer addSubview:previewView];
+  [previewView release];
+  
   UITapGestureRecognizer* recognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(previewModalTapped:)];
   [overlayContainer addGestureRecognizer:recognizer];
   [recognizer release];
-  [self.view.window addSubview:overlayContainer];
+  
   [UIView animateWithDuration:0.3 animations:^{
     overlayContainer.alpha = 1;
+    previewView.alpha = 1;
   }];
-  [overlayContainer release];
 }
 
 - (void)previewModalTapped:(UIGestureRecognizer*)recognizer {
@@ -1340,6 +1384,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
   [tableView_ reloadData];
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  // Currently only used to alert the user that there are pending invitations.
+  if (alertView.cancelButtonIndex == buttonIndex)
+    return;
+  
+  [self dismissSelf];
 }
 
 @end

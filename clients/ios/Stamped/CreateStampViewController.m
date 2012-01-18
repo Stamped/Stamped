@@ -68,6 +68,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
 @property (nonatomic, assign) BOOL isSigningInToFB; // Used to handle edge case wherein user doesn't complete fb login.
+@property (nonatomic, readonly) UIImageView* tapHereImageView;
 @end
 
 @implementation CreateStampViewController
@@ -107,6 +108,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize isSigningInToFB = isSigningInToFB_;
 @synthesize headerView = headerView_;
+@synthesize tapHereImageView = tapHereImageView_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -180,6 +182,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.signInFacebookActivityIndicator = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  tapHereImageView_ = nil;
   [super dealloc];
 }
 
@@ -398,6 +401,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.signInFacebookActivityIndicator = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  tapHereImageView_ = nil;
   [super viewDidUnload];
 }
 
@@ -414,6 +418,26 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
   [super viewWillAppear:animated];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if (currentUser.numStamps.integerValue == 0) {
+    tapHereImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_tapHere"]];
+    tapHereImageView_.center = self.view.center;
+    tapHereImageView_.frame = CGRectOffset(tapHereImageView_.frame, 0, -35);
+    tapHereImageView_.alpha = 0;
+    [scrollView_ addSubview:tapHereImageView_];
+    [tapHereImageView_ release];
+    [UIView animateWithDuration:0.3
+                          delay:0
+                        options:UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+                       tapHereImageView_.alpha = 1;
+                     }
+                     completion:nil];
+  }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -443,10 +467,13 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                          CGRectMake(0, 0, 320, 246 - CGRectGetHeight(reasoningTextView_.inputAccessoryView.frame));
                      deletePhotoButton_.alpha = 1.0;
                      editingMask_.alpha = 1.0;
+                     tapHereImageView_.alpha = 0.0;
                    }
                    completion:^(BOOL finished) {
                      reasoningTextView_.scrollEnabled = YES;
                      [self adjustTextViewContentSize];
+                     [tapHereImageView_ removeFromSuperview];
+                     tapHereImageView_ = nil;
                    }];
 }
 

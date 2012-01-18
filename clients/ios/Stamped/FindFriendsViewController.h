@@ -28,7 +28,8 @@ typedef enum {
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
                                                         UITextFieldDelegate,
-                                                        UINavigationControllerDelegate>
+                                                        UINavigationControllerDelegate,
+                                                        UIAlertViewDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
