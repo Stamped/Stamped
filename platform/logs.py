@@ -105,7 +105,7 @@ def begin(**kwargs):
     saveStat    = kwargs.pop('saveStat', None)
     requestData = kwargs.pop('requestData', None)
     nodeName    = kwargs.pop('nodeName', None)
-
+    
     refresh(format='object')
     
     localData.saveLog  = saveLog
