@@ -24,6 +24,7 @@ class Memcache(object):
     """
     
     def __init__(self, binary=False, behaviors=None):
+        self._client = None
         self.init(binary, behaviors)
     
     def init(self, binary=False, behaviors=None):
@@ -42,7 +43,7 @@ class Memcache(object):
             else:
                 # running locally so default to localhost
                 memcached_nodes.append('127.0.0.1')
-        
+            
             self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
         except Exception, e:
             logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
@@ -63,10 +64,14 @@ class Memcache(object):
     def __getitem__(self, key):
         if self._client:
             return self._export_value(self._client[key])
+        
+        raise KeyError(key)
     
     def __contains__(self, key):
         if self._client:
             return key in self._client
+        
+        return False
     
     def _import_value(self, value):
         """
@@ -200,12 +205,17 @@ def memcached_function(get_cache_client, time=0, min_compress_len=0):
                 wrapper.misses += 1
             
             if store:
-                cache.set(key, result, time=time, min_compress_len=min_compress_len)
+                cache_set = cache.set
+                if cache_set is not None:
+                    cache_set(key, result, time=time, min_compress_len=min_compress_len)
             
             return result
         
         def clear():
-            cache.flush_all()
+            cache_flush_all = cache.flush_all
+            if cache_flush_all is not None:
+                cache_flush_all()
+            
             wrapper.hits = wrapper.misses = 0
         
         wrapper.hits  = wrapper.misses = 0
