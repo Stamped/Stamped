@@ -280,43 +280,46 @@ stamped.init = function(){
     
     capsuleMore = function(){
         what = $('div.capsule .what');
-        if($('div.capsule .feature').length) {
-            featureHeight = $('div.capsule .feature').innerHeight();
-        }
-    
         
-        whatWidth = what.outerWidth();
-        lineHeight = what.css('lineHeight').replace('px','');
-        capLines = 9;
-        capHeight = parseInt(capLines * lineHeight);
+        if (what.length) {
+            if($('div.capsule .feature').length) {
+                featureHeight = $('div.capsule .feature').innerHeight();
+            }
         
-        if(what.outerHeight() > capHeight) {
-            $('div.capsule .what').css({
-                'height' : capHeight + 2,
-                'overflow' : 'hidden',
-                'text-overflow' : 'clip',
-                'width' : whatWidth
+            
+            whatWidth = what.outerWidth();
+            lineHeight = what.css('lineHeight').replace('px','');
+            capLines = 9;
+            capHeight = parseInt(capLines * lineHeight);
+            
+            if(what.outerHeight() > capHeight) {
+                $('div.capsule .what').css({
+                    'height' : capHeight + 2,
+                    'overflow' : 'hidden',
+                    'text-overflow' : 'clip',
+                    'width' : whatWidth
+                });
+                $('<a class="more-toggle" href="#">Read more...</a>').insertAfter('div.capsule .what');
+            }
+            $('.more-toggle').click(function(){
+                $(this).hide();
+                what.css({
+                    'height' : 'auto'
+                });
+                event.preventDefault();
             });
-            $('<a class="more-toggle" href="#">Read more...</a>').insertAfter('div.capsule .what');
-        }
-        $('.more-toggle').click(function(){
-            $(this).hide();
-            what.css({
-                'height' : 'auto'
+            
+            if($('#mobile-entity .what.contd *').length) {
+                $('.what.contd').wrapInner('<div class="more-cap"/>');
+                $('<a href="#" class="more-toggle-mobile">Show more information</a>').insertBefore('.more-cap');
+            };
+            
+            $('.more-toggle-mobile').click(function(){
+                $(this).hide();
+                $('.more-cap').fadeIn();
+                event.preventDefault();
             });
-            event.preventDefault();
-        });
-        
-        if($('#mobile-entity .what.contd *').length) {
-            $('.what.contd').wrapInner('<div class="more-cap"/>');
-            $('<a href="#" class="more-toggle-mobile">Show more information</a>').insertBefore('.more-cap');
-        };
-        
-        $('.more-toggle-mobile').click(function(){
-            $(this).hide();
-            $('.more-cap').fadeIn();
-            event.preventDefault();
-        });
+        }
     };
     
     // setTimeout(capsuleMore, 150);
