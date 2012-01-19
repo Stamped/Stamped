@@ -21,8 +21,6 @@ from utils              import abstract
 # Object validation
 # Data enrichment
 
-__checks = []
-
 class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
@@ -52,16 +50,6 @@ class AIntegrityCheck(object):
         self.api = api
         self.db  = db
         self.options = options
-    
-    @staticmethod
-    def register(cls):
-        global __checks
-        __checks.append(cls)
-    
-    @staticmethod
-    def getRegisteredChecks():
-        global __checks
-        return __checks
     
     def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
         progress_count = 100 / progress_step
@@ -140,9 +128,9 @@ def main():
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
     
-    checks = AIntegrityCheck.getRegisteredChecks()
+    checks = integrity.checks
     for check_cls in checks:
-        check = check_cks(api, db, options)
+        check = check_cls(api, db, options)
         try:
             check.run()
         except:

@@ -59,5 +59,7 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
                     'stamp_id' : stamp_id, 
                 }))
 
-AIntegrityCheck.register(InboxStampsIntegrityCheck)
+checks = [
+    InboxStampsIntegrityCheck, 
+]
 
