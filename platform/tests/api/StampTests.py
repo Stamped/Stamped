@@ -335,12 +335,12 @@ class StampedAPILikesPass(StampedAPIStampLikesTest):
                 "stamp_id": self.stamp['stamp_id']
             }
             result = self.handleGET(path, data)
-            self.assertEqual(len(result), i + 1)
+            self.assertEqual(len(result['user_ids']), i + 1)
 
             # Verify user is within results
             check = False
-            for item in result:
-                if item['user_id'] == user['user_id']:
+            for item in result['user_ids']:
+                if item == user['user_id']:
                     check = True
             self.assertTrue(check)
 
