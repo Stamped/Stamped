@@ -6,8 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
-import time
+import logs, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
@@ -20,23 +19,24 @@ class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
 
-def integrity_check(f, retries=5, retry_delay=0.5):
+def integrity_check(f, max_retries=0, retry_delay=0.5):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        retries = 0
+        
         while True:
             try:
                 return f(*args, **kwargs)
             except Exception, e:
-                retries -= 1
+                retries += 1
                 
-                if retries < 0:
+                if retries > max_retries:
                     raise
                 
                 time.sleep(retry_delay)
     
     __integrity_checks.append(wrapper)
     return wrapper
-
 def sample(f, ratio):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -47,22 +47,41 @@ def sample(f, ratio):
 
 @integrity_check
 def check_inboxstamps(api, db, options):
-    @sample(options.sampleSize)
     def check(doc):
-        user_id  = doc['_id']
-        refs_ids = doc['ref_ids']
+        user_id = doc['_id']
+        ref_ids = doc['ref_ids']
         
-        friend_ids = db['friends'].find({ '_id' : user_id }, { 'ref_ids' : 1 })
+        friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
+        if friend_ids is not None:
+            friend_ids = friend_ids['ref_ids']
+        else:
+            friend_ids = []
+        
         friend_ids.append(user_id)
         
-        stamp_ids  = set(db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 }))
+        stamp_ids  = map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 }))
+        
+        def correct(error):
+            if options.noop:
+                raise error
+            
+            logs.warn('RESOLVING: %s' % str(error))
+            doc['ref_ids'] = stamp_ids
+            db['inboxstamps'].save(doc)
         
         if len(ref_ids) != len(stamp_ids):
-            raise IntegrityError("inboxstamps integrity error: %s" % { 'user_id' : user_id, })
+            return correct(IntegrityError("inboxstamps integrity error: %s" % {
+                    'user_id' : user_id, 
+                    'len_ref_ids'   : len(ref_ids), 
+                    'len_stamp_ids' : len(stamp_ids), 
+                }))
         
         for ref_id in ref_ids:
             if ref_id not in stamp_ids:
-                raise IntegrityError("inboxstamps integrity error: %s" % { 'user_id' : user_id, 'ref_id' : ref_id })
+                return correct(IntegrityError("inboxstamps integrity error: %s" % {
+                    'user_id'  : user_id, 
+                    'stamp_id' : ref_id
+                }))
     
     for doc in db['inboxstamps'].find():
         check(doc)
@@ -97,7 +116,7 @@ def main():
     options, args = parseCommandLine()
     
     api = MongoStampedAPI(lite_mode=True)
-    db  = api.entityDB._collection._database
+    db  = api._entityDB._collection._database
     
     check_inboxstamps(api, db, options)
 
