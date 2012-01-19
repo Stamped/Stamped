@@ -50,16 +50,20 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
                     'expected #stamps' : len(stamp_ids), 
                 }))
         
+        invalid_stamp_ids = []
+        
         for stamp_id in ref_ids:
             if stamp_id not in stamp_ids:
                 ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(stamp_id)})
-                from pprint import pprint
-                pprint(ret)
-                
-                return correct(IntegrityError("inboxstamps integrity error: %s" % {
-                    'user_id'  : user_id, 
-                    'stamp_id' : stamp_id, 
-                }))
+                if ret is None:
+                    invalid_stamp_ids.append(stamp_id)
+        
+        if len(invalid_stamp_ids) > 0:
+            return correct(IntegrityError("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
+                len(invalid_stamp_ids), {
+                'user_id'   : user_id, 
+                'stamp_ids' : invalid_stamp_ids, 
+            })))
 
 checks = [
     InboxStampsIntegrityCheck, 
