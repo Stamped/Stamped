@@ -51,7 +51,7 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
-    def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=5, retry_delay=0.5):
+    def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
         progress_count = 100 / progress_step
         count = 0
         index = 0
@@ -102,7 +102,10 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
     """ Ensure the integrity of inbox stamps """
     
     def run(self):
-        self._sample(self.db['inboxstamps'].find(), self.options.sampleSetRatio, self.check_inbox)
+        self._sample(self.db['inboxstamps'].find(), 
+                     self.options.sampleSetRatio, 
+                     self.check_inbox, 
+                     progress_step=1)
     
     def check_inbox(self, doc):
         user_id = doc['_id']
