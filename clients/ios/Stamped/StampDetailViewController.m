@@ -73,10 +73,11 @@ typedef enum {
 - (void)setupAlsoStampedBy;
 - (NSArray*)alsoStampedByArray;
 - (void)alsoStampedByUserImageTapped:(id)sender;
+- (void)showLikesPane;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
-@property (nonatomic, readonly) UILabel* numLikesLabel;
+@property (nonatomic, readonly) TTTAttributedLabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
 @property (nonatomic, retain) NSMutableArray* commentViews;
@@ -328,7 +329,10 @@ typedef enum {
 
   numLikesLabel_.hidden = likes == 0;
   likeFaceImageView_.hidden = likes == 0;
-  numLikesLabel_.text = [NSNumber numberWithUnsignedInteger:likes].stringValue;
+  NSString* likesString = [NSNumber numberWithUnsignedInteger:likes].stringValue;
+  numLikesLabel_.text = likesString;
+  [numLikesLabel_ addLinkToURL:[NSURL URLWithString:@"likes"]
+                     withRange:NSMakeRange(0, likesString.length)];
   [numLikesLabel_ sizeToFit];
 
   // If there is a credited user or an existing like then we already have the room.
@@ -404,6 +408,13 @@ typedef enum {
 - (void)alsoStampedByUserImageTapped:(id)sender {
   Stamp* stamp = (Stamp*)[[self alsoStampedByArray] objectAtIndex:[sender tag]];
   StampDetailViewController* vc = [[StampDetailViewController alloc] initWithStamp:stamp];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
+}
+
+- (void)showLikesPane {
+  PeopleListViewController* vc = [[PeopleListViewController alloc] initWithSource:PeopleListSourceTypeLikes];
+  vc.stamp = stamp_;
   [self.navigationController pushViewController:vc animated:YES];
   [vc release];
 }
@@ -504,12 +515,24 @@ typedef enum {
   if (creditedUser)
     mainCommentFrame.size.height += 27;
 
-  numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  numLikesLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  numLikesLabel_.delegate = self;
+  numLikesLabel_.userInteractionEnabled = YES;
+  numLikesLabel_.textColor = [UIColor stampedGrayColor];
+  numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12.0];
+  numLikesLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
+  linkAttributes = [NSMutableDictionary dictionary];
+  font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
+  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+                    forKey:(NSString*)kCTForegroundColorAttributeName];
+  CFRelease(font);
+  numLikesLabel_.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
   numLikesLabel_.text = [stamp_.numLikes stringValue];
   numLikes_ = stamp_.numLikes.unsignedIntValue;
   numLikesLabel_.textAlignment = UITextAlignmentRight;
-  numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-  numLikesLabel_.textColor = [UIColor stampedGrayColor];
+  [numLikesLabel_ addLinkToURL:[NSURL URLWithString:@"likes"]
+                     withRange:NSMakeRange(0, stamp_.numLikes.stringValue.length)];
   [mainCommentContainer_ addSubview:numLikesLabel_];
   [numLikesLabel_ release];
   [numLikesLabel_ sizeToFit];
@@ -527,6 +550,10 @@ typedef enum {
                                         CGRectGetMinY(numLikesLabel_.frame) + 1,
                                         CGRectGetWidth(likeFaceImageView_.frame),
                                         CGRectGetHeight(likeFaceImageView_.frame));
+  likeFaceImageView_.userInteractionEnabled = YES;
+  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showLikesPane)];
+  [likeFaceImageView_ addGestureRecognizer:recognizer];
+  [recognizer release];
   [mainCommentContainer_ addSubview:likeFaceImageView_];
   [likeFaceImageView_ release];
 
@@ -917,6 +944,8 @@ typedef enum {
     vc.stamp = stamp_;
     [self.navigationController pushViewController:vc animated:YES];
     [vc release];
+  } else if ([urlString isEqualToString:@"likes"]) {
+    [self showLikesPane];
   }
   if (!user)
     return;

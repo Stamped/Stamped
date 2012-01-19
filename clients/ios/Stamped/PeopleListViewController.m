@@ -155,7 +155,8 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     return;
 
   if ([request.resourcePath rangeOfString:kFriendIDsPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kFollowerIDsPath].location != NSNotFound) {
+      [request.resourcePath rangeOfString:kFollowerIDsPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kLikesIDsPath].location != NSNotFound) {
     NSError* error = NULL;
     id responseObj = [response parsedBody:&error];
     if (error) {
@@ -198,7 +199,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 	NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
-    [self loadRelationshipsFromNetwork];
+    [self loadUserIDsFromNetwork];
     return;
   }
 }
@@ -253,7 +254,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     request.params = [NSDictionary dictionaryWithObject:user_.userID forKey:@"user_id"];
   else if (stamp_ && sourceType_ == PeopleListSourceTypeLikes)
     request.params = [NSDictionary dictionaryWithObject:stamp_.stampID forKey:@"stamp_id"];
-
   [request send];
 }
 
