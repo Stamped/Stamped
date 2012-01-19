@@ -227,8 +227,8 @@
 		7E42DCC813DB72B300AF63BE /* shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */; };
 		7E42FDDF13EF0F0E007B3C26 /* profile_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */; };
 		7E42FDE013EF0F0E007B3C26 /* profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */; };
-		7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* RelationshipsViewController.m */; };
-		7E453721140F003C0097E64F /* RelationshipsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* RelationshipsViewController.xib */; };
+		7E453720140F003C0097E64F /* PeopleListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* PeopleListViewController.m */; };
+		7E453721140F003C0097E64F /* PeopleListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* PeopleListViewController.xib */; };
 		7E47E93C1409A8EF00130B32 /* plus_icon_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E93B1409A8EF00130B32 /* plus_icon_highlighted@2x.png */; };
 		7E47E93E1409B0D900130B32 /* edit_pencil@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E93D1409B0D900130B32 /* edit_pencil@2x.png */; };
 		7E47E9451409B7DD00130B32 /* edit_book_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E9401409B7DD00130B32 /* edit_book_icon@2x.png */; };
@@ -309,7 +309,7 @@
 		7E5893DF147C468B002268C4 /* EditEntityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E47E94E1409C04000130B32 /* EditEntityViewController.m */; };
 		7E5893E0147C468B002268C4 /* STTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB262140C0535007D164F /* STTextField.m */; };
 		7E5893E1147C468B002268C4 /* STCategoryDropdownTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB265140C1669007D164F /* STCategoryDropdownTableView.m */; };
-		7E5893E2147C468B002268C4 /* RelationshipsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* RelationshipsViewController.m */; };
+		7E5893E2147C468B002268C4 /* PeopleListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* PeopleListViewController.m */; };
 		7E5893E3147C468B002268C4 /* FirstRunViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5406DB141550A900912463 /* FirstRunViewController.m */; };
 		7E5893E4147C468B002268C4 /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		7E5893E5147C468B002268C4 /* CollapsibleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD125F714183C9900CCBDD8 /* CollapsibleViewController.m */; };
@@ -471,7 +471,7 @@
 		7E589492147C468B002268C4 /* white_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EA64106140DD05C00153627 /* white_button_bg@2x.png */; };
 		7E589493147C468B002268C4 /* blue_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EA64107140DD05C00153627 /* blue_button_bg@2x.png */; };
 		7E589494147C468B002268C4 /* big_blue_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E684AAE140DE32F00394A70 /* big_blue_button_bg@2x.png */; };
-		7E589495147C468B002268C4 /* RelationshipsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* RelationshipsViewController.xib */; };
+		7E589495147C468B002268C4 /* PeopleListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* PeopleListViewController.xib */; };
 		7E589496147C468B002268C4 /* clear_unfollow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA51140F137400F23A26 /* clear_unfollow_bg@2x.png */; };
 		7E589497147C468B002268C4 /* green_follow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */; };
 		7E589498147C468B002268C4 /* take_photo_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52B5361412C9DF00B46A55 /* take_photo_button@2x.png */; };
@@ -1725,9 +1725,9 @@
 		7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_background@2x.png"; sourceTree = "<group>"; };
 		7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_placeholder.png; sourceTree = "<group>"; };
 		7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_placeholder@2x.png"; sourceTree = "<group>"; };
-		7E45371D140F003B0097E64F /* RelationshipsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RelationshipsViewController.h; sourceTree = "<group>"; };
-		7E45371E140F003B0097E64F /* RelationshipsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RelationshipsViewController.m; sourceTree = "<group>"; };
-		7E45371F140F003B0097E64F /* RelationshipsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RelationshipsViewController.xib; path = ../Interfaces/RelationshipsViewController.xib; sourceTree = "<group>"; };
+		7E45371D140F003B0097E64F /* PeopleListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleListViewController.h; sourceTree = "<group>"; };
+		7E45371E140F003B0097E64F /* PeopleListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleListViewController.m; sourceTree = "<group>"; };
+		7E45371F140F003B0097E64F /* PeopleListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PeopleListViewController.xib; path = ../Interfaces/PeopleListViewController.xib; sourceTree = "<group>"; };
 		7E47E93B1409A8EF00130B32 /* plus_icon_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "plus_icon_highlighted@2x.png"; sourceTree = "<group>"; };
 		7E47E93D1409B0D900130B32 /* edit_pencil@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_pencil@2x.png"; sourceTree = "<group>"; };
 		7E47E9401409B7DD00130B32 /* edit_book_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_book_icon@2x.png"; sourceTree = "<group>"; };
@@ -3481,6 +3481,16 @@
 			name = "Filter Bar";
 			sourceTree = "<group>";
 		};
+		7EC7B6F614C88EE7005599F0 /* People List */ = {
+			isa = PBXGroup;
+			children = (
+				7E45371D140F003B0097E64F /* PeopleListViewController.h */,
+				7E45371E140F003B0097E64F /* PeopleListViewController.m */,
+				7E45371F140F003B0097E64F /* PeopleListViewController.xib */,
+			);
+			name = "People List";
+			sourceTree = "<group>";
+		};
 		7ECCB93714351A7B006575D1 /* Friend Finder */ = {
 			isa = PBXGroup;
 			children = (
@@ -3710,9 +3720,6 @@
 				7EE70C4E13FC635D008CCC15 /* ProfileViewController.h */,
 				7EE70C4F13FC635D008CCC15 /* ProfileViewController.m */,
 				7EE70C5013FC635D008CCC15 /* ProfileViewController.xib */,
-				7E45371D140F003B0097E64F /* RelationshipsViewController.h */,
-				7E45371E140F003B0097E64F /* RelationshipsViewController.m */,
-				7E45371F140F003B0097E64F /* RelationshipsViewController.xib */,
 				7E89C3CF1438013000547960 /* CreditsViewController.h */,
 				7E89C3D01438013000547960 /* CreditsViewController.m */,
 				7E89C3D11438013000547960 /* CreditsViewController.xib */,
@@ -3790,6 +3797,7 @@
 				7E68B915141AA4F500D55021 /* Show Image */,
 				7ED2EF5C13E0DA48007F1AFB /* Activity */,
 				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
+				7EC7B6F614C88EE7005599F0 /* People List */,
 				7ED2EF6D13E0DF83007F1AFB /* People */,
 				7EE70C5313FC6378008CCC15 /* Profile View */,
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
@@ -4118,7 +4126,7 @@
 				7E589492147C468B002268C4 /* white_button_bg@2x.png in Resources */,
 				7E589493147C468B002268C4 /* blue_button_bg@2x.png in Resources */,
 				7E589494147C468B002268C4 /* big_blue_button_bg@2x.png in Resources */,
-				7E589495147C468B002268C4 /* RelationshipsViewController.xib in Resources */,
+				7E589495147C468B002268C4 /* PeopleListViewController.xib in Resources */,
 				7E589496147C468B002268C4 /* clear_unfollow_bg@2x.png in Resources */,
 				7E589497147C468B002268C4 /* green_follow_bg@2x.png in Resources */,
 				7E589498147C468B002268C4 /* take_photo_button@2x.png in Resources */,
@@ -4678,7 +4686,7 @@
 				7EA64108140DD05C00153627 /* white_button_bg@2x.png in Resources */,
 				7EA64109140DD05C00153627 /* blue_button_bg@2x.png in Resources */,
 				7E684AAF140DE32F00394A70 /* big_blue_button_bg@2x.png in Resources */,
-				7E453721140F003C0097E64F /* RelationshipsViewController.xib in Resources */,
+				7E453721140F003C0097E64F /* PeopleListViewController.xib in Resources */,
 				7E6FFA53140F137400F23A26 /* clear_unfollow_bg@2x.png in Resources */,
 				7E6FFA54140F137400F23A26 /* green_follow_bg@2x.png in Resources */,
 				7E52B5381412C9DF00B46A55 /* take_photo_button@2x.png in Resources */,
@@ -5224,7 +5232,7 @@
 				7E5893DF147C468B002268C4 /* EditEntityViewController.m in Sources */,
 				7E5893E0147C468B002268C4 /* STTextField.m in Sources */,
 				7E5893E1147C468B002268C4 /* STCategoryDropdownTableView.m in Sources */,
-				7E5893E2147C468B002268C4 /* RelationshipsViewController.m in Sources */,
+				7E5893E2147C468B002268C4 /* PeopleListViewController.m in Sources */,
 				7E5893E3147C468B002268C4 /* FirstRunViewController.m in Sources */,
 				7E5893E4147C468B002268C4 /* STImageView.m in Sources */,
 				7E5893E5147C468B002268C4 /* CollapsibleViewController.m in Sources */,
@@ -5358,7 +5366,7 @@
 				7E47E9501409C04000130B32 /* EditEntityViewController.m in Sources */,
 				7E5EB263140C0535007D164F /* STTextField.m in Sources */,
 				7E5EB266140C166A007D164F /* STCategoryDropdownTableView.m in Sources */,
-				7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */,
+				7E453720140F003C0097E64F /* PeopleListViewController.m in Sources */,
 				7E5406DD141550A900912463 /* FirstRunViewController.m in Sources */,
 				7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */,
 				CBD125F914183C9A00CCBDD8 /* CollapsibleViewController.m in Sources */,

@@ -16,7 +16,7 @@
 #import "Entity.h"
 #import "FriendshipManager.h"
 #import "EditProfileViewController.h"
-#import "RelationshipsViewController.h"
+#import "PeopleListViewController.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
 #import "ShowImageViewController.h"
@@ -288,19 +288,19 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (IBAction)followersButtonPressed:(id)sender {
-  RelationshipsViewController* relationshipsViewController =
-      [[RelationshipsViewController alloc] initWithRelationship:RelationshipTypeFollowers];
-  relationshipsViewController.user = user_;
-  [self.navigationController pushViewController:relationshipsViewController animated:YES];
-  [relationshipsViewController release];
+  PeopleListViewController* vc =
+      [[PeopleListViewController alloc] initWithSource:PeopleListSourceTypeFollowers];
+  vc.user = user_;
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 - (IBAction)followingButtonPressed:(id)sender {
-  RelationshipsViewController* relationshipsViewController =
-      [[RelationshipsViewController alloc] initWithRelationship:RelationshipTypeFriends];
-  relationshipsViewController.user = user_;
-  [self.navigationController pushViewController:relationshipsViewController animated:YES];
-  [relationshipsViewController release];
+  PeopleListViewController* vc =
+      [[PeopleListViewController alloc] initWithSource:PeopleListSourceTypeFriends];
+  vc.user = user_;
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate methods.

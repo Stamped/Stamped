@@ -46,6 +46,7 @@
 						<string key="NSFrame">{{0, 4}, {320, 412}}</string>
 						<reference key="NSSuperview" ref="960697748"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
@@ -241,7 +242,7 @@
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>RelationshipsViewController</string>
+					<string>PeopleListViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -269,7 +270,7 @@
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<object class="IBPartialClassDescription">
-					<string key="className">RelationshipsViewController</string>
+					<string key="className">PeopleListViewController</string>
 					<string key="superclassName">STViewController</string>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">tableView</string>
@@ -284,7 +285,7 @@
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/RelationshipsViewController.h</string>
+						<string key="minorKey">./Classes/PeopleListViewController.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

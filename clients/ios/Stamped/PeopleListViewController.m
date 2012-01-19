@@ -1,12 +1,12 @@
 //
-//  RelationshipsViewController.m
+//  PeopleListViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 8/31/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "RelationshipsViewController.h"
+#import "PeopleListViewController.h"
 
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
@@ -18,7 +18,7 @@ static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kFollowerIDsPath = @"/friendships/followers.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 
-@interface RelationshipsViewController()
+@interface PeopleListViewController()
 - (void)loadRelationshipsFromNetwork;
 - (void)loadUserDataFromNetwork;
 
@@ -27,18 +27,19 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 @property (nonatomic, assign) BOOL loadingNextChunk;
 @end
 
-@implementation RelationshipsViewController
+@implementation PeopleListViewController
 
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize peopleArray = peopleArray_;
 @synthesize loadingNextChunk = loadingNextChunk_;
 @synthesize user = user_;
+@synthesize stamp = stamp_;
 @synthesize tableView = tableView_;
 
-- (id)initWithRelationship:(RelationshipType)relationshipType {
-  self = [super initWithNibName:@"RelationshipsViewController" bundle:nil];
+- (id)initWithSource:(PeopleListSourceType)sourceType {
+  self = [super initWithNibName:@"PeopleListViewController" bundle:nil];
   if (self) {
-    relationshipType_ = relationshipType;
+    sourceType_ = sourceType;
   }
   return self;
 }
@@ -48,6 +49,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   self.userIDsToBeFetched = nil;
   self.peopleArray = nil;
   self.user = nil;
+  self.stamp = nil;
   self.tableView = nil;
   [super dealloc];
 }
@@ -63,9 +65,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [super viewDidLoad];
   [self loadRelationshipsFromNetwork];
   NSString* title = nil;
-  if (relationshipType_ == RelationshipTypeFollowers)
+  if (sourceType_ == PeopleListSourceTypeFollowers)
     title = @"Followers";
-  else if (relationshipType_ == RelationshipTypeFriends)
+  else if (sourceType_ == PeopleListSourceTypeFriends)
     title = @"Following";
 
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:title
@@ -222,7 +224,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)loadRelationshipsFromNetwork {
-  NSString* path = relationshipType_ == RelationshipTypeFollowers ? kFollowerIDsPath : kFriendIDsPath;
+  NSString* path = sourceType_ == PeopleListSourceTypeFollowers ? kFollowerIDsPath : kFriendIDsPath;
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:path delegate:self];
   request.params = [NSDictionary dictionaryWithObject:user_.userID forKey:@"user_id"];
   [request send];
