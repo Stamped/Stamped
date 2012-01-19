@@ -62,7 +62,7 @@ def check_inboxstamps(api, db, options):
             
             logs.warn('RESOLVING: %s' % str(error))
             doc['ref_ids'] = stamp_ids
-            db['inboxstamps'].update(doc)
+            db['inboxstamps'].save(doc)
         
         if len(ref_ids) != len(stamp_ids):
             return correct(IntegrityError("inboxstamps integrity error: %s" % {
