@@ -80,7 +80,7 @@ class AIntegrityCheck(object):
                     except Exception, e:
                         retries += 1
                         
-                        if retries > max_retries:
+                        if noop or retries > max_retries:
                             prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
                             utils.log("%s: %s" % (prefix, str(e)))
                             break
