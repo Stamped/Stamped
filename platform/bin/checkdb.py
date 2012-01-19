@@ -77,8 +77,7 @@ class AIntegrityCheck(object):
                 while True:
                     try:
                         self.options.noop = (retries < max_retries) or noop
-                        retval = func(obj)
-                        return retval
+                        func(obj)
                     except Exception, e:
                         retries += 1
                         
