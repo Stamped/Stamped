@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logs, random, time, utils
+import integrity, logs, random, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
@@ -51,6 +51,10 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
+    @staticmethod
+    def register(cls):
+        global __checks
+    
     def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
         progress_count = 100 / progress_step
         count = 0
@@ -67,7 +71,7 @@ class AIntegrityCheck(object):
         for obj in iterable:
             if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
                 utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
-
+            
             if random.random() < ratio:
                 noop    = self.options.noop
                 retries = 0
@@ -82,7 +86,7 @@ class AIntegrityCheck(object):
                         
                         if noop or retries > max_retries:
                             prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
-                            utils.log("%s: %s" % (prefix, str(e)))
+                            logs.warn("%s: %s" % (prefix, str(e)))
                             break
                         
                         time.sleep(retry_delay)
@@ -95,50 +99,6 @@ class AIntegrityCheck(object):
     @abstract
     def run():
         pass
-
-class InboxStampsIntegrityCheck(AIntegrityCheck):
-    """ Ensure the integrity of inbox stamps """
-    
-    def run(self):
-        self._sample(self.db['inboxstamps'].find(), 
-                     self.options.sampleSetRatio, 
-                     self.check_inbox, 
-                     max_retries=0, 
-                     progress_step=1)
-    
-    def check_inbox(self, doc):
-        user_id = doc['_id']
-        ref_ids = doc['ref_ids']
-        
-        friend_ids = get_friend_ids(self.db, user_id)
-        friend_ids.append(user_id)
-        
-        stamp_ids   = get_stamp_ids_from_user_ids(self.db['stamps'], friend_ids)
-        deleted_ids = get_stamp_ids_from_user_ids(self.db['deletedstamps'], friend_ids)
-        stamp_ids.extend(deleted_ids)
-        
-        def correct(error):
-            if self.options.noop:
-                raise error
-            
-            logs.warn('RESOLVING: %s' % str(error))
-            
-            doc['ref_ids'] = stamp_ids
-            self.db['inboxstamps'].save(doc)
-        
-        if len(ref_ids) != len(stamp_ids):
-            return correct(IntegrityError("inboxstamps integrity error: %s" % {
-                    'user_id' : user_id, 
-                    'len_ref_ids'   : len(ref_ids), 
-                    'len_stamp_ids' : len(stamp_ids), 
-                }))
-        
-        for ref_id in ref_ids:
-            if ref_id not in stamp_ids:
-                return correct(IntegrityError("inboxstamps integrity error: %s" % {
-                    'user_id'  : user_id, 
-                    'stamp_id' : ref_id
-                }))
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
