@@ -64,8 +64,6 @@ class AIntegrityCheck(object):
             except:
                 count = utils.count(iterable)
         
-        utils.log(count)
-        
         for obj in iterable:
             if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
                 utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
@@ -84,7 +82,7 @@ class AIntegrityCheck(object):
                         
                         if retries > max_retries:
                             prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
-                            logs.error("%s: %s" % (prefix, str(e)))
+                            utils.log("%s: %s" % (prefix, str(e)))
                             break
                         
                         time.sleep(retry_delay)
