@@ -103,6 +103,7 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
         self._sample(self.db['inboxstamps'].find(), 
                      self.options.sampleSetRatio, 
                      self.check_inbox, 
+                     max_retries=0, 
                      progress_step=1)
     
     def check_inbox(self, doc):
