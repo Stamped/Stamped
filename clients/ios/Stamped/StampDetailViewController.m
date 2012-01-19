@@ -76,7 +76,7 @@ typedef enum {
 - (void)showLikesPane;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
-@property (nonatomic, readonly) UIImageView* likeFaceImageView;
+@property (nonatomic, readonly) UIButton* likeFaceButton;
 @property (nonatomic, readonly) TTTAttributedLabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
@@ -103,7 +103,7 @@ typedef enum {
 @synthesize stampLabel = stampLabel_;
 @synthesize stampButton = stampButton_;
 @synthesize stampPhotoView = stampPhotoView_;
-@synthesize likeFaceImageView = likeFaceImageView_;
+@synthesize likeFaceButton = likeFaceButton_;
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
 @synthesize timestampLabel = timestampLabel_;
@@ -328,7 +328,7 @@ typedef enum {
   numLikes_ = likes;
 
   numLikesLabel_.hidden = likes == 0;
-  likeFaceImageView_.hidden = likes == 0;
+  likeFaceButton_.hidden = likes == 0;
   NSString* likesString = [NSNumber numberWithUnsignedInteger:likes].stringValue;
   numLikesLabel_.text = likesString;
   [numLikesLabel_ addLinkToURL:[NSURL URLWithString:@"likes"]
@@ -350,10 +350,10 @@ typedef enum {
                                     CGRectGetMaxY(mainCommentFrame) - 30,
                                     CGRectGetWidth(numLikesLabel_.frame),
                                     CGRectGetHeight(numLikesLabel_.frame));
-  likeFaceImageView_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceImageView_.frame) - 2,
+  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 2,
                                         CGRectGetMinY(numLikesLabel_.frame) + 1,
-                                        CGRectGetWidth(likeFaceImageView_.frame),
-                                        CGRectGetHeight(likeFaceImageView_.frame));
+                                        CGRectGetWidth(likeFaceButton_.frame),
+                                        CGRectGetHeight(likeFaceButton_.frame));
 }
 
 - (void)setupAlsoStampedBy {
@@ -545,20 +545,19 @@ typedef enum {
                                     CGRectGetMaxY(mainCommentFrame) - 30,
                                     CGRectGetWidth(numLikesLabel_.frame),
                                     CGRectGetHeight(numLikesLabel_.frame));
-  likeFaceImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"small_like_icon"]];
-  likeFaceImageView_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceImageView_.frame) - 2,
-                                        CGRectGetMinY(numLikesLabel_.frame) + 1,
-                                        CGRectGetWidth(likeFaceImageView_.frame),
-                                        CGRectGetHeight(likeFaceImageView_.frame));
-  likeFaceImageView_.userInteractionEnabled = YES;
-  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showLikesPane)];
-  [likeFaceImageView_ addGestureRecognizer:recognizer];
-  [recognizer release];
-  [mainCommentContainer_ addSubview:likeFaceImageView_];
-  [likeFaceImageView_ release];
+  
+  likeFaceButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  [likeFaceButton_ setImage:[UIImage imageNamed:@"small_like_icon"] forState:UIControlStateNormal];
+  [likeFaceButton_ sizeToFit];
+  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 8,
+                                     CGRectGetMinY(numLikesLabel_.frame) - 3,
+                                     CGRectGetWidth(likeFaceButton_.frame) + 12,
+                                     CGRectGetHeight(likeFaceButton_.frame) + 11);
+  [likeFaceButton_ addTarget:self action:@selector(showLikesPane) forControlEvents:UIControlEventTouchUpInside];
+  [mainCommentContainer_ addSubview:likeFaceButton_];
 
   numLikesLabel_.hidden = (numLikes == 0);
-  likeFaceImageView_.hidden = (numLikes == 0);
+  likeFaceButton_.hidden = (numLikes == 0);
 
   [self addUserGradientBackground];
   [self setMainCommentContainerFrame:mainCommentFrame];
