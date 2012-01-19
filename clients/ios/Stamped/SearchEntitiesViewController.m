@@ -663,7 +663,11 @@ typedef enum {
         [results removeObject:newResult];
     }
   }
-  self.resultsArray = [self.resultsArray arrayByAddingObjectsFromArray:results];
+  if (self.resultsArray)
+    self.resultsArray = [self.resultsArray arrayByAddingObjectsFromArray:results];
+  else
+    self.resultsArray = objects;
+
   [self reloadTableData];
   self.currentRequest = nil;
 }
