@@ -22,14 +22,12 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
     
     def check_inbox(self, doc):
         user_id = doc['_id']
-        ref_ids = doc['ref_ids']
+        ref_ids = set(doc['ref_ids'])
         
         friend_ids = get_friend_ids(self.db, user_id)
         friend_ids.append(user_id)
         
-        stamp_ids   = get_stamp_ids_from_user_ids(self.db['stamps'], friend_ids)
-        #deleted_ids = get_stamp_ids_from_user_ids(self.db['deletedstamps'], friend_ids)
-        #stamp_ids.extend(deleted_ids)
+        stamp_ids = set(get_stamp_ids_from_user_ids(self.db['stamps'], friend_ids))
         
         def correct(error):
             if self.options.noop:
@@ -43,14 +41,17 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
         
         # TODO: check deleted stamps if numbers don't match up
         
+        """
         if len(ref_ids) < len(stamp_ids):
-            return correct(IntegrityError("inboxstamps integrity error: %s" % {
+            raise IntegrityError("inboxstamps integrity error: %s" % {
                 'user_id' : user_id, 
                 'actual #stamps'   : len(ref_ids), 
                 'expected #stamps' : len(stamp_ids), 
-            }))
+            })
+        """
         
         invalid_stamp_ids = []
+        update = False
         
         for stamp_id in ref_ids:
             if stamp_id not in stamp_ids:
@@ -64,18 +65,30 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
                 missing_stamp_ids.append(stamp_id)
         
         if len(invalid_stamp_ids) > 0:
-            correct(IntegrityError("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
+            update = True
+            logs.warn("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
                 len(invalid_stamp_ids), {
                 'user_id'   : user_id, 
                 'stamp_ids' : invalid_stamp_ids, 
-            })))
+            }))
         
         if len(missing_stamp_ids) > 0:
-            correct(IntegrityError("inboxstamps integrity error: inbox missing %d stamps; %s" % (
+            update = True
+            logs.warn("inboxstamps integrity error: inbox missing %d stamps; %s" % (
                 len(missing_stamp_ids), {
                 'user_id'   : user_id, 
                 'stamp_ids' : missing_stamp_ids, 
-            })))
+            }))
+        
+        if update and not self.options.noop:
+            for stamp_id in invalid_stamp_ids:
+                ref_ids.remove(stamp_id)
+            
+            for stamp_id in missing_stamp_ids:
+                ref_ids.add(stamp_id)
+            
+            doc['ref_ids'] = ref_ids
+            self.db['inboxstamps'].save(doc)
 
 checks = [
     InboxStampsIntegrityCheck, 
