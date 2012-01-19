@@ -13,59 +13,97 @@ from optparse           import OptionParser
 from pprint             import pprint
 from functools          import wraps
 
+# Index collections
+#   inboxstamps
+#   creditgivers
+# Object stats
+# Object references
+# Object validation
+# Data enrichment
+
 __integrity_checks = []
 
 class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
 
-def integrity_check(f, max_retries=0, retry_delay=0.5):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        retries = 0
+def integrity_check(max_retries=5, retry_delay=0.5):
+    def decorating_function(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            noop    = args[0].noop
+            retries = 0
+            
+            while True:
+                try:
+                    args[0].noop = (retries < max_retries)
+                    retval = func(*args, **kwargs)
+                    return retval
+                except Exception, e:
+                    retries += 1
+                    
+                    if retries > max_retries:
+                        raise
+                    
+                    time.sleep(retry_delay)
+                finally:
+                    args[0].noop = noop
         
-        while True:
-            try:
-                return f(*args, **kwargs)
-            except Exception, e:
-                retries += 1
-                
-                if retries > max_retries:
-                    raise
-                
-                time.sleep(retry_delay)
+        __integrity_checks.append(wrapper)
+        return wrapper
     
-    __integrity_checks.append(wrapper)
-    return wrapper
-def sample(f, ratio):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if random.random() < ratio:
-            f(*args, **kwargs)
+    if type(max_retries) == type(decorating_function):
+        return decorating_function(max_retries)
     
-    return wrapper
+    return decorating_function
+
+def sample(ratio):
+    def decorating_function(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if random.random() < ratio:
+                func(*args, **kwargs)
+        
+        return wrapper
+    return decorating_function
+
+def get_friend_ids(db, user_id):
+    friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
+    
+    if friend_ids is not None:
+        return friend_ids['ref_ids']
+    else:
+        return []
+
+def get_stamp_ids_from_user_ids(db, user_ids):
+    if not isinstance(user_ids, (list, tuple)):
+        user_ids = [ user_ids ]
+    
+    if 1 == len(user_ids):
+        query = user_ids[0]
+    else:
+        query = { '$in' : user_ids }
+    
+    return map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
 
 @integrity_check
-def check_inboxstamps(api, db, options):
+def check_inboxstamps(options, api, db):
+    @sample(options.sampleSetRatio)
     def check(doc):
         user_id = doc['_id']
         ref_ids = doc['ref_ids']
         
-        friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
-        if friend_ids is not None:
-            friend_ids = friend_ids['ref_ids']
-        else:
-            friend_ids = []
-        
+        friend_ids = get_friend_ids(db, user_id)
         friend_ids.append(user_id)
         
-        stamp_ids  = map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 }))
+        stamp_ids = get_stamp_ids_from_user_ids(db, friend_ids)
         
         def correct(error):
             if options.noop:
                 raise error
             
             logs.warn('RESOLVING: %s' % str(error))
+            
             doc['ref_ids'] = stamp_ids
             db['inboxstamps'].save(doc)
         
@@ -97,15 +135,15 @@ def parseCommandLine():
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (run read-only)")
     
-    parser.add_option("-s", "--sampleSize", default=None, type="int", 
+    parser.add_option("-s", "--sampleSetSize", default=None, type="int", 
         action="store", help="sample size as a percentage (e.g., 5 for 5%)")
     
     (options, args) = parser.parse_args()
     
-    if options.sampleSize is None:
-        options.sampleSize = 1.0
+    if options.sampleSetSize is None:
+        options.sampleSetRatio = 1.0
     else:
-        options.sampleSize = options.sampleSize / 100.0
+        options.sampleSetRatio = options.sampleSetSize / 100.0
     
     if options.db:
         utils.init_db_config(options.db)
@@ -118,7 +156,7 @@ def main():
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
     
-    check_inboxstamps(api, db, options)
+    check_inboxstamps(options, api, db)
 
 if __name__ == '__main__':
     main()
