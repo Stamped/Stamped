@@ -6,8 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
-import time
+import logs, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
@@ -57,7 +56,7 @@ def check_inboxstamps(api, db, options):
         
         stamp_ids  = set(map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 })))
         
-        def correct(error)
+        def correct(error):
             if options.noop:
                 raise error
             
