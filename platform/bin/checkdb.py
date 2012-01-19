@@ -78,12 +78,14 @@ class AIntegrityCheck(object):
                     try:
                         self.options.noop = (retries < max_retries) or noop
                         func(obj)
+                        break
                     except Exception, e:
                         retries += 1
                         
                         if retries > max_retries:
                             prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
                             logs.error("%s: %s" % (prefix, str(e)))
+                            break
                         
                         time.sleep(retry_delay)
                         retry_delay *= 2
