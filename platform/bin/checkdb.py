@@ -57,15 +57,26 @@ def integrity_check(max_retries=5, retry_delay=0.5):
     
     return decorating_function
 
-def sample(ratio):
-    def decorating_function(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            if random.random() < ratio:
-                func(*args, **kwargs)
+def sample(iterable, ratio, func, print_progress=True, progress_step=5):
+    count = 0
+    index = 0
+    
+    try:
+        count = len(iterable)
+    except:
+        try:
+            count = iterable.count()
+        except:
+            count = utils.count(iterable)
+    
+    for obj in iterable:
+        if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
+            utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
         
-        return wrapper
-    return decorating_function
+        if random.random() < ratio:
+            func(obj)
+        
+        index += 1
 
 def get_friend_ids(db, user_id):
     friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
@@ -75,7 +86,7 @@ def get_friend_ids(db, user_id):
     else:
         return []
 
-def get_stamp_ids_from_user_ids(db, user_ids):
+def get_stamp_ids_from_user_ids(collection, user_ids):
     if not isinstance(user_ids, (list, tuple)):
         user_ids = [ user_ids ]
     
@@ -84,19 +95,22 @@ def get_stamp_ids_from_user_ids(db, user_ids):
     else:
         query = { '$in' : user_ids }
     
-    return map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
+    return map(lambda o: str(o['_id']), collection.find({ 'user.user_id' : query }, { '_id' : 1 }))
 
 @integrity_check
 def check_inboxstamps(options, api, db):
-    @sample(options.sampleSetRatio)
-    def check(doc):
+    """ Ensure the integrity of inbox stamps """
+    
+    def check_inbox(doc):
         user_id = doc['_id']
         ref_ids = doc['ref_ids']
         
         friend_ids = get_friend_ids(db, user_id)
         friend_ids.append(user_id)
         
-        stamp_ids = get_stamp_ids_from_user_ids(db, friend_ids)
+        stamp_ids   = get_stamp_ids_from_user_ids(db['stamps'], friend_ids)
+        deleted_ids = get_stamp_ids_from_user_ids(db['deletedstamps'], friend_ids)
+        stamp_ids.extend(deleted_ids)
         
         def correct(error):
             if options.noop:
@@ -121,8 +135,7 @@ def check_inboxstamps(options, api, db):
                     'stamp_id' : ref_id
                 }))
     
-    for doc in db['inboxstamps'].find():
-        check(doc)
+    sample(db['inboxstamps'].find(), options.sampleSetRatio, check_inbox)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
