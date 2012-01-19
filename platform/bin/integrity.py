@@ -87,7 +87,7 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
             for stamp_id in missing_stamp_ids:
                 ref_ids.add(stamp_id)
             
-            doc['ref_ids'] = ref_ids
+            doc['ref_ids'] = list(ref_ids)
             self.db['inboxstamps'].save(doc)
 
 checks = [
