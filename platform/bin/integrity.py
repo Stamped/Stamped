@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logs, utils
+import bson, logs, utils
+
 from checkdb import *
 
 class InboxStampsIntegrityCheck(AIntegrityCheck):

@@ -46,6 +46,8 @@ def get_stamp_ids_from_user_ids(collection, user_ids):
 
 class AIntegrityCheck(object):
     
+    __checks = []
+    
     def __init__(self, api, db, options):
         self.api = api
         self.db  = db
@@ -53,7 +55,11 @@ class AIntegrityCheck(object):
     
     @staticmethod
     def register(cls):
-        global __checks
+        AIntegrityCheck.__checks.append(cls)
+    
+    @staticmethod
+    def getRegisteredChecks():
+        return AIntegrityCheck.__checks
     
     def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
         progress_count = 100 / progress_step
@@ -132,7 +138,13 @@ def main():
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
     
-    InboxStampsIntegrityCheck(api, db, options).run()
+    checks = AIntegrityCheck.getRegisteredChecks()
+    for check_cls in checks:
+        check = check_cks(api, db, options)
+        try:
+            check.run()
+        except:
+            utils.printException()
 
 if __name__ == '__main__':
     main()
