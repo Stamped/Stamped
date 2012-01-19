@@ -52,7 +52,9 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
         
         for stamp_id in ref_ids:
             if stamp_id not in stamp_ids:
-                ret = db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(stamp_id)})
+                ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(stamp_id)})
+                from pprint import pprint
+                pprint(ret)
                 
                 return correct(IntegrityError("inboxstamps integrity error: %s" % {
                     'user_id'  : user_id, 
