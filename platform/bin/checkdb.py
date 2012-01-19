@@ -21,6 +21,8 @@ from utils              import abstract
 # Object validation
 # Data enrichment
 
+__checks = []
+
 class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
@@ -46,8 +48,6 @@ def get_stamp_ids_from_user_ids(collection, user_ids):
 
 class AIntegrityCheck(object):
     
-    __checks = []
-    
     def __init__(self, api, db, options):
         self.api = api
         self.db  = db
@@ -55,11 +55,12 @@ class AIntegrityCheck(object):
     
     @staticmethod
     def register(cls):
-        AIntegrityCheck.__checks.append(cls)
+        global __checks
+        __checks.append(cls)
     
     @staticmethod
     def getRegisteredChecks():
-        return AIntegrityCheck.__checks
+        return __checks
     
     def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
         progress_count = 100 / progress_step
