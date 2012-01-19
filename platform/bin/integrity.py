@@ -43,7 +43,7 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
         
         # TODO: check deleted stamps if numbers don't match up
         
-        if len(ref_ids) > len(stamp_ids):
+        if len(ref_ids) < len(stamp_ids):
             return correct(IntegrityError("inboxstamps integrity error: %s" % {
                     'user_id' : user_id, 
                     'actual #stamps'   : len(ref_ids), 
