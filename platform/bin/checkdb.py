@@ -51,10 +51,14 @@ def check_inboxstamps(api, db, options):
         user_id = doc['_id']
         ref_ids = doc['ref_ids']
         
-        friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })['ref_ids']
+        friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
+        if friend_ids is None:
+            utils.log(user_id)
+        
+        friend_ids = friend_ids['ref_ids']
         friend_ids.append(user_id)
         
-        stamp_ids  = set(map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 })))
+        stamp_ids  = map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 }))
         
         def correct(error):
             if options.noop:
