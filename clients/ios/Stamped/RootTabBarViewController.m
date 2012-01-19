@@ -389,9 +389,9 @@
 
 - (void)applicationDidBecomeActive:(NSNotification*)notification {
   // Force the view to load.
-  [self.selectedViewController viewWillAppear:NO];
-  [self.selectedViewController view];
-  [self.selectedViewController viewDidAppear:NO];
+//  [self.selectedViewController viewWillAppear:NO];
+//  [self.selectedViewController view];
+//  [self.selectedViewController viewDidAppear:NO];
 }
 
 #pragma mark - AccountManagerDelegate Methods.
