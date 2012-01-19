@@ -52,10 +52,11 @@ def check_inboxstamps(api, db, options):
         ref_ids = doc['ref_ids']
         
         friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
-        if friend_ids is None:
-            utils.log(user_id)
+        if friend_ids is not None:
+            friend_ids = friend_ids['ref_ids']
+        else:
+            friend_ids = []
         
-        friend_ids = friend_ids['ref_ids']
         friend_ids.append(user_id)
         
         stamp_ids  = map(lambda o: str(o['_id']), db['stamps'].find({ 'user.user_id' : { '$in' : friend_ids } }, { '_id' : 1 }))
