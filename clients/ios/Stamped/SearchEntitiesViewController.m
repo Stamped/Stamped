@@ -265,12 +265,14 @@ typedef enum {
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow animated:animated];
+
   [self.navigationController setNavigationBarHidden:YES animated:animated];
 
   RKClient* client = [RKClient sharedClient];
-  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {
     self.notConnectedImageView.alpha = 0.0;
-  else {
+  } else {
     [self resetState];
     self.notConnectedImageView.alpha = 1.0;
   }
@@ -306,17 +308,10 @@ typedef enum {
   if (self.searchField.text.length == 0)
     tooltipImageView_.alpha = 0.0;
 
-  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
-  loading_ = NO;
   if (self.navigationController.viewControllers.count > 1)
     [self.navigationController setNavigationBarHidden:NO animated:animated];
 
   [self.locationManager stopUpdatingLocation];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
-  [self reloadTableData];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -468,7 +463,7 @@ typedef enum {
   if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
     return self.addStampCell;
   
-  if (indexPath.row == 0 && currentResultType_ != ResultTypeFast && loading_)
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ != ResultTypeFast && loading_)
     return self.searchingIndicatorCell;
   
   static NSString* CellIdentifier = @"ResultCell";
@@ -477,13 +472,8 @@ typedef enum {
   if (cell == nil) {
     cell = [[[SearchEntitiesTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  
-  NSUInteger offset = 0;
-  if (loading_)
-    offset = 1;
 
-  NSUInteger index = indexPath.row - offset;
-  [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:index]];
+  [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row]];
   
   return cell;
 }
@@ -564,9 +554,9 @@ typedef enum {
       break;
   }
 
-  loading_ = YES;
-  self.resultsArray = nil;
+  self.loading = YES;
   [self reloadTableData];
+
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
@@ -591,7 +581,7 @@ typedef enum {
 - (void)sendSearchNearbyRequest {
   currentResultType_ = ResultTypeLocal;
   loadingIndicatorLabel_.text = @"Loading popular results nearby";
-  loading_ = YES;
+  self.loading = YES;
   self.resultsArray = nil;
   [self reloadTableData];
   
@@ -617,7 +607,6 @@ typedef enum {
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  loading_ = NO;
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
 
@@ -662,16 +651,22 @@ typedef enum {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  loading_ = NO;
-
-  self.resultsArray = objects;
-
+  self.loading = NO;
+  NSMutableArray* results = [NSMutableArray arrayWithArray:objects];
+  for (SearchResult* result in resultsArray_) {
+    NSString* entityID = result.searchID.length > 0 ? result.searchID : result.entityID;
+    for (SearchResult* newResult in objects) {
+      if ([newResult.searchID isEqualToString:entityID] || [newResult.entityID isEqualToString:entityID])
+        [results removeObject:newResult];
+    }
+  }
+  self.resultsArray = [self.resultsArray arrayByAddingObjectsFromArray:results];
   [self reloadTableData];
   self.currentRequest = nil;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  loading_ = NO;
+  self.loading = NO;
   self.currentRequest = nil;
   self.resultsArray = nil;
   [self reloadTableData];
@@ -766,21 +761,23 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   if (currentResultType_ == ResultTypeFast) {
-    self.searchField.text = [(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row] title];
+    SearchResult* result = [resultsArray_ objectAtIndex:indexPath.row];
+    self.searchField.text = result.title;
     self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
+    self.resultsArray = [NSArray arrayWithObject:result];
     [self sendSearchRequest];
     return;
   }
   
   SearchResult* result = nil;
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_) {
+  BOOL fullOrLocal = (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal);
+  BOOL lastCell = indexPath.row == resultsArray_.count;
+  if (currentResultType_ == ResultTypeFast || (fullOrLocal && !lastCell)) {
+    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
+  } else if (!loading_ && lastCell && currentResultType_ == ResultTypeFull) {
     result = [[[SearchResult alloc] init] autorelease];
     result.title = self.searchField.text.capitalizedString;
-  } else if (currentResultType_ == ResultTypeFast) {
-    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
-  } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {
-    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
-  } else if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_) {
+  } else if (loading_ && lastCell && fullOrLocal) {
     return;
   }
 
@@ -802,10 +799,16 @@ typedef enum {
   }
 }
 
+- (void)setLoading:(BOOL)loading {
+  loading_ = loading;
+  
+}
+
 - (void)resetState {
   self.currentResultType = ResultTypeFast;
   self.currentSearchFilter = SearchFilterNone;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.loading = NO;
   self.currentRequest = nil;
   self.searchField.text = nil;
   self.searchField.enabled = YES;
