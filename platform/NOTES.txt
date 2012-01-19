@@ -1,6 +1,5 @@
 
 platform:
-    * ensure async tasks are logged and accessible from logger
     * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
     * integrity checking daemon
@@ -111,6 +110,7 @@ OLD:
         * local / synchronous fallback if async message broker is unavailable
     * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
     * add cache expires control to memcached_function
+    * ensure async tasks are logged and accessible from logger
     
     34.026401,-118.38947899
 
