@@ -60,6 +60,7 @@ class AIntegrityCheck(object):
     
     @staticmethod
     def getRegisteredChecks():
+        global __checks
         return __checks
     
     def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
