@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import utils
+import logs
 
 from celery.task import task
 
@@ -31,51 +32,79 @@ def add(x, y):
     
     return x + y
 
+def invoke(*args, **kwargs):
+    """ 
+        wrapper to invoke a stamped api function in an asynchronous context 
+        which adds logging and exception handling.
+    """
+    
+    try:
+        stampedAPI = getStampedAPI()
+        
+        logs.begin(
+            addLog=stampedAPI._logsDB.addLog, 
+            saveLog=stampedAPI._logsDB.saveLog,
+            saveStat=stampedAPI._statsDB.addStat,
+            nodeName=stampedAPI.node_name,
+        )
+        
+        func = "%sAsync" % utils.getFuncName(1)
+        logs.info("%s %s %s" % (func, args, kwargs))
+        
+        getattr(stampedAPI, func)(*args, **kwargs)
+    except Exception as e:
+        logs.error(str(e))
+    finally:
+        try:
+            logs.save()
+        except:
+            pass
+
 @task(ignore_result=True)
 def addStamp(*args, **kwargs):
-    getStampedAPI().addStampAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def addResizedStampImages(*args, **kwargs):
-    getStampedAPI().addResizedStampImagesAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def customizeStamp(*args, **kwargs):
-    getStampedAPI().customizeStampAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def updateProfileImage(*args, **kwargs):
-    getStampedAPI().updateProfileImageAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def addAccount(*args, **kwargs):
-    getStampedAPI().addAccountAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def updateAccountSettings(*args, **kwargs):
-    getStampedAPI().updateAccountSettingsAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def alertFollowersFromTwitter(*args, **kwargs):
-    getStampedAPI().alertFollowersFromTwitterAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def alertFollowersFromFacebook(*args, **kwargs):
-    getStampedAPI().alertFollowersFromFacebookAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def addFriendship(*args, **kwargs):
-    getStampedAPI().addFriendshipAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def removeFriendship(*args, **kwargs):
-    getStampedAPI().removeFriendshipAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def inviteFriend(*args, **kwargs):
-    getStampedAPI().inviteFriendAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 
 @task(ignore_result=True)
 def addComment(*args, **kwargs):
-    getStampedAPI().addCommentAsync(*args, **kwargs)
+    invoke(*args, **kwargs)
 

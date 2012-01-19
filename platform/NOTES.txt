@@ -12,6 +12,12 @@ web:
     * web deployment script which compiles / optimizes all javascript, ensures assets are up-to-date, etc.
     * take a look at stamped-web repository
 
+data:
+    * import top songs from hypem (http://hypem.com/popular?ax=1)
+    * import top songs from wearehunted (http://wearehunted.com/a/#/emerging/)
+    * import top songs / albums from Pitchfork
+    * see: https://github.com/jgallen23/playlist-import-example
+
 Bieber:
     * limit activity notifications to last N or so
     * collapse adjacent activity items into each other
@@ -191,50 +197,9 @@ StampedAPI:
     * reusable cursor pattern for generic retrieval of unbounded lists (e.g., collections, friends, comments, credit, etc.)
         * replace current slicing strategy
 
-note: if a native python dependency fails to compile, prefix it with ARCHFLAGS="-arch i386 -arch x86_64"
-    * e.g., ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
-python >= 2.5 or 2.6 (untested on more recent versions)
-gcc / g++ - you'll have to install xcode and the apple developer tools to install these
-homebrew - package manager for mac os x (optional but recommended to install other dependencies)
-virtualenv
-pip
-libevent
-mongodb (>= 2.0)
-brew install memcached libmemcached
 
-python packages (install with pip):
-python-dev
-fabric
-BeautifulSoup
-boto
-xlrd
-pymongo
-flask
-gunicorn
-feedparser
-greenlet
-gevent
-pil
-lxml
-django
-whisper
-celery
-httplib2
-pylibmc
-APNSWrapper
-boto
-ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0 (note: we've had problems with more recent versions of pylibmc)
-
-optional for getting up and running but required for full setup:
-rabbitmq
-Java JRE
-nginx
+mongo stamped --eval "db.dropDatabase()"
 
 # Mac OS X
-brew install memcached libmemcached
 ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0
-
-apt-get install memcached
-wget http://launchpad.net/libmemcached/1.0/1.0.2/+download/libmemcached-1.0.2.tar.gz && make && make install
-pip install pylibmc
 

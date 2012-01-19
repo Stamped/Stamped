@@ -288,13 +288,6 @@
                 
                 {% if entity.category == "other" and entity.subcategory == "app" %}
                 <div class="capsule app">
-                    {% if entity.image %}
-                    <div class="feature">
-                        <a href="{{ entity.itunes_url }}">
-                            <img src="{{ entity.image }}" />
-                        </a>
-                    </div> <!-- /feature -->
-                    {% endif %}
                     <div class="what">
                         
                         <h3 class="name">{{ entity.title }}</h3>

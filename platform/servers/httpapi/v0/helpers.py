@@ -9,13 +9,14 @@ __license__   = "TODO"
 import stamped
 import os, json, utils, random, time, hashlib, logs
 
-from errors import *
-from HTTPSchemas import *
-from api.MongoStampedAPI import MongoStampedAPI
-from api.MongoStampedAuth import MongoStampedAuth
-from django.http import HttpResponse
-from django.utils.functional import wraps
-from django.views.decorators.http import require_http_methods
+from errors                         import *
+from HTTPSchemas                    import *
+from api.MongoStampedAPI            import MongoStampedAPI
+from api.MongoStampedAuth           import MongoStampedAuth
+
+from django.views.decorators.http   import require_http_methods
+from django.utils.functional        import wraps
+from django.http                    import HttpResponse
 
 t1 = time.time()
 

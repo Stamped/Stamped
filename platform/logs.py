@@ -105,7 +105,7 @@ def begin(**kwargs):
     saveStat    = kwargs.pop('saveStat', None)
     requestData = kwargs.pop('requestData', None)
     nodeName    = kwargs.pop('nodeName', None)
-
+    
     refresh(format='object')
     
     localData.saveLog  = saveLog
@@ -189,18 +189,18 @@ def save():
     if localData.format != 'object':
         # Skip if not an object
         return
-
+    
     localData.log['finish'] = datetime.datetime.utcnow()
-
+    
     try:
         if localData.saveLog == None:
             raise
         localData.saveLog(localData.log)
     except:
         pprint.pprint(localData.log)
-
+    
     try:
-        if localData.saveStat == None:
+        if localData.saveStat is None:
             raise
         localData.saveStat(localData.log)
     except:
