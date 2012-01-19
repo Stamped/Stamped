@@ -2194,11 +2194,7 @@ class StampedAPI(AStampedAPI):
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
         
-        # Get users
-        ### TODO: Return user ids instead so there's no limit? Or allow paging?
-        users = self._userDB.lookupUsers(userIds, None, limit=100)
-        
-        return users
+        return userIds
     
     """
      #####                                                                  

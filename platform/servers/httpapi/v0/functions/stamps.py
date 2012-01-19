@@ -114,11 +114,8 @@ def likesShow(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPStampId(), request)
 
-    users       = stampedAPI.getLikes(authUserId, schema.stamp_id)
-
-    output = []
-    for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+    userIds     = stampedAPI.getLikes(authUserId, schema.stamp_id)
+    output      = { 'user_ids': userIds }
     
     return transformOutput(output)
 

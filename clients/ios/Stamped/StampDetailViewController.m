@@ -978,7 +978,7 @@ typedef enum {
       canTweet = YES;
     }
     if (buttonIndex == 0) {  // Copy link...
-      [UIPasteboard generalPasteboard].URL = [NSURL URLWithString:stamp_.URL];
+      [UIPasteboard generalPasteboard].string = stamp_.URL;
     } else if (buttonIndex == 1 && canTweet) {  // Twitter or cancel depending...
       [self showTweetViewController];
     }
