@@ -12,14 +12,16 @@
 #import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
 #import "STLoadingMoreTableViewCell.h"
+#import "Stamp.h"
 #import "Util.h"
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kFollowerIDsPath = @"/friendships/followers.json";
+static NSString* const kLikesIDsPath = @"/stamps/likes/show.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @interface PeopleListViewController()
-- (void)loadRelationshipsFromNetwork;
+- (void)loadUserIDsFromNetwork;
 - (void)loadUserDataFromNetwork;
 
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
@@ -63,12 +65,20 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [self loadRelationshipsFromNetwork];
+  if (sourceType_ == PeopleListSourceTypeCredits)
+    self.peopleArray = [NSMutableArray arrayWithArray:stamp_.credits.allObjects];
+  else
+    [self loadUserIDsFromNetwork];
+
   NSString* title = nil;
   if (sourceType_ == PeopleListSourceTypeFollowers)
     title = @"Followers";
   else if (sourceType_ == PeopleListSourceTypeFriends)
     title = @"Following";
+  else if (sourceType_ == PeopleListSourceTypeCredits)
+    title = @"Credits";
+  else if (sourceType_ == PeopleListSourceTypeLikes)
+    title = @"Likes";
 
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:title
                                                                  style:UIBarButtonItemStyleBordered
@@ -223,10 +233,27 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [objectLoader send];
 }
 
-- (void)loadRelationshipsFromNetwork {
-  NSString* path = sourceType_ == PeopleListSourceTypeFollowers ? kFollowerIDsPath : kFriendIDsPath;
+- (void)loadUserIDsFromNetwork {
+  NSString* path = nil;
+  switch (sourceType_) {
+    case PeopleListSourceTypeFriends:
+      path = kFriendIDsPath;
+      break;
+    case PeopleListSourceTypeFollowers:
+      path = kFollowerIDsPath;
+      break;
+    case PeopleListSourceTypeLikes:
+      path = kLikesIDsPath;
+      break;
+    default:
+      break;
+  }
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:path delegate:self];
-  request.params = [NSDictionary dictionaryWithObject:user_.userID forKey:@"user_id"];
+  if (user_ && (sourceType_ == PeopleListSourceTypeFriends || sourceType_ == PeopleListSourceTypeFollowers))
+    request.params = [NSDictionary dictionaryWithObject:user_.userID forKey:@"user_id"];
+  else if (stamp_ && sourceType_ == PeopleListSourceTypeLikes)
+    request.params = [NSDictionary dictionaryWithObject:stamp_.stampID forKey:@"stamp_id"];
+
   [request send];
 }
 

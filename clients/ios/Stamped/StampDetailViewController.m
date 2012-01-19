@@ -18,6 +18,7 @@
 #import "Entity.h"
 #import "Favorite.h"
 #import "Notifications.h"
+#import "PeopleListViewController.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "User.h"
@@ -564,7 +565,8 @@ typedef enum {
   if (!stamp_.credits.count)
     return;
 
-  User* creditedUser = [stamp_.credits anyObject];
+  NSArray* creditedUsers = stamp_.credits.allObjects;
+  User* creditedUser = [creditedUsers objectAtIndex:0];
   CALayer* firstStampLayer = [[CALayer alloc] init];
   firstStampLayer.contents = (id)[creditedUser stampImageWithSize:StampImageSize12].CGImage;
   firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentContainer_.frame) - 29, 12, 12);
@@ -588,30 +590,26 @@ typedef enum {
   [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
   CFRelease(font);
   creditLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
-  if (stamp_.credits.count == 1) {
+  if (creditedUsers.count <= 2) {
     creditLabel.text = [NSString stringWithFormat:@"Credit to %@", creditedUser.screenName];
     [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
                     withRange:[creditLabel.text rangeOfString:creditedUser.screenName
                                                       options:NSBackwardsSearch]];
-  } else {
-    NSString* others = nil;
-    if (stamp_.credits.count - 1 == 1)
-      others = @"1 other";
-    else
-      others = [NSString stringWithFormat:@"%d others", stamp_.credits.count - 1];
-    creditLabel.text = [NSString stringWithFormat:@"Credit to %@ and %@", creditedUser.screenName, others];
-    [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
-                    withRange:[creditLabel.text rangeOfString:creditedUser.screenName
-                                                      options:NSBackwardsSearch]];
-    NSMutableArray* otherUsers = [NSMutableArray array];
-    for (User* user in stamp_.credits) {
-      if (user == creditedUser)
-        continue;
-      
-      [otherUsers addObject:user.userID];
+    if (creditedUsers.count == 2) {
+      User* secondUser = [creditedUsers objectAtIndex:1];
+      creditLabel.text = [creditLabel.text stringByAppendingFormat:@" and %@", secondUser.screenName];
+      [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
+                      withRange:[creditLabel.text rangeOfString:creditedUser.screenName
+                                                        options:NSBackwardsSearch]];
+      [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", secondUser.userID]]
+                      withRange:[creditLabel.text rangeOfString:secondUser.screenName
+                                                        options:NSBackwardsSearch]];
     }
-    [creditLabel addLinkToURL:[NSURL URLWithString:[otherUsers componentsJoinedByString:@","]]
-                    withRange:[creditLabel.text rangeOfString:others options:NSBackwardsSearch]];
+  } else {
+    NSString* people = [NSString stringWithFormat:@"%d people", creditedUsers.count];
+    creditLabel.text = [NSString stringWithFormat:@"Credit to %@", people];
+    [creditLabel addLinkToURL:[NSURL URLWithString:@"credit"]
+                    withRange:[creditLabel.text rangeOfString:people options:NSBackwardsSearch]];
   }
   [creditLabel sizeToFit];
   creditLabel.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
@@ -914,6 +912,11 @@ typedef enum {
   } else if (urlString.length == 24) {
     NSString* userID = url.absoluteString;
     user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+  } else if ([urlString isEqualToString:@"credit"]) {
+    PeopleListViewController* vc = [[PeopleListViewController alloc] initWithSource:PeopleListSourceTypeCredits];
+    vc.stamp = stamp_;
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
   }
   if (!user)
     return;
