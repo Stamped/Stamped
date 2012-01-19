@@ -30,6 +30,7 @@
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
 - (void)pushNotificationReceived:(NSNotification*)notification;
+- (void)applicationDidBecomeActive:(NSNotification*)notification;
 - (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
@@ -99,6 +100,10 @@
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(reloadPanes:)
                                                name:UIApplicationSignificantTimeChangeNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(applicationDidBecomeActive:)
+                                               name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(userLoggedOut:)
@@ -227,7 +232,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
+  [super viewDidAppear:animated];
   [self.selectedViewController viewDidAppear:animated];
 
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstStamp"]) {
@@ -297,8 +302,6 @@
                        animations:^{tooltipImageView_.alpha = 1.0;}
                        completion:nil];
   }
-    
-  
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -382,6 +385,13 @@
   }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
   [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification*)notification {
+  // Force the view to load.
+  [self.selectedViewController viewWillAppear:NO];
+  [self.selectedViewController view];
+  [self.selectedViewController viewDidAppear:NO];
 }
 
 #pragma mark - AccountManagerDelegate Methods.
