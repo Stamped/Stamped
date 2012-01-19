@@ -45,10 +45,10 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
         
         if len(ref_ids) < len(stamp_ids):
             return correct(IntegrityError("inboxstamps integrity error: %s" % {
-                    'user_id' : user_id, 
-                    'actual #stamps'   : len(ref_ids), 
-                    'expected #stamps' : len(stamp_ids), 
-                }))
+                'user_id' : user_id, 
+                'actual #stamps'   : len(ref_ids), 
+                'expected #stamps' : len(stamp_ids), 
+            }))
         
         invalid_stamp_ids = []
         
@@ -58,11 +58,23 @@ class InboxStampsIntegrityCheck(AIntegrityCheck):
                 if ret is None:
                     invalid_stamp_ids.append(stamp_id)
         
+        missing_stamp_ids = []
+        for stamp_id in stamp_ids:
+            if stamp_id not in ref_ids:
+                missing_stamp_ids.append(stamp_id)
+        
         if len(invalid_stamp_ids) > 0:
-            return correct(IntegrityError("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
+            correct(IntegrityError("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
                 len(invalid_stamp_ids), {
                 'user_id'   : user_id, 
                 'stamp_ids' : invalid_stamp_ids, 
+            })))
+        
+        if len(missing_stamp_ids) > 0:
+            correct(IntegrityError("inboxstamps integrity error: inbox missing %d stamps; %s" % (
+                len(missing_stamp_ids), {
+                'user_id'   : user_id, 
+                'stamp_ids' : missing_stamp_ids, 
             })))
 
 checks = [
