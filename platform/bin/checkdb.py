@@ -11,7 +11,7 @@ import logs, random, time, utils
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
 from pprint             import pprint
-from functools          import wraps
+from utils              import abstract
 
 # Index collections
 #   inboxstamps
@@ -21,62 +21,9 @@ from functools          import wraps
 # Object validation
 # Data enrichment
 
-__integrity_checks = []
-
 class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
-
-def integrity_check(max_retries=5, retry_delay=0.5):
-    def decorating_function(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            noop    = args[0].noop
-            retries = 0
-            
-            while True:
-                try:
-                    args[0].noop = (retries < max_retries)
-                    retval = func(*args, **kwargs)
-                    return retval
-                except Exception, e:
-                    retries += 1
-                    
-                    if retries > max_retries:
-                        raise
-                    
-                    time.sleep(retry_delay)
-                finally:
-                    args[0].noop = noop
-        
-        __integrity_checks.append(wrapper)
-        return wrapper
-    
-    if type(max_retries) == type(decorating_function):
-        return decorating_function(max_retries)
-    
-    return decorating_function
-
-def sample(iterable, ratio, func, print_progress=True, progress_step=5):
-    count = 0
-    index = 0
-    
-    try:
-        count = len(iterable)
-    except:
-        try:
-            count = iterable.count()
-        except:
-            count = utils.count(iterable)
-    
-    for obj in iterable:
-        if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
-            utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
-        
-        if random.random() < ratio:
-            func(obj)
-        
-        index += 1
 
 def get_friend_ids(db, user_id):
     friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
@@ -97,29 +44,87 @@ def get_stamp_ids_from_user_ids(collection, user_ids):
     
     return map(lambda o: str(o['_id']), collection.find({ 'user.user_id' : query }, { '_id' : 1 }))
 
-@integrity_check
-def check_inboxstamps(options, api, db):
+class AIntegrityCheck(object):
+    
+    def __init__(self, api, db, options):
+        self.api = api
+        self.db  = db
+        self.options = options
+    
+    def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
+        progress_count = 100 / progress_step
+        count = 0
+        index = 0
+        
+        try:
+            count = len(iterable)
+        except:
+            try:
+                count = iterable.count()
+            except:
+                count = utils.count(iterable)
+        
+        for obj in iterable:
+            if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
+                utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
+
+            if random.random() < ratio:
+                noop    = self.options.noop
+                retries = 0
+                
+                while True:
+                    try:
+                        self.options.noop = (retries < max_retries) or noop
+                        func(obj)
+                        break
+                    except Exception, e:
+                        retries += 1
+                        
+                        if noop or retries > max_retries:
+                            prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
+                            utils.log("%s: %s" % (prefix, str(e)))
+                            break
+                        
+                        time.sleep(retry_delay)
+                        retry_delay *= 2
+                    finally:
+                        self.options.noop = noop
+            
+            index += 1
+    
+    @abstract
+    def run():
+        pass
+
+class InboxStampsIntegrityCheck(AIntegrityCheck):
     """ Ensure the integrity of inbox stamps """
     
-    def check_inbox(doc):
+    def run(self):
+        self._sample(self.db['inboxstamps'].find(), 
+                     self.options.sampleSetRatio, 
+                     self.check_inbox, 
+                     max_retries=0, 
+                     progress_step=1)
+    
+    def check_inbox(self, doc):
         user_id = doc['_id']
         ref_ids = doc['ref_ids']
         
-        friend_ids = get_friend_ids(db, user_id)
+        friend_ids = get_friend_ids(self.db, user_id)
         friend_ids.append(user_id)
         
-        stamp_ids   = get_stamp_ids_from_user_ids(db['stamps'], friend_ids)
-        deleted_ids = get_stamp_ids_from_user_ids(db['deletedstamps'], friend_ids)
+        stamp_ids   = get_stamp_ids_from_user_ids(self.db['stamps'], friend_ids)
+        deleted_ids = get_stamp_ids_from_user_ids(self.db['deletedstamps'], friend_ids)
         stamp_ids.extend(deleted_ids)
         
         def correct(error):
-            if options.noop:
+            if self.options.noop:
                 raise error
             
             logs.warn('RESOLVING: %s' % str(error))
             
             doc['ref_ids'] = stamp_ids
-            db['inboxstamps'].save(doc)
+            self.db['inboxstamps'].save(doc)
         
         if len(ref_ids) != len(stamp_ids):
             return correct(IntegrityError("inboxstamps integrity error: %s" % {
@@ -134,8 +139,6 @@ def check_inboxstamps(options, api, db):
                     'user_id'  : user_id, 
                     'stamp_id' : ref_id
                 }))
-    
-    sample(db['inboxstamps'].find(), options.sampleSetRatio, check_inbox)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -169,7 +172,7 @@ def main():
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
     
-    check_inboxstamps(options, api, db)
+    InboxStampsIntegrityCheck(api, db, options).run()
 
 if __name__ == '__main__':
     main()
