@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logs, time, utils
+import logs, random, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
