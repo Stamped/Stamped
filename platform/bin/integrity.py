@@ -113,8 +113,8 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         invalid_cmp_ids = []
         missing_cmp_ids = []
         
-        utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
-        utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
+        #utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
+        #utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
         
         for cmp_id in ref_ids:
             if cmp_id not in cmp_ids:
@@ -125,11 +125,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
             if cmp_id not in ref_ids:
                 missing_cmp_ids.append(cmp_id)
         
-        utils.log("%d vs %d" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
-        utils.log(str(ref_ids))
-        utils.log(str(cmp_ids))
-        utils.log(str(invalid_cmp_ids))
-        utils.log(str(missing_cmp_ids))
+        #utils.log("%d vs %d" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
         
         # complain if we found unexpected ids
         if len(invalid_cmp_ids) > 0:
