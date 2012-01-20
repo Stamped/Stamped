@@ -185,7 +185,7 @@ class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
                                                 stat='stats.num_stamps')
     
     def _get_cmp(self, doc_id):
-        return self._strip_ids(db.stamps.find({'user.user_id' : doc_id}, {'_id' : 1}))
+        return self._strip_ids(self.db.stamps.find({'user.user_id' : doc_id}, {'_id' : 1}))
 
 checks = [
     InboxStampsIntegrityCheck, 
