@@ -91,17 +91,20 @@ class AIntegrityCheck(object):
     
     def _strip_ids(self, docs, key='_id'):
         if '.' in key:
-            def extract(o, args):
-                try:
-                    if 0 == len(args):
-                        return o
-                    
-                    return extract(o[args[0]], args[1:])
-                except:
-                    return None
+            def __extract(doc):
+                def _extract(o, args):
+                    try:
+                        if 0 == len(args):
+                            return o
+                        
+                        return extract(o[args[0]], args[1:])
+                    except:
+                        return None
+                
+                s = key.split('.')
+                return _extract(doc, s)
             
-            s = key.split('.')
-            return extract(doc, s)
+            extract = __extract
         else:
             extract = lambda o: str(o[key])
         
