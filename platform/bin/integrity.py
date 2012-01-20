@@ -308,5 +308,6 @@ checks = [
     StampCommentsIntegrityCheck, 
     NumFriendsIntegrityCheck, 
     NumFollowersIntegrityCheck, 
+    NumLikesIntegrityCheck, 
 ]
 
