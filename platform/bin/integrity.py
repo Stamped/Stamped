@@ -28,6 +28,9 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
     def _get_cmp(self, doc_id):
         pass
     
+    def _is_invalid_id(self, doc_id):
+        return True
+    
     def check_doc(self, doc):
         doc_id  = doc['_id']
         ref_ids = set(doc['ref_ids'])
@@ -39,9 +42,7 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
         
         for cmp_id in ref_ids:
             if cmp_id not in cmp_ids:
-                ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
-                
-                if ret is None:
+                if self._is_invalid_id(cmp_id):
                     invalid_cmp_ids.append(cmp_id)
         
         for cmp_id in cmp_ids:
@@ -49,15 +50,15 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                 missing_cmp_ids.append(cmp_id)
         
         if len(invalid_cmp_ids) > 0:
-            self._handle_error("%s integrity error: found %d invalid stamps; %s" % (
-                self._collection, len(invalid_cmp_ids), {
+            self._handle_error("%s integrity error: found %d invalid stamp%s; %s" % (
+                self._collection, "" if 1 == len(invalid_cmp_ids) else "s", len(invalid_cmp_ids), {
                 'doc_id'  : doc_id, 
                 'cmp_ids' : invalid_cmp_ids, 
             }))
         
         if len(missing_cmp_ids) > 0:
-            self._handle_error("%s integrity error: found %d missing stamps; %s" % (
-                self._collection, len(missing_cmp_ids), {
+            self._handle_error("%s integrity error: found %d missing stamp%s; %s" % (
+                self._collection, "" if 1 == len(missing_cmp_ids) else "s", len(missing_cmp_ids), {
                 'doc_id'  : doc_id, 
                 'cmp_ids' : missing_cmp_ids, 
             }))
@@ -73,10 +74,17 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
             self.db[_collection].save(doc)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
-    """ Ensures the integrity of inbox stamps """
+    """
+        Ensures the integrity of the inboxstamps collection, which maps 
+        user_ids to a list of stamp_ids in that user's inbox.
+    """
     
     def __init__(self, api, db, options):
         AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'inboxstamps')
+    
+    def _is_invalid_id(self, doc_id):
+        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
+        return ret is None
     
     def _get_cmp(self, doc_id):
         friend_ids = self._get_friend_ids(doc_id)
@@ -84,8 +92,11 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
         
         return self._get_stamp_ids_from_user_ids(friend_ids)
 
-class UserStatsIntegrityCheck(AIndexCollectionIntegrityCheck):
-    """ Ensures the integrity of creditreceived """
+class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """
+        Ensures the integrity of the creditreceived collection, which maps 
+        user_ids to stamp_ids of stamps for which user has received credit.
+    """
     
     def __init__(self, api, db, options):
         AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'creditreceived')
@@ -93,8 +104,21 @@ class UserStatsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._get_stamp_ids_from_credited_user_id(doc_id)
 
+class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """
+        Ensures the integrity of userfaventities collection, which maps 
+        user_ids to entity_ids that user has favorited.
+    """
+    
+    def __init__(self, api, db, options):
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'userfaventities')
+    
+    def _get_cmp(self, doc_id):
+        return self._strip_ids(self.db['favorites'].find({'user_id': doc_id}, {'entity.entity_id':1}), key='entity.entity_id')
+
 checks = [
     InboxStampsIntegrityCheck, 
-    UserStatsIntegrityCheck, 
+    CreditReceivedIntegrityCheck, 
+    UserFavEntitiesIntegrityCheck, 
 ]
 

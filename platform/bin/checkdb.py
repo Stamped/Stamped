@@ -87,7 +87,7 @@ class AIntegrityCheck(object):
         else:
             return []
     
-    def strip_ids(self, docs):
+    def _strip_ids(self, docs, key='_id'):
         return map(lambda o: str(o['_id']), docs)
     
     def _get_stamp_ids_from_user_ids(self, user_ids):
@@ -99,10 +99,10 @@ class AIntegrityCheck(object):
         else:
             query = { '$in' : user_ids }
         
-        return self.strip_ids(self.db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
+        return self._strip_ids(self.db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
     
     def _get_stamp_ids_from_credited_user_id(self, user_id):
-        return self.strip_ids(self.db['stamps'].find({ 'credit.user_id' : user_id }, { '_id' : 1 }))
+        return self._strip_ids(self.db['stamps'].find({ 'credit.user_id' : user_id }, { '_id' : 1 }))
     
     @abstract
     def run():
