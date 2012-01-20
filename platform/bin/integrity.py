@@ -58,7 +58,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
         
         # update the cached stat if it doesn't match its expected value
         if (stat is None and value > 0) or (stat is not None and stat != value):
-            self._handle_error("%s integrity error: invalid stat %s; %s" % (
+            self._handle_error("%s integrity error: invalid value for stat %s; %s" % (
                 self._stat_collection, self._stat, {
                 'doc_id'   : doc_id, 
                 'expected' : value, 
@@ -242,6 +242,22 @@ class NumFriendsIntegrityCheck(AStatIntegrityCheck):
                                      progress_delta=1)
     
     def _get_cmp_value(self, doc_id):
+        friends = self.db['friends'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
+        if friends != None:
+            return len(friends['ref_ids'])
+
+class NumFollowersIntegrityCheck(AStatIntegrityCheck):
+    """
+        Ensures the integrity of the the num_followers user statistic.
+    """
+    
+    def __init__(self, api, db, options):
+        AStatIntegrityCheck.__init__(self, api, db, options, 
+                                     collection='users', 
+                                     stat='stats.num_followers', 
+                                     progress_delta=1)
+    
+    def _get_cmp_value(self, doc_id):
         followers = self.db['followers'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
         if followers != None:
             return len(followers['ref_ids'])
@@ -253,5 +269,6 @@ checks = [
     UserLikesIntegrityCheck, 
     UserStampsIntegrityCheck, 
     NumFriendsIntegrityCheck, 
+    NumFollowersIntegrityCheck, 
 ]
 
