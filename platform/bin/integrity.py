@@ -117,7 +117,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
         utils.log(str(ref_ids))
         utils.log(str(cmp_ids))
-        utils.log(str(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, })))
+        utils.log(str(list(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }))))
         utils.log(str(self._strip_ids(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }), key="entity.entity_id")))
         
         for cmp_id in ref_ids:
