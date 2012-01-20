@@ -62,8 +62,6 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                 'cmp_ids' : missing_cmp_ids, 
             }))
         
-        self._update_doc(self.db[self._collection], doc, 'ref_ids', ref_ids, invalid_cmp_ids, missing_cmp_ids)
-        
         if not self.options.noop and (len(invalid_cmp_ids) > 0 or len(missing_cmp_ids) > 0):
             for cmp_id in invalid_cmp_ids:
                 ref_ids.remove(cmp_id)
@@ -72,7 +70,7 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                 ref_ids.add(cmp_id)
             
             doc[key] = list(ref_ids)
-            collection.save(doc)
+            self.db[_collection].save(doc)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """ Ensures the integrity of inbox stamps """
