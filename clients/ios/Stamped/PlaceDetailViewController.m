@@ -204,8 +204,7 @@
   // Information
   if (mapContainerView_.hidden == YES) 
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
-  
-  
+
   CollapsibleViewController* section = [self makeSectionWithName:@"Information"];
     
   if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) {
@@ -251,7 +250,7 @@
     
   // Description
   
-  if (detailedEntity_.desc && [detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];

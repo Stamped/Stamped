@@ -212,7 +212,6 @@ static const CGFloat kTodoBarHeight = 44.0;
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
-  scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.colors = [NSArray arrayWithObjects:
                                (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
@@ -494,7 +493,6 @@ static const CGFloat kTodoBarHeight = 44.0;
   collapsibleVC.sectionLabel.text = name;
   collapsibleVC.delegate = self;
   return [collapsibleVC autorelease];
-  //TODO: ensure this doesn't leak
 }
 
 - (void)addSection:(CollapsibleViewController*)section {
@@ -561,6 +559,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 #pragma mark - CollapsibleViewControllerDelegate methods.
+
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
@@ -582,9 +581,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   newHeight += CGRectGetMinY(self.mainContentView.frame);
 
   BOOL shouldScrollDown = NO;
-  if(scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
-     scrollView_.contentOffset.y >=  scrollView_.contentSize.height - scrollView_.frame.size.height)
+  if (scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
+      scrollView_.contentOffset.y >= scrollView_.contentSize.height - scrollView_.frame.size.height) {
     shouldScrollDown = YES;
+  }
   scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
   if (shouldScrollDown)
     self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);

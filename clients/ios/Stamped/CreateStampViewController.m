@@ -1137,14 +1137,6 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 
 #pragma mark - ASIRequestDelegate methods.
 
-- (void)requestStarted:(ASIHTTPRequest*)request {
-  NSLog(@"Request started...");
-}
-
-- (void)request:(ASIHTTPRequest*)request didReceiveResponseHeaders:(NSDictionary*)responseHeaders {
-  NSLog(@"Received headers: %@", responseHeaders);
-}
-
 - (void)requestFinished:(ASIHTTPRequest*)request {
   if (waitingForPhotoUpload_)
     [self sendSaveStampRequest];
@@ -1153,6 +1145,8 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 }
 
 - (void)requestFailed:(ASIHTTPRequest*)request {
+#warning check this logic.
+  // TODO(andybons): Check this logic.
   self.photoUploadRequest = nil;
   self.tempPhotoURL = nil;
   waitingForPhotoUpload_ = NO;

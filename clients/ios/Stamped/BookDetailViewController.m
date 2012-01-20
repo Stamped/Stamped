@@ -102,7 +102,7 @@
 
 - (void) setupSectionViews {
   // Amazon Review
-  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
+  if (detailedEntity_.desc.length > 0) {
     [self addSectionWithName:@"Amazon Review" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
