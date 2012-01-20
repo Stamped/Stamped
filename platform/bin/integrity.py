@@ -39,7 +39,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
         return self.check_doc(doc, value)
     
     def check_doc(self, doc, value=None):
-        doc_id = doc['_id']
+        doc_id = str(doc['_id'])
         
         def extract(o, args):
             try:
@@ -96,7 +96,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     
     def check_doc(self, doc):
         # extract the id and reference ids from the document
-        doc_id  = doc['_id']
+        doc_id  = str(doc['_id'])
         ref_ids = set(doc['ref_ids'])
         
         # get all true comparison ids
