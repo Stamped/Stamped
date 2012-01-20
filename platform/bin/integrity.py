@@ -90,8 +90,8 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
             stat = extract(doc2, s)
             
             if (stat is None and 0 == len(ref_ids)) or (stat is not None and stat != len(ref_ids)):
-                self._handle_error("%s integrity error: invalid cached stat %s; %s" % (
-                    self._collection, self.stat, {
+                self._handle_error("%s integrity error: invalid stat %s; %s" % (
+                    self._collection, self._stat, {
                     'doc_id'        : doc_id, 
                     '%s (expected)' : len(ref_ids), 
                     '%s (actual)'   : stat, 
