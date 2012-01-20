@@ -97,7 +97,7 @@ class AIntegrityCheck(object):
                         if 0 == len(args):
                             return o
                         
-                        return extract(o[args[0]], args[1:])
+                        return _extract(o[args[0]], args[1:])
                     except:
                         return None
                 
