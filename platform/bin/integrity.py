@@ -165,7 +165,7 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
                                                 progress_delta=1)
     
     def _is_invalid_id(self, doc_id):
-        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
+        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(doc_id)})
         return ret is None
     
     def _get_cmp(self, doc_id):
