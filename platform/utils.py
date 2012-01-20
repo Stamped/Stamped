@@ -818,14 +818,7 @@ def getHeadRequest(url):
     
     while True:
         try:
-            response = urllib2.urlopen(request)
-            if content_type is not None:
-                actual_content_type = response.info().getheader('Content-Type')
-                
-                if actual_content_type != content_type:
-                    return None
-            
-            return response
+            return urllib2.urlopen(request)
         except urllib2.HTTPError, e:
             # reraise the exception if the request resulted in an HTTP client 4xx error code, 
             # since it was a problem with the url / headers and retrying most likely won't 
