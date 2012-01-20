@@ -92,6 +92,12 @@ class AIntegrityCheck(object):
             
             index += 1
     
+    def _handle_error(self, msg):
+        if self.options.noop:
+            raise IntegrityError(msg)
+        
+        logs.warn(msg)
+    
     @abstract
     def run():
         pass
