@@ -114,7 +114,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         missing_cmp_ids = []
         
         utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
-        utils.log("%s vs %s" % (type(list(ref_ids)[0]), len(list(cmp_ids)[0])))
+        utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
         
         for cmp_id in ref_ids:
             if cmp_id not in cmp_ids:

@@ -76,8 +76,8 @@ class AIntegrityCheck(object):
             break
     
     def _handle_error(self, msg):
-        if self.options.noop:
-            raise IntegrityError(msg)
+        #if self.options.noop:
+        #    raise IntegrityError(msg)
         
         utils.log('ERROR: ' % msg)
     
