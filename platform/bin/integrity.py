@@ -113,6 +113,13 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         invalid_cmp_ids = []
         missing_cmp_ids = []
         
+        utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
+        utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
+        utils.log(str(ref_ids))
+        utils.log(str(cmp_ids))
+        utils.log(str(list(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }))))
+        utils.log(str(self._strip_ids(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }), key="entity.entity_id")))
+        
         for cmp_id in ref_ids:
             if cmp_id not in cmp_ids:
                 if self._is_invalid_id(cmp_id):
@@ -121,6 +128,8 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         for cmp_id in cmp_ids:
             if cmp_id not in ref_ids:
                 missing_cmp_ids.append(cmp_id)
+        
+        #utils.log("%d vs %d" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
         
         # complain if we found unexpected ids
         if len(invalid_cmp_ids) > 0:
@@ -165,7 +174,7 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
                                                 progress_delta=1)
     
     def _is_invalid_id(self, doc_id):
-        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
+        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(doc_id)})
         return ret is None
     
     def _get_cmp(self, doc_id):

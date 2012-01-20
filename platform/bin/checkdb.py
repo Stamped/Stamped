@@ -59,7 +59,7 @@ class AIntegrityCheck(object):
                         func(obj)
                         break
                     except Exception, e:
-                        #utils.printException()
+                        utils.printException()
                         retries += 1
                         
                         if noop or retries > max_retries:
@@ -73,12 +73,13 @@ class AIntegrityCheck(object):
                         self.options.noop = noop
             
             index += 1
+            break
     
     def _handle_error(self, msg):
-        if self.options.noop:
-            raise IntegrityError(msg)
+        #if self.options.noop:
+        #    raise IntegrityError(msg)
         
-        utils.log('ERROR: ' % msg)
+        utils.log('ERROR: %s' % msg)
     
     def _get_friend_ids(self, user_id):
         friend_ids = self.db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
@@ -89,7 +90,25 @@ class AIntegrityCheck(object):
             return []
     
     def _strip_ids(self, docs, key='_id'):
-        return map(lambda o: str(o['_id']), docs)
+        if '.' in key:
+            def __extract(doc):
+                def _extract(o, args):
+                    try:
+                        if 0 == len(args):
+                            return o
+                        
+                        return _extract(o[args[0]], args[1:])
+                    except:
+                        return None
+                
+                s = key.split('.')
+                return _extract(doc, s)
+            
+            extract = __extract
+        else:
+            extract = lambda o: str(o[key])
+        
+        return map(extract, docs)
     
     def _get_stamp_ids_from_user_ids(self, user_ids):
         if not isinstance(user_ids, (list, tuple)):

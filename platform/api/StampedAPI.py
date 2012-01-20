@@ -1462,6 +1462,7 @@ class StampedAPI(AStampedAPI):
         elif image_url is not None:
             # ensure external image exists
             """
+            # TODO: 
             response = utils.getHeadRequest(image_url)
             
             if response is None:
