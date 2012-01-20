@@ -13,15 +13,16 @@ from checkdb    import *
 
 class AStatIntegrityCheck(AIntegrityCheck):
     
-    def __init__(self, api, db, options, collection, stat):
+    def __init__(self, api, db, options, collection, stat, **kwargs):
         AIntegrityCheck.__init__(self, api, db, options)
         self._stat_collection = collection
         self._stat = stat
+        self._sample_kwargs = kwargs
     
     def run(self):
         self._sample(self.db[self._stat_collection].find(), 
                      self.options.sampleSetRatio, 
-                     self.check_doc)
+                     self.check_doc, **self._sample_kwargs)
     
     @abstract
     def _get_cmp_value(self, doc_id):
@@ -75,14 +76,15 @@ class AStatIntegrityCheck(AIntegrityCheck):
 
 class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     
-    def __init__(self, api, db, options, collection, stat_collection=None, stat=None):
-        AStatIntegrityCheck.__init__(self, api, db, options, stat_collection, stat)
+    def __init__(self, api, db, options, collection, stat_collection=None, stat=None, **kwargs):
+        AStatIntegrityCheck.__init__(self, api, db, options, stat_collection, stat, **kwargs)
         self._collection = collection
     
     def run(self):
         self._sample(self.db[self._collection].find(), 
                      self.options.sampleSetRatio, 
-                     self.check_doc)
+                     self.check_doc, 
+                     **self._sample_kwargs)
     
     @abstract
     def _get_cmp(self, doc_id):
@@ -154,7 +156,9 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
     
     def __init__(self, api, db, options):
-        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'inboxstamps')
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 
+                                                collection='inboxstamps', 
+                                                progress_delta=1)
     
     def _is_invalid_id(self, doc_id):
         ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
@@ -234,7 +238,8 @@ class NumFriendsIntegrityCheck(AStatIntegrityCheck):
     def __init__(self, api, db, options):
         AStatIntegrityCheck.__init__(self, api, db, options, 
                                      collection='users', 
-                                     stat='stats.num_friends')
+                                     stat='stats.num_friends', 
+                                     progress_delta=1)
     
     def _get_cmp_value(self, doc_id):
         followers = self.db['followers'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
