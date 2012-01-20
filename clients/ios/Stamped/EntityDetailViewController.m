@@ -200,6 +200,11 @@ static const CGFloat kTodoBarHeight = 44.0;
     OtherDetailViewController* vc = (OtherDetailViewController*)self;
     vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
   }
+  CGFloat maxY = 0;
+  for (UIView* subview in scrollView_.subviews)
+    maxY = MAX(CGRectGetMaxY(subview.frame), maxY);
+
+  scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, maxY);
 }
 
 #pragma mark - View lifecycle
@@ -585,6 +590,7 @@ static const CGFloat kTodoBarHeight = 44.0;
       scrollView_.contentOffset.y >= scrollView_.contentSize.height - scrollView_.frame.size.height) {
     shouldScrollDown = YES;
   }
+
   scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
   if (shouldScrollDown)
     self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);
