@@ -16,6 +16,7 @@
 #import "CreateStampViewController.h"
 #import "Comment.h"
 #import "Entity.h"
+#import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "Notifications.h"
 #import "PeopleListViewController.h"
@@ -747,7 +748,8 @@ typedef enum {
 }
 
 - (IBAction)handleEntityTap:(id)sender {
-  UIViewController* detailViewController = [Util detailViewControllerForEntity:stamp_.entityObject];
+  EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForEntity:stamp_.entityObject];
+  detailViewController.referringStamp = stamp_;
   [self.navigationController pushViewController:detailViewController animated:YES];
 }
 

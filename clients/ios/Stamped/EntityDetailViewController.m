@@ -12,6 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
+#import "CreateStampViewController.h"
 #import "DetailedEntity.h"
 #import "Entity.h"
 #import "Stamp.h"
@@ -68,6 +69,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize todoLabel = todoLabel_;
 @synthesize todoButton = todoButton_;
 @synthesize toolbarView = toolbarView_;
+@synthesize referringStamp = referringStamp_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -112,6 +114,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   self.todoLabel = nil;
   self.todoButton = nil;
   self.toolbarView = nil;
+  self.referringStamp = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
@@ -714,7 +717,11 @@ static const CGFloat kTodoBarHeight = 44.0;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObject:entityObject_.entityID forKey:@"entity_id"];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:entityObject_.entityID forKey:@"entity_id"];
+  if (referringStamp_)
+    [params setObject:referringStamp_.stampID forKey:@"stamp_id"];
+
+  objectLoader.params = params;
   if (shouldDelete) {
     entityObject_.favorite = nil;
     [entityObject_.managedObjectContext save:nil];
@@ -723,11 +730,19 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (IBAction)stampButtonPressed:(id)sender {
-  NSLog(@"Stamp, bitches");
+  User* creditedUser = entityObject_.favorite.stamp.user;
+  if ([creditedUser.userID isEqualToString:[AccountManager sharedManager].currentUser.userID])
+    creditedUser = nil;
+
+  if (!creditedUser)
+    creditedUser = referringStamp_.user;
+
+  CreateStampViewController* vc = [[CreateStampViewController alloc] initWithEntityObject:entityObject_
+                                                                               creditedTo:creditedUser];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
-- (IBAction)mainActionButtonPressed:(id)sender {
-  // Nothing to see here.
-}
+- (IBAction)mainActionButtonPressed:(id)sender {}
 
 @end

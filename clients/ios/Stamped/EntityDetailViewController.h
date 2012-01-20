@@ -48,6 +48,8 @@
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
 
+@property (nonatomic, retain) Stamp* referringStamp;
+
 @property (nonatomic, retain) IBOutlet STToolbar* toolbarView;
 @property (nonatomic, retain) IBOutlet UIButton* todoButton;
 @property (nonatomic, retain) IBOutlet UILabel* todoLabel;
