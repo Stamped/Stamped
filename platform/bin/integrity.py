@@ -39,7 +39,13 @@ class AStatIntegrityCheck(AIntegrityCheck):
         
         return self.check_doc(doc, value)
     
-    def check_doc(self, doc, value=None):
+    def check_doc(self, doc):
+        doc_id = str(doc['_id'])
+        value = self._get_cmp_value(doc_id)
+        
+        return self.check_doc_value(doc, value)
+    
+    def check_doc_value(self, doc, value):
         doc_id = str(doc['_id'])
         
         def extract(o, args):
@@ -53,8 +59,6 @@ class AStatIntegrityCheck(AIntegrityCheck):
         
         s = self._stat.split('.')
         stat = extract(doc, s)
-        if value is None:
-            value = self._get_cmp_value(doc_id)
         
         # update the cached stat if it doesn't match its expected value
         if (stat is None and value > 0) or (stat is not None and stat != value):
