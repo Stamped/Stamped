@@ -94,18 +94,18 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                     self._collection, self._stat, {
                     'doc_id'   : doc_id, 
                     'expected' : len(ref_ids), 
-                    'actual'   : stat, 
+                    'found'    : stat, 
                 }))
                 
-                if not self.options.noop:
-                    doc3 = doc2
-                    while len(s) > 1:
-                        doc3 = doc3[s[0]]
-                        s = s[1:]
-                    
-                    doc3[s[0]] = len(ref_ids)
-                    pprint(doc3)
-                    #self.db[self._stat_collection].save(doc2)
+                #if not self.options.noop:
+                doc3 = doc2
+                while len(s) > 1:
+                    doc3 = doc3[s[0]]
+                    s = s[1:]
+                
+                doc3[s[0]] = len(ref_ids)
+                pprint(doc3)
+                #self.db[self._stat_collection].save(doc2)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
