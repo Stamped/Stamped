@@ -13,9 +13,11 @@ from checkdb    import *
 
 class AIndexCollectionIntegrityCheck(AIntegrityCheck):
     
-    def __init__(self, api, db, options, collection):
+    def __init__(self, api, db, options, collection, stat_collection=None, stat=None):
         AIntegrityCheck.__init__(self, api, db, options)
         self._collection = collection
+        self._stat_collection = stat_collection
+        self._stat = stat
     
     def run(self):
         self._sample(self.db[self._collection].find(), 
@@ -72,6 +74,38 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
             
             doc[key] = list(ref_ids)
             self.db[_collection].save(doc)
+        
+        if self._stat_collection is not None and self._stat is not None:
+            doc2 = self.db[self._stat_collection].find_one({"_id" : bson.objectid.ObjectId(doc_id)})
+            def extract(o, args):
+                try:
+                    if 0 == len(args):
+                        return o
+                    
+                    return extract(o[args[0]], args[1:])
+                except:
+                    return None
+            
+            s = self._stat.split('.')
+            stat = extract(doc2, s)
+            
+            if (stat is None and 0 == len(ref_ids)) or (stat is not None and stat != len(ref_ids)):
+                self._handle_error("%s integrity error: invalid cached stat %s; %s" % (
+                    self._collection, self.stat, {
+                    'doc_id'        : doc_id, 
+                    '%s (expected)' : len(ref_ids), 
+                    '%s (actual)'   : stat, 
+                }))
+                
+                if not self.options.noop:
+                    doc3 = doc2
+                    while len(s) > 1:
+                        doc3 = doc3[s[0]]
+                        s = s[1:]
+                    
+                    doc3[s[0]] = len(ref_ids)
+                    pprint(doc3)
+                    #self.db[self._stat_collection].save(doc2)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
@@ -99,7 +133,10 @@ class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
     
     def __init__(self, api, db, options):
-        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'creditreceived')
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 
+                                                collection='creditreceived', 
+                                                stat_collection='users', 
+                                                stat='stats.num_credits')
     
     def _get_cmp(self, doc_id):
         return self._get_stamp_ids_from_credited_user_id(doc_id)
