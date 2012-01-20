@@ -79,7 +79,7 @@ class AIntegrityCheck(object):
         #if self.options.noop:
         #    raise IntegrityError(msg)
         
-        utils.log('ERROR: ' % msg)
+        utils.log('ERROR: %s' % msg)
     
     def _get_friend_ids(self, user_id):
         friend_ids = self.db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
