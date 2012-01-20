@@ -125,11 +125,11 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
             if cmp_id not in ref_ids:
                 missing_cmp_ids.append(cmp_id)
         
-        utils.log("%s vs %s" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
-        utils.log(ref_ids)
-        utils.log(cmp_ids)
-        utils.log(invalid_cmp_ids)
-        utils.log(missing_cmp_ids)
+        utils.log("%d vs %d" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
+        utils.log(str(ref_ids))
+        utils.log(str(cmp_ids))
+        utils.log(str(invalid_cmp_ids))
+        utils.log(str(missing_cmp_ids))
         
         # complain if we found unexpected ids
         if len(invalid_cmp_ids) > 0:
