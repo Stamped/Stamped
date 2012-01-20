@@ -147,15 +147,15 @@ def main():
     checks = integrity.checks
     for check_cls in checks:
         if options.check is None or options.check.lower() in check_cls.__name__.lower():
+            utils.log("running %s" % check_cls.__name__)
             check = check_cls(api, db, options)
             
             try:
-                utils.log("running integrity check '%s'" % check_cls.__name__)
                 check.run()
-                utils.log("done running integrity check '%s'" % check_cls.__name__)
             except:
                 utils.printException()
             
+            utils.log("done running %s" % check_cls.__name__)
             utils.log()
 
 if __name__ == '__main__':
