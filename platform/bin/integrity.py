@@ -92,9 +92,9 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
             if (stat is None and 0 == len(ref_ids)) or (stat is not None and stat != len(ref_ids)):
                 self._handle_error("%s integrity error: invalid stat %s; %s" % (
                     self._collection, self._stat, {
-                    'doc_id'        : doc_id, 
-                    '%s (expected)' : len(ref_ids), 
-                    '%s (actual)'   : stat, 
+                    'doc_id'   : doc_id, 
+                    'expected' : len(ref_ids), 
+                    'actual'   : stat, 
                 }))
                 
                 if not self.options.noop:
