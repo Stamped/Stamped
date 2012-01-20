@@ -1461,6 +1461,7 @@ class StampedAPI(AStampedAPI):
             image_width, image_height = image.size
         elif image_url is not None:
             # ensure external image exists
+            """
             response = utils.getHeadRequest(image_url)
             
             if response is None:
@@ -1470,6 +1471,7 @@ class StampedAPI(AStampedAPI):
                 
                 if content_type != "image/jpeg":
                     raise InputError("invalid external image format; content-type must be image/jpeg")
+            """
         
         if image_url is not None:
             if image_width is None or image_height is None:
