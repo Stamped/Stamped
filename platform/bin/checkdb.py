@@ -73,6 +73,7 @@ class AIntegrityCheck(object):
                         self.options.noop = noop
             
             index += 1
+            break
     
     def _handle_error(self, msg):
         #if self.options.noop:
@@ -89,7 +90,22 @@ class AIntegrityCheck(object):
             return []
     
     def _strip_ids(self, docs, key='_id'):
-        return map(lambda o: str(o['_id']), docs)
+        if '.' in key:
+            def extract(o, args):
+                try:
+                    if 0 == len(args):
+                        return o
+                    
+                    return extract(o[args[0]], args[1:])
+                except:
+                    return None
+            
+            s = key.split('.')
+            return extract(doc, s)
+        else:
+            extract = lambda o: str(o[key])
+        
+        return map(extract, docs)
     
     def _get_stamp_ids_from_user_ids(self, user_ids):
         if not isinstance(user_ids, (list, tuple)):
