@@ -230,6 +230,21 @@ class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamps'].find({'user.user_id' : doc_id}, {'_id' : 1}))
 
+class StampCommentsIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """
+        Ensures the integrity of the stampcomments collection, which maps 
+        stamp_ids to comment_ids associated with the stamp.
+    """
+    
+    def __init__(self, api, db, options):
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 
+                                                collection='stampcomments', 
+                                                stat_collection='stamps', 
+                                                stat='stats.num_comments')
+    
+    def _get_cmp(self, doc_id):
+        return self._strip_ids(self.db['comments'].find({'stamp_id' : doc_id}, {'_id' : 1}))
+
 class NumFriendsIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_friends user statistic.
@@ -268,6 +283,7 @@ checks = [
     UserFavEntitiesIntegrityCheck, 
     UserLikesIntegrityCheck, 
     UserStampsIntegrityCheck, 
+    StampCommentsIntegrityCheck, 
     NumFriendsIntegrityCheck, 
     NumFollowersIntegrityCheck, 
 ]
