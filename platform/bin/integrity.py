@@ -8,108 +8,92 @@ __license__   = "TODO"
 import Globals
 import bson, logs, utils
 
-from checkdb import *
+from utils      import abstract
+from checkdb    import *
 
-class InboxStampsIntegrityCheck(AIntegrityCheck):
-    """ Ensure the integrity of inbox stamps """
+class AIndexCollectionIntegrityCheck(AIntegrityCheck):
+    
+    def __init__(self, api, db, options, collection):
+        AIntegrityCheck.__init__(self, api, db, options)
+        self._collection = collection
     
     def run(self):
-        self._sample(self.db['inboxstamps'].find(), 
+        self._sample(self.db[self._collection].find(), 
                      self.options.sampleSetRatio, 
-                     self.check_inbox, 
+                     self.check_doc, 
                      max_retries=0, 
                      progress_delta=1)
     
-    def check_inbox(self, doc):
-        user_id = doc['_id']
+    @abstract
+    def _get_cmp(self, doc_id):
+        pass
+    
+    def check_doc(self, doc):
+        doc_id  = doc['_id']
         ref_ids = set(doc['ref_ids'])
         
-        friend_ids = get_friend_ids(self.db, user_id)
-        friend_ids.append(user_id)
+        cmp_ids  = set(self._get_cmp(doc_id))
         
-        stamp_ids  = set(get_stamp_ids_from_user_ids(self.db, friend_ids))
+        invalid_cmp_ids = []
+        missing_cmp_ids = []
         
-        invalid_stamp_ids = []
-        missing_stamp_ids = []
-        update = False
-        
-        for stamp_id in ref_ids:
-            if stamp_id not in stamp_ids:
-                ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(stamp_id)})
+        for cmp_id in ref_ids:
+            if cmp_id not in cmp_ids:
+                ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(cmp_id)})
                 
                 if ret is None:
-                    invalid_stamp_ids.append(stamp_id)
+                    invalid_cmp_ids.append(cmp_id)
         
-        for stamp_id in stamp_ids:
-            if stamp_id not in ref_ids:
-                missing_stamp_ids.append(stamp_id)
+        for cmp_id in cmp_ids:
+            if cmp_id not in ref_ids:
+                missing_cmp_ids.append(cmp_id)
         
-        if len(invalid_stamp_ids) > 0:
-            update = True
-            
-            self._handle_error("inboxstamps integrity error: inbox contains %d invalid stamps; %s" % (
-                len(invalid_stamp_ids), {
-                'user_id'   : user_id, 
-                'stamp_ids' : invalid_stamp_ids, 
+        if len(invalid_cmp_ids) > 0:
+            self._handle_error("%s integrity error: found %d invalid stamps; %s" % (
+                self._collection, len(invalid_cmp_ids), {
+                'doc_id'  : doc_id, 
+                'cmp_ids' : invalid_cmp_ids, 
             }))
         
-        if len(missing_stamp_ids) > 0:
-            update = True
-            
-            self._handle_error("inboxstamps integrity error: inbox missing %d stamps; %s" % (
-                len(missing_stamp_ids), {
-                'user_id'   : user_id, 
-                'stamp_ids' : missing_stamp_ids, 
+        if len(missing_cmp_ids) > 0:
+            self._handle_error("%s integrity error: found %d missing stamps; %s" % (
+                self._collection, len(missing_cmp_ids), {
+                'doc_id'  : doc_id, 
+                'cmp_ids' : missing_cmp_ids, 
             }))
         
-        self._update_doc(self.db['inboxstamps'], doc, 'ref_ids', ref_ids, invalid_stamp_ids, missing_stamp_ids)
+        self._update_doc(self.db[self._collection], doc, 'ref_ids', ref_ids, invalid_cmp_ids, missing_cmp_ids)
+        
+        if not self.options.noop and (len(invalid_cmp_ids) > 0 or len(missing_cmp_ids) > 0):
+            for cmp_id in invalid_cmp_ids:
+                ref_ids.remove(cmp_id)
+            
+            for cmp_id in missing_cmp_ids:
+                ref_ids.add(cmp_id)
+            
+            doc[key] = list(ref_ids)
+            collection.save(doc)
 
-class UserStatsIntegrityCheck(AIntegrityCheck):
-    """ Ensure the integrity of inbox stamps """
+class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """ Ensures the integrity of inbox stamps """
     
-    def run(self):
-        self._sample(self.db['creditreceived'].find(), 
-                     self.options.sampleSetRatio, 
-                     self.check_user, 
-                     progress_delta=5)
+    def __init__(self, api, db, options):
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'inboxstamps')
     
-    def check_user(self, doc):
-        user_id = doc['_id']
-        ref_ids = set(doc['ref_ids'])
+    def _get_cmp(self, doc_id):
+        friend_ids = self._get_friend_ids(doc_id)
+        friend_ids.append(doc_id)
         
-        stamp_ids = set(get_stamp_ids_from_credited_user_id(self.db, user_id))
-        
-        invalid_stamp_ids = []
-        missing_stamp_ids = []
-        update = False
-        
-        for stamp_id in ref_ids:
-            if stamp_id not in stamp_ids:
-                invalid_stamp_ids.append(stamp_id)
-        
-        for stamp_id in stamp_ids:
-            if stamp_id not in ref_ids:
-                missing_stamp_ids.append(stamp_id)
-        
-        if len(invalid_stamp_ids) > 0:
-            update = True
-            
-            self._handle_error("creditreceived integrity error: creditreceived contains %d invalid stamps; %s" % (
-                len(invalid_stamp_ids), {
-                'user_id'   : user_id, 
-                'stamp_ids' : invalid_stamp_ids, 
-            }))
-        
-        if len(missing_stamp_ids) > 0:
-            update = True
-            
-            self._handle_error("creditreceived integrity error: creditreceived missing %d stamps; %s" % (
-                len(missing_stamp_ids), {
-                'user_id'   : user_id, 
-                'stamp_ids' : missing_stamp_ids, 
-            }))
-        
-        self._update_doc(self.db['creditreceived'], doc, 'ref_ids', ref_ids, invalid_stamp_ids, missing_stamp_ids)
+        return self._get_stamp_ids_from_user_ids(friend_ids)
+
+class UserStatsIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """ Ensures the integrity of creditreceived """
+    
+    def __init__(self, api, db, options):
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'creditreceived')
+    
+    def _get_cmp(self, doc_id):
+        return self._get_stamp_ids_from_credited_user_id(doc_id)
 
 checks = [
     InboxStampsIntegrityCheck, 

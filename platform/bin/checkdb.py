@@ -25,31 +25,6 @@ class IntegrityError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
 
-def get_friend_ids(db, user_id):
-    friend_ids = db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
-    
-    if friend_ids is not None:
-        return friend_ids['ref_ids']
-    else:
-        return []
-
-def strip_ids(docs):
-    return map(lambda o: str(o['_id']), docs)
-
-def get_stamp_ids_from_user_ids(db, user_ids):
-    if not isinstance(user_ids, (list, tuple)):
-        user_ids = [ user_ids ]
-    
-    if 1 == len(user_ids):
-        query = user_ids[0]
-    else:
-        query = { '$in' : user_ids }
-    
-    return strip_ids(db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
-
-def get_stamp_ids_from_credited_user_id(db, user_id):
-    return strip_ids(db['stamps'].find({ 'credit.user_id' : user_id }, { '_id' : 1 }))
-
 class AIntegrityCheck(object):
     
     def __init__(self, api, db, options):
@@ -72,7 +47,7 @@ class AIntegrityCheck(object):
         
         for obj in iterable:
             if print_progress and (count < progress_count or 0 == (index % (count / progress_count))):
-                utils.log("%s : %s" % (func.__name__, utils.getStatusStr(index, count)))
+                utils.log("%s : %s" % (self.__class__.__name__, utils.getStatusStr(index, count)))
             
             if random.random() < ratio:
                 noop    = self.options.noop
@@ -104,16 +79,30 @@ class AIntegrityCheck(object):
         
         logs.warn(msg)
     
-    def _update_doc(self, collection, doc, key, ref_ids, invalid_stamp_ids, missing_stamp_ids):
-        if not self.options.noop and (len(invalid_stamp_ids) > 0 or len(missing_stamp_ids) > 0):
-            for stamp_id in invalid_stamp_ids:
-                ref_ids.remove(stamp_id)
-            
-            for stamp_id in missing_stamp_ids:
-                ref_ids.add(stamp_id)
-            
-            doc[key] = list(ref_ids)
-            collection.save(doc)
+    def _get_friend_ids(self, user_id):
+        friend_ids = self.db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
+        
+        if friend_ids is not None:
+            return friend_ids['ref_ids']
+        else:
+            return []
+    
+    def strip_ids(self, docs):
+        return map(lambda o: str(o['_id']), docs)
+    
+    def _get_stamp_ids_from_user_ids(self, user_ids):
+        if not isinstance(user_ids, (list, tuple)):
+            user_ids = [ user_ids ]
+        
+        if 1 == len(user_ids):
+            query = user_ids[0]
+        else:
+            query = { '$in' : user_ids }
+        
+        return self.strip_ids(self.db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
+    
+    def _get_stamp_ids_from_credited_user_id(self, user_id):
+        return self.strip_ids(self.db['stamps'].find({ 'credit.user_id' : user_id }, { '_id' : 1 }))
     
     @abstract
     def run():
@@ -130,7 +119,7 @@ def parseCommandLine():
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (run read-only)")
     
-    parser.add_option("-f", "--filter", default=None, 
+    parser.add_option("-c", "--check", default=None, 
         action="store", help="optionally filter checks based off of their name")
     
     parser.add_option("-s", "--sampleSetSize", default=None, type="int", 
@@ -156,7 +145,7 @@ def main():
     
     checks = integrity.checks
     for check_cls in checks:
-        if options.filter is None or options.filter.lower() in check_cls.__name__.lower():
+        if options.check is None or options.check.lower() in check_cls.__name__.lower():
             check = check_cls(api, db, options)
             
             try:
