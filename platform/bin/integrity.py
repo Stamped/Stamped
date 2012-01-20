@@ -51,14 +51,14 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
         
         if len(invalid_cmp_ids) > 0:
             self._handle_error("%s integrity error: found %d invalid stamp%s; %s" % (
-                self._collection, "" if 1 == len(invalid_cmp_ids) else "s", len(invalid_cmp_ids), {
+                self._collection, len(invalid_cmp_ids), "" if 1 == len(invalid_cmp_ids) else "s", {
                 'doc_id'  : doc_id, 
                 'cmp_ids' : invalid_cmp_ids, 
             }))
         
         if len(missing_cmp_ids) > 0:
             self._handle_error("%s integrity error: found %d missing stamp%s; %s" % (
-                self._collection, "" if 1 == len(missing_cmp_ids) else "s", len(missing_cmp_ids), {
+                self._collection, len(missing_cmp_ids), "" if 1 == len(missing_cmp_ids) else "s", {
                 'doc_id'  : doc_id, 
                 'cmp_ids' : missing_cmp_ids, 
             }))
