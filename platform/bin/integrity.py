@@ -113,6 +113,9 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         invalid_cmp_ids = []
         missing_cmp_ids = []
         
+        utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
+        utils.log("%s vs %s" % (type(list(ref_ids)[0]), len(list(cmp_ids)[0])))
+        
         for cmp_id in ref_ids:
             if cmp_id not in cmp_ids:
                 if self._is_invalid_id(cmp_id):

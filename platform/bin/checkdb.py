@@ -73,6 +73,7 @@ class AIntegrityCheck(object):
                         self.options.noop = noop
             
             index += 1
+            break
     
     def _handle_error(self, msg):
         if self.options.noop:
