@@ -1472,6 +1472,7 @@ class StampedAPI(AStampedAPI):
                 if content_type != "image/jpeg":
                     raise InputError("invalid external image format; content-type must be image/jpeg")
             """
+            pass
         
         if image_url is not None:
             if image_width is None or image_height is None:
