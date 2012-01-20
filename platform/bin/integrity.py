@@ -65,14 +65,14 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                 'cmp_ids' : missing_cmp_ids, 
             }))
         
+        for cmp_id in invalid_cmp_ids:
+            ref_ids.remove(cmp_id)
+        
+        for cmp_id in missing_cmp_ids:
+            ref_ids.add(cmp_id)
+        
+        doc[key] = list(ref_ids)
         if not self.options.noop and (len(invalid_cmp_ids) > 0 or len(missing_cmp_ids) > 0):
-            for cmp_id in invalid_cmp_ids:
-                ref_ids.remove(cmp_id)
-            
-            for cmp_id in missing_cmp_ids:
-                ref_ids.add(cmp_id)
-            
-            doc[key] = list(ref_ids)
             self.db[_collection].save(doc)
         
         if self._stat_collection is not None and self._stat is not None:
