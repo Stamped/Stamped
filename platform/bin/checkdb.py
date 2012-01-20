@@ -64,7 +64,7 @@ class AIntegrityCheck(object):
                         
                         if noop or retries > max_retries:
                             prefix = "ERROR" if noop else "UNRESOLVABLE ERROR"
-                            logs.warn("%s: %s" % (prefix, str(e)))
+                            utils.log("%s: %s" % (prefix, str(e)))
                             break
                         
                         time.sleep(retry_delay)
@@ -78,7 +78,7 @@ class AIntegrityCheck(object):
         if self.options.noop:
             raise IntegrityError(msg)
         
-        logs.warn(msg)
+        utils.log('ERROR: ' % msg)
     
     def _get_friend_ids(self, user_id):
         friend_ids = self.db['friends'].find_one({ '_id' : user_id }, { 'ref_ids' : 1 })
