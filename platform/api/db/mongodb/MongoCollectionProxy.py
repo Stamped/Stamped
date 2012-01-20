@@ -118,8 +118,8 @@ class MongoCollectionProxy(object):
         
         def _insert(objects, level):
             num_retries = 0
-            ret = []
             count = len(objects)
+            ret = []
             
             if count <= 0:
                 return

@@ -79,9 +79,16 @@ def logRaw(s, includeFormat=False):
 
 def _formatLog(s):
     try:
+        return normalize(s, strict=True)
+    except:
+        return "[%s] __error__ printout" % (threading.currentThread().getName(), )
+    
+    """
+    try:
         return "[%s] %s" % (threading.currentThread().getName(), normalize(s, strict=True))
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
+    """
 
 def logTask(task):
     # note: if isinstance(task, celery.result.EagerResult), then task was run locally / synchronously
