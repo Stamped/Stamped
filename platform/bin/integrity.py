@@ -125,6 +125,8 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
             if cmp_id not in ref_ids:
                 missing_cmp_ids.append(cmp_id)
         
+        utils.log("%s vs %s" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
+        
         # complain if we found unexpected ids
         if len(invalid_cmp_ids) > 0:
             self._handle_error("%s integrity error: found %d invalid reference%s; %s" % (
