@@ -262,8 +262,8 @@ class NumFriendsIntegrityCheck(AStatIntegrityCheck):
     
     def _get_cmp_value(self, doc_id):
         friends = self.db['friends'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
-        if friends != None:
-            return len(friends['ref_ids'])
+        
+        return 0 if friends is None else len(friends['ref_ids'])
 
 class NumFollowersIntegrityCheck(AStatIntegrityCheck):
     """
@@ -278,9 +278,27 @@ class NumFollowersIntegrityCheck(AStatIntegrityCheck):
     
     def _get_cmp_value(self, doc_id):
         followers = self.db['followers'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
-        if followers != None:
-            return len(followers['ref_ids'])
+        
+        return 0 if followers is None else len(followers['ref_ids'])
 
+class NumLikesIntegrityCheck(AStatIntegrityCheck):
+    """
+        Ensures the integrity of the the num_likes stamp statistic.
+    """
+    
+    def __init__(self, api, db, options):
+        AStatIntegrityCheck.__init__(self, api, db, options, 
+                                     collection='stamps', 
+                                     stat='stats.num_likes', 
+                                     progress_delta=1)
+    
+    def _get_cmp_value(self, doc_id):
+        likes = self.db['stamplikes'].find_one({'_id' : doc_id}, {'ref_ids' : 1, '_id' : 0})
+        
+        return 0 if likes is None else len(likes['ref_ids'])
+
+# TODO: replace this hard-coded array with an auto-registered array of 
+# AIntegrityCheck subclasses
 checks = [
     InboxStampsIntegrityCheck, 
     CreditReceivedIntegrityCheck, 
