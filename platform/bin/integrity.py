@@ -192,5 +192,6 @@ checks = [
     CreditReceivedIntegrityCheck, 
     UserFavEntitiesIntegrityCheck, 
     UserLikesIntegrityCheck, 
+    UserStampsIntegrityCheck, 
 ]
 
