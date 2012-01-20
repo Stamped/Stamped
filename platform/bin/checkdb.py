@@ -62,7 +62,7 @@ class AIntegrityCheck(object):
                         retries += 1
                         
                         if noop or retries > max_retries:
-                            prefix = "ERROR: " if noop else "UNRESOLVABLE ERROR: "
+                            prefix = "ERROR" if noop else "UNRESOLVABLE ERROR"
                             logs.warn("%s: %s" % (prefix, str(e)))
                             break
                         
