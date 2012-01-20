@@ -113,5 +113,6 @@ class UserStatsIntegrityCheck(AIntegrityCheck):
 
 checks = [
     InboxStampsIntegrityCheck, 
+    UserStatsIntegrityCheck, 
 ]
 

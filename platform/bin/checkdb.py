@@ -130,6 +130,9 @@ def parseCommandLine():
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (run read-only)")
     
+    parser.add_option("-f", "--filter", default=None, 
+        action="store", help="optionally filter checks based off of their name")
+    
     parser.add_option("-s", "--sampleSetSize", default=None, type="int", 
         action="store", help="sample size as a percentage (e.g., 5 for 5%)")
     
@@ -153,11 +156,17 @@ def main():
     
     checks = integrity.checks
     for check_cls in checks:
-        check = check_cls(api, db, options)
-        try:
-            check.run()
-        except:
-            utils.printException()
+        if options.filter is None or options.filter.lower() in check_cls.__name__.lower():
+            check = check_cls(api, db, options)
+            
+            try:
+                utils.log("running integrity check '%s'" % check_cls.__name__)
+                check.run()
+                utils.log("done running integrity check '%s'" % check_cls.__name__)
+            except:
+                utils.printException()
+            
+            utils.log()
 
 if __name__ == '__main__':
     main()
