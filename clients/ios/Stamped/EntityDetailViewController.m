@@ -25,9 +25,11 @@
 #import "User.h"
 #import "StampedAppDelegate.h"
 #import "Alerts.h"
+#import "STToolbar.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
+static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -63,7 +65,9 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize spinner = spinner_;
 @synthesize imageView = imageView_;
-
+@synthesize todoLabel = todoLabel_;
+@synthesize todoButton = todoButton_;
+@synthesize toolbarView = toolbarView_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -105,6 +109,9 @@ static const CGFloat kTodoBarHeight = 44.0;
   self.spinner = nil;
   self.imageView.delegate = nil;
   self.imageView = nil;
+  self.todoLabel = nil;
+  self.todoButton = nil;
+  self.toolbarView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
@@ -255,6 +262,11 @@ static const CGFloat kTodoBarHeight = 44.0;
     [self.scrollView addSubview:iv];
     [iv release];
   }
+  
+  if (entityObject_.favorite) {
+    todoLabel_.text = @"To-Do'd";
+    todoButton_.selected = YES;
+  }
 }
 
 - (void)addTodoBar {
@@ -312,7 +324,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   [bar release];
 }
 
-- (void)addToolbar {
+- (void)addTodoToolbar {
   UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 56, 320, 56)];
   bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
   bar.layer.shadowOpacity = 0.2;
@@ -344,13 +356,20 @@ static const CGFloat kTodoBarHeight = 44.0;
   [activity stopAnimating];
   self.spinner = activity;
   [bar addSubview:self.spinner];
-  
+
   [self.view addSubview:bar];
   CGRect frame = self.scrollView.frame;
   frame.size.height -= 56;
   self.scrollView.frame = frame;
   
   [bar release];
+}
+
+- (void)hideMainToolbar {
+  toolbarView_.hidden = YES;
+  CGRect frame = self.scrollView.frame;
+  frame.size.height += CGRectGetHeight(toolbarView_.frame);
+  self.scrollView.frame = frame;
 }
 
 - (NSAttributedString*)todoAttributedString:(User*)user {
@@ -408,7 +427,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   self.spinner = nil;
   self.imageView.delegate = nil;
   self.imageView = nil;
-  
+  self.todoLabel = nil;
+  self.todoButton = nil;
+  self.toolbarView = nil;
+
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
 }
@@ -672,6 +694,40 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   // Default does nothing. Override in subclasses.
+}
+
+#pragma mark - Actions
+
+- (IBAction)todoButtonPressed:(id)sender {
+  UIButton* button = sender;
+  BOOL shouldDelete = button.selected;
+  [button setSelected:!shouldDelete];
+  if (button.selected) {
+    todoLabel_.text = @"To-Do'd";
+  } else {
+    todoLabel_.text = @"To-Do";
+  }
+
+  NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = favoriteMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObject:entityObject_.entityID forKey:@"entity_id"];
+  if (shouldDelete) {
+    entityObject_.favorite = nil;
+    [entityObject_.managedObjectContext save:nil];
+  }
+  [objectLoader send];
+}
+
+- (IBAction)stampButtonPressed:(id)sender {
+  NSLog(@"Stamp, bitches");
+}
+
+- (IBAction)mainActionButtonPressed:(id)sender {
+  // Nothing to see here.
 }
 
 @end

@@ -181,6 +181,7 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self setUpToolbar];
   headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
 }
@@ -192,8 +193,6 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
-  [self setUpToolbar];
 
   if ([[AccountManager sharedManager].currentUser.userID isEqualToString:stamp_.user.userID]) {
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
@@ -243,7 +242,6 @@ typedef enum {
   self.commenterNameLabel.delegate = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
-  self.addFavoriteButton = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
   self.likeButton = nil;

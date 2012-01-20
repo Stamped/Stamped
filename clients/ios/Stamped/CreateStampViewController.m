@@ -17,9 +17,9 @@
 #import "AccountManager.h"
 #import "STCreditTextField.h"
 #import "EditEntityViewController.h"
+#import "EntityDetailViewController.h"
 #import "DetailedEntity.h"
 #import "Entity.h"
-#import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "STNavigationBar.h"
 #import "Notifications.h"
@@ -704,6 +704,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   } else {
     vc = [Util detailViewControllerForSearchResult:(SearchResult*)objectToStamp_];
   }
+  [(EntityDetailViewController*)vc hideMainToolbar];
   [self.navigationController pushViewController:vc animated:YES];
 }
 
