@@ -27,6 +27,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
         DeploymentPlatform.__init__(self, AWSDeploymentStack)
         self.options = options
         self._ami_re = re.compile('.*stamped\.base\.ami \(([0-9]+)-([0-9]+)-([0-9]+) +([0-9]+)\.([0-9]+)\.([0-9]+)\).*')
+        self.name = str(self)
     
     def _get_security_group(self, name):
         security_groups = self.conn.get_all_security_groups()

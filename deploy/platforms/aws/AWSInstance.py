@@ -262,7 +262,7 @@ class AWSInstance(AInstance):
         if block:
             if 'bootstrap' in self.roles:
                 # wait for init script to finish
-                self._validate_port(8649, desc="init script", timeout=1200)
+                self._validate_port(8649, desc="init script", timeout=1800)
             elif 'db' in self.roles:
                 self._block_mongo()
             elif 'webServer' in self.roles:

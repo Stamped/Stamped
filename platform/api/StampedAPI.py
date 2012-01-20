@@ -1461,7 +1461,7 @@ class StampedAPI(AStampedAPI):
             image_width, image_height = image.size
         elif image_url is not None:
             # ensure external image exists
-            response = utils.checkIfJpegResourceExists(image_url)
+            response = utils.getHeadRequest(image_url)
             
             if response is None:
                 raise InputError("unable to access specified stamp image '%s'" % image_url)
