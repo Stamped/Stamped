@@ -89,7 +89,7 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
             s = self._stat.split('.')
             stat = extract(doc2, s)
             
-            if (stat is None and 0 == len(ref_ids)) or (stat is not None and stat != len(ref_ids)):
+            if (stat is None and len(ref_ids) > 0) or (stat is not None and stat != len(ref_ids)):
                 self._handle_error("%s integrity error: invalid stat %s; %s" % (
                     self._collection, self._stat, {
                     'doc_id'   : doc_id, 
@@ -97,15 +97,14 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                     'found'    : stat, 
                 }))
                 
-                #if not self.options.noop:
-                doc3 = doc2
-                while len(s) > 1:
-                    doc3 = doc3[s[0]]
-                    s = s[1:]
-                
-                doc3[s[0]] = len(ref_ids)
-                pprint(doc2)
-                #self.db[self._stat_collection].save(doc2)
+                if not self.options.noop:
+                    doc3 = doc2
+                    while len(s) > 1:
+                        doc3 = doc3[s[0]]
+                        s = s[1:]
+                    
+                    doc3[s[0]] = len(ref_ids)
+                    self.db[self._stat_collection].save(doc2)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
@@ -143,19 +142,38 @@ class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
 
 class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
-        Ensures the integrity of userfaventities collection, which maps 
+        Ensures the integrity of the userfaventities collection, which maps 
         user_ids to entity_ids that user has favorited.
     """
     
     def __init__(self, api, db, options):
-        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 'userfaventities')
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 
+                                                collection='userfaventities', 
+                                                stat_collection='users', 
+                                                stat='stats.num_faves')
     
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['favorites'].find({'user_id': doc_id}, {'entity.entity_id':1}), key='entity.entity_id')
+
+class UserLikesIntegrityCheck(AIndexCollectionIntegrityCheck):
+    """
+        Ensures the integrity of the userlikes collection, which maps 
+        user_ids to stamp_ids that user has liked.
+    """
+    
+    def __init__(self, api, db, options):
+        AIndexCollectionIntegrityCheck.__init__(self, api, db, options, 
+                                                collection='userlikes', 
+                                                stat_collection='users', 
+                                                stat='stats.num_likes_given')
+    
+    def _get_cmp(self, doc_id):
+        return self._strip_ids(self.db['stamplikes'].find({'ref_ids': doc_id}, {'_id':1}))
 
 checks = [
     InboxStampsIntegrityCheck, 
     CreditReceivedIntegrityCheck, 
     UserFavEntitiesIntegrityCheck, 
+    UserLikesIntegrityCheck, 
 ]
 
