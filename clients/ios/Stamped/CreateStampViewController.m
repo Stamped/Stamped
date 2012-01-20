@@ -958,8 +958,6 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     NSString* height = [NSString stringWithFormat:@"%.0f", stampPhoto_.size.height * scale];
     [params setValue:height forKey:@"temp_image_height"];
   }
-  
-  NSLog(@"Params: %@", params);
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
@@ -1126,8 +1124,12 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   request.secretAccessKey = kS3SecretAccessKey;
   request.delegate = self;
   request.accessKey = kS3AccessKeyID;
-  request.timeOutSeconds = 60;
+  request.accessPolicy = ASIS3AccessPolicyPublicRead;
+  request.timeOutSeconds = 30;
+  request.numberOfTimesToRetryOnTimeout = 2;
   request.mimeType = @"image/jpeg";
+  request.shouldAttemptPersistentConnection = NO;
+  [ASIS3Request setShouldUpdateNetworkActivityIndicator:NO];
   [request startAsynchronous];
   self.photoUploadRequest = request;
   self.tempPhotoURL = [NSString stringWithFormat:@"http://s3.amazonaws.com/stamped.com.static.temp/%@", key];
@@ -1148,6 +1150,19 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     [self sendSaveStampRequest];
   
   waitingForPhotoUpload_ = NO;
+}
+
+- (void)requestFailed:(ASIHTTPRequest*)request {
+  self.photoUploadRequest = nil;
+  self.tempPhotoURL = nil;
+  waitingForPhotoUpload_ = NO;
+  [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  [spinner_ stopAnimating];
+  stampItButton_.hidden = NO;
+  [UIView animateWithDuration:0.2
+                   animations:^{
+                     self.shelfView.transform = CGAffineTransformIdentity;
+                   }];
 }
 
 #pragma mark - UIImagePickerControllerDelegate methods.
