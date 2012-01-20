@@ -33,7 +33,10 @@ def get_friend_ids(db, user_id):
     else:
         return []
 
-def get_stamp_ids_from_user_ids(collection, user_ids):
+def strip_ids(docs):
+    return map(lambda o: str(o['_id']), docs)
+
+def get_stamp_ids_from_user_ids(db, user_ids):
     if not isinstance(user_ids, (list, tuple)):
         user_ids = [ user_ids ]
     
@@ -42,7 +45,10 @@ def get_stamp_ids_from_user_ids(collection, user_ids):
     else:
         query = { '$in' : user_ids }
     
-    return map(lambda o: str(o['_id']), collection.find({ 'user.user_id' : query }, { '_id' : 1 }))
+    return strip_ids(db['stamps'].find({ 'user.user_id' : query }, { '_id' : 1 }))
+
+def get_stamp_ids_from_credited_user_id(db, user_id):
+    return strip_ids(db['stamps'].find({ 'credit.user_id' : user_id }, { '_id' : 1 }))
 
 class AIntegrityCheck(object):
     
@@ -51,8 +57,8 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
-    def _sample(self, iterable, ratio, func, print_progress=True, progress_step=5, max_retries=3, retry_delay=0.01):
-        progress_count = 100 / progress_step
+    def _sample(self, iterable, ratio, func, print_progress=True, progress_delta=5, max_retries=3, retry_delay=0.05):
+        progress_count = 100 / progress_delta
         count = 0
         index = 0
         
@@ -97,6 +103,17 @@ class AIntegrityCheck(object):
             raise IntegrityError(msg)
         
         logs.warn(msg)
+    
+    def _update_doc(self, collection, doc, key, ref_ids, invalid_stamp_ids, missing_stamp_ids):
+        if not self.options.noop and (len(invalid_stamp_ids) > 0 or len(missing_stamp_ids) > 0):
+            for stamp_id in invalid_stamp_ids:
+                ref_ids.remove(stamp_id)
+            
+            for stamp_id in missing_stamp_ids:
+                ref_ids.add(stamp_id)
+            
+            doc[key] = list(ref_ids)
+            collection.save(doc)
     
     @abstract
     def run():
