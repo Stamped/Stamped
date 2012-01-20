@@ -59,7 +59,7 @@ class AIntegrityCheck(object):
                         func(obj)
                         break
                     except Exception, e:
-                        #utils.printException()
+                        utils.printException()
                         retries += 1
                         
                         if noop or retries > max_retries:
