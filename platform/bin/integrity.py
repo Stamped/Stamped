@@ -104,7 +104,7 @@ class AIndexCollectionIntegrityCheck(AIntegrityCheck):
                     s = s[1:]
                 
                 doc3[s[0]] = len(ref_ids)
-                pprint(doc3)
+                pprint(doc2)
                 #self.db[self._stat_collection].save(doc2)
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
