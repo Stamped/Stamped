@@ -37,7 +37,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
         if doc is None:
             return
         
-        return self.check_doc(doc, value)
+        return self.check_doc_value(doc, value)
     
     def check_doc(self, doc):
         doc_id = str(doc['_id'])
