@@ -12,6 +12,7 @@
 #import "STCreditPickerController.h"
 #import "STViewController.h"
 #import "StampDetailHeaderView.h"
+#import "ASIHTTPRequestDelegate.h"
 
 @class Entity;
 @class UserImageView;
@@ -26,7 +27,8 @@
                                                          UINavigationControllerDelegate,
                                                          UIImagePickerControllerDelegate,
                                                          UIActionSheetDelegate,
-                                                         StampDetailHeaderViewDelegate> {
+                                                         StampDetailHeaderViewDelegate,
+                                                         ASIHTTPRequestDelegate> {
  @private
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;

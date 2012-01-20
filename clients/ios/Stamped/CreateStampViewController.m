@@ -10,8 +10,10 @@
 
 #import <CoreText/CoreText.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <RestKit/NSData+MD5.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "ASIS3ObjectRequest.h"
 #import "AccountManager.h"
 #import "STCreditTextField.h"
 #import "EditEntityViewController.h"
@@ -37,6 +39,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/";
 static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
+// Amazon S3 Shit.
+static NSString* const kS3SecretAccessKey = @"gYyVHd0PROjOrZ1ibrxJnuFT2mMVH2wHKmKy33iL";
+static NSString* const kS3AccessKeyID = @"AKIAJYZ6F44Q5N3NJ2QA";
+static NSString* const kS3Bucket = @"stamped.com.static.temp";
+
 @interface CreateStampViewController () 
 
 - (void)editorDoneButtonPressed:(id)sender;
@@ -51,6 +58,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)addStampPhotoView;
 - (void)restoreViewState;
 - (void)addStampsRemainingLayer;
+- (void)uploadPhotoToS3;
 
 - (void)socialNetworksDidChange:(id)sender;
 
@@ -67,8 +75,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
-@property (nonatomic, assign) BOOL isSigningInToFB; // Used to handle edge case wherein user doesn't complete fb login.
+@property (nonatomic, assign) BOOL isSigningInToFB;  // Used to handle edge case wherein user doesn't complete FB login.
 @property (nonatomic, readonly) UIImageView* tapHereImageView;
+@property (nonatomic, retain) ASIS3ObjectRequest* photoUploadRequest;
+@property (nonatomic, copy) NSString* tempPhotoURL;
+@property (nonatomic, assign) BOOL waitingForPhotoUpload;
 @end
 
 @implementation CreateStampViewController
@@ -109,6 +120,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize isSigningInToFB = isSigningInToFB_;
 @synthesize headerView = headerView_;
 @synthesize tapHereImageView = tapHereImageView_;
+@synthesize photoUploadRequest = photoUploadRequest_;
+@synthesize tempPhotoURL = tempPhotoURL_;
+@synthesize waitingForPhotoUpload = waitingForPhotoUpload_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -183,6 +197,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.headerView.delegate = nil;
   self.headerView = nil;
   tapHereImageView_ = nil;
+  [self.photoUploadRequest clearDelegatesAndCancel];
+  self.photoUploadRequest = nil;
+  self.tempPhotoURL = nil;
   [super dealloc];
 }
 
@@ -877,6 +894,10 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
   if ([actionSheet.title rangeOfString:@"photo"].location != NSNotFound) {
     if (buttonIndex == 0) {  // Remove the photo.
+      [self.photoUploadRequest clearDelegatesAndCancel];
+      self.photoUploadRequest = nil;
+      self.tempPhotoURL = nil;
+      waitingForPhotoUpload_ = NO;
       [stampPhotoView_ removeFromSuperview];
       stampPhotoView_ = nil;
       self.stampPhoto = nil;
@@ -912,23 +933,33 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 #pragma mark - Network request methods.
 
 - (void)sendSaveStampRequest {
-  NSMutableDictionary* paramsDictionary = [NSMutableDictionary dictionary];
-  [paramsDictionary setValue:reasoningTextView_.text forKey:@"blurb"];
+  if (self.stampPhoto && photoUploadRequest_.inProgress) {
+    waitingForPhotoUpload_ = YES;
+    return;
+  }
+
+  NSMutableDictionary* params = [NSMutableDictionary dictionary];
+  [params setValue:reasoningTextView_.text forKey:@"blurb"];
   NSString* credit = creditPickerController_.usersSeparatedByCommas;
   if (credit)
-    [paramsDictionary setValue:credit forKey:@"credit"];
+    [params setValue:credit forKey:@"credit"];
 
   if ([objectToStamp_ valueForKey:@"entityID"]) {
-    [paramsDictionary setValue:[objectToStamp_ valueForKey:@"entityID"] forKey:@"entity_id"];
+    [params setValue:[objectToStamp_ valueForKey:@"entityID"] forKey:@"entity_id"];
   } else if ([objectToStamp_ valueForKey:@"searchID"]) {
-    [paramsDictionary setValue:[objectToStamp_ valueForKey:@"searchID"] forKey:@"search_id"];
+    [params setValue:[objectToStamp_ valueForKey:@"searchID"] forKey:@"search_id"];
   }
-  RKParams* params = [RKParams paramsWithDictionary:paramsDictionary];
-
+  
   if (self.stampPhoto) {
-    NSData* imageData = UIImageJPEGRepresentation(self.stampPhoto, 0.8);
-    [params setData:imageData MIMEType:@"image/jpeg" forParam:@"image"];
+    [params setValue:self.tempPhotoURL forKey:@"temp_image_url"];
+    CGFloat scale = [UIScreen mainScreen].scale;
+    NSString* width = [NSString stringWithFormat:@"%.0f", stampPhoto_.size.width * scale];
+    [params setValue:width forKey:@"temp_image_width"];
+    NSString* height = [NSString stringWithFormat:@"%.0f", stampPhoto_.size.height * scale];
+    [params setValue:height forKey:@"temp_image_height"];
   }
+  
+  NSLog(@"Params: %@", params);
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
@@ -942,7 +973,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)sendSaveEntityRequest {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateEntityPath 
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateEntityPath
                                                                     delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = entityMapping;
@@ -1006,14 +1037,14 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
     [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 
     [spinner_ stopAnimating];
-//    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(self.shelfView.frame));
+    
     CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
     [UIView animateWithDuration:0.2
-                     animations:^{ 
-//                       self.shelfView.transform = topTransform;
+                     animations:^{
                        bottomToolbar_.transform = bottomTransform;
                        stampItButton_.transform = bottomTransform;
                        stampsRemainingLayer_.transform = CATransform3DMakeAffineTransform(bottomTransform);
+                       scrollView_.contentOffset = CGPointZero;
                      }
                      completion:^(BOOL finished) {
                        [UIView animateWithDuration:0.3
@@ -1084,6 +1115,41 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [stampPhotoView_ release];
 }
 
+- (void)uploadPhotoToS3 {
+  if (!self.stampPhoto)
+    return;
+
+  NSData* imageData = UIImageJPEGRepresentation(self.stampPhoto, 0.8);
+  NSDate* now = [NSDate date];
+  NSString* key = [NSString stringWithFormat:@"%@-%.0f.jpg", [imageData MD5], now.timeIntervalSince1970];
+  ASIS3ObjectRequest* request = [ASIS3ObjectRequest PUTRequestForData:imageData withBucket:kS3Bucket key:key];
+  request.secretAccessKey = kS3SecretAccessKey;
+  request.delegate = self;
+  request.accessKey = kS3AccessKeyID;
+  request.timeOutSeconds = 60;
+  request.mimeType = @"image/jpeg";
+  [request startAsynchronous];
+  self.photoUploadRequest = request;
+  self.tempPhotoURL = [NSString stringWithFormat:@"http://s3.amazonaws.com/stamped.com.static.temp/%@", key];
+}
+
+#pragma mark - ASIRequestDelegate methods.
+
+- (void)requestStarted:(ASIHTTPRequest*)request {
+  NSLog(@"Request started...");
+}
+
+- (void)request:(ASIHTTPRequest*)request didReceiveResponseHeaders:(NSDictionary*)responseHeaders {
+  NSLog(@"Received headers: %@", responseHeaders);
+}
+
+- (void)requestFinished:(ASIHTTPRequest*)request {
+  if (waitingForPhotoUpload_)
+    [self sendSaveStampRequest];
+  
+  waitingForPhotoUpload_ = NO;
+}
+
 #pragma mark - UIImagePickerControllerDelegate methods.
 
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info {
@@ -1100,9 +1166,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   CGFloat height = original.size.height;
 
   CGFloat ratio = 1.0;
-  if (width > 480 || height > 480) {
-    CGFloat horizontalRatio = 480 / width;
-    CGFloat verticalRatio = 480 / height;
+  CGFloat scale = [UIScreen mainScreen].scale;
+  CGFloat max = 960.0 / scale;
+  if (width > max || height > max) {
+    CGFloat horizontalRatio = max / width;
+    CGFloat verticalRatio = max / height;
     ratio = MIN(horizontalRatio, verticalRatio);
   }
   CGRect drawRect = CGRectIntegral(CGRectMake(0, 0, width * ratio, height * ratio));
@@ -1111,6 +1179,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   self.stampPhoto = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
 
+  [self uploadPhotoToS3];
   [self addStampPhotoView];
 
   [self.navigationController dismissModalViewControllerAnimated:YES];
