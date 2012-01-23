@@ -172,7 +172,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)viewDidLayoutSubviews {
-  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(275, MAXFLOAT)];
+  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(270, MAXFLOAT)];
   CGFloat todoBarPadding = entityObject_.favorite.stamp != nil ? kTodoBarHeight : 0;
   titleLabel_.frame = CGRectMake(15, 10 + todoBarPadding,
                                  titleSize.width,

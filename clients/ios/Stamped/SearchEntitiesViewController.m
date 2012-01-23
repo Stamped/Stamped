@@ -409,6 +409,7 @@ typedef enum {
       [(UIButton*)view setSelected:NO];
   }
   self.resultsArray = nil;
+  self.cachedAutocompleteResults = nil;
   [self reloadTableData];
   
   self.currentSearchFilter = button.tag;

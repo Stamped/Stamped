@@ -148,7 +148,7 @@
                                forKey:@"language"];
     if (detailedEntity_.isbn && ![detailedEntity_.isbn isEqualToString:@""])
       [section addPairedLabelWithName:@"ISBN:" 
-                                value:detailedEntity_.isbn 
+                                value:detailedEntity_.isbn
                                forKey:@"isbn"];
     if (section.contentDict.objectEnumerator.allObjects.count > 0) {
       [self addSection:section];
@@ -175,17 +175,11 @@
   self.imageView.layer.shadowRadius = 4.0;
   self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
+  self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.imageView.bounds].CGPath;
 
-  CGRect frame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
-  frame.origin = self.gradientView.frame.origin;
-  CGFloat xOffset = self.gradientView.frame.size.width - frame.size.width;
-  CGFloat yOffset = self.gradientView.frame.size.height - frame.size.height;
-  frame.origin = CGPointMake(frame.origin.x + xOffset / 2, frame.origin.y + yOffset / 2);
-  self.gradientView.frame = frame;
+  self.gradientView.frame = CGRectOffset(self.imageView.frame, 2, 0);
   self.gradientView.hidden = NO;
   self.imageView.hidden = NO;
-  CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
-  self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
 
   [self setupMainActionsContainer];
   [self setupSectionViews];
