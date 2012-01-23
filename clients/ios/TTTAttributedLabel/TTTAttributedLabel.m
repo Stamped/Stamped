@@ -269,8 +269,20 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 }
 
 - (NSTextCheckingResult*)linkAtPoint:(CGPoint)p {
-  CFIndex index = [self characterIndexAtPoint:p];
-  return [self linkAtCharacterIndex:index];
+  CGPoint topLeft = CGPointMake(MAX(0, p.x - 4), MAX(0, p.y - 4));
+  CGPoint point = topLeft;
+  for (NSInteger i = 0; i < 8; ++i) {
+    for (NSInteger j = 0; j < 8; ++j) {
+      point.x = topLeft.x + j;
+      NSLog(@"Checking point: %@", NSStringFromCGPoint(point));
+      
+      NSTextCheckingResult* result = [self linkAtCharacterIndex:[self characterIndexAtPoint:point]];
+      if (result)
+        return result;
+    }
+    point.y = topLeft.y + i;
+  }
+  return nil;
 }
 
 - (NSUInteger)characterIndexAtPoint:(CGPoint)p {
@@ -506,6 +518,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 #pragma mark - UIControl
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"Touches began");
   UITouch* touch = [touches anyObject];	
 	NSTextCheckingResult* result = [self linkAtPoint:[touch locationInView:self]];
   if (result && self.delegate) {
