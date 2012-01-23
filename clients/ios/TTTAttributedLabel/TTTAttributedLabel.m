@@ -274,8 +274,6 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   for (NSInteger i = 0; i < 8; ++i) {
     for (NSInteger j = 0; j < 8; ++j) {
       point.x = topLeft.x + j;
-      NSLog(@"Checking point: %@", NSStringFromCGPoint(point));
-      
       NSTextCheckingResult* result = [self linkAtCharacterIndex:[self characterIndexAtPoint:point]];
       if (result)
         return result;
