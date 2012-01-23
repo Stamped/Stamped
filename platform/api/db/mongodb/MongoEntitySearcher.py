@@ -166,6 +166,7 @@ class MongoEntitySearcher(EntitySearcher):
     apple_category_whitelist = set([
         'music', 
         'film', 
+        'other', # apps
     ])
     
     # subcategories which may come from apple
@@ -175,6 +176,7 @@ class MongoEntitySearcher(EntitySearcher):
         'artist', 
         'song', 
         'album', 
+        'app',
     ])
     
     _suffix_regexes = [
