@@ -209,6 +209,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   toolbar_ = [[FindFriendsToolbar alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.frame),
                                                                   CGRectGetWidth(self.view.frame), 49)];
   toolbar_.delegate = self;
+  toolbar_.addEmailsButton.hidden = ![MFMailComposeViewController canSendMail];
   [self.view addSubview:toolbar_];
   [toolbar_ release];
   
@@ -330,7 +331,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [toolbar_ setNeedsLayout];
   if (contactFriends_) {
     [self.tableView reloadData];
-    toolbar_.centerButton.enabled = contactFriends_.count > 0;
+    toolbar_.centerButton.enabled = contactsNotUsingStamped_.count > 0;
     return;
   }
   [tableView_ reloadData];
@@ -1155,6 +1156,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     }
     self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self removeUsersToInviteWithIdentifers:[objects valueForKeyPath:@"@distinctUnionOfObjects.identifier"]];
+    toolbar_.centerButton.enabled = contactsNotUsingStamped_.count > 0;
     [self.tableView reloadData];
   }
   
@@ -1333,21 +1335,22 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [searchField_ resignFirstResponder];
+  BOOL showEmailButton = (findSource_ == FindFriendsSourceContacts);
   if (inviteSet_.count > 0) {
-    toolbar_.inviteMode = YES;
+    [toolbar_ setInviteMode:YES showEmailButton:showEmailButton];
     return;
   }
 
   for (NSIndexPath* index in tableView_.indexPathsForVisibleRows) {
     if (index.section == 1) {
-      toolbar_.inviteMode = YES;
+      [toolbar_ setInviteMode:YES showEmailButton:showEmailButton];
       return;
     }
   }
-  toolbar_.inviteMode = NO;
+  [toolbar_ setInviteMode:NO showEmailButton:showEmailButton];
 }
 
-#pragma FindFriendsToolbarDelegate methods.
+#pragma mark - FindFriendsToolbarDelegate methods.
 
 - (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button {
   [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
@@ -1384,6 +1387,23 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
   [tableView_ reloadData];
+}
+
+- (void)toolbar:(FindFriendsToolbar*)toolbar emailButtonPressed:(UIButton*)button {
+  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+  vc.mailComposeDelegate = self;
+  [vc setSubject:@"Check out my recommendations on Stamped."];
+  [vc setMessageBody:@"I'm using Stamped, a new way to recommend only what you like best. You should check it out by downloading the iPhone app here:<br/><br/><a href=\"http://stamped.com/download\">stamped.com/download</a>" isHTML:YES];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
+}
+
+#pragma mark - MFMailComposeViewControllerDelegate methods.
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+  [self dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - UIAlertViewDelegate methods.
