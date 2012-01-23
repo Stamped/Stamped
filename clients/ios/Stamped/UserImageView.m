@@ -79,6 +79,10 @@
                                              object:nil];
 }
 
+- (void)resetImage {
+  imageView_.image = [UIImage imageNamed:@"profile_placeholder"];
+}
+
 - (void)setImageURL:(NSString*)imageURL {
   if (![imageURL isEqualToString:imageURL_]) {
     [imageURL_ release];

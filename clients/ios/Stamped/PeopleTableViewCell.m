@@ -8,7 +8,7 @@
 
 #import "PeopleTableViewCell.h"
 
-#import "MediumUserImageView.h"
+#import "UserImageView.h"
 #import "UIButton+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "User.h"
@@ -18,7 +18,7 @@ static const CGFloat kUserImageSize = 41.0;
 
 @interface PeopleTableViewCell ()
 
-@property (nonatomic, readonly) MediumUserImageView* userImageView;
+@property (nonatomic, readonly) UserImageView* userImageView;
 @property (nonatomic, readonly) UIImageView* stampImageView;
 @property (nonatomic, readonly) UILabel* fullNameLabel;
 @property (nonatomic, readonly) UILabel* usernameLabel;
@@ -42,8 +42,7 @@ static const CGFloat kUserImageSize = 41.0;
   self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
   if (self) {
     self.accessoryType = UITableViewCellAccessoryNone;
-    userImageView_ = [[MediumUserImageView alloc]
-                      initWithFrame:CGRectMake(10, 5, kUserImageSize, kUserImageSize)];
+    userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 5, kUserImageSize, kUserImageSize)];
     [self.contentView addSubview:userImageView_];
     [userImageView_ release];
     
@@ -109,6 +108,14 @@ static const CGFloat kUserImageSize = 41.0;
   followButton_ = nil;
   unfollowButton_ = nil;
   [super dealloc];
+}
+
+- (void)prepareForReuse {
+  [super prepareForReuse];
+  [userImageView_ resetImage];
+  usernameLabel_.text = nil;
+  fullNameLabel_.text = nil;
+  stampImageView_.image = nil;
 }
 
 - (void)setUser:(User*)user {
