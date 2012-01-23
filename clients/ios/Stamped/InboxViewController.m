@@ -187,6 +187,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  BOOL shouldHideShelfAndTable = NO;
+  if (currentUser && currentUser.numStamps.integerValue == 0 && currentUser.following.count == 0)
+    shouldHideShelfAndTable = YES;
+
+  self.tableView.hidden = shouldHideShelfAndTable;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -246,15 +252,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     Stamp* latestStamp = [filteredStamps objectAtIndex:0];
     e.mostRecentStampDate = latestStamp.created;
   }
-  
-  User* currentUser = [AccountManager sharedManager].currentUser;
-  BOOL shouldHideShelfAndTable = NO;
-  if (currentUser && currentUser.numStamps.integerValue == 0 && currentUser.following.count == 0)
-    shouldHideShelfAndTable = YES;
-  
-  self.tableView.hidden = shouldHideShelfAndTable;
 
-  NSString* currentUserID = currentUser.userID;
+  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
   NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
     if ([obj isMemberOfClass:[Stamp class]] ||
         ([obj isMemberOfClass:[User class]] && [[(User*)obj userID] isEqualToString:currentUserID])) {

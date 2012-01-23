@@ -254,6 +254,7 @@ NSString* const kStampColors[7][2] = {
 }
 
 - (IBAction)dismissWelcomeView:(id)sender {
+  [[User managedObjectContext] save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes object:nil];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   [delegate.navigationController dismissModalViewControllerAnimated:YES];
