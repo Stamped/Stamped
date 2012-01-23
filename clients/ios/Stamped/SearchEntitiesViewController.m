@@ -408,13 +408,16 @@ typedef enum {
     if ([view isMemberOfClass:[UIButton class]] && view != sender)
       [(UIButton*)view setSelected:NO];
   }
-
+  self.resultsArray = nil;
+  [self reloadTableData];
+  
   self.currentSearchFilter = button.tag;
-
-  if (self.currentSearchFilter != SearchFilterNone)
-    button.selected = !button.selected;
-  else if (self.currentSearchFilter == SearchFilterNone)
+  
+  if (currentSearchFilter_ != SearchFilterNone) {
+    button.selected = !button.selected;    
+  } else {
     button.selected = NO;
+  }
 
   if (!button.selected)
     currentSearchFilter_ = SearchFilterNone;
