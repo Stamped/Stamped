@@ -349,10 +349,10 @@ typedef enum {
                                     CGRectGetMaxY(mainCommentFrame) - 30,
                                     CGRectGetWidth(numLikesLabel_.frame),
                                     CGRectGetHeight(numLikesLabel_.frame));
-  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 2,
-                                        CGRectGetMinY(numLikesLabel_.frame) + 1,
-                                        CGRectGetWidth(likeFaceButton_.frame),
-                                        CGRectGetHeight(likeFaceButton_.frame));
+  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) + 4,
+                                     CGRectGetMinY(numLikesLabel_.frame) - 3,
+                                     CGRectGetWidth(likeFaceButton_.frame),
+                                     CGRectGetHeight(likeFaceButton_.frame));
 }
 
 - (void)setupAlsoStampedBy {
