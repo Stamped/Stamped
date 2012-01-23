@@ -49,7 +49,7 @@
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="710466995"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<object class="NSColor" key="IBUIBackgroundColor" id="715238449">
 							<int key="NSColorSpace">3</int>
@@ -191,7 +191,7 @@
 									<object class="IBUILabel" id="437990520">
 										<reference key="NSNextResponder" ref="31986916"/>
 										<int key="NSvFlags">292</int>
-										<string key="NSFrame">{{15, -1}, {78, 25}}</string>
+										<string key="NSFrame">{{15, 0}, {78, 25}}</string>
 										<reference key="NSSuperview" ref="31986916"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="256600175"/>
@@ -353,7 +353,7 @@
 								<string key="NSFrame">{{199, 32}, {50, 16}}</string>
 								<reference key="NSSuperview" ref="710466995"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="416202101"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:311</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -387,6 +387,7 @@
 								<string key="NSFrame">{{71, 32}, {50, 16}}</string>
 								<reference key="NSSuperview" ref="710466995"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="1049665710"/>
 								<string key="NSReuseIdentifierKey">_NS:311</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -411,7 +412,7 @@
 								<string key="NSFrame">{{59, 0}, {80, 49}}</string>
 								<reference key="NSSuperview" ref="710466995"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="1049665710"/>
+								<reference key="NSNextKeyView" ref="416202101"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>

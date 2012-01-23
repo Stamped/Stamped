@@ -96,7 +96,6 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  self.affiliateLogoView.image = [UIImage imageNamed:@"logo_fandango"];
   [super viewWillAppear:animated];
 }
 
@@ -124,6 +123,8 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
+    self.mainActionLabel.text = @"Buy tickets";
+    self.affiliateLogoView.image = [UIImage imageNamed:@"logo_fandango"];
   } else if (detailedEntity_.itunesURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
