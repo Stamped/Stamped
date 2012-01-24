@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import bson, logs, utils
+import api.Schemas as Schemas
 
 from utils      import abstract
 from checkdb    import *
@@ -30,14 +31,120 @@ validate schemas
 Data enrichment
 """
 
+class ADocumentIntegrityCheck(AIntegrityCheck):
+    """
+        Abstract superclass for verifying the existence and correctness of 
+        key fields in all documents across a collection.
+    """
+    
+    def __init__(self, api, db, options, collection, id_field=None, schema=None, **kwargs):
+        AIntegrityCheck.__init__(self, api, db, options)
+        
+        self._sample_kwargs = kwargs
+        self._collection = collection
+        self._id_field = id_field
+        self._schema = schema
+    
+    def run(self):
+        self._sample(self._get_docs(), 
+                     self.options.sampleSetRatio, 
+                     self._check_doc, 
+                     **self._sample_kwargs)
+    
+    def _get_docs(self):
+        return self.db[self._collection].find()
+    
+    def _check_schema(self, obj):
+        pass
+    
+    def _check_doc(self, doc):
+        doc_id = str(doc['_id'])
+        
+        if self._id_field is not None:
+            doc[self._id_field] = str(doc['_id'])
+            del doc['_id']
+        
+        if self._schema is not None:
+            try:
+                obj = self._schema(doc)
+                self._check_schema(obj)
+            except Exception, e:
+                self._handle_error("%s integrity error: document failed schema check (%s); %s" % (
+                    self._collection, str(e), {
+                    'doc_id' : doc_id, 
+                    'object' : doc, 
+                }))
+
+class EntityDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='entities', 
+                                         id_field='entity_id', 
+                                         schema=Schemas.Entity)
+    
+    def _check_schema(self, obj):
+        assert obj.title is not None
+        assert obj.titlel is not None
+        assert obj.subcategory is not None
+
+class StampDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='stamps', 
+                                         id_field='stamp_id', 
+                                         schema=Schemas.Stamp)
+
+class UserDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='users', 
+                                         id_field='user_id', 
+                                         schema=Schemas.User)
+
+class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='users', 
+                                         id_field='user_id', 
+                                         schema=Schemas.Account)
+
+class FavoriteDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='favorites', 
+                                         id_field='favorite_id', 
+                                         schema=Schemas.Favorite)
+
+class CommentDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='comments', 
+                                         id_field='comment_id', 
+                                         schema=Schemas.Comment)
+
+class ActivityDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='activity', 
+                                         id_field='activity_id', 
+                                         schema=Schemas.Activity)
+
 class AReferenceIntegrityCheck(AIntegrityCheck):
     """
-        Abstract superclass for verifying the existence of all cross-collection
+        Abstract superclass for verifying the existence of cross-collection 
         object references.
     """
     
     def __init__(self, api, db, options, collection, refs, **kwargs):
         AIntegrityCheck.__init__(self, api, db, options)
+        
         self._sample_kwargs = kwargs
         self._collection = collection
         self._refs = refs
@@ -45,15 +152,15 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
     def run(self):
         self._sample(self._get_docs(), 
                      self.options.sampleSetRatio, 
-                     self.check_doc, 
+                     self._check_doc, 
                      **self._sample_kwargs)
     
     def _get_docs(self):
         return self.db[self._collection].find()
     
-    def check_doc(self, doc):
-        # extract the id and reference ids from the document
+    def _check_doc(self, doc):
         doc_id = str(doc['_id'])
+        
         for reference, collection in self._refs.iteritems():
             try:
                 ref_id = str(self._get_field(doc, reference))
@@ -81,44 +188,11 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
                     'object' : doc, 
                 }))
 
-class StampsReferenceIntegrityCheck(AReferenceIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        AReferenceIntegrityCheck.__init__(self, api, db, options, 
-                                          collection='stamps', 
-                                          refs={
-                                              'entity.entity_id' : 'entities', 
-                                              'user.user_id' : 'users', 
-                                          })
-
-class FavoritesReferenceIntegrityCheck(AReferenceIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        AReferenceIntegrityCheck.__init__(self, api, db, options, 
-                                          collection='favorites', 
-                                          refs={
-                                              'entity.entity_id' : 'entities', 
-                                              'user_id' : 'users', 
-                                          })
-
-class FavoritesStampReferenceIntegrityCheck(AReferenceIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        AReferenceIntegrityCheck.__init__(self, api, db, options, 
-                                          collection='favorites', 
-                                          refs={
-                                              'stamp.stamp_id' : 'stamps', 
-                                              'stamp.entity.entity_id' : 'entities', 
-                                              'stamp.user.user_id' : 'users', 
-                                          })
-    
-    def _get_docs(self):
-        return self.db[self._collection].find({"stamp" : {"$exists" : True}})
-
 class AStatIntegrityCheck(AIntegrityCheck):
     
     def __init__(self, api, db, options, collection, stat, **kwargs):
         AIntegrityCheck.__init__(self, api, db, options)
+        
         self._stat_collection = collection
         self._stat = stat
         self._sample_kwargs = kwargs
@@ -126,7 +200,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
     def run(self):
         self._sample(self.db[self._stat_collection].find(), 
                      self.options.sampleSetRatio, 
-                     self.check_doc, **self._sample_kwargs)
+                     self._check_doc, **self._sample_kwargs)
     
     @abstract
     def _get_cmp_value(self, doc_id):
@@ -143,7 +217,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
         
         return self.check_doc_value(doc, value)
     
-    def check_doc(self, doc):
+    def _check_doc(self, doc):
         doc_id = str(doc['_id'])
         value = self._get_cmp_value(doc_id)
         
@@ -195,7 +269,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     def run(self):
         self._sample(self.db[self._collection].find(), 
                      self.options.sampleSetRatio, 
-                     self.check_doc, 
+                     self._check_doc, 
                      **self._sample_kwargs)
     
     @abstract
@@ -208,7 +282,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     def _is_invalid_id(self, doc_id):
         return True
     
-    def check_doc(self, doc):
+    def _check_doc(self, doc):
         # extract the id and reference ids from the document
         doc_id  = str(doc['_id'])
         ref_ids = set(doc['ref_ids'])
@@ -407,20 +481,92 @@ class NumLikesIntegrityCheck(AStatIntegrityCheck):
         
         return 0 if likes is None else len(likes['ref_ids'])
 
+class StampsReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    """
+        Verifies all external document references in the stamps collection.
+    """
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='stamps', 
+                                          refs={
+                                              'entity.entity_id' : 'entities', 
+                                              'user.user_id' : 'users', 
+                                          })
+
+class FavoritesReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    """
+        Verifies all external document references in the favorites collection.
+    """
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='favorites', 
+                                          refs={
+                                              'entity.entity_id' : 'entities', 
+                                              'user_id' : 'users', 
+                                          })
+
+class FavoritesStampReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    """
+        Verifies all external document references in the favorites collection, 
+        specifically for favorites which are based off of a stamp.
+    """
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='favorites', 
+                                          refs={
+                                              'stamp.stamp_id' : 'stamps', 
+                                              'stamp.entity.entity_id' : 'entities', 
+                                              'stamp.user.user_id' : 'users', 
+                                          })
+    
+    def _get_docs(self):
+        return self.db[self._collection].find({"stamp" : {"$exists" : True}})
+
+class CommentsReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    """
+        Verifies all external document references in the comments collection.
+    """
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='comments', 
+                                          refs={
+                                              'user.user_id' : 'users', 
+                                              'stamp_id' : 'stamps', 
+                                          })
+
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
 checks = [
-    StampsReferenceIntegrityCheck, 
-    FavoritesReferenceIntegrityCheck, 
-    FavoritesStampReferenceIntegrityCheck, 
+    # index collection integrity checks
     InboxStampsIntegrityCheck, 
     CreditReceivedIntegrityCheck, 
     UserFavEntitiesIntegrityCheck, 
     UserLikesIntegrityCheck, 
     UserStampsIntegrityCheck, 
     StampCommentsIntegrityCheck, 
+    
+    # stat integrity checks
     NumFriendsIntegrityCheck, 
     NumFollowersIntegrityCheck, 
     NumLikesIntegrityCheck, 
+    
+    # reference integrity checks
+    StampsReferenceIntegrityCheck, 
+    FavoritesReferenceIntegrityCheck, 
+    FavoritesStampReferenceIntegrityCheck, 
+    CommentsReferenceIntegrityCheck, 
+    
+    # document integrity checks
+    EntityDocumentIntegrityCheck, 
+    StampDocumentIntegrityCheck, 
+    UserDocumentIntegrityCheck, 
+    AccountDocumentIntegrityCheck, 
+    FavoriteDocumentIntegrityCheck, 
+    CommentDocumentIntegrityCheck, 
+    ActivityDocumentIntegrityCheck, 
 ]
 
