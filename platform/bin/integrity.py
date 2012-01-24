@@ -73,6 +73,7 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
                 self._handle_error("%s integrity error: document failed %s schema check (%s); %s" % (
                     self._collection, self._schema.__name__, str(e), {
                     'doc_id' : doc_id, 
+                    'doc'    : doc, 
                 }))
 
 class AReferenceIntegrityCheck(AIntegrityCheck):
