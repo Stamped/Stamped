@@ -580,19 +580,21 @@ class StampNumIntegrityCheck(AIntegrityCheck):
     def _check_doc(self, doc):
         doc_id = str(doc['_id'])
         
-        stamps = (stamp['stats']['stamp_num'] for stamp in self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}).sort("stats.stamp_num"))
+        stamps = self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, })
+        seen   = {}
         
-        index = 1
-        for stamp_num in stamps:
-            if index != stamp_num:
-                self._handle_error("stamps integrity error: non-sequential stamp_num for user %s (%s); %s" % (
-                    doc_id, doc['screen_name'], {
-                        'stamp_num' : list(stamps), 
-                        'index'     : index, 
-                }))
-                return
+        for stamp in stamps:
+            stamp_num = stamp['stats']['stamp_num']
+            stamp_id  = str(stamp['_id'])
             
-            index += 1
+            if stamp_num in seen:
+                self._handle_error("stamps integrity error: duplicate stamp_num %d for user %s (%s); %s" % (
+                    stamp_num, doc_id, doc['screen_name'], {
+                        'stamp_id0' : seen[stamp_num], 
+                        'stamp_id1' : stamp_id, 
+                }))
+            else:
+                seen[stamp_num] = stamp_id
 
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
