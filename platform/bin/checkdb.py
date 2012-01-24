@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import integrity, logs, random, time, utils
+import integrity, libs.ec2_utils, logs, random, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
@@ -32,8 +32,11 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
-    def _sample(self, iterable, ratio, func, print_progress=True, progress_delta=5, max_retries=3, retry_delay=0.05):
+    def _sample(self, iterable, func, 
+                print_progress=True, progress_delta=5, 
+                max_retries=3, retry_delay=0.05):
         progress_count = 100 / progress_delta
+        ratio = self.options.sampleSetRatio
         count = 0
         index = 0
         
@@ -87,6 +90,22 @@ class AIntegrityCheck(object):
             return friend_ids['ref_ids']
         else:
             return []
+    
+    def _get_field(self, doc, key):
+        if '.' in key:
+            def _extract(o, args):
+                try:
+                    if 0 == len(args):
+                        return o
+                    
+                    return _extract(o[args[0]], args[1:])
+                except:
+                    return None
+            
+            s = key.split('.')
+            return _extract(doc, s)
+        else:
+            return doc[key]
     
     def _strip_ids(self, docs, key='_id'):
         if '.' in key:
@@ -161,6 +180,11 @@ def main():
     
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
+    
+    # if we're on prod, instruct pymongo to perform integrity checks on 
+    # secondaries to reduce load in primary
+    if utils.is_ec2() and libs.ec2_utils.is_prod_stack():
+        db.read_preference = ReadPreference.SECONDARY
     
     checks = integrity.checks
     for check_cls in checks:

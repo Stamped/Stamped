@@ -1774,20 +1774,12 @@ class StampedAPI(AStampedAPI):
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
         
+        ### NOTE: we rely on deleted stamps remaining in user's inboxes to 
+        # signal to clients that the stamp should be removed. this is not 
+        # necessary for the user stamps collection
+        
         # Remove from user collection
-        # self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
-        
-        # Remove from followers' inbox collections
-        # followers = self._friendshipDB.getFollowers(authUserId)
-        # followers.append(authUserId)
-        # self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
-        
-        ### NOTE: 
-        # This only removes the stamp from people who follow the user.
-        # If we allow for an "opt in" method of users adding individual
-        # stamps to their inbox, we'll have to account for that here.
-        
-        ### TODO: If restamp, remove from credited stamps' comment list
+        self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
         
         ### TODO: Remove from activity? To do? Anything else?
         
@@ -2354,7 +2346,7 @@ class StampedAPI(AStampedAPI):
             except Exception as e:
                 logs.warning(e)
                 pass
-
+        
         return result
     
     @API_CALL

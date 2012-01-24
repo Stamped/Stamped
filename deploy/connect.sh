@@ -22,7 +22,7 @@ echo "user: $user"
 echo "node: $node"
 
 dns=`./get_dns_by_node_name.py $node`
-echo "dns:   $dns"
+echo "dns:  $dns"
 
 echo -n -e "\033]0;$node\007"
 ssh -o StrictHostKeyChecking=no -i 'keys/test-keypair' "$user@$dns"

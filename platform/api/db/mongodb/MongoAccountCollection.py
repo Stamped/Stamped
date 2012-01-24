@@ -27,20 +27,20 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('name_lower')
 
     def _convertFromMongo(self, document):
-        if 'screen_name_lower' in document:
-            del(document['screen_name_lower'])
-        if 'name_lower' in document:
-            del(document['name_lower'])
+        #if 'screen_name_lower' in document:
+        #    del(document['screen_name_lower'])
+        #if 'name_lower' in document:
+        #    del(document['name_lower'])
         
         return AMongoCollection._convertFromMongo(self, document)
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
         
-        if 'screen_name' in document:
-            document['screen_name_lower'] = str(document['screen_name']).lower()
-        if 'name' in document:
-            document['name_lower'] = unicode(document['name']).lower()
+        #if 'screen_name' in document:
+        #    document['screen_name_lower'] = str(document['screen_name']).lower()
+        #if 'name' in document:
+        #    document['name_lower'] = unicode(document['name']).lower()
         
         return document
     
@@ -97,12 +97,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self._convertFromMongo(document)
 
     def updateLinkedAccounts(self, userId, twitter=None, facebook=None):
-        
-        if twitter is not None:
-            twitter_data = twitter.value
-        
-        if facebook is not None:
-            facebook_data = facebook.value
 
         ### TODO: Derive valid_twitter/facebook from schema
 
@@ -125,14 +119,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         fields = {}
 
         # Twitter
-        for k, v in twitter_data.iteritems():
-            if k in valid_twitter and v is not None:
-                fields['linked_accounts.twitter.%s' % k] = v
+        if twitter is not None:
+            for k, v in twitter.value.iteritems():
+                if k in valid_twitter and v is not None:
+                    fields['linked_accounts.twitter.%s' % k] = v
             
         # Facebook
-        for k, v in facebook_data.iteritems():
-            if k in valid_facebook and v is not None:
-                fields['linked_accounts.facebook.%s' % k] = v
+        if facebook is not None:
+            for k, v in facebook.value.iteritems():
+                if k in valid_facebook and v is not None:
+                    fields['linked_accounts.facebook.%s' % k] = v
             
         if len(fields) > 0:
             self._collection.update(
