@@ -587,7 +587,7 @@ class StampNumIntegrityCheck(AIntegrityCheck):
             if index != stamp_num:
                 self._handle_error("stamps integrity error: non-sequential stamp_num for user %s (%s); %s" % (
                     doc_id, doc['screen_name'], {
-                        'stamp_num' : stamps, 
+                        'stamp_num' : list(stamps), 
                         'index'     : index, 
                 }))
                 return
