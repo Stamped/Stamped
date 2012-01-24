@@ -18,7 +18,9 @@
 #import "Stamp.h"
 #import "Entity.h"
 #import "FacebookUser.h"
+#import "OAuth+Additions.h"
 #import "TwitterUser.h"
+#import "TWSignedRequest.h"
 #import "User.h"
 
 static SocialManager* sharedManager_ = nil;
@@ -29,16 +31,16 @@ static NSString* const kTwitterUsername = @"TwitterUsername";
 static NSString* const kTwitterBaseURI = @"http://api.twitter.com/1/";
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
-static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kTwitterSignOutURI = @"/account/end_session.json";
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kTwitterUserLookupPath = @"/users/lookup.json";
+static NSString* const kTwitterFullRequestTokenPath = @"https://api.twitter.com/oauth/request_token";
+static NSString* const kTwitterFullAuthTokenPath = @"https://api.twitter.com/oauth/access_token";
 
 static NSString* const kFacebookFriendsURI = @"/me/friends?limit=0";
 static NSString* const kFacebookAppID = @"297022226980395";
 static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
 static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
-static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";  // DEPRECATED
 static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
 static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
 static NSString* const kStampedLogoURLPath = @"http://static.stamped.com/logos/";
@@ -67,24 +69,22 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)showTwitterAccountChoices:(NSArray*)accounts;
 - (void)accountWasAuthorized:(ACAccount*)account;
 - (void)storeMainTwitterAccountAs:(ACAccount*)account;
-- (void)didReceiveTwitterFollowers:(NSDictionary*)followers;
 - (void)didReceiveTwitterFriends:(NSDictionary*)friends;
 - (void)didReceiveTwitterFriendsNotUsingStamped:(NSArray*)friends;
 - (void)displayNoAccountsAlert;
 
 - (void)checkForEndlessSignIn:(NSNotification*)note;
 - (void)requestTwitterUser;
-- (void)requestTwitterFollowers:(NSString*)userIDString;
 - (void)requestTwitterFriends:(NSString*)userIDString;
 - (void)removeTwitterCredentials;
 - (void)removeFacebookCredentials;
-- (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID;
-- (void)requestStampedLinkTwitterFollowers:(NSArray*)followers;
+- (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID token:(NSString*)token secret:(NSString*)tokenSecret;
 - (void)requestStampedUnlinkTwitter;
-- (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID;
+- (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID token:(NSString*)token;
 - (void)requestStampedUnlinkFacebook;
 - (void)requestStampedFriendsFromFacebook:(NSString*)accessToken;
 - (void)requestStampedFriendsFromTwitter;
+- (void)sendStampedTwitterFriendsRequestWithToken:(NSString*)token secret:(NSString*)tokenSecret;
 
 - (void)requestTwitterUsersNotUsingStamped;
 - (void)requestFacebookUsersNotUsingStamped;
@@ -426,12 +426,42 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (void)requestTwitterUser {
   if ([self hasiOS5Twitter]) {
-    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
-    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
-    NSString* userID = [account valueForKeyPath:@"properties.user_id"];
-    [self requestStampedLinkTwitter:account.username userID:userID];
-    [self requestTwitterFollowers:userID];
-    [self requestTwitterFriends:userID];
+    TWSignedRequest* signedRequest = [[[TWSignedRequest alloc] initWithURL:[NSURL URLWithString:kTwitterFullRequestTokenPath]
+                                                                parameters:[NSDictionary dictionaryWithObject:@"reverse_auth" forKey:@"x_auth_mode"]
+                                                             requestMethod:TWSignedRequestMethodPOST] autorelease];
+    [signedRequest performRequestWithHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+      if (data == nil) {
+        NSLog(@"Problem getting data: %@", error.localizedDescription);
+      } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+          NSString* signedReverseAuthSignature = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+          NSDictionary* step2Params = [NSDictionary dictionaryWithObjectsAndKeys:[TWSignedRequest consumerKey], @"x_reverse_auth_target",
+                                       signedReverseAuthSignature, @"x_reverse_auth_parameters", nil];
+          NSURL* authTokenURL = [NSURL URLWithString:kTwitterFullAuthTokenPath];
+          TWRequest* step2Request = [[[TWRequest alloc] initWithURL:authTokenURL parameters:step2Params requestMethod:TWRequestMethodPOST] autorelease];
+          NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+          [step2Request setAccount:[accountStore_ accountWithIdentifier:identifier]];
+          [step2Request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+            
+            //  Something went wrong
+            if (responseData == nil) {
+              NSLog(@"Error occurred in Step 2 of Twitter reverse Auth");
+            } else {
+              NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+              ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
+              NSString* userID = [account valueForKeyPath:@"properties.user_id"];
+              NSString* responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+              NSDictionary* responseDictionary = [NSURL ab_parseURLQueryString:responseStr];
+              [self requestStampedLinkTwitter:account.username
+                                       userID:userID 
+                                        token:[responseDictionary objectForKey:@"oauth_token"]
+                                       secret:[responseDictionary objectForKey:@"oauth_token_secret"]];
+              [self requestTwitterFriends:userID];
+            }
+          }];
+        });
+      }
+    }];
   } else {  
     if (!self.twitterClient)
       self.twitterClient = [RKClient clientWithBaseURL:kTwitterBaseURI];
@@ -442,39 +472,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [self.authentication authorizeRequest:request.URLRequest];
     [request send];
   }
-}
-
-- (void)requestTwitterFollowers:(NSString*)userIDString {
-  if ([self hasiOS5Twitter]) {
-    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
-    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
-    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", nil];
-    NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/followers/ids.json"];
-    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodGET] autorelease];
-    request.account = account;
-    
-    [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
-      if ([urlResponse statusCode] == 200) {
-        NSError* error = nil;
-        NSDictionary* followersObject = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&error];
-        if (followersObject)
-          [self performSelectorOnMainThread:@selector(didReceiveTwitterFollowers:) withObject:followersObject waitUntilDone:NO];
-      }
-    }];
-  } else {
-    if (!self.twitterClient)
-      self.twitterClient = [RKClient clientWithBaseURL:kTwitterBaseURI];
-
-    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil];
-    NSString* path = [kTwitterFollowersURI appendQueryParams:params];
-    RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
-    [self.authentication authorizeRequest:request.URLRequest];
-    [request send];
-  }
-}
-
-- (void)didReceiveTwitterFollowers:(NSDictionary*)followers {
-  [self requestStampedLinkTwitterFollowers:[followers objectForKey:@"ids"]];
 }
 
 - (void)requestTwitterFriends:(NSString*)userIDString {
@@ -642,7 +639,9 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if ([result isKindOfClass:[NSDictionary class]]) {
     // handle callback from request for current user info.
     if ([result objectForKey:@"name"]) {
-      [self requestStampedLinkFacebook:[result objectForKey:@"name"] userID:[result objectForKey:@"id"]];
+      [self requestStampedLinkFacebook:[result objectForKey:@"name"]
+                                userID:[result objectForKey:@"id"]
+                                 token:self.facebookClient.accessToken];
       [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     }
     resultData = [result objectForKey:@"data"];
@@ -676,7 +675,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedFriendsFromFacebook:(NSString*)accessToken {
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
-
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFindFacebookFriendsPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;
@@ -685,13 +683,13 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [loader send];
 }
 
-- (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID {
+- (void)requestStampedLinkFacebook:(NSString*)name userID:(NSString*)userID token:(NSString*)token {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
   [defaults setObject:userID forKey:@"FBID"];
   [defaults synchronize];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath delegate:self];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", token, @"facebook_token", nil];
   request.method = RKRequestMethodPOST;
   [request send];
 }
@@ -704,62 +702,63 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 - (void)requestStampedFriendsFromTwitter {
+  if ([self hasiOS5Twitter]) {
+    TWSignedRequest* signedRequest = [[[TWSignedRequest alloc] initWithURL:[NSURL URLWithString:kTwitterFullRequestTokenPath]
+                                                                parameters:[NSDictionary dictionaryWithObject:@"reverse_auth" forKey:@"x_auth_mode"]
+                                                             requestMethod:TWSignedRequestMethodPOST] autorelease];
+    [signedRequest performRequestWithHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
+      if (data == nil) {
+        NSLog(@"Problem getting data: %@", error.localizedDescription);
+      } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+          NSString* signedReverseAuthSignature = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+          NSDictionary* step2Params = [NSDictionary dictionaryWithObjectsAndKeys:[TWSignedRequest consumerKey], @"x_reverse_auth_target",
+                                       signedReverseAuthSignature, @"x_reverse_auth_parameters", nil];
+          NSURL* authTokenURL = [NSURL URLWithString:kTwitterFullAuthTokenPath];
+          TWRequest* step2Request = [[[TWRequest alloc] initWithURL:authTokenURL parameters:step2Params requestMethod:TWRequestMethodPOST] autorelease];
+          NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
+          [step2Request setAccount:[accountStore_ accountWithIdentifier:identifier]];
+          [step2Request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+            
+            //  Something went wrong
+            if (responseData == nil) {
+              NSLog(@"Error occurred in Step 2 of Twitter reverse Auth");
+            } else {
+              NSString* responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+              NSDictionary* responseDictionary = [NSURL ab_parseURLQueryString:responseStr];
+              [self sendStampedTwitterFriendsRequestWithToken:[responseDictionary objectForKey:@"oauth_token"]
+                                                       secret:[responseDictionary objectForKey:@"oauth_token_secret"]];
+            }
+          }];
+        });
+      }
+    }];
+  } else if (self.authentication) {
+    [self sendStampedTwitterFriendsRequestWithToken:self.authentication.token secret:self.authentication.tokenSecret];
+  }
+}
+
+- (void)sendStampedTwitterFriendsRequestWithToken:(NSString*)token secret:(NSString*)tokenSecret {
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
-  
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFindTwitterFriendsPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;
-  NSDictionary* params = nil;
-  if ([self hasiOS5Twitter]) {
-//    NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
-//    ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
-//    NSURL* url = [NSURL URLWithString:kTwitterRequestTokenURL];
-//    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:kOAuthCallbackURL, @"oauth_callback", nil];
-//    TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];
-//    request.account = account;
-//    NSMutableURLRequest* signedRequest = [[request signedURLRequest] mutableCopy];
-//    [signedRequest setValue:@"reverse_auth" forHTTPHeaderField:@"x_auth_mode"];
-//    NSLog(@"Signed request headers: %@", signedRequest.allHTTPHeaderFields);
-//    return;
-//  
-//    [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
-//      if ([urlResponse statusCode] == 200) {
-//        NSError* error = nil;
-//        NSDictionary* friendsObject = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&error];
-//        if (friendsObject)
-//          [self performSelectorOnMainThread:@selector(didReceiveTwitterFriends:) withObject:friendsObject waitUntilDone:NO];
-//      }
-//    }];
-    params = [NSDictionary dictionaryWithObject:[self.twitterIDsNotUsingStamped.allObjects componentsJoinedByString:@","] forKey:@"q"];
-  } else if (self.authentication) {
-    params = [NSDictionary dictionaryWithObjectsAndKeys:self.authentication.token, @"twitter_key",
-                                                        self.authentication.tokenSecret, @"twitter_secret", nil];
-  }
-
-  if (!params)
-    return;
-
-  loader.params = params;
+  loader.params = [NSDictionary dictionaryWithObjectsAndKeys:token, @"twitter_key", tokenSecret, @"twitter_secret", nil];
   loader.objectMapping = mapping;
   [loader send];
 }
 
-
-- (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID {
+- (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID token:(NSString*)token secret:(NSString*)tokenSecret {
   [[NSUserDefaults standardUserDefaults] setObject:username forKey:kTwitterUsername];
   [[NSUserDefaults standardUserDefaults] synchronize];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
-                                                              username, @"twitter_screen_name", nil];
-  request.method = RKRequestMethodPOST;
-  [request send];
-}
-
-- (void)requestStampedLinkTwitterFollowers:(NSArray*)followers {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
-  request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
+                                                              username, @"twitter_screen_name",
+                                                              token, @"twitter_key",
+                                                              tokenSecret, @"twitter_secret", nil];
+  
   request.method = RKRequestMethodPOST;
   [request send];
 }
@@ -859,15 +858,11 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
   
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
+    isSigningInToTwitter_ = NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterRemovePath].location != NSNotFound) {
-    return;
-  }
-  // Response for requestStampedLinkTwitterFollowers. End of Twitter signin.
-  if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
-    isSigningInToTwitter_ = NO;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
@@ -889,11 +884,11 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
   // Response for requestTwitterUser.
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
-    [self requestStampedLinkTwitter:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
-    [self requestTwitterFollowers:[body objectForKey:@"id_str"]];
+    [self requestStampedLinkTwitter:[body objectForKey:@"screen_name"]
+                             userID:[body objectForKey:@"id_str"]
+                              token:self.authentication.token
+                             secret:self.authentication.tokenSecret];
     [self requestTwitterFriends:[body objectForKey:@"id_str"]];
-  } else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
-    [self requestStampedLinkTwitterFollowers:[body objectForKey:@"ids"]];
   } else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     self.twitterIDsNotUsingStamped = [NSMutableSet setWithArray:[body objectForKey:@"ids"]];
     [self requestStampedFriendsFromTwitter];
