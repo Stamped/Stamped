@@ -44,7 +44,6 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
     
     def run(self):
         self._sample(self._get_docs(), 
-                     self.options.sampleSetRatio, 
                      self._check_doc, 
                      **self._sample_kwargs)
     
@@ -94,7 +93,6 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
     
     def run(self):
         self._sample(self._get_docs(), 
-                     self.options.sampleSetRatio, 
                      self._check_doc, 
                      **self._sample_kwargs)
     
@@ -142,7 +140,6 @@ class AStatIntegrityCheck(AIntegrityCheck):
     
     def run(self):
         self._sample(self.db[self._stat_collection].find(), 
-                     self.options.sampleSetRatio, 
                      self._check_doc, **self._sample_kwargs)
     
     @abstract
@@ -211,7 +208,6 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     
     def run(self):
         self._sample(self.db[self._collection].find(), 
-                     self.options.sampleSetRatio, 
                      self._check_doc, 
                      **self._sample_kwargs)
     
@@ -508,6 +504,7 @@ class PlaceDocumentIntegrityCheck(ADocumentIntegrityCheck):
     
     def _get_schema(self, doc):
         coords = doc['coordinates']
+        
         doc['coordinates'] = {
             'lat' : coords[1], 
             'lng' : coords[0], 
@@ -539,10 +536,6 @@ class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
                                          schema=Schemas.Account)
     
     def _check_schema(self, obj):
-        assert obj is not None
-        assert obj.screen_name_lower is not None 
-        assert obj.name_lower is not None
-        
         assert obj.screen_name_lower == obj.screen_name.lower()
         assert obj.name_lower == obj['name'].lower()
 
@@ -570,6 +563,34 @@ class ActivityDocumentIntegrityCheck(ADocumentIntegrityCheck):
                                          id_field='activity_id', 
                                          schema=Schemas.Activity, 
                                          progress_delta=1)
+
+class StampNumIntegrityCheck(AIntegrityCheck):
+    """
+        Verifies the uniqueness of stamp_num across stamps for a given user.
+    """
+    
+    def __init__(self, api, db, options, **kwargs):
+        AIntegrityCheck.__init__(self, api, db, options)
+        
+        self._sample_kwargs = kwargs
+    
+    def run(self):
+        self._sample(self.db.users.find(), 
+                     self._check_doc, 
+                     **self._sample_kwargs)
+    
+    def _check_doc(self, doc):
+        doc_id = str(doc['_id'])
+        
+        stamps = self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}).sort({"stats.stamp_num" : 1})
+        
+        index = 1
+        for stamp in stamps:
+            if index != stamp.stats.stamp_num:
+                self._handle_error("stamps integrity error: non-sequential stamp_num for user %s" % doc)
+                return
+            
+            index += 1
 
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
@@ -601,5 +622,8 @@ checks = [
     FavoriteDocumentIntegrityCheck, 
     CommentDocumentIntegrityCheck, 
     ActivityDocumentIntegrityCheck, 
+    
+    # misc
+    StampNumIntegrityCheck, 
 ]
 

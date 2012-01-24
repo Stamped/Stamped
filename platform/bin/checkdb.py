@@ -32,10 +32,11 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
-    def _sample(self, iterable, ratio, func, 
+    def _sample(self, iterable, func, 
                 print_progress=True, progress_delta=5, 
                 max_retries=3, retry_delay=0.05):
         progress_count = 100 / progress_delta
+        ratio = self.options.sampleSetRatio
         count = 0
         index = 0
         
