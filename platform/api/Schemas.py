@@ -51,9 +51,11 @@ class Account(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
         self.name               = SchemaElement(basestring, required=True)
+        self.name_lower         = SchemaElement(basestring)
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
+        self.screen_name_lower  = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.phone              = SchemaElement(int)

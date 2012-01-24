@@ -70,8 +70,8 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
                 obj = self._schema(doc)
                 self._check_schema(obj)
             except Exception, e:
-                self._handle_error("%s integrity error: document failed schema check (%s); %s" % (
-                    self._collection, str(e), {
+                self._handle_error("%s integrity error: document failed %s schema check (%s); %s" % (
+                    self._collection, self._schema.__name__, str(e), {
                     'doc_id' : doc_id, 
                 }))
 
@@ -524,6 +524,10 @@ class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
                                          collection='users', 
                                          id_field='user_id', 
                                          schema=Schemas.Account)
+    
+    def _check_schema(self, obj):
+        assert obj.screen_name_lower == obj.screen_name.lower()
+        assert obj.name_lower == obj.name.lower()
 
 class FavoriteDocumentIntegrityCheck(ADocumentIntegrityCheck):
     

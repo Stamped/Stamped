@@ -27,20 +27,20 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('name_lower')
 
     def _convertFromMongo(self, document):
-        if 'screen_name_lower' in document:
-            del(document['screen_name_lower'])
-        if 'name_lower' in document:
-            del(document['name_lower'])
+        #if 'screen_name_lower' in document:
+        #    del(document['screen_name_lower'])
+        #if 'name_lower' in document:
+        #    del(document['name_lower'])
         
         return AMongoCollection._convertFromMongo(self, document)
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
         
-        if 'screen_name' in document:
-            document['screen_name_lower'] = str(document['screen_name']).lower()
-        if 'name' in document:
-            document['name_lower'] = unicode(document['name']).lower()
+        #if 'screen_name' in document:
+        #    document['screen_name_lower'] = str(document['screen_name']).lower()
+        #if 'name' in document:
+        #    document['name_lower'] = unicode(document['name']).lower()
         
         return document
     
