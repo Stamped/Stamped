@@ -350,6 +350,10 @@ class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
                                                 stat_collection='users', 
                                                 stat='stats.num_stamps')
     
+    def _is_invalid_id(self, doc_id):
+        ret = self.db['deletedstamps'].find_one({"_id" : bson.objectid.ObjectId(doc_id)})
+        return ret is None
+    
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamps'].find({'user.user_id' : doc_id}, {'_id' : 1}))
 
