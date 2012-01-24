@@ -526,6 +526,7 @@ typedef enum {
   }
   NSURL* url = [NSURL URLWithString:URLString];
   RKRequest* request = [[RKRequest alloc] initWithURL:url delegate:self];
+  request.URLRequest.timeoutInterval = 3;
   [[RKClient sharedClient].requestQueue addRequest:request];
   self.currentRequest = request;
   [request release];
@@ -658,6 +659,15 @@ typedef enum {
     self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
     [self reloadTableData];
   }
+}
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
+    return;
+
+  NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
+  self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
+  [self reloadTableData];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
@@ -860,9 +870,6 @@ typedef enum {
   }
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
   if (searchField_.text.length > 0) {
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
-    self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
-    [self reloadTableData];
     [self sendFastSearchRequest];
   } else {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
