@@ -162,6 +162,11 @@ def main():
     api = MongoStampedAPI(lite_mode=True)
     db  = api._entityDB._collection._database
     
+    # if we're on prod, instruct pymongo to perform integrity checks on 
+    # secondaries to reduce load in primary
+    if utils.is_ec2() and libs.ec2_utils.is_prod_stack():
+        db.read_preference = ReadPreference.SECONDARY
+    
     checks = integrity.checks
     for check_cls in checks:
         if options.check is None or options.check.lower() in check_cls.__name__.lower():

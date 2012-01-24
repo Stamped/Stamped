@@ -136,7 +136,7 @@ def get_elb(stack=None):
 
 def is_prod_stack():
     if not is_ec2():
-        return None
+        return False
     
     stack = get_stack()
     prod  = get_prod_stack()
@@ -144,7 +144,7 @@ def is_prod_stack():
     if stack is not None and prod is not None:
         return stack.instance.stack == prod
     
-    return None
+    return False
 
 def get_prod_stack():
     if not is_ec2():

@@ -11,6 +11,25 @@ import bson, logs, utils
 from utils      import abstract
 from checkdb    import *
 
+"""
+Index collections
+Object stats
+Object references
+    * ensure external id’s exist in their respective collections
+    * stamp -> entity
+    * stamp -> user
+    * favorite -> entity
+    * favorite -> stamp
+    * favorite -> user
+Object validation
+    * titlel
+    * screen_name_lower
+    * email
+    * make sure stamp_num is unique across a given user's stamps
+validate schemas
+Data enrichment
+"""
+
 class AStatIntegrityCheck(AIntegrityCheck):
     
     def __init__(self, api, db, options, collection, stat, **kwargs):
@@ -79,6 +98,10 @@ class AStatIntegrityCheck(AIntegrityCheck):
                 self.db[self._stat_collection].save(doc)
 
 class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
+    """
+        Abstract superclass for all index collection integrity checks. An index
+        collection is 
+    """
     
     def __init__(self, api, db, options, collection, stat_collection=None, stat=None, **kwargs):
         AStatIntegrityCheck.__init__(self, api, db, options, stat_collection, stat, **kwargs)
@@ -106,55 +129,46 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         ref_ids = set(doc['ref_ids'])
         
         # get all true comparison ids
-        cmp_ids  = set(self._get_cmp(doc_id))
+        cmp_ids = set(self._get_cmp(doc_id))
         
         # compare the actual ref_ids with the expected cmp_ids, keeping track 
         # of all invalid and missing ids
-        invalid_cmp_ids = []
-        missing_cmp_ids = []
+        invalid_ids = []
+        missing_ids = []
         
-        """
-        utils.log("%s vs %s" % (len(ref_ids), len(cmp_ids)))
-        utils.log("%s vs %s" % (type(list(ref_ids)[0]), type(list(cmp_ids)[0])))
-        utils.log(str(ref_ids))
-        utils.log(str(cmp_ids))
-        utils.log(str(list(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }))))
-        utils.log(str(self._strip_ids(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' : 1, }), key="entity.entity_id")))
-        """
-        
-        for cmp_id in ref_ids:
-            if cmp_id not in cmp_ids:
-                if self._is_invalid_id(cmp_id):
-                    invalid_cmp_ids.append(cmp_id)
+        for ref_id in ref_ids:
+            if ref_id not in cmp_ids:
+                if self._is_invalid_id(ref_id):
+                    invalid_ids.append(ref_id)
         
         for cmp_id in cmp_ids:
             if cmp_id not in ref_ids:
-                missing_cmp_ids.append(cmp_id)
+                missing_ids.append(cmp_id)
         
-        #utils.log("%d vs %d" % (len(invalid_cmp_ids), len(missing_cmp_ids)))
+        #utils.log("%d vs %d" % (len(invalid_ids), len(missing_ids)))
         
         # complain if we found unexpected ids
-        if len(invalid_cmp_ids) > 0:
+        if len(invalid_ids) > 0:
             self._handle_error("%s integrity error: found %d invalid reference%s; %s" % (
-                self._collection, len(invalid_cmp_ids), "" if 1 == len(invalid_cmp_ids) else "s", {
-                'doc_id'  : doc_id, 
-                'cmp_ids' : invalid_cmp_ids, 
+                self._collection, len(invalid_ids), "" if 1 == len(invalid_ids) else "s", {
+                '_id'  : doc_id, 
+                '_ids' : invalid_ids, 
             }))
         
         # complain if we found missing ids
-        if len(missing_cmp_ids) > 0:
+        if len(missing_ids) > 0:
             self._handle_error("%s integrity error: found %d missing reference%s; %s" % (
-                self._collection, len(missing_cmp_ids), "" if 1 == len(missing_cmp_ids) else "s", {
-                'doc_id'  : doc_id, 
-                'cmp_ids' : missing_cmp_ids, 
+                self._collection, len(missing_ids), "" if 1 == len(missing_ids) else "s", {
+                '_id'  : doc_id, 
+                '_ids' : missing_ids, 
             }))
         
         # optionally store the updated document after updating the reference ids
-        if not self.options.noop and (len(invalid_cmp_ids) > 0 or len(missing_cmp_ids) > 0):
-            for cmp_id in invalid_cmp_ids:
+        if not self.options.noop and (len(invalid_ids) > 0 or len(missing_ids) > 0):
+            for cmp_id in invalid_ids:
                 ref_ids.remove(cmp_id)
             
-            for cmp_id in missing_cmp_ids:
+            for cmp_id in missing_ids:
                 ref_ids.add(cmp_id)
             
             doc['ref_ids'] = list(ref_ids)
