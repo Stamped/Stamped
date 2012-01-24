@@ -73,7 +73,6 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
                 self._handle_error("%s integrity error: document failed schema check (%s); %s" % (
                     self._collection, str(e), {
                     'doc_id' : doc_id, 
-                    'object' : doc, 
                 }))
 
 class AReferenceIntegrityCheck(AIntegrityCheck):
@@ -518,17 +517,6 @@ class StampDocumentIntegrityCheck(ADocumentIntegrityCheck):
                                          id_field='stamp_id', 
                                          schema=Schemas.Stamp)
 
-class UserDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='users', 
-                                         id_field='user_id', 
-                                         schema=Schemas.User)
-    
-    def _verify_doc(self, doc):
-        assert doc['screen_name'].lower() == doc['screen_name_lower']
-
 class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
     
     def __init__(self, api, db, options):
@@ -587,7 +575,6 @@ checks = [
     EntityDocumentIntegrityCheck, 
     PlaceDocumentIntegrityCheck, 
     StampDocumentIntegrityCheck, 
-    UserDocumentIntegrityCheck, 
     AccountDocumentIntegrityCheck, 
     FavoriteDocumentIntegrityCheck, 
     CommentDocumentIntegrityCheck, 
