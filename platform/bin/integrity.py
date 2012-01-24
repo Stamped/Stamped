@@ -532,7 +532,7 @@ class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
         assert obj.name_lower is not None
         
         assert obj.screen_name_lower == obj.screen_name.lower()
-        assert obj.name_lower == obj['name']lower()
+        assert obj.name_lower == obj['name'].lower()
 
 class FavoriteDocumentIntegrityCheck(ADocumentIntegrityCheck):
     
