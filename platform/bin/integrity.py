@@ -575,18 +575,16 @@ class StampNumIntegrityCheck(AIntegrityCheck):
         self._sample_kwargs = kwargs
     
     def run(self):
-        self._sample(self.db.users.find(), 
-                     self._check_doc, 
-                     **self._sample_kwargs)
+        self._sample(self.db.users.find(), self._check_doc, **self._sample_kwargs)
     
     def _check_doc(self, doc):
         doc_id = str(doc['_id'])
         
-        stamps = self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}, sort="stats.stamp_num")
+        stamps = (stamp['stats']['stamp_num'] for stamp in self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}).sort("stats.stamp_num"))
         
         index = 1
-        for stamp in stamps:
-            if index != stamp.stats.stamp_num:
+        for stamp_num in stamps:
+            if index != stamp_num:
                 self._handle_error("stamps integrity error: non-sequential stamp_num for user %s" % doc)
                 return
             
