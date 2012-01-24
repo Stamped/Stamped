@@ -54,6 +54,9 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
     def _check_schema(self, obj):
         pass
     
+    def _get_schema(self, doc):
+        return self._schema(doc)
+    
     def _verify_doc(self, doc):
         pass
     
@@ -67,7 +70,7 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
         if self._schema is not None:
             try:
                 self._verify_doc(doc)
-                obj = self._schema(doc)
+                obj = self._get_schema(doc)
                 self._check_schema(obj)
             except Exception, e:
                 self._handle_error("%s integrity error: document failed %s schema check (%s); %s" % (
@@ -503,6 +506,15 @@ class PlaceDocumentIntegrityCheck(ADocumentIntegrityCheck):
         
         self._entity_checker = EntityDocumentIntegrityCheck(api, db, options)
     
+    def _get_schema(self, doc):
+        coords = doc['coordinates']
+        doc['coordinates'] = {
+            'lat' : coords[1], 
+            'lng' : coords[0], 
+        }
+        
+        return ADocumentIntegrityCheck._get_schema(self, doc)
+    
     def _check_schema(self, obj):
         self._entity_checker._check_schema(obj)
         
@@ -556,7 +568,8 @@ class ActivityDocumentIntegrityCheck(ADocumentIntegrityCheck):
         ADocumentIntegrityCheck.__init__(self, api, db, options, 
                                          collection='activity', 
                                          id_field='activity_id', 
-                                         schema=Schemas.Activity)
+                                         schema=Schemas.Activity, 
+                                         progress_delta=1)
 
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
