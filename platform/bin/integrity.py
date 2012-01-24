@@ -17,13 +17,9 @@ Index collections
 Object stats
 Object references
 Object validation
-    * titlel
-    * screen_name_lower
-    * email
-    * make sure stamp_num is unique across a given user's stamps
-validate schemas
 Data enrichment
 
+TODO:
     * ensure entities and places are in sync
 """
 
@@ -274,7 +270,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         
         # if there is a corresponding stat storing the count of ref_ids, ensure 
         # that it is also in sync with the underlying list of references.
-        AStatIntegrityCheck.check_doc_id(self, doc_id, value=len(ref_ids))
+        AStatIntegrityCheck.check_doc_id(self, doc_id, value=len(cmp_ids))
 
 class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
