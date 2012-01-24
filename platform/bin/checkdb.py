@@ -32,7 +32,9 @@ class AIntegrityCheck(object):
         self.db  = db
         self.options = options
     
-    def _sample(self, iterable, ratio, func, print_progress=True, progress_delta=5, max_retries=3, retry_delay=0.05):
+    def _sample(self, iterable, ratio, func, 
+                print_progress=True, progress_delta=5, 
+                max_retries=3, retry_delay=0.05):
         progress_count = 100 / progress_delta
         count = 0
         index = 0
@@ -87,6 +89,22 @@ class AIntegrityCheck(object):
             return friend_ids['ref_ids']
         else:
             return []
+    
+    def _get_field(self, doc, key):
+        if '.' in key:
+            def _extract(o, args):
+                try:
+                    if 0 == len(args):
+                        return o
+                    
+                    return _extract(o[args[0]], args[1:])
+                except:
+                    return None
+            
+            s = key.split('.')
+            return _extract(doc, s)
+        else:
+            return doc[key]
     
     def _strip_ids(self, docs, key='_id'):
         if '.' in key:

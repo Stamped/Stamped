@@ -15,7 +15,7 @@ from checkdb    import *
 Index collections
 Object stats
 Object references
-    * ensure external id’s exist in their respective collections
+    * ensure external id's exist in their respective collections
     * stamp -> entity
     * stamp -> user
     * favorite -> entity
@@ -29,6 +29,87 @@ Object validation
 validate schemas
 Data enrichment
 """
+
+class AReferenceIntegrityCheck(AIntegrityCheck):
+    """
+        Abstract superclass for verifying the existence of all cross-collection
+        object references.
+    """
+    
+    def __init__(self, api, db, options, collection, refs, **kwargs):
+        AIntegrityCheck.__init__(self, api, db, options)
+        self._sample_kwargs = kwargs
+        self._collection = collection
+        self._refs = refs
+    
+    def run(self):
+        self._sample(self._get_docs(), 
+                     self.options.sampleSetRatio, 
+                     self.check_doc, 
+                     **self._sample_kwargs)
+    
+    def _get_docs(self):
+        return self.db[self._collection].find()
+    
+    def check_doc(self, doc):
+        # extract the id and reference ids from the document
+        doc_id = str(doc['_id'])
+        for reference, collection in self._refs.iteritems():
+            try:
+                ref_id = str(self._get_field(doc, reference))
+            except KeyError:
+                ref_id = None
+            
+            if ref_id is None:
+                self._handle_error("%s integrity error: missing required object reference %s; %s" % (
+                    self._collection, reference, {
+                    'doc_id' : doc_id, 
+                    'object' : doc, 
+                }))
+            
+            obj = self.db[collection].find({"_id" : bson.objectid.ObjectId(ref_id)})
+            
+            if obj is None:
+                self._handle_error("%s integrity error: object reference %s doesn't exist in %s; %s" % (
+                    self._collection, reference, collection, {
+                    'doc_id' : doc_id, 
+                    'ref_id' : ref_id, 
+                    'object' : doc, 
+                }))
+
+class StampsReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='stamps', 
+                                          refs={
+                                              'entity.entity_id' : 'entities', 
+                                              'user.user_id' : 'users', 
+                                          })
+
+class FavoritesReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='favorites', 
+                                          refs={
+                                              'entity.entity_id' : 'entities', 
+                                              'user_id' : 'users', 
+                                          })
+
+class FavoritesStampReferenceIntegrityCheck(AReferenceIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        AReferenceIntegrityCheck.__init__(self, api, db, options, 
+                                          collection='favorites', 
+                                          refs={
+                                              'stamp.stamp_id' : 'stamps', 
+                                              'stamp.entity.entity_id' : 'entities', 
+                                              'stamp.user.user_id' : 'users', 
+                                          })
+    
+    def _get_docs(self):
+        return self.db[self._collection].find({"stamp" : {"$exists" : True}})
 
 class AStatIntegrityCheck(AIntegrityCheck):
     
@@ -325,6 +406,9 @@ class NumLikesIntegrityCheck(AStatIntegrityCheck):
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
 checks = [
+    StampsReferenceIntegrityCheck, 
+    FavoritesReferenceIntegrityCheck, 
+    FavoritesStampReferenceIntegrityCheck, 
     InboxStampsIntegrityCheck, 
     CreditReceivedIntegrityCheck, 
     UserFavEntitiesIntegrityCheck, 
