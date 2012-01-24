@@ -527,6 +527,9 @@ class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
                                          schema=Schemas.Account)
     
     def _check_schema(self, obj):
+        assert obj.screen_name is not None
+        assert obj.name is not None
+        
         assert obj is not None
         assert obj.screen_name_lower is not None 
         assert obj.name_lower is not None
