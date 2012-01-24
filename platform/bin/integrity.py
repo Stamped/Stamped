@@ -66,6 +66,7 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
                     'doc_id' : doc_id, 
                     'object' : doc, 
                 }))
+                break
             
             try:
                 obj = self.db[collection].find({"_id" : bson.objectid.ObjectId(ref_id)})
