@@ -1505,6 +1505,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def addStampAsync(self, authUserId, stamp_id):
         logs.info("addStampAsync: %s %s" % (authUserId, stamp_id))
+        utils.log("addStampAsync: %s %s" % (authUserId, stamp_id))
         stamp = self._stampDB.getStamp(stamp_id)
         
         # Add references to the stamp in all relevant inboxes
