@@ -16,12 +16,6 @@ from checkdb    import *
 Index collections
 Object stats
 Object references
-    * ensure external id's exist in their respective collections
-    * stamp -> entity
-    * stamp -> user
-    * favorite -> entity
-    * favorite -> stamp
-    * favorite -> user
 Object validation
     * titlel
     * screen_name_lower
@@ -29,7 +23,10 @@ Object validation
     * make sure stamp_num is unique across a given user's stamps
 validate schemas
 Data enrichment
+
+    * ensure entities and places are in sync
 """
+
 
 class ADocumentIntegrityCheck(AIntegrityCheck):
     """
@@ -57,6 +54,9 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
     def _check_schema(self, obj):
         pass
     
+    def _verify_doc(self, doc):
+        pass
+    
     def _check_doc(self, doc):
         doc_id = str(doc['_id'])
         
@@ -66,6 +66,7 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
         
         if self._schema is not None:
             try:
+                self._verify_doc(doc)
                 obj = self._schema(doc)
                 self._check_schema(obj)
             except Exception, e:
@@ -74,86 +75,6 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
                     'doc_id' : doc_id, 
                     'object' : doc, 
                 }))
-
-class EntityDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='entities', 
-                                         id_field='entity_id', 
-                                         schema=Schemas.Entity, 
-                                         progress_delta=1)
-    
-    def _check_schema(self, obj):
-        assert obj.title is not None
-        assert obj.titlel is not None
-        assert obj.subcategory is not None
-
-class PlaceDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='places', 
-                                         id_field='entity_id', 
-                                         schema=Schemas.Entity, 
-                                         progress_delta=1)
-        
-        self._entity_checker = EntityDocumentIntegrityCheck(api, db, options)
-    
-    def _check_schema(self, obj):
-        self._entity_checker._check_schema(obj)
-        
-        # ensure that we have valid lat / lng for place entity
-        assert obj.coordinates.lat is not None
-        assert obj.coordinates.lng is not None
-
-class StampDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='stamps', 
-                                         id_field='stamp_id', 
-                                         schema=Schemas.Stamp)
-
-class UserDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='users', 
-                                         id_field='user_id', 
-                                         schema=Schemas.User)
-
-class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='users', 
-                                         id_field='user_id', 
-                                         schema=Schemas.Account)
-
-class FavoriteDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='favorites', 
-                                         id_field='favorite_id', 
-                                         schema=Schemas.Favorite)
-
-class CommentDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='comments', 
-                                         id_field='comment_id', 
-                                         schema=Schemas.Comment)
-
-class ActivityDocumentIntegrityCheck(ADocumentIntegrityCheck):
-    
-    def __init__(self, api, db, options):
-        ADocumentIntegrityCheck.__init__(self, api, db, options, 
-                                         collection='activity', 
-                                         id_field='activity_id', 
-                                         schema=Schemas.Activity)
 
 class AReferenceIntegrityCheck(AIntegrityCheck):
     """
@@ -556,6 +477,89 @@ class CommentsReferenceIntegrityCheck(AReferenceIntegrityCheck):
                                               'user.user_id' : 'users', 
                                               'stamp_id' : 'stamps', 
                                           })
+
+class EntityDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='entities', 
+                                         id_field='entity_id', 
+                                         schema=Schemas.Entity, 
+                                         progress_delta=1)
+    
+    def _check_schema(self, obj):
+        assert obj.title is not None
+        assert obj.titlel is not None
+        assert obj.subcategory is not None
+
+class PlaceDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='places', 
+                                         id_field='entity_id', 
+                                         schema=Schemas.Entity, 
+                                         progress_delta=1)
+        
+        self._entity_checker = EntityDocumentIntegrityCheck(api, db, options)
+    
+    def _check_schema(self, obj):
+        self._entity_checker._check_schema(obj)
+        
+        # ensure that we have valid lat / lng for place entity
+        assert obj.coordinates.lat is not None
+        assert obj.coordinates.lng is not None
+
+class StampDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='stamps', 
+                                         id_field='stamp_id', 
+                                         schema=Schemas.Stamp)
+
+class UserDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='users', 
+                                         id_field='user_id', 
+                                         schema=Schemas.User)
+    
+    def _verify_doc(self, doc):
+        assert doc['screen_name'].lower() == doc['screen_name_lower']
+
+class AccountDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='users', 
+                                         id_field='user_id', 
+                                         schema=Schemas.Account)
+
+class FavoriteDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='favorites', 
+                                         id_field='favorite_id', 
+                                         schema=Schemas.Favorite)
+
+class CommentDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='comments', 
+                                         id_field='comment_id', 
+                                         schema=Schemas.Comment)
+
+class ActivityDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='activity', 
+                                         id_field='activity_id', 
+                                         schema=Schemas.Activity)
 
 # TODO: replace this hard-coded array with an auto-registered array of 
 # AIntegrityCheck subclasses
