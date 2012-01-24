@@ -36,8 +36,7 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  self.descriptionLabel.text = [detailedEntity_.address stringByReplacingOccurrencesOfString:@", "
-                                                                                  withString:@"\n"];
+  self.descriptionLabel.text = detailedEntity_.address;
   [self setupMainActionsContainer];
   [self setupMapView];
   [self setupSectionViews];

@@ -547,6 +547,8 @@ typedef enum {
   
   likeFaceButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
   [likeFaceButton_ setImage:[UIImage imageNamed:@"small_like_icon"] forState:UIControlStateNormal];
+  likeFaceButton_.adjustsImageWhenHighlighted = NO;
+  
   [likeFaceButton_ sizeToFit];
   likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 8,
                                      CGRectGetMinY(numLikesLabel_.frame) - 3,

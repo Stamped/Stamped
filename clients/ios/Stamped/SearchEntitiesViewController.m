@@ -325,6 +325,7 @@ typedef enum {
   currentResultType_ = ResultTypeFast;
   searchField_.enabled = YES;
   self.currentSearchFilter = SearchFilterNone;
+  self.cachedAutocompleteResults = nil;
   self.resultsArray = nil;
   [self reloadTableData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -491,6 +492,8 @@ typedef enum {
   if (textField != searchField_)
     return YES;
 
+  self.cachedAutocompleteResults = nil;
+  self.resultsArray = nil;
   [self sendSearchRequest];
   [searchField_ resignFirstResponder];
   return NO;
@@ -500,6 +503,7 @@ typedef enum {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   self.currentResultType = ResultTypeFast;
+  self.cachedAutocompleteResults = nil;
   self.resultsArray = nil;
   [self reloadTableData];
   return YES;
@@ -529,6 +533,7 @@ typedef enum {
 
 - (void)sendSearchRequest {
   RKClient* client = [RKClient sharedClient];
+  self.cachedAutocompleteResults = nil;
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     self.resultsArray = nil;
     [self reloadTableData];
@@ -855,6 +860,9 @@ typedef enum {
   }
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
   if (searchField_.text.length > 0) {
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
+    self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
+    [self reloadTableData];
     [self sendFastSearchRequest];
   } else {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];

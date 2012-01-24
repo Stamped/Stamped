@@ -540,7 +540,11 @@ const CGFloat kKeyboardHeight = 217.0;
       detailedEntity_.category = @"food";
       detailedEntity_.subcategory =
           segmentedControl_.selectedSegmentIndex == 0 ? @"restaurant" : @"bar";
-      detailedEntity_.subtitle = detailedEntity_.address;
+      if (detailedEntity_.address.length > 0) {
+        detailedEntity_.subtitle = detailedEntity_.address;
+      } else {
+        detailedEntity_.subtitle = detailedEntity_.subcategory.capitalizedString;
+      }
       break;
     case STEditCategoryRowMusic:
       detailedEntity_.category = @"music";
