@@ -40,8 +40,8 @@ static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/"
 static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
 // Amazon S3 Shit.
-static NSString* const kS3SecretAccessKey = @"gYyVHd0PROjOrZ1ibrxJnuFT2mMVH2wHKmKy33iL";
-static NSString* const kS3AccessKeyID = @"AKIAJYZ6F44Q5N3NJ2QA";
+static NSString* const kS3SecretAccessKey = @"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";
+static NSString* const kS3AccessKeyID = @"AKIAIRLTXI62SD3BWAHQ";
 static NSString* const kS3Bucket = @"stamped.com.static.temp";
 
 @interface CreateStampViewController () 

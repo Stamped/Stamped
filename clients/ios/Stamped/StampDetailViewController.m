@@ -78,6 +78,7 @@ typedef enum {
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIButton* likeFaceButton;
+@property (nonatomic, readonly) UIButton* showLikesButton;
 @property (nonatomic, readonly) TTTAttributedLabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
@@ -88,6 +89,7 @@ typedef enum {
 @implementation StampDetailViewController
 
 @synthesize mainCommentContainer = mainCommentContainer_;
+@synthesize showLikesButton = showLikesButton_;
 @synthesize scrollView = scrollView_;
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
@@ -159,6 +161,7 @@ typedef enum {
   self.alsoStampedByScrollView = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  showLikesButton_ = nil;
   [super dealloc];
 }
 
@@ -261,6 +264,7 @@ typedef enum {
   self.alsoStampedByScrollView = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  showLikesButton_ = nil;
 }
 
 - (void)setUpToolbar {
@@ -328,6 +332,7 @@ typedef enum {
 
   numLikesLabel_.hidden = likes == 0;
   likeFaceButton_.hidden = likes == 0;
+  showLikesButton_.hidden = likes == 0;
   NSString* likesString = [NSNumber numberWithUnsignedInteger:likes].stringValue;
   numLikesLabel_.text = likesString;
   [numLikesLabel_ addLinkToURL:[NSURL URLWithString:@"likes"]
@@ -353,6 +358,10 @@ typedef enum {
                                      CGRectGetMinY(numLikesLabel_.frame) - 3,
                                      CGRectGetWidth(likeFaceButton_.frame),
                                      CGRectGetHeight(likeFaceButton_.frame));
+  showLikesButton_.frame = CGRectMake(CGRectGetMinX(likeFaceButton_.frame) - 5,
+                                      CGRectGetMinY(likeFaceButton_.frame) - 5,
+                                      CGRectGetWidth(likeFaceButton_.frame) + CGRectGetWidth(numLikesLabel_.frame) + 11,
+                                      CGRectGetHeight(likeFaceButton_.frame) + 16);
 }
 
 - (void)setupAlsoStampedBy {
@@ -516,7 +525,7 @@ typedef enum {
 
   numLikesLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
   numLikesLabel_.delegate = self;
-  numLikesLabel_.userInteractionEnabled = YES;
+  numLikesLabel_.userInteractionEnabled = NO;
   numLikesLabel_.textColor = [UIColor stampedGrayColor];
   numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12.0];
   numLikesLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
@@ -547,8 +556,8 @@ typedef enum {
   
   likeFaceButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
   [likeFaceButton_ setImage:[UIImage imageNamed:@"small_like_icon"] forState:UIControlStateNormal];
-  likeFaceButton_.adjustsImageWhenHighlighted = NO;
-  
+  likeFaceButton_.adjustsImageWhenHighlighted = YES;
+  likeFaceButton_.userInteractionEnabled = NO;
   [likeFaceButton_ sizeToFit];
   likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 8,
                                      CGRectGetMinY(numLikesLabel_.frame) - 3,
@@ -557,6 +566,15 @@ typedef enum {
   [likeFaceButton_ addTarget:self action:@selector(showLikesPane) forControlEvents:UIControlEventTouchUpInside];
   [mainCommentContainer_ addSubview:likeFaceButton_];
 
+  showLikesButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  showLikesButton_.frame = CGRectMake(CGRectGetMinX(likeFaceButton_.frame) - 5,
+                                      CGRectGetMinY(likeFaceButton_.frame) - 5,
+                                      CGRectGetWidth(likeFaceButton_.frame) + CGRectGetWidth(numLikesLabel_.frame) + 11,
+                                      CGRectGetHeight(likeFaceButton_.frame) + 16);
+  [showLikesButton_ addTarget:self action:@selector(showLikesPane) forControlEvents:UIControlEventTouchUpInside];
+  [mainCommentContainer_ addSubview:showLikesButton_];
+  
+  showLikesButton_.hidden = (numLikes == 0);
   numLikesLabel_.hidden = (numLikes == 0);
   likeFaceButton_.hidden = (numLikes == 0);
 
