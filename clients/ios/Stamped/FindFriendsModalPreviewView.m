@@ -36,6 +36,7 @@
 @synthesize logoImageView = logoImageView_;
 @synthesize facebookMockView = facebookMockView_;
 @synthesize emailImageView = emailImageView_;
+@synthesize sampleTwitterUsername = sampleTwitterUsername_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -62,6 +63,7 @@
   logoImageView_ = nil;
   facebookMockView_ = nil;
   emailImageView_ = nil;
+  self.sampleTwitterUsername = nil;
   [super dealloc];
 }
 
@@ -187,7 +189,10 @@
       titleLabel_.text = @"Sample Invitation for Twitter";
       headerLabel_.text = [@"@" stringByAppendingString:[SocialManager sharedManager].twitterUsername];
       profileImageView_.imageURL = [SocialManager sharedManager].twitterProfileImageURL;
-      mainTextLabel_.text = @"@andybons Hey, I'm using @stampedapp to share the restaurants, movies, books and music I like best. Join me at stamped.com.";
+      if (!sampleTwitterUsername_)
+        self.sampleTwitterUsername = @"@andybons";
+
+      mainTextLabel_.text = [NSString stringWithFormat:@"%@ Hey, I'm using @stampedapp to share the restaurants, movies, books and music I like best. Join me at stamped.com.", sampleTwitterUsername_];
       mainTextLabel_.textAlignment = UITextAlignmentLeft;
       mainTextLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
       headerLabel_.textColor = [UIColor stampedBlackColor];

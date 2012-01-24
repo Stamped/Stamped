@@ -24,5 +24,6 @@ typedef enum {
 @property (nonatomic, readonly) STImageView* profileImageView;
 @property (nonatomic, readonly) UILabel* headerLabel;
 @property (nonatomic, readonly) UILabel* mainTextLabel;
+@property (nonatomic, copy) NSString* sampleTwitterUsername;
 
 @end
