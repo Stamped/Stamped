@@ -16,6 +16,7 @@
 #import "CreateStampViewController.h"
 #import "Comment.h"
 #import "Entity.h"
+#import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "Notifications.h"
 #import "PeopleListViewController.h"
@@ -77,6 +78,7 @@ typedef enum {
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIButton* likeFaceButton;
+@property (nonatomic, readonly) UIButton* showLikesButton;
 @property (nonatomic, readonly) TTTAttributedLabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
@@ -87,6 +89,7 @@ typedef enum {
 @implementation StampDetailViewController
 
 @synthesize mainCommentContainer = mainCommentContainer_;
+@synthesize showLikesButton = showLikesButton_;
 @synthesize scrollView = scrollView_;
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
@@ -158,6 +161,7 @@ typedef enum {
   self.alsoStampedByScrollView = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  showLikesButton_ = nil;
   [super dealloc];
 }
 
@@ -181,6 +185,7 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self setUpToolbar];
   headerView_.inverted = NO;
   [headerView_ setNeedsDisplay];
 }
@@ -192,8 +197,6 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
-  [self setUpToolbar];
 
   if ([[AccountManager sharedManager].currentUser.userID isEqualToString:stamp_.user.userID]) {
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
@@ -244,7 +247,6 @@ typedef enum {
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
   self.addFavoriteButton = nil;
-  self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
   self.likeLabel = nil;
@@ -262,6 +264,7 @@ typedef enum {
   self.alsoStampedByScrollView = nil;
   self.headerView.delegate = nil;
   self.headerView = nil;
+  showLikesButton_ = nil;
 }
 
 - (void)setUpToolbar {
@@ -329,6 +332,7 @@ typedef enum {
 
   numLikesLabel_.hidden = likes == 0;
   likeFaceButton_.hidden = likes == 0;
+  showLikesButton_.hidden = likes == 0;
   NSString* likesString = [NSNumber numberWithUnsignedInteger:likes].stringValue;
   numLikesLabel_.text = likesString;
   [numLikesLabel_ addLinkToURL:[NSURL URLWithString:@"likes"]
@@ -350,10 +354,14 @@ typedef enum {
                                     CGRectGetMaxY(mainCommentFrame) - 30,
                                     CGRectGetWidth(numLikesLabel_.frame),
                                     CGRectGetHeight(numLikesLabel_.frame));
-  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 2,
-                                        CGRectGetMinY(numLikesLabel_.frame) + 1,
-                                        CGRectGetWidth(likeFaceButton_.frame),
-                                        CGRectGetHeight(likeFaceButton_.frame));
+  likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) + 4,
+                                     CGRectGetMinY(numLikesLabel_.frame) - 3,
+                                     CGRectGetWidth(likeFaceButton_.frame),
+                                     CGRectGetHeight(likeFaceButton_.frame));
+  showLikesButton_.frame = CGRectMake(CGRectGetMinX(likeFaceButton_.frame) - 5,
+                                      CGRectGetMinY(likeFaceButton_.frame) - 5,
+                                      CGRectGetWidth(likeFaceButton_.frame) + CGRectGetWidth(numLikesLabel_.frame) + 11,
+                                      CGRectGetHeight(likeFaceButton_.frame) + 16);
 }
 
 - (void)setupAlsoStampedBy {
@@ -517,7 +525,7 @@ typedef enum {
 
   numLikesLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
   numLikesLabel_.delegate = self;
-  numLikesLabel_.userInteractionEnabled = YES;
+  numLikesLabel_.userInteractionEnabled = NO;
   numLikesLabel_.textColor = [UIColor stampedGrayColor];
   numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12.0];
   numLikesLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
@@ -548,6 +556,8 @@ typedef enum {
   
   likeFaceButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
   [likeFaceButton_ setImage:[UIImage imageNamed:@"small_like_icon"] forState:UIControlStateNormal];
+  likeFaceButton_.adjustsImageWhenHighlighted = YES;
+  likeFaceButton_.userInteractionEnabled = NO;
   [likeFaceButton_ sizeToFit];
   likeFaceButton_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceButton_.frame) - 8,
                                      CGRectGetMinY(numLikesLabel_.frame) - 3,
@@ -556,6 +566,15 @@ typedef enum {
   [likeFaceButton_ addTarget:self action:@selector(showLikesPane) forControlEvents:UIControlEventTouchUpInside];
   [mainCommentContainer_ addSubview:likeFaceButton_];
 
+  showLikesButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  showLikesButton_.frame = CGRectMake(CGRectGetMinX(likeFaceButton_.frame) - 5,
+                                      CGRectGetMinY(likeFaceButton_.frame) - 5,
+                                      CGRectGetWidth(likeFaceButton_.frame) + CGRectGetWidth(numLikesLabel_.frame) + 11,
+                                      CGRectGetHeight(likeFaceButton_.frame) + 16);
+  [showLikesButton_ addTarget:self action:@selector(showLikesPane) forControlEvents:UIControlEventTouchUpInside];
+  [mainCommentContainer_ addSubview:showLikesButton_];
+  
+  showLikesButton_.hidden = (numLikes == 0);
   numLikesLabel_.hidden = (numLikes == 0);
   likeFaceButton_.hidden = (numLikes == 0);
 
@@ -749,7 +768,8 @@ typedef enum {
 }
 
 - (IBAction)handleEntityTap:(id)sender {
-  UIViewController* detailViewController = [Util detailViewControllerForEntity:stamp_.entityObject];
+  EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForEntity:stamp_.entityObject];
+  detailViewController.referringStamp = stamp_;
   [self.navigationController pushViewController:detailViewController animated:YES];
 }
 

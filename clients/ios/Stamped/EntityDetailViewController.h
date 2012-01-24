@@ -18,6 +18,7 @@
 @class DetailedEntity;
 @class SearchResult;
 @class Stamp;
+@class STToolbar;
 
 @interface EntityDetailViewController : STViewController <RKObjectLoaderDelegate, 
                                                           CollapsibleViewControllerDelegate,
@@ -31,17 +32,27 @@
   NSMutableDictionary* sectionsDict_;
 }
 
+- (IBAction)mainActionButtonPressed:(id)sender;
+- (IBAction)todoButtonPressed:(id)sender;
+- (IBAction)stampButtonPressed:(id)sender;
+
 - (id)initWithEntityObject:(Entity*)entity;
 - (id)initWithSearchResult:(SearchResult*)searchResult;
 - (void)addSectionWithName:(NSString*)name;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
 - (void)addSectionStampedBy;
-- (void)addToolbar;
+- (void)addTodoToolbar;
+- (void)hideMainToolbar;
 - (CGFloat)contentHeight;
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
 
+@property (nonatomic, retain) Stamp* referringStamp;
+
+@property (nonatomic, retain) IBOutlet STToolbar* toolbarView;
+@property (nonatomic, retain) IBOutlet UIButton* todoButton;
+@property (nonatomic, retain) IBOutlet UILabel* todoLabel;
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;
@@ -55,7 +66,5 @@
 @property (nonatomic, retain) IBOutlet STImageView* imageView;
 
 - (void)imageViewTapped;
-//- (void)setupSectionViews;
-
 
 @end

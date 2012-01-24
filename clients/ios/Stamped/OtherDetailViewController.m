@@ -136,8 +136,8 @@
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (buttonIndex == 1) {
-    NSString* telURL = [NSString stringWithFormat:@"tel://%i",
-                        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
+    NSString* telURL = [NSString stringWithFormat:@"tel://%@",
+      [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }

@@ -12,6 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
+#import "CreateStampViewController.h"
 #import "DetailedEntity.h"
 #import "Entity.h"
 #import "Stamp.h"
@@ -25,9 +26,11 @@
 #import "User.h"
 #import "StampedAppDelegate.h"
 #import "Alerts.h"
+#import "STToolbar.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
+static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -63,7 +66,10 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize spinner = spinner_;
 @synthesize imageView = imageView_;
-
+@synthesize todoLabel = todoLabel_;
+@synthesize todoButton = todoButton_;
+@synthesize toolbarView = toolbarView_;
+@synthesize referringStamp = referringStamp_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -105,6 +111,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   self.spinner = nil;
   self.imageView.delegate = nil;
   self.imageView = nil;
+  self.todoLabel = nil;
+  self.todoButton = nil;
+  self.toolbarView = nil;
+  self.referringStamp = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
@@ -162,7 +172,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)viewDidLayoutSubviews {
-  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(275, MAXFLOAT)];
+  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(270, MAXFLOAT)];
   CGFloat todoBarPadding = entityObject_.favorite.stamp != nil ? kTodoBarHeight : 0;
   titleLabel_.frame = CGRectMake(15, 10 + todoBarPadding,
                                  titleSize.width,
@@ -255,6 +265,11 @@ static const CGFloat kTodoBarHeight = 44.0;
     [self.scrollView addSubview:iv];
     [iv release];
   }
+  
+  if (entityObject_.favorite) {
+    todoLabel_.text = @"To-Do'd";
+    todoButton_.selected = YES;
+  }
 }
 
 - (void)addTodoBar {
@@ -312,7 +327,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   [bar release];
 }
 
-- (void)addToolbar {
+- (void)addTodoToolbar {
   UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 56, 320, 56)];
   bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
   bar.layer.shadowOpacity = 0.2;
@@ -344,13 +359,20 @@ static const CGFloat kTodoBarHeight = 44.0;
   [activity stopAnimating];
   self.spinner = activity;
   [bar addSubview:self.spinner];
-  
+
   [self.view addSubview:bar];
   CGRect frame = self.scrollView.frame;
   frame.size.height -= 56;
   self.scrollView.frame = frame;
   
   [bar release];
+}
+
+- (void)hideMainToolbar {
+  toolbarView_.hidden = YES;
+  CGRect frame = self.scrollView.frame;
+  frame.size.height += CGRectGetHeight(toolbarView_.frame);
+  self.scrollView.frame = frame;
 }
 
 - (NSAttributedString*)todoAttributedString:(User*)user {
@@ -408,7 +430,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   self.spinner = nil;
   self.imageView.delegate = nil;
   self.imageView = nil;
-  
+  self.todoLabel = nil;
+  self.todoButton = nil;
+  self.toolbarView = nil;
+
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
 }
@@ -673,5 +698,51 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
   // Default does nothing. Override in subclasses.
 }
+
+#pragma mark - Actions
+
+- (IBAction)todoButtonPressed:(id)sender {
+  UIButton* button = sender;
+  BOOL shouldDelete = button.selected;
+  [button setSelected:!shouldDelete];
+  if (button.selected) {
+    todoLabel_.text = @"To-Do'd";
+  } else {
+    todoLabel_.text = @"To-Do";
+  }
+
+  NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = favoriteMapping;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:entityObject_.entityID forKey:@"entity_id"];
+  if (referringStamp_)
+    [params setObject:referringStamp_.stampID forKey:@"stamp_id"];
+
+  objectLoader.params = params;
+  if (shouldDelete) {
+    entityObject_.favorite = nil;
+    [entityObject_.managedObjectContext save:nil];
+  }
+  [objectLoader send];
+}
+
+- (IBAction)stampButtonPressed:(id)sender {
+  User* creditedUser = entityObject_.favorite.stamp.user;
+  if ([creditedUser.userID isEqualToString:[AccountManager sharedManager].currentUser.userID])
+    creditedUser = nil;
+
+  if (!creditedUser)
+    creditedUser = referringStamp_.user;
+
+  CreateStampViewController* vc = [[CreateStampViewController alloc] initWithEntityObject:entityObject_
+                                                                               creditedTo:creditedUser];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
+}
+
+- (IBAction)mainActionButtonPressed:(id)sender {}
 
 @end

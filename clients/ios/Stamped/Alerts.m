@@ -59,7 +59,7 @@
                                          message:@"The username and password you entered don't match."
                                         delegate:aDelegate
                                cancelButtonTitle:@"Reset password"
-                               otherButtonTitles:@"      Try again      ", nil] autorelease];
+                               otherButtonTitles:@"      OK      ", nil] autorelease];
     default:
       return nil;
   }

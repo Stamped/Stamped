@@ -325,6 +325,7 @@ typedef enum {
   currentResultType_ = ResultTypeFast;
   searchField_.enabled = YES;
   self.currentSearchFilter = SearchFilterNone;
+  self.cachedAutocompleteResults = nil;
   self.resultsArray = nil;
   [self reloadTableData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -408,13 +409,17 @@ typedef enum {
     if ([view isMemberOfClass:[UIButton class]] && view != sender)
       [(UIButton*)view setSelected:NO];
   }
-
+  self.resultsArray = nil;
+  self.cachedAutocompleteResults = nil;
+  [self reloadTableData];
+  
   self.currentSearchFilter = button.tag;
-
-  if (self.currentSearchFilter != SearchFilterNone)
-    button.selected = !button.selected;
-  else if (self.currentSearchFilter == SearchFilterNone)
+  
+  if (currentSearchFilter_ != SearchFilterNone) {
+    button.selected = !button.selected;    
+  } else {
     button.selected = NO;
+  }
 
   if (!button.selected)
     currentSearchFilter_ = SearchFilterNone;
@@ -487,6 +492,8 @@ typedef enum {
   if (textField != searchField_)
     return YES;
 
+  self.cachedAutocompleteResults = nil;
+  self.resultsArray = nil;
   [self sendSearchRequest];
   [searchField_ resignFirstResponder];
   return NO;
@@ -496,6 +503,7 @@ typedef enum {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   self.currentResultType = ResultTypeFast;
+  self.cachedAutocompleteResults = nil;
   self.resultsArray = nil;
   [self reloadTableData];
   return YES;
@@ -518,6 +526,7 @@ typedef enum {
   }
   NSURL* url = [NSURL URLWithString:URLString];
   RKRequest* request = [[RKRequest alloc] initWithURL:url delegate:self];
+  request.URLRequest.timeoutInterval = 3;
   [[RKClient sharedClient].requestQueue addRequest:request];
   self.currentRequest = request;
   [request release];
@@ -525,6 +534,7 @@ typedef enum {
 
 - (void)sendSearchRequest {
   RKClient* client = [RKClient sharedClient];
+  self.cachedAutocompleteResults = nil;
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     self.resultsArray = nil;
     [self reloadTableData];
@@ -649,6 +659,15 @@ typedef enum {
     self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
     [self reloadTableData];
   }
+}
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
+    return;
+
+  NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@", self.searchField.text];
+  self.resultsArray = [self.cachedAutocompleteResults filteredArrayUsingPredicate:predicate];
+  [self reloadTableData];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
@@ -797,18 +816,14 @@ typedef enum {
     }
     case SearchIntentTodo: {
       EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
-      [detailViewController addToolbar];
+      [detailViewController hideMainToolbar];
+      [detailViewController addTodoToolbar];
       [self.navigationController pushViewController:detailViewController animated:YES];
       break;
     }
     default:
       break;
   }
-}
-
-- (void)setLoading:(BOOL)loading {
-  loading_ = loading;
-  
 }
 
 - (void)resetState {

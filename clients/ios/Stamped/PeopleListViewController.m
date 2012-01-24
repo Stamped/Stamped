@@ -65,10 +65,11 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  if (sourceType_ == PeopleListSourceTypeCredits)
-    self.peopleArray = [NSMutableArray arrayWithArray:stamp_.credits.allObjects];
-  else
+  if (sourceType_ == PeopleListSourceTypeCredits) {
+    self.userIDsToBeFetched = [NSMutableArray arrayWithArray:[(NSSet*)[stamp_.credits valueForKeyPath:@"userID"] allObjects]];
+  } else {
     [self loadUserIDsFromNetwork];
+  }
 
   NSString* title = nil;
   if (sourceType_ == PeopleListSourceTypeFollowers)

@@ -6,6 +6,7 @@
 //  Copyright 2011 Stamped. All rights reserved.
 //
 
+#import <MessageUI/MFMailComposeViewController.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
@@ -29,7 +30,8 @@ typedef enum {
                                                         UITableViewDataSource,
                                                         UITextFieldDelegate,
                                                         UINavigationControllerDelegate,
-                                                        UIAlertViewDelegate>
+                                                        UIAlertViewDelegate,
+                                                        MFMailComposeViewControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;

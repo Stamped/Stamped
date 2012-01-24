@@ -63,4 +63,19 @@ static const CGFloat kUserImageSize = 41.0;
   return self;
 }
 
+- (void)dealloc {
+  userImageView_ = nil;
+  nameLabel_ = nil;
+  emailLabel_ = nil;
+  inviteButton_ = nil;
+  [super dealloc];
+}
+
+- (void)prepareForReuse {
+  [super prepareForReuse];
+  [userImageView_ resetImage];
+  nameLabel_.text = nil;
+  emailLabel_.text = nil;
+}
+
 @end

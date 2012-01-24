@@ -11,6 +11,8 @@
 @class User;
 
 @interface UserImageView : UIControl
+- (void)resetImage;
+
 @property (nonatomic, readonly) UIImageView* imageView;
 @property (nonatomic, copy) NSString* imageURL;
 @end

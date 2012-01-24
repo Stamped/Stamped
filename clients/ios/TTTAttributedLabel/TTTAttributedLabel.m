@@ -67,10 +67,10 @@ static inline NSTextCheckingType NSTextCheckingTypeFromUIDataDetectorType(UIData
 }
 
 static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label) {
-    NSMutableDictionary *mutableAttributes = [NSMutableDictionary dictionary]; 
+    NSMutableDictionary* mutableAttributes = [NSMutableDictionary dictionary]; 
     
     CTFontRef font = CTFontCreateWithName((CFStringRef)label.font.fontName, label.font.pointSize, NULL);
-    [mutableAttributes setObject:(id)font forKey:(NSString *)kCTFontAttributeName];
+    [mutableAttributes setObject:(id)font forKey:(NSString*)kCTFontAttributeName];
     CFRelease(font);
     
     [mutableAttributes setObject:(id)[label.textColor CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
@@ -130,7 +130,7 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   return [self initCommon];
 }
 
-- (id)initWithCoder:(NSCoder *)coder {
+- (id)initWithCoder:(NSCoder*)coder {
   self = [super initWithCoder:coder];
   if (!self) {
     return nil;
@@ -143,9 +143,9 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
   self.dataDetectorTypes = UIDataDetectorTypeNone;
   self.links = [NSArray array];
   
-  NSMutableDictionary *mutableLinkAttributes = [NSMutableDictionary dictionary];
+  NSMutableDictionary* mutableLinkAttributes = [NSMutableDictionary dictionary];
   [mutableLinkAttributes setValue:(id)[[UIColor blueColor] CGColor] forKey:(NSString*)kCTForegroundColorAttributeName];
-  [mutableLinkAttributes setValue:[NSNumber numberWithBool:YES] forKey:(NSString *)kCTUnderlineStyleAttributeName];
+  [mutableLinkAttributes setValue:[NSNumber numberWithBool:YES] forKey:(NSString*)kCTUnderlineStyleAttributeName];
   self.linkAttributes = [NSDictionary dictionaryWithDictionary:mutableLinkAttributes];
   
   return self;
@@ -212,53 +212,53 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 
 #pragma mark -
 
-- (NSArray *)detectedLinksInString:(NSString *)string range:(NSRange)range error:(NSError **)error {
+- (NSArray*)detectedLinksInString:(NSString*)string range:(NSRange)range error:(NSError**)error {
     if (!string) {
         return [NSArray array];
     }
-    NSMutableArray *mutableLinks = [NSMutableArray array];
-    NSDataDetector *dataDetector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeFromUIDataDetectorType(self.dataDetectorTypes) error:error];
-    [dataDetector enumerateMatchesInString:string options:0 range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
+    NSMutableArray* mutableLinks = [NSMutableArray array];
+    NSDataDetector* dataDetector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeFromUIDataDetectorType(self.dataDetectorTypes) error:error];
+    [dataDetector enumerateMatchesInString:string options:0 range:range usingBlock:^(NSTextCheckingResult* result, NSMatchingFlags flags, BOOL* stop) {
         [mutableLinks addObject:result];
     }];
     
     return [NSArray arrayWithArray:mutableLinks];
 }
 
-- (void)addLinkWithTextCheckingResult:(NSTextCheckingResult *)result {
+- (void)addLinkWithTextCheckingResult:(NSTextCheckingResult*)result {
     self.links = [self.links arrayByAddingObject:result];
     
     if (self.linkAttributes) {
-        NSMutableAttributedString *mutableAttributedString = [[[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText] autorelease];
+        NSMutableAttributedString* mutableAttributedString = [[[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText] autorelease];
         [mutableAttributedString addAttributes:self.linkAttributes range:result.range];
         self.attributedText = mutableAttributedString;        
     }
 }
 
-- (void)addLinkToURL:(NSURL *)url withRange:(NSRange)range {
+- (void)addLinkToURL:(NSURL*)url withRange:(NSRange)range {
     [self addLinkWithTextCheckingResult:[NSTextCheckingResult linkCheckingResultWithRange:range URL:url]];
 }
 
-- (void)addLinkToAddress:(NSDictionary *)addressComponents withRange:(NSRange)range {
+- (void)addLinkToAddress:(NSDictionary*)addressComponents withRange:(NSRange)range {
     [self addLinkWithTextCheckingResult:[NSTextCheckingResult addressCheckingResultWithRange:range components:addressComponents]];
 }
 
-- (void)addLinkToPhoneNumber:(NSString *)phoneNumber withRange:(NSRange)range {
+- (void)addLinkToPhoneNumber:(NSString*)phoneNumber withRange:(NSRange)range {
     [self addLinkWithTextCheckingResult:[NSTextCheckingResult phoneNumberCheckingResultWithRange:range phoneNumber:phoneNumber]];
 }
 
-- (void)addLinkToDate:(NSDate *)date withRange:(NSRange)range {
+- (void)addLinkToDate:(NSDate*)date withRange:(NSRange)range {
     [self addLinkWithTextCheckingResult:[NSTextCheckingResult dateCheckingResultWithRange:range date:date]];
 }
 
-- (void)addLinkToDate:(NSDate *)date timeZone:(NSTimeZone *)timeZone duration:(NSTimeInterval)duration withRange:(NSRange)range {
+- (void)addLinkToDate:(NSDate*)date timeZone:(NSTimeZone*)timeZone duration:(NSTimeInterval)duration withRange:(NSRange)range {
     [self addLinkWithTextCheckingResult:[NSTextCheckingResult dateCheckingResultWithRange:range date:date timeZone:timeZone duration:duration]];
 }
 
 #pragma mark -
 
-- (NSTextCheckingResult *)linkAtCharacterIndex:(CFIndex)idx {
-    for (NSTextCheckingResult *result in self.links) {
+- (NSTextCheckingResult*)linkAtCharacterIndex:(CFIndex)idx {
+    for (NSTextCheckingResult* result in self.links) {
         NSRange range = result.range;
         if (range.location <= idx && idx <= range.location + range.length) {
             return result;
@@ -269,8 +269,18 @@ static inline NSDictionary* NSAttributedStringAttributesFromLabel(UILabel* label
 }
 
 - (NSTextCheckingResult*)linkAtPoint:(CGPoint)p {
-  CFIndex index = [self characterIndexAtPoint:p];
-  return [self linkAtCharacterIndex:index];
+  CGPoint topLeft = CGPointMake(MAX(0, p.x - 4), MAX(0, p.y - 4));
+  CGPoint point = topLeft;
+  for (NSInteger i = 0; i < 8; ++i) {
+    for (NSInteger j = 0; j < 8; ++j) {
+      point.x = topLeft.x + j;
+      NSTextCheckingResult* result = [self linkAtCharacterIndex:[self characterIndexAtPoint:point]];
+      if (result)
+        return result;
+    }
+    point.y = topLeft.y + i;
+  }
+  return nil;
 }
 
 - (NSUInteger)characterIndexAtPoint:(CGPoint)p {

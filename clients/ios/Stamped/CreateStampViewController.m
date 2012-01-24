@@ -17,9 +17,9 @@
 #import "AccountManager.h"
 #import "STCreditTextField.h"
 #import "EditEntityViewController.h"
+#import "EntityDetailViewController.h"
 #import "DetailedEntity.h"
 #import "Entity.h"
-#import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "STNavigationBar.h"
 #import "Notifications.h"
@@ -40,8 +40,8 @@ static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/"
 static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
 // Amazon S3 Shit.
-static NSString* const kS3SecretAccessKey = @"gYyVHd0PROjOrZ1ibrxJnuFT2mMVH2wHKmKy33iL";
-static NSString* const kS3AccessKeyID = @"AKIAJYZ6F44Q5N3NJ2QA";
+static NSString* const kS3SecretAccessKey = @"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";
+static NSString* const kS3AccessKeyID = @"AKIAIRLTXI62SD3BWAHQ";
 static NSString* const kS3Bucket = @"stamped.com.static.temp";
 
 @interface CreateStampViewController () 
@@ -704,6 +704,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   } else {
     vc = [Util detailViewControllerForSearchResult:(SearchResult*)objectToStamp_];
   }
+  [(EntityDetailViewController*)vc hideMainToolbar];
   [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -936,6 +937,10 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   if (self.stampPhoto && photoUploadRequest_.inProgress) {
     waitingForPhotoUpload_ = YES;
     return;
+  } else if (self.stampPhoto && !photoUploadRequest_.inProgress && !self.tempPhotoURL) {
+    [self uploadPhotoToS3];
+    waitingForPhotoUpload_ = YES;
+    return;
   }
 
   NSMutableDictionary* params = [NSMutableDictionary dictionary];
@@ -1145,18 +1150,18 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 }
 
 - (void)requestFailed:(ASIHTTPRequest*)request {
-#warning check this logic.
-  // TODO(andybons): Check this logic.
   self.photoUploadRequest = nil;
   self.tempPhotoURL = nil;
-  waitingForPhotoUpload_ = NO;
-  [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  [spinner_ stopAnimating];
-  stampItButton_.hidden = NO;
-  [UIView animateWithDuration:0.2
-                   animations:^{
-                     self.shelfView.transform = CGAffineTransformIdentity;
-                   }];
+  if (waitingForPhotoUpload_) {
+    waitingForPhotoUpload_ = NO;
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+    [spinner_ stopAnimating];
+    stampItButton_.hidden = NO;
+    [UIView animateWithDuration:0.2
+                     animations:^{
+                       self.shelfView.transform = CGAffineTransformIdentity;
+                     }];
+  }
 }
 
 #pragma mark - UIImagePickerControllerDelegate methods.
