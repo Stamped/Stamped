@@ -50,7 +50,13 @@ class SettingsEmailAlertToken(Schema):
 class Account(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
+        
+        # NOTE: account.name fails with a schema problem (always returning None), 
+        # but account['name'] works as expected. not sure if 'name' is possibly 
+        # being handled specially by python, but accessing it currently does *not* 
+        # work properly unless you use the attribute indexing syntax.
         self.name               = SchemaElement(basestring, required=True)
+        
         self.name_lower         = SchemaElement(basestring)
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
