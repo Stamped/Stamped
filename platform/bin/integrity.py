@@ -81,12 +81,31 @@ class EntityDocumentIntegrityCheck(ADocumentIntegrityCheck):
         ADocumentIntegrityCheck.__init__(self, api, db, options, 
                                          collection='entities', 
                                          id_field='entity_id', 
-                                         schema=Schemas.Entity)
+                                         schema=Schemas.Entity, 
+                                         progress_delta=1)
     
     def _check_schema(self, obj):
         assert obj.title is not None
         assert obj.titlel is not None
         assert obj.subcategory is not None
+
+class PlaceDocumentIntegrityCheck(ADocumentIntegrityCheck):
+    
+    def __init__(self, api, db, options):
+        ADocumentIntegrityCheck.__init__(self, api, db, options, 
+                                         collection='places', 
+                                         id_field='entity_id', 
+                                         schema=Schemas.Entity, 
+                                         progress_delta=1)
+        
+        self._entity_checker = EntityDocumentIntegrityCheck(api, db, options)
+    
+    def _check_schema(self, obj):
+        self._entity_checker._check_schema(obj)
+        
+        # ensure that we have valid lat / lng for place entity
+        assert obj.coordinates.lat is not None
+        assert obj.coordinates.lng is not None
 
 class StampDocumentIntegrityCheck(ADocumentIntegrityCheck):
     
@@ -562,6 +581,7 @@ checks = [
     
     # document integrity checks
     EntityDocumentIntegrityCheck, 
+    PlaceDocumentIntegrityCheck, 
     StampDocumentIntegrityCheck, 
     UserDocumentIntegrityCheck, 
     AccountDocumentIntegrityCheck, 
