@@ -937,6 +937,10 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   if (self.stampPhoto && photoUploadRequest_.inProgress) {
     waitingForPhotoUpload_ = YES;
     return;
+  } else if (self.stampPhoto && !photoUploadRequest_.inProgress && !self.tempPhotoURL) {
+    [self uploadPhotoToS3];
+    waitingForPhotoUpload_ = YES;
+    return;
   }
 
   NSMutableDictionary* params = [NSMutableDictionary dictionary];
@@ -1146,18 +1150,18 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 }
 
 - (void)requestFailed:(ASIHTTPRequest*)request {
-#warning check this logic.
-  // TODO(andybons): Check this logic.
   self.photoUploadRequest = nil;
   self.tempPhotoURL = nil;
-  waitingForPhotoUpload_ = NO;
-  [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  [spinner_ stopAnimating];
-  stampItButton_.hidden = NO;
-  [UIView animateWithDuration:0.2
-                   animations:^{
-                     self.shelfView.transform = CGAffineTransformIdentity;
-                   }];
+  if (waitingForPhotoUpload_) {
+    waitingForPhotoUpload_ = NO;
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+    [spinner_ stopAnimating];
+    stampItButton_.hidden = NO;
+    [UIView animateWithDuration:0.2
+                     animations:^{
+                       self.shelfView.transform = CGAffineTransformIdentity;
+                     }];
+  }
 }
 
 #pragma mark - UIImagePickerControllerDelegate methods.
