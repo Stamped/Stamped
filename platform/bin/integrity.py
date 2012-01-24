@@ -582,7 +582,7 @@ class StampNumIntegrityCheck(AIntegrityCheck):
     def _check_doc(self, doc):
         doc_id = str(doc['_id'])
         
-        stamps = self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}).sort({"stats.stamp_num" : 1})
+        stamps = self.db.stamps.find({"user.user_id" : doc_id}, {"stats.stamp_num" : 1, "_id" : 0}, sort="stats.stamp_num")
         
         index = 1
         for stamp in stamps:
