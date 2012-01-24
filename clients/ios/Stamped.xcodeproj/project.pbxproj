@@ -1096,6 +1096,14 @@
 		7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB03FDB1467527C004F7A1C /* InviteFriendTableViewCell.m */; };
 		7EB29D8514146586003A8EA3 /* inbox_photo_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */; };
 		7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */; };
+		7EB503DD14CF4C38005DDCA0 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503D814CF4C37005DDCA0 /* NSData+Base64.m */; };
+		7EB503DE14CF4C38005DDCA0 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503D814CF4C37005DDCA0 /* NSData+Base64.m */; };
+		7EB503DF14CF4C38005DDCA0 /* OAuth+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503DA14CF4C38005DDCA0 /* OAuth+Additions.m */; };
+		7EB503E014CF4C38005DDCA0 /* OAuth+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503DA14CF4C38005DDCA0 /* OAuth+Additions.m */; };
+		7EB503E114CF4C38005DDCA0 /* OAuthCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503DC14CF4C38005DDCA0 /* OAuthCore.m */; };
+		7EB503E214CF4C38005DDCA0 /* OAuthCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503DC14CF4C38005DDCA0 /* OAuthCore.m */; };
+		7EB503E514CF4C71005DDCA0 /* TWSignedRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503E414CF4C71005DDCA0 /* TWSignedRequest.m */; };
+		7EB503E614CF4C71005DDCA0 /* TWSignedRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB503E414CF4C71005DDCA0 /* TWSignedRequest.m */; };
 		7EB8A7D3146491370018E263 /* nav_gear_button_ios4.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB8A7C7146491370018E263 /* nav_gear_button_ios4.png */; };
 		7EB8A7D4146491370018E263 /* nav_gear_button_ios4@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB8A7C8146491370018E263 /* nav_gear_button_ios4@2x.png */; };
 		7EB8A7D5146491370018E263 /* nav_gear_button_ios5.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB8A7C9146491370018E263 /* nav_gear_button_ios5.png */; };
@@ -2019,6 +2027,14 @@
 		7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_photo_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
+		7EB503D714CF4C37005DDCA0 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		7EB503D814CF4C37005DDCA0 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		7EB503D914CF4C37005DDCA0 /* OAuth+Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OAuth+Additions.h"; sourceTree = "<group>"; };
+		7EB503DA14CF4C38005DDCA0 /* OAuth+Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "OAuth+Additions.m"; sourceTree = "<group>"; };
+		7EB503DB14CF4C38005DDCA0 /* OAuthCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthCore.h; sourceTree = "<group>"; };
+		7EB503DC14CF4C38005DDCA0 /* OAuthCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAuthCore.m; sourceTree = "<group>"; };
+		7EB503E314CF4C71005DDCA0 /* TWSignedRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TWSignedRequest.h; sourceTree = "<group>"; };
+		7EB503E414CF4C71005DDCA0 /* TWSignedRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TWSignedRequest.m; sourceTree = "<group>"; };
 		7EB8A7C7146491370018E263 /* nav_gear_button_ios4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_gear_button_ios4.png; sourceTree = "<group>"; };
 		7EB8A7C8146491370018E263 /* nav_gear_button_ios4@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_gear_button_ios4@2x.png"; sourceTree = "<group>"; };
 		7EB8A7C9146491370018E263 /* nav_gear_button_ios5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_gear_button_ios5.png; sourceTree = "<group>"; };
@@ -2458,6 +2474,7 @@
 		1E5AFFC5141D2A5000772F11 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				7EB503D614CF4C37005DDCA0 /* TWSignedRequest */,
 				7E07EBD114C73EFA00A2B5F0 /* ASIHTTPRequest */,
 				7ED2824114914ABA0086FF18 /* QuincyKit */,
 				7E407E7F144F462400D7847F /* TTTAttributedLabel */,
@@ -3213,6 +3230,22 @@
 				7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */,
 			);
 			name = Inbox;
+			sourceTree = "<group>";
+		};
+		7EB503D614CF4C37005DDCA0 /* TWSignedRequest */ = {
+			isa = PBXGroup;
+			children = (
+				7EB503E314CF4C71005DDCA0 /* TWSignedRequest.h */,
+				7EB503E414CF4C71005DDCA0 /* TWSignedRequest.m */,
+				7EB503D714CF4C37005DDCA0 /* NSData+Base64.h */,
+				7EB503D814CF4C37005DDCA0 /* NSData+Base64.m */,
+				7EB503D914CF4C37005DDCA0 /* OAuth+Additions.h */,
+				7EB503DA14CF4C38005DDCA0 /* OAuth+Additions.m */,
+				7EB503DB14CF4C38005DDCA0 /* OAuthCore.h */,
+				7EB503DC14CF4C38005DDCA0 /* OAuthCore.m */,
+			);
+			name = TWSignedRequest;
+			path = ABOAuthCore;
 			sourceTree = "<group>";
 		};
 		7EB8A7C6146491230018E263 /* Nav Bar */ = {
@@ -5317,6 +5350,10 @@
 				7E07EC1514C73F4000A2B5F0 /* ASIS3ObjectRequest.m in Sources */,
 				7E07EC1714C73F4000A2B5F0 /* ASIS3Request.m in Sources */,
 				7E07EC1914C73F4000A2B5F0 /* ASIS3ServiceRequest.m in Sources */,
+				7EB503DE14CF4C38005DDCA0 /* NSData+Base64.m in Sources */,
+				7EB503E014CF4C38005DDCA0 /* OAuth+Additions.m in Sources */,
+				7EB503E214CF4C38005DDCA0 /* OAuthCore.m in Sources */,
+				7EB503E614CF4C71005DDCA0 /* TWSignedRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5451,6 +5488,10 @@
 				7E07EC1414C73F4000A2B5F0 /* ASIS3ObjectRequest.m in Sources */,
 				7E07EC1614C73F4000A2B5F0 /* ASIS3Request.m in Sources */,
 				7E07EC1814C73F4000A2B5F0 /* ASIS3ServiceRequest.m in Sources */,
+				7EB503DD14CF4C38005DDCA0 /* NSData+Base64.m in Sources */,
+				7EB503DF14CF4C38005DDCA0 /* OAuth+Additions.m in Sources */,
+				7EB503E114CF4C38005DDCA0 /* OAuthCore.m in Sources */,
+				7EB503E514CF4C71005DDCA0 /* TWSignedRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5881,8 +5922,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
+				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
