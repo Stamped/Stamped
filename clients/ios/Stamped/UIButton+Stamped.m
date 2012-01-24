@@ -43,8 +43,8 @@
                                         selectedBackgroundImage:nil
                                         disabledBackgroundImage:nil];
 
-  [button setTitle:@"Following" forState:UIControlStateNormal];
-  [button setTitleColor:[UIColor colorWithRed:0.33 green:0.6 blue:0.27 alpha:1.0] forState:UIControlStateNormal];
+  [button setTitle:@"Unfollow" forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor colorWithRed:0.8 green:0.36 blue:0.32 alpha:1.0] forState:UIControlStateNormal];
   [button setTitleShadowColor:[UIColor colorWithWhite:1 alpha:0.4] forState:UIControlStateNormal];
   button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
