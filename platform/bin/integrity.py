@@ -67,7 +67,10 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
                     'object' : doc, 
                 }))
             
-            obj = self.db[collection].find({"_id" : bson.objectid.ObjectId(ref_id)})
+            try:
+                obj = self.db[collection].find({"_id" : bson.objectid.ObjectId(ref_id)})
+            except:
+                obj = None
             
             if obj is None:
                 self._handle_error("%s integrity error: object reference %s doesn't exist in %s; %s" % (
