@@ -548,6 +548,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       break;
     case FindFriendsSourceTwitter:
       previewView.modalType = FindFriendsModalTypeTwitter;
+      previewView.sampleTwitterUsername = [inviteSet_ anyObject];
       break;
     case FindFriendsSourceContacts:
       previewView.modalType = FindFriendsModalTypeEmail;

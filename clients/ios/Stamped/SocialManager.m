@@ -758,7 +758,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                                               username, @"twitter_screen_name",
                                                               token, @"twitter_key",
                                                               tokenSecret, @"twitter_secret", nil];
-  
   request.method = RKRequestMethodPOST;
   [request send];
 }
