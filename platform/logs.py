@@ -100,7 +100,6 @@ def warn(msg, *args, **kwargs):
 
 # HTTP Log Requests
 def begin(**kwargs):
-    addLog      = kwargs.pop('addLog', None)
     saveLog     = kwargs.pop('saveLog', None)
     saveStat    = kwargs.pop('saveStat', None)
     requestData = kwargs.pop('requestData', None)
@@ -113,9 +112,6 @@ def begin(**kwargs):
     
     if requestData:
         request(requestData)
-    
-    #if addLog:
-    #    localData.log['_id'] = addLog(localData.log)
     
     if nodeName:
         localData.log['node'] = nodeName
