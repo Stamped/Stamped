@@ -14,4 +14,17 @@
 @synthesize screenName = screenName_;
 @synthesize profileImageURL = profileImageURL_;
 
+- (BOOL)isEqual:(id)object {
+  if (object == self)
+    return YES;
+  if (!object || ![object isKindOfClass:[TwitterUser class]])
+    return NO;
+  
+  return [self.screenName isEqualToString:[(TwitterUser*)object screenName]];
+}
+
+- (NSUInteger)hash {
+  return screenName_.hash;
+}
+
 @end
