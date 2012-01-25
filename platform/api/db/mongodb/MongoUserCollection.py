@@ -10,6 +10,7 @@ import Globals, re, bson
 from datetime           import datetime
 from math               import log10
 from utils              import lazyProperty
+from errors             import *
 
 from Schemas            import *
 from AMongoCollection   import AMongoCollection
@@ -50,8 +51,9 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def getUserByScreenName(self, screenName):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
+        if document is None:
+            raise UnavailableError("Unable to find user (%s)" % screenName)
         return self._convertFromMongo(document)
-
     
     def checkScreenNameExists(self, screenName):
         try:
@@ -162,48 +164,6 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         return users[:20]
     
-    def searchUsersOld(self, query, limit=0):
-        query = query.lower()
-        query = self._valid_re.sub('', query)
-        
-        if len(query) == 0:
-            return []
-
-        ### TODO: Do sorting on Mongo as a custom sort function?
-        user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
-                              {"name_lower": {"$regex": query}}]}
-        data = self._collection.find(user_query).limit(min(50, limit*4))
-
-        prefix_re = re.compile(r"^%s" % query, re.IGNORECASE)
-
-        results = []
-        for item in data:
-            user = self._convertFromMongo(item)
-            
-            # length of screen name (shorter = better)
-            score = (20.0 - len(user.screen_name)) / 20.0 / 2.0
-
-            # number of stamps
-            if user.num_stamps > 0:
-                score += (log10(user.num_stamps) / 4.0)
-
-            # number of followers
-            if user.num_followers > 0:
-                score += (log10(user.num_followers) / 8.0)
-            
-            # boost 'em if it's a prefix match
-            if prefix_re.match(user.screen_name):
-                score += 10.0
-
-            results.append((score, user))
-
-        results = sorted(results, key=lambda k: -k[0])
-        users = []
-        for i in xrange(min(limit, len(results))):
-            users.append(results[i][1])
-
-        return users
-    
     def flagUser(self, user):
         ### TODO
         raise NotImplementedError
@@ -222,8 +182,6 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             self._collection.update(query, {'$set': {key: value}}, upsert=True)
         else:
             self._collection.update(query, {'$inc': {key: increment}}, upsert=True)
-        
-        #return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
     
     def findUsersByEmail(self, emails, limit=0):
         queryEmails = []
