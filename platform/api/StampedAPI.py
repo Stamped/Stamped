@@ -1416,6 +1416,7 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
+            ### TODO: Change this to DuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
             raise IllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
         
         # Build stamp
@@ -2396,7 +2397,7 @@ class StampedAPI(AStampedAPI):
             exists = False
         
         if exists:
-            raise IllegalActionError("Favorite already exists")
+            raise DuplicationError("Favorite already exists")
         
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
