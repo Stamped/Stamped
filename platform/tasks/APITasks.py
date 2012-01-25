@@ -51,6 +51,9 @@ def invoke(*args, **kwargs):
         
         func = "%sAsync" % utils.getFuncName(1)
         logs.info("%s %s %s" % (func, args, kwargs))
+        f=open('/stamped/temp', 'w')
+        f.write("%s %s %s" % (func, args, kwargs))
+        f.close()
         
         getattr(stampedAPI, func)(*args, **kwargs)
     except Exception as e:
