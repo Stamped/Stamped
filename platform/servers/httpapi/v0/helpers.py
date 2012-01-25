@@ -35,7 +35,6 @@ def handleHTTPRequest(fn):
     def handleHTTPRequest(request, *args, **kwargs):
         try:
             logs.begin(
-                addLog=stampedAPI._logsDB.addLog, 
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 requestData=request,
