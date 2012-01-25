@@ -23,7 +23,6 @@ import sources
 
 # import all databases
 import api.db
-from api.MongoStampedAPI import MongoStampedAPI
 
 #-----------------------------------------------------------
 
@@ -169,6 +168,7 @@ def parseCommandLine():
     elif options.sink == "merge":
         options.sink = MergeEntitySink()
     else:
+        from MongoStampedAPI import MongoStampedAPI
         options.sink = MongoStampedAPI(options.db)
     
     return options

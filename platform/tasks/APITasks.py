@@ -16,7 +16,8 @@ __stamped_api__ = None
 def getStampedAPI():
     """ hack to ensure that tasks only instantiate the Stamped API once """
     
-    from MongoStampedAPI import MongoStampedAPI
+    import Globals
+    from api.MongoStampedAPI import MongoStampedAPI
     global __stamped_api__
     
     if __stamped_api__ is None:
@@ -50,15 +51,20 @@ def invoke(*args, **kwargs):
         
         func = "%sAsync" % utils.getFuncName(1)
         logs.info("%s %s %s" % (func, args, kwargs))
+        f=open('/stamped/temp', 'w')
+        f.write("%s %s %s" % (func, args, kwargs))
+        f.close()
         
         getattr(stampedAPI, func)(*args, **kwargs)
     except Exception as e:
         logs.error(str(e))
-    finally:
+        raise
+    """finally:
         try:
             logs.save()
         except:
             pass
+            """
 
 @task(ignore_result=True)
 def addStamp(*args, **kwargs):
