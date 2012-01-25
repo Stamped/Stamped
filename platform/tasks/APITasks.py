@@ -33,7 +33,7 @@ def add(x, y):
     
     return x + y
 
-def invoke(*args, **kwargs):
+def invoke(request, *args, **kwargs):
     """ 
         wrapper to invoke a stamped api function in an asynchronous context 
         which adds logging and exception handling.
@@ -41,17 +41,20 @@ def invoke(*args, **kwargs):
     
     try:
         stampedAPI = getStampedAPI()
-        
-        logs.begin(
-            addLog=stampedAPI._logsDB.addLog, 
-            saveLog=stampedAPI._logsDB.saveLog,
-            saveStat=stampedAPI._statsDB.addStat,
-            nodeName=stampedAPI.node_name,
-        )
-        
         func = "%sAsync" % utils.getFuncName(1)
-        logs.async_request(func, *args, **kwargs)
-        logs.info("%s %s %s" % (func, args, kwargs))
+        
+        if not request.is_eager:
+            logs.begin(
+                #addLog=stampedAPI._logsDB.addLog, 
+                saveLog=stampedAPI._logsDB.saveLog,
+                saveStat=stampedAPI._statsDB.addStat,
+                nodeName=stampedAPI.node_name,
+            )
+            
+            logs.async_request(func, *args, **kwargs)
+        
+        logs.info("%s %s %s (is_eager=%s, hostname=%s, task_id=%s)" % 
+                  (func, args, kwargs, request.is_eager, request.hostname, request.id))
         
         getattr(stampedAPI, func)(*args, **kwargs)
     except Exception as e:
@@ -59,55 +62,56 @@ def invoke(*args, **kwargs):
         raise
     finally:
         try:
-            logs.save()
+            if not request.is_eager:
+                logs.save()
         except:
             pass
 
 @task(ignore_result=True)
 def addStamp(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(addStamp.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def addResizedStampImages(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(addResizedStampImages.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def customizeStamp(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(customizeStamp.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def updateProfileImage(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(updateProfileImage.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def addAccount(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(addAccount.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def updateAccountSettings(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(updateAccountSettings.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def alertFollowersFromTwitter(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(alertFollowersFromTwitter.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def alertFollowersFromFacebook(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(alertFollowersFromFacebook.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def addFriendship(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(addFriendship.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def removeFriendship(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(removeFriendship.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def inviteFriend(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(inviteFriend.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def addComment(*args, **kwargs):
-    invoke(*args, **kwargs)
+    invoke(addComment.request, *args, **kwargs)
 

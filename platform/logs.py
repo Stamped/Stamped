@@ -114,8 +114,8 @@ def begin(**kwargs):
     if requestData:
         request(requestData)
     
-    if addLog:
-        localData.log['_id'] = addLog(localData.log)
+    #if addLog:
+    #    localData.log['_id'] = addLog(localData.log)
     
     if nodeName:
         localData.log['node'] = nodeName

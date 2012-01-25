@@ -171,7 +171,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def updateUserStats(self, userIdOrIds, stat, value=None, increment=1):
         key = 'stats.%s' % stat
         
-        if isinstance(userIdOrIds, (list, tuple)):
+        if isinstance(userIdOrIds, (list, tuple, set)):
             # updating statistic for multiple users at once
             query = {'_id': { "$in" : map(self._getObjectIdFromString, userIdOrIds) } }
         else:

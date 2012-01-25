@@ -90,9 +90,7 @@ def invoke(task, args=None, kwargs=None, **options):
                         
                         handler.email(subject, body)
     
-    logs.warn("async failed; running locally")
-    logs.save()
-    
     # broker is not responding so attempt to invoke the task synchronously / locally
+    logs.warn("async failed; running locally")
     return task.apply(args, kwargs, **options)
 
