@@ -1505,7 +1505,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addStampAsync(self, authUserId, stamp_id):
-        stamp = self._stampDB.getStamp(stamp_id)
+        stamp   = self._stampDB.getStamp(stamp_id)
+        entity  = self._entityDB.getEntity(stamp.entity.entity_id)
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
@@ -1577,7 +1578,7 @@ class StampedAPI(AStampedAPI):
         self._addActivity(genre='restamp', 
                           user_id=authUserId, 
                           recipient_ids=creditedUserIds, 
-                          subject=stamp.entity.title, 
+                          subject=entity.title, 
                           blurb=stamp.blurb, 
                           linked_stamp_id=stamp.stamp_id, 
                           benefit=CREDIT_BENEFIT)
@@ -1586,7 +1587,7 @@ class StampedAPI(AStampedAPI):
         self._addMentionActivity(authUserId=authUserId, 
                                  mentions=stamp.mentions, 
                                  ignore=creditedUserIds, 
-                                 subject=stamp.entity.title, 
+                                 subject=entity.title, 
                                  blurb=stamp.blurb, 
                                  linked_stamp_id=stamp.stamp_id)
     
