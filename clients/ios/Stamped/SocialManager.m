@@ -85,9 +85,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)requestStampedFriendsFromFacebook:(NSString*)accessToken;
 - (void)requestStampedFriendsFromTwitter;
 - (void)sendStampedTwitterFriendsRequestWithToken:(NSString*)token secret:(NSString*)tokenSecret;
-
 - (void)requestTwitterUsersNotUsingStamped;
-- (void)requestFacebookUsersNotUsingStamped;
 
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
@@ -770,9 +768,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (void)requestTwitterUsersNotUsingStamped {
   if (twitterIDsNotUsingStamped_.count == 0) {
-    if (twitterFriendsNotUsingStamped_.count > 0) {
-      [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsNotOnStampedReceivedNotification object:self];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsNotOnStampedReceivedNotification object:self];
     return;
   }
 
@@ -825,10 +821,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
   // Keep going since it chunks in 100-user bursts.
   [self requestTwitterUsersNotUsingStamped];
-}
-
-- (void)requestFacebookUsersNotUsingStamped {
-  
 }
 
 #pragma mark - RKRequestDelegate methods.

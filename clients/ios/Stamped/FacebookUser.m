@@ -14,6 +14,15 @@
 @synthesize facebookID = facebookID_;
 @synthesize profileImageURL = profileImageURL_;
 
+- (BOOL)isEqual:(id)object {
+  if (object == self)
+    return YES;
+  if (!object || ![object isKindOfClass:[FacebookUser class]])
+    return NO;
+  
+  return [self.facebookID isEqualToString:[(FacebookUser*)object facebookID]];
+}
+
 - (NSUInteger)hash {
   return facebookID_.hash;
 }

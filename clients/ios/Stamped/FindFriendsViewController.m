@@ -762,8 +762,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)twitterFriendsNotUsingStampedReceived:(NSNotification*)notification {
   self.twitterFriendsNotUsingStamped = [SocialManager sharedManager].twitterFriendsNotUsingStamped.allObjects;
-  NSArray* desc = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
-  self.twitterFriendsNotUsingStamped = [twitterFriendsNotUsingStamped_ sortedArrayUsingDescriptors:desc];
+  if (!self.twitterFriendsNotUsingStamped) {
+    self.twitterFriendsNotUsingStamped = [NSArray array];
+  } else {
+    NSArray* desc = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
+    self.twitterFriendsNotUsingStamped = [twitterFriendsNotUsingStamped_ sortedArrayUsingDescriptors:desc];
+  }
   [tableView_ reloadData];
   [toolbar_.centerButton setTitle:@"Invite via Twitter" forState:UIControlStateNormal];
   toolbar_.centerButton.enabled = twitterFriendsNotUsingStamped_.count > 0;
