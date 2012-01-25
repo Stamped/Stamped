@@ -2830,6 +2830,7 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             # don't let error propagate
     
+    # NOTE: deprecated in terms of integrity checker in bin/checkdb.py
     def _updateUserStats(self):
         userIds = self._userDB._getAllUserIds()
         

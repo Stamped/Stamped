@@ -128,6 +128,15 @@ def request(request):
     except:
         localData.log['request'] = 'FAIL'
 
+def async_request(method, *args, **kwargs):
+    try:
+        localData.log['path']   = method
+        localData.log['method'] = 'async'
+        localData.log['args']   = str(args)
+        localData.log['kwargs'] = str(kwargs)
+    except:
+        localData.log['request'] = 'FAIL'
+
 def token(token):
     try:
         localData.log['token'] = token
