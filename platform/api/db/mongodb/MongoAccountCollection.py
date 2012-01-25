@@ -10,6 +10,7 @@ import Globals, utils, logs
 from datetime   import datetime
 from utils      import lazyProperty
 from Schemas    import *
+from errors     import *
 
 from AMongoCollection           import AMongoCollection
 from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
@@ -25,14 +26,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
-
-    def _convertFromMongo(self, document):
-        if 'screen_name_lower' in document:
-           del(document['screen_name_lower'])
-        if 'name_lower' in document:
-           del(document['name_lower'])
-        
-        return AMongoCollection._convertFromMongo(self, document)
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -89,11 +82,15 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccountByEmail(self, email):
         email = str(email).lower()
         document = self._collection.find_one({"email": email})
+        if document is None:
+            raise UnavailableError("Unable to find account (%s)" % email)
         return self._convertFromMongo(document)
     
     def getAccountByScreenName(self, screenName):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
+        if document is None:
+            raise UnavailableError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
 
     def updateLinkedAccounts(self, userId, twitter=None, facebook=None):
@@ -146,7 +143,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 'linked_accounts.facebook.facebook_screen_name': 1,
                 'linked_accounts.facebook.facebook_token': 1,
                 'linked_accounts.facebook.facebook_expire': 1,
-                # 'linked_accounts.facebook.facebook_alerts_sent': 1,
             }
 
         if linkedAccount == 'twitter':
@@ -154,7 +150,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 'linked_accounts.twitter.twitter_id': 1,
                 'linked_accounts.twitter.twitter_screen_name': 1,
                 'linked_accounts.twitter.twitter_token': 1,
-                # 'linked_accounts.twitter.twitter_alerts_sent': 1,
             }
 
         self._collection.update(

@@ -2055,16 +2055,6 @@ class StampedAPI(AStampedAPI):
         
         return comments
     
-    ### TEMP: Remove after switching to new activity
-    def _getComment(self, commentId, **kwargs): 
-        comment = self._commentDB.getComment(commentId)
-        
-        # Get user objects
-        user            = self._userDB.getUser(comment.user.user_id)
-        comment.user    = user.exportSchema(UserMini())
-        
-        return comment
-    
     
     """
     #                              
