@@ -59,12 +59,11 @@ def invoke(*args, **kwargs):
     except Exception as e:
         logs.error(str(e))
         raise
-    """finally:
+    finally:
         try:
             logs.save()
         except:
             pass
-            """
 
 @task(ignore_result=True)
 def addStamp(*args, **kwargs):
