@@ -101,7 +101,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   mapView_.delegate = self;
   [self.view addSubview:mapView_];
   [mapView_ release];
-  
+
   [self loadFavoritesFromDataStore];
   [self loadFavoritesFromNetwork];
 }
