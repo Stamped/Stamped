@@ -113,7 +113,7 @@ class MongoDBConfig(Singleton):
                 else:
                     self._connection = pymongo.Connection(self.host, self.port)
                 
-                #self._connection.stamped.read_preference = ReadPreference.SECONDARY
+                #self._connection.stamped.read_preference = pymongo.ReadPreference.SECONDARY
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:

@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import integrity, libs.ec2_utils, logs, random, time, utils
+import integrity, libs.ec2_utils
+import logs, pymongo, random, time, utils
 
 from MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
@@ -184,7 +185,7 @@ def main():
     # if we're on prod, instruct pymongo to perform integrity checks on 
     # secondaries to reduce load in primary
     if utils.is_ec2() and libs.ec2_utils.is_prod_stack():
-        db.read_preference = ReadPreference.SECONDARY
+        db.read_preference = pymongo.ReadPreference.SECONDARY
     
     checks = integrity.checks
     for check_cls in checks:

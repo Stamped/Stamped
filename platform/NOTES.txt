@@ -1,6 +1,9 @@
 
 platform:
     * remove ghost mongod process
+    * handle async errors gracefully - email + retryable
+    * monitor process should check mongo's replica set status
+    
     * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
     * integrity checking daemon

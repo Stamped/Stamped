@@ -35,7 +35,6 @@ class SinglePlatform(object):
         return self._get_uri('/restaurants/search', params)
     
     def lookup(self, location_id):
-        # TODO: docs are inconsistent w.r.t. slash after location_id...
         return self._get_uri('/restaurants/%s' % location_id)
     
     def _get_uri(self, uri, params=None):

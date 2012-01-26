@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import keys.aws, logs, utils
-import os, time, zlib, struct, array, random
+import os, time, zlib, struct, array, random, urllib2
 
 try:
     import Image, ImageFile
@@ -126,7 +126,7 @@ class S3ImageDB(AImageDB):
         
         try:
             f = utils.getFile(url)
-        except HTTPError:
+        except urllib2.HTTPError:
             logs.warn("unable to download profile image from '%s'" % url)
             raise
         
@@ -178,7 +178,7 @@ class S3ImageDB(AImageDB):
     def addResizedStampImages(self, image_url, stampId):
         try:
             f = utils.getFile(image_url)
-        except HTTPError:
+        except urllib2.HTTPError:
             logs.warn("unable to download stamp image from '%s'" % image_url)
             raise
         
