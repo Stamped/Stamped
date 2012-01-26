@@ -18,6 +18,8 @@ LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
 AMAZON_TOKEN    = 'stamped01-20'
 
+amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
+
 def _coordinatesDictToFlat(coordinates):
     try:
         if not isinstance(coordinates['lat'], float) or \
@@ -633,6 +635,10 @@ class HTTPEntity(Schema):
             # try to return the maximum-resolution apple photo possible if we have 
             # a lower-resolution version stored in our db
             return url.replace('100x100', '200x200').replace('170x170', '200x200')
+        
+        if 'amazon.com' in url:
+            # strip the 'look inside' image modifier
+            return amazon_image_re.sub(r'\1.jpg', url)
         
         return url
 
