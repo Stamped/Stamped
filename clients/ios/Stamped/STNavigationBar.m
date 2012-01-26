@@ -12,22 +12,19 @@
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
 
-NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNotification";
-
 @interface STNavigationBar ()
 - (void)initialize;
 - (CGPathRef)newPathForTitle;
-- (void)settingsButtonPressed:(id)sender;
 
-@property (nonatomic, readonly) UIButton* settingsButton;
+@property (nonatomic, readonly) CALayer* ripplesLayer;
 @end
 
 @implementation STNavigationBar
 
+@synthesize ripplesLayer = ripplesLayer_;
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
 @synthesize black = black_;
-@synthesize settingsButton = settingsButton_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -46,7 +43,8 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 }
 
 - (void)dealloc {
-  settingsButton_ = nil;
+  self.string = nil;
+  ripplesLayer_ = nil;
   [super dealloc];
 }
 
@@ -114,10 +112,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 
 - (void)initialize {
   self.layer.masksToBounds = NO;
-  
-  BOOL whiteAppearance = NO;
-  if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
-    whiteAppearance = YES;
 
   CGFloat ripplesY = CGRectGetMaxY(self.bounds);
   ripplesLayer_ = [[CALayer alloc] init];
@@ -126,17 +120,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
   [self.layer addSublayer:ripplesLayer_];
   [ripplesLayer_ release];
-  
-  settingsButton_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-  settingsButton_.frame = CGRectMake(281, 7, 34, 30);
-  NSString* imageName = whiteAppearance ? @"nav_gear_button_ios5" : @"nav_gear_button_ios4";
-  [settingsButton_ setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
-  [settingsButton_ addTarget:self
-                      action:@selector(settingsButtonPressed:)
-            forControlEvents:UIControlEventTouchUpInside];
-  settingsButton_.alpha = 0.0;
-  settingsButton_.hidden = YES;
-  [self addSubview:settingsButton_];
 }
 
 - (void)setBlack:(BOOL)black {
@@ -147,23 +130,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   
   ripplesLayer_.hidden = black;
   [self setNeedsDisplay];
-}
-
-- (void)settingsButtonPressed:(id)sender {
-  [[NSNotificationCenter defaultCenter] postNotificationName:kSettingsButtonPressedNotification
-                                                      object:nil];
-}
-
-- (void)setSettingsButtonShown:(BOOL)shown {
-  if (settingsButtonShown_ == shown)
-    return;
-  
-  settingsButtonShown_ = shown;
-  if (shown)
-    settingsButton_.hidden = NO;
-  [UIView animateWithDuration:0.2
-                   animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }
-                   completion:^(BOOL finished) { settingsButton_.hidden = !shown; }];
 }
 
 - (CGPathRef)newPathForTitle {

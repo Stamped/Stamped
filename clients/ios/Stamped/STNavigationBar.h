@@ -8,19 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-extern NSString* const kSettingsButtonPressedNotification;
-
-@interface STNavigationBar : UINavigationBar {
- @private
-  CALayer* ripplesLayer_;
-  BOOL potentialButtonTap_;
-  BOOL settingsButtonShown_;
-  NSString* string;
-}
-
-- (void)setSettingsButtonShown:(BOOL)shown;
+@interface STNavigationBar : UINavigationBar
 
 @property (nonatomic, assign) BOOL black;
 @property (nonatomic, assign) BOOL hideLogo;
-@property (nonatomic, retain) NSString* string;
+@property (nonatomic, copy) NSString* string;
 @end

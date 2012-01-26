@@ -14,7 +14,6 @@
 - (void)showListButton:(id)sender;
 - (void)showMapButton:(id)sender;
 
-
 @end
 
 @implementation STMapToggleButton

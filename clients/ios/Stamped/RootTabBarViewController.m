@@ -27,6 +27,7 @@
 - (void)updateNavBar;
 - (void)showMapView;
 - (void)showListView;
+- (void)showSettingsPane;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
@@ -46,6 +47,7 @@
 @implementation RootTabBarViewController
 
 @synthesize searchStampsNavigationController = searchStampsNavigationController_;
+@synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize viewControllers = viewControllers_;
 @synthesize selectedViewController = selectedViewController_;
 @synthesize tabBar = tabBar_;
@@ -62,6 +64,7 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
+  self.settingsNavigationController = nil;
   self.selectedViewController = nil;
   self.tabBar.delegate = nil;
   self.tabBar = nil;
@@ -227,6 +230,7 @@
   self.tabBar.delegate = nil;
   self.tabBar = nil;
   self.searchStampsNavigationController = nil;
+  self.settingsNavigationController = nil;
   self.selectedViewController = nil;
   ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
   self.tabBarItems = nil;
@@ -320,7 +324,6 @@
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [self.selectedViewController viewWillDisappear:animated];
-  [(STNavigationBar*)self.navigationController.navigationBar setSettingsButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -339,7 +342,6 @@
 }
 
 - (void)updateNavBar {
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   UITabBarItem* item = self.tabBar.selectedItem;
   if (item == stampsTabBarItem_ || item == mustDoTabBarItem_) {
     if ([self.navigationItem.rightBarButtonItem isMemberOfClass:[STMapToggleButton class]])
@@ -353,8 +355,19 @@
   } else if (item == activityTabBarItem_) {
     self.navigationItem.rightBarButtonItem = nil;
   } else if (item == peopleTabBarItem_) {
-    self.navigationItem.rightBarButtonItem = nil;
-    [navBar setSettingsButtonShown:YES];
+    UIButton* settingsButton = [UIButton buttonWithType:UIButtonTypeCustom];    
+    settingsButton.frame = CGRectMake(0, 0, 34, 30);
+    BOOL whiteAppearance = NO;
+    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
+      whiteAppearance = YES;
+
+    NSString* imageName = whiteAppearance ? @"nav_gear_button_ios5" : @"nav_gear_button_ios4";
+    [settingsButton setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+    [settingsButton addTarget:self
+                       action:@selector(showSettingsPane)
+             forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem* rightItem = [[[UIBarButtonItem alloc] initWithCustomView:settingsButton] autorelease];
+    self.navigationItem.rightBarButtonItem = rightItem;
   }
 }
 
@@ -376,6 +389,10 @@
                     duration:1
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
                   completion:nil];  
+}
+
+- (void)showSettingsPane {
+  [self.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
 }
 
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer {

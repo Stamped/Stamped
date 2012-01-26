@@ -18,7 +18,6 @@
                                                          RKObjectLoaderDelegate,
                                                          RKRequestDelegate>
 
-@property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
 
 @end
