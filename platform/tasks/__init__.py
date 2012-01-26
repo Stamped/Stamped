@@ -1,3 +1,9 @@
+#!/usr/bin/python
+
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
 
 import Globals
 import APITasks
@@ -91,5 +97,6 @@ def invoke(task, args=None, kwargs=None, **options):
                         handler.email(subject, body)
     
     # broker is not responding so attempt to invoke the task synchronously / locally
+    logs.warn("async failed; running locally")
     return task.apply(args, kwargs, **options)
 

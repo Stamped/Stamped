@@ -100,7 +100,6 @@ def warn(msg, *args, **kwargs):
 
 # HTTP Log Requests
 def begin(**kwargs):
-    addLog      = kwargs.pop('addLog', None)
     saveLog     = kwargs.pop('saveLog', None)
     saveStat    = kwargs.pop('saveStat', None)
     requestData = kwargs.pop('requestData', None)
@@ -114,9 +113,6 @@ def begin(**kwargs):
     if requestData:
         request(requestData)
     
-    if addLog:
-        localData.log['_id'] = addLog(localData.log)
-    
     if nodeName:
         localData.log['node'] = nodeName
 
@@ -125,6 +121,15 @@ def request(request):
         localData.log['path'] = request.path
         localData.log['method'] = request.method
         localData.log['headers'] = str(request.META)
+    except:
+        localData.log['request'] = 'FAIL'
+
+def async_request(method, *args, **kwargs):
+    try:
+        localData.log['path']   = method
+        localData.log['method'] = 'ASYNC'
+        localData.log['args']   = str(args)
+        localData.log['kwargs'] = str(kwargs)
     except:
         localData.log['request'] = 'FAIL'
 

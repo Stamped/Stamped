@@ -1416,6 +1416,7 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
+            ### TODO: Change this to DuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
             raise IllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
         
         # Build stamp
@@ -1504,7 +1505,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addStampAsync(self, authUserId, stamp_id):
-        stamp = self._stampDB.getStamp(stamp_id)
+        stamp   = self._stampDB.getStamp(stamp_id)
+        entity  = self._entityDB.getEntity(stamp.entity.entity_id)
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
@@ -1576,7 +1578,7 @@ class StampedAPI(AStampedAPI):
         self._addActivity(genre='restamp', 
                           user_id=authUserId, 
                           recipient_ids=creditedUserIds, 
-                          subject=stamp.entity.title, 
+                          subject=entity.title, 
                           blurb=stamp.blurb, 
                           linked_stamp_id=stamp.stamp_id, 
                           benefit=CREDIT_BENEFIT)
@@ -1585,7 +1587,7 @@ class StampedAPI(AStampedAPI):
         self._addMentionActivity(authUserId=authUserId, 
                                  mentions=stamp.mentions, 
                                  ignore=creditedUserIds, 
-                                 subject=stamp.entity.title, 
+                                 subject=entity.title, 
                                  blurb=stamp.blurb, 
                                  linked_stamp_id=stamp.stamp_id)
     
@@ -1932,7 +1934,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         mentionedUserIds = self._addMentionActivity(authUserId=authUserId, 
-                                                    mentions=stamp.mentions, 
+                                                    mentions=comment.mentions, 
                                                     subject=stamp.entity.title, 
                                                     blurb=comment.blurb, 
                                                     linked_stamp_id=stamp.stamp_id, 
@@ -1954,7 +1956,7 @@ class StampedAPI(AStampedAPI):
         # Increment comment metric
         self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
         
-        repliedUserIds = []
+        repliedUserIds = set()
         
         # Add activity for previous commenters
         ### TODO: Limit this to the last 20 comments or so
@@ -1966,6 +1968,7 @@ class StampedAPI(AStampedAPI):
             repliedUserId = prevComment['user']['user_id']
             if repliedUserId not in commentedUserIds \
                 and repliedUserId not in mentionedUserIds \
+                and repliedUserId not in repliedUserIds \
                 and repliedUserId != authUserId:
                 
                 replied_user_id = prevComment['user']['user_id']
@@ -1974,7 +1977,7 @@ class StampedAPI(AStampedAPI):
                 friendship = Friendship(user_id=authUserId, friend_id=replied_user_id)
                 
                 if self._friendshipDB.blockExists(friendship) == False:
-                    repliedUserIds.append(replied_user_id)
+                    repliedUserIds.add(replied_user_id)
         
         self._addActivity(genre='reply', 
                           user_id=authUserId, 
@@ -2054,16 +2057,6 @@ class StampedAPI(AStampedAPI):
         comments = sorted(comments, key=lambda k: k['timestamp']['created'])
         
         return comments
-    
-    ### TEMP: Remove after switching to new activity
-    def _getComment(self, commentId, **kwargs): 
-        comment = self._commentDB.getComment(commentId)
-        
-        # Get user objects
-        user            = self._userDB.getUser(comment.user.user_id)
-        comment.user    = user.exportSchema(UserMini())
-        
-        return comment
     
     
     """
@@ -2406,7 +2399,7 @@ class StampedAPI(AStampedAPI):
             exists = False
         
         if exists:
-            raise IllegalActionError("Favorite already exists")
+            raise DuplicationError("Favorite already exists")
         
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
@@ -2830,6 +2823,7 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             # don't let error propagate
     
+    # NOTE: deprecated in terms of integrity checker in bin/checkdb.py
     def _updateUserStats(self):
         userIds = self._userDB._getAllUserIds()
         

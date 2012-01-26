@@ -1,5 +1,6 @@
 
 platform:
+    * remove ghost mongod process
     * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
     * integrity checking daemon

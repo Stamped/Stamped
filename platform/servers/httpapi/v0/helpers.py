@@ -35,7 +35,6 @@ def handleHTTPRequest(fn):
     def handleHTTPRequest(request, *args, **kwargs):
         try:
             logs.begin(
-                addLog=stampedAPI._logsDB.addLog, 
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 requestData=request,
@@ -74,6 +73,12 @@ def handleHTTPRequest(fn):
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("insufficient_privileges", status=403)
+            logs.error(response.status_code)
+            return response
+        
+        except DuplicationError as e:
+            logs.warning("409 Error: %s" % (e.msg))
+            response = HttpResponse("already_exists", status=409)
             logs.error(response.status_code)
             return response
         

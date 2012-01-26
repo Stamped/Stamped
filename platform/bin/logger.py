@@ -41,6 +41,9 @@ def parseCommandLine():
     parser.add_option("-u", "--user-id", dest="user_id", 
         default=None, type="string", help="Filter results on user id")
     
+    parser.add_option("-m", "--method", dest="method", 
+        default=None, type="string", help="Request method (POST, GET, or ASYNC)")
+    
     parser.add_option("-l", "--limit", dest="limit", 
         default=10, type="int", help="Limit number of results returned")
     
@@ -68,6 +71,7 @@ def main():
     path        = options.pop('path', False)
     severity    = options.pop('severity', None)
     verbose     = options.pop('verbose', False)
+    method      = options.pop('method', None)
     
     if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
         severity = None
@@ -78,7 +82,7 @@ def main():
         levels = ['info', 'warning', 'error', 'critical']
     
     logs = MongoLogsCollection().getLogs(userId=user_id, limit=limit, errors=errors, \
-                                            path=path, severity=severity)
+                                            path=path, severity=severity, method=method)
     for i in xrange(len(logs)):
         print 
         print
