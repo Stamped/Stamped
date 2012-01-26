@@ -17,6 +17,7 @@ except:
 
 from AImageDB import AImageDB
 from StringIO import StringIO
+from errors   import *
 
 from boto.cloudfront    import CloudFrontConnection
 from boto.s3.connection import S3Connection
