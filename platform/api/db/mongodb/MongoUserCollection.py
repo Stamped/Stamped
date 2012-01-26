@@ -149,10 +149,20 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query}, limit=1000)
 
         try:
-            data = result[-1]['value']['data']
+            # Parse out the data from the result depending on how many results exist
+            # If one user found, result is in format:
+            #   [{u'_id': u'query', u'value': <user>}]
+            # If multiple users found, result is in format:
+            #   [{u'_id': u'query', u'value': {u'data': [<user1>, ..., <userN>]}}]
+
+            value = result[-1]['value'] 
+            if 'data' in value:
+                data = value['data']
+            else:
+                data = [value]
             assert(isinstance(data, list))
         except:
-            return []
+            return users
 
         for i in data:
             try:
