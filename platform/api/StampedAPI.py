@@ -1934,7 +1934,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         mentionedUserIds = self._addMentionActivity(authUserId=authUserId, 
-                                                    mentions=stamp.mentions, 
+                                                    mentions=comment.mentions, 
                                                     subject=stamp.entity.title, 
                                                     blurb=comment.blurb, 
                                                     linked_stamp_id=stamp.stamp_id, 
