@@ -34,8 +34,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
-- (void)mapButtonWasPressed:(NSNotification*)notification;
-- (void)listButtonWasPressed:(NSNotification*)notification;
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)addAnnotationForEntity:(Entity*)entity;
 - (void)mapUserTapped:(id)sender;
@@ -75,46 +73,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super dealloc];
 }
 
-- (void)mapButtonWasPressed:(NSNotification*)notification {
-  if (!self.view.superview)
-    return;
-
-  userPannedMap_ = NO;
-  [self.stampFilterBar.searchField resignFirstResponder];
-  self.tableView.scrollEnabled = NO;
-  self.fetchedResultsController.fetchRequest.predicate =
-      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"];
-  NSError* error;
-	if (![self.fetchedResultsController performFetch:&error]) {
-		// Update to handle the error appropriately.
-		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-	}
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  NSArray* entitiesArray = [sectionInfo objects];
-  [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 1.0; }
-                   completion:^(BOOL finished) {
-                     mapView_.showsUserLocation = YES;
-                     for (Entity* e in entitiesArray) {
-                       if (!e.coordinates)
-                         continue;
-                      [self addAnnotationForEntity:e];
-                     }
-                   }];
-}
-
-- (void)listButtonWasPressed:(NSNotification*)notification {
-  if (!self.view.superview)
-    return;
-
-  self.tableView.scrollEnabled = YES;
-  [self filterStamps];
-  [mapView_ removeAnnotations:mapView_.annotations];
-  [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 0.0; }
-                   completion:^(BOOL finished) { mapView_.showsUserLocation = NO; }];
-}
-
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -132,14 +90,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(mapButtonWasPressed:)
-                                               name:kMapViewButtonPressedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(listButtonWasPressed:)
-                                               name:kListViewButtonPressedNotification
                                              object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(userLoggedOut:)
@@ -211,9 +161,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (mapView_.alpha > 0)
     mapView_.showsUserLocation = YES;
 
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonShown:YES];
   [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
 }
 
@@ -221,9 +168,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewWillDisappear:animated];
   self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
   mapView_.showsUserLocation = NO;
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {

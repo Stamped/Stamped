@@ -1934,7 +1934,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         mentionedUserIds = self._addMentionActivity(authUserId=authUserId, 
-                                                    mentions=stamp.mentions, 
+                                                    mentions=comment.mentions, 
                                                     subject=stamp.entity.title, 
                                                     blurb=comment.blurb, 
                                                     linked_stamp_id=stamp.stamp_id, 
@@ -1956,7 +1956,7 @@ class StampedAPI(AStampedAPI):
         # Increment comment metric
         self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
         
-        repliedUserIds = []
+        repliedUserIds = set()
         
         # Add activity for previous commenters
         ### TODO: Limit this to the last 20 comments or so
@@ -1968,6 +1968,7 @@ class StampedAPI(AStampedAPI):
             repliedUserId = prevComment['user']['user_id']
             if repliedUserId not in commentedUserIds \
                 and repliedUserId not in mentionedUserIds \
+                and repliedUserId not in repliedUserIds \
                 and repliedUserId != authUserId:
                 
                 replied_user_id = prevComment['user']['user_id']
@@ -1976,7 +1977,7 @@ class StampedAPI(AStampedAPI):
                 friendship = Friendship(user_id=authUserId, friend_id=replied_user_id)
                 
                 if self._friendshipDB.blockExists(friendship) == False:
-                    repliedUserIds.append(replied_user_id)
+                    repliedUserIds.add(replied_user_id)
         
         self._addActivity(genre='reply', 
                           user_id=authUserId, 

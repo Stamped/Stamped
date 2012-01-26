@@ -83,8 +83,16 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         checkExists = kwargs.pop('checkExists', False)
         
         alerts = []
+
+        sentTo = set()
         
         for recipientId in recipientIds:
+
+            if recipientId in sentTo:
+                continue
+            
+            sentTo.add(recipientId)
+
             activityId = None
             activity = activityItem.value
             activity['recipient_id'] = recipientId

@@ -14,6 +14,7 @@
 #import "SearchEntitiesViewController.h"
 #import "Notifications.h"
 #import "PeopleViewController.h"
+#import "STMapViewController.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
 #import "Util.h"
@@ -22,6 +23,8 @@
 - (void)finishViewInit;
 - (void)fillStampImageView;
 - (void)setTabBarIcons;
+- (void)showMapView;
+- (void)hideMapView;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
@@ -35,6 +38,7 @@
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
+@property (nonatomic, retain) STMapViewController* mapViewController;
 @end
 
 @implementation RootTabBarViewController
@@ -50,6 +54,7 @@
 @synthesize userStampBackgroundImageView = userStampBackgroundImageView_;
 @synthesize tooltipImageView = tooltipImageView_;
 @synthesize tabBarItems = tabBarItems_;
+@synthesize mapViewController = mapViewController_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -66,6 +71,7 @@
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
+  self.mapViewController = nil;
   tooltipImageView_ = nil;
   [super dealloc];
 }
@@ -79,6 +85,8 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  self.navigationController.view.backgroundColor = [UIColor blackColor];
+  
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -112,6 +120,14 @@
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(pushNotificationReceived:)
                                                name:kPushNotificationReceivedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(showMapView)
+                                               name:kMapViewButtonPressedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(hideMapView)
+                                               name:kListViewButtonPressedNotification
                                              object:nil];
 
   [AccountManager sharedManager].delegate = self;
@@ -223,6 +239,7 @@
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
+  self.mapViewController = nil;
   tooltipImageView_ = nil;
 }
 
@@ -324,11 +341,34 @@
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)showMapView {
+  self.mapViewController = [[STMapViewController alloc] init];
+  [UIView transitionFromView:selectedViewController_.view
+                      toView:mapViewController_.view
+                    duration:1
+                     options:UIViewAnimationOptionTransitionFlipFromRight
+                  completion:nil];
+}
+
+- (void)hideMapView {
+  // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
+  // Otherwise the view ends up on top of the Tab Bar.
+  [self.view insertSubview:selectedViewController_.view atIndex:0];
+  [UIView transitionFromView:mapViewController_.view
+                      toView:selectedViewController_.view
+                    duration:1
+                     options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
+                  completion:^(BOOL finished) {
+                    // TODO(andybons): keep the map view around?
+                    self.mapViewController = nil;
+                  }];
+}
+
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer {
   if (tooltipImageView_) {
     [UIView animateWithDuration:0.3 
                           delay:0 
-                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                        options:(UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState)
                      animations:^{ tooltipImageView_.alpha = 0.0; }
                      completion:^(BOOL finished) {
                        [tooltipImageView_ removeFromSuperview];
@@ -415,24 +455,29 @@
 
 - (void)tabBar:(UITabBar*)tabBar didSelectItem:(UITabBarItem*)item {
   UIViewController* newViewController = nil;
+  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
+  [navBar setSettingsButtonShown:NO];
   if (item == stampsTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:0];
     self.navigationItem.title = @"Stamps";
+    [navBar setButtonShown:YES];
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
     activityTabBarItem_.badgeValue = nil;
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+    [navBar setButtonShown:NO];
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
     self.navigationItem.title = @"To-Do";
+    [navBar setButtonShown:YES];
   } else if (item == peopleTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
+    [navBar setButtonShown:NO];
+    [navBar setSettingsButtonShown:YES];
   }
-  [(STNavigationBar*)self.navigationController.navigationBar setListButtonShown:NO];  
-  [self.navigationController.navigationBar setNeedsDisplay];
 
   if (!newViewController || newViewController == self.selectedViewController)
     return;
