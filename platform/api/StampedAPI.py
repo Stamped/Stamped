@@ -1497,6 +1497,11 @@ class StampedAPI(AStampedAPI):
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
+        # Update user stats 
+        self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
+        
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
         tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
@@ -1512,11 +1517,6 @@ class StampedAPI(AStampedAPI):
         followers = self._friendshipDB.getFollowers(authUserId)
         followers.append(authUserId)
         self._stampDB.addInboxStampReference(followers, stamp_id)
-        
-        # Update user stats 
-        self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
