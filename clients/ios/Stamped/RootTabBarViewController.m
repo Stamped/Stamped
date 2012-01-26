@@ -23,6 +23,7 @@
 - (void)finishViewInit;
 - (void)fillStampImageView;
 - (void)setTabBarIcons;
+- (void)updateNavBar;
 - (void)showMapView;
 - (void)hideMapView;
 - (void)ensureCorrectHeightOfViewControllers;
@@ -324,6 +325,7 @@
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [self.selectedViewController viewWillDisappear:animated];
+  
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -339,6 +341,10 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (void)updateNavBar {
+#warning implement this shit.
 }
 
 - (void)showMapView {
