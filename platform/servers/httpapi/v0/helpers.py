@@ -76,6 +76,12 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
         
+        except DuplicationError as e:
+            logs.warning("409 Error: %s" % (e.msg))
+            response = HttpResponse("already_exists", status=409)
+            logs.error(response.status_code)
+            return response
+        
         except UnavailableError as e:
             logs.warning("404 Error: %s" % (e.msg))
             response = HttpResponse("not_found", status=404)

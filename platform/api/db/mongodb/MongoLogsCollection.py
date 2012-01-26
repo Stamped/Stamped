@@ -50,6 +50,7 @@ class MongoLogsCollection(AMongoCollection):
         path        = kwargs.pop('path', None)
         severity    = kwargs.pop('severity', None)
         logId       = kwargs.pop('log_id', None)
+        method      = kwargs.pop('method', None)
 
         query = {}
         if userId != None:
@@ -60,6 +61,8 @@ class MongoLogsCollection(AMongoCollection):
             query['path'] = path
         if severity != None:
             query[severity] = True
+        if method is not None:
+            query['method'] = str(method).upper()
 
         docs = self._collection.find(query).limit(limit).sort('begin', pymongo.DESCENDING)
         

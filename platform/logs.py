@@ -127,7 +127,7 @@ def request(request):
 def async_request(method, *args, **kwargs):
     try:
         localData.log['path']   = method
-        localData.log['method'] = 'async'
+        localData.log['method'] = 'ASYNC'
         localData.log['args']   = str(args)
         localData.log['kwargs'] = str(kwargs)
     except:

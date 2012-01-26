@@ -71,6 +71,15 @@ class UnavailableError(Exception):
         if msg is not None:
             logs.warning(msg)
 
+class DuplicationError(Exception):
+    def __init__(self, msg=None, desc=None):
+        Exception.__init__(self, msg)
+        self.msg  = msg
+        self.desc = desc
+        
+        if msg is not None:
+            logs.warning(msg)
+
 class AuthError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
