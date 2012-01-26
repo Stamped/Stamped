@@ -135,14 +135,8 @@
     [self fillStampImageView];
   
   [self setTabBarIcons];
-
   self.mapViewController = [[[STMapViewController alloc] init] autorelease];
-  STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
-  [toggleButton.mapButton addTarget:self action:@selector(showMapView) forControlEvents:UIControlEventTouchUpInside];
-  [toggleButton.listButton addTarget:self action:@selector(showListView) forControlEvents:UIControlEventTouchUpInside];
-  UIBarButtonItem* item = [[[UIBarButtonItem alloc] initWithCustomView:toggleButton] autorelease];
-  self.navigationItem.rightBarButtonItem = item;
-  item.tintColor = [UIColor redColor];
+  [self updateNavBar];
 }
 
 - (void)finishViewInit {
@@ -248,7 +242,6 @@
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewWillAppear:animated];
-  [self updateNavBar];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -348,13 +341,19 @@
 - (void)updateNavBar {
   STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   UITabBarItem* item = self.tabBar.selectedItem;
-  if (item == stampsTabBarItem_) {
+  if (item == stampsTabBarItem_ || item == mustDoTabBarItem_) {
+    if ([self.navigationItem.rightBarButtonItem isMemberOfClass:[STMapToggleButton class]])
+      return;
 
+    STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
+    [toggleButton.mapButton addTarget:self action:@selector(showMapView) forControlEvents:UIControlEventTouchUpInside];
+    [toggleButton.listButton addTarget:self action:@selector(showListView) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem* rightItem = [[[UIBarButtonItem alloc] initWithCustomView:toggleButton] autorelease];
+    self.navigationItem.rightBarButtonItem = rightItem;
   } else if (item == activityTabBarItem_) {
-
-  } else if (item == mustDoTabBarItem_) {
-    
+    self.navigationItem.rightBarButtonItem = nil;
   } else if (item == peopleTabBarItem_) {
+    self.navigationItem.rightBarButtonItem = nil;
     [navBar setSettingsButtonShown:YES];
   }
 }
