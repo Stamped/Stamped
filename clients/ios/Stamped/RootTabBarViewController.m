@@ -247,6 +247,7 @@
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewWillAppear:animated];
+  [self updateNavBar];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -325,7 +326,8 @@
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [self.selectedViewController viewWillDisappear:animated];
-  
+  [(STNavigationBar*)self.navigationController.navigationBar setButtonShown:NO];
+  [(STNavigationBar*)self.navigationController.navigationBar setSettingsButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -344,7 +346,18 @@
 }
 
 - (void)updateNavBar {
-#warning implement this shit.
+  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
+  UITabBarItem* item = self.tabBar.selectedItem;
+  if (item == stampsTabBarItem_) {
+    [navBar setButtonShown:YES];
+  } else if (item == activityTabBarItem_) {
+    [navBar setButtonShown:NO];
+  } else if (item == mustDoTabBarItem_) {
+    [navBar setButtonShown:YES];
+  } else if (item == peopleTabBarItem_) {
+    [navBar setButtonShown:NO];
+    [navBar setSettingsButtonShown:YES];
+  }
 }
 
 - (void)showMapView {
@@ -461,29 +474,24 @@
 
 - (void)tabBar:(UITabBar*)tabBar didSelectItem:(UITabBarItem*)item {
   UIViewController* newViewController = nil;
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  [navBar setSettingsButtonShown:NO];
   if (item == stampsTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:0];
     self.navigationItem.title = @"Stamps";
-    [navBar setButtonShown:YES];
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
     activityTabBarItem_.badgeValue = nil;
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
-    [navBar setButtonShown:NO];
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
     self.navigationItem.title = @"To-Do";
-    [navBar setButtonShown:YES];
   } else if (item == peopleTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
-    [navBar setButtonShown:NO];
-    [navBar setSettingsButtonShown:YES];
   }
+  
+  [self updateNavBar];
 
   if (!newViewController || newViewController == self.selectedViewController)
     return;
