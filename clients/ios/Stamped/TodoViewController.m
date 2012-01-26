@@ -87,15 +87,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(mapButtonWasPressed:)
-                                               name:kMapViewButtonPressedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(listButtonWasPressed:)
-                                               name:kListViewButtonPressedNotification
-                                             object:nil];
+
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
   mapView_.delegate = self;
@@ -126,9 +118,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   mapView_.showsUserLocation = NO;
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonShown:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -137,9 +126,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   if (mapView_.alpha > 0)
     mapView_.showsUserLocation = YES;
 
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonShown:YES];
   [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"TodoLastUpdatedAt"]];
 }
 

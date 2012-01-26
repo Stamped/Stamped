@@ -8,23 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
-extern NSString* const kMapViewButtonPressedNotification;
-extern NSString* const kListViewButtonPressedNotification;
 extern NSString* const kSettingsButtonPressedNotification;
 
 @interface STNavigationBar : UINavigationBar {
  @private
-  CALayer* mapLayer_;
   CALayer* ripplesLayer_;
-  BOOL listButtonShown_;
   BOOL potentialButtonTap_;
-  BOOL buttonShown_;
   BOOL settingsButtonShown_;
   NSString* string;
 }
 
-- (void)setListButtonShown:(BOOL)shown;
-- (void)setButtonShown:(BOOL)shown;
 - (void)setSettingsButtonShown:(BOOL)shown;
 
 @property (nonatomic, assign) BOOL black;

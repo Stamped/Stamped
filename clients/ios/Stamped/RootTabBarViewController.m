@@ -14,6 +14,7 @@
 #import "SearchEntitiesViewController.h"
 #import "Notifications.h"
 #import "PeopleViewController.h"
+#import "STMapToggleButton.h"
 #import "STMapViewController.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
@@ -25,7 +26,7 @@
 - (void)setTabBarIcons;
 - (void)updateNavBar;
 - (void)showMapView;
-- (void)hideMapView;
+- (void)showListView;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
@@ -122,14 +123,6 @@
                                            selector:@selector(pushNotificationReceived:)
                                                name:kPushNotificationReceivedNotification
                                              object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(showMapView)
-                                               name:kMapViewButtonPressedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(hideMapView)
-                                               name:kListViewButtonPressedNotification
-                                             object:nil];
 
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
@@ -142,6 +135,14 @@
     [self fillStampImageView];
   
   [self setTabBarIcons];
+
+  self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+  STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
+  [toggleButton.mapButton addTarget:self action:@selector(showMapView) forControlEvents:UIControlEventTouchUpInside];
+  [toggleButton.listButton addTarget:self action:@selector(showListView) forControlEvents:UIControlEventTouchUpInside];
+  UIBarButtonItem* item = [[[UIBarButtonItem alloc] initWithCustomView:toggleButton] autorelease];
+  self.navigationItem.rightBarButtonItem = item;
+  item.tintColor = [UIColor redColor];
 }
 
 - (void)finishViewInit {
@@ -326,7 +327,6 @@
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [self.selectedViewController viewWillDisappear:animated];
-  [(STNavigationBar*)self.navigationController.navigationBar setButtonShown:NO];
   [(STNavigationBar*)self.navigationController.navigationBar setSettingsButtonShown:NO];
 }
 
@@ -349,19 +349,18 @@
   STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   UITabBarItem* item = self.tabBar.selectedItem;
   if (item == stampsTabBarItem_) {
-    [navBar setButtonShown:YES];
+
   } else if (item == activityTabBarItem_) {
-    [navBar setButtonShown:NO];
+
   } else if (item == mustDoTabBarItem_) {
-    [navBar setButtonShown:YES];
+    
   } else if (item == peopleTabBarItem_) {
-    [navBar setButtonShown:NO];
     [navBar setSettingsButtonShown:YES];
   }
 }
 
 - (void)showMapView {
-  self.mapViewController = [[STMapViewController alloc] init];
+  mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
                     duration:1
@@ -369,7 +368,7 @@
                   completion:nil];
 }
 
-- (void)hideMapView {
+- (void)showListView {
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
@@ -377,10 +376,7 @@
                       toView:selectedViewController_.view
                     duration:1
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
-                  completion:^(BOOL finished) {
-                    // TODO(andybons): keep the map view around?
-                    self.mapViewController = nil;
-                  }];
+                  completion:nil];  
 }
 
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer {
