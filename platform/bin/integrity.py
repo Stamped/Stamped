@@ -250,11 +250,11 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
 
             if len(invalid_ids) > 0:
                 query = {'$pullAll': {'ref_ids': invalid_ids}}
-                self.db[_collection].update({'_id': doc['_id']}, query)
+                self.db[self._collection].update({'_id': doc['_id']}, query)
             
             if len(missing_ids) > 0:
                 query = {'$addToSet': {'ref_ids': {'$each': missing_ids}}}
-                self.db[_collection].update({'_id': doc['_id']}, query)
+                self.db[self._collection].update({'_id': doc['_id']}, query)
         
         # if there is a corresponding stat storing the count of ref_ids, ensure 
         # that it is also in sync with the underlying list of references.
