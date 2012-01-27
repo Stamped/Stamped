@@ -178,13 +178,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
             }))
             
             if not self.options.noop:
-                doc2 = doc
-                while len(s) > 1:
-                    doc2 = doc2[s[0]]
-                    s = s[1:]
-                
-                doc2[s[0]] = value
-                self.db[self._stat_collection].save(doc)
+                self.db[self._stat_collection].update({'_id': doc['_id']}, {'$set': {self._stat: value}})
 
 class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     """
@@ -249,16 +243,16 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
                 '_ids' : missing_ids, 
             }))
         
-        # optionally store the updated document after updating the reference ids
-        if not self.options.noop and (len(invalid_ids) > 0 or len(missing_ids) > 0):
-            for cmp_id in invalid_ids:
-                ref_ids.remove(cmp_id)
+        # optionally update the document with valid reference ids
+        if not self.options.noop:
+
+            if len(invalid_ids) > 0:
+                query = {'$pullAll': {'ref_ids': invalid_ids}}
+                self.db[_collection].update({'_id': doc['_id']}, query)
             
-            for cmp_id in missing_ids:
-                ref_ids.add(cmp_id)
-            
-            doc['ref_ids'] = list(ref_ids)
-            self.db[_collection].save(doc)
+            if len(missing_ids) > 0:
+                query = {'$addToSet': {'ref_ids': {'$each': missing_ids}}}
+                self.db[_collection].update({'_id': doc['_id']}, query)
         
         # if there is a corresponding stat storing the count of ref_ids, ensure 
         # that it is also in sync with the underlying list of references.
