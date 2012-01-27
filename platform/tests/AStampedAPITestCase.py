@@ -139,16 +139,18 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertLength(key, length)
     
     ### HELPER FUNCTIONS
-    def createAccount(self, name='TestUser', password="12345"):
+    def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
         _test_case = self
+
+        email = kwargs.pop('email', '%s@stamped.com' % name)
         
         path = "account/create.json"
         data = {
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
             "name": name,
-            "email": "%s@stamped.com" % name, 
+            "email": email, 
             "password": password,
             "screen_name": name
         }

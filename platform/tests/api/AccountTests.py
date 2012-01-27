@@ -65,12 +65,12 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
 
-class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
+class StampedAPIAccountInvalid(StampedAPIAccountTest):
     def test_blacklist(self):
         with expected_exception():
             (user, token) = self.createAccount('cock')
     
-    def test_invalid_characters(self):
+    def test_invalid_screen_name(self):
         with expected_exception():
             (user, token) = self.createAccount('a b')
         
@@ -88,6 +88,10 @@ class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
         
         with expected_exception():
             (user, token) = self.createAccount('@ab')
+    
+    def test_invalid_email(self):
+        with expected_exception():
+            (user, token) = self.createAccount('devbot', email='devbot@stamped.con')
 
 class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
     def test_check_email_available(self):
