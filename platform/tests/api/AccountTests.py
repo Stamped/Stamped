@@ -65,11 +65,7 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
 
-<<<<<<< HEAD
-class StampedAPIInvalidAccounts(StampedAPIAccountTest):
-=======
 class StampedAPIAccountInvalid(StampedAPIAccountTest):
->>>>>>> d0687a2339fd884cff5b6cfe2d3cb9ec6d836ca1
     def test_blacklist(self):
         with expected_exception():
             self.createAccount('cock')
