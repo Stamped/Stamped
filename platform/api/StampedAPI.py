@@ -183,9 +183,6 @@ class StampedAPI(AStampedAPI):
         
         # Validate email address
         account.email = str(account.email).lower().strip()
-        logs.info(account.email)
-        logs.info(utils.validate_email(account.email))
-        
         if not utils.validate_email(account.email):
             raise InputError("Invalid format for email address")
         
