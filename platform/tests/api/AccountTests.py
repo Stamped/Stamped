@@ -132,6 +132,17 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['user_id'], self.user['user_id'])
 
+    def test_check_email_invalid(self):
+        path = "account/check.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": '%s@stamped.con' % self.user['screen_name'],
+        }
+        
+        with expected_exception():
+            result = self.handlePOST(path, data)
+
 class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
     def test_twitter(self):
         path = "account/linked/twitter/update.json"

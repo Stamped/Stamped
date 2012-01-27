@@ -14,6 +14,7 @@
 #import "SearchEntitiesViewController.h"
 #import "Notifications.h"
 #import "PeopleViewController.h"
+#import "STMapToggleButton.h"
 #import "STMapViewController.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
@@ -25,7 +26,8 @@
 - (void)setTabBarIcons;
 - (void)updateNavBar;
 - (void)showMapView;
-- (void)hideMapView;
+- (void)showListView;
+- (void)showSettingsPane;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
@@ -45,6 +47,7 @@
 @implementation RootTabBarViewController
 
 @synthesize searchStampsNavigationController = searchStampsNavigationController_;
+@synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize viewControllers = viewControllers_;
 @synthesize selectedViewController = selectedViewController_;
 @synthesize tabBar = tabBar_;
@@ -61,6 +64,7 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
+  self.settingsNavigationController = nil;
   self.selectedViewController = nil;
   self.tabBar.delegate = nil;
   self.tabBar = nil;
@@ -122,14 +126,6 @@
                                            selector:@selector(pushNotificationReceived:)
                                                name:kPushNotificationReceivedNotification
                                              object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(showMapView)
-                                               name:kMapViewButtonPressedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(hideMapView)
-                                               name:kListViewButtonPressedNotification
-                                             object:nil];
 
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
@@ -142,6 +138,8 @@
     [self fillStampImageView];
   
   [self setTabBarIcons];
+  self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+  [self updateNavBar];
 }
 
 - (void)finishViewInit {
@@ -232,6 +230,7 @@
   self.tabBar.delegate = nil;
   self.tabBar = nil;
   self.searchStampsNavigationController = nil;
+  self.settingsNavigationController = nil;
   self.selectedViewController = nil;
   ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
   self.tabBarItems = nil;
@@ -247,7 +246,6 @@
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewWillAppear:animated];
-  [self updateNavBar];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -326,8 +324,6 @@
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [self.selectedViewController viewWillDisappear:animated];
-  [(STNavigationBar*)self.navigationController.navigationBar setButtonShown:NO];
-  [(STNavigationBar*)self.navigationController.navigationBar setSettingsButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -346,22 +342,37 @@
 }
 
 - (void)updateNavBar {
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   UITabBarItem* item = self.tabBar.selectedItem;
-  if (item == stampsTabBarItem_) {
-    [navBar setButtonShown:YES];
+  if (item == stampsTabBarItem_ || item == mustDoTabBarItem_) {
+    if ([self.navigationItem.rightBarButtonItem isMemberOfClass:[STMapToggleButton class]])
+      return;
+
+    STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
+    [toggleButton.mapButton addTarget:self action:@selector(showMapView) forControlEvents:UIControlEventTouchUpInside];
+    [toggleButton.listButton addTarget:self action:@selector(showListView) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem* rightItem = [[[UIBarButtonItem alloc] initWithCustomView:toggleButton] autorelease];
+    self.navigationItem.rightBarButtonItem = rightItem;
   } else if (item == activityTabBarItem_) {
-    [navBar setButtonShown:NO];
-  } else if (item == mustDoTabBarItem_) {
-    [navBar setButtonShown:YES];
+    self.navigationItem.rightBarButtonItem = nil;
   } else if (item == peopleTabBarItem_) {
-    [navBar setButtonShown:NO];
-    [navBar setSettingsButtonShown:YES];
+    UIButton* settingsButton = [UIButton buttonWithType:UIButtonTypeCustom];    
+    settingsButton.frame = CGRectMake(0, 0, 34, 30);
+    BOOL whiteAppearance = NO;
+    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
+      whiteAppearance = YES;
+
+    NSString* imageName = whiteAppearance ? @"nav_gear_button_ios5" : @"nav_gear_button_ios4";
+    [settingsButton setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+    [settingsButton addTarget:self
+                       action:@selector(showSettingsPane)
+             forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem* rightItem = [[[UIBarButtonItem alloc] initWithCustomView:settingsButton] autorelease];
+    self.navigationItem.rightBarButtonItem = rightItem;
   }
 }
 
 - (void)showMapView {
-  self.mapViewController = [[STMapViewController alloc] init];
+  mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
                     duration:1
@@ -369,7 +380,7 @@
                   completion:nil];
 }
 
-- (void)hideMapView {
+- (void)showListView {
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
@@ -377,10 +388,11 @@
                       toView:selectedViewController_.view
                     duration:1
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
-                  completion:^(BOOL finished) {
-                    // TODO(andybons): keep the map view around?
-                    self.mapViewController = nil;
-                  }];
+                  completion:nil];  
+}
+
+- (void)showSettingsPane {
+  [self.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
 }
 
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer {

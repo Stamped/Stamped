@@ -31,7 +31,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)loadUserDataFromNetwork;
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
-- (void)settingsButtonPressed:(NSNotification*)notification;
 - (void)userProfileHasChanged:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)updateShelf;
@@ -44,7 +43,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize friendsArray = friendsArray_;
-@synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
@@ -52,7 +50,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userIDsToBeFetched = nil;
   self.friendsArray = nil;
-  self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
   [super dealloc];
 }
@@ -66,10 +63,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(settingsButtonPressed:)
-                                               name:kSettingsButtonPressedNotification
-                                             object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(userProfileHasChanged:)
                                                name:kUserProfileHasChangedNotification
@@ -92,7 +85,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.friendsArray = nil;
-  self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
 }
 
@@ -107,17 +99,11 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setSettingsButtonShown:YES];
   [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"PeopleLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setSettingsButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -391,11 +377,6 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 #pragma mark - Custom methods.
-
-- (void)settingsButtonPressed:(NSNotification*)notification {
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
-}
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
   [self.tableView reloadData];

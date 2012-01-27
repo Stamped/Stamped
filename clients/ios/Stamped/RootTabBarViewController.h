@@ -18,6 +18,7 @@
 
 @property (nonatomic, retain) NSArray* viewControllers;
 @property (nonatomic, retain) UIViewController* selectedViewController;
+@property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
 @property (nonatomic, retain) IBOutlet UINavigationController* searchStampsNavigationController;
 @property (nonatomic, retain) IBOutlet UITabBar* tabBar;
 @property (nonatomic, retain) IBOutlet UIImageView* userStampBackgroundImageView;

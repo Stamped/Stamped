@@ -12,25 +12,19 @@
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
 
-NSString* const kMapViewButtonPressedNotification = @"kMapViewButtonPressedNotification";
-NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNotification";
-NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNotification";
-
 @interface STNavigationBar ()
 - (void)initialize;
-- (void)auxiliaryButtonTapped;
 - (CGPathRef)newPathForTitle;
-- (void)settingsButtonPressed:(id)sender;
 
-@property (nonatomic, readonly) UIButton* settingsButton;
+@property (nonatomic, readonly) CALayer* ripplesLayer;
 @end
 
 @implementation STNavigationBar
 
+@synthesize ripplesLayer = ripplesLayer_;
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
 @synthesize black = black_;
-@synthesize settingsButton = settingsButton_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -40,7 +34,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   return self;
 }
 
-// Loaded from a nib.
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
   if (self)
@@ -50,8 +43,8 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 }
 
 - (void)dealloc {
-  mapLayer_ = nil;
-  settingsButton_ = nil;
+  self.string = nil;
+  ripplesLayer_ = nil;
   [super dealloc];
 }
 
@@ -119,10 +112,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 
 - (void)initialize {
   self.layer.masksToBounds = NO;
-  
-  BOOL whiteAppearance = NO;
-  if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
-    whiteAppearance = YES;
 
   CGFloat ripplesY = CGRectGetMaxY(self.bounds);
   ripplesLayer_ = [[CALayer alloc] init];
@@ -131,27 +120,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
   [self.layer addSublayer:ripplesLayer_];
   [ripplesLayer_ release];
-
-  mapLayer_ = [[CALayer alloc] init];
-  mapLayer_.frame = CGRectMake(281, 7, 34, 30);
-  mapLayer_.contentsGravity = kCAGravityResizeAspect;
-  NSString* imageName = whiteAppearance ? @"nav_globe_button_ios5" : @"nav_globe_button_ios4";
-  mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
-  mapLayer_.backgroundColor = [UIColor whiteColor].CGColor;
-  mapLayer_.opacity = 0.0;
-  [self.layer addSublayer:mapLayer_];
-  [mapLayer_ release];
-  
-  settingsButton_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-  settingsButton_.frame = CGRectMake(281, 7, 34, 30);
-  imageName = whiteAppearance ? @"nav_gear_button_ios5" : @"nav_gear_button_ios4";
-  [settingsButton_ setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
-  [settingsButton_ addTarget:self
-                      action:@selector(settingsButtonPressed:)
-            forControlEvents:UIControlEventTouchUpInside];
-  settingsButton_.alpha = 0.0;
-  settingsButton_.hidden = YES;
-  [self addSubview:settingsButton_];
 }
 
 - (void)setBlack:(BOOL)black {
@@ -161,87 +129,7 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   black_ = black;
   
   ripplesLayer_.hidden = black;
-  mapLayer_.hidden = black;
   [self setNeedsDisplay];
-}
-
-- (void)settingsButtonPressed:(id)sender {
-  [[NSNotificationCenter defaultCenter] postNotificationName:kSettingsButtonPressedNotification
-                                                      object:nil];
-}
-
-- (void)setSettingsButtonShown:(BOOL)shown {
-  if (settingsButtonShown_ == shown)
-    return;
-  
-  settingsButtonShown_ = shown;
-  if (shown)
-    settingsButton_.hidden = NO;
-  [UIView animateWithDuration:0.2
-                   animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }
-                   completion:^(BOOL finished) { settingsButton_.hidden = !shown; }];
-}
-
-- (void)setListButtonShown:(BOOL)shown {
-  if (listButtonShown_ == shown)
-    return;
-
-  [self auxiliaryButtonTapped];
-}
-
-- (void)setButtonShown:(BOOL)shown {
-  if (buttonShown_ == shown)
-    return;
-
-  buttonShown_ = shown;
-  [UIView animateWithDuration:0.2
-                   animations:^{ mapLayer_.opacity = shown ? 1.0 : 0.0; }];
-}
-
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  [super touchesBegan:touches withEvent:event];
-
-  UITouch* touch = [touches anyObject];
-  if (CGRectContainsPoint(mapLayer_.frame, [touch locationInView:self]))
-    potentialButtonTap_ = YES;
-}
-
-- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  [super touchesCancelled:touches withEvent:event];
-
-  potentialButtonTap_ = NO;
-}
-
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  [super touchesEnded:touches withEvent:event];
-
-  UITouch* touch = [touches anyObject];
-  if (!potentialButtonTap_ || !buttonShown_)
-    return;
-
-  if (CGRectContainsPoint(mapLayer_.frame, [touch locationInView:self]))
-    [self auxiliaryButtonTapped];
-}
-
-- (void)auxiliaryButtonTapped {
-  if (listButtonShown_) {
-    NSString* imageName = @"nav_globe_button_ios4";
-    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
-      imageName = @"nav_globe_button_ios5";
-
-    mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kListViewButtonPressedNotification
-                                                        object:self];
-  } else {
-    NSString* imageName = @"nav_list_button_ios4";
-    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
-      imageName = @"nav_list_button_ios5";
-
-    mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMapViewButtonPressedNotification
-                                                        object:self];
-  }
-  listButtonShown_ = !listButtonShown_;
 }
 
 - (CGPathRef)newPathForTitle {

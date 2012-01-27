@@ -88,17 +88,12 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [super viewDidAppear:animated];
   if (mapView_.alpha > 0)
     mapView_.showsUserLocation = YES;
-
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  [navBar setButtonShown:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   mapView_.showsUserLocation = NO;
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  [navBar setButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -112,18 +107,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   mapView_.delegate = self;
   [self.view addSubview:mapView_];
   [mapView_ release];
-
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(mapButtonWasPressed:)
-                                               name:kMapViewButtonPressedNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(listButtonWasPressed:)
-                                               name:kListViewButtonPressedNotification
-                                             object:nil];
-
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  [navBar setListButtonShown:NO];
 
   [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
