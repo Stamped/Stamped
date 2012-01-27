@@ -34,8 +34,7 @@ utils.log('BROKER_URL: %s' % BROKER_URL)
 # (can be useful for debugging)
 #CELERYD_CONCURRENCY = 1
 
-"""
-# Enables error emails (note: haven't been able to get these error emails to actuall work).
+# Enables error emails (note: haven't been able to get these error emails to actually work).
 CELERY_SEND_TASK_ERROR_EMAILS = True
 
 # Name and email addresses of recipients
@@ -50,11 +49,10 @@ SERVER_EMAIL = "notifications@stamped.com"
 # TODO: Error emails aren't working
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_USE_SSL = True
+EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "notifications@stamped.com"
 EMAIL_HOST_PASSWORD = "mariotennis"
-"""
 
 # Always run tasks locally / synchronously, completely bypassing the async brokering / work queues
 # that Celery provides. Note that this can be extremely useful for debugging.

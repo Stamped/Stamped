@@ -13,17 +13,22 @@ from pprint import pprint
 
 class SinglePlatform(object):
     """
-        Lightweight wrapper around SinglePlatform restaurant API.
+        Lightweight wrapper around SinglePlatform API.
     """
     
     BASE_URL = "http://api.singleplatform.co"
     
-    def __init__(self, client_id, signing_key):
+    def __init__(self, client_id, signing_key, api_key=None):
         assert client_id   is not None and len(client_id)   > 0
         assert signing_key is not None and len(signing_key) > 0
         
         self._client_id   = client_id
-        self._signing_key = signing_key
+        self._api_key     = api_key
+        
+        padding_factor    = (4 - len(signing_key) % 4) % 4
+        signing_key      += "=" * padding_factor
+        
+        self._signing_key = base64.b64decode(unicode(signing_key).translate(dict(zip(map(ord, u'-_'), u'+/'))))
     
     def search(self, query, page=0, count=20):
         params = {
@@ -37,16 +42,20 @@ class SinglePlatform(object):
     def lookup(self, location_id):
         return self._get_uri('/restaurants/%s' % location_id)
     
+    def get_menu(self, location_id):
+        return self._get_uri('/restaurants/%s/menu' % location_id)
+    
+    def get_short_menu(self, location_id):
+        return self._get_uri('/restaurants/%s/shortmenu' % location_id)
+    
     def _get_uri(self, uri, params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))
         
+        # construct the signed url
         uri = "%s%sclient=%s" % (uri, '?' if params is None else '&', self._client_id)
         uri = uri.encode('utf-8')
-        url = "%s/%s&sig=%s" % (self.BASE_URL, uri, self._sign(uri))
-        
-        utils.log(url)
-        return None
+        url = "%s%s&sig=%s" % (self.BASE_URL, uri, self._sign(uri))
         
         request = urllib2.Request(url)
         request.add_header('Accept-encoding', 'gzip')
@@ -55,13 +64,24 @@ class SinglePlatform(object):
         return json.loads(utils.getFile(url, request))
     
     def _sign(self, uri):
-        # see http://www.doughellmann.com/PyMOTW/hmac/
-        return base64.urlsafe_b64encode(hmac.new(self._signing_key, uri, hashlib.sha1).digest())
+        digest = hmac.new(self._signing_key, uri, hashlib.sha1).digest()
+        digest = base64.urlsafe_b64encode(digest)
+        digest = digest.rstrip('=')
+        
+        return digest
+
+class StampedSinglePlatform(SinglePlatform):
+    def __init__(self):
+        SinglePlatform.__init__(self, 
+                                client_id='cyibvntpqlfgmsnynncnkbscg', 
+                                signing_key='1THU8A8TPUYw84LIXQTomgZNNx4yoKnQiDpNv9yDPuQ', 
+                                api_key='kpm48ecj0bb5zai7qc5wvq562')
 
 if __name__ == '__main__':
-    sp = SinglePlatform(client_id='stamped', signing_key='test')
+    sp = StampedSinglePlatform()
     
     # Search for Nobu NY by its phone number
-    results = sp.search(query='2122190500')
+    #results = sp.search(query='2122190500')
+    results = sp.get_menu('nobu')
     pprint(results)
 

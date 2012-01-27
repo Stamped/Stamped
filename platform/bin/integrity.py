@@ -23,7 +23,6 @@ TODO:
     * ensure entities and places are in sync
 """
 
-
 class ADocumentIntegrityCheck(AIntegrityCheck):
     """
         Abstract superclass for verifying the existence and correctness of 
@@ -34,14 +33,12 @@ class ADocumentIntegrityCheck(AIntegrityCheck):
         AIntegrityCheck.__init__(self, api, db, options)
         
         self._sample_kwargs = kwargs
-        self._collection = collection
-        self._id_field = id_field
-        self._schema = schema
+        self._collection    = collection
+        self._id_field      = id_field
+        self._schema        = schema
     
     def run(self):
-        self._sample(self._get_docs(), 
-                     self._check_doc, 
-                     **self._sample_kwargs)
+        self._sample(self._get_docs(), self._check_doc, **self._sample_kwargs)
     
     def _get_docs(self):
         return self.db[self._collection].find()
@@ -88,9 +85,7 @@ class AReferenceIntegrityCheck(AIntegrityCheck):
         self._refs = refs
     
     def run(self):
-        self._sample(self._get_docs(), 
-                     self._check_doc, 
-                     **self._sample_kwargs)
+        self._sample(self._get_docs(), self._check_doc, **self._sample_kwargs)
     
     def _get_docs(self):
         return self.db[self._collection].find()
@@ -135,8 +130,7 @@ class AStatIntegrityCheck(AIntegrityCheck):
         self._sample_kwargs = kwargs
     
     def run(self):
-        self._sample(self.db[self._stat_collection].find(), 
-                     self._check_doc, **self._sample_kwargs)
+        self._sample(self.db[self._stat_collection].find(), self._check_doc, **self._sample_kwargs)
     
     @abstract
     def _get_cmp_value(self, doc_id):
@@ -203,9 +197,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         self._collection = collection
     
     def run(self):
-        self._sample(self.db[self._collection].find(), 
-                     self._check_doc, 
-                     **self._sample_kwargs)
+        self._sample(self.db[self._collection].find(), self._check_doc, **self._sample_kwargs)
     
     @abstract
     def _get_cmp(self, doc_id):

@@ -1,6 +1,5 @@
 
 platform:
-    * remove ghost mongod process
     * handle async errors gracefully - email + retryable
     * monitor process should check mongo's replica set status
     
@@ -115,6 +114,8 @@ OLD:
     * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
     * add cache expires control to memcached_function
     * ensure async tasks are logged and accessible from logger
+    * remove ghost mongod process
+    * cron job only running once
     
     34.026401,-118.38947899
 

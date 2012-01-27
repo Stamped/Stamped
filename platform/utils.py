@@ -18,9 +18,9 @@ from StringIO            import StringIO
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
+    """
     delay = 0.01
     
-    """
     while pp.returncode is None:
         time.sleep(delay)
         delay *= 2
@@ -47,6 +47,9 @@ def shell3(cmd, customEnv=None):
     status = pp.wait()
     
     return status
+
+def is_running(cmd):
+    return 0 == shell("ps -ef | grep '%s' | grep -v grep")[1]
 
 def lazyProperty(undecorated):
     name = '_' + undecorated.__name__
