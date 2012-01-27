@@ -107,6 +107,7 @@ def getInstances():
         for i in xrange(count):
             instance = getInstance(nodeType)
             instance['name'] = '%s%d' % (nodeType, i)
+            instance['Name'] = instance['name']
             
             # automate placement via round-robin of us-east availability zones
             if 'placement' in instance and instance['placement'] is None:

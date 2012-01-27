@@ -622,7 +622,7 @@ class AWSDeploymentStack(ADeploymentStack):
         return filter(lambda instance: role in instance.roles, self.instances)
     
     def add(self, *args):
-        types = [ 'db', 'api', 'web', 'work', 'mem' ]
+        types = [ 'db', 'api', 'web', 'work', 'mem', 'mon' ]
         if 0 == len(args) or args[0] not in types:
             raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         

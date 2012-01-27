@@ -2,11 +2,10 @@
 platform:
     * handle async errors gracefully - email + retryable
     * monitor process should check mongo's replica set status
+    * add integrity checking daemon as weekly cron job
     
     * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
-    * integrity checking daemon
-    * look into integrating foursquare APIs
     * stable ids for merged entities
     * refactor repo layout and, in particular, web stuff
 
@@ -37,45 +36,12 @@ Bieber:
 * continuous integration
     * how to see current revision in git?
 
-* refactor repository layout
 * investigate autocomplete and add cron job
 
 * cap tempentities
 * remove iTunes affiliate search dependency
-* PROD tag on stack
 
 * remove linked entity corruption from activity collection
-
-each system:
-    * zero or more stacks
-    * access credentials
-
-each stack:
-    * autoscale groups
-    * each group:
-        * a group is a subclass of a node that adds ability to control all subnodes
-        * load balancer?
-        * autoscale?
-        * add node
-        * security group
-    
-    each node:
-        * initialization
-        * cron jobs
-        * daemons
-        * monitoring & reporting
-
-Look into Whirr docs, ep.io, boto, etc.
-
-ADeploymentSystem
-ADeploymentStack
-ADeploymentGroup
-ADeploymentNode
-ADeploymentInstance
-
-AContinuousDeploymentSystem?
-
-rename deployments => platforms
 
 OLD:
     * stamp image async resizing
@@ -116,6 +82,10 @@ OLD:
     * ensure async tasks are logged and accessible from logger
     * remove ghost mongod process
     * cron job only running once
+    * integrity checking daemon
+    * look into integrating foursquare APIs
+    * refactor repository layout
+    * automated way to determine whether or not we're on PROD stack
     
     34.026401,-118.38947899
 
