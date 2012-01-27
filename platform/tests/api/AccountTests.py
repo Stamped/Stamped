@@ -65,29 +65,54 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
 
-class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
+class StampedAPIInvalidAccounts(StampedAPIAccountTest):
     def test_blacklist(self):
         with expected_exception():
-            (user, token) = self.createAccount('cock')
+            self.createAccount('cock')
     
     def test_invalid_characters(self):
         with expected_exception():
-            (user, token) = self.createAccount('a b')
+            self.createAccount('a b')
         
         with expected_exception():
-            (user, token) = self.createAccount('a*b')
+            self.createAccount('a*b')
         
         with expected_exception():
-            (user, token) = self.createAccount('a!')
+            self.createAccount('a!')
         
         with expected_exception():
-            (user, token) = self.createAccount('a+b')
+            self.createAccount('a+b')
         
         with expected_exception():
-            (user, token) = self.createAccount('a/b')
+            self.createAccount('a/b')
         
         with expected_exception():
-            (user, token) = self.createAccount('@ab')
+            self.createAccount('@ab')
+    
+    def test_invalid_length(self):
+        with expected_exception():
+            self.createAccount('')
+        
+        with expected_exception():
+            self.createAccount('012345678901234578901234567890')
+    
+    def test_invalid_emails(self):
+        invalid_emails = [
+            'abc@stamped.con', 
+            'abc@gmail.con', 
+            'abc@gmailcom', 
+            'abcgmail.com', 
+            '@gmail.com', 
+            'abc@.com', 
+            'abc@@.com', 
+            'test@gmail.ghz', 
+        ]
+        
+        index = 0
+        for email in invalid_emails:
+            with expected_exception():
+                self.createAccount('testinv_%s' % index, email=email)
+            index += 1
 
 class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
     def test_check_email_available(self):
@@ -131,7 +156,7 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['user_id'], self.user['user_id'])
-
+    
     def test_check_email_invalid(self):
         path = "account/check.json"
         data = {
@@ -141,7 +166,7 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         }
         
         with expected_exception():
-            result = self.handlePOST(path, data)
+            self.handlePOST(path, data)
 
 class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
     def test_twitter(self):

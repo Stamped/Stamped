@@ -143,8 +143,9 @@ class StampedAPI(AStampedAPI):
     @HandleRollback
     def addAccount(self, account, imageData=None):
         ### TODO: Check if email already exists?
+        now = datetime.utcnow()
         
-        account.timestamp.created = datetime.utcnow()
+        account.timestamp.created = now
         account.password = convertPasswordForStorage(account['password'])
         
         # Set initial stamp limit
@@ -187,7 +188,7 @@ class StampedAPI(AStampedAPI):
         
         # Add image timestamp if exists
         if imageData:
-            account.image_cache = datetime.utcnow()
+            account.image_cache = now
         
         # Create account
         ### TODO: Add intelligent error message

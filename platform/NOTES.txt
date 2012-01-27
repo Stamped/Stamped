@@ -1,5 +1,6 @@
 
 platform:
+    * add wrapper to APITasks.py to invoke tasks with specific args
     * handle async errors gracefully - email + retryable
     * monitor process should check mongo's replica set status
     * add integrity checking daemon as weekly cron job
