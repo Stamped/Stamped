@@ -71,15 +71,15 @@ def invoke(request, *args, **kwargs):
 def addStamp(*args, **kwargs):
     invoke(addStamp.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(ignore_result=True, default_retry_delay=10, max_retries=3)
 def addResizedStampImages(*args, **kwargs):
     invoke(addResizedStampImages.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(ignore_result=True, default_retry_delay=10, max_retries=3)
 def customizeStamp(*args, **kwargs):
     invoke(customizeStamp.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(ignore_result=True, default_retry_delay=10, max_retries=3)
 def updateProfileImage(*args, **kwargs):
     invoke(updateProfileImage.request, *args, **kwargs)
 
@@ -103,7 +103,7 @@ def alertFollowersFromFacebook(*args, **kwargs):
 def addFriendship(*args, **kwargs):
     invoke(addFriendship.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(ignore_result=True, default_retry_delay=10, max_retries=3)
 def removeFriendship(*args, **kwargs):
     invoke(removeFriendship.request, *args, **kwargs)
 
