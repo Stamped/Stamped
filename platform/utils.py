@@ -632,6 +632,8 @@ def validate_email(email):
         "XN--YFRO4I67O", "XN--YGBI2AMMX", "XN--ZCKZAH", "XXX", "YE", "YT", "ZA", "ZM", "ZW"])
     try:
         if __email_re.match(email):
+            logs.info('validate_email: %s' % email.split('.')[-1].upper())
+            
             if email.split('.')[-1].upper() in valid_suffixes:
                 return True
     except:
