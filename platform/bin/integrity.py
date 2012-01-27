@@ -183,7 +183,9 @@ class AStatIntegrityCheck(AIntegrityCheck):
 class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     """
         Abstract superclass for all index collection integrity checks. An index
-        collection is 
+        collection is a collection that stores references from one id (e.g. a user)
+        to a set of ids (e.g. stamps). It is a convenience collection used to 
+        make querying faster, and can be regenerated entirely from underlying data.
     """
     
     def __init__(self, api, db, options, collection, stat_collection=None, stat=None, **kwargs):
