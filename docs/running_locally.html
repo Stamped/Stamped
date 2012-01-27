@@ -1,3 +1,9 @@
+<html>
+<head>
+<title>Running Locally</title>
+</head>
+<body>
+
 Here are some dependencies to install and basic instructions on how to get a Stamped API server up and running locally on Mac OS X.
 
 note: if a native python dependency fails to compile, prefix it with ARCHFLAGS="-arch i386 -arch x86_64"
@@ -55,3 +61,6 @@ Stamps to getting a Stamped server up and running locally:
     
     Note: if you run into errors here, they'll likely stem from python dependency issues. Most unit tests create a test account, and if one unit test fails and that test account isn't properly cleaned up, the underlying DB will likely be corrupted, so we generally clear the DB after each failed test invocation.  You can do this locally by running (assuming you're running mongod on the default port 27017):
         > mongo stamped --eval "db.dropDatabase()"
+
+</body>
+</html>
