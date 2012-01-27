@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+"""
+Assorted utility commands and classes
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
