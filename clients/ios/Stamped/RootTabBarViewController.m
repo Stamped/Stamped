@@ -372,23 +372,33 @@
 }
 
 - (void)showMapView {
+  [mapViewController_ viewWillAppear:YES];
+  [selectedViewController_ viewWillDisappear:YES];
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
                     duration:1
                      options:UIViewAnimationOptionTransitionFlipFromRight
-                  completion:nil];
+                  completion:^(BOOL finished) {
+                    [selectedViewController_ viewDidDisappear:YES];
+                    [mapViewController_ viewDidAppear:YES];
+                  }];
 }
 
 - (void)showListView {
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
+  [selectedViewController_ viewWillAppear:YES];
+  [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
                       toView:selectedViewController_.view
                     duration:1
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
-                  completion:nil];  
+                  completion:^(BOOL finished) {
+                    [mapViewController_ viewDidDisappear:YES];
+                    [selectedViewController_ viewDidAppear:YES];
+                  }];
 }
 
 - (void)showSettingsPane {
