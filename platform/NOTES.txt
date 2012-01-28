@@ -1,6 +1,8 @@
 
 platform:
     * add wrapper to APITasks.py to invoke tasks with specific args
+    * redirect useless statsd.node.log to /dev/null
+    * remove factual dumps from repository
     * handle async errors gracefully - email + retryable
     * monitor process should check mongo's replica set status
     * add integrity checking daemon as weekly cron job

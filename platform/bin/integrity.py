@@ -260,7 +260,7 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
         # that it is also in sync with the underlying list of references.
         AStatIntegrityCheck.check_doc_id(self, doc_id, value=len(cmp_ids))
 
-class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class InboxStampsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the inboxstamps collection, which maps 
         user_ids to stamp_ids in the user's inbox.
@@ -281,7 +281,7 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
         
         return self._get_stamp_ids_from_user_ids(friend_ids)
 
-class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
+class CreditReceivedIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the creditreceived collection, which maps 
         user_ids to stamp_ids for which the user has received credit.
@@ -296,7 +296,7 @@ class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._get_stamp_ids_from_credited_user_id(doc_id)
 
-class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserFavEntitiesIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userfaventities collection, which maps 
         user_ids to entity_ids the user has favorited.
@@ -311,7 +311,7 @@ class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' :1}), key='entity.entity_id')
 
-class UserLikesIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserLikesIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userlikes collection, which maps 
         user_ids to stamp_ids the user has liked.
@@ -326,7 +326,7 @@ class UserLikesIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamplikes'].find({'ref_ids' : doc_id}, {'_id' :1}))
 
-class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserStampsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userstamps collection, which maps 
         user_ids to stamp_ids created by the user.
@@ -348,7 +348,7 @@ class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamps'].find({'user.user_id' : doc_id}, {'_id' : 1}))
 
-class StampCommentsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class StampCommentsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the stampcomments collection, which maps 
         stamp_ids to comment_ids associated with the stamp.
@@ -363,7 +363,7 @@ class StampCommentsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['comments'].find({'stamp_id' : doc_id}, {'_id' : 1}))
 
-class NumFriendsIntegrityCheck(AStatIntegrityCheck):
+class NumFriendsStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_friends user statistic.
     """
@@ -379,7 +379,7 @@ class NumFriendsIntegrityCheck(AStatIntegrityCheck):
         
         return 0 if friends is None else len(friends['ref_ids'])
 
-class NumFollowersIntegrityCheck(AStatIntegrityCheck):
+class NumFollowersStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_followers user statistic.
     """
@@ -395,7 +395,7 @@ class NumFollowersIntegrityCheck(AStatIntegrityCheck):
         
         return 0 if followers is None else len(followers['ref_ids'])
 
-class NumLikesIntegrityCheck(AStatIntegrityCheck):
+class NumLikesStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_likes stamp statistic.
     """
@@ -591,17 +591,17 @@ class StampNumIntegrityCheck(AIntegrityCheck):
 # AIntegrityCheck subclasses
 checks = [
     # index collection integrity checks
-    InboxStampsIntegrityCheck, 
-    CreditReceivedIntegrityCheck, 
-    UserFavEntitiesIntegrityCheck, 
-    UserLikesIntegrityCheck, 
-    UserStampsIntegrityCheck, 
-    StampCommentsIntegrityCheck, 
+    InboxStampsIndexIntegrityCheck, 
+    CreditReceivedIndexIntegrityCheck, 
+    UserFavEntitiesIndexIntegrityCheck, 
+    UserLikesIndexIntegrityCheck, 
+    UserStampsIndexIntegrityCheck, 
+    StampCommentsIndexIntegrityCheck, 
     
     # stat integrity checks
-    NumFriendsIntegrityCheck, 
-    NumFollowersIntegrityCheck, 
-    NumLikesIntegrityCheck, 
+    NumFriendsStatIntegrityCheck, 
+    NumFollowersStatIntegrityCheck, 
+    NumLikesStatIntegrityCheck, 
     
     # reference integrity checks
     StampsReferenceIntegrityCheck, 
