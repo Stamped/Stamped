@@ -1,14 +1,18 @@
 #!/usr/bin/python
 """
-Base classes for structured, type/field checked data representation that parallels common built in Python types.
-
-TODO, evaluate use of single underscore attributes. -Landon
-TODO, consider changing the parent attribute to a weakref, which would only require small and transparent modifications. -Landon
+DEMO: Alternative implementation to demonstrate abc module
 """
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
+
+
+
+#
+# DEMO: Import relevant abc members
+#
+from abc import ABCMeta, abstractmethod
 
 import copy, platform.logs
 from datetime import datetime
@@ -521,6 +525,8 @@ when not all fields are expected to match, but should not be used as a first
 resort.
 
 """
+    # DEMO: set metaclass
+    __metaclass__ = ABCMeta
     
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
@@ -784,9 +790,13 @@ resort.
                 logs.warning(msg)
                 raise SchemaTypeError(msg)
         return ret
-    
+
+    # DEMO: use abstractmethod decorator
+    @abstractmethod
     def setSchema(self):
-        raise NotImplementedError
+        pass
+        # No longer necessary
+        #raise NotImplementedError
     
     def importSchema(self, schema):
         try:
