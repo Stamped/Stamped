@@ -54,6 +54,31 @@ I would recommend that we deprecate platform.util.abstract in favor of the abc m
 -Landon
 </p>
 </dd>
+<dt>
+Change lazyProperty to use a closure instead of attribute modification.
+</dt>
+<dd>
+<p>
+The current lazyProperty relies on setattr and a mangled name. This
+unnecessarilly exposes implementation details about lazyProperty. I suggest
+that we switch to a closure based implementation like the following one:
+</p>
+<div class="code">def lazyProperty(undecorated):
+    x = []
+    @property
+    @wraps(undecorated)
+    def decorated(self):
+        if len(x) == 0:
+            x.append( undecorated(self) )
+        return x[0]
+    return decorated
+</div>
+<p>
+The above implementation is almost identical except it does not use
+setattr, which in my opinion is a good thing.
+-Landon
+</p>
+</dd>
 </dl>
 </div>
 </body>
