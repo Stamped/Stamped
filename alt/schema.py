@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """
 DEMO: Alternative implementation to demonstrate abc module
+DEMO: weakref for parent attribute
 """
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -13,6 +14,11 @@ __license__   = "TODO"
 # DEMO: Import relevant abc members
 #
 from abc import ABCMeta, abstractmethod
+
+#
+# DEMO: need weakref.ref
+#
+import weakref
 
 import copy, platform.logs
 from datetime import datetime
@@ -147,8 +153,11 @@ situation.
     def setIsSet(self, isSet):
         self._isSet = isSet
         # The only known use of the parent attribute -Landon
+        # DEMO : use weakref
         if self._parent != None and isSet:
-            self._parent.setIsSet(isSet)
+            parent = self._parent()
+            if parent:
+                parent.setIsSet(isSet)
     
     def _setType(self, requiredType):
         allowed = [basestring, bool, int, long, float, dict, list, datetime]
@@ -556,7 +565,8 @@ resort.
             try:
                 self._elements[name] = value
                 self._elements[name]._name = name
-                self._elements[name]._parent = self
+                # DEMO: create weakref
+                self._elements[name]._parent = weakref.ref(self)
             except:
                 msg = "Cannot Add Element (%s)" % name
                 logs.warning(msg)
@@ -596,7 +606,7 @@ resort.
         
         def _returnOutput(item):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
-                item._parent = self
+                item._parent = weakref.ref(self)
                 return item
             return item.value
         
