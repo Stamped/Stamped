@@ -10,10 +10,10 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import copy, logs
+import copy, platform.logs
 from datetime import datetime
-from errors import *
-from utils import normalize
+from platform.errors import *
+from platform.utils import normalize
 
 
 # adding generic validation for email, username, etc. on a per-element basis
