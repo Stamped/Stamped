@@ -27,6 +27,24 @@ single-underscore attributes, refactoring 'protected' use where necessary.
 -Landon
 </p>
 </dd>
+<dt>
+Inefficiency of Reference cycles in SchemaElement and potential memory leaks:
+</dt>
+<dd>
+<p>
+Since Python is primarily a reference counting language, with a limited cycle detecting
+garbage collector, I think it would make sense to change the parent attribute of SchemaElement
+to be a weakref or to consider refactoring SchemeElement to remove it entirely. To the best of my knowledge,
+the parent attribute is read in only one method, SchemaElement.setIsSet, and in this situation,
+it does not appear to be necessary if the parent was otherwise unreachable. Also, if a subclass of
+SchemeElement were to override __del__, it would result in a memory leak since, to the
+best of my knowledge, the garbage collector does not collect objects which override __del__.
+Since Schemas seem to be one of the most prolific data-structures in the Stamped implementation,
+I am fairly certain that moving them over to pure reference counting would result in an appreciable
+performance gain.
+-Landon
+</p>
+</dd>
 </dl>
 </div>
 </body>

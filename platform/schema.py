@@ -1,6 +1,9 @@
 #!/usr/bin/python
 """
 Base classes for structured, type/field checked data representation that parallels common built in Python types.
+
+TODO, evaluate use of single underscore attributes. -Landon
+TODO, consider changing the parent attribute to a weakref, which would only require small and transparent modifications. -Landon
 """
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -139,7 +142,7 @@ situation.
 
     def setIsSet(self, isSet):
         self._isSet = isSet
-        
+        # The only known use of the parent attribute -Landon
         if self._parent != None and isSet:
             self._parent.setIsSet(isSet)
     
@@ -539,6 +542,7 @@ resort.
         self.importData(data)
     
     def __setattr__(self, name, value):
+        # Will work for mangled private variables too
         if name[:1] == '_':
             object.__setattr__(self, name, value)
         
