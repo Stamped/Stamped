@@ -2,9 +2,10 @@
 Primary Stamped Python module
 
 Important Leaf Modules:
+
 utils.py    : Utility functions and classes
 logs.py     : Logging functions
-schema.py   : SchemaElement base classes for uniform and checked scalar, list, and dictionary representations.
+schema.py   : Schema base classes for uniform and checked scalar, list, and dictionary representations.
 
 Important Package Modules:
 

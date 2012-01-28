@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+"""
+Base classes for structured, type/field checked data representation that parallels common built in Python types.
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
