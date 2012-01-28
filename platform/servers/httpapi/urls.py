@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Django url configuration: controls httpapi dispatch
+
+DOCUMENTED SAMPLE PATH MODULE
+prev:   ./settings.py
+next:   ./v0.functions.account.py
+see:   urlpatterns
+"""
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -12,6 +20,8 @@ from django.conf.urls.defaults import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
+# DOCUMENTED SAMPLE PATH ATTRIBUTE
+# url to function mappings for django
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'httpapi.views.home', name='home'),
@@ -28,6 +38,10 @@ urlpatterns = patterns('',
     (r'v0/oauth2/login.json',           'v0.functions.oauth2.login'),
     
     ### ACCOUNT
+    #
+    # DOCUMENTED SAMPLE PATH DATA
+    # establishes mapping of the REST command account/create to the implementing function, platform.servers.httpapi.v0.functions.account.create
+    #
     (r'v0/account/create.json',                 'v0.functions.account.create'),
     (r'v0/account/remove.json',                 'v0.functions.account.remove'),
     (r'v0/account/settings.json',               'v0.functions.account.settings'),

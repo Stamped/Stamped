@@ -1,5 +1,12 @@
 # Django settings for httpapi project.
+"""
+Django settings for httpapi project.
 
+DOCUMENTED SAMPLE PATH MODULE
+prev:   TODO
+next: ./urls.py
+see: ROOT_URLCONF
+"""
 import Globals, utils
 
 DEBUG = (not utils.is_ec2())
@@ -104,6 +111,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+#
+# DOCUMENTED SAMPLE PATH CODE
+# establish location of urlpatterns
+#
 ROOT_URLCONF = 'httpapi.urls'
 
 TEMPLATE_DIRS = (

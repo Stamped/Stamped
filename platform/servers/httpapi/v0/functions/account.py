@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Account creation functions
 
+DOCUMENTED SAMPLE PATH MODULE
+prev:   platform.servers.httpapi.urls.
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -11,6 +16,13 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
+    """
+    Create new account
+
+    DOCUMENTED SAMPLE PATH COMPONENT
+    prev:   platform.servers.httpapi.urls
+    next:   
+    """
     client_id   = checkClient(request)
     schema      = parseFileUpload(HTTPAccountNew(), request, 'profile_image')
     account     = schema.exportSchema(Account())
