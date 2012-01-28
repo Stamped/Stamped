@@ -11,8 +11,11 @@
 
 @class STSearchField;
 
-@interface STMapViewController : UIViewController <MKMapViewDelegate>
+@interface STMapViewController : UIViewController <MKMapViewDelegate, UITextFieldDelegate>
 
+@property (nonatomic, retain) IBOutlet UIView* overlayView;
+@property (nonatomic, retain) IBOutlet UIButton* locationButton;
+@property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
 
