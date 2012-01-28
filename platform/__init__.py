@@ -1,5 +1,5 @@
 """
-Primary Stamped backend Python module
+Primary Stamped Python module
 
 Important Leaf Modules:
 utils.py    : Utility functions and classes

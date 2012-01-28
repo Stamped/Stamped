@@ -1,13 +1,18 @@
 <html>
 <head>
-<title>Running Locally</title>
+    <link rel=stylesheet type="text/css" href="style.css"/> 
+    <title>Running Locally</title>
 </head>
 <body>
-
+<div class="content">
+<p>
 Here are some dependencies to install and basic instructions on how to get a Stamped API server up and running locally on Mac OS X.
-
+</p>
+<p>
 note: if a native python dependency fails to compile, prefix it with ARCHFLAGS="-arch i386 -arch x86_64"
     * e.g., ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc
+</p>
+<div class="code">
 python >= 2.5 or 2.6 (untested on more recent versions)
 gcc / g++ - you'll have to install xcode and the apple developer tools to install these
 homebrew - package manager for mac os x (optional but recommended to install other dependencies)
@@ -44,8 +49,11 @@ optional for getting up and running but required for full setup:
 rabbitmq
 Java JRE
 nginx
-
-Stamps to getting a Stamped server up and running locally:
+</div>
+<p>
+Steps to getting a Stamped server up and running locally:
+</p>
+<div class="code">
     Running mongod locally:
         > mongod
 
@@ -53,14 +61,20 @@ Stamps to getting a Stamped server up and running locally:
         > cd stamped/platform/servers/httpapi
         > python manage.py runserver 18000
     
-    Note: if you run into troubles here, it's likely a python dependency issue. At this point, you should be able to hit http://localhost:18000/v0/temp/ping.json in your browser and get a page saying 'true' as the JSON response.
+    Note: if you run into troubles here, it's likely a python dependency issue.
+        At this point, you should be able to hit http://localhost:18000/v0/temp/ping.json
+        in your browser and get a page saying 'true' as the JSON response.
     
     Run Stamped API unit tests:
         > cd stamped/tests/api
         > python main.py
-    
+</div>
+<p>    
     Note: if you run into errors here, they'll likely stem from python dependency issues. Most unit tests create a test account, and if one unit test fails and that test account isn't properly cleaned up, the underlying DB will likely be corrupted, so we generally clear the DB after each failed test invocation.  You can do this locally by running (assuming you're running mongod on the default port 27017):
+</p>
+<div class="code">
         > mongo stamped --eval "db.dropDatabase()"
-
+</div>
+</div>
 </body>
 </html>
