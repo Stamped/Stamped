@@ -50,6 +50,7 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize menuArrow = menuArrow_;
 @synthesize descriptionTextField = descriptionTextField_;
 @synthesize segmentedControl = segmentedControl_;
+@synthesize selectCountryButton = selectCountryButton_;
 
 - (id)initWithDetailedEntity:(DetailedEntity*)detailedEntity {
   self = [super initWithNibName:@"EditEntityViewController" bundle:nil];
@@ -79,6 +80,7 @@ const CGFloat kKeyboardHeight = 217.0;
   self.zipTextField = nil;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
+  self.selectCountryButton = nil;
   [super dealloc];
 }
 
@@ -145,6 +147,7 @@ const CGFloat kKeyboardHeight = 217.0;
   self.zipTextField = nil;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
+  self.selectCountryButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -489,6 +492,10 @@ const CGFloat kKeyboardHeight = 217.0;
 }
 
 #pragma mark - Action methods.
+
+- (IBAction)selectCountryButtonPressed:(id)sender {
+  NSLog(@"Select a fuckin' country");
+}
 
 - (IBAction)doneButtonPressed:(id)sender {
   detailedEntity_.title = entityNameTextField_.text;

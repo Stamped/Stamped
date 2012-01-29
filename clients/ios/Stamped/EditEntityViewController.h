@@ -38,6 +38,7 @@
 @property (nonatomic, retain) IBOutlet UITextField* cityTextField;
 @property (nonatomic, retain) IBOutlet UITextField* stateTextField;
 @property (nonatomic, retain) IBOutlet UITextField* zipTextField;
+@property (nonatomic, retain) IBOutlet UIButton* selectCountryButton;
 
 @property (nonatomic, retain) UISegmentedControl* segmentedControl;
 
@@ -45,6 +46,7 @@
 
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
 
+- (IBAction)selectCountryButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)addDescriptionButtonPressed:(id)sender;
