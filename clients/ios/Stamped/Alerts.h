@@ -18,6 +18,7 @@ typedef enum {
   AlertTemplateInvalidLogin,
   AlertTemplateInvalidSignup,
   AlertTemplateFieldRequired,
+  AlertTemplateDuplicateTodo
 } AlertTemplate;
 
 @interface Alerts : NSObject {

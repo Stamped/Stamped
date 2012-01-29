@@ -1071,7 +1071,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     [[AccountManager sharedManager] refreshToken];
   if ([objectLoader.resourcePath rangeOfString:kCreateStampPath].location != NSNotFound ||
       [objectLoader.resourcePath rangeOfString:kCreateEntityPath].location != NSNotFound) {
-    if (objectLoader.response.statusCode == 403)
+    if (objectLoader.response.statusCode == 403 || objectLoader.response.statusCode == 409)
       [[Alerts alertWithTemplate:AlertTemplateAlreadyStamped] show];
     else 
       [[Alerts alertWithTemplate:AlertTemplateDefault] show];
