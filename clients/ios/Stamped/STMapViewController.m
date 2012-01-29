@@ -131,6 +131,7 @@ static const CGFloat kMapUserImageSize = 32.0;
     searchField_.placeholder = @"Search to-dos";
   }
   self.fetchedResultsController = nil;
+  [mapView_ removeAnnotations:mapView_.annotations];
 }
 
 #pragma mark - UITextFieldDelegate methods.
@@ -159,12 +160,6 @@ static const CGFloat kMapUserImageSize = 32.0;
     searchField_.frame = frame;
     overlayView_.alpha = 0;
   }];
-}
-
-#pragma mark - NSFetchedResultsControllerDelegate methods.
-
-- (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-//  [self addAllAnnotations];
 }
 
 #pragma mark - Actions.
