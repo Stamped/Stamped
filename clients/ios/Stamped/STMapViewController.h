@@ -10,12 +10,19 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+typedef enum {
+  STMapViewControllerSourceInbox,
+  STMapViewControllerSourceTodo,
+  STMapViewControllerSourceUser
+} STMapViewControllerSource;
+
 @class STSearchField;
 
 @interface STMapViewController : UIViewController <MKMapViewDelegate,
                                                    UITextFieldDelegate,
                                                    NSFetchedResultsControllerDelegate>
 
+@property (nonatomic, assign) STMapViewControllerSource source;
 @property (nonatomic, retain) IBOutlet UIView* overlayView;
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;

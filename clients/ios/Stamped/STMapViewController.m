@@ -9,6 +9,7 @@
 #import "STMapViewController.h"
 
 #import "Entity.h"
+#import "Favorite.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "StampedAppDelegate.h"
@@ -17,6 +18,7 @@
 #import "STSearchField.h"
 #import "UserImageView.h"
 #import "User.h"
+#import "Util.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
 
@@ -24,7 +26,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 - (void)mapDisclosureTapped:(id)sender;
 - (void)overlayTapped:(UIGestureRecognizer*)recognizer;
 - (void)addAnnotationForEntity:(Entity*)entity;
-- (void)loadStampsFromDataStore;
+- (void)loadDataFromStore;
 - (void)addAllAnnotations;
 - (void)zoomToCurrentLocation;
 
@@ -41,6 +43,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 @synthesize mapView = mapView_;
 @synthesize zoomToLocation = zoomToLocation_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize source = source_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -78,7 +81,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   [recognizer release];
 
   [self zoomToCurrentLocation];
-  [self loadStampsFromDataStore];
+  [self loadDataFromStore];
 }
 
 - (void)viewDidUnload {
@@ -114,6 +117,15 @@ static const CGFloat kMapUserImageSize = 32.0;
   return delegate.navigationController;
 }
 
+- (void)setSource:(STMapViewControllerSource)source {
+  if (source != source_) {
+    source_ = source;
+  }
+
+  self.fetchedResultsController = nil;
+  [self loadDataFromStore];
+}
+
 #pragma mark - UITextFieldDelegate methods.
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
@@ -145,7 +157,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self addAllAnnotations];
+//  [self addAllAnnotations];
 }
 
 #pragma mark - Actions.
@@ -193,9 +205,16 @@ static const CGFloat kMapUserImageSize = 32.0;
     return;
 
   STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:annotation.stamp];
-  [self.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
+  UIViewController* vc = nil;
+  if (annotation.stamp) {
+    vc = [[[StampDetailViewController alloc] initWithStamp:annotation.stamp] autorelease];
+  } else if (annotation.entityObject) {
+    vc = [Util detailViewControllerForEntity:annotation.entityObject];
+  }
+  if (!vc)
+    return;
+
+  [self.navigationController pushViewController:vc animated:YES];
 }
 
 #pragma mark - MKMapViewDelegate Methods
@@ -221,33 +240,49 @@ static const CGFloat kMapUserImageSize = 32.0;
                        action:@selector(mapDisclosureTapped:)
              forControlEvents:UIControlEventTouchUpInside];
   pinView.rightCalloutAccessoryView = disclosureButton;
-  UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
-  userImageView.enabled = YES;
-  [userImageView addTarget:self
-                    action:@selector(mapUserTapped:)
-          forControlEvents:UIControlEventTouchUpInside];
-  userImageView.imageURL = [[(STPlaceAnnotation*)annotation stamp].user profileImageURLForSize:ProfileImageSize37];
-  pinView.leftCalloutAccessoryView = userImageView;
-  [userImageView release];
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
+
+  Stamp* stamp = [(STPlaceAnnotation*)annotation stamp];
+  if (stamp) {
+    UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
+    userImageView.enabled = YES;
+    [userImageView addTarget:self
+                      action:@selector(mapUserTapped:)
+            forControlEvents:UIControlEventTouchUpInside];
+    userImageView.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
+    pinView.leftCalloutAccessoryView = userImageView;
+    [userImageView release];
+  }
+
   return pinView;
 }
 
 #pragma - Other private methods.
 
-- (void)loadStampsFromDataStore {
+- (void)loadDataFromStore {
   if (!fetchedResultsController_) {
-    NSFetchRequest* request = [Entity fetchRequest];
-    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
+    NSFetchRequest* request = nil;
+    NSSortDescriptor* descriptor = nil;
+    NSPredicate* predicate = nil;
+    NSManagedObjectContext* moc = nil;
+    if (source_ == STMapViewControllerSourceInbox) {
+      request = [Entity fetchRequest];
+      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
+      moc = [Entity managedObjectContext];
+      predicate = [NSPredicate predicateWithFormat:@"coordinates != NIL AND (SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"];
+    } else if (source_ == STMapViewControllerSourceTodo) {
+      request = [Favorite fetchRequest];
+      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+      predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL AND entityObject.coordinates != NIL"];
+      moc = [Favorite managedObjectContext];
+    }
+    [request setPredicate:predicate];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    // Change to user object if present.
-    [request setPredicate:
-        [NSPredicate predicateWithFormat:@"coordinates != NIL AND (SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"]];
     [request setFetchBatchSize:20];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
-                                            managedObjectContext:[Entity managedObjectContext]
+                                            managedObjectContext:moc
                                               sectionNameKeyPath:nil
                                                        cacheName:nil];
     self.fetchedResultsController = fetchedResultsController;
@@ -267,9 +302,14 @@ static const CGFloat kMapUserImageSize = 32.0;
 - (void)addAllAnnotations {
   [mapView_ removeAnnotations:mapView_.annotations];
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  NSArray* entitiesArray = [sectionInfo objects];
-  for (Entity* e in entitiesArray)
-    [self addAnnotationForEntity:e];
+  NSArray* objectsArray = [sectionInfo objects];
+  if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
+    for (Entity* e in objectsArray)
+      [self addAnnotationForEntity:e];
+  } else if (source_ == STMapViewControllerSourceTodo) {
+    for (Favorite* f in objectsArray)
+      [self addAnnotationForEntity:f.entityObject];
+  }
 }
 
 - (void)addAnnotationForEntity:(Entity*)entity {
@@ -279,12 +319,16 @@ static const CGFloat kMapUserImageSize = 32.0;
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
                                                                     longitude:longitude];
 
-  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-  NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  // Temporary stamps won't work for profile view.
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
+  if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
+    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+    NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    // Temporary stamps won't work for profile view.
+    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
 
-  annotation.stamp = [stampsArray lastObject];
+    annotation.stamp = [stampsArray lastObject];
+  } else if (source_ == STMapViewControllerSourceTodo) {
+    annotation.entityObject = entity;
+  }
 
   [mapView_ addAnnotation:annotation];
   [annotation release];
