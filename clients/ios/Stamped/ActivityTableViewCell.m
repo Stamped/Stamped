@@ -11,16 +11,25 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "Entity.h"
+#import "ProfileViewController.h"
 #import "Stamp.h"
+#import "StampedAppDelegate.h"
 #import "User.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
+
+@interface ActivityTableViewCell ()
+- (void)userImagePressed:(id)sender;
+
+@property (nonatomic, readonly) UINavigationController* navigationController;
+@end
 
 static const CGFloat kActivityBadgeSize = 21.0;
 
 @implementation ActivityTableViewCell
 
 @synthesize event = event_;
+@synthesize navigationController = navigationController_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -29,6 +38,8 @@ static const CGFloat kActivityBadgeSize = 21.0;
     self.accessoryType = UITableViewCellAccessoryNone;
 
     userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(15, 10, 33, 33)];
+    userImageView_.enabled = YES;
+    [userImageView_ addTarget:self action:@selector(userImagePressed:) forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:userImageView_];
     [userImageView_ release];
 
@@ -137,6 +148,7 @@ static const CGFloat kActivityBadgeSize = 21.0;
 
 - (void)dealloc {
   self.event = nil;
+  navigationController_ = nil;
   [super dealloc];
 }
 
@@ -162,6 +174,18 @@ static const CGFloat kActivityBadgeSize = 21.0;
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
   // Stub. Should be implemented by subclasses.
   return nil;
+}
+
+- (UINavigationController*)navigationController {
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  return delegate.navigationController;
+}
+
+- (void)userImagePressed:(id)sender {
+  ProfileViewController* vc = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  vc.user = event_.user;
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 @end
