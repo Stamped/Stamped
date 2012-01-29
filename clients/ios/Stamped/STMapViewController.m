@@ -281,6 +281,8 @@ static const CGFloat kMapUserImageSize = 32.0;
       descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
       predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL AND entityObject.coordinates != NIL"];
       moc = [Favorite managedObjectContext];
+    } else if (source_ == STMapViewControllerSourceUser) {
+      return;
     }
     [request setPredicate:predicate];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];

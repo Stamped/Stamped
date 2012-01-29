@@ -395,8 +395,6 @@
     mapViewController_.source = STMapViewControllerSourceInbox;
   else if ([selectedViewController_ isMemberOfClass:[TodoViewController class]])
     mapViewController_.source = STMapViewControllerSourceTodo;
-  else if ([selectedViewController_ isMemberOfClass:[StampListViewController class]])  // Probably won't work.
-    mapViewController_.source = STMapViewControllerSourceUser;
 
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view

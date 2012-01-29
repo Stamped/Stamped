@@ -18,11 +18,15 @@
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 #import "STStampFilterBar.h"
+#import "STMapToggleButton.h"
+#import "STMapViewController.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @interface StampListViewController ()
+- (void)showMapView;
+- (void)showListView;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
 - (void)listButtonWasPressed:(NSNotification*)notification;
 - (void)addAnnotationForStamp:(Stamp*)stamp;
@@ -33,6 +37,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)filterStamps;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 
+@property (nonatomic, retain) STMapViewController* mapViewController;
+@property (nonatomic, assign) BOOL mapViewShown;
 @property (nonatomic, readonly) MKMapView* mapView;
 @property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, retain) NSDate* oldestInBatch;
@@ -43,6 +49,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @implementation StampListViewController
 
+@synthesize mapViewController = mapViewController_;
+@synthesize mapViewShown = mapViewShown_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize user = user_;
 @synthesize oldestInBatch = oldestInBatch_;
@@ -56,6 +64,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self = [self initWithNibName:@"StampListViewController" bundle:nil];
   if (self) {
     self.disableReload = YES;
+    self.mapViewController = [[[STMapViewController alloc] init] autorelease];
   }
   return self;
 }
@@ -66,6 +75,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.searchQuery = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.mapViewController = nil;
   mapView_ = nil;
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -79,34 +89,46 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 #pragma mark - View lifecycle
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
-                                animated:animated];
   [super viewWillAppear:animated];
+  if (mapViewShown_) {
+    [self.view.superview insertSubview:self.mapViewController.view atIndex:0];
+    self.view.hidden = YES;
+    [self.mapViewController viewWillAppear:animated];
+  } else {
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
+                                  animated:animated];
+  }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  if (mapView_.alpha > 0)
-    mapView_.showsUserLocation = YES;
+  if (mapViewShown_)
+    [self.mapViewController viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  if (mapViewShown_)
+    [self.mapViewController viewWillDisappear:animated];
+
   mapView_.showsUserLocation = NO;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
+  if (mapViewShown_)
+    [self.mapViewController viewDidDisappear:animated];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
-  mapView_.alpha = 0.0;
-  mapView_.delegate = self;
-  [self.view addSubview:mapView_];
-  [mapView_ release];
+
+  STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
+  [toggleButton.mapButton addTarget:self action:@selector(showMapView) forControlEvents:UIControlEventTouchUpInside];
+  [toggleButton.listButton addTarget:self action:@selector(showListView) forControlEvents:UIControlEventTouchUpInside];
+  UIBarButtonItem* rightItem = [[[UIBarButtonItem alloc] initWithCustomView:toggleButton] autorelease];
+  self.navigationItem.rightBarButtonItem = rightItem;
 
   [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
@@ -120,7 +142,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
-  mapView_ = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -191,6 +212,38 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   [(InboxTableViewCell*)cell setStamp:(Stamp*)[fetchedResultsController_ objectAtIndexPath:indexPath]];
+}
+
+- (void)showMapView {
+  [mapViewController_ viewWillAppear:YES];
+  [self viewWillDisappear:YES];
+
+  mapViewController_.source = STMapViewControllerSourceInbox;
+  mapViewController_.view.hidden = NO;
+  [UIView transitionFromView:self.view
+                      toView:mapViewController_.view
+                    duration:1
+                     options:UIViewAnimationOptionTransitionFlipFromRight
+                  completion:^(BOOL finished) {
+                    [self viewDidDisappear:YES];
+                    [mapViewController_ viewDidAppear:YES];
+                    mapViewShown_ = YES;
+                  }];
+}
+
+- (void)showListView {
+  [mapViewController_.view.superview insertSubview:self.view atIndex:0];
+  [self viewWillAppear:YES];
+  [mapViewController_ viewWillDisappear:YES];
+  [UIView transitionFromView:mapViewController_.view
+                      toView:self.view
+                    duration:1
+                     options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
+                  completion:^(BOOL finished) {
+                    [mapViewController_ viewDidDisappear:YES];
+                    [self viewDidAppear:YES];
+                    mapViewShown_ = NO;
+                  }];
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
