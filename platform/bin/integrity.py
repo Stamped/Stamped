@@ -178,18 +178,14 @@ class AStatIntegrityCheck(AIntegrityCheck):
             }))
             
             if not self.options.noop:
-                doc2 = doc
-                while len(s) > 1:
-                    doc2 = doc2[s[0]]
-                    s = s[1:]
-                
-                doc2[s[0]] = value
-                self.db[self._stat_collection].save(doc)
+                self.db[self._stat_collection].update({'_id': doc['_id']}, {'$set': {self._stat: value}})
 
 class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
     """
         Abstract superclass for all index collection integrity checks. An index
-        collection is 
+        collection is a collection that stores references from one id (e.g. a user)
+        to a set of ids (e.g. stamps). It is a convenience collection used to 
+        make querying faster, and can be regenerated entirely from underlying data.
     """
     
     def __init__(self, api, db, options, collection, stat_collection=None, stat=None, **kwargs):
@@ -249,22 +245,22 @@ class AIndexCollectionIntegrityCheck(AStatIntegrityCheck):
                 '_ids' : missing_ids, 
             }))
         
-        # optionally store the updated document after updating the reference ids
-        if not self.options.noop and (len(invalid_ids) > 0 or len(missing_ids) > 0):
-            for cmp_id in invalid_ids:
-                ref_ids.remove(cmp_id)
+        # optionally update the document with valid reference ids
+        if not self.options.noop:
+
+            if len(invalid_ids) > 0:
+                query = {'$pullAll': {'ref_ids': invalid_ids}}
+                self.db[self._collection].update({'_id': doc['_id']}, query)
             
-            for cmp_id in missing_ids:
-                ref_ids.add(cmp_id)
-            
-            doc['ref_ids'] = list(ref_ids)
-            self.db[_collection].save(doc)
+            if len(missing_ids) > 0:
+                query = {'$addToSet': {'ref_ids': {'$each': missing_ids}}}
+                self.db[self._collection].update({'_id': doc['_id']}, query)
         
         # if there is a corresponding stat storing the count of ref_ids, ensure 
         # that it is also in sync with the underlying list of references.
         AStatIntegrityCheck.check_doc_id(self, doc_id, value=len(cmp_ids))
 
-class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class InboxStampsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the inboxstamps collection, which maps 
         user_ids to stamp_ids in the user's inbox.
@@ -285,7 +281,7 @@ class InboxStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
         
         return self._get_stamp_ids_from_user_ids(friend_ids)
 
-class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
+class CreditReceivedIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the creditreceived collection, which maps 
         user_ids to stamp_ids for which the user has received credit.
@@ -300,7 +296,7 @@ class CreditReceivedIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._get_stamp_ids_from_credited_user_id(doc_id)
 
-class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserFavEntitiesIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userfaventities collection, which maps 
         user_ids to entity_ids the user has favorited.
@@ -315,7 +311,7 @@ class UserFavEntitiesIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['favorites'].find({'user_id' : doc_id}, {'entity.entity_id' :1}), key='entity.entity_id')
 
-class UserLikesIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserLikesIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userlikes collection, which maps 
         user_ids to stamp_ids the user has liked.
@@ -330,7 +326,7 @@ class UserLikesIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamplikes'].find({'ref_ids' : doc_id}, {'_id' :1}))
 
-class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class UserStampsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the userstamps collection, which maps 
         user_ids to stamp_ids created by the user.
@@ -352,7 +348,7 @@ class UserStampsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['stamps'].find({'user.user_id' : doc_id}, {'_id' : 1}))
 
-class StampCommentsIntegrityCheck(AIndexCollectionIntegrityCheck):
+class StampCommentsIndexIntegrityCheck(AIndexCollectionIntegrityCheck):
     """
         Ensures the integrity of the stampcomments collection, which maps 
         stamp_ids to comment_ids associated with the stamp.
@@ -367,7 +363,7 @@ class StampCommentsIntegrityCheck(AIndexCollectionIntegrityCheck):
     def _get_cmp(self, doc_id):
         return self._strip_ids(self.db['comments'].find({'stamp_id' : doc_id}, {'_id' : 1}))
 
-class NumFriendsIntegrityCheck(AStatIntegrityCheck):
+class NumFriendsStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_friends user statistic.
     """
@@ -383,7 +379,7 @@ class NumFriendsIntegrityCheck(AStatIntegrityCheck):
         
         return 0 if friends is None else len(friends['ref_ids'])
 
-class NumFollowersIntegrityCheck(AStatIntegrityCheck):
+class NumFollowersStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_followers user statistic.
     """
@@ -399,7 +395,7 @@ class NumFollowersIntegrityCheck(AStatIntegrityCheck):
         
         return 0 if followers is None else len(followers['ref_ids'])
 
-class NumLikesIntegrityCheck(AStatIntegrityCheck):
+class NumLikesStatIntegrityCheck(AStatIntegrityCheck):
     """
         Ensures the integrity of the the num_likes stamp statistic.
     """
@@ -595,17 +591,17 @@ class StampNumIntegrityCheck(AIntegrityCheck):
 # AIntegrityCheck subclasses
 checks = [
     # index collection integrity checks
-    InboxStampsIntegrityCheck, 
-    CreditReceivedIntegrityCheck, 
-    UserFavEntitiesIntegrityCheck, 
-    UserLikesIntegrityCheck, 
-    UserStampsIntegrityCheck, 
-    StampCommentsIntegrityCheck, 
+    InboxStampsIndexIntegrityCheck, 
+    CreditReceivedIndexIntegrityCheck, 
+    UserFavEntitiesIndexIntegrityCheck, 
+    UserLikesIndexIntegrityCheck, 
+    UserStampsIndexIntegrityCheck, 
+    StampCommentsIndexIntegrityCheck, 
     
     # stat integrity checks
-    NumFriendsIntegrityCheck, 
-    NumFollowersIntegrityCheck, 
-    NumLikesIntegrityCheck, 
+    NumFriendsStatIntegrityCheck, 
+    NumFollowersStatIntegrityCheck, 
+    NumLikesStatIntegrityCheck, 
     
     # reference integrity checks
     StampsReferenceIntegrityCheck, 
