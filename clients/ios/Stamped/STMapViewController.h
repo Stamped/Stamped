@@ -7,11 +7,14 @@
 //
 
 #import <MapKit/MapKit.h>
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
 @class STSearchField;
 
-@interface STMapViewController : UIViewController <MKMapViewDelegate, UITextFieldDelegate>
+@interface STMapViewController : UIViewController <MKMapViewDelegate,
+                                                   UITextFieldDelegate,
+                                                   NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet UIView* overlayView;
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
