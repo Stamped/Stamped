@@ -83,7 +83,6 @@ static const CGFloat kMapUserImageSize = 32.0;
   [recognizer release];
 
   [self zoomToCurrentLocation];
-  [self loadDataFromStore];
 }
 
 - (void)viewDidUnload {
@@ -107,6 +106,8 @@ static const CGFloat kMapUserImageSize = 32.0;
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
   zoomToLocation_ = YES;
+  if (!self.fetchedResultsController)
+    [self loadDataFromStore];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -130,7 +131,6 @@ static const CGFloat kMapUserImageSize = 32.0;
     searchField_.placeholder = @"Search to-dos";
   }
   self.fetchedResultsController = nil;
-  [self loadDataFromStore];
 }
 
 #pragma mark - UITextFieldDelegate methods.
