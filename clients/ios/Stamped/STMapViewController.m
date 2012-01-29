@@ -122,6 +122,11 @@ static const CGFloat kMapUserImageSize = 32.0;
     source_ = source;
   }
 
+  if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
+    searchField_.placeholder = @"Search stamps";
+  } else if (source_ == STMapViewControllerSourceTodo) {
+    searchField_.placeholder = @"Search to-dos";
+  }
   self.fetchedResultsController = nil;
   [self loadDataFromStore];
 }

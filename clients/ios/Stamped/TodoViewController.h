@@ -6,7 +6,6 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import <MapKit/MapKit.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
@@ -19,8 +18,7 @@
 
 @interface TodoViewController : STTableViewController <RKObjectLoaderDelegate,
                                                        TodoTableViewCellDelegate,
-                                                       NSFetchedResultsControllerDelegate,
-                                                       MKMapViewDelegate>
+                                                       NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, assign) id<TodoViewControllerDelegate> delegate;
 
