@@ -44,6 +44,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 @synthesize zoomToLocation = zoomToLocation_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 @synthesize source = source_;
+@synthesize user = user_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -62,6 +63,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.mapView = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.user = nil;
   [super dealloc];
 }
 
@@ -255,7 +257,11 @@ static const CGFloat kMapUserImageSize = 32.0;
     [userImageView addTarget:self
                       action:@selector(mapUserTapped:)
             forControlEvents:UIControlEventTouchUpInside];
-    userImageView.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
+    if (source_ == STMapViewControllerSourceInbox)
+      userImageView.imageURL = [stamp.user profileImageURLForSize:ProfileImageSize37];
+    else if (source_ == STMapViewControllerSourceUser && user_)
+      userImageView.imageURL = [user_ profileImageURLForSize:ProfileImageSize37];
+
     pinView.leftCalloutAccessoryView = userImageView;
     [userImageView release];
   }
@@ -281,7 +287,13 @@ static const CGFloat kMapUserImageSize = 32.0;
       descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
       predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL AND entityObject.coordinates != NIL"];
       moc = [Favorite managedObjectContext];
-    } else if (source_ == STMapViewControllerSourceUser) {
+    } else if (source_ == STMapViewControllerSourceUser && user_) {
+      request = [Entity fetchRequest];
+      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
+      predicate = [NSPredicate predicateWithFormat:@"coordinates != NIL AND (SUBQUERY(stamps, $s, $s.user.userID == %@ AND $s.deleted == NO).@count != 0)", user_.userID];
+      moc = [Entity managedObjectContext];
+    } else {
+      NSLog(@"No valid source was given for the map view.");
       return;
     }
     [request setPredicate:predicate];

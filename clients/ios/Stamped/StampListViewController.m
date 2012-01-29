@@ -21,17 +21,11 @@
 #import "STMapToggleButton.h"
 #import "STMapViewController.h"
 
-static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @interface StampListViewController ()
 - (void)showMapView;
 - (void)showListView;
-- (void)mapButtonWasPressed:(NSNotification*)notification;
-- (void)listButtonWasPressed:(NSNotification*)notification;
-- (void)addAnnotationForStamp:(Stamp*)stamp;
-- (void)mapUserTapped:(id)sender;
-- (void)mapDisclosureTapped:(id)sender;
 - (void)loadStampsFromNetwork;
 - (void)loadStampsFromDataStore;
 - (void)filterStamps;
@@ -39,8 +33,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @property (nonatomic, retain) STMapViewController* mapViewController;
 @property (nonatomic, assign) BOOL mapViewShown;
-@property (nonatomic, readonly) MKMapView* mapView;
-@property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, retain) NSDate* oldestInBatch;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
@@ -56,8 +48,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize oldestInBatch = oldestInBatch_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
-@synthesize userPannedMap = userPannedMap_;
-@synthesize mapView = mapView_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
 - (id)init {
@@ -76,7 +66,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.mapViewController = nil;
-  mapView_ = nil;
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
@@ -111,8 +100,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   if (mapViewShown_)
     [self.mapViewController viewWillDisappear:animated];
-
-  mapView_.showsUserLocation = NO;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -218,7 +205,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [mapViewController_ viewWillAppear:YES];
   [self viewWillDisappear:YES];
 
-  mapViewController_.source = STMapViewControllerSourceInbox;
+  mapViewController_.user = user_;
+  mapViewController_.source = STMapViewControllerSourceUser;
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:self.view
                       toView:mapViewController_.view
@@ -244,118 +232,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
                     [self viewDidAppear:YES];
                     mapViewShown_ = NO;
                   }];
-}
-
-- (void)mapButtonWasPressed:(NSNotification*)notification {
-  userPannedMap_ = NO;
-  self.tableView.scrollEnabled = NO;
-  [self.stampFilterBar.searchField resignFirstResponder];
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  NSArray* stampsArray = [sectionInfo objects];
-  [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 1.0; }
-                   completion:^(BOOL finished) {
-                     mapView_.showsUserLocation = YES;
-                     for (Stamp* s in stampsArray) {
-                       if (!s.entityObject.coordinates)
-                         continue;
-                       [self addAnnotationForStamp:s];
-                     }
-                   }];
-}
-
-- (void)listButtonWasPressed:(NSNotification*)notification {
-  self.tableView.scrollEnabled = YES;
-  [mapView_ removeAnnotations:mapView_.annotations];
-  [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 0.0; }
-                   completion:^(BOOL finished) { mapView_.showsUserLocation = NO; }];
-}
-
-#pragma mark - Map stuff.
-
-- (void)addAnnotationForStamp:(Stamp*)stamp {
-  Entity* e = stamp.entityObject;
-  NSArray* coordinates = [e.coordinates componentsSeparatedByString:@","];
-  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
-  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-  STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
-                                                                    longitude:longitude];
-  annotation.stamp = stamp;
-  [mapView_ addAnnotation:annotation];
-  [annotation release];
-}
-
-- (void)mapUserTapped:(id)sender {
-  UserImageView* userImage = sender;
-  UIView* view = [userImage superview];
-  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
-    view = [view superview];
-  
-  if (!view)
-    return;
-  
-  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = annotation.stamp.user;
-  
-  [self.navigationController pushViewController:profileViewController animated:YES];
-  [profileViewController release];
-}
-
-- (void)mapDisclosureTapped:(id)sender {
-  UIButton* disclosureButton = sender;
-  UIView* view = [disclosureButton superview];
-  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
-    view = [view superview];
-  
-  if (!view)
-    return;
-  
-  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:annotation.stamp];
-  
-  // Pass the selected object to the new view controller.
-  [self.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
-}
-
-#pragma mark - MKMapViewDelegate Methods
-
-- (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
-  if (!userPannedMap_) {
-    CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
-    MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
-    MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
-    [mapView setRegion:region animated:YES];
-  }
-}
-
-- (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-  userPannedMap_ = YES;
-}
-
-- (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-  if (![annotation isKindOfClass:[STPlaceAnnotation class]])
-    return nil;
-  
-  MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
-  UIButton* disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-  [disclosureButton addTarget:self
-                       action:@selector(mapDisclosureTapped:)
-             forControlEvents:UIControlEventTouchUpInside];
-  pinView.rightCalloutAccessoryView = disclosureButton;
-  UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
-  userImageView.enabled = YES;
-  [userImageView addTarget:self
-                    action:@selector(mapUserTapped:)
-          forControlEvents:UIControlEventTouchUpInside];
-  userImageView.imageURL = [[(STPlaceAnnotation*)annotation stamp].user profileImageURLForSize:ProfileImageSize37];
-  pinView.leftCalloutAccessoryView = userImageView;
-  [userImageView release];
-  pinView.pinColor = MKPinAnnotationColorRed;
-  pinView.canShowCallout = YES;
-  return pinView;
 }
 
 #pragma mark - STStampFilterBarDelegate methods.

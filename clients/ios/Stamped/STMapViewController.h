@@ -17,12 +17,14 @@ typedef enum {
 } STMapViewControllerSource;
 
 @class STSearchField;
+@class User;
 
 @interface STMapViewController : UIViewController <MKMapViewDelegate,
                                                    UITextFieldDelegate,
                                                    NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, assign) STMapViewControllerSource source;
+@property (nonatomic, retain) User* user;
 @property (nonatomic, retain) IBOutlet UIView* overlayView;
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
