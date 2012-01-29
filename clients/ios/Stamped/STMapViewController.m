@@ -138,7 +138,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
-  [UIView animateWithDuration:0.3 animations:^{
+  [UIView animateWithDuration:0.2 animations:^{
     locationButton_.frame = CGRectOffset(locationButton_.frame, offset, 0);
     cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
     CGRect frame = searchField_.frame;
@@ -151,7 +151,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   [self.navigationController setNavigationBarHidden:NO animated:YES];
   CGFloat offset = CGRectGetWidth(cancelButton_.frame) + 5;
-  [UIView animateWithDuration:0.3 animations:^{
+  [UIView animateWithDuration:0.2 animations:^{
     locationButton_.frame = CGRectOffset(locationButton_.frame, offset, 0);
     cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
     CGRect frame = searchField_.frame;
