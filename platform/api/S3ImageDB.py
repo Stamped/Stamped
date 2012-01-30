@@ -98,7 +98,8 @@ class S3ImageDB(AImageDB):
     def addProfileImage(self, screenName, image):
         assert isinstance(image, Image.Image)
         
-        prefix = 'users/%s' % screenName
+        # Filename is lowercase screen name
+        prefix = 'users/%s' % screenName.lower()
         width, height = image.size
         
         if width != height:
@@ -121,7 +122,8 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, square, maxSize)
     
     def addResizedProfileImages(self, screenName):
-        prefix = 'users/%s' % screenName
+        # Filename is lowercase screen name
+        prefix = 'users/%s' % screenName.lower()
         url = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
         
         try:
@@ -137,7 +139,8 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, maxSize, sizes, original_url=url)
     
     def removeProfileImage(self, screenName):
-        prefix = 'users/%s' % screenName
+        # Filename is lowercase screen name
+        prefix = 'users/%s' % screenName.lower()
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
@@ -196,8 +199,9 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, maxSize, sizes, original_url=image_url)
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
-        oldPrefix = 'users/%s' % oldScreenName
-        newPrefix = 'users/%s' % newScreenName
+        # Filename is lowercase screen name
+        oldPrefix = 'users/%s' % oldScreenName.lower()
+        newPrefix = 'users/%s' % newScreenName.lower()
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
