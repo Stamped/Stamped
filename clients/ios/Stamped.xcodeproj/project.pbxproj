@@ -239,6 +239,10 @@
 		7E42FDE013EF0F0E007B3C26 /* profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */; };
 		7E453720140F003C0097E64F /* PeopleListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* PeopleListViewController.m */; };
 		7E453721140F003C0097E64F /* PeopleListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* PeopleListViewController.xib */; };
+		7E45866514D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45866414D7346F0031BB45 /* STSelectCountryTableViewCell.m */; };
+		7E45866614D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45866414D7346F0031BB45 /* STSelectCountryTableViewCell.m */; };
+		7E45866814D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E45866714D7392F0031BB45 /* eCreate_country_check@2x.png */; };
+		7E45866914D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E45866714D7392F0031BB45 /* eCreate_country_check@2x.png */; };
 		7E47E93C1409A8EF00130B32 /* plus_icon_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E93B1409A8EF00130B32 /* plus_icon_highlighted@2x.png */; };
 		7E47E93E1409B0D900130B32 /* edit_pencil@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E93D1409B0D900130B32 /* edit_pencil@2x.png */; };
 		7E47E9451409B7DD00130B32 /* edit_book_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E9401409B7DD00130B32 /* edit_book_icon@2x.png */; };
@@ -1755,6 +1759,9 @@
 		7E45371D140F003B0097E64F /* PeopleListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleListViewController.h; sourceTree = "<group>"; };
 		7E45371E140F003B0097E64F /* PeopleListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleListViewController.m; sourceTree = "<group>"; };
 		7E45371F140F003B0097E64F /* PeopleListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PeopleListViewController.xib; path = ../Interfaces/PeopleListViewController.xib; sourceTree = "<group>"; };
+		7E45866314D7346F0031BB45 /* STSelectCountryTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSelectCountryTableViewCell.h; sourceTree = "<group>"; };
+		7E45866414D7346F0031BB45 /* STSelectCountryTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSelectCountryTableViewCell.m; sourceTree = "<group>"; };
+		7E45866714D7392F0031BB45 /* eCreate_country_check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eCreate_country_check@2x.png"; sourceTree = "<group>"; };
 		7E47E93B1409A8EF00130B32 /* plus_icon_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "plus_icon_highlighted@2x.png"; sourceTree = "<group>"; };
 		7E47E93D1409B0D900130B32 /* edit_pencil@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_pencil@2x.png"; sourceTree = "<group>"; };
 		7E47E9401409B7DD00130B32 /* edit_book_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_book_icon@2x.png"; sourceTree = "<group>"; };
@@ -2819,6 +2826,8 @@
 				7E41315814D609E70087748C /* STSelectCountryViewController.h */,
 				7E41315914D609E70087748C /* STSelectCountryViewController.m */,
 				7E41315A14D609E70087748C /* STSelectCountryViewController.xib */,
+				7E45866314D7346F0031BB45 /* STSelectCountryTableViewCell.h */,
+				7E45866414D7346F0031BB45 /* STSelectCountryTableViewCell.m */,
 			);
 			name = "Select Country";
 			sourceTree = "<group>";
@@ -2870,6 +2879,7 @@
 		7E47E93F1409B58300130B32 /* Edit Entity */ = {
 			isa = PBXGroup;
 			children = (
+				7E45866714D7392F0031BB45 /* eCreate_country_check@2x.png */,
 				7E41315514D5FE3A0087748C /* eCreate_country_button_bg@2x.png */,
 				7E47E94A1409B92C00130B32 /* edit_category_dropdown@2x.png */,
 				7E5EB26B140C56FE007D164F /* edit_action_button@2x.png */,
@@ -4677,6 +4687,7 @@
 				7E1213D314D0CDFF00B32729 /* STMapViewController.xib in Resources */,
 				7E41315714D5FE3A0087748C /* eCreate_country_button_bg@2x.png in Resources */,
 				7E41315E14D609E70087748C /* STSelectCountryViewController.xib in Resources */,
+				7E45866914D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5240,6 +5251,7 @@
 				7E1213D214D0CDFF00B32729 /* STMapViewController.xib in Resources */,
 				7E41315614D5FE3A0087748C /* eCreate_country_button_bg@2x.png in Resources */,
 				7E41315D14D609E70087748C /* STSelectCountryViewController.xib in Resources */,
+				7E45866814D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5409,6 +5421,7 @@
 				7E1213D114D0CDFF00B32729 /* STMapViewController.m in Sources */,
 				7EDCD62914D1D26900FF1975 /* STMapToggleButton.m in Sources */,
 				7E41315C14D609E70087748C /* STSelectCountryViewController.m in Sources */,
+				7E45866614D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5550,6 +5563,7 @@
 				7E1213D014D0CDFF00B32729 /* STMapViewController.m in Sources */,
 				7EDCD62814D1D26900FF1975 /* STMapToggleButton.m in Sources */,
 				7E41315B14D609E70087748C /* STSelectCountryViewController.m in Sources */,
+				7E45866514D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

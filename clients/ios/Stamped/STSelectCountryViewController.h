@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STSelectCountryViewController : UIViewController
+#import "STTableViewController.h"
+
+@interface STSelectCountryViewController : STTableViewController <UITableViewDelegate, UITableViewDataSource>
 
 @end
