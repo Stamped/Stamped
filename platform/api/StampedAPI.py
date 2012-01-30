@@ -394,7 +394,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateAccountSettingsAsync(self, old_screen_name, new_screen_name):
-        self._imageDB.changeProfileImageName(old_screen_name, new_screen_name)
+        self._imageDB.changeProfileImageName(old_screen_name.lower(), new_screen_name.lower())
     
     @API_CALL
     def getAccount(self, authUserId):
@@ -448,7 +448,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateProfileImageAsync(self, screen_name):
-        self._imageDB.addResizedProfileImages(screen_name)
+        self._imageDB.addResizedProfileImages(screen_name.lower())
     
     def _addProfileImage(self, data, user_id=None, screen_name=None):
         assert user_id is not None or screen_name is not None
