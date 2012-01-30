@@ -22,6 +22,7 @@
 @property (nonatomic, retain) NSString * city;
 @property (nonatomic, retain) NSString * coordinates;
 @property (nonatomic, retain) NSString * cuisine;
+@property (nonatomic, retain) NSString * countryCode;
 @property (nonatomic, retain) NSString * desc;
 @property (nonatomic, retain) NSString * director;
 @property (nonatomic, retain) NSString * entityID;

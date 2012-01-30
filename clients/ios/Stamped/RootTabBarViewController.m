@@ -177,7 +177,7 @@
     [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   }
   
-  STSelectCountryViewController* vc = [[STSelectCountryViewController alloc] init];
+  STSelectCountryViewController* vc = [[STSelectCountryViewController alloc] initWithCountryCode:@"GA"];
   [self presentModalViewController:vc animated:YES];
   [vc release];
 }
