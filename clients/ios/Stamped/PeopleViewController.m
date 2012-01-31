@@ -20,6 +20,7 @@
 #import "UIColor+Stamped.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
+#import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
 #import "Util.h"
@@ -27,6 +28,12 @@
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 static NSString* const kStampedSearchURI = @"/users/search.json";
+
+typedef enum PeopleSearchCorpus {
+  PeopleSearchCorpusFollowing,
+  PeopleSearchCorpusFollowers,
+  PeopleSearchCorpusEveryone
+} PeopleSearchCorpus;
 
 @interface PeopleViewController ()
 - (void)loadUserDataFromNetwork;
@@ -36,6 +43,7 @@ static NSString* const kStampedSearchURI = @"/users/search.json";
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)updateShelf;
 
+@property (nonatomic, assign) PeopleSearchCorpus searchCorpus;
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
 @property (nonatomic, copy) NSArray* searchResults;
@@ -43,6 +51,7 @@ static NSString* const kStampedSearchURI = @"/users/search.json";
 
 @implementation PeopleViewController
 
+@synthesize searchCorpus = searchCorpus_;
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize friendsArray = friendsArray_;
 @synthesize searchResults = searchResults_;
@@ -432,6 +441,17 @@ static NSString* const kStampedSearchURI = @"/users/search.json";
                    }
                    completion:nil];
   [self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  self.searchResults = nil;
+  [self.tableView reloadData];
+  return YES;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  NSLog(@"Should search: %d", searchSegmentedControl_.selectedSegmentIndex);
+  return YES;
 }
 
 #pragma mark - Custom methods.
