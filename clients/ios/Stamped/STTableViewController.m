@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/RestKit.h>
 
+#import "STSearchField.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
@@ -39,6 +40,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize spinnerView = spinnerView_;
 @synthesize searchOverlay = searchOverlay_;
 @synthesize searchField = searchField_;
+@synthesize cancelButton = cancelButton_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
@@ -49,6 +51,7 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
   self.searchField = nil;
+  self.cancelButton = nil;
   reloadLabel_ = nil;
   lastUpdatedLabel_ = nil;
   arrowImageView_ = nil;
@@ -64,6 +67,7 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
   self.searchField = nil;
+  self.cancelButton = nil;
   reloadLabel_ = nil;
   lastUpdatedLabel_ = nil;
   arrowImageView_ = nil;
@@ -296,13 +300,27 @@ static const CGFloat kReloadHeight = 60.0;
   if ((STSearchField*)textField != searchField_)
     return;
 
+  CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
+  [UIView animateWithDuration:0.2 animations:^{
+    cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
+    CGRect frame = searchField_.frame;
+    frame.size.width += offset;
+    searchField_.frame = frame;
+  }];
   [self setOverlayHidden:NO];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   if ((STSearchField*)textField != searchField_)
     return;
-  
+
+  CGFloat offset = CGRectGetWidth(cancelButton_.frame) + 5;
+  [UIView animateWithDuration:0.2 animations:^{
+    cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
+    CGRect frame = searchField_.frame;
+    frame.size.width += offset;
+    searchField_.frame = frame;
+  }];
   [self setOverlayHidden:YES];
 }
 
@@ -320,6 +338,12 @@ static const CGFloat kReloadHeight = 60.0;
       searchOverlay_.alpha = 0.75;
     }];
   }
+}
+
+#pragma mark - Actions.
+
+- (IBAction)cancelButtonPressed:(id)sender {
+  [searchField_ resignFirstResponder];
 }
 
 #pragma mark - To be implemented by subclasses.

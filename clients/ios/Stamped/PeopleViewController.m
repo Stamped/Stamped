@@ -26,6 +26,7 @@
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kStampedSearchURI = @"/users/search.json";
 
 @interface PeopleViewController ()
 - (void)loadUserDataFromNetwork;
@@ -37,13 +38,17 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
+@property (nonatomic, copy) NSArray* searchResults;
 @end
 
 @implementation PeopleViewController
 
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize friendsArray = friendsArray_;
+@synthesize searchResults = searchResults_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
+@synthesize searchSegmentedControl = searchSegmentedControl_;
+@synthesize shelfSeparator = shelfSeparator_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -51,6 +56,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   self.userIDsToBeFetched = nil;
   self.friendsArray = nil;
   self.findFriendsNavigationController = nil;
+  self.searchResults = nil;
+  self.searchSegmentedControl = nil;
+  self.shelfSeparator = nil;
   [super dealloc];
 }
 
@@ -76,7 +84,18 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     [self loadFriendsFromNetwork];
     [self loadFriendsFromDataStore];
   }
-
+  if ([searchSegmentedControl_ conformsToProtocol:@protocol(UIAppearance)]) {
+    NSDictionary* titleTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor stampedGrayColor], (id)UITextAttributeTextColor,
+                                         (id)[UIColor whiteColor], (id)UITextAttributeTextShadowColor, 
+                                         (id)[NSValue valueWithUIOffset:UIOffsetMake(0, 1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [searchSegmentedControl_ setTitleTextAttributes:titleTextAttributes forState:UIControlStateNormal];
+    NSDictionary* selectedTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor whiteColor], (id)UITextAttributeTextColor,
+                                            (id)[UIColor colorWithWhite:0.5 alpha:1.0], (id)UITextAttributeTextShadowColor,
+                                            (id)[NSValue valueWithUIOffset:UIOffsetMake(0, -1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateSelected];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateHighlighted];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
+  }
   self.hasHeaders = YES;
 }
 
@@ -85,7 +104,10 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.friendsArray = nil;
+  self.searchResults = nil;
   self.findFriendsNavigationController = nil;
+  self.searchSegmentedControl = nil;
+  self.shelfSeparator = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -376,11 +398,39 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [super textFieldDidBeginEditing:textField];
+  CGFloat offset = -44;
+  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     for (UIView* view in views) {
+                       view.frame = CGRectOffset(view.frame, 0, offset);
+                     }
+                     searchSegmentedControl_.alpha = 1;
+                     shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, 4);
+                     self.tableView.contentOffset = CGPointMake(0, offset);
+                   }
+                   completion:nil];  
   [self.navigationController setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   [super textFieldDidEndEditing:textField];
+  CGFloat offset = 44;
+  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     for (UIView* view in views) {
+                       view.frame = CGRectOffset(view.frame, 0, offset);
+                     }
+                     searchSegmentedControl_.alpha = 0;
+                     shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, -4);
+                     self.tableView.contentOffset = CGPointZero;
+                   }
+                   completion:nil];
   [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 

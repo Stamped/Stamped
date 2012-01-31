@@ -19,5 +19,7 @@
                                                          RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
+@property (nonatomic, retain) IBOutlet UISegmentedControl* searchSegmentedControl;
+@property (nonatomic, retain) IBOutlet UIView* shelfSeparator;
 
 @end
