@@ -297,23 +297,12 @@ class S3ImageDB(AImageDB):
         
         while True:
             try:
-                logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
                 conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
                 bucket = conn.lookup(self.bucket_name)
-
-                logs.info('GET KEY')
                 key = Key(bucket, name)
-
-                logs.info('GOT KEY / SET CONTENT-TYPE')
                 key.set_metadata('Content-Type', contentType)
-
-                logs.info('CONTENT-TYPE SET / SET DATA')
                 key.set_contents_from_file(data, policy='public-read')
-
-                logs.info('DATA SET / CLOSE KEY')
                 key.close()
-
-                logs.info('KEY IS CLOSED!')
                 return key
 
             except Exception as e:
