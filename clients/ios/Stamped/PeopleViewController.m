@@ -92,9 +92,8 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [super viewWillAppear:animated];
   
   [self loadFriendsFromDataStore];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  if (delegate.navigationController.navigationBarHidden)
-    [delegate.navigationController setNavigationBarHidden:NO animated:YES];
+  if (self.navigationController.navigationBarHidden)
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -351,11 +350,8 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-
   if (indexPath.section == 1 && indexPath.row == 0) {
-    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-    [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+    [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal]; 
     return;
   }
@@ -372,11 +368,28 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   }
   profileViewController.user = user;
   
-  [delegate.navigationController pushViewController:profileViewController animated:YES];
+  [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
 }
 
+#pragma mark - UITextFieldDelegate methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  [super textFieldDidBeginEditing:textField];
+  [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  [super textFieldDidEndEditing:textField];
+  [self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
 #pragma mark - Custom methods.
+
+- (UINavigationController*)navigationController {
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  return delegate.navigationController;
+}
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
   [self.tableView reloadData];
