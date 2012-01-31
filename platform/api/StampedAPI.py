@@ -830,12 +830,12 @@ class StampedAPI(AStampedAPI):
         return users
     
     @API_CALL
-    def searchUsers(self, query, limit, authUserId):
+    def searchUsers(self, authUserId, query, limit, relationship):
         limit = self._setLimit(limit, cap=10)
         
         ### TODO: Add check for privacy settings
         
-        return self._userDB.searchUsers(query, limit)
+        return self._userDB.searchUsers(authUserId, query, limit, relationship)
     
     """
     #######                                      
@@ -2320,9 +2320,9 @@ class StampedAPI(AStampedAPI):
         ### TEMP
         import copy
         kwargsCopy = copy.deepcopy(kwargs)
-
+        
         result = self._getStampCollection(authUserId, stampIds, **kwargs)
-
+        
         ### TEMP
         # Fixes infinite loop where client (1.0.3) mistakenly passes "modified" instead
         # of "created" as 'before' param. This attempts to identify those situations on 

@@ -80,6 +80,20 @@ class StampedAPIUsersSearch(StampedAPIUserTest):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 1)
+        
+        data = { 
+            "oauth_token": self.tokenC['access_token'],
+            "q": "%s" % self.userC['screen_name'][:3], 
+            'relationship' : 'followers', 
+        }
+        result = self.handlePOST(path, data)
+        
+        data = { 
+            "oauth_token": self.tokenC['access_token'],
+            "q": "%s" % self.userC['screen_name'][:3], 
+            'relationship' : 'following', 
+        }
+        result = self.handlePOST(path, data)
 
 class StampedAPIUsersPrivacy(StampedAPIUserTest):
     def test_privacy_user_id(self):

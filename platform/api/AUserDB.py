@@ -23,7 +23,7 @@ class AUserDB(object):
         pass
         
     @abstract
-    def searchUsers(self, query, limit=20):
+    def searchUsers(self, query, limit=20, relationship=None):
         pass
         
     @abstract

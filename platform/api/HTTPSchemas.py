@@ -337,6 +337,7 @@ class HTTPUserSearch(Schema):
     def setSchema(self):
         self.q                  = SchemaElement(basestring)
         self.limit              = SchemaElement(int)
+        self.relationship       = SchemaElement(basestring)
 
 class HTTPUserRelationship(Schema):
     def setSchema(self):
