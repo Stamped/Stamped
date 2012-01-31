@@ -123,6 +123,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 @synthesize photoUploadRequest = photoUploadRequest_;
 @synthesize tempPhotoURL = tempPhotoURL_;
 @synthesize waitingForPhotoUpload = waitingForPhotoUpload_;
+@synthesize editEntityNavigationController = editEntityNavigationController_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -200,6 +201,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   [self.photoUploadRequest clearDelegatesAndCancel];
   self.photoUploadRequest = nil;
   self.tempPhotoURL = nil;
+  self.editEntityNavigationController = nil;
   [super dealloc];
 }
 
@@ -419,6 +421,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   self.headerView.delegate = nil;
   self.headerView = nil;
   tapHereImageView_ = nil;
+  self.editEntityNavigationController = nil;
   [super viewDidUnload];
 }
 
@@ -745,10 +748,9 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 }
 
 - (IBAction)editButtonPressed:(id)sender {
-  EditEntityViewController* editViewController =
-      [[EditEntityViewController alloc] initWithDetailedEntity:detailedEntity_];
-  [self.navigationController presentModalViewController:editViewController animated:YES];
-  [editViewController release];
+  EditEntityViewController* editViewController = (EditEntityViewController*)editEntityNavigationController_.topViewController;
+  editViewController.detailedEntity = detailedEntity_;
+  [self.navigationController presentModalViewController:editEntityNavigationController_ animated:YES];
 }
 
 - (IBAction)saveStampButtonPressed:(id)sender {

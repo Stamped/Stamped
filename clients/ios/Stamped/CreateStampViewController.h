@@ -38,6 +38,7 @@
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* creditedUser;
 
+@property (nonatomic, retain) IBOutlet UINavigationController* editEntityNavigationController;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet StampDetailHeaderView* headerView;
 @property (nonatomic, retain) IBOutlet UILabel* reasoningLabel;

@@ -21,6 +21,7 @@ static NSString* kNotConnectedText = @"Not connected to the Internet.";
 static const CGFloat kReloadHeight = 60.0;
 
 @interface STTableViewController ()
+- (void)setOverlayHidden:(BOOL)hidden;
 - (void)overlayTapped:(UITapGestureRecognizer*)recognizer;
 @end
 
@@ -37,6 +38,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize arrowImageView = arrowImageView_;
 @synthesize spinnerView = spinnerView_;
 @synthesize searchOverlay = searchOverlay_;
+@synthesize searchField = searchField_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
@@ -46,6 +48,7 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
+  self.searchField = nil;
   reloadLabel_ = nil;
   lastUpdatedLabel_ = nil;
   arrowImageView_ = nil;
@@ -60,6 +63,7 @@ static const CGFloat kReloadHeight = 60.0;
   self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
   self.searchOverlay = nil;
+  self.searchField = nil;
   reloadLabel_ = nil;
   lastUpdatedLabel_ = nil;
   arrowImageView_ = nil;
@@ -70,7 +74,7 @@ static const CGFloat kReloadHeight = 60.0;
   [super viewDidLoad];
 
   CGFloat bottomPadding = 0;
-  if (stampFilterBar_) {
+  if (stampFilterBar_ || searchField_) {
     bottomPadding = 46;
 
     searchOverlay_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
@@ -129,7 +133,11 @@ static const CGFloat kReloadHeight = 60.0;
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  [stampFilterBar_.searchField resignFirstResponder];
+  if (stampFilterBar_)
+    [stampFilterBar_.searchField resignFirstResponder];
+
+  if (searchField_)
+    [searchField_ resignFirstResponder];
 }
 
 - (void)setIsLoading:(BOOL)loading {
@@ -152,7 +160,7 @@ static const CGFloat kReloadHeight = 60.0;
     [spinnerView_ stopAnimating];
   
   CGFloat bottomPadding = 0;
-  if (stampFilterBar_)
+  if (stampFilterBar_ || searchField_)
     bottomPadding = 46;
   
   if (!loading) {
@@ -168,8 +176,7 @@ static const CGFloat kReloadHeight = 60.0;
                        if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
                          reloadLabel_.text = kNotConnectedText;
                          arrowImageView_.alpha = 0.0;
-                       }
-                       else {
+                       } else {
                          reloadLabel_.text = kPullDownText;
                          arrowImageView_.alpha = 1.0;
                        }
@@ -276,19 +283,43 @@ static const CGFloat kReloadHeight = 60.0;
               andQuery:(NSString*)query {}
 
 - (void)stampFilterBarSearchFieldDidBeginEditing {
-  [self.tableView setContentOffset:CGPointZero animated:YES];
-  self.tableView.scrollEnabled = NO;
-  [UIView animateWithDuration:0.3 animations:^{
-    searchOverlay_.alpha = 0.75;
-  }];
+  [self setOverlayHidden:NO];
 }
 
 - (void)stampFilterBarSearchFieldDidEndEditing {
-  [UIView animateWithDuration:0.3 animations:^{
-    searchOverlay_.alpha = 0;
-  } completion:^(BOOL finished) {
-    self.tableView.scrollEnabled = YES;
-  }];
+  [self setOverlayHidden:YES];
+}
+
+#pragma mark - UITextFieldDelegate methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  if ((STSearchField*)textField != searchField_)
+    return;
+
+  [self setOverlayHidden:NO];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  if ((STSearchField*)textField != searchField_)
+    return;
+  
+  [self setOverlayHidden:YES];
+}
+
+- (void)setOverlayHidden:(BOOL)hidden {
+  if (hidden) {
+    [UIView animateWithDuration:0.3 animations:^{
+      searchOverlay_.alpha = 0;
+    } completion:^(BOOL finished) {
+      self.tableView.scrollEnabled = YES;
+    }];
+  } else {
+    [self.tableView setContentOffset:CGPointZero animated:YES];
+    self.tableView.scrollEnabled = NO;
+    [UIView animateWithDuration:0.3 animations:^{
+      searchOverlay_.alpha = 0.75;
+    }];
+  }
 }
 
 #pragma mark - To be implemented by subclasses.

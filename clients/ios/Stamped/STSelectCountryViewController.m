@@ -546,6 +546,7 @@
   self.countryCodeArray = nil;
   self.indexArray = nil;
   self.selectedIndexPath = nil;
+  self.delegate = nil;
   [super dealloc];
 }
 

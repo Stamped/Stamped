@@ -19,7 +19,7 @@
         <attribute name="category" optional="YES" attributeType="String" defaultValueString="other"/>
         <attribute name="city" optional="YES" attributeType="String"/>
         <attribute name="coordinates" optional="YES" attributeType="String"/>
-        <attribute name="countryCode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="countryCode" optional="YES" attributeType="String" defaultValueString="US" syncable="YES"/>
         <attribute name="cuisine" optional="YES" attributeType="String"/>
         <attribute name="desc" optional="YES" attributeType="String"/>
         <attribute name="director" optional="YES" attributeType="String"/>
@@ -135,7 +135,7 @@
     </entity>
     <elements>
         <element name="Comment" positionX="169" positionY="-108" width="128" height="150"/>
-        <element name="DetailedEntity" positionX="160" positionY="192" width="128" height="705"/>
+        <element name="DetailedEntity" positionX="160" positionY="192" width="128" height="720"/>
         <element name="Entity" positionX="558" positionY="81" width="128" height="750"/>
         <element name="Event" positionX="88" positionY="135" width="128" height="195"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>

@@ -21,9 +21,6 @@
 #import "STSearchField.h"
 #import "Util.h"
 
-#warning remove
-#import "STSelectCountryViewController.h"
-
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -176,10 +173,6 @@
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
     [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   }
-  
-  STSelectCountryViewController* vc = [[STSelectCountryViewController alloc] initWithCountryCode:@"GA"];
-  [self presentModalViewController:vc animated:YES];
-  [vc release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
