@@ -24,6 +24,7 @@
 @property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL hasHeaders;
 @property (nonatomic, assign) BOOL isLoading;
+@property (nonatomic, assign) BOOL searchPinned;
 @property (nonatomic, readonly) UILabel* reloadLabel;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;

@@ -8,19 +8,15 @@
 
 #import "STViewController.h"
 
-@interface STViewController ()
-@property (nonatomic, assign) CGFloat initialShelfYPosition;
-@end
+#import "StampedAppDelegate.h"
 
 @implementation STViewController
 
 @synthesize shelfView = shelfView_;
 @synthesize highlightView = highlightView_;
-@synthesize initialShelfYPosition = initialShelfYPosition_;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  initialShelfYPosition_ = shelfView_.frame.origin.y;
   highlightView_ = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.shelfView.frame) - 26, 320, 20)];
   highlightView_.backgroundColor = [UIColor colorWithRed:0.22 green:0.48 blue:0.85 alpha:1.0];
   highlightView_.alpha = 0;
@@ -29,13 +25,33 @@
   [highlightView_ release];
 }
 
+- (UINavigationController*)navigationController {
+  if ([super navigationController])
+    return [super navigationController];
+  
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  return delegate.navigationController;
+}
+
 #pragma mark - UIScrollView delegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   CGRect shelfFrame = shelfView_.frame;
-  shelfFrame.origin.y = MAX(-356, initialShelfYPosition_ - scrollView.contentOffset.y);
+  shelfFrame.origin.y = MAX([self minimumShelfYPosition], [self maximumShelfYPosition] - scrollView.contentOffset.y);
   shelfView_.frame = shelfFrame;
-  scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(CGRectGetMaxY(shelfFrame) - 9.0, 0, 0, 0);
+  CGFloat yInset = CGRectGetMaxY(shelfFrame) - 9.0;
+  if (self.navigationController.navigationBarHidden)
+    yInset -= 44;  // Height of the nav bar.
+
+  scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(yInset, 0, 0, 0);
+}
+
+- (CGFloat)minimumShelfYPosition {
+  return -356;
+}
+
+- (CGFloat)maximumShelfYPosition {
+  return -356;
 }
 
 @end

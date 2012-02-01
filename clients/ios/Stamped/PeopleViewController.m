@@ -42,6 +42,8 @@ typedef enum PeopleSearchCorpus {
 - (void)userProfileHasChanged:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)updateShelf;
+- (void)clearSearch;
+- (void)sendSearchUsersRequest;
 
 @property (nonatomic, assign) PeopleSearchCorpus searchCorpus;
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
@@ -119,14 +121,14 @@ typedef enum PeopleSearchCorpus {
   self.findFriendsNavigationController = nil;
   self.searchSegmentedControl = nil;
   self.shelfSeparator = nil;
+  self.searching = NO;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  
+  [self.navigationController setNavigationBarHidden:(self.searchField.text.length > 0)
+                                           animated:animated];
   [self loadFriendsFromDataStore];
-  if (self.navigationController.navigationBarHidden)
-    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -140,6 +142,7 @@ typedef enum PeopleSearchCorpus {
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
+  [self.navigationController setNavigationBarHidden:NO animated:animated];
 }
 
 - (void)userPulledToReload {
@@ -432,55 +435,96 @@ typedef enum PeopleSearchCorpus {
 #pragma mark - UITextFieldDelegate methods.
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
+  NSLog(@"Begin editing...");
   [super textFieldDidBeginEditing:textField];
+  if (self.searchField.text.length > 0)
+    return;
+
   CGFloat offset = -44;
-  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  NSArray* toMove = [NSArray arrayWithObjects:self.searchField, self.cancelButton, nil];
+  NSArray* toHide = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  
   [UIView animateWithDuration:0.2
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
-                     for (UIView* view in views) {
+                     for (UIView* view in toMove)
                        view.frame = CGRectOffset(view.frame, 0, offset);
-                     }
+                     
+                     for (UIView* view in toHide)
+                       view.alpha = 0;
+
                      searchSegmentedControl_.alpha = 1;
                      shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, 4);
-                     self.tableView.contentOffset = CGPointMake(0, offset);
+                     self.shelfView.frame = CGRectOffset(self.shelfView.frame, 0, -offset);
+                     self.tableView.frame = CGRectOffset(self.tableView.frame, 0, -offset);
                    }
-                   completion:nil];  
+                   completion:nil];
   [self.navigationController setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   [super textFieldDidEndEditing:textField];
+  if (self.searchField.text.length > 0)
+    return;
+
   CGFloat offset = 44;
-  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  NSArray* toMove = [NSArray arrayWithObjects:self.searchField, self.cancelButton, nil];
+  NSArray* toShow = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
   [UIView animateWithDuration:0.2
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
-                     for (UIView* view in views) {
+                     for (UIView* view in toMove)
                        view.frame = CGRectOffset(view.frame, 0, offset);
-                     }
+                     
+                     for (UIView* view in toShow)
+                       view.alpha = 1;
+
                      searchSegmentedControl_.alpha = 0;
                      shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, -4);
-                     self.tableView.contentOffset = CGPointZero;
+                     self.shelfView.frame = CGRectOffset(self.shelfView.frame, 0, -offset);
+                     self.tableView.frame = CGRectOffset(self.tableView.frame, 0, -offset);
                    }
                    completion:nil];
   [self.navigationController setNavigationBarHidden:NO animated:YES];
   if (textField.text.length == 0)
-    [self textFieldShouldClear:textField];
+    [self clearSearch];
 }
 
 - (BOOL)textFieldShouldClear:(UITextField*)textField {
   if ([textField isFirstResponder])
     return YES;
 
+  self.searchField.text = @"\u200b";
+  [self.searchField becomeFirstResponder];
+  [self performSelector:@selector(clearSearch) withObject:nil afterDelay:0];
+  return NO;
+}
+
+- (void)clearSearch {
+  self.searchField.text = nil;
   self.searchResults = nil;
+  [self.tableView reloadData];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [self sendSearchUsersRequest];
+  [self.searchField resignFirstResponder];
   [self.tableView reloadData];
   return YES;
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+#pragma mark - Custom methods.
+
+- (IBAction)searchSegmentedControlValueChanged:(id)sender {
+  if ([self.searchField isFirstResponder])
+    return;
+
+  [self sendSearchUsersRequest];
+}
+
+- (void)sendSearchUsersRequest {
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedSearchURI
@@ -491,21 +535,25 @@ typedef enum PeopleSearchCorpus {
     [params setValue:@"followers" forKey:@"relationship"];
   else if (searchSegmentedControl_.selectedSegmentIndex == PeopleSearchCorpusFollowing)
     [params setValue:@"following" forKey:@"relationship"];
-
+  
   loader.params = params;
   loader.objectMapping = mapping;
   [loader send];
   searching_ = YES;
-  [self.searchField resignFirstResponder];
   [self.tableView reloadData];
-  return YES;
 }
 
-#pragma mark - Custom methods.
+- (CGFloat)minimumShelfYPosition {
+  return self.navigationController.navigationBarHidden ? -268 : -356;
+}
 
-- (UINavigationController*)navigationController {
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  return delegate.navigationController;
+- (CGFloat)maximumShelfYPosition {
+  CGFloat max = [super maximumShelfYPosition];
+
+  if (self.navigationController.navigationBarHidden)
+    max += 44;
+  
+  return max;
 }
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
