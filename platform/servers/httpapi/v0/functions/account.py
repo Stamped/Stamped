@@ -5,6 +5,10 @@ Account creation functions
 
 DOCUMENTED SAMPLE PATH MODULE
 prev:   platform.servers.httpapi.urls.
+uses:   ../helpers.py
+uses:   platform/api/HTTPSchemas.py
+uses:
+next:
 """
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
