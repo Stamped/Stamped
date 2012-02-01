@@ -4,12 +4,6 @@ import logs
 class Fail(Exception):
     pass
 
-class InvalidArgument(Exception):
-    pass
-
-class InvalidState(Exception):
-    pass
-
 class StampedHTTPError(Exception):
     def __init__(self, msg, code, desc=None):
         Exception.__init__(self, msg)
@@ -35,7 +29,7 @@ class SchemaValidationError(Exception):
         self.msg  = msg
         self.desc = desc
 
-class InsufficientPrivilegesError(Exception):
+class StampedPermissionsErrorInsufficientPrivilegesError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg
@@ -44,7 +38,7 @@ class InsufficientPrivilegesError(Exception):
         if msg is not None:
             logs.warning(msg)
 
-class IllegalActionError(Exception):
+class StampedIllegalActionError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg
@@ -53,7 +47,7 @@ class IllegalActionError(Exception):
         if msg is not None:
             logs.warning(msg)
 
-class InputError(Exception):
+class StampedInputError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg
@@ -62,7 +56,7 @@ class InputError(Exception):
         if msg is not None:
             logs.warning(msg)
 
-class UnavailableError(Exception):
+class StampedUnavailableError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg
@@ -71,7 +65,7 @@ class UnavailableError(Exception):
         if msg is not None:
             logs.warning(msg)
 
-class DuplicationError(Exception):
+class StampedDuplicationError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg
@@ -80,7 +74,7 @@ class DuplicationError(Exception):
         if msg is not None:
             logs.warning(msg)
 
-class AuthError(Exception):
+class StampedAuthError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg

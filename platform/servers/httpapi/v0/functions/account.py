@@ -283,7 +283,7 @@ def update_apns(request):
     schema      = parseRequest(HTTPAPNSToken(), request)
 
     if len(schema.token) != 64:
-        raise InputError('Invalid token length')
+        raise StampedInputError('Invalid token length')
     
     stampedAPI.updateAPNSToken(authUserId, schema.token)
     return transformOutput(True)
@@ -296,7 +296,7 @@ def remove_apns(request):
     schema      = parseRequest(HTTPAPNSToken(), request)
 
     if len(schema.token) != 64:
-        raise InputError('Invalid token length')
+        raise StampedInputError('Invalid token length')
     
     stampedAPI.removeAPNSTokenForUser(authUserId, schema.token)
     return transformOutput(True)

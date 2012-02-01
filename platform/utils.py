@@ -806,8 +806,8 @@ def getFacebook(accessToken, path, params={}):
         return result
     except urllib2.HTTPError as e:
         if e.code == 400:
-            raise InputError('FACEBOOK API 400 ERROR: %s' % e)
-        raise UnavailableError('FACEBOOK API ERROR: %s' % e)
+            raise StampedInputError('FACEBOOK API 400 ERROR: %s' % e)
+        raise StampedUnavailableError('FACEBOOK API ERROR: %s' % e)
     except:
         raise Exception
 

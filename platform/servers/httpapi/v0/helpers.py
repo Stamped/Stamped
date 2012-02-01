@@ -52,37 +52,37 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
         
-        except AuthError as e:
+        except StampedAuthError as e:
             logs.warning("401 Error: %s" % (e.msg))
             response = HttpResponse(e.msg, status=401)
             logs.auth(e.msg)
             return response
         
-        except InputError as e:
+        except StampedInputError as e:
             logs.warning("400 Error: %s" % (e.msg))
             response = HttpResponse("invalid_request", status=400)
             logs.error(response.status_code)
             return response
         
-        except IllegalActionError as e:
+        except StampedIllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("illegal_action", status=403)
             logs.error(response.status_code)
             return response
         
-        except InsufficientPrivilegesError as e:
+        except StampedPermissionsErrorInsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("insufficient_privileges", status=403)
             logs.error(response.status_code)
             return response
         
-        except DuplicationError as e:
+        except StampedDuplicationError as e:
             logs.warning("409 Error: %s" % (e.msg))
             response = HttpResponse("already_exists", status=409)
             logs.error(response.status_code)
             return response
         
-        except UnavailableError as e:
+        except StampedUnavailableError as e:
             logs.warning("404 Error: %s" % (e.msg))
             response = HttpResponse("not_found", status=404)
             logs.error(response.status_code)
@@ -161,7 +161,7 @@ def checkOAuth(request):
     except Exception:
         msg = "Invalid access token"
         logs.warning(msg)
-        raise AuthError("invalid_token", msg)
+        raise StampedAuthError("invalid_token", msg)
 
 def parseRequest(schema, request, **kwargs):
     ### Parse Request

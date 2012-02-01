@@ -166,7 +166,7 @@ class AMongoCollection(object):
         try:
             return bson.objectid.ObjectId(string)
         except:
-            raise InputError("Invalid ObjectID (%s)" % string)
+            raise StampedInputError("Invalid ObjectID (%s)" % string)
     
     def _convertToMongo(self, obj):
         if obj is None:
@@ -262,7 +262,7 @@ class AMongoCollection(object):
     def _getMongoDocumentFromId(self, documentId):
         document = self._collection.find_one(documentId)
         if document is None:
-            raise UnavailableError("Unable to find document (id = %s)" % documentId)
+            raise StampedUnavailableError("Unable to find document (id = %s)" % documentId)
         
         return document
     

@@ -54,7 +54,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
         if document is None:
-            raise UnavailableError("Unable to find user (%s)" % screenName)
+            raise StampedUnavailableError("Unable to find user (%s)" % screenName)
         return self._convertFromMongo(document)
     
     def checkScreenNameExists(self, screenName):
@@ -114,7 +114,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             elif relationship == 'following':
                 domain = self.friends_collection.getFriends(authUserId)
             else:
-                raise InputError("invalid relationship")
+                raise StampedInputError("invalid relationship")
             
             domain = set(domain)
         

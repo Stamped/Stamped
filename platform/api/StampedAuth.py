@@ -116,14 +116,14 @@ class StampedAuth(AStampedAuth):
         if not utils.validate_email(email):
             msg = "Invalid format for email address"
             logs.warning(msg)
-            raise InputError(msg)
+            raise StampedInputError(msg)
 
         # Verify user exists
         account = self._accountDB.getAccountByEmail(email)
         if not account or not account.user_id:
             msg = "User does not exist"
             logs.warning(msg)
-            raise InputError(msg)
+            raise StampedInputError(msg)
 
         attempt = 1
         max_attempts = 5
@@ -189,7 +189,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid reset token"
             logs.warning(msg)
-            raise AuthError("invalid_token", msg)
+            raise StampedAuthError("invalid_token", msg)
 
     def updatePassword(self, authUserId, password):
         
@@ -274,7 +274,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid refresh token"
             logs.warning(msg)
-            raise AuthError("invalid_token", msg)
+            raise StampedAuthError("invalid_token", msg)
 
         ### Generate Access Token
         token = self.addAccessToken(clientId, token.user_id, refreshToken)
@@ -340,7 +340,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid Access Token"
             logs.warning(msg)
-            raise AuthError("invalid_token", msg)
+            raise StampedAuthError("invalid_token", msg)
     
     def removeAccessToken(self, tokenId):
         return self._accessTokenDB.removeAccessToken(tokenId)
@@ -380,7 +380,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid token"
             logs.warning(msg)
-            raise AuthError("invalid_token", msg)
+            raise StampedAuthError("invalid_token", msg)
 
     def ensureEmailAlertTokensForUsers(self, userIds):
         tokens = self._emailAlertDB.getTokensForUsers(userIds)
