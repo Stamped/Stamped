@@ -1,5 +1,12 @@
 # Django settings for httpapi project.
+"""
+Django settings for httpapi project.
 
+DOCUMENTED SAMPLE PATH MODULE
+prev:   Django?
+next: ./urls.py
+see: ROOT_URLCONF, INSTALLED_APPS
+"""
 import Globals, utils
 
 DEBUG = (not utils.is_ec2())
@@ -104,6 +111,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+#
+# DOCUMENTED SAMPLE PATH ATTRIBUTE
+# establish location of urlpatterns
+#
 ROOT_URLCONF = 'httpapi.urls'
 
 TEMPLATE_DIRS = (
@@ -114,6 +125,10 @@ TEMPLATE_DIRS = (
     "/stamped/stamped/platform/servers/httpapi/templates"
 )
 
+#
+# DOCUMENTED SAMPLE PATH ATTRIBUTE
+# establish location of of implementation modules (v0)?
+#
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',

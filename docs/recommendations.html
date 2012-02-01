@@ -1,0 +1,85 @@
+<html>
+<head>
+    <link rel=stylesheet type="text/css" href="style.css"/> 
+    <title>Recommendations</title>
+</head>
+<body>
+<div class="content">
+<div class="title">Recommendations</div>
+<dl>
+<dt>
+Replace custom @abstract with standard abc module:
+</dt>
+<dd>
+<p>
+Our current abstract decorator requires method invocation to notice an unimplemented method,
+in a similar fashion to having the abstract method throw an UnsupportedException itself. The
+abc (Abstract Base Class) module catches the problem in __new__ before even calling __init__.
+The code below demostrates the difference:
+</p>
+<div class="code">>>> from platform.utils import abstract
+>>> class Base(object):
+...     @abstract
+...     def foo(self):
+...         pass
+... 
+>>> Base()
+<__main__.Base object at 0x1012669d0>
+>>> class Other(Base):
+...     pass
+... 
+>>> Other()
+<__main__.Other object at 0x101266a50>
+>>> from abc import abstractmethod, ABCMeta
+>>> class Base2(object):
+...     __metaclass__ = ABCMeta
+...     @abstractmethod
+...     def foo(self):
+...         pass
+... 
+>>> Base2()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: Can't instantiate abstract class Base2 with abstract methods foo
+>>> class Other2(Base2):
+...     pass
+... 
+>>> Other2()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: Can't instantiate abstract class Other2 with abstract methods foo
+</div>
+<p>
+I would recommend that we deprecate platform.util.abstract in favor of the abc module.
+-Landon
+</p>
+</dd>
+<dt>
+Change lazyProperty to use a closure instead of attribute modification.
+</dt>
+<dd>
+<p>
+The current lazyProperty relies on setattr and a mangled name. This
+unnecessarilly exposes implementation details about lazyProperty. I suggest
+that we switch to a closure based implementation like the following one:
+</p>
+<div class="code">def lazyProperty(undecorated):
+    x = []
+    @property
+    @wraps(undecorated)
+    def decorated(self):
+        if len(x) == 0:
+            x.append( undecorated(self) )
+        return x[0]
+    return decorated
+</div>
+<p>
+The above implementation is almost identical except it does not use
+setattr, which in my opinion is a good thing.
+-Landon
+</p>
+</dd>
+</dl>
+</div>
+</body>
+</html>
