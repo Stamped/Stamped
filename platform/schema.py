@@ -1,5 +1,10 @@
 #!/usr/bin/python
+"""
+Base classes for structured, type/field checked data representation that parallels common built in Python types.
 
+TODO, evaluate use of single underscore attributes. -Landon
+TODO, consider changing the parent attribute to a weakref, which would only require small and transparent modifications. -Landon
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -10,7 +15,23 @@ from datetime import datetime
 from errors import *
 from utils import normalize
 
-"""
+
+# adding generic validation for email, username, etc. on a per-element basis
+# isSet consistency
+# 
+# user updates info; set existing value to empty
+# empty strings
+#
+# exporting sparse version which ignores isSet and just returns if it's an actual, concrete value
+# remove unused arguments and complexity from schema
+
+# required set None value or not?
+# derived values
+# default values
+
+class SchemaElement(object):
+    
+    """
 The goal of the Schema class is to create a wrapper that allows for certain 
 constraints to easily be applied to a structured set of data, ensuring that 
 anything within the wrapper is valid and complete. Additionally, it is designed 
@@ -77,22 +98,6 @@ wrapper (Schemas and SchemaLists), however, this should not be a common
 situation.
 
 """
-
-# adding generic validation for email, username, etc. on a per-element basis
-# isSet consistency
-# 
-# user updates info; set existing value to empty
-# empty strings
-#
-# exporting sparse version which ignores isSet and just returns if it's an actual, concrete value
-# remove unused arguments and complexity from schema
-
-# required set None value or not?
-# derived values
-# default values
-
-class SchemaElement(object):
-    
     def __init__(self, requiredType, **kwargs):
         self._name          = None
         self._data          = None
@@ -137,7 +142,7 @@ class SchemaElement(object):
 
     def setIsSet(self, isSet):
         self._isSet = isSet
-        
+        # The only known use of the parent attribute -Landon
         if self._parent != None and isSet:
             self._parent.setIsSet(isSet)
     
@@ -246,7 +251,9 @@ class SchemaElement(object):
             logs.warning(msg)
             raise
 
-"""
+class SchemaList(SchemaElement):
+
+    """
 A SchemaList is a special type of SchemaElement that contains multiple 
 SchemaElements of the same type. It is, not surprisingly, designed to mimic
 a standard Python list in functionality. Like a normal list, it can hold any
@@ -297,9 +304,6 @@ of the SchemaList to the list:
     schemaList.value == [1, 2, 3]
 
 """
-
-class SchemaList(SchemaElement):
-    
     def __init__(self, element, **kwargs):
         SchemaElement.__init__(self, list, **kwargs)
         self._element       = element
@@ -446,8 +450,9 @@ class SchemaList(SchemaElement):
         self._name = name
         self.importData(value)
 
+class Schema(SchemaElement):
 
-"""
+    """
 A Schema is a second variety of the SchemaElement class that contains multiple 
 SchemaElements in a dictionary-style format. Similar to how a SchemaList mimics
 a Python list, a Schema mimics a generic Python dictionary. 
@@ -516,8 +521,6 @@ when not all fields are expected to match, but should not be used as a first
 resort.
 
 """
-
-class Schema(SchemaElement):
     
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
@@ -539,6 +542,7 @@ class Schema(SchemaElement):
         self.importData(data)
     
     def __setattr__(self, name, value):
+        # Will work for mangled private variables too
         if name[:1] == '_':
             object.__setattr__(self, name, value)
         

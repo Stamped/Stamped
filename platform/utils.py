@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+"""
+Assorted utility commands and classes
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -482,7 +484,14 @@ def getStatusStr(count, maxCount):
     return "%d%% (%d / %d)" % (round((100.0 * count) / max(1, maxCount)), count, maxCount)
 
 def abstract(func):
-    """ marks the target function as abstract """
+    """ marks the target function as abstract
+
+    Consider replacing with functionality from the abc (Abstract Base Class) module.
+    Specifically: 
+    abc.ABCMeta - metaclass for abstract classes
+    abc.abstractmethod - decorator for abstract methods
+    abc.abstractproperty - decorator for abstract properties 
+    """
     
     def wrapper(*__args, **__kwargs):
         raise NotImplementedError('Missing required %s() method' % func.__name__)

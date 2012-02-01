@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Helper utilities for API functions.
 
+DOCUMENTED SAMPLE PATH MODULE
+MULTIPLE USES from functions/account.py
+"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
