@@ -175,16 +175,16 @@ class StampedAPI(AStampedAPI):
         # Validate screen name
         account.screen_name = account.screen_name.strip()
         if not utils.validate_screen_name(account.screen_name):
-            raise InputError("Invalid format for screen name")
+            raise StampedInputError("Invalid format for screen name")
         
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
-            raise InputError("Blacklisted screen name")
+            raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
         account.email = str(account.email).lower().strip()
         if not utils.validate_email(account.email):
-            raise InputError("Invalid format for email address")
+            raise StampedInputError("Invalid format for email address")
         
         # Add image timestamp if exists
         if imageData:
@@ -372,16 +372,16 @@ class StampedAPI(AStampedAPI):
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
         if not utils.validate_screen_name(account.screen_name):
-            raise InputError("Invalid format for screen name")
+            raise StampedInputError("Invalid format for screen name")
         
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
-            raise InputError("Blacklisted screen name")
+            raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
         account.email = str(account.email).lower().strip()
         if not utils.validate_email(account.email):
-            raise InputError("Invalid format for email address")
+            raise StampedInputError("Invalid format for email address")
         
         self._accountDB.updateAccount(account)
         
@@ -423,7 +423,7 @@ class StampedAPI(AStampedAPI):
         
         # Validate inputs
         if not utils.validate_hex_color(primary) or not utils.validate_hex_color(secondary):
-            raise InputError("Invalid format for colors")
+            raise StampedInputError("Invalid format for colors")
         
         account = self._accountDB.getAccount(authUserId)
         
@@ -493,7 +493,7 @@ class StampedAPI(AStampedAPI):
                 logs.debug(msg)
                 raise KeyError(msg)
             else:
-                raise InputError("Invalid input")
+                raise StampedInputError("Invalid input")
     
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
@@ -524,7 +524,7 @@ class StampedAPI(AStampedAPI):
 
     def _getTwitterFriends(self, key, secret, followers=False):
         if key is None or secret is None:
-            raise IllegalActionError("Connecting to Twitter requires a valid key / secret")
+            raise StampedIllegalActionError("Connecting to Twitter requires a valid key / secret")
         
         baseurl = 'https://api.twitter.com/1/friends/ids.json'
         if followers:
@@ -548,7 +548,7 @@ class StampedAPI(AStampedAPI):
 
     def _getFacebookFriends(self, token):
         if token is None:
-            raise IllegalActionError("Connecting to Facebook requires a valid token")
+            raise StampedIllegalActionError("Connecting to Facebook requires a valid token")
         
         friends     = []
         facebookIds = []
@@ -595,7 +595,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeLinkedAccount(self, authUserId, linkedAccount):
         if linkedAccount not in ['facebook', 'twitter']:
-            raise IllegalActionError("Invalid linked account: %s" % linkedAccount)
+            raise StampedIllegalActionError("Invalid linked account: %s" % linkedAccount)
         
         self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
         return True
@@ -721,7 +721,7 @@ class StampedAPI(AStampedAPI):
         screen_name     = userRequest.pop('screen_name', None)
         
         if user_id is None and screen_name is None:
-            raise InputError("Required field missing (user id or screen name)")
+            raise StampedInputError("Required field missing (user id or screen name)")
         
         if user_id is not None:
             return self._userDB.getUser(user_id)
@@ -736,12 +736,12 @@ class StampedAPI(AStampedAPI):
         
         if user.privacy == True:
             if authUserId is None:
-                raise InsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
         
         return user
     
@@ -853,7 +853,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
-            raise IllegalActionError("Illegal friendship: you can't follow yourself!")
+            raise StampedIllegalActionError("Illegal friendship: you can't follow yourself!")
         
         friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
         
@@ -864,7 +864,7 @@ class StampedAPI(AStampedAPI):
         
         # Check if block exists between authenticating user and user
         if self._friendshipDB.blockExists(friendship) == True:
-            raise IllegalActionError("Block exists")
+            raise StampedIllegalActionError("Block exists")
         
         # Check if friend has private account
         if user.privacy == True:
@@ -951,13 +951,13 @@ class StampedAPI(AStampedAPI):
             check = Friendship(user_id=authUserId, friend_id=userA.user_id)
             
             if not self._friendshipDB.checkFriendship(check):
-                raise InsufficientPrivilegesError("Insufficient privileges to check friendship")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to check friendship")
         
         if userB.privacy == True and authUserId != userB.user_id:
             check = Friendship(user_id=authUserId, friend_id=userB.user_id)
             
             if not self._friendshipDB.checkFriendship(check):
-                raise InsufficientPrivilegesError("Insufficient privileges to check friendship")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to check friendship")
         
         friendship = Friendship(user_id=userA.user_id, friend_id=userB.user_id)
         return self._friendshipDB.checkFriendship(friendship)
@@ -1044,10 +1044,10 @@ class StampedAPI(AStampedAPI):
         # Validate email address
         email = str(email).lower().strip()
         if not utils.validate_email(email):
-            raise InputError("Invalid format for email address")
+            raise StampedInputError("Invalid format for email address")
         
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise InputError("Invite already exists")
+            raise StampedInputError("Invite already exists")
         
         # Store email address linked to auth user id
         tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
@@ -1075,7 +1075,7 @@ class StampedAPI(AStampedAPI):
         searchId    = entityRequest.pop('search_id', None)
         
         if entityId is None and searchId is None:
-            raise InputError("Required field missing (entity_id or search_id)")
+            raise StampedInputError("Required field missing (entity_id or search_id)")
         
         if searchId is not None and searchId.startswith('T_'):
             entityId = self._convertSearchId(searchId)
@@ -1110,7 +1110,7 @@ class StampedAPI(AStampedAPI):
         
         # Check if user has access to this entity
         if entity.generated_by != authUserId or entity.generated_by is None:
-            raise InsufficientPrivilegesError("Insufficient privileges to update custom entity")
+            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to update custom entity")
         
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1413,12 +1413,12 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
-            raise IllegalActionError("No more stamps remaining")
+            raise StampedIllegalActionError("No more stamps remaining")
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            ### TODO: Change this to DuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
-            raise IllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
+            ### TODO: Change this to StampedDuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
+            raise StampedIllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
         
         # Build stamp
         stamp                       = Stamp()
@@ -1453,7 +1453,7 @@ class StampedAPI(AStampedAPI):
         # Add image to stamp
         if imageData is not None:
             if image_url is not None:
-                raise InputError("either an image may be uploaded with the stamp itself or an " + 
+                raise StampedInputError("either an image may be uploaded with the stamp itself or an " + 
                                  "external image may be referenced, but not both")
             
             ### TODO: Rollback: Delete Image
@@ -1468,18 +1468,18 @@ class StampedAPI(AStampedAPI):
             response = utils.getHeadRequest(image_url)
             
             if response is None:
-                raise InputError("unable to access specified stamp image '%s'" % image_url)
+                raise StampedInputError("unable to access specified stamp image '%s'" % image_url)
             else:
                 content_type = response.info().getheader('Content-Type')
                 
                 if content_type != "image/jpeg":
-                    raise InputError("invalid external image format; content-type must be image/jpeg")
+                    raise StampedInputError("invalid external image format; content-type must be image/jpeg")
             """
             pass
         
         if image_url is not None:
             if image_width is None or image_height is None:
-                raise InputError("invalid image dimensions")
+                raise StampedInputError("invalid image dimensions")
             
             # Add image dimensions to stamp object
             stamp.image_dimensions  = "%s,%s" % (image_width, image_height)
@@ -1608,7 +1608,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user can modify the stamp
         if authUserId != stamp.user_id:
-            raise InsufficientPrivilegesError("Insufficient privileges to modify stamp")
+            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to modify stamp")
         
         # Collect user ids
         userIds = {}
@@ -1772,7 +1772,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
-            raise InsufficientPrivilegesError("Insufficient privileges to remove stamp")
+            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to remove stamp")
         
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
@@ -1837,7 +1837,7 @@ class StampedAPI(AStampedAPI):
             friendship = Friendship(user_id=user.user_id, friend_id=authUserId)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to view stamp")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
         
         return stamp
     
@@ -1849,7 +1849,7 @@ class StampedAPI(AStampedAPI):
         
         # TODO: if authUserId == stamp.user.user_id, then the privacy should be disregarded
         if stamp.user.privacy == True:
-            raise InsufficientPrivilegesError("Insufficient privileges to view stamp")
+            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
         
         return stamp
     
@@ -1860,7 +1860,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has permission to add image
         if stamp.user_id != authUserId:
-            raise InsufficientPrivilegesError("Insufficient privileges to update stamp image")
+            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to update stamp image")
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
@@ -1896,11 +1896,11 @@ class StampedAPI(AStampedAPI):
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to add comment")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
         
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
-            raise IllegalActionError("Block exists")
+            raise StampedIllegalActionError("Block exists")
         
         # Extract mentions
         mentions = None
@@ -1999,11 +1999,11 @@ class StampedAPI(AStampedAPI):
         if comment.user.user_id != authUserId:
             stamp = self._stampDB.getStamp(comment.stamp_id)
             if stamp.user.user_id != authUserId:
-                raise InsufficientPrivilegesError("Insufficient privileges to remove comment")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to remove comment")
 
         # Don't allow user to delete comment for restamp notification
         if comment.restamp_id is not None:
-            raise IllegalActionError("Cannot remove 'restamp' comment")
+            raise StampedIllegalActionError("Cannot remove 'restamp' comment")
 
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)
@@ -2031,7 +2031,7 @@ class StampedAPI(AStampedAPI):
             friendship = Friendship(user_id=stamp.user.user_id, friend_id=authUserId)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to view stamp")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
               
         commentData = self._commentDB.getComments(stamp.stamp_id)
         
@@ -2082,15 +2082,15 @@ class StampedAPI(AStampedAPI):
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
-                    raise InsufficientPrivilegesError("Insufficient privileges to add comment")
+                    raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
             
             # Check if block exists between user and stamp owner
             if self._friendshipDB.blockExists(friendship) == True:
-                raise IllegalActionError("Block exists")
+                raise StampedIllegalActionError("Block exists")
         
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
-            raise IllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
         
         # Add like
         self._stampDB.addLike(authUserId, stampId)
@@ -2137,7 +2137,7 @@ class StampedAPI(AStampedAPI):
     def removeLike(self, authUserId, stampId):
         # Remove like (if it exists)
         if not self._stampDB.removeLike(authUserId, stampId):
-            raise IllegalActionError("'Like' does not exist for user (%s) on stamp (%s)" % (authUserId, stampId))
+            raise StampedIllegalActionError("'Like' does not exist for user (%s) on stamp (%s)" % (authUserId, stampId))
         
         # Get stamp object
         stamp = self._stampDB.getStamp(stampId)
@@ -2175,11 +2175,11 @@ class StampedAPI(AStampedAPI):
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
-                    raise InsufficientPrivilegesError("Insufficient privileges to add comment")
+                    raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
             
             # Check if block exists between user and stamp owner
             if self._friendshipDB.blockExists(friendship) == True:
-                raise IllegalActionError("Block exists")
+                raise StampedIllegalActionError("Block exists")
         
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
@@ -2306,12 +2306,12 @@ class StampedAPI(AStampedAPI):
         # Check privacy
         if user.privacy == True:
             if authUserId is None:
-                raise InsufficientPrivilegesError("Must be logged in to view account")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Must be logged in to view account")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         
@@ -2350,12 +2350,12 @@ class StampedAPI(AStampedAPI):
         # Check privacy
         if user.privacy == True:
             if authUserId is None:
-                raise InsufficientPrivilegesError("Must be logged in to view account")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Must be logged in to view account")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise InsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
         logs.info("STAMP IDS: %s" % stampIds)
@@ -2400,7 +2400,7 @@ class StampedAPI(AStampedAPI):
             exists = False
         
         if exists:
-            raise DuplicationError("Favorite already exists")
+            raise StampedDuplicationError("Favorite already exists")
         
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
@@ -2437,7 +2437,7 @@ class StampedAPI(AStampedAPI):
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
         
         if not favorite or not favorite.favorite_id:
-            raise UnavailableError('Invalid favorite: %s' % favorite)
+            raise StampedUnavailableError('Invalid favorite: %s' % favorite)
         
         self._favoriteDB.removeFavorite(authUserId, entityId)
         

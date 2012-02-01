@@ -155,8 +155,9 @@ class AEntityMatcher(object):
                         self._placesDB.removeEntity(entity_id)
             
             return None
-        except InvalidState:
-            pass
+        except:
+            utils.printException()
+            raise
         
         return None
     

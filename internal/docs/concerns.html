@@ -1,0 +1,52 @@
+<html>
+<head>
+    <link rel=stylesheet type="text/css" href="style.css"/> 
+    <title>Concerns</title>
+</head>
+<body>
+<div class="content">
+<div class="title">Concerns</div>
+<dl>
+<dt>
+Use of '_NAME' convention with psuedo-private attributes:
+</dt>
+<dd>
+<p>
+It is my understanding that single leading underscores are to be
+used with module fields that are not meant to be imported.
+Double leading underscores are to be used for psuedo-private
+attributes because they trigger class-based name mangling,
+such that __foo in class Bar is automatically translated to
+_Bar__foo, which in turn helps to prevent namespace collisions.
+To the best of my knowledge single-leading underscores do not
+trigger a similar behavior when used in class definitions.
+It seems that the single-underscore convention is used deliberately
+in many cases for 'protected' attributes, but it seems in other
+places that it is just used for what are arguably private attributes.
+I would personally suggest that we move away from 'protected' or accidental
+single-underscore attributes, refactoring 'protected' use where necessary.
+-Landon
+</p>
+</dd>
+<dt>
+Inefficiency of Reference cycles in SchemaElement and potential memory leaks:
+</dt>
+<dd>
+<p>
+Since Python is primarily a reference counting language, with a limited cycle detecting
+garbage collector, I think it would make sense to change the parent attribute of SchemaElement
+to be a weakref or to consider refactoring SchemaElement to remove it entirely. To the best of my knowledge,
+the parent attribute is read in only one method, SchemaElement.setIsSet, and in this situation,
+it does not appear to be necessary if the parent was otherwise unreachable. Also, if a subclass of
+SchemaElement were to override __del__, it would result in a memory leak since, to the
+best of my knowledge, the garbage collector does not collect objects which override __del__.
+Since Schemas seem to be one of the most prolific data-structures in the Stamped implementation,
+I am fairly certain that moving them over to pure reference counting would result in an appreciable
+performance gain.
+-Landon
+</p>
+</dd>
+</dl>
+</div>
+</body>
+</html>

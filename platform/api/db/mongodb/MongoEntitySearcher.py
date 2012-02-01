@@ -18,7 +18,7 @@ from pymongo.son    import SON
 from gevent.pool    import Pool
 from pprint         import pprint, pformat
 from utils          import lazyProperty
-from errors         import InputError
+from errors         import StampedInputError
 
 # third-party search API wrappers
 from GooglePlaces   import GooglePlaces
@@ -1241,7 +1241,7 @@ class MongoEntitySearcher(EntitySearcher):
             except:
                 msg = "Invalid coordinates (%s)" % coords
                 logs.warning(msg)
-                raise InputError(msg)
+                raise StampedInputError(msg)
         
         return coords
     

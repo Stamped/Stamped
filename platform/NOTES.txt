@@ -1,6 +1,9 @@
 
-scaling considerations
-    * modular; every component should support async w/ timeouts, fallbacks & monitoring / alerts if dependency fails
+
+
+fix user search!
+
+
 
 API v1:
     * entrypoints:
@@ -8,18 +11,6 @@ API v1:
         * collections/user
         * favorites/show
         * todo's
-    * improvements:
-        * sort:
-            * relevance
-            * created
-            * modified
-            * popularity
-            * proximity
-            * alphabetical
-        * filter:
-            * category
-            * subcategory
-
 
 class HTTPGenericSlice(Schema):
     def setSchema(self):
@@ -55,6 +46,10 @@ class HTTPUserCollectionSlice(HTTPGenericSlice):
 API:
     * rename Error => StampedError
     * standardize handleHTTPRequest to take in a parameter for whether or not auth is required and input schema
+
+blog:
+    * scaling considerations
+        * modular; every component should support async w/ timeouts, fallbacks & monitoring / alerts if dependency fails
 
 platform:
     * redirect useless statsd.node.log to /dev/null

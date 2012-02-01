@@ -1,0 +1,47 @@
+.navigator_section {
+width: 600px;
+padding-left: 4%;
+}
+
+.footnote {
+
+}
+
+.code {
+    white-space:pre;
+    font-weight: bold;
+    font-family:    monospace;
+}
+
+.text {
+
+}
+
+.legal {
+    font-size:small;
+    padding-left: 4%;
+    padding-top: 25px;
+}
+
+.title {
+    font-size:xx-large;
+}
+
+.content {
+width: 600px;
+padding-left: 4%;
+}
+
+.section_header {
+    padding-top: 20px;
+    text-decoration:underline; 
+    font-size:x-large;
+}
+
+.navigator {
+padding-right: 50px;
+}
+
+.navigator_section {
+}
+
