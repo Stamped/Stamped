@@ -343,7 +343,13 @@ static const CGFloat kReloadHeight = 60.0;
 #pragma mark - Actions.
 
 - (IBAction)cancelButtonPressed:(id)sender {
+  searchField_.text = nil;
   [searchField_ resignFirstResponder];
+  [self textFieldShouldClear:searchField_];
+}
+
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  return YES;
 }
 
 #pragma mark - To be implemented by subclasses.

@@ -47,6 +47,7 @@ typedef enum PeopleSearchCorpus {
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
 @property (nonatomic, copy) NSArray* searchResults;
+@property (nonatomic, assign) BOOL searching;
 @end
 
 @implementation PeopleViewController
@@ -58,6 +59,7 @@ typedef enum PeopleSearchCorpus {
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 @synthesize searchSegmentedControl = searchSegmentedControl_;
 @synthesize shelfSeparator = shelfSeparator_;
+@synthesize searching = searching_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -252,6 +254,13 @@ typedef enum PeopleSearchCorpus {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
+    self.searchResults = objects;
+    [self.tableView reloadData];
+    searching_ = NO;
+    return;
+  }
+
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser) {
     [self updateShelf];
@@ -289,7 +298,10 @@ typedef enum PeopleSearchCorpus {
     [self loadFriendsFromNetwork];
     return;
   }
-  
+  searching_ = NO;
+  self.searchResults = nil;
+  [self.tableView reloadData];
+
   [self setIsLoading:NO];
 }
 
@@ -303,10 +315,16 @@ typedef enum PeopleSearchCorpus {
 #pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
+  if (searching_ || searchResults_)
+    return 1;
+
   return 2;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (searching_ || searchResults_)
+    return searchResults_.count;
+  
   if (section == 0)
     return 1;
 
@@ -353,7 +371,9 @@ typedef enum PeopleSearchCorpus {
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   
   User* user = nil;
-  if (indexPath.section == 0)
+  if (searchResults_)
+    user = [searchResults_ objectAtIndex:indexPath.row];
+  else if (indexPath.section == 0)
     user = [AccountManager sharedManager].currentUser;
   else
     user = [self.friendsArray objectAtIndex:indexPath.row - 1];
@@ -366,6 +386,9 @@ typedef enum PeopleSearchCorpus {
 #pragma mark - Table view delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  if (searching_ || searchResults_)
+    return 0;
+
   return 24;
 }
 
@@ -390,7 +413,10 @@ typedef enum PeopleSearchCorpus {
                                                                                          bundle:nil];
   User* currentUser = [AccountManager sharedManager].currentUser;
   User* user = nil;
-  if (indexPath.section == 0) {
+  if (searchResults_) {
+    user = [searchResults_ objectAtIndex:indexPath.row];
+    profileViewController.stampsAreTemporary = [currentUser.following containsObject:user];
+  } else if (indexPath.section == 0) {
     user = currentUser;
     profileViewController.stampsAreTemporary = NO;
   } else {
@@ -441,16 +467,37 @@ typedef enum PeopleSearchCorpus {
                    }
                    completion:nil];
   [self.navigationController setNavigationBarHidden:NO animated:YES];
+  if (textField.text.length == 0)
+    [self textFieldShouldClear:textField];
 }
 
 - (BOOL)textFieldShouldClear:(UITextField*)textField {
+  if ([textField isFirstResponder])
+    return YES;
+
   self.searchResults = nil;
   [self.tableView reloadData];
   return YES;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  NSLog(@"Should search: %d", searchSegmentedControl_.selectedSegmentIndex);
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedSearchURI
+                                                        delegate:self];
+  loader.method = RKRequestMethodPOST;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:self.searchField.text forKey:@"q"];
+  if (searchSegmentedControl_.selectedSegmentIndex == PeopleSearchCorpusFollowers)
+    [params setValue:@"followers" forKey:@"relationship"];
+  else if (searchSegmentedControl_.selectedSegmentIndex == PeopleSearchCorpusFollowing)
+    [params setValue:@"following" forKey:@"relationship"];
+
+  loader.params = params;
+  loader.objectMapping = mapping;
+  [loader send];
+  searching_ = YES;
+  [self.searchField resignFirstResponder];
+  [self.tableView reloadData];
   return YES;
 }
 
