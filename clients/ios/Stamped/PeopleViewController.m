@@ -20,6 +20,7 @@
 #import "UIColor+Stamped.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
+#import "STLoadingMoreTableViewCell.h"
 #import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
@@ -258,9 +259,9 @@ typedef enum PeopleSearchCorpus {
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
+    searching_ = NO;
     self.searchResults = objects;
     [self.tableView reloadData];
-    searching_ = NO;
     return;
   }
 
@@ -325,7 +326,10 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (searching_ || searchResults_)
+  if (searching_)
+    return 1;
+
+  if (searchResults_)
     return searchResults_.count;
   
   if (section == 0)
@@ -338,6 +342,9 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (searching_)
+    return [STLoadingMoreTableViewCell cell];
+  
   if (indexPath.section == 1 && indexPath.row == 0 && friendsArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
@@ -407,6 +414,9 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (searching_)
+    return;
+
   if (indexPath.section == 1 && indexPath.row == 0) {
     [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal]; 
@@ -435,7 +445,6 @@ typedef enum PeopleSearchCorpus {
 #pragma mark - UITextFieldDelegate methods.
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  NSLog(@"Begin editing...");
   [super textFieldDidBeginEditing:textField];
   if (self.searchField.text.length > 0)
     return;
@@ -506,6 +515,7 @@ typedef enum PeopleSearchCorpus {
   self.searchField.text = nil;
   self.searchResults = nil;
   [self.tableView reloadData];
+  self.tableView.contentOffset = CGPointZero;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
