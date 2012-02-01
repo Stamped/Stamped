@@ -258,8 +258,7 @@ static const CGFloat kReloadHeight = 60.0;
     reloadLabel_.text = shouldReload_ ? kReleaseText : kPullDownText;
   [UIView animateWithDuration:0.15
                         delay:0
-                      options:UIViewAnimationOptionBeginFromCurrentState | 
-   UIViewAnimationOptionAllowUserInteraction
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                    animations:^{
                      CGAffineTransform transform = shouldReload_ ?
                          CGAffineTransformMakeRotation(M_PI) : CGAffineTransformIdentity;
@@ -300,13 +299,17 @@ static const CGFloat kReloadHeight = 60.0;
   if ((STSearchField*)textField != searchField_)
     return;
 
-  CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
-  [UIView animateWithDuration:0.2 animations:^{
-    cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
-    CGRect frame = searchField_.frame;
-    frame.size.width += offset;
-    searchField_.frame = frame;
-  }];
+  if (!searchField_.text.length) {
+    CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
+    cancelButton_.alpha = 1;
+    [UIView animateWithDuration:0.2 animations:^{
+      cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
+      CGRect frame = searchField_.frame;
+      frame.size.width += offset;
+      searchField_.frame = frame;
+    }];
+    disableReload_ = YES;
+  }
   [self setOverlayHidden:NO];
 }
 
@@ -314,13 +317,17 @@ static const CGFloat kReloadHeight = 60.0;
   if ((STSearchField*)textField != searchField_)
     return;
 
-  CGFloat offset = CGRectGetWidth(cancelButton_.frame) + 5;
-  [UIView animateWithDuration:0.2 animations:^{
-    cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
-    CGRect frame = searchField_.frame;
-    frame.size.width += offset;
-    searchField_.frame = frame;
-  }];
+  if (!searchField_.text.length) {
+    CGFloat offset = CGRectGetWidth(cancelButton_.frame) + 5;
+    [UIView animateWithDuration:0.2 animations:^{
+      cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
+      CGRect frame = searchField_.frame;
+      frame.size.width += offset;
+      searchField_.frame = frame;
+    } completion:^(BOOL finished) {
+      cancelButton_.alpha = 0;
+    }];
+  }
   [self setOverlayHidden:YES];
 }
 
@@ -340,16 +347,22 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
+- (CGFloat)maximumShelfYPosition {
+  if (searchField_ || stampFilterBar_)
+    return -312;
+
+  return [super maximumShelfYPosition];
+}
+
 #pragma mark - Actions.
 
 - (IBAction)cancelButtonPressed:(id)sender {
+  disableReload_ = NO;
   searchField_.text = nil;
-  [searchField_ resignFirstResponder];
-  [self textFieldShouldClear:searchField_];
-}
-
-- (BOOL)textFieldShouldClear:(UITextField*)textField {
-  return YES;
+  if ([searchField_ isFirstResponder])
+    [searchField_ resignFirstResponder];
+  else
+    [self textFieldDidEndEditing:searchField_];
 }
 
 #pragma mark - To be implemented by subclasses.

@@ -22,4 +22,6 @@
 @property (nonatomic, retain) IBOutlet UISegmentedControl* searchSegmentedControl;
 @property (nonatomic, retain) IBOutlet UIView* shelfSeparator;
 
+- (IBAction)searchSegmentedControlValueChanged:(id)sender;
+
 @end
