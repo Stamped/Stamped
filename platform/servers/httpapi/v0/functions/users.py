@@ -41,9 +41,9 @@ def lookup(request):
 def search(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserSearch(), request)
-
-    users       = stampedAPI.searchUsers(schema.q, schema.limit, authUserId)
-
+    
+    users       = stampedAPI.searchUsers(authUserId, schema.q, schema.limit, schema.relationship)
+    
     output = []
     for user in users:
         if user.user_id != authUserId:

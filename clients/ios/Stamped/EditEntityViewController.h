@@ -8,18 +8,20 @@
 
 #import <UIKit/UIKit.h>
 
+#import "STViewController.h"
 #import "STCategoryDropdownTableView.h"
+#import "STSelectCountryViewController.h"
 
 @class DetailedEntity;
-@class STNavigationBar;
 
-@interface EditEntityViewController : UIViewController <UITableViewDelegate, UITextFieldDelegate> {
+@interface EditEntityViewController : STViewController <UITableViewDelegate,
+                                                        UITextFieldDelegate,
+                                                        STSelectCountryViewControllerDelegate> {
  @private
   STEditCategoryRow selectedCategory_;
   UITextField* selectedTextField_;
 }
 
-@property (nonatomic, retain) IBOutlet STNavigationBar* navBar;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UITableView* categoryDropdownTableView;
 @property (nonatomic, retain) IBOutlet UIImageView* menuArrow;
@@ -38,15 +40,13 @@
 @property (nonatomic, retain) IBOutlet UITextField* cityTextField;
 @property (nonatomic, retain) IBOutlet UITextField* stateTextField;
 @property (nonatomic, retain) IBOutlet UITextField* zipTextField;
+@property (nonatomic, retain) IBOutlet UIButton* selectCountryButton;
 
 @property (nonatomic, retain) UISegmentedControl* segmentedControl;
 
-- (id)initWithDetailedEntity:(DetailedEntity*)detailedEntity;
-
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
 
-- (IBAction)cancelButtonPressed:(id)sender;
-- (IBAction)doneButtonPressed:(id)sender;
+- (IBAction)selectCountryButtonPressed:(id)sender;
 - (IBAction)addDescriptionButtonPressed:(id)sender;
 - (IBAction)categoryDropdownPressed:(id)sender;
 - (IBAction)addLocationButtonPressed:(id)sender;

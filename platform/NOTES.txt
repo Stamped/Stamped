@@ -1,8 +1,63 @@
 
+scaling considerations
+    * modular; every component should support async w/ timeouts, fallbacks & monitoring / alerts if dependency fails
+
+API v1:
+    * entrypoints:
+        * collections/inbox
+        * collections/user
+        * favorites/show
+        * todo's
+    * improvements:
+        * sort:
+            * relevance
+            * created
+            * modified
+            * popularity
+            * proximity
+            * alphabetical
+        * filter:
+            * category
+            * subcategory
+
+
+class HTTPGenericSlice(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int)
+        self.offset             = SchemaElement(int)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        self.sort               = SchemaElement(basestring)
+        self.reverse            = SchemaElement(bool)
+        
+        # filtering
+        self.query              = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+        self.deleted            = SchemaElement(bool)
+        self.viewport           = SchemaElement(basestring)
+        
+        # misc options
+        self.quality            = SchemaElement(int)
+        self.comments           = SchemaElement(bool)
+
+class HTTPUserCollectionSlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
+
+API:
+    * rename Error => StampedError
+    * standardize handleHTTPRequest to take in a parameter for whether or not auth is required and input schema
+
 platform:
-    * add wrapper to APITasks.py to invoke tasks with specific args
     * redirect useless statsd.node.log to /dev/null
-    * remove factual dumps from repository
     * handle async errors gracefully - email + retryable
     * monitor process should check mongo's replica set status
     * add integrity checking daemon as weekly cron job
@@ -10,7 +65,6 @@ platform:
     * cleanup and optimizations of _convertSearchId
     * alerts => async tasks
     * stable ids for merged entities
-    * refactor repo layout and, in particular, web stuff
 
 web:
     * web deployment script which compiles / optimizes all javascript, ensures assets are up-to-date, etc.
@@ -26,9 +80,6 @@ Bieber:
     * limit activity notifications to last N or so
     * collapse adjacent activity items into each other
 
-* sell alienware
-* sell buddha
-
 * app companies being returned as 'artist'
 * debug distributing reads to secondaries
 
@@ -38,12 +89,9 @@ Bieber:
 
 * continuous integration
     * how to see current revision in git?
-
 * investigate autocomplete and add cron job
-
 * cap tempentities
 * remove iTunes affiliate search dependency
-
 * remove linked entity corruption from activity collection
 
 OLD:
@@ -82,6 +130,7 @@ OLD:
         * local / synchronous fallback if async message broker is unavailable
     * cache amazon product API queries and look into utilizing multiple API keys (possibly one per API server)
     * add cache expires control to memcached_function
+    * refactor repo layout
     * ensure async tasks are logged and accessible from logger
     * remove ghost mongod process
     * cron job only running once
@@ -89,6 +138,7 @@ OLD:
     * look into integrating foursquare APIs
     * refactor repository layout
     * automated way to determine whether or not we're on PROD stack
+    * add wrapper to APITasks.py to invoke tasks with specific args
     
     34.026401,-118.38947899
 

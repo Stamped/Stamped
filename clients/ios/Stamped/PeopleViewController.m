@@ -20,12 +20,20 @@
 #import "UIColor+Stamped.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
+#import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
 #import "Util.h"
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kStampedSearchURI = @"/users/search.json";
+
+typedef enum PeopleSearchCorpus {
+  PeopleSearchCorpusFollowing,
+  PeopleSearchCorpusFollowers,
+  PeopleSearchCorpusEveryone
+} PeopleSearchCorpus;
 
 @interface PeopleViewController ()
 - (void)loadUserDataFromNetwork;
@@ -35,15 +43,23 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)updateShelf;
 
+@property (nonatomic, assign) PeopleSearchCorpus searchCorpus;
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
+@property (nonatomic, copy) NSArray* searchResults;
+@property (nonatomic, assign) BOOL searching;
 @end
 
 @implementation PeopleViewController
 
+@synthesize searchCorpus = searchCorpus_;
 @synthesize userIDsToBeFetched = userIDsToBeFetched_;
 @synthesize friendsArray = friendsArray_;
+@synthesize searchResults = searchResults_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
+@synthesize searchSegmentedControl = searchSegmentedControl_;
+@synthesize shelfSeparator = shelfSeparator_;
+@synthesize searching = searching_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -51,6 +67,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   self.userIDsToBeFetched = nil;
   self.friendsArray = nil;
   self.findFriendsNavigationController = nil;
+  self.searchResults = nil;
+  self.searchSegmentedControl = nil;
+  self.shelfSeparator = nil;
   [super dealloc];
 }
 
@@ -76,7 +95,18 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     [self loadFriendsFromNetwork];
     [self loadFriendsFromDataStore];
   }
-
+  if ([searchSegmentedControl_ conformsToProtocol:@protocol(UIAppearance)]) {
+    NSDictionary* titleTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor stampedGrayColor], (id)UITextAttributeTextColor,
+                                         (id)[UIColor whiteColor], (id)UITextAttributeTextShadowColor, 
+                                         (id)[NSValue valueWithUIOffset:UIOffsetMake(0, 1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [searchSegmentedControl_ setTitleTextAttributes:titleTextAttributes forState:UIControlStateNormal];
+    NSDictionary* selectedTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:(id)[UIColor whiteColor], (id)UITextAttributeTextColor,
+                                            (id)[UIColor colorWithWhite:0.5 alpha:1.0], (id)UITextAttributeTextShadowColor,
+                                            (id)[NSValue valueWithUIOffset:UIOffsetMake(0, -1)], (id)UITextAttributeTextShadowOffset,  nil];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateSelected];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateHighlighted];
+    [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
+  }
   self.hasHeaders = YES;
 }
 
@@ -85,16 +115,18 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.friendsArray = nil;
+  self.searchResults = nil;
   self.findFriendsNavigationController = nil;
+  self.searchSegmentedControl = nil;
+  self.shelfSeparator = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   
   [self loadFriendsFromDataStore];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  if (delegate.navigationController.navigationBarHidden)
-    [delegate.navigationController setNavigationBarHidden:NO animated:YES];
+  if (self.navigationController.navigationBarHidden)
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -222,6 +254,13 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
+    self.searchResults = objects;
+    [self.tableView reloadData];
+    searching_ = NO;
+    return;
+  }
+
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser) {
     [self updateShelf];
@@ -259,7 +298,10 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     [self loadFriendsFromNetwork];
     return;
   }
-  
+  searching_ = NO;
+  self.searchResults = nil;
+  [self.tableView reloadData];
+
   [self setIsLoading:NO];
 }
 
@@ -273,10 +315,16 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
+  if (searching_ || searchResults_)
+    return 1;
+
   return 2;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (searching_ || searchResults_)
+    return searchResults_.count;
+  
   if (section == 0)
     return 1;
 
@@ -323,7 +371,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   
   User* user = nil;
-  if (indexPath.section == 0)
+  if (searchResults_)
+    user = [searchResults_ objectAtIndex:indexPath.row];
+  else if (indexPath.section == 0)
     user = [AccountManager sharedManager].currentUser;
   else
     user = [self.friendsArray objectAtIndex:indexPath.row - 1];
@@ -336,6 +386,9 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 #pragma mark - Table view delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  if (searching_ || searchResults_)
+    return 0;
+
   return 24;
 }
 
@@ -351,11 +404,8 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-
   if (indexPath.section == 1 && indexPath.row == 0) {
-    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-    [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+    [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal]; 
     return;
   }
@@ -363,7 +413,10 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
                                                                                          bundle:nil];
   User* currentUser = [AccountManager sharedManager].currentUser;
   User* user = nil;
-  if (indexPath.section == 0) {
+  if (searchResults_) {
+    user = [searchResults_ objectAtIndex:indexPath.row];
+    profileViewController.stampsAreTemporary = [currentUser.following containsObject:user];
+  } else if (indexPath.section == 0) {
     user = currentUser;
     profileViewController.stampsAreTemporary = NO;
   } else {
@@ -372,11 +425,88 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
   }
   profileViewController.user = user;
   
-  [delegate.navigationController pushViewController:profileViewController animated:YES];
+  [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
 }
 
+#pragma mark - UITextFieldDelegate methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  [super textFieldDidBeginEditing:textField];
+  CGFloat offset = -44;
+  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     for (UIView* view in views) {
+                       view.frame = CGRectOffset(view.frame, 0, offset);
+                     }
+                     searchSegmentedControl_.alpha = 1;
+                     shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, 4);
+                     self.tableView.contentOffset = CGPointMake(0, offset);
+                   }
+                   completion:nil];  
+  [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  [super textFieldDidEndEditing:textField];
+  CGFloat offset = 44;
+  NSArray* views = [NSArray arrayWithObjects:self.searchField, self.cancelButton, self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     for (UIView* view in views) {
+                       view.frame = CGRectOffset(view.frame, 0, offset);
+                     }
+                     searchSegmentedControl_.alpha = 0;
+                     shelfSeparator_.frame = CGRectOffset(shelfSeparator_.frame, 0, -4);
+                     self.tableView.contentOffset = CGPointZero;
+                   }
+                   completion:nil];
+  [self.navigationController setNavigationBarHidden:NO animated:YES];
+  if (textField.text.length == 0)
+    [self textFieldShouldClear:textField];
+}
+
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  if ([textField isFirstResponder])
+    return YES;
+
+  self.searchResults = nil;
+  [self.tableView reloadData];
+  return YES;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedSearchURI
+                                                        delegate:self];
+  loader.method = RKRequestMethodPOST;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:self.searchField.text forKey:@"q"];
+  if (searchSegmentedControl_.selectedSegmentIndex == PeopleSearchCorpusFollowers)
+    [params setValue:@"followers" forKey:@"relationship"];
+  else if (searchSegmentedControl_.selectedSegmentIndex == PeopleSearchCorpusFollowing)
+    [params setValue:@"following" forKey:@"relationship"];
+
+  loader.params = params;
+  loader.objectMapping = mapping;
+  [loader send];
+  searching_ = YES;
+  [self.searchField resignFirstResponder];
+  [self.tableView reloadData];
+  return YES;
+}
+
 #pragma mark - Custom methods.
+
+- (UINavigationController*)navigationController {
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  return delegate.navigationController;
+}
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
   [self.tableView reloadData];

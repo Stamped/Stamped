@@ -7,12 +7,27 @@
 //
 
 #import <MapKit/MapKit.h>
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+typedef enum {
+  STMapViewControllerSourceInbox,
+  STMapViewControllerSourceTodo,
+  STMapViewControllerSourceUser
+} STMapViewControllerSource;
+
 @class STSearchField;
+@class User;
 
-@interface STMapViewController : UIViewController <MKMapViewDelegate>
+@interface STMapViewController : UIViewController <MKMapViewDelegate,
+                                                   UITextFieldDelegate,
+                                                   NSFetchedResultsControllerDelegate>
 
+@property (nonatomic, assign) STMapViewControllerSource source;
+@property (nonatomic, retain) User* user;
+@property (nonatomic, retain) IBOutlet UIView* overlayView;
+@property (nonatomic, retain) IBOutlet UIButton* locationButton;
+@property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
 

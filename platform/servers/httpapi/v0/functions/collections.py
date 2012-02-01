@@ -8,6 +8,16 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+def transform_stamps(stamps):
+    result = []
+    for stamp in stamps:
+        if 'deleted' in stamp:
+            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
+        else:
+            result.append(HTTPStamp().importSchema(stamp).exportSparse())
+    
+    return result
+
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def inbox(request):
@@ -17,15 +27,7 @@ def inbox(request):
     data        = schema.exportSparse()
     stamps      = stampedAPI.getInboxStamps(authUserId, **data)
     
-    result = []
-    for stamp in stamps:
-        if 'deleted' in stamp:
-            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
-        else:
-            result.append(HTTPStamp().importSchema(stamp).exportSparse())
-    
-    return transformOutput(result)
-
+    return transformOutput(transform_stamps(stamps))
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
@@ -40,15 +42,7 @@ def user(request):
                   }
     stamps      = stampedAPI.getUserStamps(userRequest, authUserId, **data)
     
-    result = []
-    for stamp in stamps:
-        if 'deleted' in stamp:
-            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
-        else:
-            result.append(HTTPStamp().importSchema(stamp).exportSparse())
-    
-    return transformOutput(result)
-
+    return transformOutput(transform_stamps(stamps))
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
@@ -63,12 +57,5 @@ def credit(request):
                   }
     stamps      = stampedAPI.getCreditedStamps(userRequest, authUserId, **data)
     
-    result = []
-    for stamp in stamps:
-        if 'deleted' in stamp:
-            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
-        else:
-            result.append(HTTPStamp().importSchema(stamp).exportSparse())
-    
-    return transformOutput(result)
+    return transformOutput(transform_stamps(stamps))
 

@@ -481,13 +481,16 @@ static const CGFloat kTodoBarHeight = 44.0;
   if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
     [self.spinner stopAnimating];
     self.addFavoriteButton.hidden = NO;
-    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+    if (objectLoader.response.statusCode == 409)
+      [[Alerts alertWithTemplate:AlertTemplateDuplicateTodo] show];
+    else
+      [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   }
   
   [self.loadingView stopAnimating];
 }
 
-- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
+- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader*)objectLoader {
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
@@ -495,7 +498,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   if ([objectLoader.resourcePath rangeOfString:kCreateFavoritePath].location != NSNotFound) {
     [self.spinner stopAnimating];
     self.addFavoriteButton.hidden = NO;
-    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+    if (objectLoader.response.statusCode == 409)
+      [[Alerts alertWithTemplate:AlertTemplateDuplicateTodo] show];
+    else
+      [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   }
 
   [self.loadingView stopAnimating];

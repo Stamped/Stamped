@@ -25,7 +25,6 @@
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
-static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
 
 @interface InboxViewController ()
@@ -35,15 +34,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)userLoggedOut:(NSNotification*)notification;
-- (void)addAnnotationForEntity:(Entity*)entity;
-- (void)mapUserTapped:(id)sender;
-- (void)mapDisclosureTapped:(id)sender;
 - (void)appDidBecomeActive:(NSNotification*)notification;
 - (void)appDidEnterBackground:(NSNotification*)notification;
-
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
-@property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, assign) BOOL needToRefetch;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
@@ -54,9 +48,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 @implementation InboxViewController
 
-@synthesize mapView = mapView_;
 @synthesize needToRefetch = needToRefetch_;
-@synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize fetchedResultsController = fetchedResultsController_;
@@ -69,7 +61,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.selectedIndexPath = nil;
-  mapView_ = nil;
   [super dealloc];
 }
 
@@ -111,12 +102,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                            selector:@selector(appDidEnterBackground:)
                                                name:UIApplicationDidEnterBackgroundNotification
                                              object:nil];
-  
-  mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
-  mapView_.alpha = 0.0;
-  mapView_.delegate = self;
-  [self.view addSubview:mapView_];
-  [mapView_ release];
 
   self.stampFilterBar.filterType = selectedFilterType_;
   self.stampFilterBar.searchQuery = searchQuery_;
@@ -132,7 +117,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
-  mapView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -158,16 +142,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [self.tableView reloadData];
   }
 
-  if (mapView_.alpha > 0)
-    mapView_.showsUserLocation = YES;
-
   [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
-  mapView_.showsUserLocation = NO;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -487,61 +467,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
 }
 
-#pragma mark - Map stuff.
-
-- (void)addAnnotationForEntity:(Entity*)entity {
-  NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
-  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
-  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-  STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
-                                                                    longitude:longitude];
-
-  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-  NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
-
-  annotation.stamp = [stampsArray lastObject];
-  
-  [mapView_ addAnnotation:annotation];
-  [annotation release];
-}
-
-- (void)mapUserTapped:(id)sender {
-  UserImageView* userImage = sender;
-  UIView* view = [userImage superview];
-  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
-    view = [view superview];
-  
-  if (!view)
-    return;
-  
-  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = annotation.stamp.user;
-
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController pushViewController:profileViewController animated:YES];
-  [profileViewController release];
-}
-
-- (void)mapDisclosureTapped:(id)sender {
-  UIButton* disclosureButton = sender;
-  UIView* view = [disclosureButton superview];
-  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
-    view = [view superview];
-
-  if (!view)
-    return;
-  
-  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:annotation.stamp];
-  
-  // Pass the selected object to the new view controller.
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
-}
-
 - (void)appDidBecomeActive:(NSNotification*)notification {
   [self.tableView reloadData];
   [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
@@ -550,44 +475,5 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)appDidEnterBackground:(NSNotification*)notification {
 
 }
-
-#pragma mark - MKMapViewDelegate Methods
-
-- (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
-  if (!userPannedMap_) {
-    CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
-    MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
-    MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
-    [mapView setRegion:region animated:YES];
-  }
-}
-
-- (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-  userPannedMap_ = YES;
-}
-
-- (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-  if (![annotation isKindOfClass:[STPlaceAnnotation class]])
-    return nil;
-  
-  MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
-  UIButton* disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-  [disclosureButton addTarget:self
-                       action:@selector(mapDisclosureTapped:)
-             forControlEvents:UIControlEventTouchUpInside];
-  pinView.rightCalloutAccessoryView = disclosureButton;
-  UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
-  userImageView.enabled = YES;
-  [userImageView addTarget:self
-                    action:@selector(mapUserTapped:)
-          forControlEvents:UIControlEventTouchUpInside];
-  userImageView.imageURL = [[(STPlaceAnnotation*)annotation stamp].user profileImageURLForSize:ProfileImageSize37];
-  pinView.leftCalloutAccessoryView = userImageView;
-  [userImageView release];
-  pinView.pinColor = MKPinAnnotationColorRed;
-  pinView.canShowCallout = YES;
-  return pinView;
-}
-
 
 @end

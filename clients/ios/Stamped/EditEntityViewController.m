@@ -25,11 +25,12 @@ const CGFloat kKeyboardHeight = 217.0;
 - (void)hideCategoryMenu;
 - (void)segmentedControlChanged:(id)sender;
 - (void)dismissSelf;
+- (void)cancelButtonPressed:(id)sender;
+- (void)doneButtonPressed:(id)sender;
 @end
 
 @implementation EditEntityViewController
 
-@synthesize navBar = navBar_;
 @synthesize scrollView = scrollView_;
 @synthesize categoryDropdownTableView = categoryDropdownTableView_;
 @synthesize categoryDropdownButton = categoryDropdownButton_;
@@ -50,17 +51,17 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize menuArrow = menuArrow_;
 @synthesize descriptionTextField = descriptionTextField_;
 @synthesize segmentedControl = segmentedControl_;
+@synthesize selectCountryButton = selectCountryButton_;
 
-- (id)initWithDetailedEntity:(DetailedEntity*)detailedEntity {
+- (id)init {
   self = [super initWithNibName:@"EditEntityViewController" bundle:nil];
   if (self) {
-    self.detailedEntity = detailedEntity;
+
   }
   return self;
 }
 
 - (void)dealloc {
-  self.navBar = nil;
   self.scrollView = nil;
   self.categoryDropdownTableView = nil;
   self.categoryDropdownButton = nil;
@@ -79,6 +80,7 @@ const CGFloat kKeyboardHeight = 217.0;
   self.zipTextField = nil;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
+  self.selectCountryButton = nil;
   [super dealloc];
 }
 
@@ -91,7 +93,27 @@ const CGFloat kKeyboardHeight = 217.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
 
+  UIBarButtonItem* cancelButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel"
+                                                                   style:UIBarButtonItemStyleBordered
+                                                                  target:self
+                                                                  action:@selector(cancelButtonPressed:)];
+  [self.navigationItem setLeftBarButtonItem:cancelButton];
+  [cancelButton release];
+
+  UIBarButtonItem* doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                 style:UIBarButtonItemStyleDone
+                                                                target:self
+                                                                action:@selector(doneButtonPressed:)];
+  [self.navigationItem setRightBarButtonItem:doneButton];
+  [doneButton release];
+  
   entityNameTextField_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   categoryDropdownTableView_.alpha = 0.0;
   menuArrow_.alpha = 0.0;
@@ -122,33 +144,8 @@ const CGFloat kKeyboardHeight = 217.0;
                         action:@selector(segmentedControlChanged:)
               forControlEvents:UIControlEventValueChanged];
   scrollView_.contentSize = self.view.bounds.size;
-}
-
-- (void)viewDidUnload {
-  [super viewDidUnload];
-  self.navBar = nil;
-  self.scrollView = nil;
-  self.categoryDropdownTableView = nil;
-  self.categoryDropdownButton = nil;
-  self.categoryDropdownImageView = nil;
-  self.entityNameTextField = nil;
-  self.primaryTextField = nil;
-  self.secondaryTextField = nil;
-  self.tertiaryTextField = nil;
-  self.addLocationButton = nil;
-  self.addDescriptionButton = nil;
-  self.addLocationView = nil;
-  self.streetTextField = nil;
-  self.secondStreetTextField = nil;
-  self.cityTextField = nil;
-  self.stateTextField = nil;
-  self.zipTextField = nil;
-  self.menuArrow = nil;
-  self.descriptionTextField = nil;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-  navBar_.hideLogo = YES;
+  
+  ((STNavigationBar*)self.navigationController.navigationBar).hideLogo = YES;
   entityNameTextField_.text = detailedEntity_.title;
   descriptionTextField_.text = detailedEntity_.desc;
   streetTextField_.text = detailedEntity_.street;
@@ -204,11 +201,33 @@ const CGFloat kKeyboardHeight = 217.0;
   [categoryDropdownTableView_ selectRowAtIndexPath:path
                                           animated:NO
                                     scrollPosition:UITableViewScrollPositionNone];
-  [super viewWillAppear:animated];
 }
 
-- (void)viewWillDisappear:(BOOL)animated  {
-  navBar_.hideLogo = NO; 
+- (void)viewDidUnload {
+  [super viewDidUnload];
+  self.scrollView = nil;
+  self.categoryDropdownTableView = nil;
+  self.categoryDropdownButton = nil;
+  self.categoryDropdownImageView = nil;
+  self.entityNameTextField = nil;
+  self.primaryTextField = nil;
+  self.secondaryTextField = nil;
+  self.tertiaryTextField = nil;
+  self.addLocationButton = nil;
+  self.addDescriptionButton = nil;
+  self.addLocationView = nil;
+  self.streetTextField = nil;
+  self.secondStreetTextField = nil;
+  self.cityTextField = nil;
+  self.stateTextField = nil;
+  self.zipTextField = nil;
+  self.menuArrow = nil;
+  self.descriptionTextField = nil;
+  self.selectCountryButton = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -490,7 +509,14 @@ const CGFloat kKeyboardHeight = 217.0;
 
 #pragma mark - Action methods.
 
-- (IBAction)doneButtonPressed:(id)sender {
+- (IBAction)selectCountryButtonPressed:(id)sender {
+  STSelectCountryViewController* vc = [[STSelectCountryViewController alloc] initWithCountryCode:detailedEntity_.countryCode];
+  vc.delegate = self;
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
+}
+
+- (void)doneButtonPressed:(id)sender {
   detailedEntity_.title = entityNameTextField_.text;
   detailedEntity_.desc = descriptionTextField_.text;
   detailedEntity_.street = streetTextField_.text;
@@ -510,6 +536,9 @@ const CGFloat kKeyboardHeight = 217.0;
   } else {
     detailedEntity_.address = street.length > 0 ? street : cityStateZip;
   }
+  
+  if (detailedEntity_.address)
+    detailedEntity_.address = [detailedEntity_.address stringByAppendingFormat:@", %@", detailedEntity_.countryCode];
   
   switch (selectedCategory_) {
     case STEditCategoryRowFilm:
@@ -577,7 +606,7 @@ const CGFloat kKeyboardHeight = 217.0;
   [self dismissSelf];
 }
 
-- (IBAction)cancelButtonPressed:(id)sender {
+- (void)cancelButtonPressed:(id)sender {
   [self dismissSelf];
 }
 
@@ -629,6 +658,15 @@ const CGFloat kKeyboardHeight = 217.0;
     categoryDropdownTableView_.alpha = button.selected ? 1.0 : 0.0;
     menuArrow_.alpha = button.selected ? 1.0 : 0.0;
   }];
+}
+
+#pragma mark - STSelectCountryViewControllerDelegate methods.
+
+- (void)viewController:(STSelectCountryViewController*)controller
+      didSelectCountry:(NSString*)country
+                  code:(NSString*)countryCode {
+  self.detailedEntity.countryCode = countryCode;
+  [selectCountryButton_ setTitle:country forState:UIControlStateNormal];
 }
 
 @end

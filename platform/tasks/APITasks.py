@@ -9,6 +9,7 @@ import Globals
 import utils
 import logs
 
+from optparse    import OptionParser
 from celery.task import task
 
 __stamped_api__ = None
@@ -114,4 +115,22 @@ def inviteFriend(*args, **kwargs):
 @task(ignore_result=True)
 def addComment(*args, **kwargs):
     invoke(addComment.request, *args, **kwargs)
+
+def parseCommandLine():
+    usage   = "Usage: %prog [options]"
+    version = "%prog " + __version__
+    parser  = OptionParser(usage=usage, version=version)
+    
+    return parser.parse_args()
+
+def main():
+    options, args = parseCommandLine()
+    
+    if len(args) >= 1:
+        utils.log("running %s%s" % (args[0], tuple(args[1:])))
+        
+        eval("%s(*args[1:])" % (args[0], ))
+
+if __name__ == '__main__':
+    main()
 

@@ -14,6 +14,7 @@
 #import "SearchEntitiesViewController.h"
 #import "Notifications.h"
 #import "PeopleViewController.h"
+#import "StampListViewController.h"
 #import "STMapToggleButton.h"
 #import "STMapViewController.h"
 #import "STNavigationBar.h"
@@ -42,6 +43,7 @@
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
 @property (nonatomic, retain) STMapViewController* mapViewController;
+@property (nonatomic, assign) BOOL mapViewShown;
 @end
 
 @implementation RootTabBarViewController
@@ -59,6 +61,7 @@
 @synthesize tooltipImageView = tooltipImageView_;
 @synthesize tabBarItems = tabBarItems_;
 @synthesize mapViewController = mapViewController_;
+@synthesize mapViewShown = mapViewShown_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -137,8 +140,8 @@
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
   
-  [self setTabBarIcons];
   self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+  [self setTabBarIcons];
   [self updateNavBar];
 }
 
@@ -241,17 +244,24 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
+  mapViewShown_ = NO;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  [self.selectedViewController viewWillAppear:animated];
+  if (mapViewShown_)
+    [self.mapViewController viewWillAppear:animated];
+  else
+    [self.selectedViewController viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self.selectedViewController viewDidAppear:animated];
-
+  if (mapViewShown_)
+    [self.mapViewController viewDidAppear:animated];
+  else
+    [self.selectedViewController viewDidAppear:animated];
+  
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstStamp"]) {
     UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
     overlayContainer.backgroundColor = [UIColor clearColor];
@@ -323,12 +333,18 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [self.selectedViewController viewWillDisappear:animated];
+  if (mapViewShown_)
+    [self.mapViewController viewWillDisappear:animated];
+  else
+    [self.selectedViewController viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  [self.selectedViewController viewDidDisappear:animated];
+  if (mapViewShown_)
+    [self.mapViewController viewDidDisappear:animated];
+  else
+    [self.selectedViewController viewDidDisappear:animated];
 
   if (tooltipImageView_) {
     tooltipImageView_.alpha = 0.0;
@@ -372,23 +388,41 @@
 }
 
 - (void)showMapView {
+  [mapViewController_ viewWillAppear:YES];
+  [selectedViewController_ viewWillDisappear:YES];
+
+  if ([selectedViewController_ isMemberOfClass:[InboxViewController class]])
+    mapViewController_.source = STMapViewControllerSourceInbox;
+  else if ([selectedViewController_ isMemberOfClass:[TodoViewController class]])
+    mapViewController_.source = STMapViewControllerSourceTodo;
+
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
                     duration:1
                      options:UIViewAnimationOptionTransitionFlipFromRight
-                  completion:nil];
+                  completion:^(BOOL finished) {
+                    [selectedViewController_ viewDidDisappear:YES];
+                    [mapViewController_ viewDidAppear:YES];
+                    mapViewShown_ = YES;
+                  }];
 }
 
 - (void)showListView {
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
+  [selectedViewController_ viewWillAppear:YES];
+  [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
                       toView:selectedViewController_.view
                     duration:1
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
-                  completion:nil];  
+                  completion:^(BOOL finished) {
+                    [mapViewController_ viewDidDisappear:YES];
+                    [selectedViewController_ viewDidAppear:YES];
+                    mapViewShown_ = NO;
+                  }];
 }
 
 - (void)showSettingsPane {

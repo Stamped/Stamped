@@ -21,6 +21,7 @@
 @dynamic city;
 @dynamic coordinates;
 @dynamic cuisine;
+@dynamic countryCode;
 @dynamic desc;
 @dynamic director;
 @dynamic entityID;

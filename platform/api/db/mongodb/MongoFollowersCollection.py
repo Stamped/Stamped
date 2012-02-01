@@ -37,3 +37,4 @@ class MongoFollowersCollection(AMongoCollection):
 
     def removeAllFollowers(self, userId):
         return self._removeAllRelationships(userId)
+

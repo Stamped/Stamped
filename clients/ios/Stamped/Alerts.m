@@ -60,6 +60,12 @@
                                         delegate:aDelegate
                                cancelButtonTitle:@"Reset password"
                                otherButtonTitles:@"      OK      ", nil] autorelease];
+    case AlertTemplateDuplicateTodo:
+      return [[[UIAlertView alloc] initWithTitle:@"To-do Already Exists"
+                                         message:@"You've already added this to your To-do list."
+                                        delegate:aDelegate
+                               cancelButtonTitle:@"OK"
+                               otherButtonTitles:nil] autorelease];
     default:
       return nil;
   }
