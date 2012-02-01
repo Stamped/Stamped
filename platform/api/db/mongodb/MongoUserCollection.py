@@ -5,16 +5,18 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, re, bson
+import Globals, logs, re, bson
 
-from datetime           import datetime
-from math               import log10
-from utils              import lazyProperty
-from errors             import *
+from datetime                   import datetime
+from math                       import log10
+from utils                      import lazyProperty
+from errors                     import *
 
-from Schemas            import *
-from AMongoCollection   import AMongoCollection
-from api.AUserDB        import AUserDB
+from Schemas                    import *
+from AMongoCollection           import AMongoCollection
+from MongoFollowersCollection   import MongoFollowersCollection
+from MongoFriendsCollection     import MongoFriendsCollection
+from api.AUserDB                import AUserDB
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
@@ -87,21 +89,42 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     @lazyProperty
     def _valid_re(self):
         return re.compile("[^\s\w-]+", re.IGNORECASE)
-
-    def searchUsers(self, query, limit=0):
+    
+    @lazyProperty
+    def followers_collection(self):
+        return MongoFollowersCollection()
+    
+    @lazyProperty
+    def friends_collection(self):
+        return MongoFriendsCollection()
+    
+    def searchUsers(self, authUserId, query, limit=0, relationship=None):
         query = query.lower()
         query = self._valid_re.sub('', query)
 
         if len(query) == 0:
             return []
         
-        users = []
+        users  = []
+        domain = None
+        
+        if relationship is not None:
+            if relationship == 'followers':
+                domain = self.followers_collection.getFollowers(authUserId)
+            elif relationship == 'following':
+                domain = self.friends_collection.getFriends(authUserId)
+            else:
+                raise InputError("invalid relationship")
+            
+            domain = set(domain)
         
         try:
-            users.append(self.getUserByScreenName(query))
+            user = self.getUserByScreenName(query)
+            if user is not None and (domain is None or user.user_id in domain):
+                users.append(user)
         except:
             pass
-
+        
         m = bson.code.Code("""function () {
             var score = 0.0;
             score = (20.0 - this.screen_name.length) / 40.0;
@@ -142,12 +165,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             obj.data = out
             return obj;
         }""")
-
+        
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
-
-        result = self._collection.inline_map_reduce(m, r, query=user_query, scope={'queryString':query}, limit=1000)
-
+        
+        if domain is not None:
+            user_query["_id"] = { "$in" : list(domain) }
+        
+        result = self._collection.inline_map_reduce(m, r, query=user_query, 
+                                                    scope={'queryString':query}, limit=1000)
+        
         try:
             # Parse out the data from the result depending on how many results exist
             # If one user found, result is in format:

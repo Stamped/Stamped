@@ -172,7 +172,7 @@ def parseRequest(schema, request, **kwargs):
             rawData = request.POST
         else:
             raise
-
+        
         # Build the dict because django sucks
         data = {}
         for k, v in rawData.iteritems():
@@ -183,7 +183,7 @@ def parseRequest(schema, request, **kwargs):
         data.pop('client_secret', None)
         
         logData = data.copy()
-
+        
         obfuscate = kwargs.pop('obfuscate', [])
         obfuscate.append('password')
         for item in obfuscate:
@@ -200,7 +200,7 @@ def parseRequest(schema, request, **kwargs):
         
         logs.debug("Parsed request data")
         return schema
-
+    
     except Exception as e:
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
