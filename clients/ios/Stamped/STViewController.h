@@ -13,4 +13,7 @@
 @property (nonatomic, retain) IBOutlet UIView* shelfView;
 @property (nonatomic, readonly) UIView* highlightView;
 
+- (CGFloat)minimumShelfYPosition;
+- (CGFloat)maximumShelfYPosition;
+
 @end

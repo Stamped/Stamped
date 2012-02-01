@@ -9,9 +9,9 @@ __license__   = "TODO"
 
 import datetime, gzip, httplib, json, logging, os, pickle, re, string, sys
 import htmlentitydefs, threading, time, traceback, urllib, urllib2
-import keys.aws, logs, math, random, boto
+import platform.keys.aws, platform.logs, math, random, boto
 
-from errors              import *
+from platform.errors              import *
 from boto.ec2.connection import EC2Connection
 from subprocess          import Popen, PIPE
 from functools           import wraps
@@ -54,16 +54,13 @@ def is_running(cmd):
     return 0 == shell("ps -ef | grep '%s' | grep -v grep")[1]
 
 def lazyProperty(undecorated):
-    name = '_' + undecorated.__name__
+    x = []
     @property
     @wraps(undecorated)
     def decorated(self):
-        try:
-            return getattr(self, name)
-        except AttributeError:
-            v = undecorated(self)
-            setattr(self, name, v)
-            return v
+        if len(x) == 0:
+            x.append( undecorated(self) )
+        return x[0]
     return decorated
 
 def log(s=""):
@@ -815,8 +812,8 @@ def getFacebook(accessToken, path, params={}):
         return result
     except urllib2.HTTPError as e:
         if e.code == 400:
-            raise StampedInputError('FACEBOOK API 400 ERROR: %s' % e)
-        raise StampedUnavailableError('FACEBOOK API ERROR: %s' % e)
+            raise InputError('FACEBOOK API 400 ERROR: %s' % e)
+        raise UnavailableError('FACEBOOK API ERROR: %s' % e)
     except:
         raise Exception
 

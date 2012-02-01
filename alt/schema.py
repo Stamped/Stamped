@@ -1,19 +1,29 @@
 #!/usr/bin/python
 """
-Base classes for structured, type/field checked data representation that parallels common built in Python types.
-
-TODO, evaluate use of single underscore attributes. -Landon
-TODO, consider changing the parent attribute to a weakref, which would only require small and transparent modifications. -Landon
+DEMO: Alternative implementation to demonstrate abc module
+DEMO: weakref for parent attribute
 """
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import copy, logs
+
+
+#
+# DEMO: Import relevant abc members
+#
+from abc import ABCMeta, abstractmethod
+
+#
+# DEMO: need weakref.ref
+#
+import weakref
+
+import copy, platform.logs
 from datetime import datetime
-from errors import *
-from utils import normalize
+from platform.errors import *
+from platform.utils import normalize
 
 
 # adding generic validation for email, username, etc. on a per-element basis
@@ -143,8 +153,11 @@ situation.
     def setIsSet(self, isSet):
         self._isSet = isSet
         # The only known use of the parent attribute -Landon
+        # DEMO : use weakref
         if self._parent != None and isSet:
-            self._parent.setIsSet(isSet)
+            parent = self._parent()
+            if parent:
+                parent.setIsSet(isSet)
     
     def _setType(self, requiredType):
         allowed = [basestring, bool, int, long, float, dict, list, datetime]
@@ -521,6 +534,8 @@ when not all fields are expected to match, but should not be used as a first
 resort.
 
 """
+    # DEMO: set metaclass
+    __metaclass__ = ABCMeta
     
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
@@ -550,7 +565,8 @@ resort.
             try:
                 self._elements[name] = value
                 self._elements[name]._name = name
-                self._elements[name]._parent = self
+                # DEMO: create weakref
+                self._elements[name]._parent = weakref.ref(self)
             except:
                 msg = "Cannot Add Element (%s)" % name
                 logs.warning(msg)
@@ -590,7 +606,7 @@ resort.
         
         def _returnOutput(item):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
-                item._parent = self
+                item._parent = weakref.ref(self)
                 return item
             return item.value
         
@@ -784,9 +800,13 @@ resort.
                 logs.warning(msg)
                 raise SchemaTypeError(msg)
         return ret
-    
+
+    # DEMO: use abstractmethod decorator
+    @abstractmethod
     def setSchema(self):
-        raise NotImplementedError
+        pass
+        # No longer necessary
+        #raise NotImplementedError
     
     def importSchema(self, schema):
         try:
