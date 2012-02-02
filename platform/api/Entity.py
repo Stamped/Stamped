@@ -154,12 +154,12 @@ def setFields(entity, detailed=False):
             entity.subtitle = 'Artist'
         elif entity.subcategory == 'album':
             if entity.artist_display_name is not None:
-                entity.subtitle = "%s (Album)" % entity.artist_display_name
+                entity.subtitle = "Album by %s" % entity.artist_display_name
             else:
                 entity.subtitle = 'Album'
         elif entity.subcategory == 'song':
             if entity.artist_display_name is not None:
-                entity.subtitle = "%s (Song)" % entity.artist_display_name
+                entity.subtitle = "Song by %s" % entity.artist_display_name
             else:
                 entity.subtitle = 'Song'
     

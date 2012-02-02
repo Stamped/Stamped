@@ -2057,7 +2057,13 @@ class StampedAPI(AStampedAPI):
         
         comments = sorted(comments, key=lambda k: k['timestamp']['created'])
         
+        tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
+        
         return comments
+    
+    @API_CALL
+    def getCommentsAsync(self, authUserId, stampId):
+        self._stampDB.addView(authUserId, stampId)
     
     
     """
