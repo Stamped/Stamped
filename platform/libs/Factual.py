@@ -39,8 +39,6 @@ urbanspoon
 yahoolocal
 yelp
 
-
-
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -53,10 +51,12 @@ import utils
 import json
 import urllib
 import sys
+from SinglePlatform import StampedSinglePlatform
 from pprint import pprint
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
-_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
+#_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
+_API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
 _limit = 50
 
 class Factual(object):
@@ -66,13 +66,16 @@ class Factual(object):
     def __init__(self,key=_API_Key,v3_key=_API_V3_Key):
         self.__key = key
         self.__v3_key = v3_key
+        self.__singleplatform = StampedSinglePlatform()
     
     def resolve(self, data,limit=_limit):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
         
         Accepts a JSON compatible object such as: {'name':'ino','locality':'New York'}
+
         returns a JSON like object which includes the usual attributes and 'similarity'
+
         which indicates the quality of the match. Resolve does not require much information
         and will operate on partial names.
         """
@@ -94,7 +97,9 @@ class Factual(object):
         Use Crosswalk service to find urls and ids that match the given entity.
         
         If namespace is provided, it limits the scope of the search to that service.
+
         It appears that there are not necessarilly crosswalk results for every factual_id.
+
         Regardless of the options, every entry in the result will contain the following fields:
         
         factual_id - the given id
@@ -136,11 +141,68 @@ class Factual(object):
         """
         return self.__factual('crossref',url=urllib.quote(url),limit=limit)
     
-    def __factual(self,service,**args):
+    def restaurant(self,factual_id):
+        """
+        Get Factual restaurant data for a given factual_id.
+        """
+        string = json.dumps({'factual_id':factual_id})
+        result = self.__factual('restaurants-us','t',filters=urllib.quote(string))
+        if result:
+            return result[0]
+        else:
+            return None
+
+    def entity(self,factual_id):
+        """
+        STUB Create a Stamped entity from a factual_id.
+        """
+        pass
+
+    def factual_from_entity(self,entity):
+        """
+        STUB Get the factual_id (if any) associated with the given entity.
+        """
+        pass
+    
+    def factual_from_singleplatform(self,singleplatform_id):
+        """
+        STUB Get the factual_id (if any) associated with the given singleplatform ID.
+        """
+        pass
+    
+    def singleplatform(self,factual_id):
+        """
+        Get singleplatform id from factual_id
+
+        Returns id or None if not known.
+        """
+        singleplatform_info = self.crosswalk_id(factual_id,namespace='singleplatform')
+        sp_id = None
+        if singleplatform_info and 'namespace_id' in singleplatform_info[0]:
+            sp_id = singleplatform_info[0]['namespace_id']
+        if sp_id:
+            return sp_id
+        else:
+            return None
+
+    def menu(self,factual_id):
+        """
+        Get menu for a factual_id
+
+        Currently only supports singleplatform and returns singleplatform menu verbatim.
+        """
+        sp_id = self.singleplatform(factual_id)
+        if sp_id:
+            m = self.__singleplatform.get_menu(sp_id)
+            return m
+        else:
+            return None
+
+    def __factual(self,service,prefix='places',**args):
         if 'KEY' not in args:
             args['KEY'] = self.__v3_key
         pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
-        url =  "http://api.v3.factual.com/places/%s?%s" % (service,'&'.join(pairs))
+        url =  "http://api.v3.factual.com/%s/%s?%s" % (prefix,service,'&'.join(pairs))
         return self.__query(url)
 
     def __query(self,url):
