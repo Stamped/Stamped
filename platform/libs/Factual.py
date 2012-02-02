@@ -160,15 +160,24 @@ class Factual(object):
 
     def factual_from_entity(self,entity):
         """
-        STUB Get the factual_id (if any) associated with the given entity.
+        Get the factual_id (if any) associated with the given entity.
         """
-        pass
+        filters = {'name':entity.title,'longitude':entity.lng,'latitude':entity.lat}
+        resolve_result = self.resolve(filters,1)
+        if resolve_result:
+            return resolve_result[0]['factual_id']
+        else:
+            return None
     
     def factual_from_singleplatform(self,singleplatform_id):
         """
-        STUB Get the factual_id (if any) associated with the given singleplatform ID.
+        Get the factual_id (if any) associated with the given singleplatform ID.
         """
-        pass
+        crosswalk_result = self.crosswalk_external('singleplatform',singleplatform_id,'singleplatform')
+        if crosswalk_result:
+            return crosswalk_result['factual_id']
+        else:
+            return None
     
     def singleplatform(self,factual_id):
         """
