@@ -170,7 +170,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                               {"name_lower": {"$regex": query}}]}
         
         if domain is not None:
-            user_query["_id"] = { "$in" : list(domain) }
+            user_query["_id"] = { "$in" : map(bson.objectid.ObjectId, list(domain)) }
         
         result = self._collection.inline_map_reduce(m, r, query=user_query, 
                                                     scope={'queryString':query}, limit=1000)

@@ -1,10 +1,4 @@
 
-
-
-fix user search!
-
-
-
 API v1:
     * entrypoints:
         * collections/inbox

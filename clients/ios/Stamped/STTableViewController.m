@@ -300,6 +300,7 @@ static const CGFloat kReloadHeight = 60.0;
     return;
 
   if (!searchField_.text.length) {
+    [self setIsLoading:NO];
     CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
     cancelButton_.alpha = 1;
     [UIView animateWithDuration:0.2 animations:^{
@@ -326,6 +327,7 @@ static const CGFloat kReloadHeight = 60.0;
       searchField_.frame = frame;
     } completion:^(BOOL finished) {
       cancelButton_.alpha = 0;
+      disableReload_ = NO;
     }];
   }
   [self setOverlayHidden:YES];

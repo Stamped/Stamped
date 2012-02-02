@@ -18,6 +18,7 @@
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
 #import "STSectionHeaderView.h"
+#import "STNoResultsTableViewCell.h"
 #import "SearchResult.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
@@ -446,12 +447,11 @@ typedef enum {
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if ((searchIntent_ == SearchIntentTodo && !loading_) ||
-      currentResultType_ == ResultTypeFast ||
-      (currentResultType_ == ResultTypeLocal && !loading_)) {
+  if ((currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_)) ||
+      (currentResultType_ == ResultTypeFull && searchIntent_ == SearchIntentTodo && !loading_ && resultsArray_.count > 0)) {
     return [resultsArray_ count];
   }
-
+    
   return [resultsArray_ count] + 1;
 }
 
@@ -467,9 +467,13 @@ typedef enum {
     cell.customTextLabel.text = result.title;
     return cell;
   }
-  
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
-    return self.addStampCell;
+
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_) {
+    if (searchIntent_ == SearchIntentStamp)
+      return self.addStampCell;
+    else if (searchIntent_ == SearchIntentTodo && resultsArray_.count == 0)
+      return [STNoResultsTableViewCell cell];
+  }
   
   if (indexPath.row == [resultsArray_ count] && currentResultType_ != ResultTypeFast && loading_)
     return self.searchingIndicatorCell;
@@ -801,8 +805,12 @@ typedef enum {
   if (currentResultType_ == ResultTypeFast || (fullOrLocal && !lastCell)) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if (!loading_ && lastCell && currentResultType_ == ResultTypeFull) {
-    result = [[[SearchResult alloc] init] autorelease];
-    result.title = self.searchField.text.capitalizedString;
+    if (searchIntent_ == SearchIntentStamp) {
+      result = [[[SearchResult alloc] init] autorelease];
+      result.title = self.searchField.text.capitalizedString;
+    } else {
+      return;
+    }
   } else if (loading_ && lastCell && fullOrLocal) {
     return;
   }
