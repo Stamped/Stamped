@@ -116,6 +116,10 @@ def inviteFriend(*args, **kwargs):
 def addComment(*args, **kwargs):
     invoke(addComment.request, *args, **kwargs)
 
+@task(ignore_result=True)
+def getComments(*args, **kwargs):
+    invoke(getComments.request, *args, **kwargs)
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
     version = "%prog " + __version__

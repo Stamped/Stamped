@@ -15,6 +15,9 @@ from datetime import datetime
 from errors import *
 from utils import normalize
 
+# used for parent reference
+import weakref
+
 
 # adding generic validation for email, username, etc. on a per-element basis
 # isSet consistency
@@ -142,7 +145,7 @@ situation.
 
     def setIsSet(self, isSet):
         self._isSet = isSet
-        # The only known use of the parent attribute -Landon
+        # We should use weakref to avoid garbage collection, but not working in Python 2.6 :(
         if self._parent != None and isSet:
             self._parent.setIsSet(isSet)
     

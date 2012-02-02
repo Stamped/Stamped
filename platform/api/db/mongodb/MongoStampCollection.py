@@ -16,6 +16,7 @@ from api.AStampDB                   import AStampDB
 from AMongoCollection               import AMongoCollection
 from MongoUserLikesCollection       import MongoUserLikesCollection
 from MongoStampLikesCollection      import MongoStampLikesCollection
+from MongoStampViewsCollection      import MongoStampViewsCollection
 from MongoUserStampsCollection      import MongoUserStampsCollection
 from MongoInboxStampsCollection     import MongoInboxStampsCollection
 from MongoDeletedStampCollection    import MongoDeletedStampCollection
@@ -55,6 +56,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     @lazyProperty
     def stamp_likes_collection(self):
         return MongoStampLikesCollection()
+    
+    @lazyProperty
+    def stamp_views_collection(self):
+        return MongoStampViewsCollection()
     
     @lazyProperty
     def user_likes_collection(self):
@@ -266,6 +271,13 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             raise
         except:
             return False
+
+    def addView(self, userId, stampId):
+        self.stamp_views_collection.addStampView(stampId, userId)
+
+    def getStampViews(self, stampId):
+        # Returns user ids that have viewed the stamp
+        return self.stamp_views_collection.getStampViews(stampId) 
     
     def removeStamps(self, stampIds):
         documentIds = []
