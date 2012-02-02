@@ -1339,6 +1339,10 @@
 		7EFA6EE014DB101E007360E8 /* add_friends_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EDD14DB101E007360E8 /* add_friends_button.png */; };
 		7EFA6EE114DB101E007360E8 /* add_friends_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EDE14DB101E007360E8 /* add_friends_button@2x.png */; };
 		7EFA6EE214DB101E007360E8 /* add_friends_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EDE14DB101E007360E8 /* add_friends_button@2x.png */; };
+		7EFA6EE514DB14F7007360E8 /* add_todo_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EE314DB14F7007360E8 /* add_todo_button.png */; };
+		7EFA6EE614DB14F7007360E8 /* add_todo_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EE314DB14F7007360E8 /* add_todo_button.png */; };
+		7EFA6EE714DB14F7007360E8 /* add_todo_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EE414DB14F7007360E8 /* add_todo_button@2x.png */; };
+		7EFA6EE814DB14F7007360E8 /* add_todo_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6EE414DB14F7007360E8 /* add_todo_button@2x.png */; };
 		7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A013F865C600589E11 /* PeopleViewController.m */; };
 		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
@@ -2305,6 +2309,8 @@
 		7EFA6ED414DB0772007360E8 /* map_flippy_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_flippy_button@2x.png"; sourceTree = "<group>"; };
 		7EFA6EDD14DB101E007360E8 /* add_friends_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = add_friends_button.png; sourceTree = "<group>"; };
 		7EFA6EDE14DB101E007360E8 /* add_friends_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button@2x.png"; sourceTree = "<group>"; };
+		7EFA6EE314DB14F7007360E8 /* add_todo_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = add_todo_button.png; sourceTree = "<group>"; };
+		7EFA6EE414DB14F7007360E8 /* add_todo_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_todo_button@2x.png"; sourceTree = "<group>"; };
 		7EFDC99F13F865C600589E11 /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
 		7EFDC9A013F865C600589E11 /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
 		7EFDC9A113F865C600589E11 /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PeopleViewController.xib; path = ../Interfaces/PeopleViewController.xib; sourceTree = "<group>"; };
@@ -2797,6 +2803,8 @@
 		7E374624146D9DD9005E9271 /* ToDo */ = {
 			isa = PBXGroup;
 			children = (
+				7EFA6EE314DB14F7007360E8 /* add_todo_button.png */,
+				7EFA6EE414DB14F7007360E8 /* add_todo_button@2x.png */,
 				7E374625146D9DE8005E9271 /* icon_addToDo_button.png */,
 				7E374626146D9DE8005E9271 /* icon_addToDo_button@2x.png */,
 			);
@@ -4723,6 +4731,8 @@
 				7EFA6EDC14DB0772007360E8 /* map_flippy_button@2x.png in Resources */,
 				7EFA6EE014DB101E007360E8 /* add_friends_button.png in Resources */,
 				7EFA6EE214DB101E007360E8 /* add_friends_button@2x.png in Resources */,
+				7EFA6EE614DB14F7007360E8 /* add_todo_button.png in Resources */,
+				7EFA6EE814DB14F7007360E8 /* add_todo_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5291,6 +5301,8 @@
 				7EFA6EDB14DB0772007360E8 /* map_flippy_button@2x.png in Resources */,
 				7EFA6EDF14DB101E007360E8 /* add_friends_button.png in Resources */,
 				7EFA6EE114DB101E007360E8 /* add_friends_button@2x.png in Resources */,
+				7EFA6EE514DB14F7007360E8 /* add_todo_button.png in Resources */,
+				7EFA6EE714DB14F7007360E8 /* add_todo_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

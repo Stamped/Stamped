@@ -61,7 +61,7 @@
 
 - (void)showListButton:(id)sender {
   UIImageView* background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_flippy_button"]];
-  background.center = self.center;
+  background.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CGRectGetWidth(background.frame), CGRectGetHeight(background.frame));
   [self.superview insertSubview:background belowSubview:self];
   [background release];
   [UIView animateWithDuration:1 animations:^{
@@ -76,7 +76,7 @@
 
 - (void)showMapButton:(id)sender {
   UIImageView* background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_flippy_button"]];
-  background.center = self.center;
+  background.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CGRectGetWidth(background.frame), CGRectGetHeight(background.frame));
   [self.superview insertSubview:background belowSubview:self];
   [background release];
   [UIView animateWithDuration:1 animations:^ {
