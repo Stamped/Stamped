@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 Interface for Factual API
 
@@ -41,7 +43,13 @@ yelp
 
 """
 
-from .. import utils
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
+
+import Globals
+import utils
 import json
 import urllib
 import sys
@@ -69,8 +77,7 @@ class Factual(object):
         and will operate on partial names.
         """
         string = json.dumps(data)
-        url = "http://api.v3.factual.com/places/resolve?limit="+str(limit)+"&values="+urllib.quote(string)+"&KEY="+self.__v3_key
-        r = self.__query(url)
+        r = self.__factual('resolve',limit=limit,values=urllib.quote(string))
         if r != None and len(r) > limit:
             r = r[:limit]
         return r
@@ -80,8 +87,7 @@ class Factual(object):
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        url = "http://api.v3.factual.com/t/places/read?limit="+str(limit)+"&filters="+string+"&KEY="+self.__v3_key
-        return self.__query(url)
+        return self.__factual('read',limit=limit,filters=string)
         
     def crosswalk_id(self,factual_id,namespace=None,limit=_limit):
         """
@@ -96,10 +102,10 @@ class Factual(object):
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
         url - the url associated with the entity or '' (i.e. 'http://www.menuism.com/restaurants/ino-new-york-253388')
         """
-        url = "http://api.v3.factual.com/places/crosswalk?limit="+str(limit)+"&factual_id="+factual_id+"&KEY="+self.__v3_key
+        args = {'limit':limit,'factual_id':factual_id}
         if namespace != None:
-            url = url+"&only="+namespace
-        return self.__query(url)
+            args['only'] = namespace
+        return self.__factual('crosswalk',**args)
     
     def crosswalk_external(self,space,space_id,namespace=None,limit=_limit):
         """
@@ -113,25 +119,30 @@ class Factual(object):
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
         url - the url associated with the entity or '' (i.e. 'http://www.menuism.com/restaurants/ino-new-york-253388')
         """
-        url = "http://api.v3.factual.com/places/crosswalk?limit="+str(limit)+"&namespace="+space+"&namespace_id="+space_id+"&KEY="+self.__v3_key
+        args = {'limit':limit,'namespace':space,'namespace_id':space_id}
         if namespace != None:
-            url = url+"&only="+namespace
-        return self.__query(url)
+            args['only'] = namespace
+        return self.__factual('crosswalk',**args)
         
     def crossref_id(self,factual_id,limit=_limit):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
-        url = "http://api.v3.factual.com/places/crossref?limit="+str(limit)+"&factual_id="+factual_id+"&KEY="+self.__v3_key
-        return self.__query(url)
+        return self.__factual('crossref',factual_id=factual_id,limit=limit)
         
     def crossref_url(self,url,limit=_limit):
         """
         User Crossref service to find the entities related/mentioned at the given url.
         """
-        url2 = "http://api.v3.factual.com/places/crossref?limit="+str(limit)+"&url="+urllib.quote(url)+"&KEY="+self.__v3_key
-        return self.__query(url2)
+        return self.__factual('crossref',url=urllib.quote(url),limit=limit)
     
+    def __factual(self,service,**args):
+        if 'KEY' not in args:
+            args['KEY'] = self.__v3_key
+        pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
+        url =  "http://api.v3.factual.com/places/%s?%s" % (service,'&'.join(pairs))
+        return self.__query(url)
+
     def __query(self,url):
         response = utils.getFile(url)
         m = json.loads(response)
@@ -212,6 +223,8 @@ def demo():
     for i in results:
         pprint(i)
     print("Finished")
-        
+
+if __name__ == '__main__':
+    demo()
     
     
