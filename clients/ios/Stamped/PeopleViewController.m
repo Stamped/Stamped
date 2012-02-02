@@ -21,6 +21,7 @@
 #import "Notifications.h"
 #import "ProfileViewController.h"
 #import "STLoadingMoreTableViewCell.h"
+#import "STNoResultsTableViewCell.h"
 #import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
@@ -45,6 +46,7 @@ typedef enum PeopleSearchCorpus {
 - (void)updateShelf;
 - (void)clearSearch;
 - (void)sendSearchUsersRequest;
+- (void)reloadTableData;
 
 @property (nonatomic, assign) PeopleSearchCorpus searchCorpus;
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
@@ -182,7 +184,7 @@ typedef enum PeopleSearchCorpus {
     return;
 
   self.friendsArray = [currentUser.following sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 - (void)loadFriendsFromNetwork {
@@ -261,7 +263,7 @@ typedef enum PeopleSearchCorpus {
   if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
     searching_ = NO;
     self.searchResults = objects;
-    [self.tableView reloadData];
+    [self reloadTableData];
     return;
   }
 
@@ -289,7 +291,7 @@ typedef enum PeopleSearchCorpus {
                                                                    ascending:YES 
                                                                     selector:@selector(localizedCaseInsensitiveCompare:)];
   self.friendsArray = [currentUser.following.allObjects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
-  [self.tableView reloadData];
+  [self reloadTableData];
 
   [self updateShelf];
   [self setIsLoading:NO];
@@ -304,7 +306,7 @@ typedef enum PeopleSearchCorpus {
   }
   searching_ = NO;
   self.searchResults = nil;
-  [self.tableView reloadData];
+  [self reloadTableData];
 
   [self setIsLoading:NO];
 }
@@ -326,7 +328,7 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (searching_)
+  if (searching_ || (searchResults_ && searchResults_.count == 0))
     return 1;
 
   if (searchResults_)
@@ -335,6 +337,8 @@ typedef enum PeopleSearchCorpus {
   if (section == 0)
     return 1;
 
+#warning remove
+  return 0;
   if (friendsArray_ != nil)
     return self.friendsArray.count + 1;  // One more for adding friends.
 
@@ -344,15 +348,16 @@ typedef enum PeopleSearchCorpus {
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (searching_)
     return [STLoadingMoreTableViewCell cell];
-  
+
+  if (searchResults_ && searchResults_.count == 0)
+    return [STNoResultsTableViewCell cell];
+
   if (indexPath.section == 1 && indexPath.row == 0 && friendsArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
-    UIImage* addFriendsImage = [UIImage imageNamed:@"addFriends_profilePic"];
-    UIImage* highlightedAddFriendsImage = [Util whiteMaskedImageUsingImage:addFriendsImage];
-    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:addFriendsImage
-                                                         highlightedImage:highlightedAddFriendsImage];
-    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 10, 5);
+    UIImage* addFriendsImage = [UIImage imageNamed:@"add_friends_button"];
+    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:addFriendsImage];
+    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 10, 6);
     [cell.contentView addSubview:addFriendsImageView];
     [addFriendsImageView release];
     UILabel* addFriendsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -398,6 +403,9 @@ typedef enum PeopleSearchCorpus {
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
   if (searching_ || searchResults_)
     return 0;
+#warning remove
+  if (section == 1)
+    return 0;
 
   return 24;
 }
@@ -414,7 +422,7 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (searching_)
+  if (searching_ || (searchResults_ && searchResults_.count == 0))
     return;
 
   if (indexPath.section == 1 && indexPath.row == 0) {
@@ -514,18 +522,36 @@ typedef enum PeopleSearchCorpus {
 - (void)clearSearch {
   self.searchField.text = nil;
   self.searchResults = nil;
-  [self.tableView reloadData];
+  [self reloadTableData];
   self.tableView.contentOffset = CGPointZero;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [self sendSearchUsersRequest];
   [self.searchField resignFirstResponder];
-  [self.tableView reloadData];
+  [self reloadTableData];
   return YES;
 }
 
 #pragma mark - Custom methods.
+
+- (void)reloadTableData {
+  [self.tableView reloadData];
+  CGRect frame = self.tableView.frame;
+  if ([self.tableView numberOfRowsInSection:1] == 0) {
+    frame.size.height = 24 + 52 + 44;
+    self.tableView.scrollEnabled = NO;
+    self.tableView.bounces = NO;
+    self.tableView.layer.shadowOpacity = 1.0;
+  } else {
+    frame.size.height = 363;
+    self.tableView.scrollEnabled = YES;
+    self.tableView.bounces = YES;
+    self.tableView.layer.shadowOpacity = 0;
+  }
+  if (CGRectGetHeight(frame) != CGRectGetHeight(self.tableView.frame))
+    self.tableView.frame = frame;
+}
 
 - (IBAction)searchSegmentedControlValueChanged:(id)sender {
   if ([self.searchField isFirstResponder])
@@ -550,7 +576,7 @@ typedef enum PeopleSearchCorpus {
   loader.objectMapping = mapping;
   [loader send];
   searching_ = YES;
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 - (CGFloat)minimumShelfYPosition {
@@ -567,7 +593,7 @@ typedef enum PeopleSearchCorpus {
 }
 
 - (void)userProfileHasChanged:(NSNotification*)notification {
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 - (void)currentUserUpdated:(NSNotification*)notification {

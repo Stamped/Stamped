@@ -647,6 +647,7 @@ class MediaSchema(Schema):
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
+        self.singleplatform     = SinglePlatformSchema()
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
         self.openTable          = OpenTableSchema()
@@ -701,6 +702,11 @@ class FactualSchema(Schema):
     def setSchema(self):
         self.faid               = SchemaElement(basestring)
         self.table              = SchemaElement(basestring)
+        self.factual_id         = SchemaElement(basestring)
+
+class SinglePlatformSchema(Schema):
+    def setSchema(self):
+        self.singleplatform_id  = SchemaElement(basestring)
 
 class AppleSchema(Schema):
     def setSchema(self):

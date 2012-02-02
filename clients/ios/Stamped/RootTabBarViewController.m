@@ -93,8 +93,11 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.navigationController.view.backgroundColor = [UIColor blackColor];
-  
+  UIImageView* bgImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_flippy_background"]];
+  bgImageView.frame = CGRectOffset(bgImageView.frame, 0, 64);  // Account for nav and status bars.
+  [self.navigationController.view insertSubview:bgImageView atIndex:0];
+  [bgImageView release];
+
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   [[NSNotificationCenter defaultCenter] addObserver:self
