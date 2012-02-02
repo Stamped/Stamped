@@ -151,6 +151,7 @@ class Factual(object):
             return result[0]
         else:
             return None
+            
 
     def entity(self,factual_id):
         """
