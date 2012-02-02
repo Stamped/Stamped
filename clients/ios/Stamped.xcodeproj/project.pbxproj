@@ -1331,6 +1331,14 @@
 		7EF25E3F148EE0C3004E4F11 /* column-grid@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */; };
 		7EF49996140418E20071871D /* gray_disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */; };
 		7EFA58331413E39B007ADA64 /* delete_circle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA58321413E39B007ADA64 /* delete_circle@2x.png */; };
+		7EFA6ED514DB0772007360E8 /* map_flippy_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED114DB0772007360E8 /* map_flippy_background.png */; };
+		7EFA6ED614DB0772007360E8 /* map_flippy_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED114DB0772007360E8 /* map_flippy_background.png */; };
+		7EFA6ED714DB0772007360E8 /* map_flippy_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED214DB0772007360E8 /* map_flippy_background@2x.png */; };
+		7EFA6ED814DB0772007360E8 /* map_flippy_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED214DB0772007360E8 /* map_flippy_background@2x.png */; };
+		7EFA6ED914DB0772007360E8 /* map_flippy_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED314DB0772007360E8 /* map_flippy_button.png */; };
+		7EFA6EDA14DB0772007360E8 /* map_flippy_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED314DB0772007360E8 /* map_flippy_button.png */; };
+		7EFA6EDB14DB0772007360E8 /* map_flippy_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED414DB0772007360E8 /* map_flippy_button@2x.png */; };
+		7EFA6EDC14DB0772007360E8 /* map_flippy_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFA6ED414DB0772007360E8 /* map_flippy_button@2x.png */; };
 		7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A013F865C600589E11 /* PeopleViewController.m */; };
 		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
@@ -2293,6 +2301,10 @@
 		7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "column-grid@2x.png"; sourceTree = "<group>"; };
 		7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray_disclosure_arrow@2x.png"; sourceTree = "<group>"; };
 		7EFA58321413E39B007ADA64 /* delete_circle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "delete_circle@2x.png"; sourceTree = "<group>"; };
+		7EFA6ED114DB0772007360E8 /* map_flippy_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map_flippy_background.png; sourceTree = "<group>"; };
+		7EFA6ED214DB0772007360E8 /* map_flippy_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_flippy_background@2x.png"; sourceTree = "<group>"; };
+		7EFA6ED314DB0772007360E8 /* map_flippy_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map_flippy_button.png; sourceTree = "<group>"; };
+		7EFA6ED414DB0772007360E8 /* map_flippy_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_flippy_button@2x.png"; sourceTree = "<group>"; };
 		7EFDC99F13F865C600589E11 /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
 		7EFDC9A013F865C600589E11 /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
 		7EFDC9A113F865C600589E11 /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PeopleViewController.xib; path = ../Interfaces/PeopleViewController.xib; sourceTree = "<group>"; };
@@ -3491,6 +3503,7 @@
 				7E5893AD147C4620002268C4 /* icon_dev.png */,
 				7E10061B143E46880079AEDC /* icon1.png */,
 				7E100619143E46760079AEDC /* icon1@2x.png */,
+				7EFA6ED014DB0761007360E8 /* Map */,
 				7E6BAC27148956FA000A77FE /* Category Icons */,
 				7E374624146D9DD9005E9271 /* ToDo */,
 				7EDD1743146B04BE0003D4F7 /* Earn more */,
@@ -3841,6 +3854,17 @@
 				7E806FFB14312E38003AF77D /* activity_comment_badge@2x.png */,
 			);
 			name = Activity;
+			sourceTree = "<group>";
+		};
+		7EFA6ED014DB0761007360E8 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				7EFA6ED114DB0772007360E8 /* map_flippy_background.png */,
+				7EFA6ED214DB0772007360E8 /* map_flippy_background@2x.png */,
+				7EFA6ED314DB0772007360E8 /* map_flippy_button.png */,
+				7EFA6ED414DB0772007360E8 /* map_flippy_button@2x.png */,
+			);
+			name = Map;
 			sourceTree = "<group>";
 		};
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
@@ -4695,6 +4719,10 @@
 				7E41315714D5FE3A0087748C /* eCreate_country_button_bg@2x.png in Resources */,
 				7E41315E14D609E70087748C /* STSelectCountryViewController.xib in Resources */,
 				7E45866914D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */,
+				7EFA6ED614DB0772007360E8 /* map_flippy_background.png in Resources */,
+				7EFA6ED814DB0772007360E8 /* map_flippy_background@2x.png in Resources */,
+				7EFA6EDA14DB0772007360E8 /* map_flippy_button.png in Resources */,
+				7EFA6EDC14DB0772007360E8 /* map_flippy_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5259,6 +5287,10 @@
 				7E41315614D5FE3A0087748C /* eCreate_country_button_bg@2x.png in Resources */,
 				7E41315D14D609E70087748C /* STSelectCountryViewController.xib in Resources */,
 				7E45866814D7392F0031BB45 /* eCreate_country_check@2x.png in Resources */,
+				7EFA6ED514DB0772007360E8 /* map_flippy_background.png in Resources */,
+				7EFA6ED714DB0772007360E8 /* map_flippy_background@2x.png in Resources */,
+				7EFA6ED914DB0772007360E8 /* map_flippy_button.png in Resources */,
+				7EFA6EDB14DB0772007360E8 /* map_flippy_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,7 +13,6 @@
 @interface STMapToggleButton ()
 - (void)showListButton:(id)sender;
 - (void)showMapButton:(id)sender;
-
 @end
 
 @implementation STMapToggleButton
@@ -61,33 +60,31 @@
 }
 
 - (void)showListButton:(id)sender {
-  UIView* black = [[UIView alloc] initWithFrame:CGRectInset(self.frame, 0, 1)];
-  black.layer.cornerRadius = 5;
-  black.backgroundColor = [UIColor blackColor];
-  [self.superview insertSubview:black belowSubview:self];
-  [black release];
+  UIImageView* background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_flippy_button"]];
+  background.center = self.center;
+  [self.superview insertSubview:background belowSubview:self];
+  [background release];
   [UIView animateWithDuration:1 animations:^{
     [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromRight forView:self cache:YES];
     [sender removeFromSuperview];
     [self addSubview:listButton_];
   } completion:^(BOOL finished) {
-    [black removeFromSuperview];
+    [background removeFromSuperview];
   }];
   [self sendActionsForControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)showMapButton:(id)sender {
-  UIView* black = [[UIView alloc] initWithFrame:CGRectInset(self.frame, 0, 1)];
-  black.layer.cornerRadius = 5;
-  black.backgroundColor = [UIColor blackColor];
-  [self.superview insertSubview:black belowSubview:self];
-  [black release];
+  UIImageView* background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_flippy_button"]];
+  background.center = self.center;
+  [self.superview insertSubview:background belowSubview:self];
+  [background release];
   [UIView animateWithDuration:1 animations:^ {
     [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromLeft forView:self cache:YES];
     [sender removeFromSuperview];
     [self addSubview:mapButton_];
   } completion:^(BOOL finished) {
-    [black removeFromSuperview];
+    [background removeFromSuperview];
   }];
   [self sendActionsForControlEvents:UIControlEventTouchUpInside];
 }
