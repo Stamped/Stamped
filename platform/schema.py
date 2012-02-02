@@ -15,6 +15,9 @@ from datetime import datetime
 from errors import *
 from utils import normalize
 
+# used for parent reference
+import weakref
+
 
 # adding generic validation for email, username, etc. on a per-element basis
 # isSet consistency
@@ -142,9 +145,11 @@ situation.
 
     def setIsSet(self, isSet):
         self._isSet = isSet
-        # The only known use of the parent attribute -Landon
+        # use weakref to avoid garbage collection
         if self._parent != None and isSet:
-            self._parent.setIsSet(isSet)
+            parent = self._parent()
+            if parent:
+                parent.setIsSet(isSet)
     
     def _setType(self, requiredType):
         allowed = [basestring, bool, int, long, float, dict, list, datetime]
@@ -550,7 +555,7 @@ resort.
             try:
                 self._elements[name] = value
                 self._elements[name]._name = name
-                self._elements[name]._parent = self
+                self._elements[name]._parent = weakref.ref(self)
             except:
                 msg = "Cannot Add Element (%s)" % name
                 logs.warning(msg)
@@ -590,7 +595,7 @@ resort.
         
         def _returnOutput(item):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
-                item._parent = self
+                item._parent = weakref.ref(self)
                 return item
             return item.value
         
