@@ -46,7 +46,7 @@ static const CGFloat kUserImageSize = 41.0;
     [self.contentView addSubview:userImageView_];
     [userImageView_ release];
     
-    stampImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(userImageView_.frame) + 16, 10, 14, 14)];
+    stampImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(userImageView_.frame) + 18, 10, 14, 14)];
     [self.contentView addSubview:stampImageView_];
     [stampImageView_ release];
     

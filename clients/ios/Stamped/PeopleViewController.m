@@ -348,11 +348,9 @@ typedef enum PeopleSearchCorpus {
   if (indexPath.section == 1 && indexPath.row == 0 && friendsArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
-    UIImage* addFriendsImage = [UIImage imageNamed:@"addFriends_profilePic"];
-    UIImage* highlightedAddFriendsImage = [Util whiteMaskedImageUsingImage:addFriendsImage];
-    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:addFriendsImage
-                                                         highlightedImage:highlightedAddFriendsImage];
-    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 10, 5);
+    UIImage* addFriendsImage = [UIImage imageNamed:@"add_friends_button"];
+    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:addFriendsImage];
+    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 10, 6);
     [cell.contentView addSubview:addFriendsImageView];
     [addFriendsImageView release];
     UILabel* addFriendsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
