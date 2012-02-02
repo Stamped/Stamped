@@ -151,6 +151,7 @@ class Factual(object):
             return result[0]
         else:
             return None
+            
 
     def entity(self,factual_id):
         """
@@ -293,6 +294,9 @@ def demo():
     print("Top "+str(len(results))+" reverse crossref results:")
     for i in results:
         pprint(i)
+    print('SinglePlatform menu data:')
+    menu = f.menu(item['factual_id'])
+    pprint(menu)
     print("Finished")
 
 if __name__ == '__main__':
