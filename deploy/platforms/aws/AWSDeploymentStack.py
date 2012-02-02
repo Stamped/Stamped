@@ -129,17 +129,18 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
     
-    def update(self):
+    def update(self, *args):
+        force = (len(args) >= 1 and args[0] == 'force')
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py'"
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s'" % \
+               (" --force" if force else "")
         pp  = []
         
         for instance in self.instances:
             pp.append((instance, utils.runbg(instance.public_dns_name, env.user, cmd)))
         
-        for kv in pp:
-            instance, p = kv
+        for instance, p in pp:
             ret = p.wait()
         
         utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
