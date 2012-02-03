@@ -281,3 +281,15 @@ def abstract(func):
     
     return wrapper
 
+def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'abort'), ]):
+    msg = msg % ("[%s]" % ", ".join(map(lambda o: "%s=%s" % (o[0], o[1]), options)))
+    
+    while True:
+        answer = raw_input(msg).strip().lower()
+        
+        for option in options:
+            if answer == option[0] or answer == option[1]:
+                return option[0]
+        
+        print "invalid input"
+

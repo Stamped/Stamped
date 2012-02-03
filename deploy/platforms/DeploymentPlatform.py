@@ -60,7 +60,7 @@ class DeploymentPlatform(ADeploymentPlatform):
     def update(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
-        stack.update()
+        stack.update(*args[1:])
     
     def repair(self, *args):
         stackName = args[0]

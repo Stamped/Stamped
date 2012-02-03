@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import config, json, pickle, os, re, string, utils
+import config, json, pickle, os, re, string, time, utils
 import AWSDeploymentPlatform
 
 from ADeploymentStack       import ADeploymentStack
@@ -129,19 +129,116 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
     
-    def update(self):
+    def update(self, *args):
+        force = (len(args) >= 1 and args[0] == 'force')
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py'"
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s'" % \
+               (" --force" if force else "")
         pp  = []
+        separator = "-" * 80
         
-        for instance in self.instances:
-            pp.append((instance, utils.runbg(instance.public_dns_name, env.user, cmd)))
+        if force:
+            # update all instances in parallel
+            for instance in self.instances:
+                pp.append((instance, utils.runbg(instance.public_dns_name, env.user, cmd)))
+            
+            for instance, p in pp:
+                ret = p.wait()
+        else:
+            # update all instances synchronously, removing them one-at-a-time from 
+            # their respective ELBs and readding them once we're sure that the 
+            # update was applied successfully and the resulting instance is healthy
+            for instance in self.instances:
+                utils.log()
+                utils.log(separator)
+                utils.log("[%s] UPDATING %s" % (self, instance))
+                
+                # TODO: this logic doesn't account for the case where an instance 
+                # may belong to multiple ELBs. NOTE that this scenario will never 
+                # arise in our current stack architecture, but I'm leaving this 
+                # note in here just in case that assumption changes in the future.
+                elb = self._get_elb(instance)
+                
+                # only deregister instance if it belongs to a non-trivial ELB
+                deregister = (elb is not None) # and len(elb.instances) > 1)
+                
+                if deregister:
+                    utils.log("[%s] temporarily deregistering %s from %s" % (self, instance, elb))
+                    instances = elb.deregister_instances([ instance.instance_id ])
+                    
+                    # TODO: this sleep shouldn't be necessary since the instance 
+                    # is definitely removed from the ELB at this point, but without 
+                    # pausing, the ELB seems to ignore performing a new health check 
+                    # before successfully re-registering the instance. pausing here 
+                    # effectively ensures that the state of the instance will be 
+                    # set to OutOfService s.t. the health check must be passed 
+                    # before the instance is considered InService after instance 
+                    # re-registration.
+                    time.sleep(10)
+                
+                # apply update synchronously
+                with settings(host_string=instance.public_dns_name):
+                    result = run(cmd, pty=False, shell=True)
+                    status = result.return_code
+                
+                if 0 != status:
+                    utils.log("[%s] warning: failure updating %s" % (self, instance))
+                    
+                    confirmation = utils.get_input()
+                    if deregister and (confirmation == 'n' or confirmation == 'a'):
+                        utils.log("[%s] warning: not re-registering %s with %s" % \
+                                  (self, instance, elb))
+                    
+                    if confirmation == 'n':
+                        continue
+                    elif confirmation == 'a':
+                        return
+                
+                if deregister:
+                    utils.log("[%s] %s re-registering with %s" % (self, instance, elb))
+                    elb.register_instances([ instance.instance_id ])
+                    
+                    utils.log("[%s] %s is waiting to come back online..." % (self, instance))
+                    
+                    # TODO: infer max timeout from health check settings
+                    timeout = 600
+                    delay   = 2
+                    
+                    # wait for the instance to come back online with the ELB
+                    while True:
+                        try:
+                            health = elb.get_instance_health([ instance.instance_id ])[0]
+                            
+                            if health.state == 'InService':
+                                utils.log("[%s] %s is back online with elb %s..." % \
+                                          (self, instance, elb))
+                                break
+                        except Exception, e:
+                            health = utils.AttributeDict(dict(
+                                state = "error retrieving health", 
+                                description = str(e), 
+                            ))
+                        
+                        utils.log("[%s] %s is '%s' (%s)" % (self, instance, health.state, health.description))
+                        
+                        # instance is not in service yet; sleep for a bit before retrying
+                        timeout -= delay
+                        if timeout <= 0:
+                            utils.log("[%s] %s timed out with elb %s (state=%s, desc=%s)..." % \
+                                      (self, instance, elb, health.state, health.description))
+                            
+                            confirmation = utils.get_input()
+                            if confirmation == 'n' or confirmation == 'a':
+                                return
+                            else:
+                                break
+                        
+                        time.sleep(delay)
+                
+                utils.log("[%s] successfully updated %s" % (self, instance))
         
-        for kv in pp:
-            instance, p = kv
-            ret = p.wait()
-        
+        utils.log()
         utils.log("[%s] done updating %d instances" % (self, len(self.instances)))
     
     def run_mongo_cmd(self, mongo_cmd, transform=True, slave_okay=True, 
@@ -621,6 +718,31 @@ class AWSDeploymentStack(ADeploymentStack):
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)
     
+    def _get_elb(self, instance_or_instances):
+        # TODO: this function doesn't account for the case where an instance 
+        # may belong to multiple ELBs. NOTE that this scenario will never 
+        # arise in our current stack architecture, but I'm leaving this 
+        # note in here just in case that assumption changes in the future.
+        
+        if isinstance(instance_or_instances, (list, tuple, set)):
+            instances = instance_or_instances
+        else:
+            instances = [ instance_or_instances ]
+        
+        # get all ELBs
+        conn = ELBConnection(AWSDeploymentPlatform.AWS_ACCESS_KEY_ID, 
+                             AWSDeploymentPlatform.AWS_SECRET_KEY)
+        elbs = conn.get_all_load_balancers()
+        
+        # attempt to find the ELB belonging to this stack's set of API servers
+        for elb in elbs:
+            for awsInstance in elb.instances: 
+                for instance in instances:
+                    if awsInstance.id == instance.instance_id:
+                        return elb
+        
+        return None
+    
     def add(self, *args):
         types = [ 'db', 'api', 'web', 'work', 'mem', 'mon' ]
         if 0 == len(args) or args[0] not in types:
@@ -636,7 +758,6 @@ class AWSDeploymentStack(ADeploymentStack):
                 raise Fail("last argument should be number of %s instances to add" % add)
         
         sim = []
-        ids = set()
         placements = defaultdict(int)
         placements['us-east-1a'] = 0
         placements['us-east-1b'] = 0
@@ -647,7 +768,6 @@ class AWSDeploymentStack(ADeploymentStack):
         for instance in self.instances:
             if instance.name.startswith(add):
                 sim.append(instance)
-                ids.add(instance.instance_id)
                 cur = int(instance.name[len(add):])
                 
                 placements[instance.placement] += 1
@@ -715,28 +835,15 @@ class AWSDeploymentStack(ADeploymentStack):
             return
         
         if add in ['api', 'web']:
-            utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
+            utils.log("[%s] checking for matching ELBs within stack %s" % (self, self.name))
             
-            # get all ELBs
-            conn = ELBConnection(AWSDeploymentPlatform.AWS_ACCESS_KEY_ID, 
-                                 AWSDeploymentPlatform.AWS_SECRET_KEY)
-            elbs = conn.get_all_load_balancers()
-            the_elb = None
-            
-            # attempt to find the ELB belonging to this stack's set of API servers
-            for elb in elbs:
-                for awsInstance in elb.instances: 
-                    if awsInstance.id in ids:
-                        the_elb = elb
-                        break
-                
-                if the_elb is not None:
-                    break
+            # attempt to find the ELB associated with nodes of the desired type for this stack
+            elb = self._get_elb(sim)
             
             # register the new instance with the appropriate ELB
-            if the_elb is not None:
-                utils.log("[%s] registering instances with ELB '%s'" % (self, the_elb))
-                the_elb.register_instances(list(i.instance_id for i in instances))
+            if elb is not None:
+                utils.log("[%s] registering instances with ELB '%s'" % (self, elb))
+                elb.register_instances(list(i.instance_id for i in instances))
             else:
                 utils.log("[%s] unable to find ELB for instances'" % (self, ))
         elif add == 'db':
