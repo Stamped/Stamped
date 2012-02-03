@@ -51,8 +51,12 @@ import utils
 import json
 import urllib
 import sys
-from SinglePlatform import StampedSinglePlatform
-from pprint import pprint
+from SinglePlatform     import StampedSinglePlatform
+from pprint             import pprint
+from pymongo            import Connection
+from multiprocessing    import Queue
+from MongoStampedAPI    import MongoStampedAPI
+from gevent.pool        import Pool
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 #_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
@@ -222,7 +226,84 @@ class Factual(object):
             return m['response']['data']
         except:
             return None
-            
+
+def _handle_entity(entity,queue,f,db):
+    try:
+        args = {}
+        args['name'] = entity['title']
+        args['longitude'] = entity['coordinates']['lng']
+        args['latitude'] = entity['coordinates']['lat']
+        if 'details' in entity:
+            details = entity['details']
+            if 'contact' in details:
+                contact = details['contact']
+                if 'phone' in contact:
+                    args['tel'] = contact['phone']
+            if 'place' in details:
+                place2 = details['place']
+                if 'address_components' in place2:
+                    for comp in place2['address_components']:
+                        types = comp['types']
+                        if 'postal_code' in types:
+                            args['postcode'] = comp['long_name']
+                        #if 'country' in types:
+                        #    args['country'] = comp['country']
+                        if 'locality' in types:
+                            args['locality'] = comp['long_name']
+        results = f.resolve(args,1)
+        if results:
+            result = results[0]
+            test = result['similarity'] > .80 and result['status'] == '1'
+            if len(args) <= 3:
+                test = test and result['similarity'] > .90
+            if test:
+                factual_id = result['factual_id']
+                entity['sources']['factual'] = {'factual_id':factual_id}
+                singleplatform_id = f.singleplatform(factual_id)
+                if singleplatform_id:
+                    entity['sources']['singleplatform'] = {'singleplatform_id':singleplatform_id}
+                    queue.put('both')
+                else:
+                    queue.put('factual')
+                #db.updateEntity(entity)
+            else:
+                queue.put('bad-match')
+    except Exception as e:
+        print "Encountered an error with %s" % entity
+        print e
+        print e.message
+        queue.put('error')
+
+def _count(queue):
+    counts = {}
+    while True:
+        status = queue.get()
+        if status != 'done':
+            counts[status] = counts.setdefault(status,0) + 1
+            pprint(counts)
+        else:
+            return
+
+def populatePlaces():
+    f = Factual()
+    stampedAPI = MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    
+    rs = entityDB._collection.find({"subcategory" : "restaurant"},output="list")
+    pool = Pool(16)
+    pool2 = Pool(1)
+    queue = Queue()
+    for result in rs[0:100]:
+        entity = entityDB._convertFromMongo(result)    
+        pool.spawn(_handle_entity, entity,queue,f,entityDB)
+    pool2.spawn(_count,queue)
+    print("here")
+    pool.join()
+    print("joined")
+    queue.send('done')
+    pool2.join()
+    print("finished")
+
 def demo():
     """
     Interactive feature demo for the Factual class.
@@ -300,6 +381,6 @@ def demo():
     print("Finished")
 
 if __name__ == '__main__':
-    demo()
+    populatePlaces()
     
     
