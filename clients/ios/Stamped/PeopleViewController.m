@@ -53,6 +53,7 @@ typedef enum PeopleSearchCorpus {
 @property (nonatomic, copy) NSArray* friendsArray;
 @property (nonatomic, copy) NSArray* searchResults;
 @property (nonatomic, assign) BOOL searching;
+@property (nonatomic, readonly) UIView* emptyPaneView;
 @end
 
 @implementation PeopleViewController
@@ -65,6 +66,7 @@ typedef enum PeopleSearchCorpus {
 @synthesize searchSegmentedControl = searchSegmentedControl_;
 @synthesize shelfSeparator = shelfSeparator_;
 @synthesize searching = searching_;
+@synthesize emptyPaneView = emptyPaneView_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -75,6 +77,7 @@ typedef enum PeopleSearchCorpus {
   self.searchResults = nil;
   self.searchSegmentedControl = nil;
   self.shelfSeparator = nil;
+  emptyPaneView_ = nil;
   [super dealloc];
 }
 
@@ -113,6 +116,23 @@ typedef enum PeopleSearchCorpus {
     [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
   }
   self.hasHeaders = YES;
+  
+  emptyPaneView_ = [[UIView alloc] initWithFrame:CGRectMake(0, 124, 320, 292)];
+  UIImageView* imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_people"]];
+  [emptyPaneView_ addSubview:imageView];
+  [imageView release];
+  UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+  [button setImage:[UIImage imageNamed:@"add_friends_button"] forState:UIControlStateNormal];
+  [button sizeToFit];
+  button.frame = CGRectMake(CGRectGetMidX(self.view.frame) - (CGRectGetWidth(button.frame) / 2), 67,
+                            CGRectGetWidth(button.frame),
+                            CGRectGetHeight(button.frame));
+  button.layer.shadowPath = [UIBezierPath bezierPathWithRect:button.bounds].CGPath;
+  button.layer.shadowOpacity = 0.2;
+  button.layer.shadowOffset = CGSizeMake(0, 2);
+  [emptyPaneView_ addSubview:button];
+  [self.view addSubview:emptyPaneView_];
+  [emptyPaneView_ release];
 }
 
 - (void)viewDidUnload {
@@ -125,6 +145,7 @@ typedef enum PeopleSearchCorpus {
   self.searchSegmentedControl = nil;
   self.shelfSeparator = nil;
   self.searching = NO;
+  emptyPaneView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
