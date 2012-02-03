@@ -11,12 +11,7 @@ from AMongoCollection import AMongoCollection
 
 class MongoStampCommentsCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'comment_id': basestring
-    }
-    
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='stampcomments')
     
     ### PUBLIC

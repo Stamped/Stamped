@@ -360,6 +360,26 @@ class Alert(Schema):
         self.created            = SchemaElement(datetime)
 
 
+# ########## #
+# ClientLogs #
+# ########## #
+
+class ClientLogsEntry(Schema):
+    def setSchema(self):
+        self.entry_id           = SchemaElement(basestring)
+        self.created            = SchemaElement(datetime)
+        self.user_id            = SchemaElement(basestring)
+        self.key                = SchemaElement(basestring, required=True)
+        self.value              = SchemaElement(basestring)
+        
+        # optional ids
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.favorite_id        = SchemaElement(basestring)
+        self.comment_id         = SchemaElement(basestring)
+        self.activity_id        = SchemaElement(basestring)
+
+
 # ######## #
 # Entities #
 # ######## #

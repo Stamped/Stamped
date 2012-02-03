@@ -11,11 +11,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoCreditReceivedCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'stamp_id': basestring
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='creditreceived')
     

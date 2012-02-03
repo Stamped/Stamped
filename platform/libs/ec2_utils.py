@@ -115,12 +115,13 @@ def get_stack(stack=None):
     
     return info
 
-def get_elb(stack=None):
+def get_api_elb(stack=None):
     if not is_ec2():
         return None
     
     stack = get_stack(stack)
-    instance_ids = (instance.instance_id for instance in stack.nodes)
+    api_nodes = filter(lambda n: 'apiServer' in n.roles, stack.nodes)
+    api_ids   = (instance.instance_id for instance in api_ids)
     
     # get all ELBs
     conn = ELBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
@@ -128,6 +129,7 @@ def get_elb(stack=None):
     
     # attempt to find the ELB belonging to this stack's set of API servers
     for elb in elbs:
+        # TODO: this is deprecated; 
         for awsInstance in elb.instances: 
             if awsInstance.id in instance_ids:
                 return elb

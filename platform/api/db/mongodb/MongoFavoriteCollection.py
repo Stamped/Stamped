@@ -18,7 +18,7 @@ from Schemas import *
 
 class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
         AFavoriteDB.__init__(self)
 

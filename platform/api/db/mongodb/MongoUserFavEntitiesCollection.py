@@ -11,11 +11,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoUserFavEntitiesCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'entity_id': basestring
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='userfaventities')
     

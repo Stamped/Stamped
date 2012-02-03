@@ -10,11 +10,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoCreditGiversCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'user_id': basestring
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='creditgivers')
     

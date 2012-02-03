@@ -11,12 +11,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoFriendsCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'friend_id': basestring,
-        'timestamp': basestring
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='friends')
     

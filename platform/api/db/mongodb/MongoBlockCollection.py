@@ -11,12 +11,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoBlockCollection(AMongoCollection):
     
-    SCHEMA = {
-        'user_id': basestring,
-        'blocked_id': basestring,
-        'timestamp': basestring
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='blocks')
     
