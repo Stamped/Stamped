@@ -65,6 +65,7 @@ from functools          import partial
 from urllib2            import HTTPError
 from gevent             import sleep
 from itertools          import combinations
+import time
 import random
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
@@ -278,7 +279,7 @@ class Factual(object):
     #    """
     #    pass
 
-    def factual_from_entity(self,entity):
+    def factual_from_entity(self,entity,log=None):
         """
         Get the factual_id (if any) associated with the given entity.
 
@@ -293,7 +294,7 @@ class Factual(object):
             results = self.resolve(f,1)
             if results:
                 result = results[0]
-                if self.__acceptable(result):
+                if self.__acceptable(result,entity,f,log=log):
                     factual_id = result['factual_id']
                     break
         return factual_id
@@ -368,16 +369,19 @@ class Factual(object):
         except:
             return None
     
-    def __acceptable(self,result):
+    def __acceptable(self,result,entity,filters,log=None):
         """
         Determines whether a Resolve result is a positive match.
         
         Currently trusts the builtin 'resolved' field. 
         """
-        return result['resolved']
+        good = result['resolved']
+        if not good and log:
+            log.write('FAILED:\n%s\n%s\n%\n' % (result,entity,filters))
+        return good
 
 
-def resolveEntities(size,verbose=True):
+def resolveEntities(size,log=None):
     """
     Resolve a random batch of entities, and output accuracy stats
     """
@@ -387,29 +391,33 @@ def resolveEntities(size,verbose=True):
     
     rs = entityDB._collection.find({"subcategory" : "restaurant"})
     end = random.randint(size,rs.count())
-    ids = []
     i = 0
     count = 0
     throttled = 0
     for entity in rs[end-size:end]:
         i += 1
+        before = time.time()
         try:
-            factual_id = f.factual_from_entity(entity)
+            factual_id = f.factual_from_entity(entity,log=log)
             if factual_id:
                 count += 1
-            print "%.2f : %d / %d" % (count*1.0/i,count,i)
+            if log:
+                log.write("%.2f : %d / %d\n" % (count*1.0/i,count,i))
         except HTTPError as e:
             if e.code == 403:
                 throttled += 1
                 if throttled > 5:
-                    print("Too much throttling...aborting")
+                    if log:
+                        log.write("Too much throttling...aborting\n\n")
                     return
-                print("slowing down for throttling")
+                if log:
+                    log.write("slowing down for throttling...\n\n\n")
                 sleep(throttled)
             else:
                 raise e
-        sleep(1)
-    pprint(len(ids))
+        elapsed = time.time() - before
+        if elapsed < 1:
+            sleep(1-elapsed)
 
 def demo():
     """
@@ -494,7 +502,7 @@ if __name__ == '__main__':
         count = 100
         if len(sys.argv) > 2:
             count = int(sys.argv[2])
-        resolveEntities(count,verbose=True)
+        resolveEntities(count,log=sys.stdout)
     else:
         demo()
     
