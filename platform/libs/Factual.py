@@ -3,6 +3,8 @@
 """
 Interface for Factual API
 
+To get the factual_id (if any) of a given entity, use Factual.factual_from_entity.
+
 Important attributes of a place entity:
 
 factual_id - the unique entity identifier
@@ -15,7 +17,6 @@ region - state code (i.e. 'PA' )
 tel - telephone number (i.e. '(412) 765-3200')
 latitude - float (i.e. 40.525447)
 longitude - float (i.e. -80.005443)
-
 
 Crosswalk:
 Crosswalk attempts to map ids and URIs from one service to
@@ -50,23 +51,142 @@ import Globals
 import utils
 import json
 import urllib
+import oauth
+import urllib2
+from urlparse import urlparse, parse_qsl
 import sys
-from SinglePlatform import StampedSinglePlatform
-from pprint import pprint
+from SinglePlatform     import StampedSinglePlatform
+from pprint             import pprint
+from pymongo            import Connection
+from gevent.queue       import Queue
+from MongoStampedAPI    import MongoStampedAPI
+from gevent.pool        import Pool
+from functools          import partial
+from urllib2            import HTTPError
+from gevent             import sleep
+from itertools          import combinations
+import time
+import random
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
+# Random (but seemingly functional API Key)
 #_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
 _API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
+_API_V3_Secret = "pJ4OIbsi8l3V1sXNRngy3uCGe0DzCIpWfzwGtbkM"
 _limit = 50
+
+
+def _path(path_string,entity,subfunc=None):
+    """
+    Helper function for creating resolve filters
+
+    See _relevant_fields for usage.
+    _path assumes that is working with dictionary like elements
+    except for leafs and wildcard iterables
+    """
+    path = path_string.split()
+    cur = entity
+    for k in path:
+        # wildcard support for list elements
+        if k == '*':
+            for v in cur:
+                result = subfunc(v)
+                if result:
+                    return result
+            return None
+        if k in cur:
+            cur = cur[k]
+        else:
+            return None
+    if subfunc:
+        cur = subfunc(cur) 
+    return cur
+
+def _street(val):
+    if val:
+        tokens = val.split(',')
+        if tokens:
+            return tokens[0]
+    return None
+
+def _category(entity):
+    if entity['subcategory'] == 'restaurant':
+        return 'Food & Beverage > Restaurants'
+    elif entity['category'] == 'food':
+        return 'Food & Beverage'
+    else:
+        return None
+#
+# Currently used entity data and their associated name for use in a resolve filter
+#
+_relevant_fields = {
+    'name':partial(_path,'title'),
+    'longitude':partial(_path,'coordinates lng'),
+    'latitude':partial(_path,'coordinates lat'),
+    'tel':partial(_path,'details contact phone'),
+    'address':partial(_path,'details place address',subfunc=_street),
+    'category':_category,
+}
+
+def _filters(entity,fields):
+    """
+    Helper function to create a filters from a dict of filter names and entity functions
+
+    _filters will ignore unavailable fields (None values).
+
+    See _relevant_fields for typical arguments
+    """
+    m = {}
+    for k in fields:
+        f = _relevant_fields[k]
+        v = f(entity)
+        if v:
+            m[k] = v
+    return m
+
+#
+# Alternative fallback filter combinations if the standard filter fails to resolve
+#
+_field_combos = [
+    # Commented out until throttling is resolved
+    #set(['name','latitude','longitude','category']),
+    #set(['name','address','tel','category','latitude','longitude']),
+    #set(['tel','latitude','longitude','address','category']),
+]
+
+def _combos(entity):
+    """
+    Creates a prioritized list of filters for use with resolve.
+
+    The first filter includes all available information.
+
+    The other filters are unique subsets of the first as specified by _field_combos
+    """
+    filters = _filters(entity,_relevant_fields.keys())
+    keys = frozenset(filters.keys())
+    combos = set([keys])
+    result = [filters]
+    for combo in _field_combos:
+        inter = frozenset(combo & keys)
+        # if non-empty and not repeated
+        if inter and inter not in combos:
+            # add new combination to filter list
+            combos.add(inter)
+            m = {}
+            for k in inter:
+                m[k] = filters[k]
+            result.append(m)
+    return result
 
 class Factual(object):
     """
     Factual API Wrapper
     """
-    def __init__(self,key=_API_Key,v3_key=_API_V3_Key):
-        self.__key = key
-        self.__v3_key = v3_key
+    def __init__(self,key=_API_V3_Key,secret=_API_V3_Secret,log=None):
+        self.__v3_key = key
+        self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
+        self.__log_file = log
     
     def resolve(self, data,limit=_limit):
         """
@@ -152,27 +272,39 @@ class Factual(object):
         else:
             return None
             
-
-    def entity(self,factual_id):
-        """
-        STUB Create a Stamped entity from a factual_id.
-        """
-        pass
+    # TODO implement
+    #
+    #def entity(self,factual_id):
+    #    """
+    #    STUB Create a Stamped entity from a factual_id.
+    #    """
+    #    pass
 
     def factual_from_entity(self,entity):
         """
         Get the factual_id (if any) associated with the given entity.
+
+        This method iterates through all available filters for the given
+        entity until one of them resolves acceptably.
+
+        If the entity fails to resolve, None is returned.
         """
-        filters = {'name':entity.title,'longitude':entity.lng,'latitude':entity.lat}
-        resolve_result = self.resolve(filters,1)
-        if resolve_result:
-            return resolve_result[0]['factual_id']
-        else:
-            return None
+        filters = _combos(entity)
+        factual_id = None
+        for f in filters:
+            results = self.resolve(f,1)
+            if results:
+                result = results[0]
+                if self.__acceptable(result,entity,f):
+                    factual_id = result['factual_id']
+                    break
+        return factual_id
     
     def factual_from_singleplatform(self,singleplatform_id):
         """
         Get the factual_id (if any) associated with the given singleplatform ID.
+
+        Convenience method for crosswalk lookup from a singleplatform ID.
         """
         crosswalk_result = self.crosswalk_external('singleplatform',singleplatform_id,'singleplatform')
         if crosswalk_result:
@@ -184,7 +316,7 @@ class Factual(object):
         """
         Get singleplatform id from factual_id
 
-        Returns id or None if not known.
+        Convenience method for crosswalk lookup for singleplatform
         """
         singleplatform_info = self.crosswalk_id(factual_id,namespace='singleplatform')
         sp_id = None
@@ -209,25 +341,143 @@ class Factual(object):
             return None
 
     def __factual(self,service,prefix='places',**args):
-        if 'KEY' not in args:
-            args['KEY'] = self.__v3_key
+        """
+        Helper method for making OAuth Factual API calls.
+
+        This code is based on the recommended Python sample code available at:
+
+        http://developer.factual.com/display/docs/Core+API+-+Oauth
+
+        The custom beginning constructs the url based on input parameters.
+
+        The custom end parses the JSON response and abstracts the data portion if successful.
+        """
         pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
         url =  "http://api.v3.factual.com/%s/%s?%s" % (prefix,service,'&'.join(pairs))
-        return self.__query(url)
+        params    = parse_qsl(urlparse(url).query)
+        consumer  = oauth.OAuthConsumer(key=self.__v3_key, secret=self.__v3_secret)
+        request   = oauth.OAuthRequest.from_consumer_and_token(consumer, http_method='GET', http_url=url, parameters=params)
 
-    def __query(self,url):
-        response = utils.getFile(url)
+        request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
+
+        req = urllib2.Request(url, None, request.to_header())
+        res = urllib2.urlopen(req)
+
+        response = res.read()
         m = json.loads(response)
         try:
             return m['response']['data']
         except:
             return None
-            
+    
+    def __distance(self,a,b):
+        if 'latitude' in a and 'latitude' in b and 'longitude' in a and 'longitude' in b:
+            latA = a['latitude']
+            latB = b['latitude']
+            lonA = a['longitude']
+            lonB = b['longitude']
+            dLat = latA-latB
+            dLon = lonA-lonB
+            return (dLat**2+dLon**2)**.5
+        else:
+            #Don't disqualify if ommitted
+            return 0
+
+    def __phone_test(self,result,entity,filters):
+        if 'tel' in filters and 'tel' in result:
+            good = filters['tel'] == result['tel'] or result['similarity'] > .98
+            if not good:
+                self.__log("Rejected for different tel values\n")
+            return good
+        else:
+            return True 
+    
+    def __category_test(self,result,entity,filters):
+        if 'category' not in filters or 'category' not in result:
+            # Don't reject things for no category
+            return True
+        if not result['category'].startswith(filters['category']):
+            self.__log("Rejected for bad category\n")
+            return False
+        else:
+            return True
+
+    def __custom_test(self,result,entity,filters):
+        if not self.__category_test(result,entity,filters):
+            return False
+        if self.__distance(result,filters) > 1:
+            self.__log("Rejected for distance\n")
+            return False
+        if not self.__phone_test(result,entity,filters):
+            return False
+        if result['similarity'] < .95:
+            self.__log("Rejected for similarity\n")
+            return False
+        return True
+
+    
+    def __acceptable(self,result,entity,filters):
+        """
+        Determines whether a Resolve result is a positive match.
+        
+        Currently trusts the builtin 'resolved' field. 
+        """
+        good = result['resolved']
+        if not good:
+            good = self.__custom_test(result,entity,filters)
+        if not good:
+            self.__log('FAILED:\n%s\n%s\n%s\n' % (result,entity,filters))
+        return good
+    
+    def __log(self,message):
+        if self.__log_file:
+            self.__log_file.write(message)
+
+def resolveEntities(size,log=None):
+    """
+    Resolve a random batch of entities, and output accuracy stats
+    """
+    f = Factual(log=sys.stdout)
+    stampedAPI = MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    
+    rs = entityDB._collection.find({"subcategory" : "restaurant"})
+    end = random.randint(size,rs.count())
+    i = 0
+    count = 0
+    throttled = 0
+    for entity in rs[end-size:end]:
+        i += 1
+        before = time.time()
+        try:
+            factual_id = f.factual_from_entity(entity)
+            if factual_id:
+                count += 1
+            if log:
+                log.write("%.2f : %d / %d\n" % (count*1.0/i,count,i))
+        except HTTPError as e:
+            if e.code == 403:
+                throttled += 1
+                if throttled > 5:
+                    if log:
+                        log.write("Too much throttling...aborting\n\n")
+                    return
+                if log:
+                    log.write("slowing down for throttling...\n\n\n")
+                sleep(throttled)
+            else:
+                raise e
+        elapsed = time.time() - before
+        if elapsed < 1:
+            sleep(1-elapsed)
+
 def demo():
     """
     Interactive feature demo for the Factual class.
+
     Follow the prompts to test out features for different inputs.
-    Refer to the 
+
+    Refer to the source code for more information.
     """
     sys.stdout.write('Use default attributes (non-empty for false): ')
     use_defaults = sys.stdin.readline().strip()
@@ -300,6 +550,12 @@ def demo():
     print("Finished")
 
 if __name__ == '__main__':
-    demo()
+    if len(sys.argv) > 1 and sys.argv[1] == 'resolve':
+        count = 100
+        if len(sys.argv) > 2:
+            count = int(sys.argv[2])
+        resolveEntities(count,log=sys.stdout)
+    else:
+        demo()
     
     
