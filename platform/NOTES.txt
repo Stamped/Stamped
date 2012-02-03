@@ -1,4 +1,7 @@
 
+    * generic, private logging endpoint for clients
+    * improve error messages for get_dns_by_node_name
+
 API v1:
     * entrypoints:
         * collections/inbox
@@ -16,6 +19,7 @@ class HTTPGenericSlice(Schema):
         # (relevance, popularity, proximity, created, modified, alphabetical)
         self.sort               = SchemaElement(basestring)
         self.reverse            = SchemaElement(bool)
+        self.center             = SchemaElement(basestring) # "lat,lng"
         
         # filtering
         self.query              = SchemaElement(basestring)
@@ -24,7 +28,7 @@ class HTTPGenericSlice(Schema):
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
         self.deleted            = SchemaElement(bool)
-        self.viewport           = SchemaElement(basestring)
+        self.viewport           = SchemaElement(basestring) # "lat0,lng0;lat1,lng1"
         
         # misc options
         self.quality            = SchemaElement(int)
@@ -38,7 +42,6 @@ class HTTPUserCollectionSlice(HTTPGenericSlice):
         self.screen_name        = SchemaElement(basestring)
 
 API:
-    * rename Error => StampedError
     * standardize handleHTTPRequest to take in a parameter for whether or not auth is required and input schema
 
 blog:

@@ -11,13 +11,7 @@ from AMongoCollection import AMongoCollection
 
 class MongoFollowersCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'friend_id': basestring,
-        'timestamp': basestring
-    }
-    
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='followers')
     
     ### PUBLIC

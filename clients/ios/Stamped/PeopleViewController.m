@@ -47,12 +47,14 @@ typedef enum PeopleSearchCorpus {
 - (void)clearSearch;
 - (void)sendSearchUsersRequest;
 - (void)reloadTableData;
+- (void)showAddFriendsPane;
 
 @property (nonatomic, assign) PeopleSearchCorpus searchCorpus;
 @property (nonatomic, retain) NSMutableArray* userIDsToBeFetched;
 @property (nonatomic, copy) NSArray* friendsArray;
 @property (nonatomic, copy) NSArray* searchResults;
 @property (nonatomic, assign) BOOL searching;
+@property (nonatomic, readonly) UIView* emptyPaneView;
 @end
 
 @implementation PeopleViewController
@@ -65,6 +67,7 @@ typedef enum PeopleSearchCorpus {
 @synthesize searchSegmentedControl = searchSegmentedControl_;
 @synthesize shelfSeparator = shelfSeparator_;
 @synthesize searching = searching_;
+@synthesize emptyPaneView = emptyPaneView_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -75,6 +78,7 @@ typedef enum PeopleSearchCorpus {
   self.searchResults = nil;
   self.searchSegmentedControl = nil;
   self.shelfSeparator = nil;
+  emptyPaneView_ = nil;
   [super dealloc];
 }
 
@@ -113,6 +117,24 @@ typedef enum PeopleSearchCorpus {
     [searchSegmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
   }
   self.hasHeaders = YES;
+  
+  emptyPaneView_ = [[UIView alloc] initWithFrame:CGRectMake(0, 124, 320, 292)];
+  UIImageView* imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_people"]];
+  [emptyPaneView_ addSubview:imageView];
+  [imageView release];
+  UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+  [button setImage:[UIImage imageNamed:@"add_friends_button"] forState:UIControlStateNormal];
+  [button sizeToFit];
+  button.frame = CGRectMake(CGRectGetMidX(self.view.frame) - (CGRectGetWidth(button.frame) / 2), 67,
+                            CGRectGetWidth(button.frame),
+                            CGRectGetHeight(button.frame));
+  button.layer.shadowPath = [UIBezierPath bezierPathWithRect:button.bounds].CGPath;
+  button.layer.shadowOpacity = 0.2;
+  button.layer.shadowOffset = CGSizeMake(0, 2);
+  [button addTarget:self action:@selector(showAddFriendsPane) forControlEvents:UIControlEventTouchUpInside];
+  [emptyPaneView_ addSubview:button];
+  [self.view insertSubview:emptyPaneView_ belowSubview:self.tableView];
+  [emptyPaneView_ release];
 }
 
 - (void)viewDidUnload {
@@ -125,6 +147,7 @@ typedef enum PeopleSearchCorpus {
   self.searchSegmentedControl = nil;
   self.shelfSeparator = nil;
   self.searching = NO;
+  emptyPaneView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -337,9 +360,7 @@ typedef enum PeopleSearchCorpus {
   if (section == 0)
     return 1;
 
-#warning remove
-  return 0;
-  if (friendsArray_ != nil)
+  if (friendsArray_.count > 0)
     return self.friendsArray.count + 1;  // One more for adding friends.
 
   return 0;
@@ -403,8 +424,8 @@ typedef enum PeopleSearchCorpus {
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
   if (searching_ || searchResults_)
     return 0;
-#warning remove
-  if (section == 1)
+
+  if (section == 1 && friendsArray_.count == 0)
     return 0;
 
   return 24;
@@ -426,8 +447,7 @@ typedef enum PeopleSearchCorpus {
     return;
 
   if (indexPath.section == 1 && indexPath.row == 0) {
-    [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
-    [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal]; 
+    [self showAddFriendsPane]; 
     return;
   }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController"
@@ -459,7 +479,7 @@ typedef enum PeopleSearchCorpus {
 
   CGFloat offset = -44;
   NSArray* toMove = [NSArray arrayWithObjects:self.searchField, self.cancelButton, nil];
-  NSArray* toHide = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  NSArray* toHide = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, self.emptyPaneView, nil];
   
   [UIView animateWithDuration:0.2
                         delay:0
@@ -487,7 +507,7 @@ typedef enum PeopleSearchCorpus {
 
   CGFloat offset = 44;
   NSArray* toMove = [NSArray arrayWithObjects:self.searchField, self.cancelButton, nil];
-  NSArray* toShow = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, nil];
+  NSArray* toShow = [NSArray arrayWithObjects:self.reloadLabel, self.lastUpdatedLabel, self.arrowImageView, self.spinnerView, self.emptyPaneView, nil];
   [UIView animateWithDuration:0.2
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
@@ -534,6 +554,11 @@ typedef enum PeopleSearchCorpus {
 }
 
 #pragma mark - Custom methods.
+
+- (void)showAddFriendsPane {
+  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+  [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal];
+}
 
 - (void)reloadTableData {
   [self.tableView reloadData];

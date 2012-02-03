@@ -2,6 +2,7 @@
 import AccountTests
 import ActivityTests
 import BlockTests
+import ClientLogsTests
 import CollectionTests
 import CommentTests
 import EntityTests

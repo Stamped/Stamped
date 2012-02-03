@@ -11,12 +11,7 @@ from AMongoCollection import AMongoCollection
 
 class MongoStampViewsCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'user_id': basestring
-    }
-    
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='stampviews')
     
     ### PUBLIC
@@ -31,5 +26,4 @@ class MongoStampViewsCollection(AMongoCollection):
     def getStampViews(self, stampId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(stampId, limit)
-        
 

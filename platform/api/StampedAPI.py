@@ -2884,4 +2884,10 @@ class StampedAPI(AStampedAPI):
                 logs.info('num_followers: old (%s) new (%s)' % (stats_num_followers, num_followers))
                 
                 self._userDB.updateUserStats(userId, 'num_followers', num_followers)
+    
+    def addClientLogsEntry(self, authUserId, entry):
+        entry.user_id = authUserId
+        entry.created = datetime.utcnow()
+        
+        return self._clientLogsDB.addEntry(entry)
 

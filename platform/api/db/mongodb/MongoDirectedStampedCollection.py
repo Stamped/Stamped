@@ -23,12 +23,7 @@ from MongoBlockCollection import MongoBlockCollection
 
 class MongoDirectedStampsCollection(AMongoCollection):
     
-    SCHEMA = {
-        '_id': basestring,
-        'stamp_id': basestring
-    }
-    
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='directedstamps')
     
     ### PUBLIC

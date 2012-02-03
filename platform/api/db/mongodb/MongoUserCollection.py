@@ -20,7 +20,7 @@ from api.AUserDB                import AUserDB
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
-    def __init__(self, setup=False):
+    def __init__(self):
         AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User, overflow=True)
         AUserDB.__init__(self)
         

@@ -371,6 +371,23 @@ class HTTPEmail(Schema):
         self.email              = SchemaElement(basestring)
 
 
+# ########## #
+# ClientLogs #
+# ########## #
+
+class HTTPClientLogsEntry(Schema):
+    def setSchema(self):
+        self.key                = SchemaElement(basestring, required=True)
+        self.value              = SchemaElement(basestring)
+        
+        # optional ids
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.favorite_id        = SchemaElement(basestring)
+        self.comment_id         = SchemaElement(basestring)
+        self.activity_id        = SchemaElement(basestring)
+
+
 # ######## #
 # Entities #
 # ######## #

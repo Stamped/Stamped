@@ -248,4 +248,8 @@ class AStampedAPI(AEntitySink):
     @abstract
     def getStats(self):
         raise NotImplementedError
+    
+    @abstract
+    def addClientLogsEntry(self, entry):
+        raise NotImplementedError
 

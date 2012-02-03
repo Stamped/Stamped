@@ -139,10 +139,14 @@ urlpatterns = patterns('',
     (r'v0/temp/followers.json',         'v0.functions.temp.followers'),
     (r'v0/temp/timeout.json',           'v0.functions.temp.timeout'),
     
+    ### SETTINGS
     url(R'^pw/(?P<token>[\w-]{36})$',   'protected.views.passwordReset'),
     url(R'^settings/password/forgot$',  'protected.views.passwordForgot'),
     url(R'^settings/password/sent$',    'protected.views.passwordSent'),
     url(R'^settings/password/success$', 'protected.views.passwordSuccess'),
+    
+    ### CLIENT LOGGING
+    (r'v0/private/logs/create.json',    'v0.functions.logs.create'),
     
     ### DOCS
     # (r'v0/oauth2/$',                    'v0.views.oauth2'),
