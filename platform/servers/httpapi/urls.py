@@ -146,7 +146,7 @@ urlpatterns = patterns('',
     url(R'^settings/password/success$', 'protected.views.passwordSuccess'),
     
     ### CLIENT LOGGING
-    (r'v0/clientlogs/addentry.json',    'v0.functions.clientlogs.addentry'),
+    (r'v0/private/logs/create.json',    'v0.functions.logs.create'),
     
     ### DOCS
     # (r'v0/oauth2/$',                    'v0.views.oauth2'),
