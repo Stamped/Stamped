@@ -137,7 +137,7 @@ const CGFloat kKeyboardHeight = 217.0;
     [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateHighlighted];
     [segmentedControl_ setTitleTextAttributes:selectedTextAttributes forState:UIControlStateNormal | UIControlStateSelected];
   }
-  segmentedControl_.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
+  segmentedControl_.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, CGRectGetHeight(segmentedControl_.bounds));
   [primaryTextField_.superview insertSubview:segmentedControl_ belowSubview:categoryDropdownTableView_];
   [segmentedControl_ release];
   [segmentedControl_ addTarget:self
