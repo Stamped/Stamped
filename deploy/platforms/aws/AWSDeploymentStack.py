@@ -175,12 +175,22 @@ class AWSDeploymentStack(ADeploymentStack):
                     # set to OutOfService s.t. the health check must be passed 
                     # before the instance is considered InService after instance 
                     # re-registration.
+                    # 
+                    # NOTE: an additional advantage of pausing here is that the 
+                    # instance update script may restart certain daemons, and a 
+                    # small pause after removing the instance from its ELB should  
+                    # give the instance's daemons a chance to finish handling any 
+                    # in-progress requests (e.g., gunicorn / nginx).
                     time.sleep(10)
                 
                 # apply update synchronously
                 with settings(host_string=instance.public_dns_name):
-                    result = run(cmd, pty=False, shell=True)
-                    status = result.return_code
+                    # TODO: if run fails, don't abort
+                    try:
+                        result = run(cmd, pty=False, shell=True)
+                        status = result.return_code
+                    except:
+                        status = 1
                 
                 if 0 != status:
                     utils.log("[%s] warning: failure updating %s" % (self, instance))
