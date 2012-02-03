@@ -3,6 +3,8 @@
 """
 Interface for Factual API
 
+To get the factual_id (if any) of a given entity, use Factual.factual_from_entity.
+
 Important attributes of a place entity:
 
 factual_id - the unique entity identifier
@@ -15,7 +17,6 @@ region - state code (i.e. 'PA' )
 tel - telephone number (i.e. '(412) 765-3200')
 latitude - float (i.e. 40.525447)
 longitude - float (i.e. -80.005443)
-
 
 Crosswalk:
 Crosswalk attempts to map ids and URIs from one service to
@@ -54,14 +55,123 @@ import sys
 from SinglePlatform     import StampedSinglePlatform
 from pprint             import pprint
 from pymongo            import Connection
-from multiprocessing    import Queue
+from gevent.queue       import Queue
 from MongoStampedAPI    import MongoStampedAPI
 from gevent.pool        import Pool
+from functools          import partial
+from urllib2            import HTTPError
+from gevent             import sleep
+from itertools          import combinations
+import random
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
+# Random (but seemingly functional API Key)
 #_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
 _API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
 _limit = 50
+
+
+def _path(path_string,entity,subfunc=None):
+    """
+    Helper function for creating resolve filters
+
+    See _relevant_fields for usage.
+    _path assumes that is working with dictionary like elements
+    except for leafs and wildcard iterables
+    """
+    path = path_string.split()
+    cur = entity
+    for k in path:
+        # wildcard support for list elements
+        if k == '*':
+            for v in cur:
+                result = subfunc(v)
+                if result:
+                    return result
+            return None
+        if k in cur:
+            cur = cur[k]
+        else:
+            return None
+    if subfunc:
+        cur = subfunc(cur) 
+    return cur
+
+def _street(val):
+    if val:
+        tokens = val.split(',')
+        if tokens:
+            return tokens[0]
+    return None
+
+def _category(entity):
+    if entity['subcategory'] == 'restaurant':
+        return 'Food & Beverage > Restaurants'
+    elif entity['category'] == 'food':
+        return 'Food & Beverage'
+    else:
+        return None
+#
+# Currently used entity data and their associated name for use in a resolve filter
+#
+_relevant_fields = {
+    'name':partial(_path,'title'),
+    'longitude':partial(_path,'coordinates lng'),
+    'latitude':partial(_path,'coordinates lat'),
+    'tel':partial(_path,'details contact phone'),
+    'address':partial(_path,'details place address',subfunc=_street),
+    'category':_category,
+}
+
+def _filters(entity,fields):
+    """
+    Helper function to create a filters from a dict of filter names and entity functions
+
+    _filters will ignore unavailable fields (None values).
+
+    See _relevant_fields for typical arguments
+    """
+    m = {}
+    for k in fields:
+        f = _relevant_fields[k]
+        v = f(entity)
+        if v:
+            m[k] = v
+    return m
+
+#
+# Alternative fallback filter combinations if the standard filter fails to resolve
+#
+_field_combos = [
+    # Commented out until throttling is resolved
+    #set(['name','latitude','longitude','category']),
+    #set(['name','address','tel','category','latitude','longitude']),
+    #set(['tel','latitude','longitude','address','category']),
+]
+
+def _combos(entity):
+    """
+    Creates a prioritized list of filters for use with resolve.
+
+    The first filter includes all available information.
+
+    The other filters are unique subsets of the first as specified by _field_combos
+    """
+    filters = _filters(entity,_relevant_fields.keys())
+    keys = frozenset(filters.keys())
+    combos = set([keys])
+    result = [filters]
+    for combo in _field_combos:
+        inter = frozenset(combo & keys)
+        # if non-empty and not repeated
+        if inter and inter not in combos:
+            # add new combination to filter list
+            combos.add(inter)
+            m = {}
+            for k in inter:
+                m[k] = filters[k]
+            result.append(m)
+    return result
 
 class Factual(object):
     """
@@ -156,27 +266,39 @@ class Factual(object):
         else:
             return None
             
-
-    def entity(self,factual_id):
-        """
-        STUB Create a Stamped entity from a factual_id.
-        """
-        pass
+    # TODO implement
+    #
+    #def entity(self,factual_id):
+    #    """
+    #    STUB Create a Stamped entity from a factual_id.
+    #    """
+    #    pass
 
     def factual_from_entity(self,entity):
         """
         Get the factual_id (if any) associated with the given entity.
+
+        This method iterates through all available filters for the given
+        entity until one of them resolves acceptably.
+
+        If the entity fails to resolve, None is returned.
         """
-        filters = {'name':entity.title,'longitude':entity.lng,'latitude':entity.lat}
-        resolve_result = self.resolve(filters,1)
-        if resolve_result:
-            return resolve_result[0]['factual_id']
-        else:
-            return None
+        filters = _combos(entity)
+        factual_id = None
+        for f in filters:
+            results = self.resolve(f,1)
+            if results:
+                result = results[0]
+                if self.__acceptable(result):
+                    factual_id = result['factual_id']
+                    break
+        return factual_id
     
     def factual_from_singleplatform(self,singleplatform_id):
         """
         Get the factual_id (if any) associated with the given singleplatform ID.
+
+        Convenience method for crosswalk lookup from a singleplatform ID.
         """
         crosswalk_result = self.crosswalk_external('singleplatform',singleplatform_id,'singleplatform')
         if crosswalk_result:
@@ -188,7 +310,7 @@ class Factual(object):
         """
         Get singleplatform id from factual_id
 
-        Returns id or None if not known.
+        Convenience method for crosswalk lookup for singleplatform
         """
         singleplatform_info = self.crosswalk_id(factual_id,namespace='singleplatform')
         sp_id = None
@@ -213,6 +335,11 @@ class Factual(object):
             return None
 
     def __factual(self,service,prefix='places',**args):
+        """
+        Helper method for Factual API calls.
+        
+        Generates url and uses it with __query. 
+        """
         if 'KEY' not in args:
             args['KEY'] = self.__v3_key
         pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
@@ -220,95 +347,66 @@ class Factual(object):
         return self.__query(url)
 
     def __query(self,url):
+        """
+        Helper method for making a RESTful API call and parsing the JSON response
+        """
         response = utils.getFile(url)
         m = json.loads(response)
         try:
             return m['response']['data']
         except:
             return None
+    
+    def __acceptable(self,result):
+        """
+        Determines whether a Resolve result is a positive match.
+        
+        Currently trusts the builtin 'resolved' field. 
+        """
+        return result['resolved']
 
-def _handle_entity(entity,queue,f,db):
-    try:
-        args = {}
-        args['name'] = entity['title']
-        args['longitude'] = entity['coordinates']['lng']
-        args['latitude'] = entity['coordinates']['lat']
-        if 'details' in entity:
-            details = entity['details']
-            if 'contact' in details:
-                contact = details['contact']
-                if 'phone' in contact:
-                    args['tel'] = contact['phone']
-            if 'place' in details:
-                place2 = details['place']
-                if 'address_components' in place2:
-                    for comp in place2['address_components']:
-                        types = comp['types']
-                        if 'postal_code' in types:
-                            args['postcode'] = comp['long_name']
-                        #if 'country' in types:
-                        #    args['country'] = comp['country']
-                        if 'locality' in types:
-                            args['locality'] = comp['long_name']
-        results = f.resolve(args,1)
-        if results:
-            result = results[0]
-            test = result['similarity'] > .80 and result['status'] == '1'
-            if len(args) <= 3:
-                test = test and result['similarity'] > .90
-            if test:
-                factual_id = result['factual_id']
-                entity['sources']['factual'] = {'factual_id':factual_id}
-                singleplatform_id = f.singleplatform(factual_id)
-                if singleplatform_id:
-                    entity['sources']['singleplatform'] = {'singleplatform_id':singleplatform_id}
-                    queue.put('both')
-                else:
-                    queue.put('factual')
-                #db.updateEntity(entity)
-            else:
-                queue.put('bad-match')
-    except Exception as e:
-        print "Encountered an error with %s" % entity
-        print e
-        print e.message
-        queue.put('error')
 
-def _count(queue):
-    counts = {}
-    while True:
-        status = queue.get()
-        if status != 'done':
-            counts[status] = counts.setdefault(status,0) + 1
-            pprint(counts)
-        else:
-            return
-
-def populatePlaces():
+def resolveEntities(size,verbose=True):
+    """
+    Resolve a random batch of entities, and output accuracy stats
+    """
     f = Factual()
     stampedAPI = MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
-    rs = entityDB._collection.find({"subcategory" : "restaurant"},output="list")
-    pool = Pool(16)
-    pool2 = Pool(1)
-    queue = Queue()
-    for result in rs[0:100]:
-        entity = entityDB._convertFromMongo(result)    
-        pool.spawn(_handle_entity, entity,queue,f,entityDB)
-    pool2.spawn(_count,queue)
-    print("here")
-    pool.join()
-    print("joined")
-    queue.send('done')
-    pool2.join()
-    print("finished")
+    rs = entityDB._collection.find({"subcategory" : "restaurant"})
+    end = random.randint(size,rs.count())
+    ids = []
+    i = 0
+    count = 0
+    throttled = 0
+    for entity in rs[end-size:end]:
+        i += 1
+        try:
+            factual_id = f.factual_from_entity(entity)
+            if factual_id:
+                count += 1
+            print "%.2f : %d / %d" % (count*1.0/i,count,i)
+        except HTTPError as e:
+            if e.code == 403:
+                throttled += 1
+                if throttled > 5:
+                    print("Too much throttling...aborting")
+                    return
+                print("slowing down for throttling")
+                sleep(throttled)
+            else:
+                raise e
+        sleep(.3)
+    pprint(len(ids))
 
 def demo():
     """
     Interactive feature demo for the Factual class.
+
     Follow the prompts to test out features for different inputs.
-    Refer to the 
+
+    Refer to the source code for more information.
     """
     sys.stdout.write('Use default attributes (non-empty for false): ')
     use_defaults = sys.stdin.readline().strip()
@@ -381,6 +479,12 @@ def demo():
     print("Finished")
 
 if __name__ == '__main__':
-    populatePlaces()
+    if len(sys.argv) > 1 and sys.argv[1] == 'resolve':
+        count = 100
+        if len(sys.argv) > 2:
+            count = int(sys.argv[2])
+        resolveEntities(count,verbose=True)
+    else:
+        demo
     
     
