@@ -394,8 +394,8 @@ class Factual(object):
     
     def __category_test(self,result,entity,filters):
         if 'category' not in filters or 'category' not in result:
-            self.__log("Rejected for not having a category\n")
-            return False
+            # Don't reject things for no category
+            return True
         if not result['category'].startswith(filters['category']):
             self.__log("Rejected for bad category\n")
             return False
