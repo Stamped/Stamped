@@ -20,8 +20,8 @@ class StampedAPIClientLogsTests(AStampedAPITestCase):
         self.deleteAccount(self.token)
     
     def test_addentry(self):
-        path = "clientlogs/addentry.json"
-        data = { 
+        path = "private/logs/create.json"
+        data = {
             "oauth_token"   : self.token['access_token'], 
             "key"           : "search", 
             "value"         : "pizza", 

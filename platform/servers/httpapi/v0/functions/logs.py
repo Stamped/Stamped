@@ -10,7 +10,7 @@ from Schemas            import ClientLogsEntry
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
-def addentry(request):
+def create(request):
     authUserId      = checkOAuth(request)
     schema          = parseRequest(HTTPClientLogsEntry(), request)
     
