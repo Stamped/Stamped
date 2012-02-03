@@ -182,10 +182,11 @@ class Factual(object):
     """
     Factual API Wrapper
     """
-    def __init__(self,key=_API_V3_Key,secret=_API_V3_Secret):
+    def __init__(self,key=_API_V3_Key,secret=_API_V3_Secret,log=None):
         self.__v3_key = key
         self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
+        self.__log_file = log
     
     def resolve(self, data,limit=_limit):
         """
@@ -279,7 +280,7 @@ class Factual(object):
     #    """
     #    pass
 
-    def factual_from_entity(self,entity,log=None):
+    def factual_from_entity(self,entity):
         """
         Get the factual_id (if any) associated with the given entity.
 
@@ -294,7 +295,7 @@ class Factual(object):
             results = self.resolve(f,1)
             if results:
                 result = results[0]
-                if self.__acceptable(result,entity,f,log=log):
+                if self.__acceptable(result,entity,f):
                     factual_id = result['factual_id']
                     break
         return factual_id
@@ -369,23 +370,74 @@ class Factual(object):
         except:
             return None
     
-    def __acceptable(self,result,entity,filters,log=None):
+    def __distance(self,a,b):
+        if 'latitude' in a and 'latitude' in b and 'longitude' in a and 'longitude' in b:
+            latA = a['latitude']
+            latB = b['latitude']
+            lonA = a['longitude']
+            lonB = b['longitude']
+            dLat = latA-latB
+            dLon = lonA-lonB
+            return (dLat**2+dLon**2)**.5
+        else:
+            #Don't disqualify if ommitted
+            return 0
+
+    def __phone_test(self,result,entity,filters):
+        if 'tel' in filters and 'tel' in result:
+            good = filters['tel'] == result['tel'] or result['similarity'] > .98
+            if not good:
+                self.__log("Rejected for different tel values\n")
+            return good
+        else:
+            return True 
+    
+    def __category_test(self,result,entity,filters):
+        if 'category' not in filters or 'category' not in result:
+            self.__log("Rejected for not having a category\n")
+            return False
+        if not result['category'].startswith(filters['category']):
+            self.__log("Rejected for bad category\n")
+            return False
+        else:
+            return True
+
+    def __custom_test(self,result,entity,filters):
+        if not self.__category_test(result,entity,filters):
+            return False
+        if self.__distance(result,filters) > 1:
+            self.__log("Rejected for distance\n")
+            return False
+        if not self.__phone_test(result,entity,filters):
+            return False
+        if result['similarity'] < .95:
+            self.__log("Rejected for similarity\n")
+            return False
+        return True
+
+    
+    def __acceptable(self,result,entity,filters):
         """
         Determines whether a Resolve result is a positive match.
         
         Currently trusts the builtin 'resolved' field. 
         """
         good = result['resolved']
-        if not good and log:
-            log.write('FAILED:\n%s\n%s\n%s\n' % (result,entity,filters))
+        if not good:
+            good = self.__custom_test(result,entity,filters)
+        if not good:
+            self.__log('FAILED:\n%s\n%s\n%s\n' % (result,entity,filters))
         return good
-
+    
+    def __log(self,message):
+        if self.__log_file:
+            self.__log_file.write(message)
 
 def resolveEntities(size,log=None):
     """
     Resolve a random batch of entities, and output accuracy stats
     """
-    f = Factual()
+    f = Factual(log=sys.stdout)
     stampedAPI = MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -398,7 +450,7 @@ def resolveEntities(size,log=None):
         i += 1
         before = time.time()
         try:
-            factual_id = f.factual_from_entity(entity,log=log)
+            factual_id = f.factual_from_entity(entity)
             if factual_id:
                 count += 1
             if log:
