@@ -51,6 +51,9 @@ import Globals
 import utils
 import json
 import urllib
+import oauth
+import urllib2
+from urlparse import urlparse, parse_qsl
 import sys
 from SinglePlatform     import StampedSinglePlatform
 from pprint             import pprint
@@ -68,6 +71,7 @@ _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
 #_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
 _API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
+_API_V3_Secret = "pJ4OIbsi8l3V1sXNRngy3uCGe0DzCIpWfzwGtbkM"
 _limit = 50
 
 
@@ -177,9 +181,9 @@ class Factual(object):
     """
     Factual API Wrapper
     """
-    def __init__(self,key=_API_Key,v3_key=_API_V3_Key):
-        self.__key = key
-        self.__v3_key = v3_key
+    def __init__(self,key=_API_V3_Key,secret=_API_V3_Secret):
+        self.__v3_key = key
+        self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
     
     def resolve(self, data,limit=_limit):
@@ -336,21 +340,28 @@ class Factual(object):
 
     def __factual(self,service,prefix='places',**args):
         """
-        Helper method for Factual API calls.
-        
-        Generates url and uses it with __query. 
+        Helper method for making OAuth Factual API calls.
+
+        This code is based on the recommended Python sample code available at:
+
+        http://developer.factual.com/display/docs/Core+API+-+Oauth
+
+        The custom beginning constructs the url based on input parameters.
+
+        The custom end parses the JSON response and abstracts the data portion if successful.
         """
-        if 'KEY' not in args:
-            args['KEY'] = self.__v3_key
         pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
         url =  "http://api.v3.factual.com/%s/%s?%s" % (prefix,service,'&'.join(pairs))
-        return self.__query(url)
+        params    = parse_qsl(urlparse(url).query)
+        consumer  = oauth.OAuthConsumer(key=self.__v3_key, secret=self.__v3_secret)
+        request   = oauth.OAuthRequest.from_consumer_and_token(consumer, http_method='GET', http_url=url, parameters=params)
 
-    def __query(self,url):
-        """
-        Helper method for making a RESTful API call and parsing the JSON response
-        """
-        response = utils.getFile(url)
+        request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
+
+        req = urllib2.Request(url, None, request.to_header())
+        res = urllib2.urlopen(req)
+
+        response = res.read()
         m = json.loads(response)
         try:
             return m['response']['data']
@@ -397,7 +408,7 @@ def resolveEntities(size,verbose=True):
                 sleep(throttled)
             else:
                 raise e
-        sleep(.3)
+        sleep(1)
     pprint(len(ids))
 
 def demo():
@@ -485,6 +496,6 @@ if __name__ == '__main__':
             count = int(sys.argv[2])
         resolveEntities(count,verbose=True)
     else:
-        demo
+        demo()
     
     
