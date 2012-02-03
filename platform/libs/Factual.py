@@ -377,7 +377,7 @@ class Factual(object):
         """
         good = result['resolved']
         if not good and log:
-            log.write('FAILED:\n%s\n%s\n%\n' % (result,entity,filters))
+            log.write('FAILED:\n%s\n%s\n%s\n' % (result,entity,filters))
         return good
 
 
