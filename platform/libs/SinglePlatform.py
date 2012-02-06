@@ -50,6 +50,10 @@ class SinglePlatform(object):
     def get_short_menu(self, location_id):
         return self._get_uri('/restaurants/%s/shortmenu' % location_id)
     
+    #TODO implement
+    def get_stamped_menu(self,location_id):
+        pass
+
     def _get_uri(self, uri, params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))

@@ -873,3 +873,49 @@ class BarnesAndNobleSchema(Schema):
     def setSchema(self):
         self.bid                = SchemaElement(int)
 
+class MenuSchema(Schema):
+    def setSchema(self):
+        self.source = SchemaElement(basestring)
+        self.source_id = SchemaElement(basestring)
+        self.source_info = SchemaElement(basestring)
+        self.disclaimer = SchemaElement(basestring)
+        self.attribution_image = SchemaElement(basestring)
+        self.attribution_image_link = SchemaElement(basestring)
+        self.timestamp = SchemaElement(float)
+        self.menus = SchemaList(SubmenuSchema())
+
+class SubmenuSchema(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.times = MenuTimesSchema()
+        self.footnote = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.sections = SchemaList(MenuSectionSchema())
+
+class MenuSectionSchema(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.items = SchemaList(MenuItemSchema())
+
+class MenuItemSchema(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.categories = SchemaList(SchemaElement(basestring))
+        self.short_desc = SchemaElement(basestring)
+        self.spicy = SchemaElement(int)
+        self.allergens = SchemaList(SchemaElement(basestring))
+        self.allergen_free = SchemaList(SchemaElement(basestring))
+        self.restrictions = SchemaList(SchemaElement(basestring))
+        self.prices = MenuPriceSchema()
+
+class MenuPriceSchema(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.price = SchemaElement(basestring)
+        self.calories = SchemaElement(int)
+        self.unit = SchemaElement(basestring)
+        self.currency = SchemaElement(basestring)
