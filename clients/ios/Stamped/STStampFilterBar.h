@@ -36,6 +36,7 @@ typedef enum {
 @property (nonatomic, assign) StampFilterType filterType;
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, readonly) STSearchField* searchField;
+@property (nonatomic, readonly) UIImageView* tooltipImageView;
 
 - (void)reset;
 

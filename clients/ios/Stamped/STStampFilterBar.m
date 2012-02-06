@@ -8,6 +8,8 @@
 
 #import "STStampFilterBar.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "STSearchField.h"
 
 static const CGFloat kHorizontalSeparation = 42.0;
@@ -27,7 +29,6 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
-@property (nonatomic, retain) UIButton* clearFilterButton;
 @property (nonatomic, retain) UIButton* searchButton;
 @end
 
@@ -39,8 +40,8 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 @synthesize filterType = filterType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize searchField = searchField_;
-@synthesize clearFilterButton = clearFilterButton_;
 @synthesize searchButton = searchButton_;
+@synthesize tooltipImageView = tooltipImageView_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -61,8 +62,10 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 - (void)dealloc {
   self.filterButtons = nil;
   self.searchQuery = nil;
-  self.clearFilterButton = nil;
   self.searchButton = nil;
+  searchField_ = nil;
+  scrollView_ = nil;
+  tooltipImageView_ = nil;
   [super dealloc];
 }
 
@@ -109,12 +112,6 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
       button.selected = NO;
     }
   }
-
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{ clearFilterButton_.alpha = filterType_ == StampFilterTypeNone ? 0 : 1; }
-                   completion:nil];
 }
 
 - (void)addFirstPageButtons {
@@ -178,19 +175,6 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
 
-  // None.
-  ++i;
-  self.clearFilterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"hdr_filter_clear_button"]
-                      forState:UIControlStateNormal];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"hdr_filter_clear_button_selected"]
-                      forState:UIControlStateHighlighted];
-  clearFilterButton_.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
-  clearFilterButton_.tag = StampFilterTypeNone;
-  clearFilterButton_.alpha = 0;
-  [scrollView_ addSubview:clearFilterButton_];
-  [filterButtons_ addObject:clearFilterButton_];
-  
   for (UIButton* button in filterButtons_) {
     [button addTarget:self
                action:@selector(filterButtonPressed:)
@@ -293,40 +277,60 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 - (void)showTooltipIfNeeded {
   BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 10);
+  if (tooltipImageView_) {
+    [tooltipImageView_.layer removeAllAnimations];
+    tooltipImageView_.alpha = 1;
+    UIImageView* tooltipView = tooltipImageView_;
+    tooltipImageView_ = nil;
+    [UIView animateWithDuration:0.2
+                          delay:0
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{ tooltipView.alpha = 0; }
+                     completion:^(BOOL finished) {
+                       if (!finished)
+                         return;
+
+                       [tooltipView removeFromSuperview];
+                     }];
+    [self showTooltipIfNeeded];
+    return;
+  }
   for (UIButton* button in filterButtons_) {
     if (filterType_ == button.tag && button.selected) {
-      UIImageView* tooltipView = [self tooltipViewForButton:button showInstruction:showInstruction];
-      tooltipView.alpha = 0;
-      CGPoint tooltipCenter = [button.superview convertPoint:button.center toView:button.window];
+      tooltipImageView_ = [self tooltipViewForButton:button showInstruction:showInstruction];
+      tooltipImageView_.alpha = 0;
+      CGPoint tooltipCenter = [button.superview convertPoint:button.center toView:self.superview];
       if (filterType_ == StampFilterTypeFood) {
         tooltipCenter.x += 50;
       } else if (filterType_ == StampFilterTypeBook && showInstruction) {
         tooltipCenter.x += 17;
       }
-      tooltipCenter.y += (CGRectGetHeight(tooltipView.bounds) / 2) + 2;
-      tooltipView.center = tooltipCenter;
-      [button.window addSubview:tooltipView];
+      tooltipCenter.y += (CGRectGetHeight(tooltipImageView_.bounds) / 2) + 2;
+      tooltipImageView_.center = tooltipCenter;
+      [self.superview addSubview:tooltipImageView_];
+      
       [UIView animateWithDuration:0.4
                             delay:0
                           options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseOut
                        animations:^{
-                         tooltipView.alpha = 1;
-                         CGPoint center = tooltipView.center;
+                         tooltipImageView_.alpha = 1;
+                         CGPoint center = tooltipImageView_.center;
                          center.y += 7;
-                         tooltipView.center = center;
+                         tooltipImageView_.center = center;
                        }
                        completion:^(BOOL finished) {
-                         [UIView animateWithDuration:0.25
-                                               delay:0.75
+                         if (!finished)
+                           return;
+
+                         [UIView animateWithDuration:0.2
+                                               delay:1.5
                                              options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseIn
-                                          animations:^{
-                                            tooltipView.alpha = 0;
-                                            CGPoint center = tooltipView.center;
-                                            center.y += 5;
-                                            tooltipView.center = center;
-                                          }
+                                          animations:^{ tooltipImageView_.alpha = 0; }
                                           completion:^(BOOL finished) {
-                                            [tooltipView removeFromSuperview];
+                                            if (!finished)
+                                              return;
+                                            [tooltipImageView_ removeFromSuperview];
+                                            tooltipImageView_ = nil;
                                           }];
                        }];
       break;
@@ -335,6 +339,13 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 }
 
 #pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  if (!tooltipImageView_)
+    return;
+
+  tooltipImageView_.transform = CGAffineTransformMakeTranslation(-scrollView.contentOffset.x, 0);
+}
 
 - (BOOL)scrollViewShouldScrollToTop:(UIScrollView*)scrollView {
   return NO;

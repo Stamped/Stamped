@@ -620,8 +620,6 @@
 		7E589538147C468B002268C4 /* hdr_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB231441F21F00DDEAE9 /* hdr_back_button@2x.png */; };
 		7E589539147C468B002268C4 /* hdr_filter_books_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB241441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png */; };
 		7E58953A147C468B002268C4 /* hdr_filter_books_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB251441F21F00DDEAE9 /* hdr_filter_books_button@2x.png */; };
-		7E58953B147C468B002268C4 /* hdr_filter_clear_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB261441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png */; };
-		7E58953C147C468B002268C4 /* hdr_filter_clear_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB271441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png */; };
 		7E58953D147C468B002268C4 /* hdr_filter_movies_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB281441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png */; };
 		7E58953E147C468B002268C4 /* hdr_filter_movies_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB291441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png */; };
 		7E58953F147C468B002268C4 /* hdr_filter_music_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB2A1441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png */; };
@@ -1122,8 +1120,6 @@
 		7EBBDB3C1441F21F00DDEAE9 /* hdr_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB231441F21F00DDEAE9 /* hdr_back_button@2x.png */; };
 		7EBBDB3D1441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB241441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png */; };
 		7EBBDB3E1441F21F00DDEAE9 /* hdr_filter_books_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB251441F21F00DDEAE9 /* hdr_filter_books_button@2x.png */; };
-		7EBBDB3F1441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB261441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png */; };
-		7EBBDB401441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB271441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png */; };
 		7EBBDB411441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB281441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png */; };
 		7EBBDB421441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB291441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png */; };
 		7EBBDB431441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB2A1441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png */; };
@@ -2148,8 +2144,6 @@
 		7EBBDB231441F21F00DDEAE9 /* hdr_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_back_button@2x.png"; sourceTree = "<group>"; };
 		7EBBDB241441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_books_button_selected@2x.png"; sourceTree = "<group>"; };
 		7EBBDB251441F21F00DDEAE9 /* hdr_filter_books_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_books_button@2x.png"; sourceTree = "<group>"; };
-		7EBBDB261441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_clear_button_selected@2x.png"; sourceTree = "<group>"; };
-		7EBBDB271441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_clear_button@2x.png"; sourceTree = "<group>"; };
 		7EBBDB281441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_movies_button_selected@2x.png"; sourceTree = "<group>"; };
 		7EBBDB291441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_movies_button@2x.png"; sourceTree = "<group>"; };
 		7EBBDB2A1441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_filter_music_button_selected@2x.png"; sourceTree = "<group>"; };
@@ -3660,8 +3654,6 @@
 				7EBBDB231441F21F00DDEAE9 /* hdr_back_button@2x.png */,
 				7EBBDB241441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png */,
 				7EBBDB251441F21F00DDEAE9 /* hdr_filter_books_button@2x.png */,
-				7EBBDB261441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png */,
-				7EBBDB271441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png */,
 				7EBBDB281441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png */,
 				7EBBDB291441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png */,
 				7EBBDB2A1441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png */,
@@ -4497,8 +4489,6 @@
 				7E589538147C468B002268C4 /* hdr_back_button@2x.png in Resources */,
 				7E589539147C468B002268C4 /* hdr_filter_books_button_selected@2x.png in Resources */,
 				7E58953A147C468B002268C4 /* hdr_filter_books_button@2x.png in Resources */,
-				7E58953B147C468B002268C4 /* hdr_filter_clear_button_selected@2x.png in Resources */,
-				7E58953C147C468B002268C4 /* hdr_filter_clear_button@2x.png in Resources */,
 				7E58953D147C468B002268C4 /* hdr_filter_movies_button_selected@2x.png in Resources */,
 				7E58953E147C468B002268C4 /* hdr_filter_movies_button@2x.png in Resources */,
 				7E58953F147C468B002268C4 /* hdr_filter_music_button_selected@2x.png in Resources */,
@@ -5094,8 +5084,6 @@
 				7EBBDB3C1441F21F00DDEAE9 /* hdr_back_button@2x.png in Resources */,
 				7EBBDB3D1441F21F00DDEAE9 /* hdr_filter_books_button_selected@2x.png in Resources */,
 				7EBBDB3E1441F21F00DDEAE9 /* hdr_filter_books_button@2x.png in Resources */,
-				7EBBDB3F1441F21F00DDEAE9 /* hdr_filter_clear_button_selected@2x.png in Resources */,
-				7EBBDB401441F21F00DDEAE9 /* hdr_filter_clear_button@2x.png in Resources */,
 				7EBBDB411441F21F00DDEAE9 /* hdr_filter_movies_button_selected@2x.png in Resources */,
 				7EBBDB421441F21F00DDEAE9 /* hdr_filter_movies_button@2x.png in Resources */,
 				7EBBDB431441F21F00DDEAE9 /* hdr_filter_music_button_selected@2x.png in Resources */,
