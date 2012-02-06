@@ -276,10 +276,10 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 }
 
 - (void)showTooltipIfNeeded {
-  BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 10);
+  BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 15);
   if (tooltipImageView_) {
     [tooltipImageView_.layer removeAllAnimations];
-    tooltipImageView_.alpha = 1;
+    tooltipImageView_.alpha = [[tooltipImageView_.layer presentationLayer] opacity];
     UIImageView* tooltipView = tooltipImageView_;
     tooltipImageView_ = nil;
     [UIView animateWithDuration:0.2
@@ -297,6 +297,9 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   }
   for (UIButton* button in filterButtons_) {
     if (filterType_ == button.tag && button.selected) {
+      NSInteger numTimesShown = [[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed];
+      [[NSUserDefaults standardUserDefaults] setInteger:++numTimesShown forKey:kNumInstructionsDisplayed];
+      [[NSUserDefaults standardUserDefaults] synchronize];
       tooltipImageView_ = [self tooltipViewForButton:button showInstruction:showInstruction];
       tooltipImageView_.alpha = 0;
       CGPoint tooltipCenter = [button.superview convertPoint:button.center toView:self.superview];
@@ -308,7 +311,6 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
       tooltipCenter.y += (CGRectGetHeight(tooltipImageView_.bounds) / 2) + 2;
       tooltipImageView_.center = tooltipCenter;
       [self.superview addSubview:tooltipImageView_];
-      
       [UIView animateWithDuration:0.4
                             delay:0
                           options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseOut
@@ -321,9 +323,9 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
                        completion:^(BOOL finished) {
                          if (!finished)
                            return;
-
+                         CGFloat delay = showInstruction ? 1.5 : 0.5;
                          [UIView animateWithDuration:0.2
-                                               delay:1.5
+                                               delay:delay
                                              options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseIn
                                           animations:^{ tooltipImageView_.alpha = 0; }
                                           completion:^(BOOL finished) {
