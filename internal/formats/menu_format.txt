@@ -4,8 +4,8 @@ TOP_LEVEL = {
 	'source_id' : SOURCE_ID,
 	'source_info' : SOURCE_SPECIFIC_STATE, 
 	'disclaimer'	:	DISCLAIMER_TEXT,
-	'attributionImage'	: IMAGE_URL,
-	'attributionImageLink'	:	IMAGE_ATTRIBUTION_LINK,
+	'attribution_image'	: IMAGE_URL,
+	'attribution_image_link'	:	IMAGE_ATTRIBUTION_LINK,
 	'timestamp': FETCHED_TIMESTAMP,
 	'menus':[
 		( MENU )* 
@@ -31,15 +31,6 @@ SECTION = {
 	'desc'	: TEXT_DESCRIPTION,
 	'short_desc'	: SHORT_DESCRIPTION,
 	'category'	: CANONICAL_SECTION_NAME,
-	'prices'	:	[
-		{
-			'title'	:	FORMATTED_TITLE,
-			'price'	:	PRICE,
-			'calories'	:	CALORIES,
-			'unit'	:	UNIT, #i.e. per pound, each (default),
-			'currency'	: CURRENCY #default is dollars
-		}
-	]
 	'items' : [
 		( ITEM )*
 	]
@@ -52,7 +43,7 @@ ITEM = {
 	'short_desc'	: SHORT_DESCRIPTION,
 	'spicy'	: (0,5), #default 0
 	'allergens'	: [ (COMMON_ALLERGENS)* ], #i.e. dairy,peanut
-	'allergenFree'	: [ (COMMON_ALLERGEN-free)* ], #i.e. dairy-free
+	'allergen_free'	: [ (COMMON_ALLERGEN-free)* ], #i.e. dairy-free
 	'restrictions'	: [	(COMMON_RESTRICTION)* ], #i.e. vegan, halal
 	'prices'	:	[
 		{
@@ -75,8 +66,8 @@ ITEM = {
 	'source': 'singleplatform',
 	'source_id' : 'hard-knox-cafe',
 	'source_info' : None, 
-	'attributionImage': 'http://a.singleplatform.com/Stamped/hard-knox-cafe/provided_by.png',
-	'attributionImageLink': 'http://www.singlepage.com/hard-knox-cafe/menu?ref=Stamped',
+	'attribution_image': 'http://a.singleplatform.com/Stamped/hard-knox-cafe/provided_by.png',
+	'attribution_image_link': 'http://www.singlepage.com/hard-knox-cafe/menu?ref=Stamped',
 	'disclaimer': 'Disclaimer: Always check with the restaurant for pricing and availability of menu items. SinglePlatform is not responsible for menu or pricing changes, but the information is believed to be accurate when posted. Listing of a menu does not mean that there is any affiliation, endorsement or sponsorship between SinglePlatform and the listed restaurant.',
 	'timestamp': FETCHED_TIMESTAMP,
 	'menus':[
