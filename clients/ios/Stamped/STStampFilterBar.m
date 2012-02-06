@@ -273,13 +273,12 @@ static const CGFloat kTopMargin = 7;
       break;
       
     default:
-      NSLog(@"WTF. This shouldn't happen...");
+      NSLog(@"WTF. Can't find %@", imgName);
       break;
   }
   if (showInstruction)
     imgName = [imgName stringByAppendingString:@"_tap"];
-  
-  NSLog(@"Image name: %@", imgName);
+
   return [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imgName]] autorelease];
 }
 
@@ -292,14 +291,19 @@ static const CGFloat kTopMargin = 7;
 }
 
 - (void)showTooltipIfNeeded {
+  BOOL showInstruction = YES;
   for (UIButton* button in filterButtons_) {
     if (filterType_ == button.tag && button.selected) {
-      UIImageView* tooltipView = [self tooltipViewForButton:button showInstruction:YES];
+      UIImageView* tooltipView = [self tooltipViewForButton:button showInstruction:showInstruction];
       tooltipView.alpha = 0;
-      CGPoint buttonCenter = [button.superview convertPoint:button.center toView:button.window];
-      //NSLog(@"Window center: %@", NSStringFromCGPoint(buttonCenter));
-      buttonCenter.y += CGRectGetHeight(tooltipView.bounds) / 2;
-      tooltipView.center = buttonCenter;
+      CGPoint tooltipCenter = [button.superview convertPoint:button.center toView:button.window];
+      if (filterType_ == StampFilterTypeFood) {
+        tooltipCenter.x += 50;
+      } else if (filterType_ == StampFilterTypeBook && showInstruction) {
+        tooltipCenter.x += 17;
+      }
+      tooltipCenter.y += CGRectGetHeight(tooltipView.bounds) / 2;
+      tooltipView.center = tooltipCenter;
       [button.window addSubview:tooltipView];
       [UIView animateWithDuration:0.4
                             delay:0
