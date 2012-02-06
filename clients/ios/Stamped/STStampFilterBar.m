@@ -12,6 +12,7 @@
 
 static const CGFloat kHorizontalSeparation = 42.0;
 static const CGFloat kTopMargin = 7;
+static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 @interface STStampFilterBar ()
 - (void)initialize;
@@ -21,6 +22,8 @@ static const CGFloat kTopMargin = 7;
 - (void)fireDelegateMethod;
 - (void)addFirstPageButtons;
 - (void)addSecondPageButtons;
+- (void)showTooltipIfNeeded;
+- (UIImageView*)tooltipViewForButton:(UIButton*)button showInstruction:(BOOL)showInstruction;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
@@ -246,7 +249,38 @@ static const CGFloat kTopMargin = 7;
 
 - (void)filterButtonPressed:(id)sender {
   self.filterType = [(UIButton*)sender tag];
+
+  [self showTooltipIfNeeded];
   [self fireDelegateMethod];
+}
+
+- (UIImageView*)tooltipViewForButton:(UIButton*)button showInstruction:(BOOL)showInstruction {
+  NSString* imgName = @"tooltip_filter_";
+  switch (button.tag) {
+    case StampFilterTypeBook:
+      imgName = [imgName stringByAppendingString:@"books"];
+      break;
+    case StampFilterTypeFilm:
+      imgName = [imgName stringByAppendingString:@"film"];
+      break;
+    case StampFilterTypeMusic:
+      imgName = [imgName stringByAppendingString:@"music"];
+      break;
+    case StampFilterTypeFood:
+      imgName = [imgName stringByAppendingString:@"food"];
+      break;
+    case StampFilterTypeOther:
+      imgName = [imgName stringByAppendingString:@"other"];
+      break;
+      
+    default:
+      NSLog(@"WTF. Can't find %@", imgName);
+      break;
+  }
+  if (showInstruction)
+    imgName = [imgName stringByAppendingString:@"_tap"];
+
+  return [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imgName]] autorelease];
 }
 
 - (void)fireDelegateMethod {
@@ -255,6 +289,49 @@ static const CGFloat kTopMargin = 7;
   [delegate_ stampFilterBar:self
             didSelectFilter:filterType_
                    andQuery:searchQuery_];
+}
+
+- (void)showTooltipIfNeeded {
+  BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 10);
+  for (UIButton* button in filterButtons_) {
+    if (filterType_ == button.tag && button.selected) {
+      UIImageView* tooltipView = [self tooltipViewForButton:button showInstruction:showInstruction];
+      tooltipView.alpha = 0;
+      CGPoint tooltipCenter = [button.superview convertPoint:button.center toView:button.window];
+      if (filterType_ == StampFilterTypeFood) {
+        tooltipCenter.x += 50;
+      } else if (filterType_ == StampFilterTypeBook && showInstruction) {
+        tooltipCenter.x += 17;
+      }
+      tooltipCenter.y += (CGRectGetHeight(tooltipView.bounds) / 2) + 2;
+      tooltipView.center = tooltipCenter;
+      [button.window addSubview:tooltipView];
+      [UIView animateWithDuration:0.4
+                            delay:0
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseOut
+                       animations:^{
+                         tooltipView.alpha = 1;
+                         CGPoint center = tooltipView.center;
+                         center.y += 7;
+                         tooltipView.center = center;
+                       }
+                       completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.25
+                                               delay:0.75
+                                             options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionCurveEaseIn
+                                          animations:^{
+                                            tooltipView.alpha = 0;
+                                            CGPoint center = tooltipView.center;
+                                            center.y += 5;
+                                            tooltipView.center = center;
+                                          }
+                                          completion:^(BOOL finished) {
+                                            [tooltipView removeFromSuperview];
+                                          }];
+                       }];
+      break;
+    }
+  }
 }
 
 #pragma mark - UIScrollViewDelegate methods.
