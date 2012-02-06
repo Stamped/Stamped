@@ -30,7 +30,6 @@ SECTION = {
 	'title' : FORMATTED_TITLE,
 	'desc'	: TEXT_DESCRIPTION,
 	'short_desc'	: SHORT_DESCRIPTION,
-	'category'	: CANONICAL_SECTION_NAME,
 	'items' : [
 		( ITEM )*
 	]
