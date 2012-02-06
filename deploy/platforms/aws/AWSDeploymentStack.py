@@ -185,11 +185,11 @@ class AWSDeploymentStack(ADeploymentStack):
                 
                 # apply update synchronously
                 with settings(host_string=instance.public_dns_name):
-                    # TODO: if run fails, don't abort
                     try:
                         result = run(cmd, pty=False, shell=True)
                         status = result.return_code
                     except:
+                        # if run fails, ask the user whether or not to continue instead of aborting
                         status = 1
                 
                 if 0 != status:
