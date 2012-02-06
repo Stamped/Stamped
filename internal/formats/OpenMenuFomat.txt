@@ -1,0 +1,224 @@
+{
+  "omf_uuid":"",
+  "omf_accuracy":"",
+  "privacy":"",
+  "omf_version":"",
+  "omf_updated_timestamp":"",
+  "restaurant_info":{
+    "restaurant_name":"",
+    "brief_description":"",
+    "full_description":"",
+    "location_id":"",
+    "mobile":"",
+    "address_1":"",
+    "address_2":"",
+    "city_town":"",
+    "state_province":"",
+    "postal_code":"",
+    "country":"",
+    "phone":"",
+    "fax":"",
+    "longitude":"",
+    "latitude":"",
+    "business_type":"",
+    "utc_offset":"",
+    "website_url":"",
+    "omf_file_url":""
+  },
+  "environment_info":{
+    "cuisine_type_primary":"",
+    "cuisine_type_secondary":"",
+    "smoking_allowed":"",
+    "takeout_available":"",
+    "seating_qty":"",
+    "max_group_size":"",
+    "pets_allowed":"",
+    "wheelchair_accessible":"",
+    "age_level_preference":"",
+    "dress_code":"",
+    "delivery_available":"",
+    "delivery_radius":"",
+    "delivery_fee":"",
+    "catering_available":"",
+    "reservations":"",
+    "alcohol_type":"",
+    "music_type":""
+  },
+  "parent_company":{
+    "parent_company_name":"",
+    "parent_company_website":"",
+    "address_1":"",
+    "address_2":"",
+    "city_town":"",
+    "state_province":"",
+    "postal_code":"",
+    "country":"",
+    "phone":"",
+    "fax":""
+  },
+  "operating_days":{
+    "mon_open_time":"",
+    "mon_close_time":"",
+    "tue_open_time":"",
+    "tue_close_time":"",
+    "wed_open_time":"",
+    "wed_close_time":"",
+    "thu_open_time":"",
+    "thu_close_time":"",
+    "fri_open_time":"",
+    "fri_close_time":"",
+    "sat_open_time":"",
+    "sat_close_time":"",
+    "sun_open_time":"",
+    "sun_close_time":""
+  },
+  "seating_locations":[
+    {
+      "seating_location":""
+    },
+  ],
+  "logo_urls":[
+    {
+      "logo_url":"", 
+      "width":"", 
+      "height":"",
+      "image_type":"",
+      "image_media":""
+    },
+  ],
+  "contacts":[
+    {
+      "first_name":"",
+      "last_name":"",
+      "email":"",
+      "contact_type":""
+    },
+  ],
+  "accepted_currencies":[
+    {
+      "accepted_currency":""
+    },
+  ],
+  "online_reservations":[
+    {
+      "online_reservation_type":"", 
+      "online_reservation_name":"", 
+      "online_reservation_url":""
+    },
+  ],
+  "online_ordering":[
+    {
+      "online_order_type":"", 
+      "online_order_name":"", 
+      "online_order_url":""
+    },
+  ],
+  "parking":{
+    "street_free":"",
+    "street_metered":"",
+    "private_lot":"",
+    "garage":"",
+    "valet":""
+  },
+  "crosswalks":[
+    {
+      "crosswalk_id":"", 
+      "crosswalk_company":"", 
+      "crosswalk_url":""
+    },
+  ],
+  "menus":[
+    {
+      "menu_name":"",
+      "menu_description":"",
+      "menu_note":"",
+      "currency_symbol":"",
+      "language":"",
+      "disabled":"",
+      "menu_uid":"",
+      "menu_duration_name":"",
+      "menu_duration_time_start":"",
+      "menu_duration_time_end":"",
+      "menu_groups":[
+        {
+          "group_name":"",
+          "group_description":"",
+          "group_note":"",
+          "group_uid":"",
+          "disabled":"",
+          "menu_group_options":[
+             {
+               "group_options_name": "",
+               "menu_group_option_information": "",
+               "menu_group_option_min_selected": "",
+               "menu_group_option_max_selected": "",
+               "option_items": [
+                 {
+                   "menu_group_option_name": "",
+                   "menu_group_option_additional_cost": ""
+                 },
+               ]
+             },
+          ],
+          "menu_items":[
+            {
+              "menu_item_name":"",
+              "menu_item_description":"",
+              "menu_item_price":"",
+              "menu_item_calories":"",
+              "menu_item_heat_index":"",
+              "menu_item_allergy_information":"",
+              "menu_item_allergy_information_allergens":"",
+              "item_uid":"",
+              "disabled":"",
+              "special":"",
+              "vegetarian":"",
+              "vegan":"",
+              "kosher":"",
+              "halal":"",
+              "gluten_free":"",
+              "menu_item_options":[
+                {
+                  "item_options_name": "",
+                  "menu_item_option_information": "",
+                  "menu_item_option_min_selected": "",
+                  "menu_item_option_max_selected": "",
+                  "option_items": [
+                    {
+                      "menu_item_option_name": "",
+                      "menu_item_option_additional_cost": ""
+                    },
+                  ]
+                },
+              ],
+              "menu_item_sizes":[
+                {
+                  "menu_item_size_name": "",
+                  "menu_item_size_description": "",
+                  "menu_item_size_price": "",
+                  "menu_item_size_calories": ""
+                },
+              ],
+              "menu_item_tags":[
+                {
+                  "menu_item_tag": ""
+                },
+              ],
+              "menu_item_images":[
+                {
+                  "image_url":"",
+                  "width":"",
+                  "height":"",
+                  "image_media_id":"",
+                  "image_type_id":"",
+                  "image_type":"",
+                  "image_media":""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
