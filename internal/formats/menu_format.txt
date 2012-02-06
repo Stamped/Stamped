@@ -30,6 +30,7 @@ SECTION = {
 	'title' : FORMATTED_TITLE,
 	'desc'	: TEXT_DESCRIPTION,
 	'short_desc'	: SHORT_DESCRIPTION,
+	'category'	: CANONICAL_SECTION_NAME,
 	'prices'	:	[
 		{
 			'title'	:	FORMATTED_TITLE,
@@ -47,6 +48,7 @@ SECTION = {
 ITEM = {
 	'title' : FORMATTED_TITLE,
 	'desc'	: TEXT_DESCRIPTION,
+	'categories' : [ (CATEGORY)* ] // soup,entree,etc.
 	'short_desc'	: SHORT_DESCRIPTION,
 	'spicy'	: (0,5), #default 0
 	'allergens'	: [ (COMMON_ALLERGENS)* ], #i.e. dairy,peanut
@@ -88,6 +90,7 @@ ITEM = {
 			            	'title':'Crab Cakes',
 			            	'desc':'fresh house made crab cakes served with spicy aioli',
 			            	'type':'item',
+							'categories':['appetizer']
 			            	'prices':[
 			            		{
 			            			'price':'9.00'
@@ -102,6 +105,7 @@ ITEM = {
 					'items': [
 						{
 			            	'title':'Hard Knox Caesar Salad',
+			            	'categories':['salad']
 			            	'desc':'crisp hearts of romaine lettuce with shredded parmesan cheese and house made creamy caesar dressing',
 			            	'type':'item',
 			            	'prices':[
@@ -123,6 +127,7 @@ ITEM = {
 					'items': [
 			            {
 			            	'title':'Hamburger',
+			            	'categories':['entree','burger','sandwich']
 			            	'desc':'half pound fresh ground chuck grilled on an open flame with mayo, mustard, lettuce, tomatoes, onions, and pickles.',
 			            	'type':'item',
 			            	'prices':[
