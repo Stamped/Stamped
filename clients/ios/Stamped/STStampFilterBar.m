@@ -12,6 +12,7 @@
 
 static const CGFloat kHorizontalSeparation = 42.0;
 static const CGFloat kTopMargin = 7;
+static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 @interface STStampFilterBar ()
 - (void)initialize;
@@ -291,7 +292,7 @@ static const CGFloat kTopMargin = 7;
 }
 
 - (void)showTooltipIfNeeded {
-  BOOL showInstruction = YES;
+  BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 10);
   for (UIButton* button in filterButtons_) {
     if (filterType_ == button.tag && button.selected) {
       UIImageView* tooltipView = [self tooltipViewForButton:button showInstruction:showInstruction];
@@ -302,7 +303,7 @@ static const CGFloat kTopMargin = 7;
       } else if (filterType_ == StampFilterTypeBook && showInstruction) {
         tooltipCenter.x += 17;
       }
-      tooltipCenter.y += CGRectGetHeight(tooltipView.bounds) / 2;
+      tooltipCenter.y += (CGRectGetHeight(tooltipView.bounds) / 2) + 2;
       tooltipView.center = tooltipCenter;
       [button.window addSubview:tooltipView];
       [UIView animateWithDuration:0.4
