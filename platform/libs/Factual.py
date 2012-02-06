@@ -65,6 +65,8 @@ from functools          import partial
 from urllib2            import HTTPError
 from gevent             import sleep
 from itertools          import combinations
+from re                 import match
+from threading          import Lock
 import time
 import random
 
@@ -187,6 +189,9 @@ class Factual(object):
         self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
         self.__log_file = log
+        self.__lock = Lock()
+        self.__last_call = time.time()
+        self.__cooldown = .4
     
     def resolve(self, data,limit=_limit):
         """
@@ -289,17 +294,17 @@ class Factual(object):
 
         If the entity fails to resolve, None is returned.
         """
+        first = True
         filters = _combos(entity)
-        factual_id = None
         for f in filters:
-            results = self.resolve(f,1)
+            results = self.resolve(f,10)
             if results:
-                result = results[0]
-                if self.__acceptable(result,entity,f):
-                    factual_id = result['factual_id']
-                    break
-        return factual_id
-    
+                for result in results:
+                    if self.__acceptable(result,entity,f,first):
+                        return result['factual_id']
+                    first = False
+        return None
+
     def factual_from_singleplatform(self,singleplatform_id):
         """
         Get the factual_id (if any) associated with the given singleplatform ID.
@@ -360,10 +365,17 @@ class Factual(object):
 
         request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
 
-        req = urllib2.Request(url, None, request.to_header())
-        res = urllib2.urlopen(req)
-
-        response = res.read()
+        with self.__lock:
+            elapsed = time.time() - self.__last_call
+            #in case of error, set last call
+            self.__last_call = time.time()
+            cooldown = self.__cooldown - elapsed
+            if cooldown > 0:
+                sleep(cooldown)
+            req = urllib2.Request(url, None, request.to_header())
+            res = urllib2.urlopen(req)
+            response = res.read()
+            self.__last_call = time.time()
         m = json.loads(response)
         try:
             return m['response']['data']
@@ -383,40 +395,40 @@ class Factual(object):
             #Don't disqualify if ommitted
             return 0
 
-    def __phone_test(self,result,entity,filters):
+    def __phone_test(self,result,entity,filters,verbose=False):
         if 'tel' in filters and 'tel' in result:
             good = filters['tel'] == result['tel'] or result['similarity'] > .98
-            if not good:
+            if not good and verbose:
                 self.__log("Rejected for different tel values\n")
             return good
         else:
             return True 
     
-    def __category_test(self,result,entity,filters):
+    def __category_test(self,result,entity,filters,verbose=False):
         if 'category' not in filters or 'category' not in result:
             # Don't reject things for no category
             return True
         if not result['category'].startswith(filters['category']):
-            self.__log("Rejected for bad category\n")
+            if verbose: self.__log("Rejected for bad category\n")
             return False
         else:
             return True
 
-    def __custom_test(self,result,entity,filters):
-        if not self.__category_test(result,entity,filters):
+    def __custom_test(self,result,entity,filters,verbose=False):
+        if not self.__category_test(result,entity,filters,verbose):
             return False
         if self.__distance(result,filters) > 1:
-            self.__log("Rejected for distance\n")
+            if verbose: self.__log("Rejected for distance\n")
             return False
-        if not self.__phone_test(result,entity,filters):
+        if not self.__phone_test(result,entity,filters,verbose):
             return False
-        if result['similarity'] < .95:
-            self.__log("Rejected for similarity\n")
+        if result['similarity'] < .70:
+            if verbose: self.__log("Rejected for similarity\n")
             return False
         return True
 
     
-    def __acceptable(self,result,entity,filters):
+    def __acceptable(self,result,entity,filters,verbose=False):
         """
         Determines whether a Resolve result is a positive match.
         
@@ -424,8 +436,8 @@ class Factual(object):
         """
         good = result['resolved']
         if not good:
-            good = self.__custom_test(result,entity,filters)
-        if not good:
+            good = self.__custom_test(result,entity,filters,verbose)
+        if not good and verbose:
             self.__log('FAILED:\n%s\n%s\n%s\n' % (result,entity,filters))
         return good
     
@@ -433,7 +445,27 @@ class Factual(object):
         if self.__log_file:
             self.__log_file.write(message)
 
-def resolveEntities(size,log=None):
+def _eligible(entity):
+    #if 'sources' in entity:
+    #    sources = entity['sources']
+    #    if 'factual' in sources:
+    #        if 'factual_id' in sources['factual']:
+    #            return False
+    if 'details' in entity:
+        details = entity['details']
+        if 'contact' in details:
+            contact = details['contact']
+            if 'phone' in contact:
+                phone = contact['phone']
+                if phone.startswith('+'):
+                    return False
+                if phone.startswith('0'):
+                    return False
+                if not match('\(\d\d\d\)',phone):
+                    return False
+    return True
+
+def resolveEntities(size=None,log=None):
     """
     Resolve a random batch of entities, and output accuracy stats
     """
@@ -441,35 +473,46 @@ def resolveEntities(size,log=None):
     stampedAPI = MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
-    rs = entityDB._collection.find({"subcategory" : "restaurant"})
+    rs = entityDB._collection.find({
+        "subcategory" : "restaurant",
+        "sources.factual.factual_id":{'$exists':False},
+    })
+    if not size:
+        size = rs.count()
     end = random.randint(size,rs.count())
     i = 0
     count = 0
     throttled = 0
-    for entity in rs[end-size:end]:
-        i += 1
-        before = time.time()
-        try:
-            factual_id = f.factual_from_entity(entity)
-            if factual_id:
-                count += 1
-            if log:
-                log.write("%.2f : %d / %d\n" % (count*1.0/i,count,i))
-        except HTTPError as e:
-            if e.code == 403:
-                throttled += 1
-                if throttled > 5:
-                    if log:
-                        log.write("Too much throttling...aborting\n\n")
-                    return
+    li = list(rs[end-size:end])
+    t = 0
+    for entity in li:
+        t += 1
+        if _eligible(entity):
+            i += 1
+            try:
+                factual_id = f.factual_from_entity(entity)
+                if factual_id:
+                    count += 1
+                    ent = entityDB._convertFromMongo(entity)
+                    ent.factual_id = factual_id
+                    try:
+                        entityDB.updateEntity(ent)
+                    except:
+                        log.write('\n\n\n\n\nUPDATE FAILED!!!!!!!!!!!!!\n\n\n\n\n\n')
                 if log:
-                    log.write("slowing down for throttling...\n\n\n")
-                sleep(throttled)
-            else:
-                raise e
-        elapsed = time.time() - before
-        if elapsed < 1:
-            sleep(1-elapsed)
+                    log.write("%.2f : %d / %d : %d / %d\n" % (count*1.0/i,count,i,t,len(li)))
+            except HTTPError as e:
+                if e.code == 403:
+                    throttled += 1
+                    if throttled > 5:
+                        if log:
+                            log.write("Too much throttling...aborting\n\n")
+                        return
+                    if log:
+                        log.write("slowing down for throttling...\n\n\n")
+                    sleep(throttled)
+                else:
+                    raise e
 
 def demo():
     """
@@ -551,7 +594,7 @@ def demo():
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'resolve':
-        count = 100
+        count = None
         if len(sys.argv) > 2:
             count = int(sys.argv[2])
         resolveEntities(count,log=sys.stdout)
