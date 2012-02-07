@@ -16,6 +16,7 @@
 #import "EntityDetailViewController.h"
 #import "SearchEntitiesAutoSuggestCell.h"
 #import "SearchEntitiesTableViewCell.h"
+#import "STStampFilterBar.h"
 #import "STSearchField.h"
 #import "STSectionHeaderView.h"
 #import "STNoResultsTableViewCell.h"
@@ -72,8 +73,8 @@ typedef enum {
 @property (nonatomic, assign) BOOL loading;
 @property (nonatomic, readonly) UIButton* clearFilterButton;
 @property (nonatomic, assign) SearchFilter currentSearchFilter;
-@property (nonatomic, retain) UIView* filterBar;
 @property (nonatomic, retain) UIImageView* notConnectedImageView;
+@property (nonatomic, retain) STStampFilterBar* stampFilterBar;
 @end
 
 @implementation SearchEntitiesViewController
@@ -95,10 +96,10 @@ typedef enum {
 @synthesize searchIntent = searchIntent_;
 @synthesize clearFilterButton = clearFilterButton_;
 @synthesize tableView = tableView_;
-@synthesize filterBar = filterBar_;
 @synthesize nearbyImageView = nearbyImageView_;
 @synthesize searchButton = searchButton_;
 @synthesize notConnectedImageView = notConnectedImageView_;
+@synthesize stampFilterBar = stampFilterBar_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -113,12 +114,13 @@ typedef enum {
   self.locationButton = nil;
   self.loadingIndicatorLabel = nil;
   self.tableView = nil;
-  self.filterBar = nil;
   self.nearbyImageView = nil;
   self.searchButton = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
   self.notConnectedImageView = nil;
+  self.stampFilterBar.delegate = nil;
+  self.stampFilterBar = nil;
   [super dealloc];
 }
 
@@ -145,7 +147,9 @@ typedef enum {
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
   self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
-  [self createFilterBar];
+  stampFilterBar_ = [[STStampFilterBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)
+                                                      style:STStampFilterBarStyleDark];
+  stampFilterBar_.delegate = self;
   
   UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_notConnected"]];
   CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
@@ -162,86 +166,6 @@ typedef enum {
 }
 
 - (void)createFilterBar {
-  filterBar_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-  CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
-  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor,
-                                              (id)[UIColor colorWithWhite:0.5 alpha:1.0].CGColor, nil];
-  gradient.startPoint = CGPointZero;
-  gradient.endPoint = CGPointMake(0, 1);
-  gradient.frame = filterBar_.bounds;
-  [filterBar_.layer addSublayer:gradient];
-  [gradient release];
-  
-  NSUInteger i = 0;
-  const CGFloat yDistance = 42.0;
-  // Food.
-  UIButton* filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_restaurants_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_restaurants_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterFood;
-  [filterBar_ addSubview:filterButton];
-  // Book.
-  ++i;
-  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_books_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_books_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterBook;
-  [filterBar_ addSubview:filterButton];
-  // Film.
-  ++i;
-  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_movies_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_movies_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterFilm;
-  [filterBar_ addSubview:filterButton];
-  // Music.
-  ++i;
-  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_music_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_music_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterMusic;
-  [filterBar_ addSubview:filterButton];
-  // Other.
-  ++i;
-  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_other_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"sea_filter_other_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterOther;
-  [filterBar_ addSubview:filterButton];
-  // None.
-  ++i;
-  clearFilterButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"sea_filter_clear_button"]
-                      forState:UIControlStateNormal];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"sea_filter_clear_button_selected"]
-                      forState:UIControlStateSelected];
-  clearFilterButton_.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  clearFilterButton_.tag = SearchFilterNone;
-  clearFilterButton_.alpha = 0.0;
-  [filterBar_ addSubview:clearFilterButton_];
-
-  for (UIView* view in filterBar_.subviews) {
-    if ([view isMemberOfClass:[UIButton class]]) {
-      [(UIButton*)view addTarget:self
-                          action:@selector(filterButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
-    }
-  }
 }
 
 - (void)viewDidUnload {
@@ -255,7 +179,6 @@ typedef enum {
   self.loadingIndicatorLabel = nil;
   self.locationButton = nil;
   self.tableView = nil;
-  self.filterBar = nil;
   self.nearbyImageView = nil;
   self.searchButton = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -263,6 +186,8 @@ typedef enum {
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
   self.notConnectedImageView = nil;
+  self.stampFilterBar.delegate = nil;
+  self.stampFilterBar = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -406,10 +331,10 @@ typedef enum {
 
 - (void)filterButtonPressed:(id)sender {
   UIButton* button = sender;
-  for (UIView* view in filterBar_.subviews) {
-    if ([view isMemberOfClass:[UIButton class]] && view != sender)
-      [(UIButton*)view setSelected:NO];
-  }
+//  for (UIView* view in filterBar_.subviews) {
+//    if ([view isMemberOfClass:[UIButton class]] && view != sender)
+//      [(UIButton*)view setSelected:NO];
+//  }
   self.resultsArray = nil;
   self.cachedAutocompleteResults = nil;
   [self reloadTableData];
@@ -440,7 +365,7 @@ typedef enum {
   if (currentResultType_ != ResultTypeFull || [tableView_ numberOfRowsInSection:0] == 0)
     tableView_.tableHeaderView = nil;
   else
-    tableView_.tableHeaderView = filterBar_;
+    tableView_.tableHeaderView = stampFilterBar_;
   tableView_.hidden = [tableView_ numberOfRowsInSection:0] == 0;
 }
 
