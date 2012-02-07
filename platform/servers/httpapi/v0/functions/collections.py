@@ -31,7 +31,7 @@ def inbox(request):
 @require_http_methods(["GET"])
 def user(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
     stamps      = stampedAPI.getUserStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
@@ -40,7 +40,7 @@ def user(request):
 @require_http_methods(["GET"])
 def credit(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
     stamps      = stampedAPI.getCreditedStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))

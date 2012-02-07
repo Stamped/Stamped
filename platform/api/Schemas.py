@@ -410,10 +410,12 @@ class GenericSlice(Schema):
         self.comments           = SchemaElement(bool, default=True)
 
 
-class UserCollectionSlice(GenericSlice, UserTiny):
+class UserCollectionSlice(GenericSlice):
     def setSchema(self):
         GenericSlice.setSchema(self)
-        UserTiny.setSchema(self)
+        
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
 
 class ViewportSchema(Schema):
     def setSchema(self):

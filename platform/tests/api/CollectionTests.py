@@ -236,15 +236,14 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), _validate_result2)
         self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
-
 class StampedAPICollectionsDeleted(StampedAPICollectionTest):
     def test_deleted(self):
-
         entityD = self.createEntity(self.tokenA)
-        stampD = self.createStamp(self.tokenA, entityD['entity_id'])
-        self.deleteStamp(self.tokenA, stampD['stamp_id'])
+        stampD  = self.createStamp(self.tokenA, entityD['entity_id'])
+        
+        self.deleteStamp (self.tokenA, stampD['stamp_id'])
         self.deleteEntity(self.tokenA, entityD['entity_id'])
-
+        
         path = "collections/inbox.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
@@ -253,6 +252,7 @@ class StampedAPICollectionsDeleted(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 4), 
                    lambda x: self.assertTrue(x[-1]['blurb'] == self.stampA['blurb']), 
+                   lambda x: self.assertTrue(x[0]['stamp_id'] == stampD['stamp_id']), 
                    lambda x: self.assertTrue('deleted' in x[0]), 
         ])
 

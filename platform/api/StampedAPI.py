@@ -62,7 +62,8 @@ class StampedAPI(AStampedAPI):
         else:
             self._node_name = "localhost"
         
-        utils.log("StampedAPI running on node '%s'" % (self.node_name))
+        if not self.lite_mode:
+            utils.log("StampedAPI running on node '%s'" % (self.node_name))
     
     @property
     def node_name(self):
@@ -714,7 +715,7 @@ class StampedAPI(AStampedAPI):
     ### PRIVATE
     
     def _getUserFromIdOrScreenName(self, userTiny):
-        if not isinstance(userRequest, SchemaElement):
+        if not isinstance(userTiny, SchemaElement):
             userTiny    = UserTiny(userTiny)
         
         if userTiny.user_id is None and userTiny.screen_name is None:
@@ -2282,12 +2283,12 @@ class StampedAPI(AStampedAPI):
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         
-        """
-        if genericSlice.deleted:
-            deleted = self._stampDB.getDeletedStamps(stampIds, **params)
+        if genericSlice.deleted or genericSlice.sort == 'modified' or genericSlice.sort == 'created':
+            deleted = self._stampDB.getDeletedStamps(stampIds, genericSlice)
+            
             if len(deleted) > 0:
                 stamps = stamps + deleted
-        """
+                stamps.sort(key=lambda k: k.timestamp[genericSlice.sort], reverse=not genericSlice.reverse)
         
         return stamps
     

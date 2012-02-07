@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import atexit, urllib, json, unittest, mimetools, urllib2
+import atexit, os, json, unittest, mimetools, urllib, urllib2
 
 from pprint           import pprint
 from StampedTestUtils import *
@@ -319,6 +319,23 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+    
+    def _loadCollection(self, collection, filename=None, drop=True):
+        if filename is None:
+            filename = "%s.db" % collection
+        
+        col = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "api/data"), filename)
+        cmd = "mongoimport -d stamped -c %s --stopOnError %s %s" % \
+              (collection, "--drop" if drop else "", col)
+        
+        #utils.log(cmd)
+        ret = utils.shell(cmd)
+        self.assertEqual(ret[1], 0)
+    
+    def _dropCollection(self, collection):
+        cmd = "mongo stamped --eval \"db.%s.drop()\"" % collection
+        ret = utils.shell(cmd)
+        self.assertEqual(ret[1], 0)
 
 def __cleanup():
     global _test_case, _accounts

@@ -156,15 +156,18 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             
             reverse = not reverse
         elif genericSlice.sort == 'proximity':
-            if genericSlice.center is None:
+            if genericSlice.center.lat is None or genericSlice.center.lng is None:
                 raise StampedInputError("proximity sort requires a valid center parameter")
             
-            query["entity.lat"] = { "$exists" : True}
-            query["entity.lng"] = { "$exists" : True}
+            query["entity.coordinates.lat"] = { "$exists" : True}
+            query["entity.coordinates.lng"] = { "$exists" : True}
             
             reverse = not reverse
         elif genericSlice.sort == 'relevance':
             reverse = not reverse
+        
+        if genericSlice.sort != 'relevance' and genericSlice.query is not None:
+            raise StampedInputError("non-empty search query is only compatible with sort set to \"relevance\"")
         
         # handle before / since filters
         # -----------------------------
@@ -198,16 +201,29 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # handle viewport filter
         # ----------------------
         if genericSlice.viewport.lowerRight.lat is not None:
-            query["entity.lat"] = { "$gte" : genericSlice.viewport.lowerRight.lat, 
-                                    "$lte" : genericSlice.viewport.upperLeft.lat, }
+            query["entity.coordinates.lat"] = { 
+                "$gte" : genericSlice.viewport.lowerRight.lat, 
+                "$lte" : genericSlice.viewport.upperLeft.lat, 
+            }
             
             if genericSlice.viewport.upperLeft.lng <= genericSlice.viewport.lowerRight.lng:
-                query["entity.lng"] = { "$gte" : genericSlice.viewport.upperLeft.lng, 
-                                        "$lte" : genericSlice.viewport.lowerRight.lng, }
+                query["entity.coordinates.lng"] = { 
+                    "$gte" : genericSlice.viewport.upperLeft.lng, 
+                    "$lte" : genericSlice.viewport.lowerRight.lng, 
+                }
             else:
                 # handle special case where the viewport crosses the +180 / -180 mark
-                add_or_query([ { "entity.lng" : { "$gte" : genericSlice.viewport.upperLeft.lng, }, }, 
-                               { "entity.lng" : { "$lte" : genericSlice.viewport.lowerRight.lng, }, }, ])
+                add_or_query([  {
+                        "entity.coordinates.lng" : {
+                            "$gte" : genericSlice.viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "entity.coordinates.lng" : {
+                            "$lte" : genericSlice.viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ])
         
         # handle search query filter
         # --------------------------
@@ -218,10 +234,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
                            { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
         
-        # handle order in which to return sorted results
-        # ----------------------------------------------
-        order = pymongo.ASCENDING if genericSlice.reverse else pymongo.DESCENDING
-        
+        #import pprint
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericSlice.value))
         
@@ -230,13 +243,14 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         if sort is not None:
             # fast-path which uses built-in sorting
             # -------------------------------------
+            
+            # order in which to return sorted results
+            order = pymongo.ASCENDING if reverse else pymongo.DESCENDING
+            
             results = self._collection.find(query) \
                       .sort(sort, order) \
                       .skip(genericSlice.offset) \
                       .limit(genericSlice.limit)
-            
-            #results = list(results)
-            #utils.log(len(results))
         else:
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------
@@ -254,8 +268,8 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 # TODO: handle +180 / -180 meridian special case 
                 _map = bson.code.Code("""function ()
                 {
-                    var diff0 = (this.entity.lat - center.lat);
-                    var diff1 = (this.entity.lng - center.lng);
+                    var diff0 = (this.entity.coordinates.lat - center.lat);
+                    var diff1 = (this.entity.coordinates.lng - center.lng);
                     var score = Math.sqrt(diff0 * diff0 + diff1 * diff1);
                     
                     emit('query', { obj : this, score : score });
@@ -272,7 +286,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                         score += 10 * this.stats.num_credit;
                     
                     if (this.stats.num_likes > 0)
-                        score += this.stats.num_likes;
+                        score += 3 * this.stats.num_likes;
                     
                     if (this.stats.num_comments > 0)
                         score += this.stats.num_comments;
@@ -288,6 +302,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 #     * recency
                 #     * popularity
                 #     * other metadata sources (e.g., tags, menu, etc.)
+                # NOTE: blurb & entity title matching already occurs at regex query level!
+                # these scores are then completely redundant since levenshtein will never 
+                # be taken into account.
                 _map = bson.code.Code("""function ()
                 {
                     function levenshtein(a, b)
@@ -329,11 +346,24 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                         return d[a.length][b.length];
                     }
                     
-                    var blurb = this.blurb.toLowerCase();
-                    var title = this.entity.title.toLowerCase();
+                    var blurb, title;
                     var score = 0.0;
                     
-                    if (title.match(query) || blurb.match(query)) {
+                    try {
+                        title = this.entity.title.toLowerCase();
+                    } catch(e) {
+                        title = ""
+                    }
+                    
+                    try {
+                        blurb = this.blurb.toLowerCase();
+                    } catch(e) {
+                        blurb = ""
+                    }
+                    
+                    if (title.length > 0 && title.match(query)) {
+                        score = 0;
+                    } else if (blurb.length > 0 && blurb.match(query)) {
                         score = 0.5;
                     } else {
                         var dists = [
@@ -400,21 +430,24 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 
                 assert(isinstance(data, list))
             except:
-                utils.printException()
-                utils.log(str(result))
-                
+                logs.debug(utils.getFormattedException())
                 return []
             
             results = map(lambda d: d['obj'], data)
+            if reverse:
+                results = list(reversed(results))
+            
             results = results[genericSlice.offset : genericSlice.offset + genericSlice.limit]
+            #for r in results:
+            #    from pprint import pprint; pprint(r)
         
         return map(self._convertFromMongo, results)
     
     def countStamps(self, userId):
         return len(self.user_stamps_collection.getUserStampIds(userId))
     
-    def getDeletedStamps(self, stampIds, **kwargs):
-        return self.deleted_stamp_collection.getStamps(stampIds, **kwargs)
+    def getDeletedStamps(self, stampIds, genericSlice):
+        return self.deleted_stamp_collection.getStamps(stampIds, genericSlice)
     
     def checkStamp(self, userId, entityId):
         try:

@@ -28,6 +28,8 @@ class AStampedTestCase(unittest.TestCase):
         if not isinstance(assertions, (list, tuple)):
             assertions = [ assertions ]
         
+        result = None
+        
         while True:
             try:
                 result = func()
@@ -39,7 +41,8 @@ class AStampedTestCase(unittest.TestCase):
             except:
                 retries -= 1
                 if retries < 0:
-                    pprint(result)
+                    if result is not None:
+                        pprint(result)
                     raise
                 
                 time.sleep(delay)
