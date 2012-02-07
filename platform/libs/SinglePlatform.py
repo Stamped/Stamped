@@ -130,7 +130,7 @@ class SinglePlatform(object):
     def get_menu(self, location_id):
         return self._get_uri('/restaurants/%s/menu' % location_id)
 
-    deg get_menu_schema(self, location_id):
+    def get_menu_schema(self, location_id):
         return toMenuSchema(self.get_menu(location_id))
     
     def get_short_menu(self, location_id):

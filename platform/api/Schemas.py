@@ -394,6 +394,7 @@ class Entity(Schema):
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
+        # Not present in existing database
         self.locale             = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
@@ -723,6 +724,7 @@ class FactualSchema(Schema):
         self.faid               = SchemaElement(basestring)
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
+        self.factual_timestamp  = SchemaElement(float)
 
 class SinglePlatformSchema(Schema):
     def setSchema(self):
