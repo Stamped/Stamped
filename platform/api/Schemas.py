@@ -910,7 +910,7 @@ class MenuItemSchema(Schema):
         self.allergens = SchemaList(SchemaElement(basestring))
         self.allergen_free = SchemaList(SchemaElement(basestring))
         self.restrictions = SchemaList(SchemaElement(basestring))
-        self.prices = MenuPriceSchema()
+        self.prices = SchemaList(MenuPriceSchema())
 
 class MenuPriceSchema(Schema):
     def setSchema(self):
@@ -919,3 +919,20 @@ class MenuPriceSchema(Schema):
         self.calories = SchemaElement(int)
         self.unit = SchemaElement(basestring)
         self.currency = SchemaElement(basestring)
+
+class MenuTimesSchema(Schema):
+    def setSchema(self):
+        self.sun = SchemaList(MenuHoursSchema())
+        self.mon = SchemaList(MenuHoursSchema())
+        self.tue = SchemaList(MenuHoursSchema())
+        self.wed = SchemaList(MenuHoursSchema())
+        self.thu = SchemaList(MenuHoursSchema())
+        self.fri = SchemaList(MenuHoursSchema())
+        self.sat = SchemaList(MenuHoursSchema())
+
+class MenuHoursSchema(Schema):
+    def setSchema(self):
+        self.open = SchemaElement(basestring)
+        self.close = SchemaElement(basestring)
+        
+
