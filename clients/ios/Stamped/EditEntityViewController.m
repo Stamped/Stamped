@@ -8,6 +8,8 @@
 
 #import "EditEntityViewController.h"
 
+#import <RestKit/RestKit.h>
+
 #import "DetailedEntity.h"
 #import "STNavigationBar.h"
 #import "UIColor+Stamped.h"
@@ -36,7 +38,6 @@ const CGFloat kKeyboardHeight = 217.0;
 @property (nonatomic, copy) NSString* cityText;
 @property (nonatomic, copy) NSString* stateText;
 @property (nonatomic, copy) NSString* zipText;
-@property (nonatomic, copy) NSString* countryCode;
 @property (nonatomic, copy) NSString* descriptionText;
 
 @end
@@ -73,7 +74,6 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize cityText = cityText_;
 @synthesize stateText = stateText_;
 @synthesize zipText = zipText_;
-@synthesize countryCode = countryCode_;
 @synthesize descriptionText = descriptionText_;
 
 - (id)init {
@@ -112,7 +112,6 @@ const CGFloat kKeyboardHeight = 217.0;
   self.cityText = nil;
   self.stateText = nil;
   self.zipText = nil;
-  self.countryCode = nil;
   self.descriptionText = nil;
   [super dealloc];
 }
@@ -135,8 +134,6 @@ const CGFloat kKeyboardHeight = 217.0;
 - (void)viewDidLoad {
   [super viewDidLoad];
   
-  NSLog(@"Category: %@", detailedEntity_.category);
-  
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
@@ -151,12 +148,20 @@ const CGFloat kKeyboardHeight = 217.0;
   [self.navigationItem setLeftBarButtonItem:cancelButton];
   [cancelButton release];
 
-  UIBarButtonItem* doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
-                                                                 style:UIBarButtonItemStyleDone
-                                                                target:self
-                                                                action:@selector(doneButtonPressed:)];
-  [self.navigationItem setRightBarButtonItem:doneButton];
-  [doneButton release];
+  UIButton* doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [doneButton setBackgroundImage:[UIImage imageNamed:@"blue_button_background"] forState:UIControlStateNormal];
+  [doneButton setTitle:@"Done" forState:UIControlStateNormal];
+  doneButton.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  [doneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+  [doneButton setTitleShadowColor:[UIColor clearColor] forState:UIControlStateHighlighted];
+  [doneButton setTitleShadowColor:[UIColor stampedDarkGrayColor] forState:UIControlStateNormal];
+  doneButton.titleLabel.shadowOffset = CGSizeMake(0, -1);
+  [doneButton sizeToFit];
+  [doneButton addTarget:self action:@selector(doneButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+  
+  UIBarButtonItem* doneItem = [[UIBarButtonItem alloc] initWithCustomView:doneButton];
+  [self.navigationItem setRightBarButtonItem:doneItem];
+  [doneItem release];
   
   entityNameTextField_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   categoryDropdownTableView_.alpha = 0.0;
@@ -226,7 +231,6 @@ const CGFloat kKeyboardHeight = 217.0;
   self.cityText = nil;
   self.stateText = nil;
   self.zipText = nil;
-  self.countryCode = nil;
   self.descriptionText = nil;
   
   if ([detailedEntity_.category isEqualToString:@"other"] || selectedCategory_ == STEditCategoryRowOther) {
@@ -284,6 +288,9 @@ const CGFloat kKeyboardHeight = 217.0;
       }
     }
   }
+
+  [selectCountryButton_ setTitle:[STSelectCountryViewController countryNameForCountryCode:detailedEntity_.countryCode]
+                        forState:UIControlStateNormal];
   
   NSIndexPath* path = [NSIndexPath indexPathForRow:selectedCategory_ inSection:0];
   [categoryDropdownTableView_ selectRowAtIndexPath:path
