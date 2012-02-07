@@ -241,7 +241,10 @@ static const CGFloat kReloadHeight = 60.0;
   }
 
   if (stampFilterBar_ && (stampFilterBar_.searchQuery.length > 0 || stampFilterBar_.filterType != StampFilterTypeNone)) {
-    self.highlightView.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
+    CGFloat percentCollapsed = MAX(0, MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15));
+    self.highlightView.alpha = percentCollapsed;
+    if (stampFilterBar_.tooltipImageView)
+      stampFilterBar_.tooltipImageView.transform = CGAffineTransformMakeTranslation(0, 11 * percentCollapsed);
   }
   
   RKClient* client = [RKClient sharedClient];
