@@ -2600,6 +2600,14 @@ class StampedAPI(AStampedAPI):
         
         return activity
     
+    def getMenu(self,entity):
+        if 'factual_id' not in entity:
+            self._factual.enrich(entity)
+        if 'factual_id' not in entity:
+            return MenuSchema()
+        else:
+            return self._factual.menu(entity.factual_id)
+    
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 

@@ -1065,4 +1065,75 @@ class HTTPActivity(Schema):
             raise NotImplementedError
         return self
 
+# #### #
+# Menu #
+# #### #
+
+class HTTPMenu(Schema):
+    def setSchema(self):
+        self.disclaimer = SchemaElement(basestring)
+        self.attribution_image = SchemaElement(basestring)
+        self.attribution_image_link = SchemaElement(basestring)
+        self.menus = SchemaList(HTTPSubmenu())
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'MenuSchema':
+            self.disclaimer = schema.disclaimer
+            self.attribution_image = schema.attribution_image
+            self.attribution_image_link = schema.attribution_image_link
+            self.menus = schema.menus.value
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPSubmenu(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.times = HTTPMenuTimes()
+        self.footnote = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.sections = SchemaList(HTTPMenuSection())
+
+class HTTPMenuSection(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.items = SchemaList(HTTPMenuItem())
+
+class HTTPMenuItem(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.categories = SchemaList(SchemaElement(basestring))
+        self.short_desc = SchemaElement(basestring)
+        self.spicy = SchemaElement(int)
+        self.allergens = SchemaList(SchemaElement(basestring))
+        self.allergen_free = SchemaList(SchemaElement(basestring))
+        self.restrictions = SchemaList(SchemaElement(basestring))
+        self.prices = SchemaList(HTTPMenuPrice())
+
+class HTTPMenuPrice(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.price = SchemaElement(basestring)
+        self.calories = SchemaElement(int)
+        self.unit = SchemaElement(basestring)
+        self.currency = SchemaElement(basestring)
+
+class HTTPMenuTimes(Schema):
+    def setSchema(self):
+        self.sun = SchemaList(HTTPMenuHours())
+        self.mon = SchemaList(HTTPMenuHours())
+        self.tue = SchemaList(HTTPMenuHours())
+        self.wed = SchemaList(HTTPMenuHours())
+        self.thu = SchemaList(HTTPMenuHours())
+        self.fri = SchemaList(HTTPMenuHours())
+        self.sat = SchemaList(HTTPMenuHours())
+
+class HTTPMenuHours(Schema):
+    def setSchema(self):
+        self.open = SchemaElement(basestring)
+        self.close = SchemaElement(basestring)
 

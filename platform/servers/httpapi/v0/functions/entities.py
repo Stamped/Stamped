@@ -115,3 +115,14 @@ def nearby(request):
     
     return transformOutput(autosuggest)
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def menu(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPEntityId(), request)
+    entity      = stampedAPI.getEntity(schema, authUserId)
+    menu        = stampedAPI.getMenu(entity)
+    httpMenu    = HTTPMenu().importSchema(menu)
+
+    return transformOutput(httpMenu.value)
+
