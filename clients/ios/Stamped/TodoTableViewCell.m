@@ -87,7 +87,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   CGSize descriptionSize = [descriptionLabel_ sizeThatFits:CGSizeMake(200, MAXFLOAT)];
   descriptionLabel_.frame = CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
                                        CGRectGetMinY(typeImageView_.frame) - 2,
-                                       descriptionSize.width,
+                                       200,  // WHY isn't sizeThatFits working!?
                                        descriptionSize.height);
 }
 
