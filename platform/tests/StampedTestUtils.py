@@ -6,7 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, time, types, unittest, utils
+import os, time, types, utils
+import sys
+if sys.version_info.major == 2 and sys.version_info.minor > 6:
+    import unittest2 as unittest
+else:
+    import unittest
 
 from pprint import pprint
 

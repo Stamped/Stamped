@@ -38,6 +38,7 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
+from libs.Factual    import Factual
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -2671,6 +2672,10 @@ class StampedAPI(AStampedAPI):
     def _theTVDB(self):
         return TheTVDB()
     
+    @lazyProperty
+    def _factual(self):
+        return Factual()
+    
     def _convertSearchId(self, search_id):
         if not search_id.startswith('T_'):
             # already a valid entity id
@@ -2769,6 +2774,8 @@ class StampedAPI(AStampedAPI):
                     e2 = pformat(entity2.value)
                     
                     logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
+                if entity is not None:
+                    self._factual.enrich(entity)    
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             

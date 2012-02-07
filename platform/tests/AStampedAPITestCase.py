@@ -7,8 +7,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import atexit, urllib, json, unittest, mimetools, urllib2
-
+import atexit, urllib, json, mimetools, urllib2
+import sys
+if sys.version_info.major == 2 and sys.version_info.minor > 6:
+    import unittest2 as unittest
+else:
+    import unittest
 from pprint           import pprint
 from StampedTestUtils import *
 
