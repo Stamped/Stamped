@@ -340,7 +340,7 @@ class Factual(object):
         """
         sp_id = self.singleplatform(factual_id)
         if sp_id:
-            m = self.__singleplatform.get_menu(sp_id)
+            m = self.__singleplatform.get_menu_schema(sp_id)
             return m
         else:
             return None

@@ -80,6 +80,8 @@ def _parseMenu(menu):
     return m
 
 def toMenuSchema(menu):
+    if not menu:
+        return None
     schema = MenuSchema()
     schema.source = 'singleplatform'
     schema.source_id = menu['location']['id']
@@ -127,6 +129,9 @@ class SinglePlatform(object):
     
     def get_menu(self, location_id):
         return self._get_uri('/restaurants/%s/menu' % location_id)
+
+    deg get_menu_schema(self, location_id):
+        return toMenuSchema(self.get_menu(location_id))
     
     def get_short_menu(self, location_id):
         return self._get_uri('/restaurants/%s/shortmenu' % location_id)
