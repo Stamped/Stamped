@@ -14,6 +14,7 @@
 
 static const CGFloat kHorizontalSeparation = 42.0;
 static const CGFloat kTopMargin = 7;
+static const CGFloat kTopMarginDark = 3;
 static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 @interface STStampFilterBar ()
@@ -30,6 +31,8 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 @property (nonatomic, readonly) UIScrollView* scrollView;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) UIButton* searchButton;
+@property (nonatomic, assign) BOOL searchDisabled;
+@property (nonatomic, assign) STStampFilterBarStyle style;
 @end
 
 @implementation STStampFilterBar
@@ -42,6 +45,8 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 @synthesize searchField = searchField_;
 @synthesize searchButton = searchButton_;
 @synthesize tooltipImageView = tooltipImageView_;
+@synthesize searchDisabled = searchDisabled_;
+@synthesize style = style_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -59,6 +64,18 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   return self;
 }
 
+- (id)initWithFrame:(CGRect)frame style:(STStampFilterBarStyle)style {
+  self = [super initWithFrame:frame];
+  if (self) {
+    style_ = style;
+    if (style == STStampFilterBarStyleDark)
+      searchDisabled_ = YES;
+
+    [self initialize];
+  }
+  return self;
+}
+
 - (void)dealloc {
   self.filterButtons = nil;
   self.searchQuery = nil;
@@ -71,7 +88,17 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 - (void)initialize {
   self.filterButtons = [NSMutableArray array];
-  
+  if (style_ == STStampFilterBarStyleDark) {
+    CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
+    gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor,
+                       (id)[UIColor colorWithWhite:0.5 alpha:1.0].CGColor, nil];
+    gradient.startPoint = CGPointZero;
+    gradient.endPoint = CGPointMake(0, 1);
+    gradient.frame = self.bounds;
+    [self.layer addSublayer:gradient];
+    [gradient release];
+  }
+
   scrollView_ = [[UIScrollView alloc] initWithFrame:self.bounds];
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.bounds) * 2,
                                        CGRectGetHeight(self.bounds));
@@ -80,15 +107,19 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   scrollView_.showsHorizontalScrollIndicator = NO;
   scrollView_.delegate = self;
   scrollView_.scrollsToTop = NO;
+  scrollView_.scrollEnabled = !searchDisabled_;
   [self addSubview:scrollView_];
   [scrollView_ release];
   [self addFirstPageButtons];
-  [self addSecondPageButtons];
+  if (!searchDisabled_)
+    [self addSecondPageButtons];
 
-  UIImageView* keyline = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_keyline_horiz"]];
-  [self addSubview:keyline];
-  [keyline release];
-  
+  if (style_ == STStampFilterBarStyleDefault) {
+    UIImageView* keyline = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_keyline_horiz"]];
+    [self addSubview:keyline];
+    [keyline release];
+  }
+
   self.filterType = StampFilterTypeNone;
 }
 
@@ -116,13 +147,16 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 - (void)addFirstPageButtons {
   NSUInteger i = 0;
+  CGFloat topMargin = style_ == STStampFilterBarStyleDefault ? kTopMargin : kTopMarginDark;
+  NSString* headerPrefix = style_ == STStampFilterBarStyleDefault ? @"hdr_filter_" : @"sea_filter_";
+
   // Food.
   UIButton* filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_restaurants_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_restaurants_button_selected"]
+  NSString* imgName = [headerPrefix stringByAppendingString:@"restaurants_button"];
+  [filterButton setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:[imgName stringByAppendingString:@"_selected"]]
                 forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
+  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), topMargin, 40, 40);
   filterButton.tag = StampFilterTypeFood;
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
@@ -130,11 +164,11 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   // Book.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_books_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_books_button_selected"]
+  imgName = [headerPrefix stringByAppendingString:@"books_button"];
+  [filterButton setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:[imgName stringByAppendingString:@"_selected"]]
                 forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
+  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), topMargin, 40, 40);
   filterButton.tag = StampFilterTypeBook;
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
@@ -142,11 +176,11 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   // Film.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_movies_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_movies_button_selected"]
+  imgName = [headerPrefix stringByAppendingString:@"movies_button"];
+  [filterButton setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:[imgName stringByAppendingString:@"_selected"]]
                 forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
+  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), topMargin, 40, 40);
   filterButton.tag = StampFilterTypeFilm;
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
@@ -154,11 +188,11 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   // Music.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_music_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_music_button_selected"]
+  imgName = [headerPrefix stringByAppendingString:@"music_button"];
+  [filterButton setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:[imgName stringByAppendingString:@"_selected"]]
                 forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
+  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), topMargin, 40, 40);
   filterButton.tag = StampFilterTypeMusic;
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
@@ -166,11 +200,11 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
   // Other.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_other_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"hdr_filter_other_button_selected"]
+  imgName = [headerPrefix stringByAppendingString:@"other_button"];
+  [filterButton setImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:[imgName stringByAppendingString:@"_selected"]]
                 forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
+  filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), topMargin, 40, 40);
   filterButton.tag = StampFilterTypeOther;
   [scrollView_ addSubview:filterButton];
   [filterButtons_ addObject:filterButton];
@@ -180,7 +214,9 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
                action:@selector(filterButtonPressed:)
      forControlEvents:UIControlEventTouchUpInside];
   }
-  
+  if (searchDisabled_)
+    return;
+
   self.searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
   searchButton_.frame = CGRectMake(279, kTopMargin, 40, 40);
   [searchButton_ setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button"]

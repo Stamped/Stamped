@@ -19,6 +19,11 @@ typedef enum {
   StampFilterTypeOther
 } StampFilterType;
 
+typedef enum {
+  STStampFilterBarStyleDefault,
+  STStampFilterBarStyleDark
+} STStampFilterBarStyle;
+
 @class STStampFilterBar;
 
 @protocol STStampFilterBarDelegate
@@ -31,6 +36,8 @@ typedef enum {
 @end
 
 @interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate>
+
+- (id)initWithFrame:(CGRect)frame style:(STStampFilterBarStyle)style;
 
 @property (nonatomic, assign) IBOutlet id<STStampFilterBarDelegate> delegate;
 @property (nonatomic, assign) StampFilterType filterType;
