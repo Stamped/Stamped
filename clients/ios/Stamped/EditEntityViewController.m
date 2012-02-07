@@ -27,6 +27,18 @@ const CGFloat kKeyboardHeight = 217.0;
 - (void)dismissSelf;
 - (void)cancelButtonPressed:(id)sender;
 - (void)doneButtonPressed:(id)sender;
+
+@property (nonatomic, copy) NSString* primaryText;
+@property (nonatomic, copy) NSString* secondaryText;
+@property (nonatomic, copy) NSString* tertiaryText;
+@property (nonatomic, copy) NSString* streetText;
+@property (nonatomic, copy) NSString* secondStreet;
+@property (nonatomic, copy) NSString* cityText;
+@property (nonatomic, copy) NSString* stateText;
+@property (nonatomic, copy) NSString* zipText;
+@property (nonatomic, copy) NSString* countryCode;
+@property (nonatomic, copy) NSString* descriptionText;
+
 @end
 
 @implementation EditEntityViewController
@@ -52,6 +64,17 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize descriptionTextField = descriptionTextField_;
 @synthesize segmentedControl = segmentedControl_;
 @synthesize selectCountryButton = selectCountryButton_;
+
+@synthesize primaryText = primaryText_;
+@synthesize secondaryText = secondaryText_;
+@synthesize tertiaryText = tertiaryText_;
+@synthesize streetText = streetText_;
+@synthesize secondStreet = secondStreet_;
+@synthesize cityText = cityText_;
+@synthesize stateText = stateText_;
+@synthesize zipText = zipText_;
+@synthesize countryCode = countryCode_;
+@synthesize descriptionText = descriptionText_;
 
 - (id)init {
   self = [super initWithNibName:@"EditEntityViewController" bundle:nil];
@@ -81,11 +104,29 @@ const CGFloat kKeyboardHeight = 217.0;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
   self.selectCountryButton = nil;
+  self.primaryText = nil;
+  self.secondaryText = nil;
+  self.tertiaryText = nil;
+  self.streetText = nil;
+  self.secondStreet = nil;
+  self.cityText = nil;
+  self.stateText = nil;
+  self.zipText = nil;
+  self.countryCode = nil;
+  self.descriptionText = nil;
   [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
-  // Releases the view if it doesn't have a superview.
+  self.primaryText = primaryTextField_.text;
+  self.secondaryText = secondaryTextField_.text;
+  self.tertiaryText = tertiaryTextField_.text;
+  self.streetText = streetTextField_.text;
+  self.secondStreet = secondStreetTextField_.text;
+  self.cityText = cityTextField_.text;
+  self.stateText = stateTextField_.text;
+  self.zipText = zipTextField_.text;
+  self.descriptionText = descriptionTextField_.text;
   [super didReceiveMemoryWarning];
 }
 
@@ -158,6 +199,36 @@ const CGFloat kKeyboardHeight = 217.0;
   zipTextField_.text = detailedEntity_.zipcode;
   segmentedControl_.selectedSegmentIndex = 0;
 
+  if (primaryText_.length)
+    primaryTextField_.text = primaryText_;
+  if (secondaryText_.length)
+    secondaryTextField_.text = secondaryText_;
+  if (tertiaryText_.length)
+    tertiaryTextField_.text = tertiaryText_;
+  if (streetText_.length)
+    streetTextField_.text = streetText_;
+  if (secondStreet_.length)
+    secondStreetTextField_.text = secondStreet_;
+  if (cityText_.length)
+    cityTextField_.text = cityText_;
+  if (stateText_.length)
+    stateTextField_.text = stateText_;
+  if (zipText_.length)
+    zipTextField_.text = zipText_;
+  if (descriptionText_.length)
+    descriptionTextField_.text = descriptionText_;
+  
+  self.primaryText = nil;
+  self.secondaryText = nil;
+  self.tertiaryText = nil;
+  self.streetText = nil;
+  self.secondStreet = nil;
+  self.cityText = nil;
+  self.stateText = nil;
+  self.zipText = nil;
+  self.countryCode = nil;
+  self.descriptionText = nil;
+  
   if ([detailedEntity_.category isEqualToString:@"other"] || selectedCategory_ == STEditCategoryRowOther) {
     [self showOtherView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_other_icon"];
@@ -200,7 +271,10 @@ const CGFloat kKeyboardHeight = 217.0;
   } else {
     selectedCategory_ = STEditCategoryRowOther;
   }
-  
+
+  if (selectedCategory_ != STEditCategoryRowMusic && descriptionTextField_.text.length > 0)
+    [self addDescriptionButtonPressed:addDescriptionButton_];
+
   if (selectedCategory_ == STEditCategoryRowFood || selectedCategory_ == STEditCategoryRowOther) {
     NSArray* fields = [NSArray arrayWithObjects:streetTextField_, secondStreetTextField_, cityTextField_, stateTextField_, zipTextField_, nil];
     for (UITextField* field in fields) {
@@ -210,8 +284,6 @@ const CGFloat kKeyboardHeight = 217.0;
       }
     }
   }
-  if (selectedCategory_ != STEditCategoryRowMusic && descriptionTextField_.text.length > 0)
-    [self addDescriptionButtonPressed:addDescriptionButton_];
   
   NSIndexPath* path = [NSIndexPath indexPathForRow:selectedCategory_ inSection:0];
   [categoryDropdownTableView_ selectRowAtIndexPath:path
