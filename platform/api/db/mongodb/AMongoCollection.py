@@ -297,7 +297,7 @@ class AMongoCollection(object):
         sort        = kwargs.pop('sort', 'timestamp.created')
         order       = kwargs.pop('sortOrder', pymongo.DESCENDING)
         limit       = kwargs.pop('limit', 0)
-
+        
         params = {'_id': {'$in': documentIds}}
         
         if since is not None and before is not None:
@@ -307,13 +307,11 @@ class AMongoCollection(object):
         elif before is not None:
             params[sort] = {'$lte': before}
         
+        documents = self._collection.find(params)
         if sort is not None:
-            documents = self._collection.find(params).sort(sort, \
-                order).limit(limit)
-        else:
-            documents = self._collection.find(params).limit(limit)
+            documents = documents.sort(sort, order)
         
-        return documents
+        return documents.limit(limit)
     
     
     ### RELATIONSHIP MANAGEMENT

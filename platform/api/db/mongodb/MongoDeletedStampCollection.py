@@ -49,18 +49,17 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
             'limit':    kwargs.pop('limit', 20),
             'sort':     'timestamp.modified',
         }
-
-        documentIds = []
-        for stampId in stampIds:
-            documentIds.append(self._getObjectIdFromString(stampId))
-
+        
+        ids = map(self._getObjectIdFromString, stampIds)
+        
         # Get stamps
-        documents = self._getMongoDocumentsFromIds(documentIds, **params)
-
+        documents = self._getMongoDocumentsFromIds(ids, **params)
+        
         stamps = []
         for document in documents:
             stamp = self._convertFromMongo(document)
             stamp.deleted = True
             stamps.append(stamp)
-
+        
         return stamps
+

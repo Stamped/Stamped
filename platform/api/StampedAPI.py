@@ -713,20 +713,17 @@ class StampedAPI(AStampedAPI):
     
     ### PRIVATE
     
-    def _getUserFromIdOrScreenName(self, userRequest):
-        if isinstance(userRequest, SchemaElement):
-            userRequest = userRequest.value
+    def _getUserFromIdOrScreenName(self, userTiny):
+        if not isinstance(userRequest, SchemaElement):
+            userTiny    = UserTiny(userTiny)
         
-        user_id         = userRequest.pop('user_id', None)
-        screen_name     = userRequest.pop('screen_name', None)
-        
-        if user_id is None and screen_name is None:
+        if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
         
-        if user_id is not None:
-            return self._userDB.getUser(user_id)
+        if userTiny.user_id is not None:
+            return self._userDB.getUser(userTiny.user_id)
         
-        return self._userDB.getUserByScreenName(screen_name)
+        return self._userDB.getUserByScreenName(userTiny.screen_name)
     
     ### PUBLIC
     
@@ -736,12 +733,12 @@ class StampedAPI(AStampedAPI):
         
         if user.privacy == True:
             if authUserId is None:
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsError("Insufficient privileges to view user")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsError("Insufficient privileges to view user")
         
         return user
     
@@ -951,13 +948,13 @@ class StampedAPI(AStampedAPI):
             check = Friendship(user_id=authUserId, friend_id=userA.user_id)
             
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to check friendship")
+                raise StampedPermissionsError("Insufficient privileges to check friendship")
         
         if userB.privacy == True and authUserId != userB.user_id:
             check = Friendship(user_id=authUserId, friend_id=userB.user_id)
             
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to check friendship")
+                raise StampedPermissionsError("Insufficient privileges to check friendship")
         
         friendship = Friendship(user_id=userA.user_id, friend_id=userB.user_id)
         return self._friendshipDB.checkFriendship(friendship)
@@ -1110,7 +1107,7 @@ class StampedAPI(AStampedAPI):
         
         # Check if user has access to this entity
         if entity.generated_by != authUserId or entity.generated_by is None:
-            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to update custom entity")
+            raise StampedPermissionsError("Insufficient privileges to update custom entity")
         
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1608,7 +1605,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user can modify the stamp
         if authUserId != stamp.user_id:
-            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to modify stamp")
+            raise StampedPermissionsError("Insufficient privileges to modify stamp")
         
         # Collect user ids
         userIds = {}
@@ -1772,7 +1769,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
-            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to remove stamp")
+            raise StampedPermissionsError("Insufficient privileges to remove stamp")
         
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
@@ -1837,7 +1834,7 @@ class StampedAPI(AStampedAPI):
             friendship = Friendship(user_id=user.user_id, friend_id=authUserId)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
+                raise StampedPermissionsError("Insufficient privileges to view stamp")
         
         return stamp
     
@@ -1849,7 +1846,7 @@ class StampedAPI(AStampedAPI):
         
         # TODO: if authUserId == stamp.user.user_id, then the privacy should be disregarded
         if stamp.user.privacy == True:
-            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
+            raise StampedPermissionsError("Insufficient privileges to view stamp")
         
         return stamp
     
@@ -1860,7 +1857,7 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has permission to add image
         if stamp.user_id != authUserId:
-            raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to update stamp image")
+            raise StampedPermissionsError("Insufficient privileges to update stamp image")
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
@@ -1896,7 +1893,7 @@ class StampedAPI(AStampedAPI):
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
+                raise StampedPermissionsError("Insufficient privileges to add comment")
         
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
@@ -1999,7 +1996,7 @@ class StampedAPI(AStampedAPI):
         if comment.user.user_id != authUserId:
             stamp = self._stampDB.getStamp(comment.stamp_id)
             if stamp.user.user_id != authUserId:
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to remove comment")
+                raise StampedPermissionsError("Insufficient privileges to remove comment")
 
         # Don't allow user to delete comment for restamp notification
         if comment.restamp_id is not None:
@@ -2031,7 +2028,7 @@ class StampedAPI(AStampedAPI):
             friendship = Friendship(user_id=stamp.user.user_id, friend_id=authUserId)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view stamp")
+                raise StampedPermissionsError("Insufficient privileges to view stamp")
               
         commentData = self._commentDB.getComments(stamp.stamp_id)
         
@@ -2088,7 +2085,7 @@ class StampedAPI(AStampedAPI):
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
+                    raise StampedPermissionsError("Insufficient privileges to add comment")
             
             # Check if block exists between user and stamp owner
             if self._friendshipDB.blockExists(friendship) == True:
@@ -2181,7 +2178,7 @@ class StampedAPI(AStampedAPI):
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to add comment")
+                    raise StampedPermissionsError("Insufficient privileges to add comment")
             
             # Check if block exists between user and stamp owner
             if self._friendshipDB.blockExists(friendship) == True:
@@ -2239,9 +2236,8 @@ class StampedAPI(AStampedAPI):
         except:
             return cap
     
-    def _getStampCollection(self, authUserId, stampIds, **kwargs):
-        quality         = kwargs.pop('quality', 3)
-        includeComments = kwargs.pop('comments', False)
+    def _getStampCollection(self, authUserId, stampIds, genericSlice, enrich=True):
+        quality         = genericSlice.quality
         
         # Set quality
         if quality == 1:        # wifi
@@ -2254,24 +2250,25 @@ class StampedAPI(AStampedAPI):
             stampCap    = 20
             commentCap  = 4
         
-        # Limit slice of data returned
-        params = self._setSliceParams(kwargs, stampCap, 'created')
+        if genericSlice.limit is None:
+            genericSlice.limit = stampCap
         
-        stampData = self._stampDB.getStamps(stampIds, **params)
-        
+        stampData = self._stampDB.getStampsSlice(stampIds, genericSlice)
         commentPreviews = {}
         
-        if includeComments == True:
+        if genericSlice.comments:
             # Only grab comments for slice
             realizedStampIds = []
             for stamp in stampData:
                 realizedStampIds.append(stamp.stamp_id)
+            
             commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
             
             # Group previews by stamp_id
             for comment in commentData:
                 if comment.stamp_id not in commentPreviews:
                     commentPreviews[comment.stamp_id] = []
+                
                 commentPreviews[comment.stamp_id].append(comment)
         
         # Add user object and preview to stamps
@@ -2279,70 +2276,58 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
                 stamp.comment_preview = commentPreviews[stamp.stamp_id]
+            
             stamps.append(stamp)
         
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+        if enrich:
+            stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         
-        if kwargs.pop('deleted', False):
+        """
+        if genericSlice.deleted:
             deleted = self._stampDB.getDeletedStamps(stampIds, **params)
             if len(deleted) > 0:
                 stamps = stamps + deleted
+        """
         
-        if params['sort'] == 'modified':
-            stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
-        else:
-            stamps.sort(key=lambda k:k.timestamp.created, reverse=True)
-        
-        return stamps[:params['limit']]
+        return stamps
     
     @API_CALL
-    def getInboxStamps(self, authUserId, **kwargs):
+    def getInboxStamps(self, authUserId, genericSlice):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
         
-        kwargs['comments']  = True
-        kwargs['deleted']   = True
-        kwargs['sort']      = 'modified' ## TEMP
-        
-        return self._getStampCollection(authUserId, stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, genericSlice)
     
     @API_CALL
-    def getUserStamps(self, userRequest, authUserId, **kwargs):
-        user = self._getUserFromIdOrScreenName(userRequest)
+    def getUserStamps(self, authUserId, userSlice):
+        user = self._getUserFromIdOrScreenName(userSlice)
         
         # Check privacy
         if user.privacy == True:
             if authUserId is None:
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Must be logged in to view account")
+                raise StampedPermissionsError("Must be logged in to view account")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
-        
-        kwargs['comments'] = True
-        
-        ### TEMP
-        import copy
-        kwargsCopy = copy.deepcopy(kwargs)
-        
-        result = self._getStampCollection(authUserId, stampIds, **kwargs)
+        result   = self._getStampCollection(authUserId, stampIds, userSlice)
         
         ### TEMP
         # Fixes infinite loop where client (1.0.3) mistakenly passes "modified" instead
         # of "created" as 'before' param. This attempts to identify those situations on 
         # the second pass and returns the next segment of stamps.
-        if len(result) >= 10 and 'before' in kwargs:
+        if len(result) >= 10 and userSlice.before is not None:
             try:
-                before = datetime.utcfromtimestamp(int(kwargsCopy.pop('before', None)))
+                before = datetime.utcfromtimestamp(int(userSlice.before))
                 from datetime import timedelta
                 import calendar
                 modified = result[-1].timestamp.modified
                 if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
                     and result[-1].timestamp.created + timedelta(hours=1) < before:
-                    kwargsCopy['before'] = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
-                    result = self._getStampCollection(authUserId, stampIds, **kwargsCopy)
+                    userSlice.before = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
+                    result = self._getStampCollection(authUserId, stampIds, userSlice)
             except Exception as e:
                 logs.warning(e)
                 pass
@@ -2350,23 +2335,23 @@ class StampedAPI(AStampedAPI):
         return result
     
     @API_CALL
-    def getCreditedStamps(self, userRequest, authUserId, **kwargs):
-        user = self._getUserFromIdOrScreenName(userRequest)
+    def getCreditedStamps(self, authUserId, userSlice):
+        user = self._getUserFromIdOrScreenName(userSlice)
         
         # Check privacy
         if user.privacy == True:
             if authUserId is None:
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Must be logged in to view account")
+                raise StampedPermissionsError("Must be logged in to view account")
             
             friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
             
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsErrorInsufficientPrivilegesError("Insufficient privileges to view user")
+                raise StampedPermissionsError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
-        logs.info("STAMP IDS: %s" % stampIds)
+        #logs.info("STAMP IDS: %s" % stampIds)
         
-        return self._getStampCollection(authUserId, stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, userSlice)
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):

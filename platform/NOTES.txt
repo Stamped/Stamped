@@ -1,6 +1,10 @@
 
-    * generic, private logging endpoint for clients
+    * test map reduce sorting extensively, including targeted unit tests
     * improve error messages for get_dns_by_node_name
+    * popbar => po special case of name checking; make fuzzy name deduping based on name prefix s.t. leniancy is inversely proportional to string length (e.g., shorter strings should have harsher requirements for matching)
+    * possibly also do prefix-based matching after breaking up into words
+    * cleanup userRequest instances; enforce screen_name if given in addition to user_id
+    * what happens if user_id or screen_name lookup fails?
 
 API v1:
     * entrypoints:
@@ -131,6 +135,9 @@ OLD:
     * refactor repository layout
     * automated way to determine whether or not we're on PROD stack
     * add wrapper to APITasks.py to invoke tasks with specific args
+    * improve deploy update script to rollout updates one node at a time and be ELB-aware
+    * generic, private logging endpoint for clients
+    * change bootstrap/bin/update.py to return non-zero exit status if WARNINGs encountered
     
     34.026401,-118.38947899
 

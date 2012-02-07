@@ -380,6 +380,47 @@ class ClientLogsEntry(Schema):
         self.activity_id        = SchemaElement(basestring)
 
 
+# ####### #
+# Slicing #
+# ####### #
+
+class GenericSlice(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int)
+        self.offset             = SchemaElement(int, default=0)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        self.sort               = SchemaElement(basestring, default='modified')
+        self.reverse            = SchemaElement(bool,       default=False)
+        self.center             = CoordinatesSchema()
+        
+        # filtering
+        self.query              = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.since              = SchemaElement(datetime)
+        self.before             = SchemaElement(datetime)
+        self.viewport           = ViewportSchema()
+        
+        # misc options
+        self.quality            = SchemaElement(int,  default=1)
+        self.deleted            = SchemaElement(bool, default=False)
+        self.comments           = SchemaElement(bool, default=True)
+
+
+class UserCollectionSlice(GenericSlice, UserTiny):
+    def setSchema(self):
+        GenericSlice.setSchema(self)
+        UserTiny.setSchema(self)
+
+class ViewportSchema(Schema):
+    def setSchema(self):
+        self.upperLeft          = CoordinatesSchema()
+        self.lowerRight         = CoordinatesSchema()
+
+
 # ######## #
 # Entities #
 # ######## #
