@@ -18,6 +18,11 @@ tel - telephone number (i.e. '(412) 765-3200')
 latitude - float (i.e. 40.525447)
 longitude - float (i.e. -80.005443)
 
+Resolve:
+Resolve attempts to identify the Factual entity which matches a limited set
+of attributes that may only be partially correct. Try running Factual.py
+without arguments to access the demo.
+
 Crosswalk:
 Crosswalk attempts to map ids and URIs from one service to
 the ids and URIs of other services. For a complete list
@@ -69,6 +74,7 @@ from re                 import match
 from threading          import Lock
 import time
 import random
+import datetime
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -120,7 +126,7 @@ def _category(entity):
         return None
 
 def _time(unused):
-    return time.time()
+    return datetime.datetime.utcnow()
 #
 # Currently used entity data and their associated name for use in a resolve filter
 #
@@ -164,7 +170,7 @@ def _filters(entity,fields):
 def _enrich(entity,data,fields=_enrich_fields):
     for k,f in fields.items():
         v = f(data)
-        if v:
+        if v is not None and not k in entity:
             entity[k] = v
 
 
