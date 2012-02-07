@@ -155,6 +155,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
       newEntity_ = YES;
       self.detailedEntity = [DetailedEntity object];
       detailedEntity_.title = searchResult.title;
+      detailedEntity_.category = @"other";
       self.objectToStamp = detailedEntity_;
     } else {
       self.objectToStamp = searchResult;

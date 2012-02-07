@@ -93,6 +93,9 @@ const CGFloat kKeyboardHeight = 217.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  
+  NSLog(@"Category: %@", detailedEntity_.category);
+  
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
@@ -154,8 +157,12 @@ const CGFloat kKeyboardHeight = 217.0;
   stateTextField_.text = detailedEntity_.state;
   zipTextField_.text = detailedEntity_.zipcode;
   segmentedControl_.selectedSegmentIndex = 0;
-  
-  if ([detailedEntity_.category isEqualToString:@"film"]) {
+
+  if ([detailedEntity_.category isEqualToString:@"other"] || selectedCategory_ == STEditCategoryRowOther) {
+    [self showOtherView];
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_other_icon"];
+    selectedCategory_ = STEditCategoryRowOther;
+  } else if ([detailedEntity_.category isEqualToString:@"film"] || selectedCategory_ == STEditCategoryRowFilm) {
     [self showFilmView];
     selectedCategory_ = STEditCategoryRowFilm;
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_film_icon"];
@@ -165,19 +172,19 @@ const CGFloat kKeyboardHeight = 217.0;
     if ([detailedEntity_.subcategory isEqualToString:@"tv"]) {
       segmentedControl_.selectedSegmentIndex = 1;
     }
-  } else if ([detailedEntity_.category isEqualToString:@"book"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"book"] || selectedCategory_ == STEditCategoryRowBooks) {
     [self showBookView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_book_icon"];
     primaryTextField_.text = detailedEntity_.author;
     selectedCategory_ = STEditCategoryRowBooks;
-  } else if ([detailedEntity_.category isEqualToString:@"food"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"food"] || selectedCategory_ == STEditCategoryRowFood) {
     [self showFoodView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_food_icon"];
     if ([detailedEntity_.subcategory isEqualToString:@"bar"]) {
       segmentedControl_.selectedSegmentIndex = 1;
     }
     selectedCategory_ = STEditCategoryRowFood;
-  } else if ([detailedEntity_.category isEqualToString:@"music"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"music"] || selectedCategory_ == STEditCategoryRowMusic) {
     [self showMusicView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_music_icon"];
     if ([detailedEntity_.subcategory isEqualToString:@"song"]) {
@@ -190,13 +197,22 @@ const CGFloat kKeyboardHeight = 217.0;
     if ([(NSArray*)detailedEntity_.albums count] > 0)
       secondaryTextField_.text = [detailedEntity_.albums objectAtIndex:0];
     selectedCategory_ = STEditCategoryRowMusic;
-  } else if ([detailedEntity_.category isEqualToString:@"other"]) {
-    [self showOtherView];
-    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_other_icon"];
-    selectedCategory_ = STEditCategoryRowOther;
   } else {
     selectedCategory_ = STEditCategoryRowOther;
   }
+  
+  if (selectedCategory_ == STEditCategoryRowFood || selectedCategory_ == STEditCategoryRowOther) {
+    NSArray* fields = [NSArray arrayWithObjects:streetTextField_, secondStreetTextField_, cityTextField_, stateTextField_, zipTextField_, nil];
+    for (UITextField* field in fields) {
+      if (field.text.length > 0) {
+        [self addLocationButtonPressed:addLocationButton_];
+        break;
+      }
+    }
+  }
+  if (selectedCategory_ != STEditCategoryRowMusic && descriptionTextField_.text.length > 0)
+    [self addDescriptionButtonPressed:addDescriptionButton_];
+  
   NSIndexPath* path = [NSIndexPath indexPathForRow:selectedCategory_ inSection:0];
   [categoryDropdownTableView_ selectRowAtIndexPath:path
                                           animated:NO
@@ -274,29 +290,30 @@ const CGFloat kKeyboardHeight = 217.0;
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [self hideCategoryMenu];
+  
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectOffset(CGRectInset(scrollView_.frame, 0, kKeyboardHeight / 2), 0, -kKeyboardHeight / 2);
+                     CGRect frame = [textField.superview convertRect:textField.frame toView:scrollView_];
+                     [scrollView_ scrollRectToVisible:frame animated:YES];
+                   }
+                   completion:nil];
 
-  CGFloat maxY = 0.0;
-  for (UIView* view in scrollView_.subviews) {
-    if (view.alpha != 0.0)
-      maxY = fmaxf(CGRectGetMaxY(view.frame), maxY);
-  }
-  CGFloat inset = fmaxf(0, kKeyboardHeight - (scrollView_.contentSize.height - maxY - 20));
-  CGFloat yOffset = 0.0;
-  CGRect textFieldFrame = [textField convertRect:textField.frame toView:scrollView_];
-  if (scrollView_.contentOffset.y == 0 &&
-      CGRectGetMaxY(textFieldFrame) > (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight)) {
-    yOffset = inset;
-  }
-  [UIView animateWithDuration:0.2 animations:^{
-    self.scrollView.contentInset = UIEdgeInsetsMake(0, 0, inset, 0);
-    if (yOffset > 0)
-      self.scrollView.contentOffset = CGPointMake(0, yOffset);
-  }];
   selectedTextField_ = textField;
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   selectedTextField_ = nil;
+  
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectOffset(CGRectInset(scrollView_.frame, 0, -kKeyboardHeight / 2), 0, kKeyboardHeight / 2);
+                   }
+                   completion:nil];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
