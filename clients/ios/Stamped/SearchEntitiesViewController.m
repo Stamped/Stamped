@@ -16,7 +16,6 @@
 #import "EntityDetailViewController.h"
 #import "SearchEntitiesAutoSuggestCell.h"
 #import "SearchEntitiesTableViewCell.h"
-#import "STStampFilterBar.h"
 #import "STSearchField.h"
 #import "STSectionHeaderView.h"
 #import "STNoResultsTableViewCell.h"
@@ -28,23 +27,14 @@ static NSString* const kNearbyPath = @"/entities/nearby.json";
 static NSString* const kSearchPath = @"/entities/search.json";
 static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v2/";
 
-typedef enum {
-  SearchFilterNone = 0,
-  SearchFilterFood,
-  SearchFilterBook,
-  SearchFilterFilm,
-  SearchFilterMusic,
-  SearchFilterOther
-} SearchFilter;
-
-// This MUST be kept in sync with the enum order above.
+// This MUST be kept in sync with the enum order of StampFilterType.
 
 NSString* const kSearchFilterStrings[6] = {
   @"",
   @"food",
   @"book",
-  @"film",
   @"music",
+  @"film",
   @"other"
 };
 
@@ -57,7 +47,6 @@ typedef enum {
 
 @interface SearchEntitiesViewController ()
 - (void)createFilterBar;
-- (void)filterButtonPressed:(id)sender;
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
 - (void)sendFastSearchRequest;
@@ -72,7 +61,7 @@ typedef enum {
 @property (nonatomic, assign) ResultType currentResultType;
 @property (nonatomic, assign) BOOL loading;
 @property (nonatomic, readonly) UIButton* clearFilterButton;
-@property (nonatomic, assign) SearchFilter currentSearchFilter;
+@property (nonatomic, assign) StampFilterType currentSearchFilter;
 @property (nonatomic, retain) UIImageView* notConnectedImageView;
 @property (nonatomic, retain) STStampFilterBar* stampFilterBar;
 @end
@@ -250,14 +239,14 @@ typedef enum {
     return;
   currentResultType_ = ResultTypeFast;
   searchField_.enabled = YES;
-  self.currentSearchFilter = SearchFilterNone;
+  self.currentSearchFilter = StampFilterTypeNone;
   self.cachedAutocompleteResults = nil;
   self.resultsArray = nil;
   [self reloadTableData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   self.searchField.text = nil;
-  [self filterButtonPressed:nil];
+  [self stampFilterBar:stampFilterBar_ didSelectFilter:StampFilterTypeNone andQuery:nil];
   searchField_.placeholder = @"Find something to stamp";
   CGRect searchFrame = searchField_.frame;
   searchFrame.size.width = 207;
@@ -294,13 +283,13 @@ typedef enum {
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     return;
   self.currentResultType = ResultTypeLocal;
-  self.currentSearchFilter = SearchFilterNone;
+  self.currentSearchFilter = StampFilterTypeNone;
   self.resultsArray = nil;
   [self reloadTableData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   self.searchField.text = nil;
-  [self filterButtonPressed:nil];
+  [self stampFilterBar:stampFilterBar_ didSelectFilter:StampFilterTypeNone andQuery:nil];
   [searchField_ resignFirstResponder];
   searchField_.enabled = NO;
   searchField_.placeholder = nil;
@@ -329,37 +318,6 @@ typedef enum {
   [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
-- (void)filterButtonPressed:(id)sender {
-  UIButton* button = sender;
-//  for (UIView* view in filterBar_.subviews) {
-//    if ([view isMemberOfClass:[UIButton class]] && view != sender)
-//      [(UIButton*)view setSelected:NO];
-//  }
-  self.resultsArray = nil;
-  self.cachedAutocompleteResults = nil;
-  [self reloadTableData];
-  
-  self.currentSearchFilter = button.tag;
-  
-  if (currentSearchFilter_ != SearchFilterNone) {
-    button.selected = !button.selected;    
-  } else {
-    button.selected = NO;
-  }
-
-  if (!button.selected)
-    currentSearchFilter_ = SearchFilterNone;
-  
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
-                   completion:nil];
-  
-  if (searchField_.text.length)
-    [self sendSearchRequest];
-}
-
 - (void)reloadTableData {
   [self.tableView reloadData];
   if (currentResultType_ != ResultTypeFull || [tableView_ numberOfRowsInSection:0] == 0)
@@ -367,6 +325,29 @@ typedef enum {
   else
     tableView_.tableHeaderView = stampFilterBar_;
   tableView_.hidden = [tableView_ numberOfRowsInSection:0] == 0;
+}
+
+#pragma mark - STStampFilterBarDelegate methods.
+
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType
+              andQuery:(NSString*)query {
+  self.resultsArray = nil;
+  self.cachedAutocompleteResults = nil;
+  [self reloadTableData];
+  
+  currentSearchFilter_ = filterType;
+  
+  if (searchField_.text.length)
+    [self sendSearchRequest];
+}
+
+- (void)stampFilterBarSearchFieldDidBeginEditing {
+  // Do nothing. TODO(andybons): Make optional.
+}
+
+- (void)stampFilterBarSearchFieldDidEndEditing {
+  // Do nothing.
 }
 
 #pragma mark - Table view data source
@@ -449,7 +430,7 @@ typedef enum {
   query = [query lowercaseString];
   query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
   NSString* URLString = [NSString stringWithFormat:@"%@%@.json.gz", kFastSearchURI, query];
-  if (currentSearchFilter_ != SearchFilterNone) {
+  if (currentSearchFilter_ != StampFilterTypeNone) {
     NSString* queryString = [NSString stringWithFormat:@"?category=%@", kSearchFilterStrings[currentSearchFilter_]];
     URLString = [URLString stringByAppendingString:queryString];
   }
@@ -477,20 +458,20 @@ typedef enum {
   [searchField_ resignFirstResponder];
   currentResultType_ = ResultTypeFull;
   switch (currentSearchFilter_) {
-    case SearchFilterBook:
+    case StampFilterTypeBook:
       loadingIndicatorLabel_.text = @"Searching books...";
       break;
-    case SearchFilterFood:
+    case StampFilterTypeFood:
       loadingIndicatorLabel_.text = @"Searching restaurants & bars...";
       break;
-    case SearchFilterMusic:
+    case StampFilterTypeMusic:
       loadingIndicatorLabel_.text = @"Searching music...";
       break;
-    case SearchFilterFilm:
+    case StampFilterTypeFilm:
       loadingIndicatorLabel_.text = @"Searching movies & TV shows...";
       break;
-    case SearchFilterOther:
-    case SearchFilterNone:
+    case StampFilterTypeOther:
+    case StampFilterTypeNone:
     default:
       loadingIndicatorLabel_.text = @"Searching...";
       break;
@@ -512,7 +493,7 @@ typedef enum {
     [params setObject:coordString forKey:@"coordinates"];
   }
 
-  if (currentSearchFilter_ != SearchFilterNone)
+  if (currentSearchFilter_ != StampFilterTypeNone)
     [params setObject:kSearchFilterStrings[currentSearchFilter_] forKey:@"category"];
 
   objectLoader.params = params;
@@ -574,7 +555,7 @@ typedef enum {
         [terms addObject:result.title];
       }
     }
-    if (currentSearchFilter_ != SearchFilterNone) {
+    if (currentSearchFilter_ != StampFilterTypeNone) {
       NSPredicate* predicate = [NSPredicate predicateWithFormat:@"category == %@",
           kSearchFilterStrings[currentSearchFilter_]];
       self.resultsArray = [array filteredArrayUsingPredicate:predicate];
@@ -672,9 +653,9 @@ typedef enum {
   else
     [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
   [gradientLayer release];
-  if (currentSearchFilter_ == SearchFilterNone ||
-      currentSearchFilter_ == SearchFilterFood ||
-      currentSearchFilter_ == SearchFilterOther ||
+  if (currentSearchFilter_ == StampFilterTypeNone ||
+      currentSearchFilter_ == StampFilterTypeFood ||
+      currentSearchFilter_ == StampFilterTypeOther ||
       currentResultType_ == ResultTypeLocal) {
     UIImageView* google = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"poweredbygoogle"]];
     google.frame = CGRectOffset(google.frame, 213, 5);
@@ -691,19 +672,19 @@ typedef enum {
   } else {
     NSString* corpus = @"All results";
     switch (currentSearchFilter_) {
-      case SearchFilterBook:
+      case StampFilterTypeBook:
         corpus = @"Books only";
         break;
-      case SearchFilterMusic:
+      case StampFilterTypeMusic:
         corpus = @"Music only";
         break;
-      case SearchFilterFilm:
+      case StampFilterTypeFilm:
         corpus = @"Movies & TV shows only";
         break;
-      case SearchFilterFood:
+      case StampFilterTypeFood:
         corpus = @"Restaurants & bars only";
         break;
-      case SearchFilterOther:
+      case StampFilterTypeOther:
         corpus = @"Other category results";
         break;
       default:
@@ -761,7 +742,7 @@ typedef enum {
 
 - (void)resetState {
   self.currentResultType = ResultTypeFast;
-  self.currentSearchFilter = SearchFilterNone;
+  self.currentSearchFilter = StampFilterTypeNone;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.loading = NO;
   self.currentRequest = nil;
@@ -769,7 +750,7 @@ typedef enum {
   self.searchField.enabled = YES;
   self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
-  [self filterButtonPressed:nil];
+  [self stampFilterBar:stampFilterBar_ didSelectFilter:StampFilterTypeNone andQuery:nil];
 
   CGRect frame = searchField_.frame;
   frame.size.width = 207;

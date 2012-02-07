@@ -313,6 +313,9 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 - (void)showTooltipIfNeeded {
   BOOL showInstruction = ([[NSUserDefaults standardUserDefaults] integerForKey:kNumInstructionsDisplayed] < 15);
+  if (!showInstruction && style_ == STStampFilterBarStyleDark)
+    return;
+
   if (tooltipImageView_) {
     [tooltipImageView_.layer removeAllAnimations];
     tooltipImageView_.alpha = [[tooltipImageView_.layer presentationLayer] opacity];
