@@ -8,8 +8,93 @@ __license__   = "TODO"
 import Globals
 import base64, hashlib, hmac
 import json, urllib, urllib2, utils
+import sys
+
 
 from pprint import pprint
+from Schemas    import MenuSchema
+from Schemas    import SubmenuSchema
+from Schemas    import MenuSectionSchema
+from Schemas    import MenuItemSchema
+from Schemas    import MenuPriceSchema
+import time
+
+_spicy_map = {
+    'none':0,
+    'mild':1,
+    'medium':2,
+    'hot':3,
+}
+
+def _parse_spicy(entry):
+    if 'spicy' in entry:
+        return _spicy_map[entry['spicy']]
+    else:
+        return None
+
+def _parse_prices(entry):
+    prices = []
+    for p in entry['prices']:
+        p2 = MenuPriceSchema()
+        p2.title = p['title']
+        p2.price = p['price']
+        p2.unit = p['unit']
+        p2.currency = 'dollars'
+        prices.append(p2)
+    return prices
+
+
+def _parseMenu(menu):
+    m = SubmenuSchema()
+    m.title = menu['title']
+    # TODO times
+    m.footnote = menu['footnote']
+    m.desc = menu['desc']
+    sections = []
+    cur_section = None
+    cur_items = []
+    for entry in menu['entries']:
+        t = entry['type']
+        if t == 'section':
+            if cur_section:
+                cur_section.items = cur_items
+                cur_items = []
+            cur_section = MenuSectionSchema()
+            sections.append(cur_section)
+            cur_section.title = entry['title']
+            cur_section.desc = entry['desc']
+        elif t == 'item':
+            item = MenuItemSchema()
+            item.title = entry['title']
+            item.desc = entry['desc']
+            item.spicy = _parse_spicy(entry)
+            item.allergens = entry['allergens']
+            item.allergen_free = entry['allergenFree']
+            item.restrictions = entry['restrictions']
+            item.prices = _parse_prices(entry)
+            cur_items.append(item)
+    if not cur_section:
+        cur_section =  MenuSectionSchema()
+    cur_section.items = cur_items
+    m.sections = sections
+    return m
+
+def toMenuSchema(menu):
+    if not menu:
+        return None
+    schema = MenuSchema()
+    schema.source = 'singleplatform'
+    schema.source_id = menu['location']['id']
+    schema.timestamp = time.time()
+    menus = menu['menus']
+    if len(menus) == 0:
+        return None
+    first_menu = menus[0]
+    schema.disclaimer = first_menu['disclaimer']
+    schema.attribution_image = first_menu['attributionImage']
+    schema.attribution_image_link = first_menu['attributionImageLink']
+    schema.menus = [ _parseMenu(m) for m in menus]
+    return schema
 
 class SinglePlatform(object):
     """
@@ -44,10 +129,13 @@ class SinglePlatform(object):
     
     def get_menu(self, location_id):
         return self._get_uri('/restaurants/%s/menu' % location_id)
+
+    deg get_menu_schema(self, location_id):
+        return toMenuSchema(self.get_menu(location_id))
     
     def get_short_menu(self, location_id):
         return self._get_uri('/restaurants/%s/shortmenu' % location_id)
-    
+
     def _get_uri(self, uri, params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))
@@ -79,9 +167,18 @@ class StampedSinglePlatform(SinglePlatform):
 
 if __name__ == '__main__':
     sp = StampedSinglePlatform()
-    
-    # Search for Nobu NY by its phone number
-    #results = sp.search(query='2122190500')
-    results = sp.get_menu('nobu')
-    pprint(results)
+    if len(sys.argv) > 1:
+        import Factual
+        f = Factual.Factual()
+        sp_id = f.singleplatform(sys.argv[1])
+        print(sp_id)
+        results = sp.get_menu(sp_id)
+        #pprint(results)
+        results = toMenuSchema(results)
+        pprint(results.value)
+    else:
+        # Search for Nobu NY by its phone number
+        #results = sp.search(query='2122190500')
+        results = sp.get_menu('nobu')
+        pprint(results)
 

@@ -1,0 +1,144 @@
+
+TOP_LEVEL = {
+	'source': SOURCE,
+	'source_id' : SOURCE_ID,
+	'source_info' : SOURCE_SPECIFIC_STATE, 
+	'disclaimer'	:	DISCLAIMER_TEXT,
+	'attribution_image'	: IMAGE_URL,
+	'attribution_image_link'	:	IMAGE_ATTRIBUTION_LINK,
+	'timestamp': FETCHED_TIMESTAMP,
+	'menus':[
+		( MENU )* 
+	]
+}
+
+MENU = {
+	'title'		:	FORMATTED_TITLE,
+	'times'		:	{
+		DAY : [(start,end)*]
+		...
+	}
+	'footnote'	:	FOOTNOTE_TEXT,
+	'desc'		: 	TEXT_DESCRIPTION,
+	'short_desc'	: SHORT_DESCRIPTION,
+	'sections'	:	[
+		( SECTION )*
+	]
+}
+
+SECTION = {
+	'title' : FORMATTED_TITLE,
+	'desc'	: TEXT_DESCRIPTION,
+	'short_desc'	: SHORT_DESCRIPTION,
+	'items' : [
+		( ITEM )*
+	]
+}
+
+ITEM = {
+	'title' : FORMATTED_TITLE,
+	'desc'	: TEXT_DESCRIPTION,
+	'categories' : [ (CATEGORY)* ] // soup,entree,etc.
+	'short_desc'	: SHORT_DESCRIPTION,
+	'spicy'	: (0,5), #default 0
+	'allergens'	: [ (COMMON_ALLERGENS)* ], #i.e. dairy,peanut
+	'allergen_free'	: [ (COMMON_ALLERGEN-free)* ], #i.e. dairy-free
+	'restrictions'	: [	(COMMON_RESTRICTION)* ], #i.e. vegan, halal
+	'prices'	:	[
+		{
+			'title'	:	FORMATTED_TITLE,
+			'price'	:	PRICE,
+			'calories'	:	CALORIES,
+			'unit'	:	UNIT, #i.e. per pound, each (default),
+			'currency'	: CURRENCY #default is dollars
+		}
+	]
+}
+
+###############
+# SAMPLES
+#
+# NOTE: sparsely shown
+###############
+
+{
+	'source': 'singleplatform',
+	'source_id' : 'hard-knox-cafe',
+	'source_info' : None, 
+	'attribution_image': 'http://a.singleplatform.com/Stamped/hard-knox-cafe/provided_by.png',
+	'attribution_image_link': 'http://www.singlepage.com/hard-knox-cafe/menu?ref=Stamped',
+	'disclaimer': 'Disclaimer: Always check with the restaurant for pricing and availability of menu items. SinglePlatform is not responsible for menu or pricing changes, but the information is believed to be accurate when posted. Listing of a menu does not mean that there is any affiliation, endorsement or sponsorship between SinglePlatform and the listed restaurant.',
+	'timestamp': FETCHED_TIMESTAMP,
+	'menus':[
+		{
+			'title':'Dinner Menu',
+			'entries':[
+				{
+					'title': 'Appetizers',
+					'items': [
+			            {
+			            	'title':'Crab Cakes',
+			            	'desc':'fresh house made crab cakes served with spicy aioli',
+			            	'type':'item',
+							'categories':['appetizer']
+			            	'prices':[
+			            		{
+			            			'price':'9.00'
+			            		}
+			            	]
+			            },
+			            ...
+			        ]
+			    },
+	            {
+	            	'title':'Soup & Salads',
+					'items': [
+						{
+			            	'title':'Hard Knox Caesar Salad',
+			            	'categories':['salad']
+			            	'desc':'crisp hearts of romaine lettuce with shredded parmesan cheese and house made creamy caesar dressing',
+			            	'type':'item',
+			            	'prices':[
+			            		{
+			            			'price':'6.00'
+			            		},
+			            		{
+			            			'title':'Add Chicken',
+			            			'price':'3.00',
+			            		}
+			            	]
+			            },
+			            ...
+			        ]
+			    },
+	            {
+	            	'title':'Sandwiches',
+	            	'desc':'Served With Choice Of One Side',
+					'items': [
+			            {
+			            	'title':'Hamburger',
+			            	'categories':['entree','burger','sandwich']
+			            	'desc':'half pound fresh ground chuck grilled on an open flame with mayo, mustard, lettuce, tomatoes, onions, and pickles.',
+			            	'type':'item',
+			            	'prices':[
+			            		{
+			            			'price':'6.00'
+			            		},
+			            		{
+			            			'title':'With Cheese Add',
+			            			'price':'0.50'
+			            		},
+			            		{
+			            			'title':'With Bacon And Cheese',
+			            			'price':'1.50'
+			            		}
+			            	]
+			            },
+			            ...
+			        ]
+			    },
+			    ...
+			]
+		}
+	]
+}

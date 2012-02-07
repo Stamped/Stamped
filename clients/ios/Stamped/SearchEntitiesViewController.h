@@ -9,6 +9,8 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "STStampFilterBar.h"
+
 @class STSearchField;
 
 typedef enum {
@@ -18,6 +20,7 @@ typedef enum {
 
 @interface SearchEntitiesViewController : UIViewController <RKObjectLoaderDelegate,
                                                             RKRequestDelegate,
+                                                            STStampFilterBarDelegate,
                                                             UITextFieldDelegate,
                                                             UITableViewDelegate,
                                                             UITableViewDataSource>

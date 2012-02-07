@@ -175,9 +175,15 @@
   self.imageView.layer.shadowRadius = 4.0;
   self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
-  self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.imageView.bounds].CGPath;
-
-  self.gradientView.frame = CGRectOffset(self.imageView.frame, 2, 0);
+  CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
+  CGRect viewFrame = self.imageView.frame;
+  viewFrame.size.height -= (imageFrame.origin.y * 2);
+  viewFrame.size.width -= (imageFrame.origin.x * 2);
+  viewFrame.origin.x += (imageFrame.origin.x * 2);
+  self.imageView.backgroundColor = [UIColor redColor];
+  self.imageView.frame = viewFrame;
+  self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectOffset(self.imageView.bounds, 0, 3)].CGPath;
+  self.gradientView.frame = viewFrame;
   self.gradientView.hidden = NO;
   self.imageView.hidden = NO;
 

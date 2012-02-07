@@ -281,28 +281,25 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 }
 
 // Thanks to cncool. http://stackoverflow.com/questions/389342/how-to-get-the-size-of-a-scaled-uiimage-in-uiimageview
-+ (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView
-{
-  float imageRatio = image.size.width / image.size.height;
-  float viewRatio = imageView.frame.size.width / imageView.frame.size.height;
++ (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView {
+  CGFloat imageRatio = image.size.width / image.size.height;
+  CGFloat viewRatio = imageView.frame.size.width / imageView.frame.size.height;
   
-  if(imageRatio < viewRatio)
-  {
-    float scale = imageView.frame.size.height / image.size.height;
-    float width = scale * image.size.width;
-    float topLeftX = (imageView.frame.size.width - width) * 0.5;
+  if (imageRatio < viewRatio) {
+    CGFloat scale = imageView.frame.size.height / image.size.height;
+    CGFloat width = scale * image.size.width;
+    CGFloat topLeftX = (imageView.frame.size.width - width) * 0.5;
     return CGRectMake(topLeftX, 0, width, imageView.frame.size.height);
-  }
-  else
-  {
-    float scale = imageView.frame.size.width / image.size.width;
-    float height = scale * image.size.height;
-    float topLeftY = (imageView.frame.size.height - height) * 0.5;
+  } else {
+    CGFloat scale = imageView.frame.size.width / image.size.width;
+    CGFloat height = scale * image.size.height;
+    CGFloat topLeftY = (imageView.frame.size.height - height) * 0.5;
     return CGRectMake(0, topLeftY, imageView.frame.size.width, height);
   }
 }
-  // Fix for long back button titles overlapping the Stamped logo.
-+ (NSString*)truncateTitleForBackButton:(NSString *)title {
+
+// Fix for long back button titles overlapping the Stamped logo.
++ (NSString*)truncateTitleForBackButton:(NSString*)title {
   CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
   if (titleSize.width > 87) {
     BOOL firstLoop = YES;
@@ -310,9 +307,9 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
       if (firstLoop) {
         firstLoop = NO;
         title = [[title substringToIndex:title.length - 1] stringByAppendingString:@"…"];
-      }
-      else
+      } else {
         title = [[title substringToIndex:title.length - 2] stringByAppendingString:@"…"];
+      }
       // -2 because we've already appended the ellipsis.
       titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
     }
