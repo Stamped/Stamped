@@ -9,7 +9,8 @@ import Globals
 import time, utils
 import pysolr, pymongo
 
-from collections import defaultdict
+from collections    import defaultdict
+from pprint         import pprint
 
 def solr_id(id):
     if isinstance(id, basestring) or isinstance(id, int):
@@ -28,7 +29,7 @@ def extract_fields(obj, fields):
 
 def init(conn, solr, schemas):
     for ns, fields in schemas.items():
-        utils.log("Importing all documents from ns '%s' to solr" % ns)
+        print("Importing all documents from ns '%s' to solr" % ns)
         
         coll = conn
         for part in ns.split('.'):
@@ -68,18 +69,20 @@ def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:898
         
         solr_docs = []
         for op in cursor:
+            pprint(op)
+            
             if op['ns'] in schemas:
                 spec['ts'] = {'$gt': op['ts']}
                 
                 if op['op'] == 'd':
                     id = solr_id(op['o']['_id'])
-                    utils.log("Deleting document with id '%s'" % id)
+                    print("Deleting document with id '%s'" % id)
                     #solr.delete(id=id)
                 elif op['op'] in ['i', 'u']:
                     solr_docs.append(extract_fields(op['o'], schemas[op['ns']]))
         
         if solr_docs:
-            utils.log('Adding %d docs to solr' % len(solr_docs))
+            print('Adding %d docs to solr' % len(solr_docs))
             #solr.add(solr_docs)
         
         db.fts.save({'_id': 'state', 'ts': spec['ts']['$gt']})
