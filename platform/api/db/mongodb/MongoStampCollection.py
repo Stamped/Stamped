@@ -415,7 +415,8 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 return obj;
             }""")
             
-            result = self._collection.inline_map_reduce(_map, _reduce, 
+            result = self._collection.inline_map_reduce(_map, 
+                                                        _reduce, 
                                                         query=query, 
                                                         scope=scope, 
                                                         jsMode=True, 

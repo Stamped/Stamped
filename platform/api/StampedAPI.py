@@ -453,6 +453,7 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("if no image data is provided, a temp_image_url is required")
         
         user = self._userDB.getUser(authUserId)
+        screen_name = user.screen_name
         
         image_cache = datetime.utcnow()
         user.image_cache = image_cache

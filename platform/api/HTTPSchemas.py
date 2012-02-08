@@ -196,8 +196,6 @@ class HTTPAccountProfileImage(Schema):
         
         # for asynchronous image uploads
         self.temp_image_url     = SchemaElement(basestring)
-        self.temp_image_width   = SchemaElement(int)
-        self.temp_image_height  = SchemaElement(int)
 
 class HTTPAccountCheck(Schema):
     def setSchema(self):
