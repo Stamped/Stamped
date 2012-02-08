@@ -44,3 +44,19 @@ class AEntityDB(AEntitySink):
     def addEntities(self, entities):
         raise NotImplementedError
 
+    @abstract
+    def getMenus(self, entityId):
+        raise NotImplementedError
+    
+    @abstract
+    def getMenu(self, entityId):
+        raise NotImplementedError
+    
+    @abstract
+    def updateMenu(self, entityId, source, sourceId):
+        raise NotImplementedError
+
+    @abstract
+    def updateMenus(self, entityId):
+        raise NotImplementedError
+
