@@ -66,6 +66,35 @@ class StampedAPIPlacesSearch(StampedAPIPlaceTest):
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
 
+_ino = {
+    "title": "Ino Cafe and Wine Bar",
+    "subtitle": "New York, NY",
+    "desc": "unused", 
+    "category": "food",
+    "subcategory": "restaurant",
+    "address": "21 Bedford Street, New York, NY",
+    "coordinates": "40.72908,-74.003697"
+}
+
+class StampedAPIPlacesMenu(AStampedAPITestCase):
+    def setUp(self):
+        (self.user, self.token) = self.createAccount()
+        self.entity = self.createPlaceEntity(self.token,_ino)
+
+    def tearDown(self):
+        self.deleteEntity(self.token, self.entity['entity_id'])
+        self.deleteAccount(self.token)
+
+    def test_menu(self):
+        path = "entities/menu.json"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        result = self.handleGET(path, data)
+        test = len(result['menus']) != 0
+        self.assertEqual(test,True)
+
 if __name__ == '__main__':
     main()
 

@@ -18,6 +18,11 @@ tel - telephone number (i.e. '(412) 765-3200')
 latitude - float (i.e. 40.525447)
 longitude - float (i.e. -80.005443)
 
+Resolve:
+Resolve attempts to identify the Factual entity which matches a limited set
+of attributes that may only be partially correct. Try running Factual.py
+without arguments to access the demo.
+
 Crosswalk:
 Crosswalk attempts to map ids and URIs from one service to
 the ids and URIs of other services. For a complete list
@@ -55,11 +60,11 @@ import oauth
 import urllib2
 from urlparse import urlparse, parse_qsl
 import sys
+from Schemas            import Entity
 from SinglePlatform     import StampedSinglePlatform
 from pprint             import pprint
 from pymongo            import Connection
 from gevent.queue       import Queue
-from MongoStampedAPI    import MongoStampedAPI
 from gevent.pool        import Pool
 from functools          import partial
 from urllib2            import HTTPError
@@ -69,6 +74,7 @@ from re                 import match
 from threading          import Lock
 import time
 import random
+import datetime
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -118,6 +124,9 @@ def _category(entity):
         return 'Food & Beverage'
     else:
         return None
+
+def _time(unused):
+    return datetime.datetime.utcnow()
 #
 # Currently used entity data and their associated name for use in a resolve filter
 #
@@ -128,6 +137,18 @@ _relevant_fields = {
     'tel':partial(_path,'details contact phone'),
     'address':partial(_path,'details place address',subfunc=_street),
     'category':_category,
+}
+
+_enrich_fields = {
+    'title':partial(_path,'name'),
+    'factual_id':partial(_path,'factual_id'),
+    'lng':partial(_path,'longitude'),
+    'lat':partial(_path,'latitude'),
+    'email':partial(_path,'email'),
+    'fax':partial(_path,'fax'),
+    'phone':partial(_path,'tel'),
+    'site':partial(_path,'website'),
+    'factual_timestamp':_time,
 }
 
 def _filters(entity,fields):
@@ -145,6 +166,13 @@ def _filters(entity,fields):
         if v:
             m[k] = v
     return m
+
+def _enrich(entity,data,fields=_enrich_fields):
+    for k,f in fields.items():
+        v = f(data)
+        if v is not None and not k in entity:
+            entity[k] = v
+
 
 #
 # Alternative fallback filter combinations if the standard filter fails to resolve
@@ -215,8 +243,15 @@ class Factual(object):
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        return self.__factual('read',limit=limit,filters=string)
-        
+        return self.__factual('global',prefix='t',limit=limit,filters=string)
+    
+    def place(self,factual_id):
+        result = self.places({'factual_id':factual_id},1)
+        if result:
+            return result[0]
+        else:
+            return None
+
     def crosswalk_id(self,factual_id,namespace=None,limit=_limit):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
@@ -277,13 +312,27 @@ class Factual(object):
         else:
             return None
             
-    # TODO implement
-    #
-    #def entity(self,factual_id):
-    #    """
-    #    STUB Create a Stamped entity from a factual_id.
-    #    """
-    #    pass
+    def entity(self,factual_id):
+        """
+        STUB Create a Stamped entity from a factual_id.
+        """
+        entity = Entity()
+        self.enrich(entity,factual_id)
+        return entity
+
+    def enrich(self,entity,factual_id=None):
+        if factual_id is None:
+            factual_id = self.factual_from_entity(entity)
+        data = self.restaurant(factual_id)
+        rest_flag = True
+        if not data:
+            rest_flag = False
+            data = self.place(factual_id)
+        if not data:
+            return
+        _enrich(entity,data)
+        if entity.singleplatform_id is not None: entity.singleplatform_id = self.singleplatform(factual_id)
+        return entity
 
     def factual_from_entity(self,entity):
         """
@@ -470,7 +519,8 @@ def resolveEntities(size=None,log=None):
     Resolve a random batch of entities, and output accuracy stats
     """
     f = Factual(log=sys.stdout)
-    stampedAPI = MongoStampedAPI()
+    import MongoStampedAPI
+    stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
     rs = entityDB._collection.find({
@@ -593,11 +643,22 @@ def demo():
     print("Finished")
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == 'resolve':
-        count = None
-        if len(sys.argv) > 2:
-            count = int(sys.argv[2])
-        resolveEntities(count,log=sys.stdout)
+    if len(sys.argv) > 1:
+        arg = sys.argv[1]
+        if arg == 'resolve':
+            count = None
+            if len(sys.argv) > 2:
+                count = int(sys.argv[2])
+            resolveEntities(count,log=sys.stdout)
+        elif arg == 'entity':
+            f = Factual()
+            entity = f.entity(sys.argv[2])
+            if entity != None:
+                pprint(entity.value)
+            else:
+                print("No data found for given factual_id")
+        else:
+            print("bad usage")
     else:
         demo()
     

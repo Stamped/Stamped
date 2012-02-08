@@ -19,6 +19,8 @@
 
 @interface STSelectCountryViewController : STTableViewController <UITableViewDelegate, UITableViewDataSource>
 
++ (NSString*)countryNameForCountryCode:(NSString*)countryCode;
+
 - (id)initWithCountryCode:(NSString*)countryCode;
 
 @property (nonatomic, assign) id<STSelectCountryViewControllerDelegate> delegate;

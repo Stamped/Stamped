@@ -46,7 +46,7 @@ class OpenTableEntityMatcher(AIDBasedEntityMatcher):
 
 class FactualEntityMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options=None):
-        AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.factual.faid')
+        AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.factual.factual_id')
 
 class TheTVDBMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options=None):

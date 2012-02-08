@@ -437,6 +437,7 @@ class Entity(Schema):
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
+        # Not present in existing database
         self.locale             = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
@@ -766,6 +767,7 @@ class FactualSchema(Schema):
         self.faid               = SchemaElement(basestring)
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
+        self.factual_timestamp  = SchemaElement(datetime)
 
 class SinglePlatformSchema(Schema):
     def setSchema(self):
@@ -924,7 +926,7 @@ class MenuSchema(Schema):
         self.disclaimer = SchemaElement(basestring)
         self.attribution_image = SchemaElement(basestring)
         self.attribution_image_link = SchemaElement(basestring)
-        self.timestamp = SchemaElement(float)
+        self.timestamp = SchemaElement(datetime)
         self.menus = SchemaList(SubmenuSchema())
 
 class SubmenuSchema(Schema):
