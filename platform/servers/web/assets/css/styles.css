@@ -875,6 +875,12 @@ margin-right:15px;
 float:right;
 }
 
+#home.public .more .copyright a{
+color:#999;
+font-weight:normal;
+margin-right:10px;
+}
+
 #home.wrap{
 position:relative;
 }
