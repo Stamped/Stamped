@@ -445,12 +445,26 @@ class StampedAPI(AStampedAPI):
         self._imageDB.generateStamp(primary, secondary)
     
     @API_CALL
-    def updateProfileImage(self, authUserId, data):
-        return self._addProfileImage(data, user_id=authUserId)
+    def updateProfileImage(self, authUserId, schema):
+        if schema.profile_image is not None:
+            return self._addProfileImage(schema.profile_image, user_id=authUserId)
+        
+        if schema.temp_image_url is None:
+            raise StampedInputError("if no image data is provided, a temp_image_url is required")
+        
+        user = self._userDB.getUser(authUserId)
+        
+        image_cache = datetime.utcnow()
+        user.image_cache = image_cache
+        self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
+        
+        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, schema.temp_image_url])
+        
+        return user
     
     @API_CALL
-    def updateProfileImageAsync(self, screen_name):
-        self._imageDB.addResizedProfileImages(screen_name.lower())
+    def updateProfileImageAsync(self, screen_name, image_url):
+        self._imageDB.addResizedProfileImages(screen_name.lower(), image_url)
     
     def _addProfileImage(self, data, user_id=None, screen_name=None):
         assert user_id is not None or screen_name is not None
@@ -461,14 +475,14 @@ class StampedAPI(AStampedAPI):
             screen_name = user.screen_name
         
         image = self._imageDB.getImage(data)
-        self._imageDB.addProfileImage(screen_name.lower(), image)
+        image_url = self._imageDB.addProfileImage(screen_name.lower(), image)
         
         if user is not None:
             image_cache = datetime.utcnow()
             user.image_cache = image_cache
             self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
         
-        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name])
+        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
         return user
     
     def checkAccount(self, login):
@@ -1462,6 +1476,7 @@ class StampedAPI(AStampedAPI):
             image_width, image_height = image.size
         elif image_url is not None:
             # ensure external image exists
+            # TODO!!!
             """
             # TODO: 
             response = utils.getHeadRequest(image_url)
@@ -2284,7 +2299,7 @@ class StampedAPI(AStampedAPI):
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         
-        if genericSlice.deleted or genericSlice.sort == 'modified' or genericSlice.sort == 'created':
+        if genericSlice.deleted and (genericSlice.sort == 'modified' or genericSlice.sort == 'created'):
             deleted = self._stampDB.getDeletedStamps(stampIds, genericSlice)
             
             if len(deleted) > 0:
@@ -2296,6 +2311,9 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getInboxStamps(self, authUserId, genericSlice):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
+        
+        # TODO: deprecate with new clients going forward
+        genericSlice.deleted = True
         
         return self._getStampCollection(authUserId, stampIds, genericSlice)
     

@@ -107,7 +107,7 @@ def update_profile_image(request):
     authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
-    user        = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
+    user        = stampedAPI.updateProfileImage(authUserId, schema)
     user        = HTTPUser().importSchema(user)
     
     return transformOutput(user.exportSparse())

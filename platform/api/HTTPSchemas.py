@@ -154,7 +154,12 @@ class HTTPAccountNew(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.phone              = SchemaElement(int)
         self.profile_image      = SchemaElement(basestring, normalize=False)
-
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
             schema.importData(self.exportSparse(), overflow=True)
@@ -188,6 +193,11 @@ class HTTPCustomizeStamp(Schema):
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
         self.profile_image      = SchemaElement(basestring, normalize=False)
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
 
 class HTTPAccountCheck(Schema):
     def setSchema(self):
@@ -888,18 +898,23 @@ class HTTPStamp(Schema):
             raise NotImplementedError
         return self
 
-class HTTPStampNew(Schema):
+class HTTPImageUpload(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
-        self.search_id          = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring)
-        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)
         
         # for asynchronous image uploads
         self.temp_image_url     = SchemaElement(basestring)
         self.temp_image_width   = SchemaElement(int)
         self.temp_image_height  = SchemaElement(int)
+
+class HTTPStampNew(HTTPImageUpload):
+    def setSchema(self):
+        HTTPImageUpload.setSchema(self)
+        
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
 
 class HTTPStampEdit(Schema):
     def setSchema(self):
