@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logging, time, utils
+import time, utils
 import pysolr, pymongo
 
 from collections import defaultdict
@@ -28,7 +28,7 @@ def extract_fields(obj, fields):
 
 def init(conn, solr, schemas):
     for ns, fields in schemas.items():
-        logging.debug("Importing all documents from ns '%s' to solr" % ns)
+        utils.log("Importing all documents from ns '%s' to solr" % ns)
         
         coll = conn
         for part in ns.split('.'):
@@ -64,23 +64,22 @@ def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:898
     
     while True:
         if not cursor or not cursor.alive:
-            cursor = db.oplog['$main'].find(spec, tailable=True).sort(
-                "$natural", 1)
+            cursor = db.oplog.rs.find(spec, tailable=True).sort("$natural", 1)
         
         solr_docs = []
         for op in cursor:
             if op['ns'] in schemas:
                 spec['ts'] = {'$gt': op['ts']}
+                
                 if op['op'] == 'd':
                     id = solr_id(op['o']['_id'])
+                    utils.log("Deleting document with id '%s'" % id)
                     #solr.delete(id=id)
-                    logging.debug("Deleting document with id '%s'" % id)
-                if op['op'] in ['i', 'u']:
-                    solr_docs.append(extract_fields(op['o'],
-                                                    schemas[op['ns']]))
+                elif op['op'] in ['i', 'u']:
+                    solr_docs.append(extract_fields(op['o'], schemas[op['ns']]))
         
         if solr_docs:
-            logging.debug('Sending %d docs to solr' % len(solr_docs))
+            utils.log('Adding %d docs to solr' % len(solr_docs))
             #solr.add(solr_docs)
         
         db.fts.save({'_id': 'state', 'ts': spec['ts']['$gt']})
@@ -88,8 +87,6 @@ def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:898
 
 if __name__ == '__main__':
     import argparse
-    
-    logging.basicConfig(level=logging.DEBUG)
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--mongo_host', '-m', dest='mongo_host', type=str, default="localhost",
