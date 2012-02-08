@@ -422,6 +422,13 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   return [NSString stringWithFormat:@"https://api.twitter.com/1/users/profile_image?screen_name=%@&size=bigger", self.twitterUsername];
 }
 
+- (NSString*)largeTwitterProfileImageURL {
+  if (!self.twitterUsername)
+    return nil;
+  
+  return [NSString stringWithFormat:@"https://api.twitter.com/1/users/profile_image?screen_name=%@&size=reasonably_small", self.twitterUsername];
+}
+
 - (void)requestTwitterUser {
   if ([self hasiOS5Twitter]) {
     TWSignedRequest* signedRequest = [[[TWSignedRequest alloc] initWithURL:[NSURL URLWithString:kTwitterFullRequestTokenPath]
@@ -511,6 +518,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   NSString* facebookID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
   if (!facebookID)
     return nil;
+
   return [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture", facebookID];
 }
 

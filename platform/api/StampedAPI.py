@@ -2811,8 +2811,8 @@ class StampedAPI(AStampedAPI):
         
         assert entity.entity_id is not None
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
-        #if factual_enrichment_flag:
-        #    tasks.invoke(tasks.APITasks._convertSearchId, args=[account.user_id])
+        if factual_enrichment_flag:
+            tasks.invoke(tasks.APITasks._convertSearchId, args=[account.user_id])
 
         return entity.entity_id
     
@@ -2820,8 +2820,9 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(entity_id)
         if entity:
             self._factual.enrich(entity)
-            self._entityDB.updateEntity(entity)
-            self._entityDB.updateMenus(entity_id)
+            if 'factual_id' in entity:
+                self._entityDB.updateEntity(entity)
+                self._entityDB.updateMenus(entity_id)
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
     

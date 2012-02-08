@@ -6,14 +6,17 @@
 //  Copyright 2011 Stamped. All rights reserved.
 //
 
+#import <Restkit/RestKit.h>
 #import <UIKit/UIKit.h>
 
 #import "StampCustomizerViewController.h"
 
 @class UserImageView;
 
-@interface WelcomeViewController : UIViewController
-    <UIScrollViewDelegate, StampCustomizerViewControllerDelegate>
+@interface WelcomeViewController : UIViewController <UIScrollViewDelegate,
+                                                     StampCustomizerViewControllerDelegate,
+                                                     UIActionSheetDelegate,
+                                                     RKObjectLoaderDelegate>
 
 @property (nonatomic, retain) IBOutlet UIView* contentView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -22,6 +25,7 @@
 
 @property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* userImageActivityView;
 @property (nonatomic, retain) IBOutlet UIImageView* largeStampColorImageView;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp0;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp1;

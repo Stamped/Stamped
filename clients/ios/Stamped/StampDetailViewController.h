@@ -6,6 +6,7 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <MessageUI/MFMailComposeViewController.h>
 #import <RestKit/RestKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
@@ -24,6 +25,7 @@ extern NSString* const kRemoveStampPath;
 @interface StampDetailViewController : STViewController <UITextFieldDelegate,
                                                          UIActionSheetDelegate,
                                                          UIScrollViewDelegate,
+                                                         MFMailComposeViewControllerDelegate,
                                                          RKObjectLoaderDelegate,
                                                          TTTAttributedLabelDelegate,
                                                          StampDetailCommentViewDelegate,
