@@ -322,7 +322,14 @@ class Factual(object):
 
     def enrich(self,entity,factual_id=None):
         if factual_id is None:
-            factual_id = self.factual_from_entity(entity)
+            if 'factual_id' in entity:
+                factual_id = entity.factual_id
+            else:
+                factual_id = self.factual_from_entity(entity)
+                if factual_id:
+                    entity.factual_id = factual_id
+                else:
+                    return
         data = self.restaurant(factual_id)
         rest_flag = True
         if not data:
@@ -331,7 +338,7 @@ class Factual(object):
         if not data:
             return
         _enrich(entity,data)
-        if entity.singleplatform_id is not None: entity.singleplatform_id = self.singleplatform(factual_id)
+        if 'singleplatform_id' not in entity: entity.singleplatform_id = self.singleplatform(factual_id)
         return entity
 
     def factual_from_entity(self,entity):

@@ -21,6 +21,7 @@ from libs.SinglePlatform import StampedSinglePlatform
 from urllib2             import HTTPError
 import tasks.APITasks
 import tasks
+import pprint
 
 _refresh_days = 14
 
@@ -62,5 +63,8 @@ class MongoMenuCollection(AMongoCollection, AMenuDB):
                 logs.warning("Got an HTTP exception #%d" % (e.code,))
 
         if updated_menu is not None:
-            mongo_id = self._collection.insert_one(updated_menu, safe=True)
-            self._collection.remove({'source':source,'source_id':source_id,'_id':{ '$ne' : mongo_id }})
+            #logs.warning("updated menu for %s:%s:%s\n%s" % (entity_id, source, source_id,pprint.pformat(updated_menu.value)))
+            mongo_id = self._collection.insert_one(updated_menu.value, safe=True)
+            #logs.warning("added menu with _id %s" % mongo_id )
+            self._collection.remove({'source':source,'source_id':source_id,'entity_id':entity_id,'_id':{ '$ne' : mongo_id }})
+        return updated_menu
