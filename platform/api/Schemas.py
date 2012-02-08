@@ -920,6 +920,7 @@ class BarnesAndNobleSchema(Schema):
 
 class MenuSchema(Schema):
     def setSchema(self):
+        self.entity_id = SchemaElement(basestring)
         self.source = SchemaElement(basestring)
         self.source_id = SchemaElement(basestring)
         self.source_info = SchemaElement(basestring)
@@ -927,6 +928,7 @@ class MenuSchema(Schema):
         self.attribution_image = SchemaElement(basestring)
         self.attribution_image_link = SchemaElement(basestring)
         self.timestamp = SchemaElement(datetime)
+        self.quality = SchemaElement(float)
         self.menus = SchemaList(SubmenuSchema())
 
 class SubmenuSchema(Schema):

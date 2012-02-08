@@ -2605,13 +2605,18 @@ class StampedAPI(AStampedAPI):
         
         return activity
     
-    def getMenu(self,entity):
-        if 'factual_id' not in entity:
-            self._factual.enrich(entity)
-        if 'factual_id' not in entity:
-            return MenuSchema()
-        else:
-            return self._factual.menu(entity.factual_id)
+    """
+    #     # ###### #     # #     #
+    ##   ## #      ##    # #     #
+    # # # # #      # #   # #     #
+    #  #  # ###### #  #  # #     #
+    #     # #      #   # # #     #
+    #     # #      #    ## #     #
+    #     # ###### #     #  #####
+    """
+    
+    def getMenu(self,entityId):
+        return self._entityDB.getMenu(entityId)
     
     """
     ######                                      
@@ -2690,10 +2695,13 @@ class StampedAPI(AStampedAPI):
         return Factual()
     
     def _convertSearchId(self, search_id):
+
         if not search_id.startswith('T_'):
             # already a valid entity id
             return search_id
-        
+
+        # flag for asynchronous Factual based enrichment
+        factual_enrichment_flag = False
         # temporary entity_id; lookup in tempentities collection and 
         # merge result into primary entities db
         doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
@@ -2788,7 +2796,7 @@ class StampedAPI(AStampedAPI):
                     
                     logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
                 if entity is not None:
-                    self._factual.enrich(entity)    
+                    factual_enrichment_flag = True 
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             
@@ -2803,9 +2811,23 @@ class StampedAPI(AStampedAPI):
         
         assert entity.entity_id is not None
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
-        
+        #if factual_enrichment_flag:
+        #    tasks.invoke(tasks.APITasks._convertSearchId, args=[account.user_id])
+
         return entity.entity_id
     
+    def _convertSearchIdAsync(self,entity_id):
+        entity = self._entityDB.getEntity(entity_id)
+        if entity:
+            self._factual.enrich(entity)
+            self._entityDB.updateEntity(entity)
+            self._entityDB.updateMenus(entity_id)
+        else:
+            logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
+    
+    def _updateMenuAsync(self, entity_id, source, source_id):
+        self._entityDB.updateMenu(entity_id, source, source_id)
+
     def _addEntity(self, entity):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))

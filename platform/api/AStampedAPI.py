@@ -226,6 +226,14 @@ class AStampedAPI(AEntitySink):
     @abstract
     def getActivity(self, authUserId, **kwargs):
         raise NotImplementedError
+
+    # ##### #
+    # Menus #
+    # ##### #
+    
+    @abstract
+    def getMenu(self,entityId):
+        raise NotImplementedError
     
     # ########### #
     # Private API #
