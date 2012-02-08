@@ -14,7 +14,7 @@ echo "dns:  $dns"
 cmd="mongoexport -d stamped -c $coll -o $coll"
 ssh -o StrictHostKeyChecking=no -i 'keys/test-keypair' "$user@$dns" "$cmd"
 
-mkdir .temp
+mkdir -p .temp
 scp -i 'keys/test-keypair' "$user@$dns:/home/ubuntu/$coll" .temp
 
 mongoimport --drop -d stamped -c $coll .temp/$coll
