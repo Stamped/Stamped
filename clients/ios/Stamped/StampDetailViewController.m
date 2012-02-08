@@ -68,6 +68,7 @@ typedef enum {
 - (void)sendAddCommentRequest;
 - (void)sendRemoveCommentRequest:(NSString*)commentID;
 - (void)showTweetViewController;
+- (void)showEmailViewController;
 - (void)handleURL:(NSURL*)url;
 - (void)deleteStampButtonPressed:(id)sender;
 - (void)sendDeleteStampRequest;
@@ -710,17 +711,22 @@ typedef enum {
 }
 
 - (IBAction)handleShareButtonTap:(id)sender {
-  NSString* tweetMsg = nil;
-  if ([TWTweetComposeViewController canSendTweet] &&
-      [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
-    tweetMsg = @"Share to Twitter...";
-  }
-
   UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
                                                       delegate:self
-                                             cancelButtonTitle:@"Cancel"
+                                             cancelButtonTitle:nil
                                         destructiveButtonTitle:nil
-                                             otherButtonTitles:@"Copy link", tweetMsg, nil] autorelease];
+                                             otherButtonTitles:nil] autorelease];
+  
+  if ([TWTweetComposeViewController canSendTweet] &&
+      [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
+    [sheet addButtonWithTitle:@"Share to Twitter..."];
+  }
+  
+  if ([MFMailComposeViewController canSendMail])
+    [sheet addButtonWithTitle:@"Email..."];
+  
+  [sheet addButtonWithTitle:@"Copy link"];
+  sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   sheet.tag = StampDetailActionTypeShare;
   [sheet showInView:self.view];
@@ -1028,12 +1034,32 @@ typedef enum {
         [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
       canTweet = YES;
     }
-    if (buttonIndex == 0) {  // Copy link...
+    if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
       [UIPasteboard generalPasteboard].string = stamp_.URL;
-    } else if (buttonIndex == 1 && canTweet) {  // Twitter or cancel depending...
+    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Share to Twitter..."] && canTweet) {  // Twitter or cancel depending...
       [self showTweetViewController];
+    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Email..."]) {
+      [self showEmailViewController];
     }
   }
+}
+
+- (void)showEmailViewController {
+  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+  vc.mailComposeDelegate = self;
+  [vc setSubject:[NSString stringWithFormat:@"Check out this stamp of %@", stamp_.entityObject.title]];
+  [vc setMessageBody:[NSString stringWithFormat:@"<a href=\"%@\">%@</a><br/><br/>(Sent via <a href=\"http://stamped.com/\">Stamped</a>)", stamp_.URL, stamp_.URL]
+              isHTML:YES];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
+}
+
+#pragma mark - MFMailComposeViewControllerDelegate methods.
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+  [self dismissModalViewControllerAnimated:YES];
 }
 
 - (void)showTweetViewController {
