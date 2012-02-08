@@ -14,10 +14,12 @@
 #import "Util.h"
 #import "FindFriendsViewController.h"
 #import "Notifications.h"
+#import "SocialManager.h"
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
 
 static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
+static NSString* const kUpdateProfileImagePath = @"/account/update_profile_image.json";
 NSString* const kStampColors[7][2] = {
   { @"004ab2", @"0057d1" },
   { @"84004b", @"ff00ea" },
@@ -30,6 +32,7 @@ NSString* const kStampColors[7][2] = {
 
 @interface WelcomeViewController ()
 - (void)setUserStampColorPrimary:(NSString*)primary secondary:(NSString*)secondary;
+- (void)showSocialNetworkUserPhotoChoices;
 
 @property (nonatomic, retain) RKRequest* currentStampRequest;
 @end
@@ -44,6 +47,7 @@ NSString* const kStampColors[7][2] = {
 @synthesize userStampImageView = userStampImageView_;
 @synthesize largeStampColorImageView = largeStampColorImageView_;
 @synthesize userImageView = userImageView_;
+@synthesize userImageActivityView = userImageActivityView_;
 @synthesize galleryStamp0 = galleryStamp0_;
 @synthesize galleryStamp1 = galleryStamp1_;
 @synthesize galleryStamp2 = galleryStamp2_;
@@ -89,6 +93,7 @@ NSString* const kStampColors[7][2] = {
   self.userStampImageView = nil;
   self.largeStampColorImageView = nil;
   self.userImageView = nil;
+  self.userImageActivityView = nil;
   [super dealloc];
 }
 
@@ -144,6 +149,7 @@ NSString* const kStampColors[7][2] = {
   self.largeStampColorImageView = nil;
   self.userStampImageView = nil;
   self.userImageView = nil;
+  self.userImageActivityView = nil;
 }
 
 #pragma mark - Private methods.
@@ -154,7 +160,6 @@ NSString* const kStampColors[7][2] = {
   user.secondaryColor = secondary;
   UIImage* stampImage = [Util stampImageForUser:user];
   self.userStampImageView.image = stampImage;
-  //user.stampImage = stampImage;
   [user.managedObjectContext save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];
@@ -173,6 +178,66 @@ NSString* const kStampColors[7][2] = {
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
                                                                    secondary, @"color_secondary", nil];
   self.currentStampRequest = objectLoader;
+  [objectLoader send];
+}
+
+- (void)showSocialNetworkUserPhotoChoices {
+  if (![SocialManager sharedManager].facebookProfileImageURL && ![SocialManager sharedManager].twitterProfileImageURL)
+    return;
+
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Import your profile image from..."
+                                                      delegate:self
+                                             cancelButtonTitle:nil
+                                        destructiveButtonTitle:nil
+                                             otherButtonTitles:nil] autorelease];
+  
+  if ([SocialManager sharedManager].facebookProfileImageURL)
+    [sheet addButtonWithTitle:@"Facebook"];
+
+  if ([SocialManager sharedManager].twitterProfileImageURL)
+    [sheet addButtonWithTitle:@"Twitter"];
+  
+  sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  [sheet showInView:self.view];
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  [userImageActivityView_ stopAnimating];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kUserProfileHasChangedNotification object:nil];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  [userImageActivityView_ stopAnimating];
+  self.userImageView.imageURL = nil;
+}
+
+#pragma mark - UIActionSheetDelegate methods.
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == actionSheet.cancelButtonIndex)
+    return;
+
+  NSString* imageURL = nil;
+  if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Twitter"]) {
+    imageURL = [SocialManager sharedManager].largeTwitterProfileImageURL;
+  } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Facebook"]) {
+    imageURL = [SocialManager sharedManager].facebookProfileImageURL;
+  }
+  if (!imageURL)
+    return;
+
+  self.userImageView.imageURL = imageURL;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUpdateProfileImagePath
+                                                                    delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = mapping;
+  objectLoader.params = [NSDictionary dictionaryWithObject:imageURL forKey:@"temp_image_url"];
+  [userImageActivityView_ startAnimating];
   [objectLoader send];
 }
 
@@ -260,6 +325,17 @@ NSString* const kStampColors[7][2] = {
 }
 
 #pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView*)scrollView {
+  [self scrollViewDidEndDecelerating:scrollView];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
+  if ((scrollView_.contentOffset.x / CGRectGetWidth(scrollView.frame) == 1) &&
+      [[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"]) {
+    [self showSocialNetworkUserPhotoChoices];
+  }
+}
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   backButton_.alpha = fminf(1, scrollView_.contentOffset.x / CGRectGetWidth(scrollView_.frame));

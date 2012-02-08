@@ -53,5 +53,7 @@ extern NSString* const kStampedFindTwitterFriendsPath;
 @property (nonatomic, readonly) NSString* facebookProfileImageURL;
 @property (nonatomic, readonly) NSString* twitterUsername;
 @property (nonatomic, readonly) NSString* twitterProfileImageURL;
+@property (nonatomic, readonly) NSString* largeTwitterProfileImageURL;
+
 
 @end
