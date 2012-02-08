@@ -63,7 +63,8 @@ class MongoMenuCollection(AMongoCollection, AMenuDB):
                 logs.warning("Got an HTTP exception #%d" % (e.code,))
 
         if updated_menu is not None:
-            logs.warning("updated menu for %s:%s:%s\n%s" % (entity_id, source, source_id,pprint.pformat(updated_menu.value)))
+            #logs.warning("updated menu for %s:%s:%s\n%s" % (entity_id, source, source_id,pprint.pformat(updated_menu.value)))
             mongo_id = self._collection.insert_one(updated_menu.value, safe=True)
-            #self._collection.remove({'source':source,'source_id':source_id,'entity_id':entity_id,'_id':{ '$ne' : mongo_id }})
+            #logs.warning("added menu with _id %s" % mongo_id )
+            self._collection.remove({'source':source,'source_id':source_id,'entity_id':entity_id,'_id':{ '$ne' : mongo_id }})
         return updated_menu

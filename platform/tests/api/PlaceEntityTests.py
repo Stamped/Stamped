@@ -95,7 +95,7 @@ class StampedAPIPlacesMenu(AStampedAPITestCase):
         }
         try:
             result = self.handleGET(path, data)
-            print(result)
+            #print(result)
         except HTTPError as e:
             pass
         except Exception:

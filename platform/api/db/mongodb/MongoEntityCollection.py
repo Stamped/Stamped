@@ -75,25 +75,25 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         return result
     
     def getMenus(self, entityId):
-        logs.warning("getting menus for %s",entityId)
+        #logs.warning("getting menus for %s",entityId)
         menus = self.menu_collection.getMenus(entityId)
         if len(menus) == 0:
             entity = self.getEntity(entityId)
             if entity:
-                logs.warning("no menu found for %s" % entity.title)
+                #logs.warning("no menu found for %s" % entity.title)
                 if 'factual_id' not in entity:
-                    logs.warning("looking for factual_id")
+                    #logs.warning("looking for factual_id")
                     self.factual.enrich(entity)
                     if entity.factual_id is not None:
-                        logs.warning("factual_id is %s" % entity.factual_id)
+                        #logs.warning("factual_id is %s" % entity.factual_id)
                         self.updateEntity(entity)
                     else:
-                        logs.warning("no factual_id found")
+                        logs.warning("no factual_id found for %s" % entityId)
                 if 'singleplatform_id' in entity:
-                    logs.warning("singleplatform_id is %s" % entity.singleplatform_id)
+                    #logs.warning("singleplatform_id is %s" % entity.singleplatform_id)
                     menu = self.updateMenu(entityId,'singleplatform',entity.singleplatform_id)
                     if menu is not None:
-                        logs.warning("adding menu for %s" % entity.singleplatform_id)
+                        #logs.warning("adding menu for %s" % entity.singleplatform_id)
                         menus.append(menu)
         return menus
 
