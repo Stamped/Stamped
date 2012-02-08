@@ -1,6 +1,20 @@
 
-    * generic, private logging endpoint for clients
+Searching Approaches:
+    * Separate reverse-index table; query term => entities / stamps?
+    * Augment stamp with cache of entity data (e.g., title, category, subcategory, etc.)
+    * Augment stamp with cache of extracted entity keywords
+
+*** How to handle restricting search to a subset of stamps or entities?
+    * break search up into buckets w/ each bucket containing at most n items
+
+
+    * add viewport sanity checking in HTTPGenericSlice => GenericSlice conversion
+    * test map reduce sorting extensively, including targeted unit tests
     * improve error messages for get_dns_by_node_name
+    * popbar => po special case of name checking; make fuzzy name deduping based on name prefix s.t. leniancy is inversely proportional to string length (e.g., shorter strings should have harsher requirements for matching)
+    * possibly also do prefix-based matching after breaking up into words
+    * cleanup userRequest instances; enforce screen_name if given in addition to user_id
+    * what happens if user_id or screen_name lookup fails?
 
 API v1:
     * entrypoints:
@@ -131,6 +145,9 @@ OLD:
     * refactor repository layout
     * automated way to determine whether or not we're on PROD stack
     * add wrapper to APITasks.py to invoke tasks with specific args
+    * improve deploy update script to rollout updates one node at a time and be ELB-aware
+    * generic, private logging endpoint for clients
+    * change bootstrap/bin/update.py to return non-zero exit status if WARNINGs encountered
     
     34.026401,-118.38947899
 
@@ -188,6 +205,11 @@ db.logstats.group({ reduce: function(obj,prev) { prev.users[obj.uid] = 1; }, con
 db.comments.group({ reduce: function(obj,prev) { prev.count += 1 }, cond:{stamp_id: {$exists: true} }, initial: {count: 0, }, key:{stamp_id:1}, });
 
 rabbitmqctl list_queues name messages consumers
+
+db.entities.find({"subtitle": "food", "details.place.address": { $exists: true }}).forEach( function (doc) { doc.subtitle = doc.details.place.address; db.entities.save(doc); });
+
+db.stamps.find().forEach(function(doc) {doc.entity = { "entity_id" : doc.entity.entity_id }; db.stamps.save(doc);})
+db.stamps.find().forEach(function(doc) {e=db.entities.find({"_id" : ObjectId(doc.entity.entity_id)}); if (e.length() != 1) {return;} e = e[0]; try{if ('title' in e) {doc.entity.title=e.title.toLowerCase();}} catch(e) {} try{if ('category' in e) {doc.entity.category=e.category;}} catch(e){} try{if ('subcategory' in e) {doc.entity.subcategory=e.subcategory;}} catch(e) {} try{if ('coordinates' in e) {doc.entity.coordinates=e.coordinates;}} catch(e) {} db.stamps.save(doc);})
 
 
 StampedAPI:

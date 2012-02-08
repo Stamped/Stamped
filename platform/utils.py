@@ -69,7 +69,7 @@ def lazyProperty(undecorated):
 def log(s=""):
     s = _formatLog(s) + "\n"
     
-    logs.debug(s)
+    logs.info(s)
     sys.stderr.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
@@ -84,7 +84,7 @@ def logRaw(s, includeFormat=False):
 
 def _formatLog(s):
     try:
-        return normalize(s, strict=True)
+        return normalize(str(s), strict=True)
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
     
