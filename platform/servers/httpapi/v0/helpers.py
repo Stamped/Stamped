@@ -75,7 +75,7 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
         
-        except StampedPermissionsErrorInsufficientPrivilegesError as e:
+        except StampedPermissionsError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("insufficient_privileges", status=403)
             logs.error(response.status_code)

@@ -95,11 +95,11 @@ class S3ImageDB(AImageDB):
             '31x31': (31, 31),  # 1x
         }
     
-    def addProfileImage(self, screenName, image):
+    def addProfileImage(self, screen_name, image):
         assert isinstance(image, Image.Image)
         
         # Filename is lowercase screen name
-        prefix = 'users/%s' % screenName.lower()
+        prefix = 'users/%s' % screen_name.lower()
         width, height = image.size
         
         if width != height:
@@ -116,31 +116,31 @@ class S3ImageDB(AImageDB):
             # image is already square
             square = image
         
-        maxSize = self.profileImageMaxSize
+        max_size = self.profileImageMaxSize
         
         # Add original profile image
-        self._addImageSizes(prefix, square, maxSize)
+        self._addImageSizes(prefix, square, max_size)
+        return 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
     
-    def addResizedProfileImages(self, screenName):
+    def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
-        prefix = 'users/%s' % screenName.lower()
-        url = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
+        prefix = 'users/%s' % screen_name.lower()
         
         try:
-            f = utils.getFile(url)
+            f = utils.getFile(image_url)
         except urllib2.HTTPError:
-            logs.warn("unable to download profile image from '%s'" % url)
+            logs.warn("unable to download profile image from '%s'" % image_url)
             raise
         
-        image   = self.getImage(f)
-        sizes   = self.profileImageSizes
-        maxSize = self.profileImageMaxSize
+        image    = self.getImage(f)
+        sizes    = self.profileImageSizes
+        max_size = self.profileImageMaxSize
         
-        self._addImageSizes(prefix, image, maxSize, sizes, original_url=url)
+        self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
-    def removeProfileImage(self, screenName):
+    def removeProfileImage(self, screen_name):
         # Filename is lowercase screen name
-        prefix = 'users/%s' % screenName.lower()
+        prefix = 'users/%s' % screen_name.lower()
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
@@ -156,8 +156,8 @@ class S3ImageDB(AImageDB):
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
         
-        prefix  = 'entities/%s' % entityId
-        maxSize = (960, 960)
+        prefix   = 'entities/%s' % entityId
+        max_size = (960, 960)
         
         sizes = {
             'ios1x': (196, 288),
@@ -165,17 +165,17 @@ class S3ImageDB(AImageDB):
         }
         
         # Add images in all sizes
-        self._addImageSizes(prefix, image, maxSize, sizes)
+        self._addImageSizes(prefix, image, max_size, sizes)
     
     def addStampImage(self, stampId, image):
         assert isinstance(image, Image.Image)
         
-        prefix  = 'stamps/%s' % stampId
-        url     = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
-        maxSize = (960, 960)
+        prefix   = 'stamps/%s' % stampId
+        url      = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
+        max_size = (960, 960)
         
         # Add images in all sizes
-        self._addImageSizes(prefix, image, maxSize)
+        self._addImageSizes(prefix, image, max_size)
         return url
     
     def addResizedStampImages(self, image_url, stampId):
@@ -185,9 +185,9 @@ class S3ImageDB(AImageDB):
             logs.warn("unable to download stamp image from '%s'" % image_url)
             raise
         
-        image   = self.getImage(f)
-        prefix  = 'stamps/%s' % stampId
-        maxSize = (960, 960)
+        image    = self.getImage(f)
+        prefix   = 'stamps/%s' % stampId
+        max_size = (960, 960)
         
         sizes   = {
             'ios1x'  : (200, None),
@@ -196,7 +196,7 @@ class S3ImageDB(AImageDB):
             'mobile' : (572, None),
         }
         
-        self._addImageSizes(prefix, image, maxSize, sizes, original_url=image_url)
+        self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
         # Filename is lowercase screen name
@@ -215,7 +215,7 @@ class S3ImageDB(AImageDB):
             new = '%s-%s%s' % (newPrefix, size, suffix)
             self._copyInS3(old, new)
     
-    def _addImageSizes(self, prefix, image, maxSize, sizes=None, original_url=None):
+    def _addImageSizes(self, prefix, image, max_size, sizes=None, original_url=None):
         assert isinstance(image, Image.Image)
         
         def resizeImage(image, size):
@@ -245,8 +245,8 @@ class S3ImageDB(AImageDB):
             return resized
         
         # Save original
-        if original_url != "%s.jpg" % prefix:
-            original = resizeImage(image, maxSize)
+        if original_url is None or original_url.lower() != ("%s.jpg" % prefix).lower():
+            original = resizeImage(image, max_size)
             self._addJPG(prefix, original)
         
         # Save resized versions

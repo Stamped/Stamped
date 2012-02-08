@@ -101,7 +101,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def searchUsers(self, authUserId, query, limit=0, relationship=None):
         query = query.lower()
         query = self._valid_re.sub('', query)
-
+        
         if len(query) == 0:
             return []
         
@@ -139,7 +139,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             }
             emit('query', {user: this, score:score});
         }""")
-
+        
         r = bson.code.Code("""function(key, values) {
             var out = [];
             var min = 0.0;
@@ -181,7 +181,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             #   [{u'_id': u'query', u'value': <user>}]
             # If multiple users found, result is in format:
             #   [{u'_id': u'query', u'value': {u'data': [<user1>, ..., <userN>]}}]
-
+            
             value = result[-1]['value'] 
             if 'data' in value:
                 data = value['data']
@@ -190,7 +190,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             assert(isinstance(data, list))
         except:
             return users
-
+        
         for i in data:
             try:
                 user = self._convertFromMongo(i['user'])
@@ -198,7 +198,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                     users.append(user)
             except:
                 continue
-
+        
         return users[:20]
     
     def flagUser(self, user):

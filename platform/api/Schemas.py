@@ -380,6 +380,49 @@ class ClientLogsEntry(Schema):
         self.activity_id        = SchemaElement(basestring)
 
 
+# ####### #
+# Slicing #
+# ####### #
+
+class GenericSlice(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int)
+        self.offset             = SchemaElement(int, default=0)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        self.sort               = SchemaElement(basestring, default='modified')
+        self.reverse            = SchemaElement(bool,       default=False)
+        self.center             = CoordinatesSchema()
+        
+        # filtering
+        self.query              = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.since              = SchemaElement(datetime)
+        self.before             = SchemaElement(datetime)
+        self.viewport           = ViewportSchema()
+        
+        # misc options
+        self.quality            = SchemaElement(int,  default=1)
+        self.deleted            = SchemaElement(bool, default=False)
+        self.comments           = SchemaElement(bool, default=True)
+
+
+class UserCollectionSlice(GenericSlice):
+    def setSchema(self):
+        GenericSlice.setSchema(self)
+        
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
+
+class ViewportSchema(Schema):
+    def setSchema(self):
+        self.upperLeft          = CoordinatesSchema()
+        self.lowerRight         = CoordinatesSchema()
+
+
 # ######## #
 # Entities #
 # ######## #
@@ -724,7 +767,7 @@ class FactualSchema(Schema):
         self.faid               = SchemaElement(basestring)
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
-        self.factual_timestamp  = SchemaElement(float)
+        self.factual_timestamp  = SchemaElement(datetime)
 
 class SinglePlatformSchema(Schema):
     def setSchema(self):
@@ -877,13 +920,15 @@ class BarnesAndNobleSchema(Schema):
 
 class MenuSchema(Schema):
     def setSchema(self):
+        self.entity_id = SchemaElement(basestring)
         self.source = SchemaElement(basestring)
         self.source_id = SchemaElement(basestring)
         self.source_info = SchemaElement(basestring)
         self.disclaimer = SchemaElement(basestring)
         self.attribution_image = SchemaElement(basestring)
         self.attribution_image_link = SchemaElement(basestring)
-        self.timestamp = SchemaElement(float)
+        self.timestamp = SchemaElement(datetime)
+        self.quality = SchemaElement(float)
         self.menus = SchemaList(SubmenuSchema())
 
 class SubmenuSchema(Schema):

@@ -22,10 +22,8 @@ def transform_stamps(stamps):
 @require_http_methods(["GET"])
 def inbox(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericSlice(), request)
-    
-    data        = schema.exportSparse()
-    stamps      = stampedAPI.getInboxStamps(authUserId, **data)
+    schema      = parseRequest(HTTPGenericSlice(), request).exportSchema(GenericSlice())
+    stamps      = stampedAPI.getInboxStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
 
@@ -33,14 +31,8 @@ def inbox(request):
 @require_http_methods(["GET"])
 def user(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPUserCollectionSlice(), request)
-    
-    data        = schema.exportSparse()
-    userRequest = {
-                    'user_id':      data.pop('user_id', None),
-                    'screen_name':  data.pop('screen_name', None)
-                  }
-    stamps      = stampedAPI.getUserStamps(userRequest, authUserId, **data)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
+    stamps      = stampedAPI.getUserStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
 
@@ -48,14 +40,8 @@ def user(request):
 @require_http_methods(["GET"])
 def credit(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPUserCollectionSlice(), request)
-    
-    data        = schema.exportSparse()
-    userRequest = {
-                    'user_id':      data.pop('user_id', None),
-                    'screen_name':  data.pop('screen_name', None)
-                  }
-    stamps      = stampedAPI.getCreditedStamps(userRequest, authUserId, **data)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
+    stamps      = stampedAPI.getCreditedStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
 

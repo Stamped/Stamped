@@ -8,7 +8,8 @@ __license__   = "TODO"
 import Globals
 import os, time, types, utils
 import sys
-if sys.version_info.major == 2 and sys.version_info.minor > 6:
+
+if sys.version_info[0] == 2 and sys.version_info[1] > 6:
     import unittest2 as unittest
 else:
     import unittest
@@ -33,6 +34,8 @@ class AStampedTestCase(unittest.TestCase):
         if not isinstance(assertions, (list, tuple)):
             assertions = [ assertions ]
         
+        result = None
+        
         while True:
             try:
                 result = func()
@@ -44,7 +47,8 @@ class AStampedTestCase(unittest.TestCase):
             except:
                 retries -= 1
                 if retries < 0:
-                    pprint(result)
+                    if result is not None:
+                        pprint(result)
                     raise
                 
                 time.sleep(delay)

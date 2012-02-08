@@ -17,7 +17,7 @@ from Schemas    import SubmenuSchema
 from Schemas    import MenuSectionSchema
 from Schemas    import MenuItemSchema
 from Schemas    import MenuPriceSchema
-import time
+import datetime
 
 _spicy_map = {
     'none':0,
@@ -85,7 +85,7 @@ def toMenuSchema(menu):
     schema = MenuSchema()
     schema.source = 'singleplatform'
     schema.source_id = menu['location']['id']
-    schema.timestamp = time.time()
+    schema.timestamp = datetime.datetime.utcnow()
     menus = menu['menus']
     if len(menus) == 0:
         return None

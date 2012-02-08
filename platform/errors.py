@@ -29,7 +29,7 @@ class SchemaValidationError(Exception):
         self.msg  = msg
         self.desc = desc
 
-class StampedPermissionsErrorInsufficientPrivilegesError(Exception):
+class StampedPermissionsError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
         self.msg  = msg

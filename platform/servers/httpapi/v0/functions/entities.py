@@ -115,3 +115,17 @@ def nearby(request):
     
     return transformOutput(autosuggest)
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def menu(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPEntityId(), request)
+    menu        = stampedAPI.getMenu(schema.entity_id)
+    if menu is not None:
+        httpMenu    = HTTPMenu().importSchema(menu)
+        return transformOutput(httpMenu.exportSparse())
+    else:
+        response = HttpResponse("not_found")
+        response.status_code = 404
+        return response
+

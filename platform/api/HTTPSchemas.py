@@ -6,9 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import copy, urllib, urlparse, re, logs, string, time, utils
-from datetime import datetime, date, timedelta
-from schema import *
-from Schemas import *
+
+from datetime   import datetime, date, timedelta
+from errors     import *
+from schema     import *
+from Schemas    import *
 
 # ####### #
 # PRIVATE #
@@ -152,7 +154,12 @@ class HTTPAccountNew(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.phone              = SchemaElement(int)
         self.profile_image      = SchemaElement(basestring, normalize=False)
-
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
             schema.importData(self.exportSparse(), overflow=True)
@@ -186,6 +193,9 @@ class HTTPCustomizeStamp(Schema):
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
         self.profile_image      = SchemaElement(basestring, normalize=False)
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
 
 class HTTPAccountCheck(Schema):
     def setSchema(self):
@@ -886,18 +896,23 @@ class HTTPStamp(Schema):
             raise NotImplementedError
         return self
 
-class HTTPStampNew(Schema):
+class HTTPImageUpload(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
-        self.search_id          = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring)
-        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)
         
         # for asynchronous image uploads
         self.temp_image_url     = SchemaElement(basestring)
         self.temp_image_width   = SchemaElement(int)
         self.temp_image_height  = SchemaElement(int)
+
+class HTTPStampNew(HTTPImageUpload):
+    def setSchema(self):
+        HTTPImageUpload.setSchema(self)
+        
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
 
 class HTTPStampEdit(Schema):
     def setSchema(self):
@@ -911,11 +926,82 @@ class HTTPStampId(Schema):
 
 class HTTPGenericSlice(Schema):
     def setSchema(self):
+        # paging
         self.limit              = SchemaElement(int)
+        self.offset             = SchemaElement(int)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        self.sort               = SchemaElement(basestring, default='modified')
+        self.reverse            = SchemaElement(bool,       default=False)
+        self.center             = SchemaElement(basestring) # "lat,lng"
+        
+        # filtering
+        self.query              = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
-        self.quality            = SchemaElement(int)
-        self.sort               = SchemaElement(basestring)
+        self.viewport           = SchemaElement(basestring) # "lat0,lng0,lat1,lng1"
+        
+        # misc options
+        self.quality            = SchemaElement(int,  default=1)
+        self.deleted            = SchemaElement(bool, default=False)
+        self.comments           = SchemaElement(bool, default=True)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'GenericSlice' or \
+           schema.__class__.__name__ == 'UserCollectionSlice':
+            data = self.exportSparse()
+            
+            if 'center' in data:
+                try:
+                    lat, lng = data['center'].split(',')
+                    data['center'] = {
+                        'lat' : float(lat), 
+                        'lng' : float(lng)
+                    }
+                except:
+                    raise StampedInputError("invalid center parameter; format \"lat,lng\"")
+            
+            if 'viewport' in data:
+                try:
+                    lat0, lng0, lat1, lng1 = data['viewport'].split(',')
+                    
+                    data['viewport'] = {
+                        'upperLeft' : {
+                            'lat' : float(lat0), 
+                            'lng' : float(lng0), 
+                        }, 
+                        'lowerRight' : {
+                            'lat' : float(lat1), 
+                            'lng' : float(lng1), 
+                        }
+                    }
+                except:
+                    raise StampedInputError("invalid center parameter; format \"lat0,lng0,lat1,lng1\"")
+            
+            if 'since' in data:
+                try: 
+                    data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
+                except:
+                    raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+            
+            if 'before' in data:
+                try: 
+                    data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
+                except:
+                    raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+            
+            if 'offset' not in data:
+                data['offset'] = 0
+            
+            #import pprint; utils.log(pprint.pformat(data))
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
 
 class HTTPUserCollectionSlice(HTTPGenericSlice):
     def setSchema(self):
@@ -923,7 +1009,7 @@ class HTTPUserCollectionSlice(HTTPGenericSlice):
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
-        self.deleted            = SchemaElement(bool)
+        #self.deleted            = SchemaElement(bool)
 
 class HTTPStampImage(Schema):
     def setSchema(self):
@@ -1065,4 +1151,75 @@ class HTTPActivity(Schema):
             raise NotImplementedError
         return self
 
+# #### #
+# Menu #
+# #### #
+
+class HTTPMenu(Schema):
+    def setSchema(self):
+        self.disclaimer = SchemaElement(basestring)
+        self.attribution_image = SchemaElement(basestring)
+        self.attribution_image_link = SchemaElement(basestring)
+        self.menus = SchemaList(HTTPSubmenu())
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'MenuSchema':
+            self.disclaimer = schema.disclaimer
+            self.attribution_image = schema.attribution_image
+            self.attribution_image_link = schema.attribution_image_link
+            self.menus = schema.menus.value
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPSubmenu(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.times = HTTPMenuTimes()
+        self.footnote = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.sections = SchemaList(HTTPMenuSection())
+
+class HTTPMenuSection(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.items = SchemaList(HTTPMenuItem())
+
+class HTTPMenuItem(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.categories = SchemaList(SchemaElement(basestring))
+        self.short_desc = SchemaElement(basestring)
+        self.spicy = SchemaElement(int)
+        self.allergens = SchemaList(SchemaElement(basestring))
+        self.allergen_free = SchemaList(SchemaElement(basestring))
+        self.restrictions = SchemaList(SchemaElement(basestring))
+        self.prices = SchemaList(HTTPMenuPrice())
+
+class HTTPMenuPrice(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.price = SchemaElement(basestring)
+        self.calories = SchemaElement(int)
+        self.unit = SchemaElement(basestring)
+        self.currency = SchemaElement(basestring)
+
+class HTTPMenuTimes(Schema):
+    def setSchema(self):
+        self.sun = SchemaList(HTTPMenuHours())
+        self.mon = SchemaList(HTTPMenuHours())
+        self.tue = SchemaList(HTTPMenuHours())
+        self.wed = SchemaList(HTTPMenuHours())
+        self.thu = SchemaList(HTTPMenuHours())
+        self.fri = SchemaList(HTTPMenuHours())
+        self.sat = SchemaList(HTTPMenuHours())
+
+class HTTPMenuHours(Schema):
+    def setSchema(self):
+        self.open = SchemaElement(basestring)
+        self.close = SchemaElement(basestring)
 

@@ -42,25 +42,25 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
         documentId = self._getObjectIdFromString(stampId)
         return self._removeMongoDocument(documentId)
 
-    def getStamps(self, stampIds, **kwargs):
+    def getStamps(self, stampIds, genericSlice):
+        # NOTE: only supports sorting by 'modified' and 'created'
         params = {
-            'since':    kwargs.pop('since', None),
-            'before':   kwargs.pop('before', None), 
-            'limit':    kwargs.pop('limit', 20),
-            'sort':     'timestamp.modified',
+            'since':    genericSlice.since, 
+            'before':   genericSlice.before, 
+            'limit':    genericSlice.limit, 
+            'sort':     "timestamp.%s" % genericSlice.sort, 
         }
-
-        documentIds = []
-        for stampId in stampIds:
-            documentIds.append(self._getObjectIdFromString(stampId))
-
+        
+        ids = map(self._getObjectIdFromString, stampIds)
+        
         # Get stamps
-        documents = self._getMongoDocumentsFromIds(documentIds, **params)
-
+        documents = self._getMongoDocumentsFromIds(ids, **params)
+        
         stamps = []
         for document in documents:
             stamp = self._convertFromMongo(document)
             stamp.deleted = True
             stamps.append(stamp)
-
+        
         return stamps
+
