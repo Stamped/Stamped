@@ -9,6 +9,7 @@ import Globals
 import time, utils
 import pymongo
 
+from pymongo.errors import AutoReconnect
 from collections    import defaultdict
 from pprint         import pprint
  
@@ -34,14 +35,14 @@ class MongoNotificationHandler(AMongoNotificationHandler):
     def delete(self, namespace, id):
         print("Deleting document with id '%s' from ns '%s'" % (id, namespace))
 
-def __solr_id(id):
+def __extract_id(id):
     if isinstance(id, basestring) or isinstance(id, int):
         return id
     else:
         return repr(id)
 
 def __extract_fields(obj, fields):
-    doc = {'id': __solr_id(obj['_id'])}
+    doc = { 'id': __extract_id(obj['_id']) }
     
     for field in obj.keys():
         if field in fields:
@@ -110,40 +111,45 @@ def run(mongo_notification_handler,
                 # fallback to starting at the beginning of the oplog
                 pass
     
+    # poll the mongo oplog indefinitely
     while True:
-        if not cursor or not cursor.alive:
-            cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
-            count  = cursor.count()
-        
-        docs    = defaultdict(list)
-        index   = 0
-        
-        for op in cursor:
-            pprint(op)
-            ns = op['ns']
+        try:
+            if not cursor or not cursor.alive:
+                cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
+                count  = cursor.count()
             
-            if ns in schemas:
-                spec['ts'] = { '$gt': op['ts'] }
-                #pprint(op)
+            docs    = defaultdict(list)
+            index   = 0
+            
+            for op in cursor:
+                pprint(op)
+                ns = op['ns']
                 
-                if op['op'] == 'd':
-                    id = __solr_id(op['o']['_id'])
+                if ns in schemas:
+                    spec['ts'] = { '$gt': op['ts'] }
+                    #pprint(op)
                     
-                    mongo_notification_handler.delete(ns, id)
-                elif op['op'] in ['i', 'u']:
-                    docs[ns].append(__extract_fields(op['o'], schemas[ns]))
+                    if op['op'] == 'd':
+                        id = __extract_id(op['o']['_id'])
+                        
+                        mongo_notification_handler.delete(ns, id)
+                    elif op['op'] in ['i', 'u']:
+                        docs[ns].append(__extract_fields(op['o'], schemas[ns]))
+                
+                index += 1
+                
+                if first and (count < progress_count or 0 == (index % (count / progress_count))):
+                    print "%s" % utils.getStatusStr(index, count)
             
-            index += 1
+            if docs:
+                for ns, docs in docs.iteritems():
+                    mongo_notification_handler.add(ns, docs)
             
-            if first and (count < progress_count or 0 == (index % (count / progress_count))):
-                print "%s" % utils.getStatusStr(index, count)
+            first = False
+            db.fts.save({ '_id': 'state', 'ts': spec['ts']['$gt'] })
+        except AutoReconnect as e:
+            pass
         
-        if docs:
-            for ns, docs in docs.iteritems():
-                mongo_notification_handler.add(ns, docs)
-        
-        first = False
-        db.fts.save({ '_id': 'state', 'ts': spec['ts']['$gt'] })
         time.sleep(1)
 
 if __name__ == '__main__':
@@ -154,8 +160,6 @@ if __name__ == '__main__':
                         help=("hostname or IP address of the Mongo instance to use"))
     parser.add_argument('--mongo_port', '-p', dest='mongo_port', type=int, default=27017,
                         help="port number of the Mongo instance")
-    parser.add_argument('--solr_url', '-s', dest='solr_url', type=str, default="http://127.0.0.1:8983/solr/",
-                        help="URL of the Solr instance to use")
     parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + __version__)
     
     args    = parser.parse_args()
