@@ -7,19 +7,41 @@ __license__   = "TODO"
 
 import Globals
 import time, utils
-import pysolr, pymongo
+import pymongo
 
 from collections    import defaultdict
 from pprint         import pprint
+ 
+#import pysolr
+#solr  = pysolr.Solr(solr_url)
+#solr.add([__extract_fields(obj, fields) for obj in coll.find()])
+#solr.delete(id=id)
+#solr.add(solr_docs)
 
-def solr_id(id):
+class AMongoNotificationHandler(object):
+    
+    def add(self, namespace, documents):
+        pass
+    
+    def delete(self, namespace, id):
+        pass
+
+class MongoNotificationHandler(AMongoNotificationHandler):
+    
+    def add(self, namespace, documents):
+        print("Adding %d docs from ns '%s'" % (len(documents), namespace))
+    
+    def delete(self, namespace, id):
+        print("Deleting document with id '%s' from ns '%s'" % (id, namespace))
+
+def __solr_id(id):
     if isinstance(id, basestring) or isinstance(id, int):
         return id
     else:
         return repr(id)
 
-def extract_fields(obj, fields):
-    doc = {'id': solr_id(obj['_id'])}
+def __extract_fields(obj, fields):
+    doc = {'id': __solr_id(obj['_id'])}
     
     for field in obj.keys():
         if field in fields:
@@ -27,23 +49,25 @@ def extract_fields(obj, fields):
     
     return doc
 
-def init(conn, solr, schemas):
+def __init(conn, mongo_notification_handler, schemas):
     for ns, fields in schemas.items():
-        print("Importing all documents from ns '%s' to solr" % ns)
+        print("Importing all documents from ns '%s'" % ns)
         
         coll = conn
         for part in ns.split('.'):
             coll = coll[part]
         
-        print str([extract_fields(obj, fields) for obj in coll.find()])
-        #solr.add([extract_fields(obj, fields) for obj in coll.find()])
+        docs = [__extract_fields(obj, fields) for obj in coll.find()]
+        mongo_notification_handler.add(ns, docs)
 
-def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:8983/solr/"):
+def run(mongo_notification_handler, 
+        mongo_host='localhost', 
+        mongo_port=27017):
+    assert isinstance(mongo_notification_handler, AMongoNotificationHandler)
+    
     conn  = pymongo.Connection(mongo_host, mongo_port)
     db    = conn.local
     oplog = db.oplog.rs
-    solr  = None
-    #solr  = pysolr.Solr(solr_url)
     
     schemas = defaultdict(set)
     for o in db.fts.schemas.find():
@@ -52,54 +76,74 @@ def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:898
     progress_delta = 5
     progress_count = 100 / progress_delta
     
+    state  = db.fts.find_one({'_id': 'state'})
     first  = True
     cursor = None
     count  = 0
     spec   = {}
     
-    state = db.fts.find_one({'_id': 'state'})
     if state and 'ts' in state:
         first = oplog.find_one()
         
         if first['ts'].time > state['ts'].time and first['ts'].inc > state['ts'].inc:
-            init(conn, solr, schemas)
+            __init(conn, mongo_notification_handler, schemas)
         else:
-            spec['ts'] = {'$gt': state['ts']}
+            spec['ts'] = { '$gt': state['ts'] }
     else:
-        init(conn, solr, schemas)
+        __init(conn, mongo_notification_handler, schemas)
+    
+    # TODO: address async issue here..
+    
+    if not 'ts' in spec:
+        try:
+            # attempt to start pulling at the last occurrence of the target namespaces
+            s = {"ns" : { "$in" : map(str, schemas.keys()) } }
+            
+            last = list(oplog.find(s).sort("$natural", -1).limit(1))[0]
+            spec['ts'] = { '$gt': last['ts'] }
+        except:
+            # fallback to starting at the end of the oplog
+            try:
+                last = list(oplog.find().sort("$natural", -1).limit(1))[0]
+                spec['ts'] = { '$gt': last['ts'] }
+            except:
+                # fallback to starting at the beginning of the oplog
+                pass
     
     while True:
         if not cursor or not cursor.alive:
             cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
             count  = cursor.count()
         
-        solr_docs  = []
-        index      = 0
+        docs    = defaultdict(list)
+        index   = 0
         
         for op in cursor:
-            if op['ns'] in schemas:
-                pprint(op)
-                spec['ts'] = {'$gt': op['ts']}
+            pprint(op)
+            ns = op['ns']
+            
+            if ns in schemas:
+                spec['ts'] = { '$gt': op['ts'] }
+                #pprint(op)
                 
                 if op['op'] == 'd':
-                    id = solr_id(op['o']['_id'])
+                    id = __solr_id(op['o']['_id'])
                     
-                    print("Deleting document with id '%s'" % id)
-                    #solr.delete(id=id)
+                    mongo_notification_handler.delete(ns, id)
                 elif op['op'] in ['i', 'u']:
-                    solr_docs.append(extract_fields(op['o'], schemas[op['ns']]))
+                    docs[ns].append(__extract_fields(op['o'], schemas[ns]))
             
             index += 1
             
             if first and (count < progress_count or 0 == (index % (count / progress_count))):
                 print "%s" % utils.getStatusStr(index, count)
         
-        if solr_docs:
-            print('Adding %d docs to solr' % len(solr_docs))
-            #solr.add(solr_docs)
+        if docs:
+            for ns, docs in docs.iteritems():
+                mongo_notification_handler.add(ns, docs)
         
         first = False
-        db.fts.save({'_id': 'state', 'ts': spec['ts']['$gt']})
+        db.fts.save({ '_id': 'state', 'ts': spec['ts']['$gt'] })
         time.sleep(1)
 
 if __name__ == '__main__':
@@ -114,7 +158,8 @@ if __name__ == '__main__':
                         help="URL of the Solr instance to use")
     parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + __version__)
     
-    args = parser.parse_args()
+    args    = parser.parse_args()
+    handler = MongoNotificationHandler()
     
-    run(mongo_host=args.mongo_host, mongo_port=args.mongo_port, solr_url=args.solr_url)
+    run(handler, args.mongo_host, args.mongo_port)
 
