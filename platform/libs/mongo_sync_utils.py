@@ -39,24 +39,29 @@ def init(conn, solr, schemas):
         #solr.add([extract_fields(obj, fields) for obj in coll.find()])
 
 def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:8983/solr/"):
-    conn = pymongo.Connection(mongo_host, mongo_port)
-    db   = conn.local
-    #solr = pysolr.Solr(solr_url)
-    solr = None
+    conn  = pymongo.Connection(mongo_host, mongo_port)
+    db    = conn.local
+    oplog = db.oplog.rs
+    solr  = None
+    #solr  = pysolr.Solr(solr_url)
     
     schemas = defaultdict(set)
     for o in db.fts.schemas.find():
         schemas[o['ns']] = schemas[o['ns']].union(o['fields'])
     
+    progress_delta = 5
+    progress_count = 100 / progress_delta
+    
+    first  = True
     cursor = None
+    count  = 0
     spec   = {}
     
     state = db.fts.find_one({'_id': 'state'})
     if state and 'ts' in state:
-        first = db.oplog['$main'].find_one()
-        if (first['ts'].time > state['ts'].time and
-            first['ts'].inc > state['ts'].inc):
-            
+        first = oplog.find_one()
+        
+        if first['ts'].time > state['ts'].time and first['ts'].inc > state['ts'].inc:
             init(conn, solr, schemas)
         else:
             spec['ts'] = {'$gt': state['ts']}
@@ -65,26 +70,35 @@ def run(mongo_host='localhost', mongo_port=27017, solr_url="http://127.0.0.1:898
     
     while True:
         if not cursor or not cursor.alive:
-            cursor = db.oplog.rs.find(spec, tailable=True).sort("$natural", 1)
+            cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
+            count  = cursor.count()
         
-        solr_docs = []
+        solr_docs  = []
+        index      = 0
+        
         for op in cursor:
-            pprint(op)
-            
             if op['ns'] in schemas:
+                pprint(op)
                 spec['ts'] = {'$gt': op['ts']}
                 
                 if op['op'] == 'd':
                     id = solr_id(op['o']['_id'])
+                    
                     print("Deleting document with id '%s'" % id)
                     #solr.delete(id=id)
                 elif op['op'] in ['i', 'u']:
                     solr_docs.append(extract_fields(op['o'], schemas[op['ns']]))
+            
+            index += 1
+            
+            if first and (count < progress_count or 0 == (index % (count / progress_count))):
+                print "%s" % utils.getStatusStr(index, count)
         
         if solr_docs:
             print('Adding %d docs to solr' % len(solr_docs))
             #solr.add(solr_docs)
         
+        first = False
         db.fts.save({'_id': 'state', 'ts': spec['ts']['$gt']})
         time.sleep(1)
 
