@@ -2385,7 +2385,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericSlice):
-        return self._getStampCollection(authUserId, None, friendsSlice)
+        return self._getStampCollection(authUserId, None, genericSlice)
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):
