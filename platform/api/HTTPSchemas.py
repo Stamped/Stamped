@@ -952,7 +952,7 @@ class HTTPGenericSlice(Schema):
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'GenericSlice' or \
            schema.__class__.__name__ == 'UserCollectionSlice' or \
-           schema.__class__.__name__ == 'FriendsCollectionSlice':
+           schema.__class__.__name__ == 'FriendsSlice':
             data = self.exportSparse()
             
             if 'center' in data:
