@@ -62,7 +62,7 @@ class MongoCollectionCollection(ACollectionDB):
         # potentially use inboxstamps to expand the BFS more efficiently
         
         def visit_user(user_id, distance):
-            if uesr_id not in visited_users and distance <= max_distance:
+            if user_id not in visited_users and distance <= max_distance:
                 if inclusive or distance == max_distance:
                     stamp_ids.extend(self.getUserStampIds(user_id))
                 
