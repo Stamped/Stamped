@@ -22,13 +22,13 @@ class MongoFriendsCollection(AMongoCollection):
     
     def checkFriend(self, userId, friendId):
         return self._checkRelationship(keyId=userId, refId=friendId)
-            
+    
     def removeFriend(self, userId, friendId):
         return self._removeRelationship(keyId=userId, refId=friendId)
-            
+    
     def getFriends(self, userId, limit=None):
         return self._getRelationships(userId, limit)
-
+    
     def removeAllFriends(self, userId):
         return self._removeAllRelationships(userId)
 

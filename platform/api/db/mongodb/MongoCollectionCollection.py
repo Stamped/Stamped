@@ -73,7 +73,7 @@ class MongoCollectionCollection(ACollectionDB):
                 if distance < max_distance:
                     heapq.heappush(todo, (distance, user_id))
         
-        # seed the algorithm with the initial user id at distance 0
+        # seed the algorithm with the initial user at distance 0
         visit_user(userId, 0)
         
         while True:
@@ -99,6 +99,10 @@ class MongoCollectionCollection(ACollectionDB):
         inclusive       = friendsSlice.inclusive
         max_distance    = friendsSlice.distance
         
+        if max_distance == 0:
+            stamp_ids.update(self.getUserStampIds(userId))
+            return stamp_ids
+        
         def visit_user(user_id, distance):
             if user_id not in visited_users and distance < max_distance:
                 stamp_ids.update(self.getInboxStampIds(user_id))
@@ -108,7 +112,49 @@ class MongoCollectionCollection(ACollectionDB):
                 if distance < max_distance - 1:
                     heapq.heappush(todo, (distance, user_id))
         
-        # seed the algorithm with the initial user id at distance 0
+        # seed the algorithm with the initial user at distance 0
+        visit_user(userId, 0)
+        
+        while True:
+            try:
+                distance, user_id = heapq.heappop(todo)
+            except IndexError:
+                break # heap is empty
+            
+            if distance < max_distance:
+                friend_ids  = self.friendship_collection.getFriends(user_id)
+                distance    = distance + 1
+                
+                for friend_id in friend_ids:
+                    visit_user(friend_id, distance)
+        
+        return stamp_ids
+    
+    def getFriendsStampIds3(self, userId, friendsSlice):
+        visited_users   = set()
+        stamp_ids       = set()
+        todo            = []
+        
+        inclusive       = friendsSlice.inclusive
+        max_distance    = friendsSlice.distance
+        
+        if max_distance == 0:
+            stamp_ids.update(self.getUserStampIds(userId))
+            return stamp_ids
+        
+        def visit_user(user_id, distance):
+            if user_id not in visited_users and distance < max_distance:
+                if distance > 2:
+                    stamp_ids.extend(self.getUserStampIds(user_id))
+                elif distance < 2:
+                    stamp_ids.update(self.getInboxStampIds(user_id))
+                
+                visited_users.add(user_id)
+                
+                if distance < max_distance - 1:
+                    heapq.heappush(todo, (distance, user_id))
+        
+        # seed the algorithm with the initial user at distance 0
         visit_user(userId, 0)
         
         while True:
