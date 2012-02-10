@@ -780,7 +780,7 @@ typedef enum {
 }
 
 - (void)handleUserImageViewTap:(id)sender {
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
   profileViewController.user = stamp_.user;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
@@ -804,7 +804,7 @@ typedef enum {
 }
 
 - (void)commentViewUserImageTapped:(StampDetailCommentView*)commentView {
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
   profileViewController.user = commentView.comment.user;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
@@ -975,7 +975,7 @@ typedef enum {
   if (!user)
     return;
 
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
   profileViewController.user = user;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];

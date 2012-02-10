@@ -74,6 +74,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize stampCounterLayer = stampCounterLayer_;
 @synthesize stampLayer = stampLayer_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize screenName = screenName_;
+
+- (id)init {
+  self = [super initWithNibName:@"ProfileViewController" bundle:nil];
+  if (self) {}
+  return self;
+}
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -96,6 +103,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.unfollowButton = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.screenName = nil;
   stampLayer_ = nil;
   stampCounterLayer_ = nil;
   [super dealloc];
