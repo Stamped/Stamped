@@ -52,6 +52,7 @@ class MongoCollectionCollection(ACollectionDB):
     # TODO: optimize this function; find more efficient alternative to heapq?
     # TODO: cache results of this function locally and in Memcached
     def getFriendsStampIds(self, userId, friendsSlice):
+        return []
         visited_users   = set()
         stamp_ids       = []
         todo            = []

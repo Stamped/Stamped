@@ -56,7 +56,7 @@ def friends(request):
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
-def global(request):
+def popular(request):
     # TODO
     raise NotImplementedError()
 

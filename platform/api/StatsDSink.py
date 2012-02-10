@@ -52,6 +52,8 @@ class StatsDSink(AStatsSink):
                     if sleep > 32:
                         logs.warning("ERROR initializing StatsD!!!")
                         return
+        else:
+            return
         
         logs.info("initializing StatsD at %s:%d" % (host, port))
         self.statsd = StatsD(host, port)
