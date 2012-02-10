@@ -143,15 +143,16 @@ class MongoCollectionCollection(ACollectionDB):
             return stamp_ids
         
         def visit_user(user_id, distance):
-            if user_id not in visited_users and distance < max_distance:
+            if user_id not in visited_users and distance <= max_distance:
                 if distance > 2:
                     stamp_ids.extend(self.getUserStampIds(user_id))
-                elif distance < 2:
+                elif distance < 2 and distance < max_distance:
                     stamp_ids.update(self.getInboxStampIds(user_id))
                 
                 visited_users.add(user_id)
                 
-                if distance < max_distance - 1:
+                offset = 1 if max_distance > 2 else 0
+                if distance < max_distance - offset:
                     heapq.heappush(todo, (distance, user_id))
         
         # seed the algorithm with the initial user at distance 0
