@@ -54,9 +54,4 @@ def friends(request):
     
     return transformOutput(transform_stamps(stamps))
 
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def global(request):
-    # TODO
-    raise NotImplementedError()
 
