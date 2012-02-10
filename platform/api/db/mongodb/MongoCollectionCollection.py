@@ -145,7 +145,7 @@ class MongoCollectionCollection(ACollectionDB):
         def visit_user(user_id, distance):
             if user_id not in visited_users and distance <= max_distance:
                 if distance > 2:
-                    stamp_ids.extend(self.getUserStampIds(user_id))
+                    stamp_ids.update(self.getUserStampIds(user_id))
                 elif distance < 2 and distance < max_distance:
                     stamp_ids.update(self.getInboxStampIds(user_id))
                 
