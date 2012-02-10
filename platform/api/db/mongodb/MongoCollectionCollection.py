@@ -93,7 +93,7 @@ class MongoCollectionCollection(ACollectionDB):
     
     def getFriendsStampIds2(self, userId, friendsSlice):
         visited_users   = set()
-        stamp_ids       = []
+        stamp_ids       = set()
         todo            = []
         
         inclusive       = friendsSlice.inclusive
@@ -101,7 +101,7 @@ class MongoCollectionCollection(ACollectionDB):
         
         def visit_user(user_id, distance):
             if user_id not in visited_users and distance < max_distance:
-                stamp_ids.extend(self.getInboxStampIds(user_id))
+                stamp_ids.update(self.getInboxStampIds(user_id))
                 
                 visited_users.add(user_id)
                 
