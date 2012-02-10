@@ -95,6 +95,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
                     if menu is not None:
                         #logs.warning("adding menu for %s" % entity.singleplatform_id)
                         menus.append(menu)
+        else:
+            logs.warning("\n\n%s\nMenu was CACHED for %s" % ( '#'*40, entityId ) )
         return menus
 
     def getMenu(self, entityId):
@@ -120,8 +122,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         entity = self.getEntity(entityId)
         if entity is not None:
             for k,v in _menu_sources.items():
-                if v in entity:
-                    self.updateMenu(entityId,k,v)
+                if v in entity and entity[v] is not None:
+                    self.updateMenu(entityId,k,entity[v])
     
     def removeEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)

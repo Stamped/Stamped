@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+
+"""
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -17,7 +20,11 @@ from Schemas    import SubmenuSchema
 from Schemas    import MenuSectionSchema
 from Schemas    import MenuItemSchema
 from Schemas    import MenuPriceSchema
+from urllib2            import HTTPError
+from threading          import Lock
+from gevent             import sleep
 import datetime
+import time
 
 _spicy_map = {
     'none':0,
@@ -28,9 +35,10 @@ _spicy_map = {
 
 def _parse_spicy(entry):
     if 'spicy' in entry:
-        return _spicy_map[entry['spicy']]
-    else:
-        return None
+        v = entry['spicy']
+        if v in _spicy_map:
+            return _spicy_map[v]
+    return None
 
 def _parse_prices(entry):
     prices = []
@@ -114,6 +122,10 @@ class SinglePlatform(object):
         signing_key      += "=" * padding_factor
         
         self._signing_key = base64.b64decode(unicode(signing_key).translate(dict(zip(map(ord, u'-_'), u'+/'))))
+        self.__lock = Lock()
+        self.__last_call = time.time()
+        self.__cooldown = .4
+        self.__throttled = 0
     
     def search(self, query, page=0, count=20):
         params = {
@@ -149,7 +161,24 @@ class SinglePlatform(object):
         request.add_header('Accept-encoding', 'gzip')
         request.add_header('Accept', 'application/json')
         
-        return json.loads(utils.getFile(url, request))
+        result = None
+        try:
+            with self.__lock:
+                if self.__throttled > 5:
+                    raise HTTPError(url,403,'Internal rate limit exceeded',None,None)
+                elapsed = time.time() - self.__last_call
+                self.__last_call = time.time()
+                cooldown = self.__cooldown - elapsed
+                if cooldown > 0:
+                    sleep(cooldown)
+                result = json.loads(utils.getFile(url, request))
+                self.__last_call = time.time()
+        except HTTPError as e:
+            if e.code == 403:
+                self.__throttled += 1
+                sleep(1)
+            raise
+        return result
     
     def _sign(self, uri):
         digest = hmac.new(self._signing_key, uri, hashlib.sha1).digest()

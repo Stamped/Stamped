@@ -78,7 +78,7 @@ _ino = {
     "coordinates": "40.72908,-74.003697"
 }
 
-class StampedAPIPlacesMenu(AStampedAPITestCase):
+class _FactualTestCase(AStampedAPITestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount()
         self.entity = self.createPlaceEntity(self.token,_ino)
@@ -86,6 +86,8 @@ class StampedAPIPlacesMenu(AStampedAPITestCase):
     def tearDown(self):
         self.deleteEntity(self.token, self.entity['entity_id'])
         self.deleteAccount(self.token)
+
+class StampedAPIPlacesMenu(_FactualTestCase):
 
     def test_menu(self):
         path = "entities/menu.json"
@@ -95,12 +97,30 @@ class StampedAPIPlacesMenu(AStampedAPITestCase):
         }
         try:
             result = self.handleGET(path, data)
+            result2 = self.handleGET(path, data)
+            self.assertEqual(result, result2)
             #print(result)
         except HTTPError as e:
             pass
         except Exception:
             print('no result')
-
+"""
+class StampedAPIPlacesFactualData(_FactualTestCase):
+    
+    def test_menu(self):
+        path = "entities/factualData.json"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        try:
+            result = self.handleGET(path, data)
+            print(result)
+        except HTTPError as e:
+            pass
+        except Exception:
+            print('no result')
+"""
 if __name__ == '__main__':
     main()
 

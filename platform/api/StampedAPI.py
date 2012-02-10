@@ -2376,6 +2376,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getFriendsStamps(self, authUserId, friendsSlice):
+        if friendsSlice.distance > 3 or friendsSlice.distance < 0:
+            raise StampedInputError("Unsupported value for distance")
+        
         stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
         
         return self._getStampCollection(authUserId, stampIds, friendsSlice)
@@ -2623,7 +2626,23 @@ class StampedAPI(AStampedAPI):
     
     def getMenu(self,entityId):
         return self._entityDB.getMenu(entityId)
+
+    def updateMenus(self, entityId):
+        self._entityDB.updateMenus(entityId)
     
+    def factualEnrich(self, entity):
+        self._convertSearchIdAsync(entity.entity_id)
+    
+    def getFactualData(self, entity):
+        return self._factualDB.factual_data(entity)
+
+    def getFactualDataById(self, entityId):
+        entity = self._getEntity(entityId)
+        if entity is not None:
+            return self.getFactualData(entity)
+        else:
+            return None
+
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -2825,9 +2844,11 @@ class StampedAPI(AStampedAPI):
     def _convertSearchIdAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
         if entity:
-            self._factual.enrich(entity)
-            if 'factual_id' in entity:
-                self._entityDB.updateEntity(entity)
+            modified = self._factual.resolveEntity(entity)
+            modified2 = self._factual.enrichEntity(entity)
+            if modified2 or modified:
+                entity
+            if 'singleplatform_id' in entity:
                 self._entityDB.updateMenus(entity_id)
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)

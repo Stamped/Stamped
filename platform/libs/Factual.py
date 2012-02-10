@@ -62,6 +62,7 @@ from urlparse import urlparse, parse_qsl
 import sys
 from Schemas            import Entity
 from SinglePlatform     import StampedSinglePlatform
+from SourceController   import SourceController
 from pprint             import pprint
 from pymongo            import Connection
 from gevent.queue       import Queue
@@ -74,7 +75,9 @@ from re                 import match
 from threading          import Lock
 import time
 import random
-import datetime
+from datetime           import datetime
+from datetime           import timedelta
+from utils              import lazyProperty
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -125,8 +128,19 @@ def _category(entity):
     else:
         return None
 
-def _time(unused):
-    return datetime.datetime.utcnow()
+def _ppath(*args,**kwargs):
+    return partial(_path,*args,**kwargs)
+
+def _full_address(data):
+    if 'address' in data and 'locality' in data and 'region' in data and 'postcode' in data:
+        street = data['address']
+        if 'address_extended' in data:
+            street = "%s %s" % (street, data['address_extended'])
+        full = "%s, %s, %s %s" % (street,data['locality'],data['region'],data['postcode'])
+        return full
+    else:
+        return None
+
 #
 # Currently used entity data and their associated name for use in a resolve filter
 #
@@ -140,15 +154,23 @@ _relevant_fields = {
 }
 
 _enrich_fields = {
-    'title':partial(_path,'name'),
-    'factual_id':partial(_path,'factual_id'),
-    'lng':partial(_path,'longitude'),
-    'lat':partial(_path,'latitude'),
-    'email':partial(_path,'email'),
-    'fax':partial(_path,'fax'),
-    'phone':partial(_path,'tel'),
-    'site':partial(_path,'website'),
-    'factual_timestamp':_time,
+    'title':_ppath('name'),
+    'factual_id':_ppath('factual_id'),
+    'lng':_ppath('longitude'),
+    'lat':_ppath('latitude'),
+    'phone':_ppath('tel'),
+    'site':_ppath('website'),
+    'singleplatform_id':_ppath('singleplatform_id'),
+    'address':_full_address,
+}
+
+_address_fields = {
+    'address_street':_ppath('address'),
+    'address_street_ext':_ppath('address_extended'),
+    'address_locality':_ppath('locality'),
+    'address_region':_ppath('region'),
+    'address_postcode':_ppath('postcode'),
+    'address_country':_ppath('country'),
 }
 
 def _filters(entity,fields):
@@ -168,10 +190,17 @@ def _filters(entity,fields):
     return m
 
 def _enrich(entity,data,fields=_enrich_fields):
+    result = False
     for k,f in fields.items():
         v = f(data)
         if v is not None and not k in entity:
             entity[k] = v
+            result = True
+    return result
+
+def _populate(entity,data,fields):
+    for k,f in fields.items():
+        entity[k] = f(data)
 
 
 #
@@ -219,7 +248,13 @@ class Factual(object):
         self.__log_file = log
         self.__lock = Lock()
         self.__last_call = time.time()
-        self.__cooldown = .4
+        self.__cooldown = .15
+        self.__max_crosswalk_age = timedelta(30)
+        self.__max_resolve_age = timedelta(30)
+
+    @lazyProperty
+    def __sourceController(self):
+        return SourceController()
     
     def resolve(self, data,limit=_limit):
         """
@@ -252,7 +287,7 @@ class Factual(object):
         else:
             return None
 
-    def crosswalk_id(self,factual_id,namespace=None,limit=_limit):
+    def crosswalk_id(self,factual_id,namespace=None,limit=_limit,namespaces=None):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
         
@@ -270,6 +305,10 @@ class Factual(object):
         args = {'limit':limit,'factual_id':factual_id}
         if namespace != None:
             args['only'] = namespace
+            del args['limit']
+        elif namespaces != None:
+            args['only'] = ','.join(namespaces)
+            del args['limit']
         return self.__factual('crosswalk',**args)
     
     def crosswalk_external(self,space,space_id,namespace=None,limit=_limit):
@@ -319,27 +358,69 @@ class Factual(object):
         entity = Entity()
         self.enrich(entity,factual_id)
         return entity
+    
+    def resolveEntity(self, entity):
+        factual_id = None
+        result = False
+        if 'factual_id' in entity:
+            factual_id = entity['factual_id']
+        else:
+            should_resolve = 'factual_timestamp' not in entity
+            if 'factual_timestamp' in entity:
+                resolve_age = datetime.utcnow() - entity['factual_timestamp']
+                if resolve_age > self.__max_resolve_age:
+                    should_resolve = True
+            if should_resolve:
+                factual_id = self.factual_from_entity(entity)
+                entity.factual_timestamp = datetime.utcnow()
+                entity.factual_id = factual_id
+                result = True
+        if factual_id is not None:
+            should_crosswalk = 'factual_crosswalk' not in entity
+            if 'factual_crosswalk' in entity:
+                crosswalk_age = datetime.utcnow() - entity['factual_crosswalk']
+                if crosswalk_age > self.__max_crosswalk_age:
+                    should_crosswalk = True
+            if should_crosswalk:
+                data = self.crosswalk_id(factual_id,namespaces=['singleplatform'])
+                if data is not None:
+                    for datum in data:
+                        namespace = datum['namespace']
+                        namespace_id = datum['namespace_id']
+                        if namespace == 'singleplatform':
+                            entity.singleplatform_id = namespace_id
+                            entity.singleplatform_timestamp = datetime.utcnow()
+                entity.factual_crosswalk = datetime.utcnow()
+                result = True
+        return result
+    
+    def enrichEntity(self, entity):
+        return self.enrich(entity)
 
-    def enrich(self,entity,factual_id=None):
+    def enrich(self, entity, factual_id=None, data=None):
+        result = False
         if factual_id is None:
             if 'factual_id' in entity:
                 factual_id = entity.factual_id
             else:
                 factual_id = self.factual_from_entity(entity)
-                if factual_id:
+                if factual_id is not None:
                     entity.factual_id = factual_id
-                else:
-                    return
-        data = self.restaurant(factual_id)
-        rest_flag = True
-        if not data:
-            rest_flag = False
-            data = self.place(factual_id)
-        if not data:
-            return
-        _enrich(entity,data)
-        if 'singleplatform_id' not in entity: entity.singleplatform_id = self.singleplatform(factual_id)
-        return entity
+                    entity.factual_timestamp = datetime.utcnow()
+                    result = True
+        if factual_id is None:
+            return False
+        if data is None:
+            data = self.data(factual_id,entity=entity)
+        if data is None:
+            return result
+        result = _enrich(entity,data)
+        if self.__sourceController.writeTo('address','factual',entity):
+            _populate(entity,data,_address_fields)
+            entity.address_source = 'factual'
+            entity.address_timestamp = datetime.utcnow()
+            result = True
+        return result
 
     def factual_from_entity(self,entity):
         """
@@ -387,6 +468,17 @@ class Factual(object):
             return sp_id
         else:
             return None
+    
+    def data(self,factual_id,entity=None):
+        """
+        Generate Factual data for given factual_id.
+
+        The entity argument is optional but may allow the method to run more efficiently.
+        """
+        data = self.restaurant(factual_id)
+        if data is None:
+            data = self.place(factual_id)
+        return data
 
     def menu(self,factual_id):
         """
@@ -531,8 +623,7 @@ def resolveEntities(size=None,log=None):
     entityDB   = stampedAPI._entityDB
     
     rs = entityDB._collection.find({
-        "subcategory" : "restaurant",
-        "sources.factual.factual_id":{'$exists':False},
+    "category" : "food",
     })
     if not size:
         size = rs.count()
@@ -543,6 +634,7 @@ def resolveEntities(size=None,log=None):
     li = list(rs[end-size:end])
     t = 0
     for entity in li:
+        entity = entityDB._convertFromMongo(entity)
         t += 1
         if _eligible(entity):
             i += 1
@@ -605,6 +697,8 @@ def demo():
     sys.stdout.write('Choose an item (by index): ')
     index = int(sys.stdin.readline().strip())
     item = results[index]
+    data = f.data(item['factual_id'])
+    pprint(data)
     sys.stdout.write('Limit to namespace (blank for no namespace): ')
     namespace = sys.stdin.readline().strip()
     sys.stdout.write('Enter maximum number of crosswalk results: ')
@@ -649,6 +743,77 @@ def demo():
     pprint(menu)
     print("Finished")
 
+def enrichAll():
+    import MongoStampedAPI
+    stampedAPI = MongoStampedAPI.MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    
+    rs = entityDB._collection.find({
+        "category" : "food",
+        "sources.factual.factual_timestamp": {'$exists':False},
+    })
+    li = list(rs)
+    for i in range(len(li)):
+        doc = li[i]
+        entity = entityDB._convertFromMongo(doc)
+        print("enriching %s: %d / %d" % ( entity.title, i , len(li) ) )
+        stampedAPI.factualEnrich(entity)
+
+def populateMenus():
+    import MongoStampedAPI
+    stampedAPI = MongoStampedAPI.MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    
+    rs = entityDB._collection.find({
+        "sources.singleplatform.singleplatform_id": {'$exists':True},
+        "sources.singleplatform.singleplatform_timestamp": {'$exists':False},
+    })
+    li = list(rs)
+    for i in range(len(li)):
+        doc = li[i]
+        entity = entityDB._convertFromMongo(doc)
+        print("updating menu for %s: %d / %d" % ( entity.title, i , len(li) ) )
+        stampedAPI.updateMenus(entity.entity_id)
+
+def resolveAll():
+    import MongoStampedAPI
+    stampedAPI = MongoStampedAPI.MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    f = Factual()
+    
+    rs = entityDB._collection.find({
+        "category" : "food",
+    })
+    li = list(rs)
+    for i in range(len(li)):
+        doc = li[i]
+        entity = entityDB._convertFromMongo(doc)
+        print("resolving %s: %d / %d" % ( entity.title, i , len(li) ) )
+        modified = f.resolveEntity(entity)
+        if modified:
+            print( 'modified' )
+            entityDB.update(entity)
+
+
+def sourceAndTimestamp():
+    import MongoStampedAPI
+    stampedAPI = MongoStampedAPI.MongoStampedAPI()
+    entityDB   = stampedAPI._entityDB
+    
+    rs = entityDB._collection.find({
+        "details.place.address_source": {'$exists':False},
+        "details.place.address_street": {'$exists':True},
+    })
+    li = list(rs)
+    for i in range(len(li)):
+        doc = li[i]
+        entity = entityDB._convertFromMongo(doc)
+        print("updating address source for %s: %d / %d" % ( entity.title, i , len(li) ) )
+        entity.address_source = 'factual'
+        entity.address_timestamp = datetime.utcnow()
+        entityDB.update(entity)
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         arg = sys.argv[1]
@@ -664,6 +829,14 @@ if __name__ == '__main__':
                 pprint(entity.value)
             else:
                 print("No data found for given factual_id")
+        elif arg == 'enrichAll':
+            enrichAll()
+        elif arg == 'populateMenus':
+            populateMenus()
+        elif arg == 'sourceAndTimestamp':
+            sourceAndTimestamp()
+        elif arg == 'resolveAll':
+            resolveAll()
         else:
             print("bad usage")
     else:

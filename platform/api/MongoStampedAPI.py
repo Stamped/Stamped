@@ -38,6 +38,7 @@ from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenColl
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from db.mongodb.MongoDeletedEntityCollection    import MongoDeletedEntityCollection
 from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
+from db.mongodb.MongoFactualCollection          import MongoFactualCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -148,6 +149,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _clientLogsDB(self):
         return MongoClientLogsCollection()
+
+    @lazyProperty
+    def _factualDB(self):
+        return MongoFactualCollection()
     
     def getStats(self, store=False):
         unique_user_stats = {}

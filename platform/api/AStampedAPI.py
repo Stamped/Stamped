@@ -232,7 +232,26 @@ class AStampedAPI(AEntitySink):
     # ##### #
     
     @abstract
-    def getMenu(self,entityId):
+    def getMenu(self, entityId):
+        raise NotImplementedError
+
+    @abstract
+    def updateMenus(self, entityId):
+        raise NotImplementedError
+
+    # ####### #
+    # Factual #
+    # ####### #
+    @abstract
+    def factualEnrich(self, entity):
+        raise
+
+    @abstract
+    def getFactualData(self, entity):
+        raise NotImplementedError
+
+    @abstract
+    def getFactualDataById(self, entity):
         raise NotImplementedError
     
     # ########### #

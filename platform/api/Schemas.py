@@ -170,8 +170,8 @@ class UserMini(Schema):
 
 class UserTiny(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
 
 class Invite(Schema):
     def setSchema(self):
@@ -533,6 +533,18 @@ class EntityDetailsSchema(Schema):
 
 class PlaceSchema(Schema):
     def setSchema(self):
+        #
+        # The new core address set
+        #
+        self.address_street     = SchemaElement(basestring)
+        self.address_street_ext = SchemaElement(basestring)
+        self.address_locality   = SchemaElement(basestring)
+        self.address_region     = SchemaElement(basestring)
+        self.address_postcode   = SchemaElement(basestring)
+        self.address_country    = SchemaElement(basestring)
+        self.address_source     = SchemaElement(basestring)
+        self.address_timestamp  = SchemaElement(datetime)
+
         self.address            = SchemaElement(basestring)
         self.address_components = SchemaList(AddressComponentSchema())
         self.types              = SchemaList(SchemaElement(basestring))
@@ -542,7 +554,7 @@ class PlaceSchema(Schema):
         self.publicTransit      = SchemaElement(basestring)
         self.parking            = SchemaElement(basestring)
         self.parkingDetails     = SchemaElement(basestring)
-        self.wheelchairAccess   = SchemaElement(basestring)
+        self.wheelchairAccess   = SchemaElement(basestring) 
 
 class AddressComponentSchema(Schema):
     def setSchema(self):
@@ -774,10 +786,13 @@ class FactualSchema(Schema):
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
         self.factual_timestamp  = SchemaElement(datetime)
+        self.factual_crosswalk  = SchemaElement(datetime)
+        
 
 class SinglePlatformSchema(Schema):
     def setSchema(self):
         self.singleplatform_id  = SchemaElement(basestring)
+        self.singleplatform_timestamp  = SchemaElement(datetime)
 
 class AppleSchema(Schema):
     def setSchema(self):
@@ -987,5 +1002,6 @@ class MenuHoursSchema(Schema):
     def setSchema(self):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
-        
+
+
 

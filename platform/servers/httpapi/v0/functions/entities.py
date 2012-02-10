@@ -129,3 +129,16 @@ def menu(request):
         response.status_code = 404
         return response
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def factualData(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPEntityId(), request)
+    data        = stampedAPI.getFactualDataById(schema.entity_id)
+    if data is not None:
+        return transformOutput(data)
+    else:
+        response = HttpResponse("not_found")
+        response.status_code = 404
+        return response
+
