@@ -278,6 +278,17 @@ class StampedAPICollectionsFriends(StampedAPICollectionTest):
         with expected_exception():
             self.handleGET(path, data)
 
+class StampedAPICollectionsSuggested(StampedAPICollectionTest):
+    def test_suggested_stamps(self):
+        path = "collections/suggested.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertIsInstance(x, list), 
+        ])
+
 if __name__ == '__main__':
     main()
 

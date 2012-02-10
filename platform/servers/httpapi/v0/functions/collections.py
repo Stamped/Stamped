@@ -56,7 +56,10 @@ def friends(request):
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
-def popular(request):
-    # TODO
-    raise NotImplementedError()
+def suggested(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPGenericSlice(), request).exportSchema(GenericSlice())
+    stamps      = stampedAPI.getSuggestedStamps(authUserId, schema)
+    
+    return transformOutput(transform_stamps(stamps))
 
