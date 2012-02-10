@@ -871,11 +871,11 @@ margin-left:0;
 margin-right:15px;
 }
 
-#home.public .more .copyright{
+#home.public .more .copyright, .more .copyright{
 float:right;
 }
 
-#home.public .more .copyright a{
+#home.public .more .copyright a, .more .copyright a{
 color:#999;
 font-weight:normal;
 margin-right:10px;
