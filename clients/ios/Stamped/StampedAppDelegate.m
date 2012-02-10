@@ -244,8 +244,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"num_friends", @"numFriends",
      @"num_stamps", @"numStamps",
      @"num_stamps_left", @"numStampsLeft",
-     @"image_url", @"imageURL",
-     nil];
+     @"image_url", @"imageURL", nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", @"location", @"identifier", nil];
   
