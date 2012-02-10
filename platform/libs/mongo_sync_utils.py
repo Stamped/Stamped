@@ -7,12 +7,31 @@ __license__   = "TODO"
 
 import Globals
 import time, utils
-import pymongo
+import argparse, pymongo
 
 from pymongo.errors import AutoReconnect
 from collections    import defaultdict
 from pprint         import pprint
  
+"""
+{
+    'title': {
+        'boost': 1.0, 
+        'index': 'analyzed', 
+        'store': 'yes', 
+        'type': u'string', 
+        "term_vector" : "with_positions_offsets", 
+    },
+    'cuisine': {
+        'boost': 1.0, 
+        'index': 'analyzed', 
+        'store': 'yes', 
+        "type": u'string', 
+        "term_vector" : "with_positions_offsets", 
+    },
+}
+"""
+
 #import pysolr
 #solr  = pysolr.Solr(solr_url)
 #solr.add([__extract_fields(obj, fields) for obj in coll.find()])
@@ -153,14 +172,12 @@ def run(mongo_notification_handler,
         time.sleep(1)
 
 if __name__ == '__main__':
-    import argparse
-    
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mongo_host', '-m', dest='mongo_host', type=str, default="localhost",
+    parser.add_argument('-m', '--mongo_host', dest='mongo_host', type=str, default="localhost",
                         help=("hostname or IP address of the Mongo instance to use"))
-    parser.add_argument('--mongo_port', '-p', dest='mongo_port', type=int, default=27017,
+    parser.add_argument('-p', '--mongo_port', dest='mongo_port', type=int, default=27017,
                         help="port number of the Mongo instance")
-    parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + __version__)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     args    = parser.parse_args()
     handler = MongoNotificationHandler()

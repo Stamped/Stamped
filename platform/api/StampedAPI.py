@@ -2375,6 +2375,12 @@ class StampedAPI(AStampedAPI):
         return self._getStampCollection(authUserId, stampIds, userSlice)
     
     @API_CALL
+    def getFriendsStamps(self, authUserId, friendsSlice):
+        stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
+        
+        return self._getStampCollection(authUserId, stampIds, friendsSlice)
+    
+    @API_CALL
     def getUserMentions(self, userID, limit=None):
         ### TODO: Implement
         raise NotImplementedError
