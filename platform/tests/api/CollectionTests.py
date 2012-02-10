@@ -256,6 +256,28 @@ class StampedAPICollectionsDeleted(StampedAPICollectionTest):
                    lambda x: self.assertTrue('deleted' in x[0]), 
         ])
 
+class StampedAPICollectionsFriends(StampedAPICollectionTest):
+    def test_friends_of_friends(self):
+        path = "collections/friends.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertIsInstance(x, list), 
+        ])
+        
+        data["distance"]  = 1
+        data["inclusive"] = False
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertIsInstance(x, list), 
+        ])
+        
+        data["distance"]  = -1
+        with expected_exception():
+            self.handleGET(path, data)
+
 if __name__ == '__main__':
     main()
 

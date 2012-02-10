@@ -170,8 +170,8 @@ class UserMini(Schema):
 
 class UserTiny(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
 
 class Invite(Schema):
     def setSchema(self):
@@ -409,13 +409,19 @@ class GenericSlice(Schema):
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
 
-
 class UserCollectionSlice(GenericSlice):
     def setSchema(self):
         GenericSlice.setSchema(self)
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
+
+class FriendsSlice(GenericSlice):
+    def setSchema(self):
+        GenericSlice.setSchema(self)
+        
+        self.distance           = SchemaElement(int,  default=2)
+        self.inclusive          = SchemaElement(bool, default=True)
 
 class ViewportSchema(Schema):
     def setSchema(self):

@@ -45,3 +45,18 @@ def credit(request):
     
     return transformOutput(transform_stamps(stamps))
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def friends(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFriendsSlice(), request).exportSchema(FriendsSlice())
+    stamps      = stampedAPI.getFriendsStamps(authUserId, schema)
+    
+    return transformOutput(transform_stamps(stamps))
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def popular(request):
+    # TODO
+    raise NotImplementedError()
+
