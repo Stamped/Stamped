@@ -750,6 +750,7 @@ typedef enum {
   self.searchField.enabled = YES;
   self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
+  [stampFilterBar_ reset];
   [self stampFilterBar:stampFilterBar_ didSelectFilter:StampFilterTypeNone andQuery:nil];
 
   CGRect frame = searchField_.frame;
