@@ -52,7 +52,6 @@ class MongoCollectionCollection(ACollectionDB):
     # TODO: optimize this function; find more efficient alternative to heapq?
     # TODO: cache results of this function locally and in Memcached
     def getFriendsStampIds(self, userId, friendsSlice):
-        return []
         visited_users   = set()
         stamp_ids       = []
         todo            = []
@@ -88,8 +87,42 @@ class MongoCollectionCollection(ACollectionDB):
                 distance    = distance + 1
                 
                 for friend_id in friend_ids:
-                    if not friend_id in visited_users:
-                        visit_user(friend_id, distance)
+                    visit_user(friend_id, distance)
+        
+        return stamp_ids
+    
+    def getFriendsStampIds2(self, userId, friendsSlice):
+        visited_users   = set()
+        stamp_ids       = []
+        todo            = []
+        
+        inclusive       = friendsSlice.inclusive
+        max_distance    = friendsSlice.distance
+        
+        def visit_user(user_id, distance):
+            if user_id not in visited_users and distance < max_distance:
+                stamp_ids.extend(self.getInboxStampIds(user_id))
+                
+                visited_users.add(user_id)
+                
+                if distance < max_distance - 1:
+                    heapq.heappush(todo, (distance, user_id))
+        
+        # seed the algorithm with the initial user id at distance 0
+        visit_user(userId, 0)
+        
+        while True:
+            try:
+                distance, user_id = heapq.heappop(todo)
+            except IndexError:
+                break # heap is empty
+            
+            if distance < max_distance:
+                friend_ids  = self.friendship_collection.getFriends(user_id)
+                distance    = distance + 1
+                
+                for friend_id in friend_ids:
+                    visit_user(friend_id, distance)
         
         return stamp_ids
     
