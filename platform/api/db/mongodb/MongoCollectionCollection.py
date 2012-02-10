@@ -49,6 +49,8 @@ class MongoCollectionCollection(ACollectionDB):
     def getUserCreditStampIds(self, userId):
         return self.user_credit_collection.getCredit(userId)
     
+    # TODO: optimize this function; find more efficient alternative to heapq?
+    # TODO: cache results of this function locally and in Memcached
     def getFriendsStampIds(self, userId, friendsSlice):
         visited_users   = set()
         stamp_ids       = []
@@ -85,7 +87,7 @@ class MongoCollectionCollection(ACollectionDB):
                 distance    = distance + 1
                 
                 for friend_id in friend_ids:
-                    if not friend_id in todo and not friend_id in visited_users:
+                    if not friend_id in visited_users:
                         visit_user(friend_id, distance)
         
         return stamp_ids

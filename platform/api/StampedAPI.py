@@ -2376,6 +2376,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getFriendsStamps(self, authUserId, friendsSlice):
+        if friendsSlice.distance > 3 or friendsSlice.distance < 0:
+            raise StampedInputError("Unsupported value for distance")
+        
         stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
         
         return self._getStampCollection(authUserId, stampIds, friendsSlice)
