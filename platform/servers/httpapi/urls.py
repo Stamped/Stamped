@@ -122,6 +122,8 @@ urlpatterns = patterns('',
     (r'v0/collections/inbox.json',      'v0.functions.collections.inbox'),
     (r'v0/collections/user.json',       'v0.functions.collections.user'),
     (r'v0/collections/credit.json',     'v0.functions.collections.credit'),
+    (r'v0/collections/friends.json',    'v0.functions.collections.friends'),
+    #(r'v0/collections/global.json',  'v0.functions.collections.global'),
     
     ### FAVORITES
     (r'v0/favorites/create.json',       'v0.functions.favorites.create'),

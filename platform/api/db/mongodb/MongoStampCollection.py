@@ -139,8 +139,15 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return map(self._convertFromMongo, documents)
     
     def getStampsSlice(self, stampIds, genericSlice):
-        ids         = map(self._getObjectIdFromString, stampIds)
-        query       = { '_id' : { '$in' : ids } }
+        if stampIds is not None and len(stampIds) > 0:
+            ids     = map(self._getObjectIdFromString, stampIds)
+            
+            if len(ids) == 1:
+                query   = { '_id' : ids[0] }
+            else:
+                query   = { '_id' : { '$in' : ids } }
+        else:
+            query   = { }
         
         time_filter = 'timestamp.created'
         reverse     = genericSlice.reverse

@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals
 import math, os, pymongo, time, utils, logs
 
-from errors import Fail
-from datetime import datetime
 from pymongo.errors import AutoReconnect
+from errors         import Fail
+from datetime       import datetime
 
 class MongoCollectionProxy(object):
     def __init__(self, parent, connection, database, collection):

@@ -951,7 +951,8 @@ class HTTPGenericSlice(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'GenericSlice' or \
-           schema.__class__.__name__ == 'UserCollectionSlice':
+           schema.__class__.__name__ == 'UserCollectionSlice' or \
+           schema.__class__.__name__ == 'FriendsCollectionSlice':
             data = self.exportSparse()
             
             if 'center' in data:
@@ -1009,7 +1010,13 @@ class HTTPUserCollectionSlice(HTTPGenericSlice):
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
-        #self.deleted            = SchemaElement(bool)
+
+class HTTPFriendsSlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
+        self.distance           = SchemaElement(int)
+        self.inclusive          = SchemaElement(bool)
 
 class HTTPStampImage(Schema):
     def setSchema(self):
