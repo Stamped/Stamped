@@ -151,7 +151,7 @@ class MongoCollectionCollection(ACollectionDB):
                 
                 visited_users.add(user_id)
                 
-                offset = 1 if max_distance > 2 else 0
+                offset = 0 if max_distance > 2 else 1
                 if distance < max_distance - offset:
                     heapq.heappush(todo, (distance, user_id))
         
