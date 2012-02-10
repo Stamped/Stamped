@@ -170,8 +170,8 @@ class UserMini(Schema):
 
 class UserTiny(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
 
 class Invite(Schema):
     def setSchema(self):
