@@ -67,7 +67,7 @@ class MongoCollectionCollection(ACollectionDB):
                     stamp_ids.extend(self.getUserStampIds(user_id))
                 
                 visited_users.add(user_id)
-                heapq.heappush(todo, (distance, userId))
+                heapq.heappush(todo, (distance, user_id))
         
         # seed the algorithm with the initial user id at distance 0
         visit_user(userId, 0)
@@ -86,7 +86,7 @@ class MongoCollectionCollection(ACollectionDB):
                     if not friend_id in todo and not friend_id in visited_users:
                         visit_user(friend_id, distance)
         
-        return stamp_ids
+        return stamp_ids, len(visited_users)
     
     def getMentions(self, userId):
         raise NotImplementedError
