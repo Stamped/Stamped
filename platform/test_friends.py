@@ -30,14 +30,14 @@ for user_id in user_ids:
         t0   = time.time()
         ret0 = api._collectionDB.getFriendsStampIds(user_id, s)
         t1   = time.time()
-        dur  = (t1 - t0) * 1000.0
+        dur  = (t1 - t0)
         
         print "%d) %d (%s seconds)" % (distance, len(ret0), dur)
         
         t0   = time.time()
         ret1 = api._collectionDB.getFriendsStampIds2(user_id, s)
         t1   = time.time()
-        dur  = (t1 - t0) * 1000.0
+        dur  = (t1 - t0)
         
         print "%d) %d (%s seconds)" % (distance, len(ret1), dur)
 
