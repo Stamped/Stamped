@@ -16,6 +16,7 @@ typedef enum {
   STMapViewControllerSourceUser
 } STMapViewControllerSource;
 
+@class STScopeSlider;
 @class STSearchField;
 @class User;
 
@@ -25,7 +26,7 @@ typedef enum {
 
 @property (nonatomic, assign) STMapViewControllerSource source;
 @property (nonatomic, retain) User* user;
-@property (nonatomic, retain) IBOutlet UISlider* scopeSlider;
+@property (nonatomic, retain) IBOutlet STScopeSlider* scopeSlider;
 @property (nonatomic, retain) IBOutlet UIView* overlayView;
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;

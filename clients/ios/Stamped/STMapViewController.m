@@ -16,6 +16,7 @@
 #import "StampDetailViewController.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
+#import "STScopeSlider.h"
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
@@ -79,8 +80,6 @@ static const CGFloat kMapUserImageSize = 32.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [scopeSlider_ setMinimumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
-  [scopeSlider_ setMaximumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
   UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                action:@selector(overlayTapped:)];
   [overlayView_ addGestureRecognizer:recognizer];
