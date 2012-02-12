@@ -27,7 +27,7 @@
     if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
       whiteAppearance = YES;
 
-    NSString* imageName = whiteAppearance ? @"nav_globe_button_ios5" : @"nav_globe_button_ios4";
+    NSString* imageName = whiteAppearance ? @"nav_map_button_ios5" : @"nav_globe_button_ios4";
     UIImage* globeImage = [UIImage imageNamed:imageName];
     self.mapButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [mapButton_ setImage:globeImage forState:UIControlStateNormal];
