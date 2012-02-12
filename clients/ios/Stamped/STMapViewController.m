@@ -16,6 +16,7 @@
 #import "StampDetailViewController.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
+#import "STScopeSlider.h"
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
@@ -43,6 +44,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 @synthesize mapView = mapView_;
 @synthesize zoomToLocation = zoomToLocation_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize scopeSlider = scopeSlider_;
 @synthesize source = source_;
 @synthesize user = user_;
 
@@ -64,6 +66,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.user = nil;
+  self.scopeSlider = nil;
   [super dealloc];
 }
 
@@ -95,6 +98,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.mapView = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.scopeSlider = nil;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
