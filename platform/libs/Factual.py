@@ -62,7 +62,6 @@ from urlparse import urlparse, parse_qsl
 import sys
 from Schemas            import Entity
 from SinglePlatform     import StampedSinglePlatform
-from SourceController   import SourceController
 from pprint             import pprint
 from pymongo            import Connection
 from gevent.queue       import Queue
@@ -252,10 +251,6 @@ class Factual(object):
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
 
-    @lazyProperty
-    def __sourceController(self):
-        return SourceController()
-    
     def resolve(self, data,limit=_limit):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
@@ -415,7 +410,8 @@ class Factual(object):
         if data is None:
             return result
         result = _enrich(entity,data)
-        if self.__sourceController.writeTo('address','factual',entity):
+        #if self.__sourceController.writeTo('address','factual',entity):
+        if True:
             _populate(entity,data,_address_fields)
             entity.address_source = 'factual'
             entity.address_timestamp = datetime.utcnow()

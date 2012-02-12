@@ -2855,7 +2855,7 @@ class StampedAPI(AStampedAPI):
             modified2 = self._factual.enrichEntity(entity)
             
             if modified2 or modified:
-                entity
+                self._entityDB.update(entity)
             if 'singleplatform_id' in entity:
                 self._entityDB.updateMenus(entity_id)
         else:
