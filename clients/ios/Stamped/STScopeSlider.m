@@ -72,8 +72,29 @@ typedef enum {
 - (void)updateImage {
   UIImage* background = [UIImage imageNamed:@"scope_drag_outer"];
   UIGraphicsBeginImageContextWithOptions(background.size, NO, 0.0);
-//  CGContextRef context = UIGraphicsGetCurrentContext();
   [background drawInRect:CGRectMake(0, 0, background.size.width, background.size.height)];
+  UIImage* inner = nil;
+  switch (granularity_) {
+    case STScopeSliderGranularityYou:
+      inner = [UIImage imageNamed:@"scope_drag_inner_you"];
+      break;
+    case STScopeSliderGranularityFriends:
+      inner = [UIImage imageNamed:@"scope_drag_inner_friends"];
+      break;
+    case STScopeSliderGranularityFriendsOfFriends:
+      inner = [UIImage imageNamed:@"scope_drag_inner_fof"];
+      break;
+    case STScopeSliderGranularityEveryone:
+      inner = [UIImage imageNamed:@"scope_drag_inner_all"];
+      break;
+    default:
+      break;
+  }
+  CGFloat xPos = (background.size.width - inner.size.width) / 2;
+  CGFloat yPos = ((background.size.height - inner.size.height) / 2) - 2;  // Account for shadow.
+  [inner drawInRect:CGRectMake(xPos, yPos, inner.size.width, inner.size.height)];
+  UIImage* cover = [UIImage imageNamed:@"scope_drag_inner_cover"];
+  [cover drawInRect:CGRectMake(xPos, yPos, cover.size.width, cover.size.height)];
   UIImage* final = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
   [self setThumbImage:final forState:UIControlStateNormal];
