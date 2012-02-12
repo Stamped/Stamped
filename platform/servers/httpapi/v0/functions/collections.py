@@ -11,10 +11,13 @@ from httpapi.v0.helpers import *
 def transform_stamps(stamps):
     result = []
     for stamp in stamps:
-        if 'deleted' in stamp:
-            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
-        else:
-            result.append(HTTPStamp().importSchema(stamp).exportSparse())
+        try:
+            if 'deleted' in stamp:
+                result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
+            else:
+                result.append(HTTPStamp().importSchema(stamp).exportSparse())
+        except:
+            logs.warn(utils.getFormattedException())
     
     return result
 
