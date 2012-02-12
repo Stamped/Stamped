@@ -57,7 +57,7 @@
 						<string key="NSFrame">{{0, 44}, {320, 372}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="320509962"/>
+						<reference key="NSNextKeyView" ref="324308673"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -66,15 +66,15 @@
 						<float key="IBUIAlpha">0.0</float>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
-					<object class="IBUIView" id="320509962">
+					<object class="IBUIView" id="324308673">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">268</int>
 						<array class="NSMutableArray" key="NSSubviews">
-							<object class="IBUISlider" id="648053796">
-								<reference key="NSNextResponder" ref="320509962"/>
+							<object class="IBUISlider" id="882663567">
+								<reference key="NSNextResponder" ref="324308673"/>
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{59, 14}, {202, 23}}</string>
-								<reference key="NSSuperview" ref="320509962"/>
+								<reference key="NSSuperview" ref="324308673"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:9</string>
@@ -82,14 +82,14 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
-								<float key="IBUIValue">0.25</float>
+								<float key="IBUIValue">0.33000001311302185</float>
 								<bool key="IBUIContinuous">NO</bool>
 							</object>
 						</array>
 						<string key="NSFrame">{{0, 367}, {320, 49}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="648053796"/>
+						<reference key="NSNextKeyView" ref="882663567"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -328,7 +328,7 @@
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">scopeSlider</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="648053796"/>
+						<reference key="destination" ref="882663567"/>
 					</object>
 					<int key="connectionID">25</int>
 				</object>
@@ -382,7 +382,7 @@
 							<reference ref="552814992"/>
 							<reference ref="388427412"/>
 							<reference ref="287395347"/>
-							<reference ref="320509962"/>
+							<reference ref="324308673"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -445,17 +445,17 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">23</int>
-						<reference key="object" ref="320509962"/>
+						<reference key="object" ref="324308673"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="648053796"/>
+							<reference ref="882663567"/>
 						</array>
 						<reference key="parent" ref="191373211"/>
 						<string key="objectName">Toolbar</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">24</int>
-						<reference key="object" ref="648053796"/>
-						<reference key="parent" ref="320509962"/>
+						<reference key="object" ref="882663567"/>
+						<reference key="parent" ref="324308673"/>
 						<string key="objectName">Scope Slider</string>
 					</object>
 				</array>
@@ -511,7 +511,7 @@
 						<string key="locationButton">UIButton</string>
 						<string key="mapView">MKMapView</string>
 						<string key="overlayView">UIView</string>
-						<string key="scopeSlider">UISlider</string>
+						<string key="scopeSlider">STScopeSlider</string>
 						<string key="searchField">STSearchField</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -533,7 +533,7 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="scopeSlider">
 							<string key="name">scopeSlider</string>
-							<string key="candidateClassName">UISlider</string>
+							<string key="candidateClassName">STScopeSlider</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="searchField">
 							<string key="name">searchField</string>

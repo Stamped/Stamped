@@ -10,6 +10,7 @@
 
 @interface STScopeSlider ()
 - (void)commonInit;
+- (void)valueChanged:(id)sender;
 @end
 
 @implementation STScopeSlider
@@ -34,6 +35,24 @@
   [self setMinimumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
   [self setMaximumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
   self.continuous = NO;
+  [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
+}
+
+- (void)valueChanged:(id)sender {
+  NSInteger quotient = (self.value / 0.333f) + 0.5f;
+  [self setValue:(0.333 * quotient) animated:YES];
+}
+
+- (CGRect)maximumValueImageRectForBounds:(CGRect)bounds {
+  CGRect rect = [super maximumValueImageRectForBounds:bounds];
+  //NSLog(@"Max drawing rect: %@", NSStringFromCGRect(rect));
+  return rect;
+}
+
+- (CGRect)minimumValueImageRectForBounds:(CGRect)bounds {
+  CGRect rect = [super minimumValueImageRectForBounds:bounds];
+  //NSLog(@"Min drawing rect: %@", NSStringFromCGRect(rect));
+  return rect;
 }
 
 @end

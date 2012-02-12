@@ -27,19 +27,18 @@
     if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
       whiteAppearance = YES;
 
-    NSString* imageName = whiteAppearance ? @"nav_map_button_ios5" : @"nav_globe_button_ios4";
-    UIImage* globeImage = [UIImage imageNamed:imageName];
+    UIImage* mapImage = [UIImage imageNamed:@"nav_map_button"];
     self.mapButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [mapButton_ setImage:globeImage forState:UIControlStateNormal];
+    [mapButton_ setImage:mapImage forState:UIControlStateNormal];
     [mapButton_ addTarget:self
                      action:@selector(showListButton:)
            forControlEvents:UIControlEventTouchUpInside];
     mapButton_.adjustsImageWhenHighlighted = NO;
-    mapButton_.frame = CGRectMake(0, 0, globeImage.size.width, globeImage.size.height);
+    mapButton_.frame = CGRectMake(0, 0, mapImage.size.width, mapImage.size.height);
     self.bounds = mapButton_.bounds;
     [self addSubview:mapButton_];
     
-    imageName = whiteAppearance ? @"nav_list_button_ios5" : @"nav_list_button_ios4";
+    NSString* imageName = whiteAppearance ? @"nav_list_button_ios5" : @"nav_list_button_ios4";
     UIImage* listImage = [UIImage imageNamed:imageName];
     self.listButton = [UIButton buttonWithType:UIButtonTypeCustom];
     listButton_.adjustsImageWhenHighlighted = NO;
