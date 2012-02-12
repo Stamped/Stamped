@@ -43,6 +43,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 @synthesize mapView = mapView_;
 @synthesize zoomToLocation = zoomToLocation_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize scopeSlider = scopeSlider_;
 @synthesize source = source_;
 @synthesize user = user_;
 
@@ -64,6 +65,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.user = nil;
+  self.scopeSlider = nil;
   [super dealloc];
 }
 
@@ -77,6 +79,8 @@ static const CGFloat kMapUserImageSize = 32.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [scopeSlider_ setMinimumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
+  [scopeSlider_ setMaximumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
   UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                action:@selector(overlayTapped:)];
   [overlayView_ addGestureRecognizer:recognizer];
@@ -95,6 +99,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.mapView = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.scopeSlider = nil;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
