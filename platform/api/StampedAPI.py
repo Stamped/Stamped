@@ -2724,13 +2724,13 @@ class StampedAPI(AStampedAPI):
         return Factual()
     
     def _convertSearchId(self, search_id):
-
         if not search_id.startswith('T_'):
             # already a valid entity id
             return search_id
-
+        
         # flag for asynchronous Factual based enrichment
         factual_enrichment_flag = False
+        
         # temporary entity_id; lookup in tempentities collection and 
         # merge result into primary entities db
         doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
@@ -2824,6 +2824,7 @@ class StampedAPI(AStampedAPI):
                     e2 = pformat(entity2.value)
                     
                     logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
+                
                 if entity is not None:
                     factual_enrichment_flag = True 
         elif search_id.startswith('T_TVDB_'):
@@ -2840,18 +2841,21 @@ class StampedAPI(AStampedAPI):
         
         assert entity.entity_id is not None
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
+        
         if factual_enrichment_flag:
-            tasks.invoke(tasks.APITasks._convertSearchId, args=[account.user_id])
-
+            tasks.invoke(tasks.APITasks._convertSearchId, args=[entity.entity_id])
+        
         return entity.entity_id
     
     def _convertSearchIdAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
+        
         if entity:
-            modified = self._factual.resolveEntity(entity)
+            modified  = self._factual.resolveEntity(entity)
             modified2 = self._factual.enrichEntity(entity)
+            
             if modified2 or modified:
-                entity
+                self._entityDB.update(entity)
             if 'singleplatform_id' in entity:
                 self._entityDB.updateMenus(entity_id)
         else:
@@ -2859,7 +2863,7 @@ class StampedAPI(AStampedAPI):
     
     def _updateMenuAsync(self, entity_id, source, source_id):
         self._entityDB.updateMenu(entity_id, source, source_id)
-
+    
     def _addEntity(self, entity):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
