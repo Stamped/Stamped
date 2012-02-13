@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """
-Not finished
 """
 
 __author__    = "Stamped (dev@stamped.com)"

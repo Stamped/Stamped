@@ -56,7 +56,7 @@ class ExternalSourceController(ASourceController):
 				'address':timedelta(30)
 			},
 			'priorities': {
-				'address':['factual']
+				'address':['factual','googleplaces']
 			},
 			'timestamps': {
 				'address':['address_timestamp'],
