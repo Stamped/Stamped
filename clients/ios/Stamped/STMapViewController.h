@@ -24,7 +24,8 @@ typedef enum {
 @interface STMapViewController : UIViewController <MKMapViewDelegate,
                                                    UITextFieldDelegate,
                                                    NSFetchedResultsControllerDelegate,
-                                                   STMapScopeSliderDelegate>
+                                                   STMapScopeSliderDelegate,
+                                                   RKObjectLoaderDelegate>
 
 @property (nonatomic, assign) STMapViewControllerSource source;
 @property (nonatomic, retain) User* user;
