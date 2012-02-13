@@ -289,14 +289,20 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 {
                     var score = 0.0;
                     
-                    if (this.stats.num_credit > 0)
-                        score += 10 * this.stats.num_credit;
+                    try {
+                        if (this.stats.num_credit > 0)
+                            score += 10 * this.stats.num_credit;
+                    } catch(err) {}
                     
-                    if (this.stats.num_likes > 0)
-                        score += 3 * this.stats.num_likes;
+                    try {
+                        if (this.stats.num_likes > 0)
+                            score += 3 * this.stats.num_likes;
+                    } catch(err) {}
                     
-                    if (this.stats.num_comments > 0)
-                        score += this.stats.num_comments;
+                    try {
+                        if (this.stats.num_comments > 0)
+                            score += this.stats.num_comments;
+                    } catch(err) {}
                     
                     emit('query', { obj : this, score : score });
                 }""")
@@ -359,13 +365,13 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                     try {
                         title = this.entity.title.toLowerCase();
                     } catch(e) {
-                        title = ""
+                        title = "";
                     }
                     
                     try {
                         blurb = this.blurb.toLowerCase();
                     } catch(e) {
-                        blurb = ""
+                        blurb = "";
                     }
                     
                     if (title.length > 0 && title.match(query)) {
@@ -410,14 +416,14 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                         if (v.score > min) {
                             out[out.length] = { score : v.score, obj : v.obj }
                             out.sort(sortOut);
-                            out.pop()
+                            out.pop();
                         }
                     }
                 });
                 
                 out.sort(sortOut);
                 var obj = new Object();
-                obj.data = out
+                obj.data = out;
                 
                 return obj;
             }""")
