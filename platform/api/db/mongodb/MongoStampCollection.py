@@ -285,8 +285,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 (genericSlice.sort == 'relevance' and genericSlice.query is None):
                 # handle popularity-based sort
                 # ----------------------------
-                _map = bson.code.Code("""function ()
-                {
+                _map = bson.code.Code("""function () {
                     var score = 0.0;
                     
                     try {
@@ -318,8 +317,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 # NOTE: blurb & entity title matching already occurs at regex query level!
                 # these scores are then completely redundant since levenshtein will never 
                 # be taken into account.
-                _map = bson.code.Code("""function ()
-                {
+                _map = bson.code.Code("""function () {
                     function levenshtein(a, b)
                     {
                         var d = [], cost, i, j;
@@ -432,7 +430,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                                         _reduce, 
                                                         query=query, 
                                                         scope=scope, 
-                                                        jsMode=True, 
                                                         limit=1000)
             
             try:
