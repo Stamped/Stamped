@@ -16,7 +16,6 @@
 #import "StampDetailViewController.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
-#import "STMapScopeSlider.h"
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
@@ -66,6 +65,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.user = nil;
+  self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
   [super dealloc];
 }
@@ -98,6 +98,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   self.mapView = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
 }
 
@@ -195,7 +196,7 @@ static const CGFloat kMapUserImageSize = 32.0;
     return;
 
   STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
   profileViewController.user = annotation.stamp.user;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
@@ -234,6 +235,12 @@ static const CGFloat kMapUserImageSize = 32.0;
 
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
   zoomToLocation_ = NO;
+  NSLog(@"Region did change...");
+  MKMapRect region = mapView.visibleMapRect;
+  CLLocationCoordinate2D topLeft = MKCoordinateForMapPoint(region.origin);
+  NSLog(@"Origin: %f,%f", topLeft.latitude, topLeft.longitude);
+  CLLocationCoordinate2D bottomRight = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMaxX(region), MKMapRectGetMaxY(region)));
+  NSLog(@"Bottom right: %f,%f", bottomRight.latitude, bottomRight.longitude);
 }
 
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
@@ -357,6 +364,12 @@ static const CGFloat kMapUserImageSize = 32.0;
   MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
   MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
   [mapView_ setRegion:region animated:YES];
+}
+
+#pragma mark - STMapScopeSliderDelegate methods.
+
+- (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
+  NSLog(@"Changed granularity to %d", granularity);
 }
 
 @end

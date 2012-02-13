@@ -15,6 +15,15 @@ typedef enum {
   STMapScopeSliderGranularityEveryone
 } STMapScopeSliderGranularity;
 
+@class STMapScopeSlider;
+
+@protocol STMapScopeSliderDelegate
+- (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity;
+@end
+
 @interface STMapScopeSlider : UISlider
+
+@property (nonatomic, assign) IBOutlet id<STMapScopeSliderDelegate> delegate;
+@property (nonatomic, assign) STMapScopeSliderGranularity granularity;
 
 @end

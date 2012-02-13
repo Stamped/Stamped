@@ -10,19 +10,21 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "STMapScopeSlider.h"
+
 typedef enum {
   STMapViewControllerSourceInbox,
   STMapViewControllerSourceTodo,
   STMapViewControllerSourceUser
 } STMapViewControllerSource;
 
-@class STMapScopeSlider;
 @class STSearchField;
 @class User;
 
 @interface STMapViewController : UIViewController <MKMapViewDelegate,
                                                    UITextFieldDelegate,
-                                                   NSFetchedResultsControllerDelegate>
+                                                   NSFetchedResultsControllerDelegate,
+                                                   STMapScopeSliderDelegate>
 
 @property (nonatomic, assign) STMapViewControllerSource source;
 @property (nonatomic, retain) User* user;

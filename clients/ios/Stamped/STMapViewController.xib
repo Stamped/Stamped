@@ -366,6 +366,14 @@
 					</object>
 					<int key="connectionID">22</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="882663567"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">26</int>
+				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<array key="orderedObjects">
@@ -485,7 +493,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">25</int>
+			<int key="maxID">26</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -519,7 +527,7 @@
 						<string key="locationButton">UIButton</string>
 						<string key="mapView">MKMapView</string>
 						<string key="overlayView">UIView</string>
-						<string key="scopeSlider">STScopeSlider</string>
+						<string key="scopeSlider">STMapScopeSlider</string>
 						<string key="searchField">STSearchField</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -541,7 +549,7 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="scopeSlider">
 							<string key="name">scopeSlider</string>
-							<string key="candidateClassName">STScopeSlider</string>
+							<string key="candidateClassName">STMapScopeSlider</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="searchField">
 							<string key="name">searchField</string>

@@ -13,13 +13,12 @@
 - (void)valueChanged:(id)sender;
 - (void)dragEnded:(id)sender;
 - (void)updateImage;
-
-@property (nonatomic, assign) STMapScopeSliderGranularity granularity;
 @end
 
 @implementation STMapScopeSlider
 
 @synthesize granularity = granularity_;
+@synthesize delegate = delegate_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -35,6 +34,11 @@
     [self commonInit];
   
   return self;
+}
+
+- (void)dealloc {
+  delegate_ = nil;
+  [super dealloc];
 }
 
 - (void)commonInit {
@@ -65,6 +69,9 @@
 - (void)setGranularity:(STMapScopeSliderGranularity)granularity {
   if (granularity != granularity_) {
     granularity_ = granularity;
+    if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
+      [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
+
     [self updateImage];
   }
 }
