@@ -41,11 +41,11 @@ class MongoMenuCollection(AMongoCollection, AMenuDB):
     ### PUBLIC
     def getMenus(self, entityId):
         documents = self._collection.find({'entity_id': entityId})
-        logs.warning("\n\nFound %d %s menus\n\n"  % ( documents.count() , entityId ))
+        #logs.debug("\n\nFound %d %s menus\n\n"  % ( documents.count() , entityId ))
         menus = []
         cur = datetime.utcnow()
         for document in documents:
-            logs.warning("\n\nMenu found\n\n" )
+            #logs.debug("\n\nMenu found\n\n" )
             del document['_id']
             menu = self._convertFromMongo(document)
             age = cur - menu.timestamp
