@@ -2133,9 +2133,9 @@ class StampedAPI(AStampedAPI):
         stamp.is_liked = True
         
         # Give credit once a given threshold is hit
-        benefit = False
+        benefit = None
         if stamp.num_likes >= 3 and not stamp.like_threshold_hit:
-            benefit = True
+            benefit = LIKE_BENEFIT
             
             # Update stamp stats
             self._stampDB.giveLikeCredit(stamp.stamp_id)
@@ -2150,7 +2150,8 @@ class StampedAPI(AStampedAPI):
                               user_id=authUserId, 
                               recipient_ids=[ stamp.user_id ], 
                               subject=stamp.entity.title, 
-                              linked_stamp_id=stamp.stamp_id)
+                              linked_stamp_id=stamp.stamp_id,
+                              benefit=benefit)
         
         return stamp
     
