@@ -211,3 +211,9 @@ def save():
     except:
         pass
 
+def _report(caller,msg='',level=logging.ERROR):
+    caller2 = log.findCaller()
+    log.log(level,"REPORT from %s:%s:%s-\t%s\nCALLED by %s:%s:%s",caller2[0],caller2[1],caller2[2],msg,caller[0],caller[1],caller[2],exc_info=True)
+
+def report(*args,**kwargs):
+    _report(log.findCaller(),*args,**kwargs)
