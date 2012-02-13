@@ -285,18 +285,23 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 (genericSlice.sort == 'relevance' and genericSlice.query is None):
                 # handle popularity-based sort
                 # ----------------------------
-                _map = bson.code.Code("""function ()
-                {
+                _map = bson.code.Code("""function () {
                     var score = 0.0;
                     
-                    if (this.stats.num_credit > 0)
-                        score += 10 * this.stats.num_credit;
+                    try {
+                        if (this.stats.num_credit > 0)
+                            score += 10 * this.stats.num_credit;
+                    } catch(err) {}
                     
-                    if (this.stats.num_likes > 0)
-                        score += 3 * this.stats.num_likes;
+                    try {
+                        if (this.stats.num_likes > 0)
+                            score += 3 * this.stats.num_likes;
+                    } catch(err) {}
                     
-                    if (this.stats.num_comments > 0)
-                        score += this.stats.num_comments;
+                    try {
+                        if (this.stats.num_comments > 0)
+                            score += this.stats.num_comments;
+                    } catch(err) {}
                     
                     emit('query', { obj : this, score : score });
                 }""")
@@ -312,8 +317,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 # NOTE: blurb & entity title matching already occurs at regex query level!
                 # these scores are then completely redundant since levenshtein will never 
                 # be taken into account.
-                _map = bson.code.Code("""function ()
-                {
+                _map = bson.code.Code("""function () {
                     function levenshtein(a, b)
                     {
                         var d = [], cost, i, j;
@@ -359,13 +363,13 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                     try {
                         title = this.entity.title.toLowerCase();
                     } catch(e) {
-                        title = ""
+                        title = "";
                     }
                     
                     try {
                         blurb = this.blurb.toLowerCase();
                     } catch(e) {
-                        blurb = ""
+                        blurb = "";
                     }
                     
                     if (title.length > 0 && title.match(query)) {
@@ -410,14 +414,14 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                         if (v.score > min) {
                             out[out.length] = { score : v.score, obj : v.obj }
                             out.sort(sortOut);
-                            out.pop()
+                            out.pop();
                         }
                     }
                 });
                 
                 out.sort(sortOut);
                 var obj = new Object();
-                obj.data = out
+                obj.data = out;
                 
                 return obj;
             }""")
@@ -426,7 +430,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                                         _reduce, 
                                                         query=query, 
                                                         scope=scope, 
-                                                        jsMode=True, 
                                                         limit=1000)
             
             try:
