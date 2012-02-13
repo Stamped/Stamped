@@ -432,7 +432,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                                         _reduce, 
                                                         query=query, 
                                                         scope=scope, 
-                                                        jsMode=True, 
                                                         limit=1000)
             
             try:
