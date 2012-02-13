@@ -46,8 +46,12 @@ typedef enum {
 
 - (void)commonInit {
   self.granularity = STScopeSliderGranularityFriends;
-  [self setMinimumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
-  [self setMaximumTrackImage:[UIImage imageNamed:@"scope_track"] forState:UIControlStateNormal];
+  UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
+  trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
+  [self insertSubview:trackImageView atIndex:0];
+  [trackImageView release];
+  [self setMinimumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
+  [self setMaximumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
   [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
   [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
 }
@@ -59,7 +63,10 @@ typedef enum {
 - (void)dragEnded:(id)sender {
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
   self.granularity = quotient;
-  [self setValue:(0.333 * quotient) animated:YES];
+  CGFloat value = (0.333 * quotient);
+  if (quotient == 3)
+    value = 1.0;
+  [self setValue:value animated:YES];
 }
 
 - (void)setGranularity:(STScopeSliderGranularity)granularity {

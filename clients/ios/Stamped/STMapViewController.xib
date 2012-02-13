@@ -73,17 +73,17 @@
 							<object class="IBUISlider" id="882663567">
 								<reference key="NSNextResponder" ref="324308673"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{59, 14}, {202, 23}}</string>
+								<string key="NSFrame">{{45, 15}, {230, 23}}</string>
 								<reference key="NSSuperview" ref="324308673"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:9</string>
 								<bool key="IBUIOpaque">NO</bool>
+								<int key="IBUIContentMode">4</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<float key="IBUIValue">0.33000001311302185</float>
-								<bool key="IBUIContinuous">NO</bool>
 							</object>
 						</array>
 						<string key="NSFrame">{{0, 367}, {320, 49}}</string>
