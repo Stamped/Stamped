@@ -8,6 +8,7 @@
 
 #import "STMapViewController.h"
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "Favorite.h"
 #import "ProfileViewController.h"
@@ -21,17 +22,25 @@
 #import "Util.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
+static NSString* const kInboxPath = @"/collections/inbox.json";
+static NSString* const kUserPath = @"/collections/user.json";
+static NSString* const kFavoritesPath = @"/favorites/show.json";
+static NSString* const kFriendsPath = @"/collections/friends.json";
+static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 @interface STMapViewController ()
 - (void)mapDisclosureTapped:(id)sender;
 - (void)overlayTapped:(UIGestureRecognizer*)recognizer;
 - (void)addAnnotationForEntity:(Entity*)entity;
-- (void)loadDataFromStore;
+- (void)addAnnotationForStamp:(Stamp*)stamp;
+- (void)loadDataFromNetwork;
 - (void)addAllAnnotations;
 - (void)zoomToCurrentLocation;
+- (void)centerOnCurrentLocation;
+- (NSString*)viewportAsString;
 
 @property (nonatomic, assign) BOOL zoomToLocation;
-@property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
+@property (nonatomic, copy) NSArray* resultsArray;
 @end
 
 @implementation STMapViewController
@@ -42,36 +51,33 @@ static const CGFloat kMapUserImageSize = 32.0;
 @synthesize searchField = searchField_;
 @synthesize mapView = mapView_;
 @synthesize zoomToLocation = zoomToLocation_;
-@synthesize fetchedResultsController = fetchedResultsController_;
 @synthesize scopeSlider = scopeSlider_;
 @synthesize source = source_;
 @synthesize user = user_;
+@synthesize resultsArray = resultsArray_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
-  if (self) {
-
-  }
+  if (self) {}
   return self;
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.overlayView = nil;
   self.locationButton = nil;
   self.cancelButton = nil;
   self.searchField = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
-  self.fetchedResultsController.delegate = nil;
-  self.fetchedResultsController = nil;
   self.user = nil;
   self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
+  self.resultsArray = nil;
   [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
-  // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
   // Release any cached data, images, etc that aren't in use.
 }
@@ -85,19 +91,18 @@ static const CGFloat kMapUserImageSize = 32.0;
   [overlayView_ addGestureRecognizer:recognizer];
   [recognizer release];
 
-  [self zoomToCurrentLocation];
+  zoomToLocation_ = YES;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.overlayView = nil;
   self.locationButton = nil;
   self.cancelButton = nil;
   self.searchField = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
-  self.fetchedResultsController.delegate = nil;
-  self.fetchedResultsController = nil;
   self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
 }
@@ -110,9 +115,6 @@ static const CGFloat kMapUserImageSize = 32.0;
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
-  zoomToLocation_ = YES;
-  if (!self.fetchedResultsController)
-    [self loadDataFromStore];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -135,11 +137,22 @@ static const CGFloat kMapUserImageSize = 32.0;
   } else if (source_ == STMapViewControllerSourceTodo) {
     searchField_.placeholder = @"Search to-dos";
   }
-  self.fetchedResultsController = nil;
   [mapView_ removeAnnotations:mapView_.annotations];
 }
 
 #pragma mark - UITextFieldDelegate methods.
+
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  NSLog(@"Clear...");
+  [self loadDataFromNetwork];
+  return YES;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  [self loadDataFromNetwork];
+  return YES;
+}
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [self.navigationController setNavigationBarHidden:YES animated:YES];
@@ -174,7 +187,7 @@ static const CGFloat kMapUserImageSize = 32.0;
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
-  [self zoomToCurrentLocation];
+  [self centerOnCurrentLocation];
 }
 
 #pragma mark - Gesture recognizers.
@@ -224,6 +237,17 @@ static const CGFloat kMapUserImageSize = 32.0;
   [self.navigationController pushViewController:vc animated:YES];
 }
 
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)loader didLoadObjects:(NSArray*)objects {
+  self.resultsArray = objects;
+  [self addAllAnnotations];
+}
+
+- (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {
+  NSLog(@"Error loading map data: %@. Error code: %d", error.localizedDescription, loader.response.statusCode);
+}
+
 #pragma mark - MKMapViewDelegate Methods
 
 - (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
@@ -233,14 +257,15 @@ static const CGFloat kMapUserImageSize = 32.0;
   }
 }
 
+- (void)mapView:(MKMapView*)mapView regionWillChangeAnimated:(BOOL)animated {
+  
+}
+
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-  zoomToLocation_ = NO;
-  NSLog(@"Region did change...");
-  MKMapRect region = mapView.visibleMapRect;
-  CLLocationCoordinate2D topLeft = MKCoordinateForMapPoint(region.origin);
-  NSLog(@"Origin: %f,%f", topLeft.latitude, topLeft.longitude);
-  CLLocationCoordinate2D bottomRight = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMaxX(region), MKMapRectGetMaxY(region)));
-  NSLog(@"Bottom right: %f,%f", bottomRight.latitude, bottomRight.longitude);
+  if ([searchField_ isFirstResponder])
+    return;
+
+  [self loadDataFromNetwork];
 }
 
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
@@ -255,6 +280,7 @@ static const CGFloat kMapUserImageSize = 32.0;
   pinView.rightCalloutAccessoryView = disclosureButton;
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
+  pinView.animatesDrop = YES;
 
   Stamp* stamp = [(STPlaceAnnotation*)annotation stamp];
   if (stamp) {
@@ -275,64 +301,58 @@ static const CGFloat kMapUserImageSize = 32.0;
   return pinView;
 }
 
-#pragma - Other private methods.
+#pragma mark - Other private methods.
 
-- (void)loadDataFromStore {
-  if (!fetchedResultsController_) {
-    NSFetchRequest* request = nil;
-    NSSortDescriptor* descriptor = nil;
-    NSPredicate* predicate = nil;
-    NSManagedObjectContext* moc = nil;
-    if (source_ == STMapViewControllerSourceInbox) {
-      request = [Entity fetchRequest];
-      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
-      moc = [Entity managedObjectContext];
-      predicate = [NSPredicate predicateWithFormat:@"coordinates != NIL AND (SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"];
-    } else if (source_ == STMapViewControllerSourceTodo) {
-      request = [Favorite fetchRequest];
-      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-      predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL AND entityObject.coordinates != NIL"];
-      moc = [Favorite managedObjectContext];
-    } else if (source_ == STMapViewControllerSourceUser && user_) {
-      request = [Entity fetchRequest];
-      descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
-      predicate = [NSPredicate predicateWithFormat:@"coordinates != NIL AND (SUBQUERY(stamps, $s, $s.user.userID == %@ AND $s.deleted == NO).@count != 0)", user_.userID];
-      moc = [Entity managedObjectContext];
-    } else {
-      NSLog(@"No valid source was given for the map view.");
-      return;
-    }
-    [request setPredicate:predicate];
-    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    [request setFetchBatchSize:20];
-    NSFetchedResultsController* fetchedResultsController =
-        [[NSFetchedResultsController alloc] initWithFetchRequest:request
-                                            managedObjectContext:moc
-                                              sectionNameKeyPath:nil
-                                                       cacheName:nil];
-    self.fetchedResultsController = fetchedResultsController;
-    fetchedResultsController.delegate = self;
-    [fetchedResultsController release];
+- (void)loadDataFromNetwork {
+  [mapView_ removeAnnotations:mapView_.annotations];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  NSString* keyPath = source_ == STMapViewControllerSourceTodo ? @"Favorite" : @"Stamp";
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:keyPath];
+  NSString* path = nil;
+  switch (scopeSlider_.granularity) {
+    case STMapScopeSliderGranularityYou:
+      path = kUserPath;
+      break;
+    case STMapScopeSliderGranularityFriends:
+      path = kInboxPath;
+      break;
+    case STMapScopeSliderGranularityFriendsOfFriends:
+      path = kFriendsPath;
+      break;
+    case STMapScopeSliderGranularityEveryone:
+      path = kSuggestedPath;
+      break;
+    default:
+      break;
   }
 
-  NSError* error;
-  if (![self.fetchedResultsController performFetch:&error]) {
-    // Update to handle the error appropriately.
-    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-    return;
-  }
-  [self addAllAnnotations];
+  if (source_ == STMapViewControllerSourceTodo)
+    path = kFavoritesPath;
+
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
+  objectLoader.objectMapping = mapping;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"quality",
+                                    [self viewportAsString], @"viewport", @"relevance", @"sort", nil];
+  if (searchField_.text.length > 0)
+    [params setValue:searchField_.text forKey:@"query"];
+
+  if (scopeSlider_.granularity == STMapScopeSliderGranularityYou)
+    [params setValue:[AccountManager sharedManager].currentUser.screenName forKey:@"screen_name"];
+  
+  NSLog(@"Params: %@", params);
+
+  objectLoader.params = params;
+  [objectLoader send];
 }
 
 - (void)addAllAnnotations {
   [mapView_ removeAnnotations:mapView_.annotations];
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  NSArray* objectsArray = [sectionInfo objects];
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    for (Entity* e in objectsArray)
-      [self addAnnotationForEntity:e];
+    for (Stamp* s in resultsArray_)
+      [self addAnnotationForStamp:s];
   } else if (source_ == STMapViewControllerSourceTodo) {
-    for (Favorite* f in objectsArray)
+    for (Favorite* f in resultsArray_)
       [self addAnnotationForEntity:f.entityObject];
   }
 }
@@ -343,18 +363,19 @@ static const CGFloat kMapUserImageSize = 32.0;
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
                                                                     longitude:longitude];
+  
+  annotation.entityObject = entity;
+  [mapView_ addAnnotation:annotation];
+  [annotation release];
+}
 
-  if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-    NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    // Temporary stamps won't work for profile view.
-    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
-
-    annotation.stamp = [stampsArray lastObject];
-  } else if (source_ == STMapViewControllerSourceTodo) {
-    annotation.entityObject = entity;
-  }
-
+- (void)addAnnotationForStamp:(Stamp*)stamp {
+  NSArray* coordinates = [stamp.entityObject.coordinates componentsSeparatedByString:@","];
+  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
+  STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
+                                                                    longitude:longitude];
+  annotation.stamp = stamp;
   [mapView_ addAnnotation:annotation];
   [annotation release];
 }
@@ -366,10 +387,21 @@ static const CGFloat kMapUserImageSize = 32.0;
   [mapView_ setRegion:region animated:YES];
 }
 
+- (void)centerOnCurrentLocation {
+  [mapView_ setCenterCoordinate:mapView_.userLocation.location.coordinate animated:YES];
+}
+
+- (NSString*)viewportAsString {
+  MKMapRect region = self.mapView.visibleMapRect;
+  CLLocationCoordinate2D topLeft = MKCoordinateForMapPoint(region.origin);
+  CLLocationCoordinate2D bottomRight = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMaxX(region), MKMapRectGetMaxY(region)));
+  return [NSString stringWithFormat:@"%f,%f,%f,%f", topLeft.latitude, topLeft.longitude, bottomRight.latitude, bottomRight.longitude];
+}
+
 #pragma mark - STMapScopeSliderDelegate methods.
 
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
-  NSLog(@"Changed granularity to %d", granularity);
+  [self loadDataFromNetwork];
 }
 
 @end
