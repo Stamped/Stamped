@@ -17,6 +17,8 @@ class StampedAPIActivityTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
+        (self.userD, self.tokenD) = self.createAccount('UserD')
         self.createFriendship(self.tokenB, self.userA)
         self.entityA = self.createEntity(self.tokenA)
         self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
@@ -41,6 +43,8 @@ class StampedAPIActivityTest(AStampedAPITestCase):
         self.deleteFriendship(self.tokenB, self.userA)
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
+        self.deleteAccount(self.tokenD)
 
 class StampedAPIActivityShow(StampedAPIActivityTest):
     def test_show(self):
@@ -94,6 +98,47 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
         
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
+        ])
+        
+        self.deleteStamp(self.tokenA, stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, entity['entity_id'])
+
+class StampedAPIActivityLikes(StampedAPIActivityTest):
+    def test_show_like_benefit(self):
+        entity = self.createEntity(self.tokenA)
+        stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": entity['entity_id'],
+            "blurb": "Great spot!",
+            "credit": self.userB['screen_name'],
+        }
+        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+
+
+        path = "stamps/likes/create.json"
+
+        for token in [self.tokenB, self.tokenC, self.tokenD]:
+            data = { 
+                "oauth_token": token['access_token'],
+                "stamp_id": stamp['stamp_id']
+            }
+            result = self.handlePOST(path, data)
+        
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+
+        def _checkBenefit(result):
+            benefit = None
+            for i in result:
+                if 'benefit' in i:
+                    benefit = i['benefit']
+            self.assertTrue(benefit is not None)
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertTrue(len(x) >= 3),
+                   lambda x: _checkBenefit(x) 
         ])
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
