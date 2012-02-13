@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'AEntitySource' ]
+__all__ = [ 'AExternalSource' ]
 
 import Globals
 from logs import log, report
@@ -16,7 +16,7 @@ except:
 	report()
 	raise
 
-class AEntitySource(object):
+class AExternalSource(object):
 	"""
 	Abstract Base Class for Third Party Data-Source wrappers.
 	"""

@@ -15,7 +15,7 @@ import Globals
 from logs import log, report
 
 try
-	from AEntitySource		import AEntitySource
+	from AExternalSource	import AExternalSource
 	from libs.Factual		import Factual
 	from utils				import lazyProperty
 except:
