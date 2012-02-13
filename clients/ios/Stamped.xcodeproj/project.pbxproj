@@ -1294,8 +1294,8 @@
 		7EDC8FC814E81D2700E1FEEC /* scope_track.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDC8FAB14E81D2700E1FEEC /* scope_track.png */; };
 		7EDC8FC914E81D2700E1FEEC /* scope_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDC8FAC14E81D2700E1FEEC /* scope_track@2x.png */; };
 		7EDC8FCA14E81D2700E1FEEC /* scope_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDC8FAC14E81D2700E1FEEC /* scope_track@2x.png */; };
-		7EDC8FCD14E82E5500E1FEEC /* STScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDC8FCC14E82E5500E1FEEC /* STScopeSlider.m */; };
-		7EDC8FCE14E82E5500E1FEEC /* STScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDC8FCC14E82E5500E1FEEC /* STScopeSlider.m */; };
+		7EDC8FCD14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDC8FCC14E82E5500E1FEEC /* STMapScopeSlider.m */; };
+		7EDC8FCE14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDC8FCC14E82E5500E1FEEC /* STMapScopeSlider.m */; };
 		7EDCD62814D1D26900FF1975 /* STMapToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDCD62714D1D26900FF1975 /* STMapToggleButton.m */; };
 		7EDCD62914D1D26900FF1975 /* STMapToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDCD62714D1D26900FF1975 /* STMapToggleButton.m */; };
 		7EDD174A146B04EB0003D4F7 /* earn_tip_1stStamp.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1744146B04EB0003D4F7 /* earn_tip_1stStamp.png */; };
@@ -2326,8 +2326,8 @@
 		7EDC8FA914E81D2700E1FEEC /* scope_drag_outer@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scope_drag_outer@2x.png"; sourceTree = "<group>"; };
 		7EDC8FAB14E81D2700E1FEEC /* scope_track.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scope_track.png; sourceTree = "<group>"; };
 		7EDC8FAC14E81D2700E1FEEC /* scope_track@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scope_track@2x.png"; sourceTree = "<group>"; };
-		7EDC8FCB14E82E5500E1FEEC /* STScopeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScopeSlider.h; sourceTree = "<group>"; };
-		7EDC8FCC14E82E5500E1FEEC /* STScopeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScopeSlider.m; sourceTree = "<group>"; };
+		7EDC8FCB14E82E5500E1FEEC /* STMapScopeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMapScopeSlider.h; sourceTree = "<group>"; };
+		7EDC8FCC14E82E5500E1FEEC /* STMapScopeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMapScopeSlider.m; sourceTree = "<group>"; };
 		7EDCD62614D1D26900FF1975 /* STMapToggleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMapToggleButton.h; sourceTree = "<group>"; };
 		7EDCD62714D1D26900FF1975 /* STMapToggleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMapToggleButton.m; sourceTree = "<group>"; };
 		7EDD1744146B04EB0003D4F7 /* earn_tip_1stStamp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = earn_tip_1stStamp.png; sourceTree = "<group>"; };
@@ -2811,8 +2811,8 @@
 				7E1213CD14D0CDFF00B32729 /* STMapViewController.h */,
 				7E1213CE14D0CDFF00B32729 /* STMapViewController.m */,
 				7E1213CF14D0CDFF00B32729 /* STMapViewController.xib */,
-				7EDC8FCB14E82E5500E1FEEC /* STScopeSlider.h */,
-				7EDC8FCC14E82E5500E1FEEC /* STScopeSlider.m */,
+				7EDC8FCB14E82E5500E1FEEC /* STMapScopeSlider.h */,
+				7EDC8FCC14E82E5500E1FEEC /* STMapScopeSlider.m */,
 			);
 			name = "Map View";
 			sourceTree = "<group>";
@@ -5702,7 +5702,7 @@
 				7E41315C14D609E70087748C /* STSelectCountryViewController.m in Sources */,
 				7E45866614D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 				7E6C257414D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
-				7EDC8FCE14E82E5500E1FEEC /* STScopeSlider.m in Sources */,
+				7EDC8FCE14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5846,7 +5846,7 @@
 				7E41315B14D609E70087748C /* STSelectCountryViewController.m in Sources */,
 				7E45866514D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 				7E6C257314D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
-				7EDC8FCD14E82E5500E1FEEC /* STScopeSlider.m in Sources */,
+				7EDC8FCD14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

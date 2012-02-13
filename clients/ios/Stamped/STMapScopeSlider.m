@@ -1,30 +1,23 @@
 //
-//  STScopeSlider.m
+//  STMapScopeSlider.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 2/12/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STScopeSlider.h"
+#import "STMapScopeSlider.h"
 
-typedef enum {
-  STScopeSliderGranularityYou = 0,
-  STScopeSliderGranularityFriends,
-  STScopeSliderGranularityFriendsOfFriends,
-  STScopeSliderGranularityEveryone
-} STScopeSliderGranularity;
-
-@interface STScopeSlider ()
+@interface STMapScopeSlider ()
 - (void)commonInit;
 - (void)valueChanged:(id)sender;
 - (void)dragEnded:(id)sender;
 - (void)updateImage;
 
-@property (nonatomic, assign) STScopeSliderGranularity granularity;
+@property (nonatomic, assign) STMapScopeSliderGranularity granularity;
 @end
 
-@implementation STScopeSlider
+@implementation STMapScopeSlider
 
 @synthesize granularity = granularity_;
 
@@ -45,7 +38,7 @@ typedef enum {
 }
 
 - (void)commonInit {
-  self.granularity = STScopeSliderGranularityFriends;
+  self.granularity = STMapScopeSliderGranularityFriends;
   UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
   trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
   [self insertSubview:trackImageView atIndex:0];
@@ -69,7 +62,7 @@ typedef enum {
   [self setValue:value animated:YES];
 }
 
-- (void)setGranularity:(STScopeSliderGranularity)granularity {
+- (void)setGranularity:(STMapScopeSliderGranularity)granularity {
   if (granularity != granularity_) {
     granularity_ = granularity;
     [self updateImage];
@@ -82,16 +75,16 @@ typedef enum {
   [background drawInRect:CGRectMake(0, 0, background.size.width, background.size.height)];
   UIImage* inner = nil;
   switch (granularity_) {
-    case STScopeSliderGranularityYou:
+    case STMapScopeSliderGranularityYou:
       inner = [UIImage imageNamed:@"scope_drag_inner_you"];
       break;
-    case STScopeSliderGranularityFriends:
+    case STMapScopeSliderGranularityFriends:
       inner = [UIImage imageNamed:@"scope_drag_inner_friends"];
       break;
-    case STScopeSliderGranularityFriendsOfFriends:
+    case STMapScopeSliderGranularityFriendsOfFriends:
       inner = [UIImage imageNamed:@"scope_drag_inner_fof"];
       break;
-    case STScopeSliderGranularityEveryone:
+    case STMapScopeSliderGranularityEveryone:
       inner = [UIImage imageNamed:@"scope_drag_inner_all"];
       break;
     default:

@@ -16,7 +16,7 @@
 #import "StampDetailViewController.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
-#import "STScopeSlider.h"
+#import "STMapScopeSlider.h"
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
