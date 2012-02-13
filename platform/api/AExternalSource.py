@@ -82,5 +82,5 @@ class AExternalSource(object):
 		All functions must accept one argument.
 		"""
 		for k,v in fields.items():
-			self.writeField(entity, v(data))
+			self.writeField(entity, v(data), k)
 

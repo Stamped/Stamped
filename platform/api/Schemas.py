@@ -786,6 +786,7 @@ class FactualSchema(Schema):
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
         self.factual_timestamp  = SchemaElement(datetime)
+        self.factual_source     = SchemaElement(basestring)
         self.factual_crosswalk  = SchemaElement(datetime)
         
 
@@ -793,6 +794,7 @@ class SinglePlatformSchema(Schema):
     def setSchema(self):
         self.singleplatform_id  = SchemaElement(basestring)
         self.singleplatform_timestamp  = SchemaElement(datetime)
+        self.singleplatform_source = SchemaElement(basestring)
 
 class AppleSchema(Schema):
     def setSchema(self):
