@@ -545,11 +545,14 @@ class PlaceSchema(Schema):
         self.address_source     = SchemaElement(basestring)
         self.address_timestamp  = SchemaElement(datetime)
 
+        self.neighborhood               = SchemaElement(basestring)
+        self.neighborhood_source        = SchemaElement(basestring)
+        self.neighborhood_timestamp     = SchemaElement(datetime)
+
         self.address            = SchemaElement(basestring)
         self.address_components = SchemaList(AddressComponentSchema())
         self.types              = SchemaList(SchemaElement(basestring))
         self.vicinity           = SchemaElement(basestring)
-        self.neighborhood       = SchemaElement(basestring)
         self.crossStreet        = SchemaElement(basestring)
         self.publicTransit      = SchemaElement(basestring)
         self.parking            = SchemaElement(basestring)
@@ -565,8 +568,14 @@ class AddressComponentSchema(Schema):
 class ContactSchema(Schema):
     def setSchema(self):
         self.phone              = SchemaElement(basestring)
-        self.fax                = SchemaElement(basestring)
+        self.phone_source       = SchemaElement(basestring)
+        self.phone_timestamp    = SchemaElement(datetime)
+
         self.site               = SchemaElement(basestring)
+        self.site_source        = SchemaElement(basestring)
+        self.site_timestamp     = SchemaElement(datetime)
+
+        self.fax                = SchemaElement(basestring)
         self.email              = SchemaElement(basestring)
         self.hoursOfOperation   = SchemaElement(basestring)
 
@@ -574,6 +583,13 @@ class RestaurantSchema(Schema):
     def setSchema(self):
         self.diningStyle        = SchemaElement(basestring)
         self.cuisine            = SchemaElement(basestring)
+        self.cuisine_source     = SchemaElement(basestring)
+        self.cuisine_timestamp  = SchemaElement(datetime)
+
+        self.menu_source        = SchemaElement(basestring)
+        self.menu_timestamp     = SchemaElement(datetime)
+
+
         #self.price              = SchemaElement(basestring)
         self.payment            = SchemaElement(basestring)
         self.dressCode          = SchemaElement(basestring)

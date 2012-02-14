@@ -102,7 +102,6 @@ urlpatterns = patterns('',
     (r'v0/entities/search.json',        'v0.functions.entities.search'),
     (r'v0/entities/nearby.json',        'v0.functions.entities.nearby'),
     (r'v0/entities/menu.json',          'v0.functions.entities.menu'),
-    (r'v0/entities/factualData.json',       'v0.functions.entities.factualData'),
     
     ### STAMPS
     (r'v0/stamps/create.json',          'v0.functions.stamps.create'),

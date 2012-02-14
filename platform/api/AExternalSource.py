@@ -12,6 +12,7 @@ from logs import log, report
 
 try:
     from abc        import ABCMeta, abstractmethod, abstractproperty
+    from datetime   import datetime
 except:
     report()
     raise
@@ -42,7 +43,7 @@ class AExternalSource(object):
         pass
 
     @abstractmethod
-    def decorateEntity(self, entity, controller):
+    def decorateEntity(self, entity, controller, decoration_db):
         """
         Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity fields if necessary.
 
@@ -56,6 +57,11 @@ class AExternalSource(object):
         Returns the name of this source as would be used with a SourceController.
         """
         pass
+
+    def writeSingleton(self, entity, group, data):
+        entity[group] = data
+        entity["%s_source" % (group,)] = self.sourceName
+        entity['%s_timestamp' % (group,)] = datetime.utcnow()
     
     def writeField(self, entity, data, path):
         """

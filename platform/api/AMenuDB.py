@@ -11,10 +11,10 @@ from utils import abstract
 class AMenuDB(object):
         
     @abstract
-    def getMenus(self, entityId):
+    def getMenu(self, entityId):
         pass
     
     @abstract
-    def updateMenu(self, entity_id, source, source_id):
+    def updateMenu(self, menu):
         pass
     

@@ -121,24 +121,7 @@ def menu(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityId(), request)
     menu        = stampedAPI.getMenu(schema.entity_id)
-    if menu is not None:
-        httpMenu    = HTTPMenu().importSchema(menu)
-        return transformOutput(httpMenu.exportSparse())
-    else:
-        response = HttpResponse("not_found")
-        response.status_code = 404
-        return response
+    httpMenu    = HTTPMenu().importSchema(menu)
+    return transformOutput(httpMenu.exportSparse())
 
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def factualData(request):
-    authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPEntityId(), request)
-    data        = stampedAPI.getFactualDataById(schema.entity_id)
-    if data is not None:
-        return transformOutput(data)
-    else:
-        response = HttpResponse("not_found")
-        response.status_code = 404
-        return response
 

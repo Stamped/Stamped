@@ -6,25 +6,36 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+from logs       import report
 
-from datetime import datetime
-from utils import lazyProperty
+try:
+    from datetime                       import datetime
+    from utils                          import lazyProperty
 
-from Schemas import *
-from Entity  import setFields, isEqual, getSimplifiedTitle
+    from Schemas                        import *
+    from Entity                         import setFields, isEqual, getSimplifiedTitle
 
-from AMongoCollection import AMongoCollection
-from MongoPlacesEntityCollection import MongoPlacesEntityCollection
-from MongoMenuCollection import MongoMenuCollection
-from AEntityDB import AEntityDB
-from difflib import SequenceMatcher
-from libs.Factual import Factual
+    from AMongoCollection               import AMongoCollection
+    from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
+    from MongoMenuCollection            import MongoMenuCollection
+    from AEntityDB                      import AEntityDB
+    from difflib                        import SequenceMatcher
+    from libs.Factual                   import Factual
+    from libs.FactualSource             import FactualSource
+    from libs.GooglePlacesSource        import GooglePlacesSource
+    from libs.SinglePlatformSource      import SinglePlatformSource
+    from libs.ExternalSourceController  import ExternalSourceController
+    from ADecorationDB                  import ADecorationDB
+    from errors                         import StampedUnavailableError
+except:
+    report()
+    raise
 
 _menu_sources = {
     'singleplatform':'singleplatform_id',
 }
 
-class MongoEntityCollection(AMongoCollection, AEntityDB):
+class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def __init__(self, collection='entities'):
         AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity)
@@ -35,12 +46,32 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         return MongoPlacesEntityCollection()
 
     @lazyProperty
-    def menu_collection(self):
+    def __menu_db(self):
         return MongoMenuCollection()
 
     @lazyProperty
     def factual(self):
         return Factual()
+    
+    @lazyProperty
+    def __factual(self):
+        return FactualSource()
+
+    @lazyProperty
+    def __googleplaces(self):
+        return GooglePlacesSource()
+
+    @lazyProperty
+    def __singleplatform(self):
+        return SinglePlatformSource()
+
+    @lazyProperty
+    def __controller(self):
+        return ExternalSourceController()
+    
+    @lazyProperty
+    def __sources(self):
+        return [self.__factual,self.__googleplaces,self.__singleplatform]
     
     ### PUBLIC
     
@@ -74,39 +105,29 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             result.append(self._convertFromMongo(item))
         return result
     
-    def getMenus(self, entityId):
-        #logs.warning("getting menus for %s",entityId)
-        menus = self.menu_collection.getMenus(entityId)
-        if len(menus) == 0:
-            entity = self.getEntity(entityId)
-            if entity:
-                #logs.warning("no menu found for %s" % entity.title)
-                if 'factual_id' not in entity:
-                    #logs.warning("looking for factual_id")
-                    self.factual.enrich(entity)
-                    if entity.factual_id is not None:
-                        #logs.warning("factual_id is %s" % entity.factual_id)
-                        self.updateEntity(entity)
-                    else:
-                        logs.warning("no factual_id found for %s" % entityId)
-                if 'singleplatform_id' in entity:
-                    #logs.warning("singleplatform_id is %s" % entity.singleplatform_id)
-                    menu = self.updateMenu(entityId,'singleplatform',entity.singleplatform_id)
-                    if menu is not None:
-                        #logs.warning("adding menu for %s" % entity.singleplatform_id)
-                        menus.append(menu)
-        else:
-            logs.warning("\n\n%s\nMenu was CACHED for %s" % ( '#'*40, entityId ) )
-        return menus
+    def enrichEntity(self, entity):
+        update_required = False
+        for source in self.__sources:
+            modified = source.resolveEntity(entity, self.__controller)
+            update_required |= modified
+        for source in self.__sources:
+            modified = source.enrichEntity(entity, self.__controller)
+            update_required |= modified
+        for source in self.__sources:
+            modified = source.decorateEntity(entity, self.__controller, self)
+            update_required |= modified
+        return update_required
 
     def getMenu(self, entityId):
-        menus = self.getMenus(entityId)
-        menu = None
-        for m in menus:
-            if menu == None:
-                menu = m
-            elif m.quality > menu.quality:
-                menu = m
+        menu = self.__menu_db.getMenu(entityId)
+        if menu is None:
+            entity = self.getEntity(entityId)
+            modified = self.enrichEntity(entity)
+            if modified:
+                self.updateEntity(entity)
+            menu = self.__menu_db.getMenu(entityId)
+        if menu is None:
+            raise StampedUnavailableError("Unable to find menu (id = %s)" % entityId)
         return menu
     
     def updateEntity(self, entity):
@@ -114,16 +135,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         document = self._updateMongoDocument(document)
         
         return self._convertFromMongo(document)
-    
-    def updateMenu(self, entityId, source, sourceId):
-        return self.menu_collection.updateMenu(entityId,source,sourceId)
-    
-    def updateMenus(self, entityId):
-        entity = self.getEntity(entityId)
-        if entity is not None:
-            for k,v in _menu_sources.items():
-                if v in entity and entity[v] is not None:
-                    self.updateMenu(entityId,k,entity[v])
     
     def removeEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
@@ -146,3 +157,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         
         return self._addObjects(entities)
 
+    def updateDecoration(self, name, value):
+        if name == 'menu':
+            self.__menu_db.updateMenu(value)
+        

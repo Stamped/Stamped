@@ -15,114 +15,134 @@ import Globals
 from logs import log, report
 
 try:
-	from ASourceController	import ASourceController
-	from datetime			import datetime
-	from datetime			import timedelta
+    from ASourceController  import ASourceController
+    from datetime           import datetime
+    from datetime           import timedelta
 except:
-	report()
-	raise
+    report()
+    raise
 
 class ExternalSourceController(ASourceController):
 
-	def __init__(self):
-		ASourceController.__init__(self)
-		self.__resolve_groups = set(['factual','singleplatform'])
-		self.__max_resolve_ages = {
-			'factual': timedelta(30),
-			'singleplatform': timedelta(30),
-		}
-		self.__resolve_source_priorities = {
-			'factual': ['factual','singleplatform'],
-			'singleplatform': ['factual'],
-		}
-		self.__resolve_timestamps = {
-			'factual': ['factual_timestamp'],
-			'singleplatform': ['singleplatform_timestamp'],
-		}
-		self.__resolve_sources = {
-			'factual': ['factual_source'],
-			'singleplatform': ['singleplatform_source'],
-		}
-		self.__resolve = {
-			'ages':self.__max_resolve_ages,
-			'priorities':self.__resolve_source_priorities,
-			'timestamps':self.__resolve_timestamps,
-			'sources':self.__resolve_sources,
-			'groups':self.__resolve_groups,
-		}
-		self.__enrich = {
-			'groups': set(['address']),
-			'ages': {
-				'address':timedelta(30)
-			},
-			'priorities': {
-				'address':['factual','googleplaces']
-			},
-			'timestamps': {
-				'address':['address_timestamp'],
-			},
-			'sources': {
-				'address':['address_source'],
-			},
-		}
+    def __init__(self):
+        ASourceController.__init__(self)
+        self.__resolve_groups = set(['factual','singleplatform'])
+        self.__max_resolve_ages = {
+            'factual': timedelta(30),
+            'singleplatform': timedelta(30),
+        }
+        self.__resolve_source_priorities = {
+            'factual': ['factual','singleplatform'],
+            'singleplatform': ['factual'],
+        }
+        self.__resolve_timestamps = {
+            'factual': ['factual_timestamp'],
+            'singleplatform': ['singleplatform_timestamp'],
+        }
+        self.__resolve_sources = {
+            'factual': ['factual_source'],
+            'singleplatform': ['singleplatform_source'],
+        }
+        self.__resolve = {
+            'ages':self.__max_resolve_ages,
+            'priorities':self.__resolve_source_priorities,
+            'timestamps':self.__resolve_timestamps,
+            'sources':self.__resolve_sources,
+            'groups':self.__resolve_groups,
+        }
+        self.__enrich = {
+            'ages': {
+            },
+            'priorities': {
+                'address':['factual','googleplaces'],
+                'neighborhood':['googleplaces'],
+                'phone':['factual','googleplaces'],
+                'site':['factual','googleplaces'],
+            },
+            'timestamps': {
+            },
+            'sources': {
+            },
+        }
+        self.__decorate = {
+            'ages': {
+            },
+            'priorities': {
+                'menu':['singleplatform'],
+            },
+            'timestamps': {
+            },
+            'sources': {
+            },
+        }
 
-	def shouldResolve(self, group, source, entity,timestamp=None):
-		if timestamp == None:
-			timestamp = datetime.utcnow()
-		return self.__genericShould(group, source, entity, timestamp, self.__resolve)
-	
-	def shouldEnrich(self, group, source, entity,timestamp=None):
-		if timestamp == None:
-			timestamp = datetime.utcnow()
-		return self.__genericShould(group, source, entity, timestamp, self.__enrich)
+    def shouldResolve(self, group, source, entity,timestamp=None):
+        if timestamp == None:
+            timestamp = datetime.utcnow()
+        return self.__genericShould(group, source, entity, timestamp, self.__resolve)
+    
+    def shouldEnrich(self, group, source, entity,timestamp=None):
+        if timestamp == None:
+            timestamp = datetime.utcnow()
+        return self.__genericShould(group, source, entity, timestamp, self.__enrich)
 
-	def shouldDecorate(self, group, source, entity,timestamp=None):
-		"""
-		Returns whether an EntitySource should create the named decoration group.
+    def shouldDecorate(self, group, source, entity,timestamp=None):
+        if timestamp == None:
+            timestamp = datetime.utcnow()
+        return self.__genericShould(group, source, entity, timestamp, self.__decorate)
 
-		The optional timestamp parameter can be used to indicate state data from the current source.
-		"""
-		return False
+    def __genericShould(self, group, source, entity, timestamp, state):
+        priorities = state['priorities']
+        if group not in priorities:
+            return False
 
-	def __genericShould(self, group, source, entity, timestamp, state):
-		priorities = state['priorities']
-		ages = state['ages']
-		timestamps = state['timestamps']
-		sources = state['sources']
-		groups = state['groups']
-		if group not in groups:
-			return False
-		if source in priorities[group]:
-			old_source = self.__field(entity, sources[group])
-			delta = self.__compare(old_source, source, priorities[group])
-			if delta > 0:
-				return True
-			elif delta < 0:
-				return False
-			else:
-				old_timestamp = self.__field(entity, timestamps[group])
-				return self.__stale(old_timestamp, timestamp, ages[group])
-		else:
-			return False
+        max_age = timedelta(30)
+        timestamp_path = "%s_timestamp" % group
+        sources = state['sources']
+        source_path = "%s_source" % group
 
-	def __field(self, entity, path):
-		cur = entity
-		for k in path:
-			if k in cur:
-				cur = cur[k]
-			else:
-				return None
-		return cur
-	
-	def __compare(self, old_source, new_source, priorities):
-		if old_source is None:
-			return 1000 #arbitrary largish positive number
-		else:
-			return priorities.index(old_source) - priorities.index(new_source)
-	
-	def __stale(self, old_timestamp, new_timestamp, max_age):
-		if old_timestamp is None:
-			return True
-		else:
-			return new_timestamp - old_timestamp > max_age
-			
+        ages = state['ages']
+        sources = state['sources']
+        ages = state['ages']
+        timestamps = state['timestamps']
+        if group in timestamps:
+            timestamp_path = timestamps[group]
+        if group in sources:
+            source_path = sources[group]
+        if group in ages:
+            max_age = ages[group]
+
+        if source in priorities[group]:
+            old_source = self.__field(entity, source_path)
+            delta = self.__compare(old_source, source, priorities[group])
+            if delta > 0:
+                return True
+            elif delta < 0:
+                return False
+            else:
+                old_timestamp = self.__field(entity, timestamps[group])
+                return self.__stale(old_timestamp, timestamp, ages[group])
+        else:
+            return False
+
+    def __field(self, entity, path):
+        cur = entity
+        for k in path:
+            if k in cur:
+                cur = cur[k]
+            else:
+                return None
+        return cur
+    
+    def __compare(self, old_source, new_source, priorities):
+        if old_source is None:
+            return 1000 #arbitrary largish positive number
+        else:
+            return priorities.index(old_source) - priorities.index(new_source)
+    
+    def __stale(self, old_timestamp, new_timestamp, max_age):
+        if old_timestamp is None:
+            return True
+        else:
+            return new_timestamp - old_timestamp > max_age
+            

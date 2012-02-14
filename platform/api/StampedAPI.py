@@ -1113,8 +1113,10 @@ class StampedAPI(AStampedAPI):
     
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
-        
         ### TODO: Check if user has access to this entity?
+        modified = self._entityDB.enrichEntity(entity)
+        if modified:
+            self._entityDB.update(entity)
         return entity
     
     @API_CALL
@@ -2632,22 +2634,6 @@ class StampedAPI(AStampedAPI):
     def getMenu(self,entityId):
         return self._entityDB.getMenu(entityId)
 
-    def updateMenus(self, entityId):
-        self._entityDB.updateMenus(entityId)
-    
-    def factualEnrich(self, entity):
-        self._convertSearchIdAsync(entity.entity_id)
-    
-    def getFactualData(self, entity):
-        return self._factualDB.factual_data(entity)
-
-    def getFactualDataById(self, entityId):
-        entity = self._getEntity(entityId)
-        if entity is not None:
-            return self.getFactualData(entity)
-        else:
-            return None
-
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -2719,10 +2705,6 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _theTVDB(self):
         return TheTVDB()
-    
-    @lazyProperty
-    def _factual(self):
-        return Factual()
     
     def _convertSearchId(self, search_id):
         if not search_id.startswith('T_'):
@@ -2851,19 +2833,12 @@ class StampedAPI(AStampedAPI):
     def _convertSearchIdAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
         
-        if entity:
-            modified  = self._factual.resolveEntity(entity)
-            modified2 = self._factual.enrichEntity(entity)
-            
-            if modified2 or modified:
+        if entity is not None:
+            modified  = self._entityDB.enrichEntity(entity)
+            if modified:
                 self._entityDB.update(entity)
-            if 'singleplatform_id' in entity:
-                self._entityDB.updateMenus(entity_id)
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
-    
-    def _updateMenuAsync(self, entity_id, source, source_id):
-        self._entityDB.updateMenu(entity_id, source, source_id)
     
     def _addEntity(self, entity):
         if entity is not None:

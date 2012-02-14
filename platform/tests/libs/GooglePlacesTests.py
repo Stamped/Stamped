@@ -47,8 +47,9 @@ class APlacesSourceTest(AStampedAPITestCase):
 
 class PlacesSourceEnrichTest(APlacesSourceTest):
 
-    def test_ino_resolve(self):
+    def test_luger_enrich(self):
         modified = self.source.enrichEntity(self.entity,self.controller)
+        print(pformat(self.entity.value))
         self.assertEqual(modified,True)
         self.assertEqual(self.entity.address_country, 'US')
         self.assertEqual(self.entity.address_locality, 'Brooklyn')
