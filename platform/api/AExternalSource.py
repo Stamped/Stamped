@@ -77,7 +77,11 @@ class AExternalSource(object):
         if len(path) > 1:
             for k in path[:-1]:
                 cur = entity[k]
-        cur[path[-1]] = data
+        if data is None:
+            if path[-1] in cur:
+                del cur[path[-1]]
+        else:
+            cur[path[-1]] = data
     
     def writeFields(self, entity, data, fields):
         """
