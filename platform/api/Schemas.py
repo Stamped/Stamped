@@ -549,6 +549,10 @@ class PlaceSchema(Schema):
         self.neighborhood_source        = SchemaElement(basestring)
         self.neighborhood_timestamp     = SchemaElement(datetime)
 
+        self.hours              = TimesSchema()
+        self.hours_source       = SchemaElement(basestring)
+        self.hours_timestamp    = SchemaElement(datetime)
+
         self.address            = SchemaElement(basestring)
         self.address_components = SchemaList(AddressComponentSchema())
         self.types              = SchemaList(SchemaElement(basestring))
@@ -1020,6 +1024,7 @@ class HoursSchema(Schema):
     def setSchema(self):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
 
 
 

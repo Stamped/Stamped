@@ -1229,4 +1229,5 @@ class HTTPHours(Schema):
     def setSchema(self):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
 
