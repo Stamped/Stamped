@@ -15,7 +15,7 @@ from logs import log, report
 
 try:
     from AExternalSource        import AExternalSource
-    from crawler.GooglePlaces   import GooglePlaces
+    from GooglePlaces           import GooglePlaces
     from utils                  import lazyProperty
     from datetime               import datetime
     from functools              import partial
