@@ -159,6 +159,6 @@ class MongoFriendshipCollection(AFriendshipDB):
                     visit_user(friend_id, distance)
         
         # friends of friends sorted by overlap
-        users = sorted(visited_users.iteritems(), key=operator.itemgetter(1), reverse=True)
+        users = map(operator.itemgetter(0), sorted(visited_users.iteritems(), key=operator.itemgetter(1), reverse=True))
         return users
 
