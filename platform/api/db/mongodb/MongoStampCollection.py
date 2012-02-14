@@ -367,7 +367,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                             }
                         }
                         
-                        if inside {
+                        if (inside) {
                             dist_value = 10000.0;
                         } else {
                             var diff0 = (this.entity.coordinates.lat - center.lat);
