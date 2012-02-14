@@ -150,9 +150,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             query   = { }
         
         time_filter = 'timestamp.created'
+        sort        = None
         reverse     = genericSlice.reverse
         viewport    = (genericSlice.viewport.lowerRight.lat is not None)
-        sort        = None
         relaxed     = (viewport and genericSlice.query is not None and genericSlice.sort == 'relevance')
         
         # handle setup for sorting
@@ -256,7 +256,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             # -------------------------------------
             
             # order in which to return sorted results
-            order = pymongo.ASCENDING if reverse else pymongo.DESCENDING
+            order   = pymongo.ASCENDING if reverse else pymongo.DESCENDING
             
             results = self._collection.find(query) \
                       .sort(sort, order) \

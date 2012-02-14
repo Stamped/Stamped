@@ -111,7 +111,7 @@ class MongoCollectionCollection(ACollectionDB):
         if max_distance <= 2:
             stamp_ids = list(stamp_ids)
         
-        return stamp_ids
+        return stamp_ids, visited_users
     
     def getMentions(self, userId):
         raise NotImplementedError

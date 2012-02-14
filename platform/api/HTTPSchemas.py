@@ -349,6 +349,10 @@ class HTTPUserSearch(Schema):
         self.limit              = SchemaElement(int)
         self.relationship       = SchemaElement(basestring)
 
+class HTTPSuggestedUsers(Schema):
+    def setSchema(self):
+        self.personalized       = SchemaElement(bool, default=False)
+
 class HTTPUserRelationship(Schema):
     def setSchema(self):
         self.user_id_a          = SchemaElement(basestring)

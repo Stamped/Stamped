@@ -19,7 +19,7 @@ class StampedAPIUserTest(AStampedAPITestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
         self.screen_names = ['UserA', 'UserB']
-
+    
     def tearDown(self):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
@@ -293,13 +293,11 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)
 
-
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):
-
         suggestedUsers = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
         newAccounts = []
-
+        
         for suggestedUser in suggestedUsers:
             path = "account/check.json"
             data = {
@@ -307,28 +305,37 @@ class StampedAPISuggested(StampedAPIUserTest):
                 "client_secret": CLIENT_SECRET,
                 "login": suggestedUser,
             }
-
+            
             try:
                 result = self.handlePOST(path, data)
             except:
                 newAccounts.append(self.createAccount(suggestedUser))
-
+        
         path = "users/suggested.json"
         data = { 
             "oauth_token": self.tokenA['access_token']
         }
         result = self.handleGET(path, data)
-
+        
         returnedScreenNames = []
         for user in result:
             self.assertTrue('screen_name' in user)
             returnedScreenNames.append(user['screen_name'])
-
+        
         for suggestedUser in suggestedUsers:
             self.assertTrue(suggestedUser in returnedScreenNames)
-
+        
         for user, token in newAccounts:
             self.deleteAccount(token)
+    
+    def test_suggested_personalized(self):
+        path = "users/suggested.json"
+        data = { 
+            "oauth_token"  : self.tokenA['access_token'], 
+            "personalized" : True, 
+        }
+        result = self.handleGET(path, data)
+        self.assertIsInstance(result, list)
 
 if __name__ == '__main__':
     main()
