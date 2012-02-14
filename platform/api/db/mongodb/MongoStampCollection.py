@@ -474,7 +474,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 
                 if entity_id not in seen:
                     seen.add(entity_id)
-                    ret.append(entity_id)
+                    ret.append(result)
             
             results = ret
         
