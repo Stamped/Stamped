@@ -105,17 +105,29 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             result.append(self._convertFromMongo(item))
         return result
     
-    def enrichEntity(self, entity):
+    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True):
         update_required = False
-        for source in self.__sources:
-            modified = source.resolveEntity(entity, self.__controller)
-            update_required |= modified
-        for source in self.__sources:
-            modified = source.enrichEntity(entity, self.__controller)
-            update_required |= modified
-        for source in self.__sources:
-            modified = source.decorateEntity(entity, self.__controller, self)
-            update_required |= modified
+        if resolve:
+            for source in self.__sources:
+                try:
+                    modified = source.resolveEntity(entity, self.__controller)
+                    update_required |= modified
+                except:
+                    report("Unexpected resolve error from %s",source.sourceName)
+        if enrich:
+            for source in self.__sources:
+                try:
+                    modified = source.enrichEntity(entity, self.__controller)
+                    update_required |= modified
+                except:
+                    report("Unexpected enrich error from %s",source.sourceName)
+        if decorate:
+            for source in self.__sources:
+                try:
+                    modified = source.decorateEntity(entity, self.__controller, self)
+                    update_required |= modified
+                except:
+                    report("Unexpected decorate error from %s",source.sourceName)
         return update_required
 
     def getMenu(self, entityId):
