@@ -62,7 +62,11 @@ class AExternalSource(object):
         now = datetime.utcnow()
         if controller is not None:
             now = controller.now()
-        entity[group] = data
+        if data is None:
+            if group in entity:
+                del entity[group]
+        else:
+            entity[group] = data
         entity["%s_source" % (group,)] = self.sourceName
         entity['%s_timestamp' % (group,)] = now
     
