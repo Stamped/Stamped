@@ -83,8 +83,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         else:
             return []
         
-        data = self._collection.find(query).limit(limit)
-        return map(self._convertFromMongo, data)
+        results = self._collection.find(query).limit(limit)
+        return map(self._convertFromMongo, results)
     
     @lazyProperty
     def _valid_re(self):

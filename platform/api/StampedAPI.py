@@ -851,6 +851,31 @@ class StampedAPI(AStampedAPI):
         
         return self._userDB.searchUsers(authUserId, query, limit, relationship)
     
+    @API_CALL
+    def getSuggestedUsers(self, authUserId, personalized):
+        if personalized:
+            user_ids = self._friendshipDB.getSuggestedUserIds(authUserId)
+            
+            return self.getUsers(user_ids, None, authUserId)
+        else:
+            suggested = {
+                'mariobatali':      1, 
+                'nymag':            2, 
+                'parislemon':       3, 
+                'michaelkors':      4, 
+                'petertravers':     5, 
+                'shawnblanc':       6,
+                'benbrooks':        7,
+                'rebeccaminkoff':   8, 
+            }
+            
+            users = self.getUsers(None, suggested.keys(), authUserId)
+            return sorted(users, key=lambda k: suggested[k['screen_name']])
+    
+    @API_CALL
+    def ignoreSuggestedUsers(self, authUserId, user_ids):
+        pass
+    
     """
     #######                                      
     #       #####  # ###### #    # #####   ####  
@@ -2382,7 +2407,7 @@ class StampedAPI(AStampedAPI):
         if friendsSlice.distance > 3 or friendsSlice.distance < 0:
             raise StampedInputError("Unsupported value for distance")
         
-        stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
+        stampIds, _ = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
         
         return self._getStampCollection(authUserId, stampIds, friendsSlice)
     
@@ -2633,7 +2658,7 @@ class StampedAPI(AStampedAPI):
     
     def getMenu(self,entityId):
         return self._entityDB.getMenu(entityId)
-
+    
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
