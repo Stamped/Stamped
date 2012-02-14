@@ -130,9 +130,13 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     def getSuggestedUserIds(self, userId):
         visited_users   = {}
+        seen_users      = set()
         todo            = []
         
         def visit_user(user_id, distance):
+            if user_id in seen_users:
+                return
+            
             if distance == 2:
                 try:
                     count = visited_users[user_id]
@@ -140,6 +144,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 except:
                     visited_users[user_id] = 1
             else:
+                seen_users.add(user_id)
                 heapq.heappush(todo, (distance, user_id))
         
         # seed the algorithm with the initial user at distance 0
