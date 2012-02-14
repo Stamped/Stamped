@@ -42,7 +42,7 @@
 }
 
 - (void)commonInit {
-  self.granularity = STMapScopeSliderGranularityFriends;
+  [self setGranularity:STMapScopeSliderGranularityFriends animated:NO];
   UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
   trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
   [self insertSubview:trackImageView atIndex:0];
@@ -59,21 +59,21 @@
 
 - (void)dragEnded:(id)sender {
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
-  self.granularity = quotient;
-  CGFloat value = (0.333 * quotient);
-  if (quotient == 3)
-    value = 1.0;
-  [self setValue:value animated:YES];
+  [self setGranularity:quotient animated:YES];
 }
 
-- (void)setGranularity:(STMapScopeSliderGranularity)granularity {
+- (void)setGranularity:(STMapScopeSliderGranularity)granularity animated:(BOOL)animated {
   if (granularity != granularity_) {
     granularity_ = granularity;
+    
     if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
       [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
-
+    
     [self updateImage];
   }
+
+  CGFloat value = granularity == 3 ? 1.0 : granularity * 0.333;
+  [self setValue:value animated:animated];
 }
 
 - (void)updateImage {

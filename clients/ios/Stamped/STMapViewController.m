@@ -115,6 +115,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.selectedAnnotation = nil;
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
   mapView_.showsUserLocation = NO;
@@ -122,6 +126,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  NSLog(@"Annotations count: %d", mapView_.annotations.count);
   mapView_.showsUserLocation = YES;
 }
 
@@ -142,6 +147,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
     searchField_.placeholder = @"Search stamps";
+    if (source_ == STMapViewControllerSourceInbox)
+      [scopeSlider_ setGranularity:STMapScopeSliderGranularityFriends animated:NO];
+    else if (source_ == STMapViewControllerSourceUser)
+      [scopeSlider_ setGranularity:STMapScopeSliderGranularityYou animated:NO];
   } else if (source_ == STMapViewControllerSourceTodo) {
     searchField_.placeholder = @"Search to-dos";
   }
@@ -151,7 +160,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - UITextFieldDelegate methods.
 
 - (BOOL)textFieldShouldClear:(UITextField*)textField {
-  NSLog(@"Clear...");
+  textField.text = nil;
   [self loadDataFromNetwork];
   return YES;
 }

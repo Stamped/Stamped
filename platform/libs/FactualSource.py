@@ -20,6 +20,7 @@ try:
     from utils              import lazyProperty
     from datetime           import datetime
     from functools          import partial
+    import json
 except:
     report()
     raise
@@ -50,6 +51,7 @@ class FactualSource(AExternalSource):
             ('address_postcode',):_ppath('postcode'),
             ('address_country',):_ppath('country'),
         }
+        self.__hours_map = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
     @lazyProperty
     def __factual(self):
@@ -87,7 +89,7 @@ class FactualSource(AExternalSource):
         if factual_id is None:
             return False
         result = False
-        fields = ['address','phone','tel','site','cuisine']
+        fields = ['address','phone','tel','site','cuisine','hours']
         should_enrich = False
         for f in fields:
             if controller.shouldEnrich(f,self.sourceName,entity):
@@ -99,16 +101,47 @@ class FactualSource(AExternalSource):
                 if controller.shouldEnrich('address','factual',entity):
                     self.writeFields(entity, data, self.__address_fields)
                     entity['address_source'] = 'factual'
-                    entity['address_timestamp'] = datetime.utcnow()
+                    entity['address_timestamp'] = controller.now()
                     result = True
                 if controller.shouldEnrich('phone','factual',entity) and 'tel' in data and data['tel'] != '':
-                    self.writeSingleton(entity,'phone',data['tel'])
+                    self.writeSingleton(entity,'phone',data['tel'],controller=controller)
                     result = True
                 if controller.shouldEnrich('site','factual',entity) and 'website' in data and data['website'] != '':
-                    self.writeSingleton(entity,'site',data['website'])
+                    self.writeSingleton(entity,'site',data['website'],controller=controller)
                     result = True
                 if controller.shouldEnrich('cuisine',self.sourceName,entity) and 'cuisine' in data and data['cuisine'] != '':
-                    self.writeSingleton(entity,'cuisine',data['cuisine'])
+                    self.writeSingleton(entity,'cuisine',data['cuisine'],controller=controller)
+                if controller.shouldEnrich('hours',self.sourceName,entity) and 'hours' in data:
+                    raw_hours_s = data['hours']
+                    try:
+                        raw_hours = json.loads(raw_hours_s)
+                        hours = {}
+                        broken = False
+                        for k,v in raw_hours.items():
+                            k = int(k)-1
+                            if k < len(self.__hours_map):
+                                day = self.__hours_map[k]
+                                times = []
+                                for slot in v:
+                                    time_d = {}
+                                    time_d['open'] = slot[0]
+                                    time_d['close'] = slot[1]
+                                    if len(slot) > 2:
+                                        time_d['desc'] = slot[2]
+                                    times.append(time_d)
+                                hours[day] = times
+                            else:
+                                broken = True
+                                break
+                        if not broken and len(hours) > 0:
+                            entity['hours'] = hours
+                            entity['hours_timestamp'] = controller.now()
+                            entity['hours_source'] = self.sourceName
+                            result = True
+                    except ValueError:
+                        log.warning('bad json for hours')
+
+
         return result
 
     def decorateEntity(self, entity, controller, decoration_db):

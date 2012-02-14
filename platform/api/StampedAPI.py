@@ -1139,7 +1139,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         ### TODO: Check if user has access to this entity?
-        modified = self._entityDB.enrichEntity(entity)
+        modified = self._entityDB.enrichEntity(entity,decorate=False)
         if modified:
             self._entityDB.update(entity)
         return entity
