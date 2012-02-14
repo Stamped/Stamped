@@ -1182,7 +1182,7 @@ class HTTPMenu(Schema):
 class HTTPSubmenu(Schema):
     def setSchema(self):
         self.title = SchemaElement(basestring)
-        self.times = HTTPMenuTimes()
+        self.times = HTTPTimes()
         self.footnote = SchemaElement(basestring)
         self.desc = SchemaElement(basestring)
         self.short_desc = SchemaElement(basestring)
@@ -1215,17 +1215,17 @@ class HTTPMenuPrice(Schema):
         self.unit = SchemaElement(basestring)
         self.currency = SchemaElement(basestring)
 
-class HTTPMenuTimes(Schema):
+class HTTPTimes(Schema):
     def setSchema(self):
-        self.sun = SchemaList(HTTPMenuHours())
-        self.mon = SchemaList(HTTPMenuHours())
-        self.tue = SchemaList(HTTPMenuHours())
-        self.wed = SchemaList(HTTPMenuHours())
-        self.thu = SchemaList(HTTPMenuHours())
-        self.fri = SchemaList(HTTPMenuHours())
-        self.sat = SchemaList(HTTPMenuHours())
+        self.sun = SchemaList(HTTPHours())
+        self.mon = SchemaList(HTTPHours())
+        self.tue = SchemaList(HTTPHours())
+        self.wed = SchemaList(HTTPHours())
+        self.thu = SchemaList(HTTPHours())
+        self.fri = SchemaList(HTTPHours())
+        self.sat = SchemaList(HTTPHours())
 
-class HTTPMenuHours(Schema):
+class HTTPHours(Schema):
     def setSchema(self):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
