@@ -856,6 +856,7 @@ class StampedAPI(AStampedAPI):
         if personalized:
             user_ids = self._friendshipDB.getSuggestedUserIds(authUserId)
             
+            logs.warn(str(user_ids))
             return self.getUsers(user_ids, None, authUserId)
         else:
             suggested = {
@@ -874,7 +875,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):
-        pass
+        # TODO
+        raise NotImplementedError()
     
     """
     #######                                      
