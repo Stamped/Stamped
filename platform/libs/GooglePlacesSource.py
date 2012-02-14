@@ -165,7 +165,7 @@ class GooglePlacesSource(AExternalSource):
             data['address_street'] = "%s %s" % (number, route)
         data2 = {}
         for k,v in data.items():
-            data2[tuple(k.split('.')] = _constant(v)
+            data2[tuple(k.split('.'))] = _constant(v)
         return data2
     
 
