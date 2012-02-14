@@ -106,6 +106,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return result
     
     def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True):
+        self.__controller.clearNow()
         update_required = False
         if resolve:
             for source in self.__sources:

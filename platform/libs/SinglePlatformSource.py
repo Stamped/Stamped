@@ -53,7 +53,7 @@ class SinglePlatformSource(AExternalSource):
                     if menu is not None:
                         menu['entity_id'] = entity['entity_id']
                         entity['menu_source'] = self.sourceName
-                        entity['menu_timestamp'] = datetime.utcnow()
+                        entity['menu_timestamp'] = controller.now()
                         decoration_db.updateDecoration('menu', menu)
                         log.info('Regenerated menu for %s',singleplatform_id)
                         result = True

@@ -101,16 +101,16 @@ class FactualSource(AExternalSource):
                 if controller.shouldEnrich('address','factual',entity):
                     self.writeFields(entity, data, self.__address_fields)
                     entity['address_source'] = 'factual'
-                    entity['address_timestamp'] = datetime.utcnow()
+                    entity['address_timestamp'] = controller.now()
                     result = True
                 if controller.shouldEnrich('phone','factual',entity) and 'tel' in data and data['tel'] != '':
-                    self.writeSingleton(entity,'phone',data['tel'])
+                    self.writeSingleton(entity,'phone',data['tel'],controller=controller)
                     result = True
                 if controller.shouldEnrich('site','factual',entity) and 'website' in data and data['website'] != '':
-                    self.writeSingleton(entity,'site',data['website'])
+                    self.writeSingleton(entity,'site',data['website'],controller=controller)
                     result = True
                 if controller.shouldEnrich('cuisine',self.sourceName,entity) and 'cuisine' in data and data['cuisine'] != '':
-                    self.writeSingleton(entity,'cuisine',data['cuisine'])
+                    self.writeSingleton(entity,'cuisine',data['cuisine'],controller=controller)
                 if controller.shouldEnrich('hours',self.sourceName,entity) and 'hours' in data:
                     raw_hours_s = data['hours']
                     try:
@@ -135,7 +135,7 @@ class FactualSource(AExternalSource):
                                 break
                         if not broken and len(hours) > 0:
                             entity['hours'] = hours
-                            entity['hours_timestamp'] = datetime.utcnow()
+                            entity['hours_timestamp'] = controller.now()
                             entity['hours_source'] = self.sourceName
                             result = True
                     except ValueError:

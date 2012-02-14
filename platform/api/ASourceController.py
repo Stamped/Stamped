@@ -11,41 +11,59 @@ import Globals
 from logs import log, report
 
 try:
-	from abc 		import ABCMeta, abstractmethod
+    from abc        import ABCMeta, abstractmethod
+    from datetime   import datetime
 except:
-	report()
-	raise
+    report()
+    raise
 
 class ASourceController(object):
-	"""
-	Abstact base class for the controller interface expected by subclasses of AEntitySource.
-	"""
-	__metaclass__ = ABCMeta
+    """
+    Abstact base class for the controller interface expected by subclasses of AEntitySource.
+    """
+    __metaclass__ = ABCMeta
 
-	@abstractmethod
-	def shouldResolve(self, group, source, entity,timestamp=None):
-		"""
-		Returns whether an EntitySource should write to the given id-field group.
+    def __init__(self):
+        self.__now = None
 
-		The optional timestamp parameter can be used to indicate state data from the current source.
-		"""
-		pass
+    @abstractmethod
+    def shouldResolve(self, group, source, entity,timestamp=None):
+        """
+        Returns whether an EntitySource should write to the given id-field group.
 
-	@abstractmethod
-	def shouldEnrich(self, group, source, entity,timestamp=None):
-		"""
-		Returns whether an EntitySource should write to the given data-field group.
+        The optional timestamp parameter can be used to indicate state data from the current source.
+        """
+        pass
 
-		The optional timestamp parameter can be used to indicate state data from the current source.
-		"""
-		pass
+    @abstractmethod
+    def shouldEnrich(self, group, source, entity,timestamp=None):
+        """
+        Returns whether an EntitySource should write to the given data-field group.
 
-	@abstractmethod
-	def shouldDecorate(self, group, source, entity,timestamp=None):
-		"""
-		Returns whether an EntitySource should create the named decoration group.
+        The optional timestamp parameter can be used to indicate state data from the current source.
+        """
+        pass
 
-		The optional timestamp parameter can be used to indicate state data from the current source.
-		"""
-		pass
+    @abstractmethod
+    def shouldDecorate(self, group, source, entity,timestamp=None):
+        """
+        Returns whether an EntitySource should create the named decoration group.
+
+        The optional timestamp parameter can be used to indicate state data from the current source.
+        """
+        pass
+
+    def now():
+        """
+        Returns the timestamp that should be used in place of datetime.utcnow() for timestamp unification.
+        """
+        if self.__now is None:
+            self.__now = datetime.utcnow()
+        return self.__now
+
+    def clearNow():
+        """
+        Should be called to clear out cached now field.
+        """
+        self.__now = None
 
