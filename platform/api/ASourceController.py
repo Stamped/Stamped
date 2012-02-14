@@ -53,7 +53,7 @@ class ASourceController(object):
         """
         pass
 
-    def now():
+    def now(self):
         """
         Returns the timestamp that should be used in place of datetime.utcnow() for timestamp unification.
         """
@@ -61,7 +61,7 @@ class ASourceController(object):
             self.__now = datetime.utcnow()
         return self.__now
 
-    def clearNow():
+    def clearNow(self):
         """
         Should be called to clear out cached now field.
         """
