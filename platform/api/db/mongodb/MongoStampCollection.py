@@ -367,7 +367,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                             }
                         }
                         
-                        if inside {
+                        if (inside) {
                             dist_value = 10000.0;
                         } else {
                             var diff0 = (this.entity.coordinates.lat - center.lat);
@@ -442,11 +442,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 return obj;
             }""")
             
-            result = self._collection.inline_map_reduce(_map, 
-                                                        _reduce, 
-                                                        query=query, 
-                                                        scope=scope, 
-                                                        limit=1000)
+            result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             
             try:
                 value = result[-1]['value'] 
@@ -465,8 +461,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 results = list(reversed(results))
             
             results = results[genericSlice.offset : genericSlice.offset + genericSlice.limit]
-            #for r in results:
-            #    from pprint import pprint; pprint(r)
         
         results = map(self._convertFromMongo, results)
         
@@ -480,7 +474,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 
                 if entity_id not in seen:
                     seen.add(entity_id)
-                    ret.append(entity_id)
+                    ret.append(result)
+            
+            results = ret
         
         return results
     
