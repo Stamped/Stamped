@@ -15,7 +15,7 @@ from logs import log, report
 
 try:
     from AExternalSource        import AExternalSource
-    from crawler.GooglePlaces   import GooglePlaces
+    from GooglePlaces           import GooglePlaces
     from utils                  import lazyProperty
     from datetime               import datetime
     from functools              import partial
@@ -96,15 +96,18 @@ class GooglePlacesSource(AExternalSource):
         return 'googleplaces'
 
     def __details(self, entity):
-        details = None
-        if 'lng' in entity and 'lat' in entity and 'title' in entity:
-            gdata = self.__places.getSearchResultsByLatLng((entity['lat'],entity['lng']),{'name':entity['title']})
-            if gdata is not None and len(gdata) > 0:
-                gdatum = gdata[0]
-                if 'reference' in gdatum:
-                    ref = gdatum['reference']
-                    details = self.__places.getPlaceDetails(ref)
-        return details
+        try:
+            details = None
+            if 'lng' in entity and 'lat' in entity and 'title' in entity:
+                gdata = self.__places.getSearchResultsByLatLng((entity['lat'],entity['lng']),{'name':entity['title']})
+                if gdata is not None and len(gdata) > 0:
+                    gdatum = gdata[0]
+                    if 'reference' in gdatum:
+                        ref = gdatum['reference']
+                        details = self.__places.getPlaceDetails(ref)
+            return details
+        except:
+            return None
 
     def __neighborhood(self, details):
         locality = None
