@@ -22,6 +22,7 @@
 #import "Util.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
+static const CGFloat kMapSpanHysteresisPercentage = 0.3;
 static NSString* const kInboxPath = @"/collections/inbox.json";
 static NSString* const kUserPath = @"/collections/user.json";
 static NSString* const kFavoritesPath = @"/favorites/show.json";
@@ -35,11 +36,14 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)addAnnotationForStamp:(Stamp*)stamp;
 - (void)loadDataFromNetwork;
 - (void)addAllAnnotations;
+- (void)removeAllAnnotations;
 - (void)zoomToCurrentLocation;
 - (void)centerOnCurrentLocation;
 - (NSString*)viewportAsString;
 
+@property (nonatomic, retain) id<MKAnnotation> selectedAnnotation;
 @property (nonatomic, assign) BOOL zoomToLocation;
+@property (nonatomic, assign) MKMapRect lastMapRect;
 @property (nonatomic, copy) NSArray* resultsArray;
 @end
 
@@ -55,6 +59,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize source = source_;
 @synthesize user = user_;
 @synthesize resultsArray = resultsArray_;
+@synthesize selectedAnnotation = selectedAnnotation_;
+@synthesize lastMapRect = lastMapRect_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -74,6 +80,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
   self.resultsArray = nil;
+  self.selectedAnnotation = nil;
   [super dealloc];
 }
 
@@ -105,6 +112,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.mapView = nil;
   self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
+  self.selectedAnnotation = nil;
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -114,6 +126,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  NSLog(@"Annotations count: %d", mapView_.annotations.count);
   mapView_.showsUserLocation = YES;
 }
 
@@ -134,16 +147,20 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
     searchField_.placeholder = @"Search stamps";
+    if (source_ == STMapViewControllerSourceInbox)
+      [scopeSlider_ setGranularity:STMapScopeSliderGranularityFriends animated:NO];
+    else if (source_ == STMapViewControllerSourceUser)
+      [scopeSlider_ setGranularity:STMapScopeSliderGranularityYou animated:NO];
   } else if (source_ == STMapViewControllerSourceTodo) {
     searchField_.placeholder = @"Search to-dos";
   }
-  [mapView_ removeAnnotations:mapView_.annotations];
+  [self removeAllAnnotations];
 }
 
 #pragma mark - UITextFieldDelegate methods.
 
 - (BOOL)textFieldShouldClear:(UITextField*)textField {
-  NSLog(@"Clear...");
+  textField.text = nil;
   [self loadDataFromNetwork];
   return YES;
 }
@@ -157,6 +174,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
+  cancelButton_.alpha = 1;
   [UIView animateWithDuration:0.2 animations:^{
     locationButton_.frame = CGRectOffset(locationButton_.frame, offset, 0);
     cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
@@ -177,6 +195,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     frame.size.width += offset;
     searchField_.frame = frame;
     overlayView_.alpha = 0;
+  } completion:^(BOOL finished) {
+    cancelButton_.alpha = 0;
   }];
 }
 
@@ -257,14 +277,19 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   }
 }
 
-- (void)mapView:(MKMapView*)mapView regionWillChangeAnimated:(BOOL)animated {
-  
-}
-
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-  if ([searchField_ isFirstResponder])
+  // Calculate delta of origins.
+  CGFloat originDelta = MKMetersBetweenMapPoints(lastMapRect_.origin, mapView.visibleMapRect.origin);
+  MKMapPoint lowerRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMaxY(lastMapRect_));
+  CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, lowerRight);
+
+  if ((originDelta / span) < kMapSpanHysteresisPercentage)
+    return;
+  
+  if (searchField_.text.length > 0)
     return;
 
+  lastMapRect_ = mapView.visibleMapRect;
   [self loadDataFromNetwork];
 }
 
@@ -304,7 +329,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - Other private methods.
 
 - (void)loadDataFromNetwork {
-  [mapView_ removeAnnotations:mapView_.annotations];
+  [self removeAllAnnotations];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   NSString* keyPath = source_ == STMapViewControllerSourceTodo ? @"Favorite" : @"Stamp";
@@ -333,21 +358,21 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.objectMapping = mapping;
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"quality",
-                                    [self viewportAsString], @"viewport", @"relevance", @"sort", nil];
+                                    [self viewportAsString], @"viewport", @"relevance", @"sort", @"true", @"unique", nil];
   if (searchField_.text.length > 0)
     [params setValue:searchField_.text forKey:@"query"];
 
   if (scopeSlider_.granularity == STMapScopeSliderGranularityYou)
     [params setValue:[AccountManager sharedManager].currentUser.screenName forKey:@"screen_name"];
-  
-  NSLog(@"Params: %@", params);
 
   objectLoader.params = params;
   [objectLoader send];
 }
 
 - (void)addAllAnnotations {
-  [mapView_ removeAnnotations:mapView_.annotations];
+  [self removeAllAnnotations];
+  self.selectedAnnotation = nil;
+
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
     for (Stamp* s in resultsArray_)
       [self addAnnotationForStamp:s];
@@ -355,6 +380,20 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     for (Favorite* f in resultsArray_)
       [self addAnnotationForEntity:f.entityObject];
   }
+
+  if (selectedAnnotation_ && searchField_.text.length > 0)
+    [mapView_ selectAnnotation:selectedAnnotation_ animated:YES];
+}
+
+- (void)removeAllAnnotations {
+  NSMutableArray* toRemove = [NSMutableArray arrayWithCapacity:mapView_.annotations.count];
+  for (id<MKAnnotation> annotation in mapView_.annotations) {
+    if ([annotation isMemberOfClass:[STPlaceAnnotation class]])
+      [toRemove addObject:annotation];
+  }
+  
+  for (STPlaceAnnotation* annotation in toRemove)
+    [mapView_ removeAnnotation:annotation];
 }
 
 - (void)addAnnotationForEntity:(Entity*)entity {
@@ -367,6 +406,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   annotation.entityObject = entity;
   [mapView_ addAnnotation:annotation];
   [annotation release];
+  if (!selectedAnnotation_)
+    self.selectedAnnotation = annotation;
 }
 
 - (void)addAnnotationForStamp:(Stamp*)stamp {
@@ -378,6 +419,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   annotation.stamp = stamp;
   [mapView_ addAnnotation:annotation];
   [annotation release];
+  if (!selectedAnnotation_)
+    self.selectedAnnotation = annotation;
 }
 
 - (void)zoomToCurrentLocation {

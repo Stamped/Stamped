@@ -948,6 +948,7 @@ class HTTPGenericSlice(Schema):
         self.quality            = SchemaElement(int,  default=1)
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
+        self.unique             = SchemaElement(bool, default=False)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'GenericSlice' or \

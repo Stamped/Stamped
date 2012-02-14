@@ -151,7 +151,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         
         time_filter = 'timestamp.created'
         reverse     = genericSlice.reverse
+        viewport    = (genericSlice.viewport.lowerRight.lat is not None)
         sort        = None
+        relaxed     = (viewport and genericSlice.query is not None and genericSlice.sort == 'relevance')
         
         # handle setup for sorting
         # ------------------------
@@ -169,8 +171,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             query["entity.coordinates.lat"] = { "$exists" : True}
             query["entity.coordinates.lng"] = { "$exists" : True}
             
-            reverse = not reverse
-        elif genericSlice.sort == 'relevance':
             reverse = not reverse
         
         if genericSlice.sort != 'relevance' and genericSlice.query is not None:
@@ -207,30 +207,34 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         
         # handle viewport filter
         # ----------------------
-        if genericSlice.viewport.lowerRight.lat is not None:
-            query["entity.coordinates.lat"] = { 
-                "$gte" : genericSlice.viewport.lowerRight.lat, 
-                "$lte" : genericSlice.viewport.upperLeft.lat, 
-            }
-            
-            if genericSlice.viewport.upperLeft.lng <= genericSlice.viewport.lowerRight.lng:
-                query["entity.coordinates.lng"] = { 
-                    "$gte" : genericSlice.viewport.upperLeft.lng, 
-                    "$lte" : genericSlice.viewport.lowerRight.lng, 
-                }
+        if viewport:
+            if relaxed:
+                query["entity.coordinates.lat"] = { "$exists" : True}
+                query["entity.coordinates.lng"] = { "$exists" : True}
             else:
-                # handle special case where the viewport crosses the +180 / -180 mark
-                add_or_query([  {
-                        "entity.coordinates.lng" : {
-                            "$gte" : genericSlice.viewport.upperLeft.lng, 
+                query["entity.coordinates.lat"] = { 
+                    "$gte" : genericSlice.viewport.lowerRight.lat, 
+                    "$lte" : genericSlice.viewport.upperLeft.lat, 
+                }
+                
+                if genericSlice.viewport.upperLeft.lng <= genericSlice.viewport.lowerRight.lng:
+                    query["entity.coordinates.lng"] = { 
+                        "$gte" : genericSlice.viewport.upperLeft.lng, 
+                        "$lte" : genericSlice.viewport.lowerRight.lng, 
+                    }
+                else:
+                    # handle special case where the viewport crosses the +180 / -180 mark
+                    add_or_query([  {
+                            "entity.coordinates.lng" : {
+                                "$gte" : genericSlice.viewport.upperLeft.lng, 
+                            }, 
                         }, 
-                    }, 
-                    {
-                        "entity.coordinates.lng" : {
-                            "$lte" : genericSlice.viewport.lowerRight.lng, 
+                        {
+                            "entity.coordinates.lng" : {
+                                "$lte" : genericSlice.viewport.lowerRight.lng, 
+                            }, 
                         }, 
-                    }, 
-                ])
+                    ])
         
         # handle search query filter
         # --------------------------
@@ -262,9 +266,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------
             scope = {
-                'query'  : genericSlice.query, 
-                'limit'  : genericSlice.limit, 
-                'offset' : genericSlice.offset, 
+                'query'    : genericSlice.query, 
+                'limit'    : genericSlice.limit, 
+                'offset'   : genericSlice.offset, 
+                'viewport' : genericSlice.viewport.value, 
             }
             
             if genericSlice.sort == 'proximity':
@@ -309,6 +314,12 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 # handle relevancy-based sort
                 # ---------------------------
                 
+                if relaxed:
+                    scope['center'] = {
+                        'lat' : (genericSlice.upperLeft.lat + genericSlice.lowerRight.lat) / 2.0, 
+                        'lng' : (genericSlice.upperLeft.lng + genericSlice.lowerRight.lng) / 2.0, 
+                    }
+                
                 # TODO: incorporate more complicated relevancy metrics into this 
                 # weighting function, including possibly:
                 #     * recency
@@ -318,47 +329,8 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 # these scores are then completely redundant since levenshtein will never 
                 # be taken into account.
                 _map = bson.code.Code("""function () {
-                    function levenshtein(a, b)
-                    {
-                        var d = [], cost, i, j;
-                        
-                        if (a.length === 0) {
-                            return b.length;
-                        }
-                        
-                        if (b.length === 0) {
-                            return a.length;
-                        }
-                        
-                        for (i = 0; i <= a.length; i++) {
-                            d[i] = [];
-                            d[i][0] = i;
-                        }
-                        
-                        for (j = 0; j <= b.length; j++) {
-                            d[0][j] = j;
-                        }
-                        
-                        for (i = 1; i <= a.length; i++) {
-                            for (j = 1; j <= b.length; j++) {
-                                if (a.charAt(i-1)==b.charAt(j-1)) {
-                                    cost = 0;
-                                } else {
-                                    cost = 1;
-                                }
-                                
-                                d[i][j] = Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+cost);
-                                
-                                if(i>1&&j>1&&a.charAt(i-1)==b.charAt(j-2)&&a.charAt(i-2)==b.charAt(j-1)) {
-                                    d[i][j] = Math.min(d[i][j],d[i-2][j-2]+cost);
-                                }
-                            }
-                        }
-                        return d[a.length][b.length];
-                    }
-                    
+                    var title_value = 0.0, dist_value = 0.0;
                     var blurb, title;
-                    var score = 0.0;
                     
                     try {
                         title = this.entity.title.toLowerCase();
@@ -373,25 +345,69 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                     }
                     
                     if (title.length > 0 && title.match(query)) {
-                        score = 0;
+                        title_value = 1.0;
                     } else if (blurb.length > 0 && blurb.match(query)) {
-                        score = 0.5;
+                        title_value = 0.5;
                     } else {
-                        var dists = [
-                            levenshtein(query, title), 
-                            levenshtein(query, blurb), 
-                        ];
+                        title_value = 0.1;
+                    }
+                    
+                    try {
+                        var inside = false;
                         
-                        score = dists[0];
+                        if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
+                            if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
+                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                    inside = true;
+                                }
+                            } else {
+                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                    inside = true;
+                                }
+                            }
+                        }
                         
-                        for (var i = 1; i < dists.length; i++) {
-                            var dist = dists[i];
+                        if (inside) {
+                            dist_value = 10000.0;
+                        } else {
+                            var diff0 = (this.entity.coordinates.lat - center.lat);
+                            var diff1 = (this.entity.coordinates.lng - center.lng);
+                            var dist  = Math.sqrt(diff0 * diff0 + diff1 * diff1);
                             
-                            if (dist < score) {
-                                score = dist;
+                            if (dist < 0) {
+                                dist_value = 0;
+                            }
+                            else {
+                                var x = (dist - 50);
+                                var a = -0.4;
+                                var b = 2.8;
+                                var c = -6.3;
+                                var d = 4.0;
+                                
+                                var x2 = x * x;
+                                var x3 = x2 * x;
+                                
+                                var value = a * x3 + b * x2 + c * x + d;
+                                
+                                if (value > 0) {
+                                    value = Math.log(1 + value);
+                                } else {
+                                    value = -Math.log(1 - value);
+                                }
+                                
+                                dist_value = value;
                             }
                         }
                     }
+                    catch (e) {
+                        dist_value = 0;
+                    }
+                    
+                    var title_weight = 1.0;
+                    var dist_weight  = 1.0;
+                    
+                    var score = title_value * title_weight + \
+                                dist_value  * dist_weight;
                     
                     emit('query', { obj : this, score : score });
                 }""")
@@ -426,11 +442,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 return obj;
             }""")
             
-            result = self._collection.inline_map_reduce(_map, 
-                                                        _reduce, 
-                                                        query=query, 
-                                                        scope=scope, 
-                                                        limit=1000)
+            result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             
             try:
                 value = result[-1]['value'] 
@@ -449,10 +461,24 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 results = list(reversed(results))
             
             results = results[genericSlice.offset : genericSlice.offset + genericSlice.limit]
-            #for r in results:
-            #    from pprint import pprint; pprint(r)
         
-        return map(self._convertFromMongo, results)
+        results = map(self._convertFromMongo, results)
+        
+        # condense results to remove duplicate entities across stamps
+        if genericSlice.unique:
+            seen = set()
+            ret  = []
+            
+            for result in results:
+                entity_id = result.entity_id
+                
+                if entity_id not in seen:
+                    seen.add(entity_id)
+                    ret.append(result)
+            
+            results = ret
+        
+        return results
     
     def countStamps(self, userId):
         return len(self.user_stamps_collection.getUserStampIds(userId))

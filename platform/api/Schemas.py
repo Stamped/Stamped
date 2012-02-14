@@ -408,6 +408,7 @@ class GenericSlice(Schema):
         self.quality            = SchemaElement(int,  default=1)
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
+        self.unique             = SchemaElement(bool, default=False)
 
 class UserCollectionSlice(GenericSlice):
     def setSchema(self):

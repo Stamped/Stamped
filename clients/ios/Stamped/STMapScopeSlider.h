@@ -23,7 +23,9 @@ typedef enum {
 
 @interface STMapScopeSlider : UISlider
 
+- (void)setGranularity:(STMapScopeSliderGranularity)granularity animated:(BOOL)animated;
+
 @property (nonatomic, assign) IBOutlet id<STMapScopeSliderDelegate> delegate;
-@property (nonatomic, assign) STMapScopeSliderGranularity granularity;
+@property (nonatomic, readonly) STMapScopeSliderGranularity granularity;
 
 @end
