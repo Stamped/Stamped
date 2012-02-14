@@ -408,6 +408,7 @@ class GenericSlice(Schema):
         self.quality            = SchemaElement(int,  default=1)
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
+        self.unique             = SchemaElement(bool, default=False)
 
 class UserCollectionSlice(GenericSlice):
     def setSchema(self):
@@ -973,7 +974,7 @@ class MenuSchema(Schema):
 class SubmenuSchema(Schema):
     def setSchema(self):
         self.title = SchemaElement(basestring)
-        self.times = MenuTimesSchema()
+        self.times = TimesSchema()
         self.footnote = SchemaElement(basestring)
         self.desc = SchemaElement(basestring)
         self.short_desc = SchemaElement(basestring)
@@ -1006,17 +1007,17 @@ class MenuPriceSchema(Schema):
         self.unit = SchemaElement(basestring)
         self.currency = SchemaElement(basestring)
 
-class MenuTimesSchema(Schema):
+class TimesSchema(Schema):
     def setSchema(self):
-        self.sun = SchemaList(MenuHoursSchema())
-        self.mon = SchemaList(MenuHoursSchema())
-        self.tue = SchemaList(MenuHoursSchema())
-        self.wed = SchemaList(MenuHoursSchema())
-        self.thu = SchemaList(MenuHoursSchema())
-        self.fri = SchemaList(MenuHoursSchema())
-        self.sat = SchemaList(MenuHoursSchema())
+        self.sun = SchemaList(HoursSchema())
+        self.mon = SchemaList(HoursSchema())
+        self.tue = SchemaList(HoursSchema())
+        self.wed = SchemaList(HoursSchema())
+        self.thu = SchemaList(HoursSchema())
+        self.fri = SchemaList(HoursSchema())
+        self.sat = SchemaList(HoursSchema())
 
-class MenuHoursSchema(Schema):
+class HoursSchema(Schema):
     def setSchema(self):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
