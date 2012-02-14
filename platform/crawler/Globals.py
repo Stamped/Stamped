@@ -15,8 +15,3 @@ while True:
         break
     except ImportError:
         sys.path.insert(0, os.path.dirname(sys.path[0]))
-
-#__builtins__['options'] = { }
-from utils import AttributeDict
-options = AttributeDict()
-
