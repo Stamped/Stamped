@@ -163,7 +163,9 @@ class GooglePlacesSource(AExternalSource):
                         data['address_locality'] = name
         if route is not None and number is not None:
             data['address_street'] = "%s %s" % (number, route)
-        data = { tuple(k.split('.')):_constant(v) for k,v in data.items() }
-        return data
+        data2 = {}
+        for k,v in data.items():
+            data2[tuple(k.split('.')] = _constant(v)
+        return data2
     
 
