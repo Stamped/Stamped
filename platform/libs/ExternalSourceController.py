@@ -59,6 +59,9 @@ class ExternalSourceController(ASourceController):
                 'phone':['factual','googleplaces'],
                 'site':['factual','googleplaces'],
                 'hours':['factual'],
+                'price_range':['factual'],
+                'cuisine':['factual'],
+                'alcohol_flag':['factual'],
             },
             'timestamps': {
             },

@@ -23,6 +23,7 @@ except:
     report()
     raise
 
+_verbose = False
 
 class AFactualSourceTest(AStampedAPITestCase):
 
@@ -49,6 +50,8 @@ class FactualSourceResolveTest(AFactualSourceTest):
 
     def test_ino_resolve(self):
         modified = self.source.resolveEntity(self.ino,self.controller)
+        if _verbose:
+            print('\n%s\n' % (pformat(self.ino.value),))
         self.assertEqual(modified,True)
         self.assertEqual(self.ino.factual_id,'4333b825-8573-422c-89c5-26927e717dac')
         self.assertEqual(self.ino.factual_source,'factual')
@@ -66,15 +69,19 @@ class FactualSourceEnrichFailTest(AFactualSourceTest):
 class FactualSourceEnrichTest(AFactualSourceTest):
 
     def test_ino_enrich(self):
+        self.controller.clearNow()
+        now = self.controller.now()
         modified = self.source.resolveEntity(self.ino,self.controller)
         self.assertEqual(modified,True)
         self.assertEqual(self.ino.factual_id,'4333b825-8573-422c-89c5-26927e717dac')
         self.assertEqual(self.ino.factual_source,'factual')
-        self.assertEqual(self.recent(self.ino,'factual_timestamp'),True)
+        self.assertEqual(self.ino.factual_timestamp,now)
         self.assertEqual(self.ino.singleplatform_id,'ino')
         self.assertEqual(self.ino.singleplatform_source,'factual')
-        self.assertEqual(self.recent(self.ino,'singleplatform_timestamp'),True)
+        self.assertEqual(self.ino.singleplatform_timestamp,now)
         modified = self.source.enrichEntity(self.ino,self.controller)
+        if _verbose:
+            print('\n%s\n' % (pformat(self.ino.value),))
         self.assertEqual(modified,True)
         self.assertEqual(self.ino.address_country, 'US')
         self.assertEqual(self.ino.address_locality, 'New York')
@@ -82,8 +89,10 @@ class FactualSourceEnrichTest(AFactualSourceTest):
         self.assertEqual(self.ino.address_region, 'NY')
         self.assertEqual(self.ino.address_street, '21 Bedford St')
         self.assertEqual(self.ino.address_source, 'factual')
-        self.assertEqual(self.recent(self.ino,'address_timestamp'),True)
+        self.assertEqual(self.ino.price_range, 2)
+        self.assertEqual(self.ino.address_timestamp,now)
 
 if __name__ == '__main__':
+    _verbose = True
     main()
 

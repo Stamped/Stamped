@@ -23,6 +23,7 @@ except:
     report()
     raise
 
+_verbose = False
 
 class APlacesSourceTest(AStampedAPITestCase):
 
@@ -49,7 +50,8 @@ class PlacesSourceEnrichTest(APlacesSourceTest):
 
     def test_luger_enrich(self):
         modified = self.source.enrichEntity(self.entity,self.controller)
-        print(pformat(self.entity.value))
+        if _verbose:
+            print(pformat(self.entity.value))
         self.assertEqual(modified,True)
         self.assertEqual(self.entity.address_country, 'US')
         self.assertEqual(self.entity.address_locality, 'Brooklyn')
@@ -82,5 +84,6 @@ class PlacesSourceEnrichTest(AFactualSourceTest):
         self.assertEqual(self.recent(self.ino,'address_timestamp'),True)
 """
 if __name__ == '__main__':
+    _verbose = True
     main()
 
