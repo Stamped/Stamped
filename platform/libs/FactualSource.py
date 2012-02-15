@@ -52,6 +52,12 @@ class FactualSource(AExternalSource):
             ('address_country',):_ppath('country'),
         }
         self.__hours_map = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+        self.__simple_fields = {
+            'phone':'tel',
+            'site':'website',
+            'cuisine':'cuisine',
+            'alcohol_flag':'alcohol',
+        }
 
     @lazyProperty
     def __factual(self):
@@ -68,13 +74,13 @@ class FactualSource(AExternalSource):
         if controller.shouldResolve('factual','factual',entity):
             factual_id = self.__factual.factual_from_entity(entity)
             entity['factual_id'] = factual_id
-            entity['factual_timestamp'] = datetime.utcnow()
+            entity['factual_timestamp'] = controller.now()
             entity['factual_source'] = 'factual'
             result = True
         if factual_id is not None and controller.shouldResolve('singleplatform','factual',entity):
             singleplatform_id = self.__factual.singleplatform(factual_id)
             entity['singleplatform_id'] = singleplatform_id
-            entity['singleplatform_timestamp'] = datetime.utcnow()
+            entity['singleplatform_timestamp'] = controller.now()
             entity['singleplatform_source'] = 'factual'
             result = True
         return result
@@ -89,7 +95,8 @@ class FactualSource(AExternalSource):
         if factual_id is None:
             return False
         result = False
-        fields = ['address','phone','tel','site','cuisine','hours']
+        fields = ['address','phone','tel','site','cuisine','hours','price_range']
+        fields.extend(self.__simple_fields.keys())
         should_enrich = False
         for f in fields:
             if controller.shouldEnrich(f,self.sourceName,entity):
@@ -98,19 +105,21 @@ class FactualSource(AExternalSource):
         if should_enrich:
             data = self.__factual.data(factual_id,entity=entity)
             if data is not None:
+                for k,v in self.__simple_fields.items():
+                    if controller.shouldEnrich(k,self.sourceName,entity) and v in data:
+                        self.writeSingleton(entity,k,data[v],controller=controller)
+                        result = True
                 if controller.shouldEnrich('address','factual',entity):
                     self.writeFields(entity, data, self.__address_fields)
                     entity['address_source'] = 'factual'
                     entity['address_timestamp'] = controller.now()
                     result = True
-                if controller.shouldEnrich('phone','factual',entity) and 'tel' in data and data['tel'] != '':
-                    self.writeSingleton(entity,'phone',data['tel'],controller=controller)
-                    result = True
-                if controller.shouldEnrich('site','factual',entity) and 'website' in data and data['website'] != '':
-                    self.writeSingleton(entity,'site',data['website'],controller=controller)
-                    result = True
-                if controller.shouldEnrich('cuisine',self.sourceName,entity) and 'cuisine' in data and data['cuisine'] != '':
-                    self.writeSingleton(entity,'cuisine',data['cuisine'],controller=controller)
+                if controller.shouldEnrich('price_range',self.sourceName,entity) and 'price' in data:
+                    try:
+                        price = int(data['price'])
+                        self.writeSingleton(entity,'price_range',price,controller=controller)
+                    except:
+                        log.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)
                 if controller.shouldEnrich('hours',self.sourceName,entity) and 'hours' in data:
                     raw_hours_s = data['hours']
                     try:
@@ -140,7 +149,6 @@ class FactualSource(AExternalSource):
                             result = True
                     except ValueError:
                         log.warning('bad json for hours')
-
 
         return result
 

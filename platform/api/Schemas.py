@@ -594,6 +594,14 @@ class RestaurantSchema(Schema):
         self.menu_source        = SchemaElement(basestring)
         self.menu_timestamp     = SchemaElement(datetime)
 
+        self.price_range        = SchemaElement(int)
+        self.price_range_source = SchemaElement(basestring)
+        self.price_range_timestamp = SchemaElement(datetime)
+
+        self.alcohol_flag       = SchemaElement(bool)
+        self.alcohol_flag_source        = SchemaElement(basestring)
+        self.alcohol_flag_timestamp     = SchemaElement(datetime)
+
 
         #self.price              = SchemaElement(basestring)
         self.payment            = SchemaElement(basestring)
@@ -662,6 +670,9 @@ class VideoSchema(Schema):
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
+        self.cast_source        = SchemaElement(basestring)
+        self.cast_timestamp     = SchemaElement(datetime)
+        
         self.director           = SchemaElement(basestring)
         self.in_theaters        = SchemaElement(bool)
         
@@ -678,6 +689,7 @@ class VideoSchema(Schema):
 
 class ArtistSchema(Schema):
     def setSchema(self):
+        self.artist_type        = SchemaElement(basestring)
         self.albums             = SchemaList(ArtistAlbumsSchema())
         self.songs              = SchemaList(ArtistSongsSchema())
 
@@ -730,6 +742,10 @@ class PriceSchema(Schema):
 
 class MediaSchema(Schema):
     def setSchema(self):
+        self.release_date               = SchemaElement(datetime)
+        self.release_date_source        = SchemaElement(basestring)
+        self.release_date_timestamp     = SchemaElement(datetime)
+
         self.title_version              = SchemaElement(basestring)
         self.search_terms               = SchemaElement(basestring)
         self.parental_advisory_id       = SchemaElement(basestring)

@@ -21,6 +21,7 @@ try:
     from AEntityDB                      import AEntityDB
     from difflib                        import SequenceMatcher
     from libs.Factual                   import Factual
+    from libs.CleanerSource             import CleanerSource
     from libs.FactualSource             import FactualSource
     from libs.GooglePlacesSource        import GooglePlacesSource
     from libs.SinglePlatformSource      import SinglePlatformSource
@@ -66,12 +67,16 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return SinglePlatformSource()
 
     @lazyProperty
+    def __cleaner(self):
+        return CleanerSource()
+
+    @lazyProperty
     def __controller(self):
         return ExternalSourceController()
     
     @lazyProperty
     def __sources(self):
-        return [self.__factual,self.__googleplaces,self.__singleplatform]
+        return [self.__cleaner,self.__factual,self.__googleplaces,self.__singleplatform]
     
     ### PUBLIC
     

@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'states' ]
+__all__ = [ 'states', 'months' ]
 
 import Globals
 from logs import log, report
@@ -81,4 +81,19 @@ states = {
     "West Virginia":"WV",
     "Wisconsin":"WI",
     "Wyoming":"WY"
+}
+
+months = {
+    'January':1,
+    'February':2,
+    'March':3,
+    'April':4,
+    'May':5,
+    'June':6,
+    'July':7,
+    'August':8,
+    'September':9,
+    'Octoboer':10,
+    'November':11,
+    'December':12,
 }
