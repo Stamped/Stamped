@@ -95,6 +95,7 @@ def handleHTTPRequest(fn):
         
         except Exception as e:
             logs.warning("500 Error: %s" % e)
+            logs.warning(utils.getFormattedException())
             response = HttpResponse("internal server error", status=500)
             logs.error(response.status_code)
             return response

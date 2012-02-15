@@ -64,7 +64,7 @@ class GooglePlacesSource(AExternalSource):
                 reformatted = self.__reformat(details)
                 self.writeFields(entity, None, reformatted)
                 entity['address_source'] = self.sourceName
-                entity['address_timestamp'] = datetime.utcnow()
+                entity['address_timestamp'] = controller.now()
                 result = True
         if controller.shouldEnrich('neighborhood',self.sourceName,entity):
             if details is None:
@@ -72,19 +72,19 @@ class GooglePlacesSource(AExternalSource):
             if details is not None:
                 neighborhood = self.__neighborhood(details)
                 if neighborhood is not None:
-                    self.writeSingleton(entity,'neighborhood',neighborhood)
+                    self.writeSingleton(entity,'neighborhood',neighborhood,controller=controller)
                     result = True
         if controller.shouldEnrich('phone',self.sourceName,entity):
             if details is None:
                 details = self.__details(entity)
             if details is not None and 'formatted_phone_number' in details and details['formatted_phone_number'] != '':
-                self.writeSingleton(entity,'phone',details['formatted_phone_number'])
+                self.writeSingleton(entity,'phone',details['formatted_phone_number'],controller=controller)
                 result = True
         if controller.shouldEnrich('site',self.sourceName,entity):
             if details is None:
                 details = self.__details(entity)
             if details is not None and 'website' in details and details['website'] != '':
-                self.writeSingleton(entity,'site',details['website'])
+                self.writeSingleton(entity,'site',details['website'],controller=controller)
                 result = True
         return result
 

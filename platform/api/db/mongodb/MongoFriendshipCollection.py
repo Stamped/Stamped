@@ -6,6 +6,7 @@ __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
 import Globals, logs
+import heapq, operator
 
 from utils import lazyProperty
 
@@ -126,4 +127,45 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     def getBlocks(self, userId):
         return self.block_collection.getBlocks(userId)
+    
+    def getSuggestedUserIds(self, userId):
+        visited_users   = {}
+        seen_users      = set()
+        todo            = []
+        
+        def visit_user(user_id, distance):
+            if user_id in seen_users:
+                return
+            
+            if distance == 2:
+                try:
+                    count = visited_users[user_id]
+                    visited_users[user_id] = count + 1
+                except:
+                    visited_users[user_id] = 1
+            else:
+                seen_users.add(user_id)
+                heapq.heappush(todo, (distance, user_id))
+        
+        # seed the algorithm with the initial user at distance 0
+        visit_user(userId, 0)
+        
+        while True:
+            try:
+                distance, user_id = heapq.heappop(todo)
+            except IndexError:
+                break # heap is empty
+            
+            if distance < 2:
+                friend_ids  = self.getFriends(user_id)
+                distance    = distance + 1
+                
+                for friend_id in friend_ids:
+                    visit_user(friend_id, distance)
+        
+        # friends of friends sorted by overlap
+        users = sorted(visited_users.iteritems(), key=operator.itemgetter(1), reverse=True)
+        users = map(operator.itemgetter(0), users)
+        
+        return users
 

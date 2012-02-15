@@ -58,10 +58,17 @@ class AExternalSource(object):
         """
         pass
 
-    def writeSingleton(self, entity, group, data):
-        entity[group] = data
+    def writeSingleton(self, entity, group, data, controller=None):
+        now = datetime.utcnow()
+        if controller is not None:
+            now = controller.now()
+        if data is None:
+            if group in entity:
+                del entity[group]
+        else:
+            entity[group] = data
         entity["%s_source" % (group,)] = self.sourceName
-        entity['%s_timestamp' % (group,)] = datetime.utcnow()
+        entity['%s_timestamp' % (group,)] = now
     
     def writeField(self, entity, data, path):
         """

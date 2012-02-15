@@ -41,7 +41,6 @@ urlpatterns = patterns('',
     #
     # DOCUMENTED SAMPLE PATH DATA
     # establishes mapping of the REST command account/create to the implementing function, platform.servers.httpapi.v0.functions.account.create
-    #
     (r'v0/account/create.json',                 'v0.functions.account.create'),
     (r'v0/account/remove.json',                 'v0.functions.account.remove'),
     (r'v0/account/settings.json',               'v0.functions.account.settings'),

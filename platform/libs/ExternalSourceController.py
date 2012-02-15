@@ -58,6 +58,7 @@ class ExternalSourceController(ASourceController):
                 'neighborhood':['googleplaces'],
                 'phone':['factual','googleplaces'],
                 'site':['factual','googleplaces'],
+                'hours':['factual'],
             },
             'timestamps': {
             },
