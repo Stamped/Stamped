@@ -62,6 +62,7 @@ class ExternalSourceController(ASourceController):
                 'price_range':['factual'],
                 'cuisine':['factual'],
                 'alcohol_flag':['factual'],
+                'release_date':['cleaner'],
             },
             'timestamps': {
             },
