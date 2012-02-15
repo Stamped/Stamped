@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import stamped, utils
+import Globals, utils
 import time
 
 from api.MongoStampedAPI    import MongoStampedAPI
