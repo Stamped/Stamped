@@ -87,7 +87,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.deleted_stamp_collection.addStamp(stampId)
 
         return result
-        
+    
     def addUserStampReference(self, userId, stampId):
         # Add a reference to the stamp in the user's collection
         self.user_stamps_collection.addUserStamp(userId, stampId)
@@ -522,6 +522,19 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             return self._convertFromMongo(document)
         except:
             return None
+    
+    def getStampsFromEntity(self, entityId, limit=None):
+        try:
+            ### TODO: Index
+            docs = self._collection.find({
+                'entity.entity_id': entityId,
+            })
+            if limit is not None:
+                docs = docs.limit(limit)
+            
+            return (self._convertFromMongo(doc) for doc in docs)
+        except:
+            return []
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:
