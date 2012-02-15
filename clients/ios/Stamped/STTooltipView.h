@@ -10,4 +10,9 @@
 
 @interface STTooltipView : UIView
 
+- (id)initWithText:(NSString*)text;
+- (void)setText:(NSString*)text animated:(BOOL)animated;
+
+
+@property (nonatomic, readonly) UILabel* textLabel;
 @end

@@ -25,9 +25,11 @@ try:
     from libs.FactualSource             import FactualSource
     from libs.GooglePlacesSource        import GooglePlacesSource
     from libs.SinglePlatformSource      import SinglePlatformSource
+    from libs.TMDBSource                import TMDBSource
     from libs.ExternalSourceController  import ExternalSourceController
     from ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
+    from logs                           import log
 except:
     report()
     raise
@@ -76,7 +78,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     @lazyProperty
     def __sources(self):
-        return [self.__cleaner,self.__factual,self.__googleplaces,self.__singleplatform]
+        return [self.__cleaner,self.__factual,self.__googleplaces,self.__singleplatform, TMDBSource()]
     
     ### PUBLIC
     
@@ -110,31 +112,42 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             result.append(self._convertFromMongo(item))
         return result
     
-    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True):
+    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True,max_cycles=4):
         self.__controller.clearNow()
-        update_required = False
-        if resolve:
-            for source in self.__sources:
-                try:
-                    modified = source.resolveEntity(entity, self.__controller)
-                    update_required |= modified
-                except:
-                    report("Unexpected resolve error from %s",source.sourceName)
-        if enrich:
-            for source in self.__sources:
-                try:
-                    modified = source.enrichEntity(entity, self.__controller)
-                    update_required |= modified
-                except:
-                    report("Unexpected enrich error from %s",source.sourceName)
-        if decorate:
-            for source in self.__sources:
-                try:
-                    modified = source.decorateEntity(entity, self.__controller, self)
-                    update_required |= modified
-                except:
-                    report("Unexpected decorate error from %s",source.sourceName)
-        return update_required
+        update_required_total = False
+        for i in range(max_cycles):
+            update_required = False
+            if resolve:
+                for source in self.__sources:
+                    try:
+                        modified = source.resolveEntity(entity, self.__controller)
+                        if modified:
+                            log.info('%s resolved %s',source.sourceName,entity.title)
+                        update_required |= modified
+                    except:
+                        report("Unexpected resolve error from %s" % source.sourceName)
+            if enrich:
+                for source in self.__sources:
+                    try:
+                        modified = source.enrichEntity(entity, self.__controller)
+                        if modified:
+                            log.info('%s enriched %s',source.sourceName,entity.title)
+                        update_required |= modified
+                    except:
+                        report("Unexpected enrich error from %s" % source.sourceName)
+            if decorate:
+                for source in self.__sources:
+                    try:
+                        modified = source.decorateEntity(entity, self.__controller, self)
+                        if modified:
+                            log.info('%s decorated %s',source.sourceName,entity.title)
+                        update_required |= modified
+                    except:
+                        report("Unexpected decorate error from %s" % source.sourceName)
+            update_required_total |= update_required
+            if update_required is False:
+                break
+        return update_required_total
 
     def getMenu(self, entityId):
         menu = self.__menu_db.getMenu(entityId)

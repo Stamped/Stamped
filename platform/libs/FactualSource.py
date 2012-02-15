@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 """
-Not finished
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -58,6 +57,16 @@ class FactualSource(AExternalSource):
             'cuisine':'cuisine',
             'alcohol_flag':'alcohol',
         }
+        self.__eligible_subcategories = {
+            'restaurant'        : 'food', 
+            'bar'               : 'food', 
+            'bakery'            : 'food', 
+            'cafe'              : 'food', 
+            'market'            : 'food', 
+            'food'              : 'food', 
+            'night_club'        : 'food', 
+            'establishment'     : 'other',
+        }
 
     @lazyProperty
     def __factual(self):
@@ -71,6 +80,8 @@ class FactualSource(AExternalSource):
         """
         result = False
         factual_id = entity['factual_id']
+        if entity['subcategory'] not in self.__eligible_subcategories:
+            return False
         if controller.shouldResolve('factual','factual',entity):
             factual_id = self.__factual.factual_from_entity(entity)
             entity['factual_id'] = factual_id
@@ -92,6 +103,8 @@ class FactualSource(AExternalSource):
         Returns True if the entity was modified.
         """
         factual_id = entity['factual_id']
+        if entity['subcategory'] not in self.__eligible_subcategories:
+            return False
         if factual_id is None:
             return False
         result = False
