@@ -105,17 +105,10 @@ class TMDBSource(AExternalSource):
 
         Returns True if the entity was modified.
         """
+        if entity['subcategory'] not in self.__eligible_subcategories:
+            return False
         result = False
-
         return result
-
-    def decorateEntity(self, entity, controller, decoration_db):
-        """
-        Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity fields if necessary.
-
-        Returns True if the entity was modified.
-        """
-        return False
 
     @property
     def sourceName(self):
