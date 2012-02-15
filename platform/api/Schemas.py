@@ -670,8 +670,9 @@ class VideoSchema(Schema):
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
-        self.cast_source        = SchemaElement(basestring)
-        self.cast_timestamp     = SchemaElement(datetime)
+        self.cast_list                  = SchemaList(CastEntrySchema())
+        self.cast_list_source           = SchemaElement(basestring)
+        self.cast_list_timestamp        = SchemaElement(datetime)
         
         self.director           = SchemaElement(basestring)
         self.in_theaters        = SchemaElement(bool)
@@ -686,6 +687,11 @@ class VideoSchema(Schema):
         self.v_hd_rental_price  = SchemaElement(basestring)
         
         self.imdb_id            = SchemaElement(basestring)
+
+class CastEntrySchema(Schema):
+    def setSchema(self):
+        self.name       = SchemaElement(basestring)
+        self.role       = SchemaElement(basestring)
 
 class ArtistSchema(Schema):
     def setSchema(self):
@@ -766,6 +772,7 @@ class MediaSchema(Schema):
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
+        self.tmdb               = TMDBSchema()
         self.singleplatform     = SinglePlatformSchema()
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
@@ -832,6 +839,12 @@ class SinglePlatformSchema(Schema):
         self.singleplatform_id  = SchemaElement(basestring)
         self.singleplatform_timestamp  = SchemaElement(datetime)
         self.singleplatform_source = SchemaElement(basestring)
+
+class TMDBSchema(Schema):
+    def setSchema(self):
+        self.tmdb_id            = SchemaElement(basestring)
+        self.tmdb_source        = SchemaElement(basestring)
+        self.tmdb_timestamp     = SchemaElement(datetime)
 
 class AppleSchema(Schema):
     def setSchema(self):

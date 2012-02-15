@@ -13,8 +13,7 @@ import Globals
 from logs import log, report
 
 try:
-    from libs.CleanerSource             import CleanerSource
-    from libs.ExternalSourceController  import ExternalSourceController
+    from MongoStampedAPI                import MongoStampedAPI
     from AStampedAPITestCase            import *
     from Schemas                        import Entity
     from pprint                         import pprint
@@ -25,11 +24,10 @@ except:
 
 _verbose = False
 
-class ACleanerSourceTest(AStampedAPITestCase):
+class AEnrichTest(AStampedAPITestCase):
 
     def setUp(self):
-        self.source = CleanerSource()
-        self.controller = ExternalSourceController()
+        self.api = MongoStampedAPI()
         self.media1 = Entity()
         raw = {
             "category" : "film",
@@ -62,19 +60,16 @@ class ACleanerSourceTest(AStampedAPITestCase):
     def tearDown(self):
         pass
 
-class CleanerSourceReleaseDateTest(ACleanerSourceTest):
+class EnrichMovieTest(AEnrichTest):
 
-    def test_release_date(self):
-        self.controller.clearNow()
-        now = self.controller.now()
-        modified = self.source.enrichEntity(self.media1,self.controller)
+    def test_enrich_movie(self):
+        modified = self.api._entityDB.enrichEntity(self.media1)
         if _verbose:
             pprint(self.media1.value)
         self.assertEqual(modified,True)
         release_date = datetime(2011,8,26)
         self.assertEqual(self.media1.release_date,release_date)
         self.assertEqual(self.media1.release_date_source,'cleaner')
-        self.assertEqual(self.media1.release_date_timestamp,now)
 
 if __name__ == '__main__':
     _verbose = True

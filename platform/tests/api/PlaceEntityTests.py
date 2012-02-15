@@ -10,10 +10,12 @@ import Globals, utils
 from AStampedAPITestCase import *
 
 from urllib2            import HTTPError
+from pprint             import pprint
 
 # ###### #
 # PLACE #
 # ###### #
+_verbose = False 
 
 class StampedAPIPlaceTest(AStampedAPITestCase):
     def setUp(self):
@@ -95,16 +97,13 @@ class StampedAPIPlacesMenu(_FactualTestCase):
             "oauth_token": self.token['access_token'],
             "entity_id": self.entity['entity_id']
         }
-        try:
-            result = self.handleGET(path, data)
-            result2 = self.handleGET(path, data)
-            self.assertEqual(result, result2)
-            print(result)
-        except HTTPError as e:
-            pass
-        except Exception:
-            print('no result')
+        result = self.handleGET(path, data)
+        result2 = self.handleGET(path, data)
+        self.assertEqual(result, result2)
+        if _verbose:
+            pprint(result)
 
 if __name__ == '__main__':
+    _verbose = True
     main()
 

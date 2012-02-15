@@ -29,15 +29,6 @@ class CleanerSource(AExternalSource):
     """
     def __init__(self):
         AExternalSource.__init__(self)
-
-    def resolveEntity(self, entity, controller):
-        """
-        Attempt to fill populate id fields based on seed data.
-
-        Returns True if the entity was modified.
-        """
-        result = False
-        return result
     
     def enrichEntity(self, entity, controller):
         """
@@ -73,9 +64,6 @@ class CleanerSource(AExternalSource):
                         self.writeSingleton(entity,'release_date',new_date,controller=controller)
                         result = True
         return result
-
-    def decorateEntity(self, entity, controller, decoration_db):
-        return False
 
     @property
     def sourceName(self):

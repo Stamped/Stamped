@@ -34,6 +34,7 @@ class AFactualSourceTest(AStampedAPITestCase):
         self.ino.title = 'Ino Cafe and Wine Bar'
         self.ino.lat = 40.72908
         self.ino.lng = -74.003697
+        self.ino.subcategory = 'restaurant'
 
     def tearDown(self):
         pass

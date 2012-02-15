@@ -24,32 +24,29 @@ class AExternalSource(object):
 
     __metaclass__ = ABCMeta
 
-    @abstractmethod
     def resolveEntity(self, entity, controller):
         """
         Attempt to fill populate id fields based on seed data.
 
         Returns True if the entity was modified.
         """
-        pass
+        return False
     
-    @abstractmethod
     def enrichEntity(self, entity, controller):
         """
         Attempt to populate data fields based on id data.
 
         Returns True if the entity was modified.
         """
-        pass
+        return False
 
-    @abstractmethod
     def decorateEntity(self, entity, controller, decoration_db):
         """
         Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity fields if necessary.
 
         Returns True if the entity was modified.
         """
-        pass
+        return False
     
     @abstractmethod
     def sourceName(self):
