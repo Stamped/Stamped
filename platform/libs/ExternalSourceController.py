@@ -26,29 +26,18 @@ class ExternalSourceController(ASourceController):
 
     def __init__(self):
         ASourceController.__init__(self)
-        self.__resolve_groups = set(['factual','singleplatform'])
-        self.__max_resolve_ages = {
-            'factual': timedelta(30),
-            'singleplatform': timedelta(30),
-        }
-        self.__resolve_source_priorities = {
-            'factual': ['factual','singleplatform'],
-            'singleplatform': ['factual'],
-        }
-        self.__resolve_timestamps = {
-            'factual': ['factual_timestamp'],
-            'singleplatform': ['singleplatform_timestamp'],
-        }
-        self.__resolve_sources = {
-            'factual': ['factual_source'],
-            'singleplatform': ['singleplatform_source'],
-        }
         self.__resolve = {
-            'ages':self.__max_resolve_ages,
-            'priorities':self.__resolve_source_priorities,
-            'timestamps':self.__resolve_timestamps,
-            'sources':self.__resolve_sources,
-            'groups':self.__resolve_groups,
+            'ages': {
+            },
+            'priorities': {
+                'factual': ['factual','singleplatform'],
+                'singleplatform': ['factual'],
+                'tmdb':['tmdb'],
+            },
+            'timestamps': {
+            },
+            'sources': {
+            }
         }
         self.__enrich = {
             'ages': {
@@ -63,6 +52,7 @@ class ExternalSourceController(ASourceController):
                 'cuisine':['factual'],
                 'alcohol_flag':['factual'],
                 'release_date':['cleaner'],
+                'cast_list':['tmdb'],
             },
             'timestamps': {
             },
@@ -102,9 +92,9 @@ class ExternalSourceController(ASourceController):
             return False
 
         max_age = timedelta(30)
-        timestamp_path = "%s_timestamp" % group
+        timestamp_path = ["%s_timestamp" % group]
         sources = state['sources']
-        source_path = "%s_source" % group
+        source_path = ["%s_source" % group]
 
         ages = state['ages']
         sources = state['sources']
@@ -125,8 +115,8 @@ class ExternalSourceController(ASourceController):
             elif delta < 0:
                 return False
             else:
-                old_timestamp = self.__field(entity, timestamps[group])
-                return self.__stale(old_timestamp, timestamp, ages[group])
+                old_timestamp = self.__field(entity, timestamp_path)
+                return self.__stale(old_timestamp, timestamp, max_age)
         else:
             return False
 
