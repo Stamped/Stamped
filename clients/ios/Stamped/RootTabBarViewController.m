@@ -21,6 +21,9 @@
 #import "STSearchField.h"
 #import "Util.h"
 
+#warning remove
+#import "STTooltipView.h"
+
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -172,10 +175,17 @@
                                                nil];
   // This will load all views.
   [self ensureCorrectHeightOfViewControllers];
-  if (!self.tabBar.selectedItem) {
+  if (!self.tabBar.selectedItem)
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
-    [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
-  }
+
+  [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
+  
+  STTooltipView* tooltip = [[STTooltipView alloc] initWithFrame:CGRectMake(0, 0, 100, 32)];
+  tooltip.center = self.view.center;
+  tooltip.frame = CGRectOffset(tooltip.frame, 0, -50);
+  [self.view addSubview:tooltip];
+  
+  [tooltip release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
