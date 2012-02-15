@@ -874,7 +874,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):
-        pass
+        # TODO
+        raise NotImplementedError()
     
     """
     #######                                      

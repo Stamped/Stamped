@@ -237,6 +237,8 @@
 		7E42DCC813DB72B300AF63BE /* shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */; };
 		7E42FDDF13EF0F0E007B3C26 /* profile_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */; };
 		7E42FDE013EF0F0E007B3C26 /* profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */; };
+		7E43FECE14EB08E500C6AC9D /* STTooltipView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E43FECD14EB08E500C6AC9D /* STTooltipView.m */; };
+		7E43FECF14EB08E500C6AC9D /* STTooltipView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E43FECD14EB08E500C6AC9D /* STTooltipView.m */; };
 		7E453720140F003C0097E64F /* PeopleListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* PeopleListViewController.m */; };
 		7E453721140F003C0097E64F /* PeopleListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* PeopleListViewController.xib */; };
 		7E45866514D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45866414D7346F0031BB45 /* STSelectCountryTableViewCell.m */; };
@@ -1846,6 +1848,8 @@
 		7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_background@2x.png"; sourceTree = "<group>"; };
 		7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_placeholder.png; sourceTree = "<group>"; };
 		7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_placeholder@2x.png"; sourceTree = "<group>"; };
+		7E43FECC14EB08E500C6AC9D /* STTooltipView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTooltipView.h; sourceTree = "<group>"; };
+		7E43FECD14EB08E500C6AC9D /* STTooltipView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTooltipView.m; sourceTree = "<group>"; };
 		7E45371D140F003B0097E64F /* PeopleListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleListViewController.h; sourceTree = "<group>"; };
 		7E45371E140F003B0097E64F /* PeopleListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleListViewController.m; sourceTree = "<group>"; };
 		7E45371F140F003B0097E64F /* PeopleListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PeopleListViewController.xib; path = ../Interfaces/PeopleListViewController.xib; sourceTree = "<group>"; };
@@ -4067,6 +4071,8 @@
 				7E7DDE13145A0AE50058ACA9 /* STToolbar.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
+				7E43FECC14EB08E500C6AC9D /* STTooltipView.h */,
+				7E43FECD14EB08E500C6AC9D /* STTooltipView.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 				7EE70C4B13FC61AE008CCC15 /* STSectionHeaderView.h */,
@@ -5703,6 +5709,7 @@
 				7E45866614D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 				7E6C257414D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
 				7EDC8FCE14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
+				7E43FECF14EB08E500C6AC9D /* STTooltipView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5847,6 +5854,7 @@
 				7E45866514D7346F0031BB45 /* STSelectCountryTableViewCell.m in Sources */,
 				7E6C257314D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
 				7EDC8FCD14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
+				7E43FECE14EB08E500C6AC9D /* STTooltipView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
