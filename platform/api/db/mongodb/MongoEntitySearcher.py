@@ -1231,8 +1231,7 @@ class MongoEntitySearcher(EntitySearcher):
         if coords is not None and isinstance(coords, basestring):
             lat, lng = coords.split(',')
             coords = [ float(lat), float(lng) ]
-        
-        if coords is not None and 'lat' in coords and coords.lat is not None:
+        elif coords is not None and 'lat' in coords and coords.lat is not None:
             try:
                 coords = [coords['lat'], coords['lng']]
                 
@@ -1242,7 +1241,8 @@ class MongoEntitySearcher(EntitySearcher):
                 msg = "Invalid coordinates (%s)" % coords
                 logs.warning(msg)
                 raise StampedInputError(msg)
-        
+        else:
+            return None
         return coords
     
     def _handle_search_error(self, key, error):
