@@ -19,6 +19,7 @@ typedef enum {
 } STMapViewControllerSource;
 
 @class STSearchField;
+@class STToolbar;
 @class User;
 
 @interface STMapViewController : UIViewController <MKMapViewDelegate,
@@ -34,6 +35,7 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
+@property (nonatomic, retain) IBOutlet STToolbar* toolbar;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
 
 - (IBAction)cancelButtonPressed:(id)sender;

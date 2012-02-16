@@ -391,14 +391,14 @@
 }
 
 - (void)showMapView {
-  [mapViewController_ viewWillAppear:YES];
-  [selectedViewController_ viewWillDisappear:YES];
-
   if ([selectedViewController_ isMemberOfClass:[InboxViewController class]])
     mapViewController_.source = STMapViewControllerSourceInbox;
   else if ([selectedViewController_ isMemberOfClass:[TodoViewController class]])
     mapViewController_.source = STMapViewControllerSourceTodo;
 
+  [mapViewController_ viewWillAppear:YES];
+  [selectedViewController_ viewWillDisappear:YES];
+  
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
