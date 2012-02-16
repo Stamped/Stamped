@@ -41,12 +41,13 @@ class TMDBSource(AExternalSource):
         result = None
         if 'release_date' in movie:
             date_string = movie['release_date']
-            match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date_string)
-            if match is not None:
-                try:
-                    result = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-                except ValueError:
-                    pass
+            if date_string is not None:
+                match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date_string)
+                if match is not None:
+                    try:
+                        result = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+                    except ValueError:
+                        pass
         return result
 
     def resolveEntity(self, entity, controller):
@@ -62,6 +63,8 @@ class TMDBSource(AExternalSource):
             title = entity['title']
             if title is not None:
                 movies = self.__tmdb.movie_search(title)['results']
+                if len(movies) > 5:
+                    movies = movies[:5]
                 best_movie = None
                 for movie in movies:
                     score = 0
@@ -78,7 +81,7 @@ class TMDBSource(AExternalSource):
                     else:
                         alternative_titles = self.__tmdb.movie_alternative_titles(movie['id'])
                         found = False
-                        for alternative_title in alternative_title:
+                        for alternative_title in alternative_titles:
                             if alternative_title == title:
                                 found = True
                                 break
@@ -116,5 +119,22 @@ class TMDBSource(AExternalSource):
         Returns the name of this source as would be used with a SourceController.
         """
         return 'tmdb'
-    
 
+
+if __name__ == '__main__':
+    import MongoStampedAPI
+    api = MongoStampedAPI.MongoStampedAPI()
+    db = api._entityDB
+    
+    rs = db._collection.find({
+        "subcategory": "movie",
+       # "sources.tmdb.tmdb_id": {'$exists':False},
+    })
+    li = list(rs)
+    for i in range(len(li)):
+        doc = li[i]
+        entity = db._convertFromMongo(doc)
+        modified = db.enrichEntity(entity)
+        print("%-6supdating menu for %s: %d / %d" % ( modified, entity.title, i , len(li) ) )
+        if modified:
+            db.update(entity)

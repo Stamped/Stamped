@@ -60,6 +60,12 @@ def parseCommandLine():
 def main():
     # parse commandline
     (options, args) = parseCommandLine()
+    if 'mario' in args:
+        print('you are dealing with MARIO!!!!!!!!\n\nAre you sure? (yes or no)')
+        line = sys.stdin.readline().strip()
+        if line != 'yes':
+            print("aborting!!!")
+            return
     
     deploymentSystem = AWSDeploymentPlatform(options)
     command = args[0]

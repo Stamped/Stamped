@@ -72,21 +72,17 @@ class ExternalSourceController(ASourceController):
         }
 
     def shouldResolve(self, group, source, entity,timestamp=None):
-        if timestamp == None:
-            timestamp = datetime.utcnow()
-        return self.__genericShould(group, source, entity, timestamp, self.__resolve)
+        return self.genericShould(group, source, entity, timestamp, self.__resolve)
     
     def shouldEnrich(self, group, source, entity,timestamp=None):
-        if timestamp == None:
-            timestamp = datetime.utcnow()
-        return self.__genericShould(group, source, entity, timestamp, self.__enrich)
+        return self.genericShould(group, source, entity, timestamp, self.__enrich)
 
     def shouldDecorate(self, group, source, entity,timestamp=None):
-        if timestamp == None:
-            timestamp = datetime.utcnow()
-        return self.__genericShould(group, source, entity, timestamp, self.__decorate)
+        return self.genericShould(group, source, entity, timestamp, self.__decorate)
 
-    def __genericShould(self, group, source, entity, timestamp, state):
+    def genericShould(self, group, source, entity, timestamp, state):
+        if timestamp is None:
+            timestamp = self.now()
         priorities = state['priorities']
         if group not in priorities:
             return False

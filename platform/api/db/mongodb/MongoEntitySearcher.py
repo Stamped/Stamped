@@ -29,6 +29,8 @@ from libs.TheTVDB   import TheTVDB
 from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
+import tasks
+import tasks.APITasks
 
 # Stamped HQ coords: '40.736006685255155,-73.98884296417236'
 
@@ -678,13 +680,14 @@ class MongoEntitySearcher(EntitySearcher):
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
-            gevent.spawn(self._add_temp, results)
+            #gevent.spawn(self._add_temp, results)
+            tasks.invoke(tasks.APITasks._saveTempEntity, args=[results])
         
         return results
     
     def _add_temp(self, results):
         """ retain a copy of all external entities in the 'tempentities' collection """
-        
+        logs.debug('Saving tempentities')
         for result in results:
             entity = result[0]
             
@@ -696,13 +699,17 @@ class MongoEntitySearcher(EntitySearcher):
                     #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
                     self.tempDB.addEntity(entity)
                     entity.entity_id = entity.search_id
+                    logs.info('Added %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                 except:
                     # TODO: why is this occasionally failing?
                     if entity.search_id is not None:
                         entity.entity_id = entity.search_id
                     
                     utils.printException()
+                    logs.warning('Error trying to add %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                     pass
+            else:
+                logs.info('did not add %s to tempentities:\n%s\n'%(entity.entity_id,pformat(entity.value)))
     
     def _prune_results(self, results, limit, prefix):
         """ limit the number of results returned and remove obvious duplicates """

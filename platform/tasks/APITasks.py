@@ -121,12 +121,12 @@ def getComments(*args, **kwargs):
     invoke(getComments.request, *args, **kwargs)
 
 @task(ignore_result=True)
-def _convertSearchId(*args, **kwargs):
-    invoke(_convertSearchId.request, *args, **kwargs)
+def _enrichEntity(*args, **kwargs):
+    invoke(_enrichEntity.request, *args, **kwargs)
 
 @task(ignore_result=True)
-def _updateMenu(*args, **kwargs):
-    invoke(_updateMenu.request, *args, **kwargs)
+def _saveTempEntity(*args, **kwargs):
+    invoke(_saveTempEntity.request, *args, **kwargs)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options]"

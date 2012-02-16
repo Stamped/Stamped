@@ -723,7 +723,7 @@ typedef enum {
   }
   
   if ([MFMailComposeViewController canSendMail])
-    [sheet addButtonWithTitle:@"Email..."];
+    [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
   
   [sheet addButtonWithTitle:@"Copy link"];
   sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
@@ -1038,7 +1038,7 @@ typedef enum {
       [UIPasteboard generalPasteboard].string = stamp_.URL;
     } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Share to Twitter..."] && canTweet) {  // Twitter or cancel depending...
       [self showTweetViewController];
-    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Email..."]) {
+    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
       [self showEmailViewController];
     }
   }

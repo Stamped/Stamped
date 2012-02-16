@@ -17,6 +17,7 @@
 #import "StampDetailViewController.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
+#import "STToolbar.h"
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
@@ -61,6 +62,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize resultsArray = resultsArray_;
 @synthesize selectedAnnotation = selectedAnnotation_;
 @synthesize lastMapRect = lastMapRect_;
+@synthesize toolbar = toolbar_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -81,6 +83,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.scopeSlider = nil;
   self.resultsArray = nil;
   self.selectedAnnotation = nil;
+  self.toolbar = nil;
   [super dealloc];
 }
 
@@ -113,6 +116,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.scopeSlider.delegate = nil;
   self.scopeSlider = nil;
   self.selectedAnnotation = nil;
+  self.toolbar = nil;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -122,6 +126,13 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
   mapView_.showsUserLocation = NO;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  CGRect frame = mapView_.frame;
+  frame.size.height = toolbar_.hidden ? 372 : 323;
+  mapView_.frame = frame;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -145,13 +156,15 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   }
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    searchField_.placeholder = @"Search stamps";
+    searchField_.placeholder = NSLocalizedString(@"Search stamps", nil);
+    toolbar_.hidden = NO;
     if (source_ == STMapViewControllerSourceInbox)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityFriends animated:NO];
     else if (source_ == STMapViewControllerSourceUser)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityYou animated:NO];
   } else if (source_ == STMapViewControllerSourceTodo) {
-    searchField_.placeholder = @"Search to-dos";
+    searchField_.placeholder = NSLocalizedString(@"Search to-dos", nil);
+    toolbar_.hidden = YES;
   }
   [self removeAllAnnotations];
 }

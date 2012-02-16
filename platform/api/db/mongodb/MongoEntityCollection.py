@@ -34,9 +34,6 @@ except:
     report()
     raise
 
-_menu_sources = {
-    'singleplatform':'singleplatform_id',
-}
 
 class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
@@ -71,10 +68,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def __cleaner(self):
         return CleanerSource()
-
-    @lazyProperty
-    def __controller(self):
-        return ExternalSourceController()
     
     @lazyProperty
     def __sources(self):
@@ -112,37 +105,38 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             result.append(self._convertFromMongo(item))
         return result
     
-    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True,max_cycles=4):
-        self.__controller.clearNow()
+    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True,max_cycles=4,controller=None):
+        if controller is None:
+            controller = ExternalSourceController()
         update_required_total = False
         for i in range(max_cycles):
             update_required = False
             if resolve:
                 for source in self.__sources:
                     try:
-                        modified = source.resolveEntity(entity, self.__controller)
+                        modified = source.resolveEntity(entity, controller)
                         if modified:
                             log.info('%s resolved %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected resolve error from %s" % source.sourceName)
             if enrich:
                 for source in self.__sources:
                     try:
-                        modified = source.enrichEntity(entity, self.__controller)
+                        modified = source.enrichEntity(entity, controller)
                         if modified:
                             log.info('%s enriched %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected enrich error from %s" % source.sourceName)
             if decorate:
                 for source in self.__sources:
                     try:
-                        modified = source.decorateEntity(entity, self.__controller, self)
+                        modified = source.decorateEntity(entity, controller, self)
                         if modified:
                             log.info('%s decorated %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected decorate error from %s" % source.sourceName)
             update_required_total |= update_required
             if update_required is False:
