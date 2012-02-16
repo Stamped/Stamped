@@ -2767,7 +2767,7 @@ class StampedAPI(AStampedAPI):
         if doc is not None:
             entity = self._tempEntityDB._convertFromMongo(doc)
         if entity is not None:
-            logs.debug('looked up temp entity:\n%s\n',pformat(entity.value))
+            logs.debug('looked up temp entity:\n%s\n' % (pformat(entity.value),))
         
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
