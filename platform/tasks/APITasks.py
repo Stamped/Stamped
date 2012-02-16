@@ -124,6 +124,10 @@ def getComments(*args, **kwargs):
 def _enrichEntity(*args, **kwargs):
     invoke(_enrichEntity.request, *args, **kwargs)
 
+@task(ignore_result=True)
+def _saveTempEntity(*args, **kwargs):
+    invoke(_saveTempEntity.request, *args, **kwargs)
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
     version = "%prog " + __version__

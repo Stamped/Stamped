@@ -13,6 +13,7 @@ try:
 
     import utils
     import os, logs, re, time, urlparse
+    from logs           import log
 
     import Blacklist
     import libs.ec2_utils
@@ -2758,9 +2759,6 @@ class StampedAPI(AStampedAPI):
             # already a valid entity id
             return search_id
         
-        # flag for asynchronous Factual based enrichment
-        factual_enrichment_flag = False
-        
         # temporary entity_id; lookup in tempentities collection and 
         # merge result into primary entities db
         doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
@@ -2855,8 +2853,6 @@ class StampedAPI(AStampedAPI):
                     
                     logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
                 
-                if entity is not None:
-                    factual_enrichment_flag = True 
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             
@@ -2872,14 +2868,12 @@ class StampedAPI(AStampedAPI):
         assert entity.entity_id is not None
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
         
-        if factual_enrichment_flag:
-            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         
         return entity.entity_id
 
-    def _enrichEntity(self,entity_id):
+    def _enrichEntityAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
-        
         if entity is not None:
             modified  = self._entityDB.enrichEntity(entity)
             if modified:
@@ -2887,6 +2881,8 @@ class StampedAPI(AStampedAPI):
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
 
+    def _saveTempEntityAsync(self,results):
+        self._entitySearcher._add_temp(results)
     
     def _addEntity(self, entity):
         if entity is not None:

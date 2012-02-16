@@ -29,6 +29,8 @@ from libs.TheTVDB   import TheTVDB
 from Entity         import setFields, isEqual, getSimplifiedTitle
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
+import tasks
+import tasks.APITasks
 
 # Stamped HQ coords: '40.736006685255155,-73.98884296417236'
 
@@ -678,7 +680,8 @@ class MongoEntitySearcher(EntitySearcher):
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
-            gevent.spawn(self._add_temp, results)
+            #gevent.spawn(self._add_temp, results)
+            tasks.invoke(tasks.APITasks._saveTempEntity, args=[results])
         
         return results
     
