@@ -5,40 +5,51 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
-import os, logs, re, time, urlparse
+import Globals
 
-import Blacklist
-import libs.ec2_utils
-import libs.Memcache
-import tasks.APITasks
+from logs import report
 
-from pprint          import pprint, pformat
-from datetime        import datetime
-from auth            import convertPasswordForStorage
-from utils           import lazyProperty
-from functools       import wraps
-from errors          import *
+try:
 
-from AStampedAPI     import AStampedAPI
-from AAccountDB      import AAccountDB
-from AEntityDB       import AEntityDB
-from APlacesEntityDB import APlacesEntityDB
-from AUserDB         import AUserDB
-from AStampDB        import AStampDB
-from ACommentDB      import ACommentDB
-from AFavoriteDB     import AFavoriteDB
-from ACollectionDB   import ACollectionDB
-from AFriendshipDB   import AFriendshipDB
-from AActivityDB     import AActivityDB
-from Schemas         import *
+    import utils
+    import os, logs, re, time, urlparse
 
-# third-party search API wrappers
-from GooglePlaces    import GooglePlaces
-from libs.apple      import AppleAPI
-from libs.AmazonAPI  import AmazonAPI
-from libs.TheTVDB    import TheTVDB
-from libs.Factual    import Factual
+    import Blacklist
+    import libs.ec2_utils
+    import libs.Memcache
+    import tasks.APITasks
+
+    from pprint          import pprint, pformat
+    from datetime        import datetime
+    from auth            import convertPasswordForStorage
+    from utils           import lazyProperty
+    from functools       import wraps
+    from errors          import *
+
+    from AStampedAPI     import AStampedAPI
+    from AAccountDB      import AAccountDB
+    from AEntityDB       import AEntityDB
+    from APlacesEntityDB import APlacesEntityDB
+    from AUserDB         import AUserDB
+    from AStampDB        import AStampDB
+    from ACommentDB      import ACommentDB
+    from AFavoriteDB     import AFavoriteDB
+    from ACollectionDB   import ACollectionDB
+    from AFriendshipDB   import AFriendshipDB
+    from AActivityDB     import AActivityDB
+    from Schemas         import *
+
+    # third-party search API wrappers
+    from GooglePlaces    import GooglePlaces
+    from libs.apple      import AppleAPI
+    from libs.AmazonAPI  import AmazonAPI
+    from libs.TheTVDB    import TheTVDB
+    from libs.Factual    import Factual
+    from libs.ec2_utils  import is_prod_stack
+
+except:
+    report()
+    raise
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -65,6 +76,13 @@ class StampedAPI(AStampedAPI):
         
         if not self.lite_mode:
             utils.log("StampedAPI running on node '%s'" % (self.node_name))
+        
+        try:
+            self.__is_prod = is_prod_stack()
+        except Exception:
+            log.warning('is_prod_stack threw an exception; defaulting to True',exc_info=1)
+            self.__is_prod = True
+        self.__is_prod = True
     
     @property
     def node_name(self):
@@ -1140,9 +1158,12 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         ### TODO: Check if user has access to this entity?
-        modified = self._entityDB.enrichEntity(entity,decorate=False)
-        if modified:
-            self._entityDB.update(entity)
+        if self.__is_prod is False:
+            modified = self._entityDB.enrichEntity(entity,decorate=False)
+            if modified:
+                self._entityDB.update(entity)
+        else:
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
     
     @API_CALL
@@ -2852,11 +2873,11 @@ class StampedAPI(AStampedAPI):
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
         
         if factual_enrichment_flag:
-            tasks.invoke(tasks.APITasks._convertSearchId, args=[entity.entity_id])
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         
         return entity.entity_id
-    
-    def _convertSearchIdAsync(self,entity_id):
+
+    def _enrichEntity(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
         
         if entity is not None:
@@ -2865,6 +2886,7 @@ class StampedAPI(AStampedAPI):
                 self._entityDB.update(entity)
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
+
     
     def _addEntity(self, entity):
         if entity is not None:
