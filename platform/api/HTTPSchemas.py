@@ -316,6 +316,11 @@ class HTTPUser(Schema):
             raise NotImplementedError
         return self
 
+class HTTPSuggestedUser(HTTPUser):
+    def setSchema(self):
+        HTTPUser.setSchema(self)
+        self.explanations       = SchemaList(SchemaElement(basestring))
+
 class HTTPUserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)

@@ -19,8 +19,9 @@ from api.ACollectionDB              import ACollectionDB
 
 class MongoCollectionCollection(ACollectionDB):
     
-    def __init__(self):
+    def __init__(self, api=None):
         ACollectionDB.__init__(self)
+        self.api = api
     
     ### PUBLIC
     
@@ -49,15 +50,24 @@ class MongoCollectionCollection(ACollectionDB):
     def getUserCreditStampIds(self, userId):
         return self.user_credit_collection.getCredit(userId)
     
+    def getMentions(self, userId):
+        raise NotImplementedError
+    
     # TODO: optimize this function; find more efficient alternative to heapq?
     # TODO: cache results of this function locally and in Memcached
     def getFriendsStampIds(self, userId, friendsSlice):
+        inclusive       = friendsSlice.inclusive
+        max_distance    = friendsSlice.distance
+        
+        if inclusive and max_distance == 2:
+            stamp_ids   = self._getCachedFriendsStampIds(userId)
+            
+            if stamp_ids is not None:
+                return stamp_ids
+        
         visited_users   = set()
         stamp_ids       = []
         todo            = []
-        
-        inclusive       = friendsSlice.inclusive
-        max_distance    = friendsSlice.distance
         
         if max_distance == 0:
             stamp_ids.update(self.getUserStampIds(userId))
@@ -111,8 +121,28 @@ class MongoCollectionCollection(ACollectionDB):
         if max_distance <= 2:
             stamp_ids = list(stamp_ids)
         
-        return stamp_ids, visited_users
+        return stamp_ids
     
-    def getMentions(self, userId):
-        raise NotImplementedError
+    def _getCachedFriendsStampIds(self, userId):
+        # TODO: add friendsSlice params if / once they're actually used
+        if self.api is not None:
+            try:
+                key = self._getFoFCacheKey(userId)
+                
+                return self.api._cache[key]
+            except:
+                pass
+    
+    def _cacheFriendsStampIds(self, userId, value):
+        if self.api is not None:
+            try:
+                key = self._getFoFCacheKey(userId)
+                
+                # TTL of 2 weeks
+                return self.api._cache.set(key, value, time=14*24*60*60)
+            except:
+                pass
+    
+    def _getFoFCacheKey(self, userId):
+        return "fof(%s)" % userId
 

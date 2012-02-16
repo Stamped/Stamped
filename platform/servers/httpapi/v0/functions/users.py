@@ -58,11 +58,18 @@ def suggested(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPSuggestedUsers(), request)
     
-    users       = stampedAPI.getSuggestedUsers(authUserId, schema.personalized)
+    results     = stampedAPI.getSuggestedUsers(authUserId, schema.personalized)
     output      = []
     
-    for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+    if schema.personalized:
+        for user, explanations in results:
+            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            user2.explanations = explanations
+            output.append(user2)
+    else:
+        for user in results:
+            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            output.append(user2)
     
     return transformOutput(output)
 
