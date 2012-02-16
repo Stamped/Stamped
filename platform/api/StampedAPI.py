@@ -47,6 +47,7 @@ try:
     from libs.TheTVDB    import TheTVDB
     from libs.Factual    import Factual
     from libs.ec2_utils  import is_prod_stack
+    from pprint          import pformat
 
 except:
     report()
@@ -2766,6 +2767,8 @@ class StampedAPI(AStampedAPI):
         
         if doc is not None:
             entity = self._tempEntityDB._convertFromMongo(doc)
+        if entity is not None:
+            log.debug('looked up temp entity:\n%s\n',pformat(entity.value))
         
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
@@ -2841,6 +2844,7 @@ class StampedAPI(AStampedAPI):
                             entity.address.lower() == entity2.address.lower())
                 
                 if replace:
+                    log.debug('replaced entity with:\n%s\n',pformat(entity2))
                     entity = entity2
                     self._googlePlaces.parseEntityDetail(details, entity)
                 elif entity is None:
