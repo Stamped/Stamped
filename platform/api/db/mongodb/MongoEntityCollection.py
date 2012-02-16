@@ -124,7 +124,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         if modified:
                             log.info('%s resolved %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected resolve error from %s" % source.sourceName)
             if enrich:
                 for source in self.__sources:
@@ -133,7 +133,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         if modified:
                             log.info('%s enriched %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected enrich error from %s" % source.sourceName)
             if decorate:
                 for source in self.__sources:
@@ -142,7 +142,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         if modified:
                             log.info('%s decorated %s',source.sourceName,entity.title)
                         update_required |= modified
-                    except:
+                    except Exception:
                         report("Unexpected decorate error from %s" % source.sourceName)
             update_required_total |= update_required
             if update_required is False:
