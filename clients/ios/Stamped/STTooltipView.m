@@ -86,16 +86,6 @@ static const CGFloat kTriangleWidth = 12.0;
   return CGSizeMake(CGRectGetWidth(textLabel_.bounds) + 22, 32 + kTriangleHeight);
 }
 
-- (void)setFrame:(CGRect)frame {
-  [super setFrame:frame];
-  [self updatePath];
-}
-
-- (void)setBounds:(CGRect)bounds {
-  [super setBounds:bounds];
-  [self updatePath];
-}
-
 - (void)updatePath {
   CGRect rect = CGRectOffset(CGRectInset(self.bounds, 0, kTriangleHeight / 2), 0, -(kTriangleHeight / 2));
   shapeLayer_.path = [self pathForRect:CGRectInset(rect, 1, 1)].CGPath;
@@ -145,11 +135,19 @@ static const CGFloat kTriangleWidth = 12.0;
 }
 
 - (void)setText:(NSString*)text animated:(BOOL)animated {
+  if ([textLabel_.text isEqualToString:text])
+    return;
+
   textLabel_.text = text;
   [self setNeedsLayout];
   [self layoutIfNeeded];
   if (!animated) {
+    CGFloat oldWidth = CGRectGetWidth(self.bounds);
     [self sizeToFit];
+    CGRect frame = self.frame;
+    frame.origin.x -= (CGRectGetWidth(self.bounds) - oldWidth) / 2;
+    self.frame = frame;
+    [self updatePath];
     [self setNeedsDisplay];
     return;
   }
@@ -161,15 +159,22 @@ static const CGFloat kTriangleWidth = 12.0;
   CABasicAnimation* borderAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
   borderAnimation.duration = 0.3;
   borderAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-
-  animation.fromValue = (id)shapeLayer_.path;
-  borderAnimation.fromValue = (id)borderShapeLayer_.path;
+  animation.fromValue = [(id)(shapeLayer_.presentationLayer) path];
+  borderAnimation.fromValue = [(id)borderShapeLayer_.presentationLayer path];
+  CGFloat oldWidth = CGRectGetWidth(self.bounds);
   [self sizeToFit];
+  [self updatePath];
   animation.toValue = (id)shapeLayer_.path;
   borderAnimation.toValue = (id)borderShapeLayer_.path;
   [shapeLayer_ addAnimation:animation forKey:@"animatePath"];
   [borderShapeLayer_ addAnimation:borderAnimation forKey:@"animatePath"];
-
+  CGRect frame = self.frame;
+  frame.origin.x -= (CGRectGetWidth(self.bounds) - oldWidth) / 2;
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{ self.frame = frame; }
+                   completion:nil];
 }
 
 @end

@@ -126,7 +126,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  NSLog(@"Annotations count: %d", mapView_.annotations.count);
   mapView_.showsUserLocation = YES;
 }
 

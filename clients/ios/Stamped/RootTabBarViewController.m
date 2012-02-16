@@ -21,9 +21,6 @@
 #import "STSearchField.h"
 #import "Util.h"
 
-#warning remove
-#import "STTooltipView.h"
-
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -151,12 +148,6 @@
   [self updateNavBar];
 }
 
-#warning remove
-
-- (void)changeText:(STTooltipView*)view {
-  [view setText:@"friends" animated:YES];
-}
-
 - (void)finishViewInit {
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
@@ -185,13 +176,6 @@
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
 
   [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
-  
-  STTooltipView* tooltip = [[STTooltipView alloc] initWithText:@"friends of friends"];
-  tooltip.center = self.view.center;
-  tooltip.frame = CGRectOffset(tooltip.frame, 0, -50);
-  [self.view addSubview:tooltip];
-  [self performSelector:@selector(changeText:) withObject:tooltip afterDelay:1];
-  [tooltip release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {

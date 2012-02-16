@@ -8,15 +8,22 @@
 
 #import "STMapScopeSlider.h"
 
+#import "STTooltipView.h"
+
 @interface STMapScopeSlider ()
 - (void)commonInit;
 - (void)valueChanged:(id)sender;
 - (void)dragEnded:(id)sender;
+- (void)dragBegan:(id)sender;
 - (void)updateImage;
+- (void)updateTooltipPosition;
+
+@property (nonatomic, readonly) STTooltipView* tooltipView;
 @end
 
 @implementation STMapScopeSlider
 
+@synthesize tooltipView = tooltipView_;
 @synthesize granularity = granularity_;
 @synthesize delegate = delegate_;
 
@@ -38,6 +45,7 @@
 
 - (void)dealloc {
   delegate_ = nil;
+  tooltipView_ = nil;
   [super dealloc];
 }
 
@@ -51,15 +59,63 @@
   [self setMaximumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
   [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
   [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
+  [self addTarget:self action:@selector(dragBegan:) forControlEvents:UIControlEventTouchDown];
+  tooltipView_ = [[STTooltipView alloc] initWithText:@"friends of friends"];
+  tooltipView_.center = self.center;
+  tooltipView_.frame = CGRectOffset(tooltipView_.frame, 0, -57);
+  tooltipView_.alpha = 0;
+  [self addSubview:tooltipView_];
+  [tooltipView_ release];
+}
+
+- (void)updateTooltipPosition {
+  CGFloat range = CGRectGetWidth(self.frame) - self.currentThumbImage.size.width;
+  NSInteger xPos = ((self.value * range) + (self.currentThumbImage.size.width / 2.0));
+  tooltipView_.center = CGPointMake(xPos, tooltipView_.center.y);
 }
 
 - (void)valueChanged:(id)sender {
+  [self updateTooltipPosition];
+  NSInteger quotient = (self.value / 0.333f) + 0.5f;
+  STMapScopeSliderGranularity granularity = quotient;
+  NSString* string = nil;
+  switch (granularity) {
+    case STMapScopeSliderGranularityYou:
+      string = @"you";
+      break;
+    case STMapScopeSliderGranularityFriends:
+      string = @"friends";
+      break;
+    case STMapScopeSliderGranularityFriendsOfFriends:
+      string = @"friends of friends";
+      break;
+    case STMapScopeSliderGranularityEveryone:
+      string = @"popular";
+      break;
+    default:
+      break;
+  }
+  if (string)
+    [tooltipView_ setText:string animated:NO];
+}
 
+- (void)dragBegan:(id)sender {
+  [self updateTooltipPosition];
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{ tooltipView_.alpha = 1.0; }
+                   completion:nil];
 }
 
 - (void)dragEnded:(id)sender {
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
   [self setGranularity:quotient animated:YES];
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{ tooltipView_.alpha = 0.0; }
+                   completion:nil];
 }
 
 - (void)setGranularity:(STMapScopeSliderGranularity)granularity animated:(BOOL)animated {
@@ -74,6 +130,13 @@
 
   CGFloat value = granularity == 3 ? 1.0 : granularity * 0.333;
   [self setValue:value animated:animated];
+  if (animated) {
+    [UIView animateWithDuration:0.1 animations:^{
+      [self updateTooltipPosition];
+    }];
+  } else {
+    [self updateTooltipPosition];
+  }
 }
 
 - (void)updateImage {
