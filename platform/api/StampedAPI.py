@@ -2778,8 +2778,6 @@ class StampedAPI(AStampedAPI):
         
         if doc is not None:
             entity = self._tempEntityDB._convertFromMongo(doc)
-        if entity is not None:
-            logs.debug('looked up temp entity:\n%s\n' % (pformat(entity.value),))
         
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
@@ -2855,7 +2853,6 @@ class StampedAPI(AStampedAPI):
                             entity.address.lower() == entity2.address.lower())
                 
                 if replace:
-                    logs.debug('replaced entity with:\n%s\n',pformat(entity2))
                     entity = entity2
                     self._googlePlaces.parseEntityDetail(details, entity)
                 elif entity is None:
@@ -2898,7 +2895,6 @@ class StampedAPI(AStampedAPI):
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
 
     def _saveTempEntityAsync(self,results):
-        logs.debug('Saving tempentities')
         self._entitySearcher._add_temp(results)
     
     def _addEntity(self, entity):

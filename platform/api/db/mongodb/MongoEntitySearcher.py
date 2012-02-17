@@ -692,7 +692,7 @@ class MongoEntitySearcher(EntitySearcher):
     
     def _add_temp(self, results):
         """ retain a copy of all external entities in the 'tempentities' collection """
-        logs.debug('Saving tempentities')
+        #logs.debug('Saving tempentities')
         for result in results:
             entity = result[0]
             
@@ -704,7 +704,7 @@ class MongoEntitySearcher(EntitySearcher):
                     #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
                     self.tempDB.addEntity(entity)
                     entity.entity_id = entity.search_id
-                    logs.info('Added %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
+                    #logs.info('Added %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                 except:
                     # TODO: why is this occasionally failing?
                     if entity.search_id is not None:
@@ -714,7 +714,8 @@ class MongoEntitySearcher(EntitySearcher):
                     logs.warning('Error trying to add %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                     pass
             else:
-                logs.info('did not add %s to tempentities:\n%s\n'%(entity.entity_id,pformat(entity.value)))
+                pass
+                #logs.info('did not add %s to tempentities:\n%s\n'%(entity.entity_id,pformat(entity.value)))
     
     def _prune_results(self, results, limit, prefix):
         """ limit the number of results returned and remove obvious duplicates """

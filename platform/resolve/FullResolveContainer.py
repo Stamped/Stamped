@@ -16,6 +16,7 @@ try:
     from EntityGroups           import *
 
     from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
 except:
     report()
     raise
@@ -40,4 +41,9 @@ class FullResolveContainer(BasicSourceContainer):
         for group in groups:
             self.addGroup(group)
 
-        self.addSource(FactualSource())
+        sources = [
+            FactualSource(),
+            GooglePlacesSource()
+        ]
+        for source in sources:
+            self.addSource(source)
