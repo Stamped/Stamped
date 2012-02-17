@@ -2848,8 +2848,7 @@ class StampedAPI(AStampedAPI):
                 
                 replace  = (entity is None and entity2 is not None)
                 replace |= (entity is not None and entity2 is not None and 
-                            entity.title.lower() == entity2.title.lower() and
-                            entity.address.lower() == entity2.address.lower())
+                            entity.title.lower() == entity2.title.lower())
                 
                 if replace:
                     entity = entity2
