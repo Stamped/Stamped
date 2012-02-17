@@ -122,12 +122,12 @@
 - (void)setGranularity:(STMapScopeSliderGranularity)granularity animated:(BOOL)animated {
   if (granularity != granularity_) {
     granularity_ = granularity;
-    
-    if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
-      [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
-    
-    [self updateImage];
   }
+  
+  if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
+    [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
+  
+  [self updateImage];  
 
   CGFloat value = granularity == 3 ? 1.0 : granularity * 0.333;
   [self setValue:value animated:animated];
