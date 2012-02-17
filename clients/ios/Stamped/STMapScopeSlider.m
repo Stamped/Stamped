@@ -84,7 +84,7 @@
       string = @"you";
       break;
     case STMapScopeSliderGranularityFriends:
-      string = @"friends";
+      string = @"your friends";
       break;
     case STMapScopeSliderGranularityFriendsOfFriends:
       string = @"friends of friends";
