@@ -2626,6 +2626,8 @@ class StampedAPI(AStampedAPI):
         else:
             stampCap    = 20
             commentCap  = 4
+
+        kwargs['sort'] = 'created'
         
         # Limit slice of data returned
         params = self._setSliceParams(kwargs, stampCap)
