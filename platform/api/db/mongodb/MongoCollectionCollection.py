@@ -55,11 +55,13 @@ class MongoCollectionCollection(ACollectionDB):
     
     # TODO: optimize this function; find more efficient alternative to heapq?
     # TODO: cache results of this function locally and in Memcached
+    
     def getFriendsStampIds(self, userId, friendsSlice):
         inclusive       = friendsSlice.inclusive
         max_distance    = friendsSlice.distance
+        cache           = (inclusive and max_distance == 2)
         
-        if inclusive and max_distance == 2:
+        if cache:
             stamp_ids   = self._getCachedFriendsStampIds(userId)
             
             if stamp_ids is not None:
@@ -121,8 +123,13 @@ class MongoCollectionCollection(ACollectionDB):
         if max_distance <= 2:
             stamp_ids = list(stamp_ids)
         
+        if cache:
+            self._cacheFriendsStampIds(userId, stamp_ids)
+        
         return stamp_ids
     
+    # small local LRU cache augmented by the global memcached cache
+    @lru_cache(maxsize=256)
     def _getCachedFriendsStampIds(self, userId):
         # TODO: add friendsSlice params if / once they're actually used
         if self.api is not None:
@@ -137,9 +144,9 @@ class MongoCollectionCollection(ACollectionDB):
         if self.api is not None:
             try:
                 key = self._getFoFCacheKey(userId)
+                ttl = 14 * 24 * 60 * 60 # TTL of 2 weeks
                 
-                # TTL of 2 weeks
-                return self.api._cache.set(key, value, time=14*24*60*60)
+                return self.api._cache.set(key, value, time=ttl)
             except:
                 pass
     

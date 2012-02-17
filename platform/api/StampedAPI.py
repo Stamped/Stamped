@@ -2429,7 +2429,6 @@ class StampedAPI(AStampedAPI):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
-        #logs.info("STAMP IDS: %s" % stampIds)
         
         return self._getStampCollection(authUserId, stampIds, userSlice)
     
