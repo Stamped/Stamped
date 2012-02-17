@@ -635,6 +635,21 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [self signOutOfFacebook:YES];
 }
 
+- (void)fbDidExtendToken:(NSString*)accessToken expiresAt:(NSDate*)expiresAt {
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:accessToken forKey:@"FBAccessTokenKey"];
+  [defaults setObject:expiresAt forKey:@"FBExpirationDateKey"];
+  [defaults synchronize];
+}
+
+- (void)fbDidLogout {
+  [self signOutOfFacebook:YES];
+}
+
+- (void)fbSessionInvalidated {
+  [self signOutOfFacebook:YES];
+}
+
 // FBRequestDelegate methods.
 
 - (void)request:(FBRequest*)request didLoad:(id)result {
