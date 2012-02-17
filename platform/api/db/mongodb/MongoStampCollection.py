@@ -139,7 +139,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return map(self._convertFromMongo, documents)
     
     def getStampsSlice(self, stampIds, genericSlice):
-        if stampIds is not None and len(stampIds) > 0:
+        if stampIds is not None:
+            if len(stampIds) == 0:
+                return []
+            
             ids     = map(self._getObjectIdFromString, stampIds)
             
             if len(ids) == 1:
