@@ -576,6 +576,8 @@ class MongoEntitySearcher(EntitySearcher):
                         entity.entity_id = entity.search_id
                     else:
                         return
+                elif entity.search_id is not None:
+                    del entity.search_id
                 
                 # if local search and result is too far away, discard it
                 if local and abs(result[1]) > 30 :
@@ -677,6 +679,9 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
+        #
+        # STYLE maybe unpack result into named variables for clarity -Landon
+        #
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
