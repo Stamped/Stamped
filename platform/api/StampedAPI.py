@@ -2552,9 +2552,11 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
+
+        kwargs['sort'] = 'created'
         
         # Limit slice of data returned
-        params = self._setSliceParams(kwargs, favCap, 'created')
+        params = self._setSliceParams(kwargs, favCap)
         
         favoriteData = self._favoriteDB.getFavorites(authUserId, **params)
         
