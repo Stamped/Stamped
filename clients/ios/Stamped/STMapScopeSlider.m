@@ -84,7 +84,7 @@
       string = @"you";
       break;
     case STMapScopeSliderGranularityFriends:
-      string = @"friends";
+      string = @"your friends";
       break;
     case STMapScopeSliderGranularityFriendsOfFriends:
       string = @"friends of friends";
@@ -96,7 +96,7 @@
       break;
   }
   if (string)
-    [tooltipView_ setText:string animated:NO];
+    [tooltipView_ setText:string animated:YES];
 }
 
 - (void)dragBegan:(id)sender {

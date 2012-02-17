@@ -873,9 +873,17 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getSuggestedUsers(self, authUserId, personalized):
         if personalized:
-            user_ids = self._friendshipDB.getSuggestedUserIds(authUserId)
+            suggestions = self._friendshipDB.getSuggestedUserIds(authUserId)
+            output      = []
             
-            return self.getUsers(user_ids, None, authUserId)
+            for suggestion in suggestions:
+                user_id      = suggestion[0]
+                explanations = suggestion[1]
+                user         = self._userDB.getUser(user_id)
+                
+                output.append([ user, explanations ])
+            
+            return output
         else:
             suggested = {
                 'mariobatali':      1, 
@@ -2430,7 +2438,7 @@ class StampedAPI(AStampedAPI):
         if friendsSlice.distance > 3 or friendsSlice.distance < 0:
             raise StampedInputError("Unsupported value for distance")
         
-        stampIds, _ = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
+        stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
         
         return self._getStampCollection(authUserId, stampIds, friendsSlice)
     
@@ -2544,9 +2552,11 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
+
+        kwargs['sort'] = 'created'
         
         # Limit slice of data returned
-        params = self._setSliceParams(kwargs, favCap, 'created')
+        params = self._setSliceParams(kwargs, favCap)
         
         favoriteData = self._favoriteDB.getFavorites(authUserId, **params)
         

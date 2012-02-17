@@ -15,6 +15,10 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
+		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
+		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
+		7E007BF914EEB69A00FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E05100414B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
 		7E05100514B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
 		7E07EBE614C73F1600A2B5F0 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */; };
@@ -1638,6 +1642,8 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
+		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
 		7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoadingMoreTableViewCell.h; sourceTree = "<group>"; };
 		7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLoadingMoreTableViewCell.m; sourceTree = "<group>"; };
@@ -3497,6 +3503,8 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7E007BF614EEB68400FB557E /* Default.png */,
+				7E007BF414EEB67000FB557E /* Default@2x.png */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -4930,6 +4938,8 @@
 				7EDC8FC814E81D2700E1FEEC /* scope_track.png in Resources */,
 				7EDC8FCA14E81D2700E1FEEC /* scope_track@2x.png in Resources */,
 				7E72761A14E8960C00C6323B /* clear_image@2x.png in Resources */,
+				7E007BF514EEB67000FB557E /* Default@2x.png in Resources */,
+				7E007BF714EEB68400FB557E /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5537,6 +5547,8 @@
 				7EDC8FC714E81D2700E1FEEC /* scope_track.png in Resources */,
 				7EDC8FC914E81D2700E1FEEC /* scope_track@2x.png in Resources */,
 				7E72761914E8960C00C6323B /* clear_image@2x.png in Resources */,
+				7E007BF814EEB69400FB557E /* Default@2x.png in Resources */,
+				7E007BF914EEB69A00FB557E /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5953,6 +5965,7 @@
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -5995,6 +6008,7 @@
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -6038,6 +6052,7 @@
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -6111,6 +6126,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = CONFIGURATION_Beta;
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -6239,6 +6255,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
@@ -6279,6 +6296,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "CONFIGURATION_$(CONFIGURATION)";
+				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;

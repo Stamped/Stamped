@@ -21,11 +21,12 @@ static const CGFloat kTriangleWidth = 12.0;
 
 @property (nonatomic, retain) CAShapeLayer* shapeLayer;
 @property (nonatomic, retain) CAShapeLayer* borderShapeLayer;
+@property (nonatomic, retain) CATextLayer* textLayer;
 @end
 
 @implementation STTooltipView
 
-@synthesize textLabel = textLabel_;
+@synthesize textLayer = textLayer_;
 @synthesize shapeLayer = shapeLayer_;
 @synthesize borderShapeLayer = borderShapeLayer_;
 
@@ -51,16 +52,18 @@ static const CGFloat kTriangleWidth = 12.0;
     gradientLayer.mask = shapeLayer_;
     [self.layer addSublayer:gradientLayer];
 
-    textLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-    textLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
-    textLabel_.backgroundColor = [UIColor clearColor];
-    textLabel_.textColor = [UIColor whiteColor];
-    textLabel_.shadowColor = [UIColor colorWithWhite:0 alpha:0.4];
-    textLabel_.shadowOffset = CGSizeMake(0, -1);
-    textLabel_.text = text;
-    [textLabel_ sizeToFit];
-    [self addSubview:textLabel_];
-    [textLabel_ release];
+    textLayer_ = [CATextLayer layer];
+    textLayer_.alignmentMode = kCAAlignmentCenter;
+    textLayer_.foregroundColor = [UIColor whiteColor].CGColor;
+    textLayer_.shadowOffset = CGSizeMake(0, -1);
+    textLayer_.contentsScale = [UIScreen mainScreen].scale;
+    CGFontRef font = CGFontCreateWithFontName((CFStringRef)@"Helvetica-Bold");
+    textLayer_.font = font;
+    CGFontRelease(font);
+    textLayer_.fontSize = 11;
+    textLayer_.string = text;
+    [self.layer addSublayer:textLayer_];
+
     [self sizeToFit];
     gradientLayer.frame = CGRectMake(0, 0, 320, CGRectGetHeight(self.bounds));
     borderGradientLayer.frame = CGRectMake(0, 0, 320, CGRectGetHeight(self.bounds) + 1);
@@ -70,20 +73,15 @@ static const CGFloat kTriangleWidth = 12.0;
 }
 
 - (void)dealloc {
-  textLabel_ = nil;
   self.shapeLayer = nil;
   self.borderShapeLayer = nil;
+  self.textLayer = nil;
   [super dealloc];
 }
 
-- (void)layoutSubviews {
-  [super layoutSubviews];
-  [textLabel_ sizeToFit];
-  textLabel_.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - (kTriangleHeight / 2));
-}
-
 - (CGSize)sizeThatFits:(CGSize)size {
-  return CGSizeMake(CGRectGetWidth(textLabel_.bounds) + 22, 32 + kTriangleHeight);
+  return CGSizeMake([(NSString*)textLayer_.string sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]].width + 22,
+                    kTriangleHeight + 32);
 }
 
 - (void)updatePath {
@@ -99,6 +97,7 @@ static const CGFloat kTriangleWidth = 12.0;
   CGPathRef strokePath = CGContextCopyPath(ctx);
   UIGraphicsEndImageContext();
   borderShapeLayer_.path = strokePath;
+  textLayer_.frame = CGRectOffset(rect, 0, 12);
 }
 
 - (UIBezierPath*)pathForRect:(CGRect)rect {
@@ -135,46 +134,41 @@ static const CGFloat kTriangleWidth = 12.0;
 }
 
 - (void)setText:(NSString*)text animated:(BOOL)animated {
-  if ([textLabel_.text isEqualToString:text])
+  if ([(NSString*)textLayer_.string isEqualToString:text])
     return;
 
-  textLabel_.text = text;
-  [self setNeedsLayout];
-  [self layoutIfNeeded];
+  textLayer_.string = text;
+  CGSize size = CGSizeMake([(NSString*)textLayer_.string sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]].width + 22,
+                           kTriangleHeight + 32);
   if (!animated) {
-    CGFloat oldWidth = CGRectGetWidth(self.bounds);
     [self sizeToFit];
-    CGRect frame = self.frame;
-    frame.origin.x -= (CGRectGetWidth(self.bounds) - oldWidth) / 2;
-    self.frame = frame;
+    self.bounds = CGRectMake(0, 0, size.width, size.height);
     [self updatePath];
     [self setNeedsDisplay];
     return;
   }
   self.layer.shadowPath = nil;
-  
+
   CABasicAnimation* animation = [CABasicAnimation animationWithKeyPath:@"path"];
-  animation.duration = 0.3;
+  animation.duration = 0.2;
   animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
   CABasicAnimation* borderAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
-  borderAnimation.duration = 0.3;
+  borderAnimation.duration = 0.2;
   borderAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-  animation.fromValue = [(id)(shapeLayer_.presentationLayer) path];
+  animation.fromValue = [(id)shapeLayer_.presentationLayer path];
   borderAnimation.fromValue = [(id)borderShapeLayer_.presentationLayer path];
-  CGFloat oldWidth = CGRectGetWidth(self.bounds);
-  [self sizeToFit];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     self.bounds = CGRectMake(0, 0, size.width, size.height);
+                   }
+                   completion:nil];  
   [self updatePath];
   animation.toValue = (id)shapeLayer_.path;
   borderAnimation.toValue = (id)borderShapeLayer_.path;
   [shapeLayer_ addAnimation:animation forKey:@"animatePath"];
   [borderShapeLayer_ addAnimation:borderAnimation forKey:@"animatePath"];
-  CGRect frame = self.frame;
-  frame.origin.x -= (CGRectGetWidth(self.bounds) - oldWidth) / 2;
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
-                   animations:^{ self.frame = frame; }
-                   completion:nil];
 }
 
 @end

@@ -799,26 +799,38 @@ def get_modified_time(filename):
     return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 
 def getFacebook(accessToken, path, params={}):
-    try:
-        baseurl = 'https://graph.facebook.com'
-        params['access_token'] = accessToken
-        params  = urllib.urlencode(params)
-        url     = "%s%s?%s" % (baseurl, path, params)
-        result  = json.load(urllib2.urlopen(url))
-        
-        if 'error' in result:
-            if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
-                # OAuth exception
+    num_retries = 0
+    max_retries = 5
+
+    while True:
+        try:
+            baseurl = 'https://graph.facebook.com'
+            params['access_token'] = accessToken
+            params  = urllib.urlencode(params)
+            url     = "%s%s?%s" % (baseurl, path, params)
+            result  = json.load(urllib2.urlopen(url))
+            
+            if 'error' in result:
+                if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
+                    # OAuth exception
+                    raise
                 raise
-            raise
-        
-        return result
-    except urllib2.HTTPError as e:
-        if e.code == 400:
-            raise StampedInputError('FACEBOOK API 400 ERROR: %s' % e)
-        raise StampedUnavailableError('FACEBOOK API ERROR: %s' % e)
-    except:
-        raise Exception
+            
+            return result
+            
+        except urllib2.HTTPError as e:
+            logs.warning('Facebook API Error: %s' % e)
+            num_retries += 1
+            if num_retries > max_retries:
+                if e.code == 400:
+                    raise StampedInputError('Facebook API 400 Error')
+                raise StampedUnavailableError('Facebook API Error')
+                
+            logs.info("Retrying (%s)" % (num_retries))
+            time.sleep(0.5)
+
+        except Exception as e:
+            raise Exception('Error connecting to Facebook: %s' % e)
 
 def getTwitter(url, key, secret, http_method="GET", post_body=None, http_headers=None):
     import libs.TwitterOAuth as TwitterOAuth

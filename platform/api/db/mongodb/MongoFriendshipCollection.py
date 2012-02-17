@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = 'Stamped (dev@stamped.com)'
 __version__   = '1.0'
@@ -6,7 +6,7 @@ __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
 import Globals, logs, utils
-import heapq, math, operator
+import heapq, math
 
 from collections                import defaultdict
 from utils                      import lazyProperty
@@ -191,7 +191,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         user_entity_ids, user_categories, user_clusters = self._get_stamp_info(userId)
         
         #for cluster in user_clusters:
-        #    print "%s) %d" % (cluster['avg'], len(cluster['data']))
+        #    print "(%s) %d %s" % (cluster['avg'], len(cluster['data']), cluster['data'])
         
         for entity_id in user_entity_ids:
             stamps = self.stamp_collection.getStampsFromEntity(entity_id, limit=200)
@@ -238,6 +238,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             sum1  = 1.0 / sum1 if sum1 > 0 else 0.0
             score = -1
             
+            # compare seed user's stamp clusters with this user's stamp clusters
             for cluster0 in user_clusters:
                 ll0  = cluster0['avg']
                 len0 = len(cluster0['data']) * sum0
@@ -291,15 +292,20 @@ class MongoFriendshipCollection(AFriendshipDB):
         """
         # TODO: integrate other signals into ranking function
         # TODO: support ignoring a friend suggestion
+        # TODO: better support for new users w/out stamps or friends
         
         # SIGNALS:
-        #    * (DONE) friend overlap
+        #    * friend overlap
+        #       * TODO: normalize to be independent of #friends
         #    * stamped entity overlap
         #       * would need fast entity_id => list(stamp_id) lookups
+        #       * TODO: normalize to be independent of #stamps
         #    * stamp category overlap
         #    * quality signals for potential friends
         #    * geographical proximity
-        #    * small boost if other user is following you
+        #    * TODO: small boost if other user is following you
+        #    * TODO: current coordinates
+        #    * TODO: global user popularity / freshness
         
         # friends of friends sorted by overlap
         # TODO: optimize this sorted loop to only retain the top n results
