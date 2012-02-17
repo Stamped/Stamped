@@ -96,7 +96,7 @@
       break;
   }
   if (string)
-    [tooltipView_ setText:string animated:NO];
+    [tooltipView_ setText:string animated:YES];
 }
 
 - (void)dragBegan:(id)sender {
