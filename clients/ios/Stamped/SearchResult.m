@@ -44,6 +44,9 @@
 }
 
 - (UIImage*)entitySearchCategoryImage {
+  if ([self.category isEqualToString:@"other"] && self.distance)
+    return nil;
+
   if (self.category)
     return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_eSearch_%@", self.category.lowercaseString]];
   
