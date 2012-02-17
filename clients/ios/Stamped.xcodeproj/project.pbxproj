@@ -1642,8 +1642,8 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
-		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
-		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
+		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
 		7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoadingMoreTableViewCell.h; sourceTree = "<group>"; };
 		7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLoadingMoreTableViewCell.m; sourceTree = "<group>"; };
@@ -3503,8 +3503,6 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				7E007BF614EEB68400FB557E /* Default.png */,
-				7E007BF414EEB67000FB557E /* Default@2x.png */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -3635,6 +3633,8 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7E007BF614EEB68400FB557E /* Default.png */,
+				7E007BF414EEB67000FB557E /* Default@2x.png */,
 				7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */,
 				7E5893AF147C4628002268C4 /* icon_dev@2x.png */,
 				7E5893AD147C4620002268C4 /* icon_dev.png */,
@@ -5972,8 +5972,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				PROVISIONING_PROFILE = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6015,8 +6015,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				PROVISIONING_PROFILE = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6059,8 +6059,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				PROVISIONING_PROFILE = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

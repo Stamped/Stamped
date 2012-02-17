@@ -77,9 +77,10 @@
 - (void)valueChanged:(id)sender {
   [self updateTooltipPosition];
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
-  STMapScopeSliderGranularity granularity = quotient;
+  granularity_ = quotient;
+  [self updateImage];
   NSString* string = nil;
-  switch (granularity) {
+  switch (granularity_) {
     case STMapScopeSliderGranularityYou:
       string = @"you";
       break;
