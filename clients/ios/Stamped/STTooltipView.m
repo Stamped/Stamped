@@ -22,6 +22,7 @@ static const CGFloat kTriangleWidth = 12.0;
 @property (nonatomic, retain) CAShapeLayer* shapeLayer;
 @property (nonatomic, retain) CAShapeLayer* borderShapeLayer;
 @property (nonatomic, retain) CATextLayer* textLayer;
+@property (nonatomic, readonly) UIImageView* highlightView;
 @end
 
 @implementation STTooltipView
@@ -29,6 +30,7 @@ static const CGFloat kTriangleWidth = 12.0;
 @synthesize textLayer = textLayer_;
 @synthesize shapeLayer = shapeLayer_;
 @synthesize borderShapeLayer = borderShapeLayer_;
+@synthesize highlightView = highlightView_;
 
 - (id)initWithText:(NSString*)text {
   self = [super initWithFrame:CGRectZero];
@@ -63,6 +65,11 @@ static const CGFloat kTriangleWidth = 12.0;
     textLayer_.fontSize = 11;
     textLayer_.string = text;
     [self.layer addSublayer:textLayer_];
+    
+    UIImage* highlightImage = [[UIImage imageNamed:@"popup_innerShadow"] stretchableImageWithLeftCapWidth:3 topCapHeight:0];
+    highlightView_ = [[UIImageView alloc] initWithImage:highlightImage];
+    [self addSubview:highlightView_];
+    [highlightView_ release];
 
     [self sizeToFit];
     gradientLayer.frame = CGRectMake(0, 0, 320, CGRectGetHeight(self.bounds));
@@ -76,12 +83,27 @@ static const CGFloat kTriangleWidth = 12.0;
   self.shapeLayer = nil;
   self.borderShapeLayer = nil;
   self.textLayer = nil;
+  highlightView_ = nil;
   [super dealloc];
+}
+
+- (void)setBounds:(CGRect)bounds {
+  [super setBounds:bounds];
+  highlightView_.frame = CGRectMake(2, 1.5, CGRectGetWidth(self.bounds) - 4, 3);
+}
+
+- (void)setFrame:(CGRect)frame {
+  [super setFrame:frame];
+  highlightView_.frame = CGRectMake(2, 1.5, CGRectGetWidth(self.bounds) - 4, 3);
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
   return CGSizeMake([(NSString*)textLayer_.string sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]].width + 22,
                     kTriangleHeight + 32);
+}
+
+- (void)layoutSubviews {
+  [super layoutSubviews];
 }
 
 - (void)updatePath {

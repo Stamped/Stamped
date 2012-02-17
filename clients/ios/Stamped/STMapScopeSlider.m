@@ -60,7 +60,7 @@
   [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
   [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
   [self addTarget:self action:@selector(dragBegan:) forControlEvents:UIControlEventTouchDown];
-  tooltipView_ = [[STTooltipView alloc] initWithText:@"friends of friends"];
+  tooltipView_ = [[STTooltipView alloc] initWithText:@"your friends"];
   tooltipView_.center = self.center;
   tooltipView_.frame = CGRectOffset(tooltipView_.frame, 0, -57);
   tooltipView_.alpha = 0;
@@ -113,7 +113,7 @@
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
   [self setGranularity:quotient animated:YES];
   [UIView animateWithDuration:0.3
-                        delay:0
+                        delay:2
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
                    animations:^{ tooltipView_.alpha = 0.0; }
                    completion:nil];
