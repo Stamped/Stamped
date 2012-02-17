@@ -77,6 +77,7 @@ import random
 from datetime           import datetime
 from datetime           import timedelta
 from utils              import lazyProperty
+import logs
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -517,6 +518,7 @@ class Factual(object):
             if cooldown > 0:
                 sleep(cooldown)
             req = urllib2.Request(url, None, request.to_header())
+            logs.info(req.get_full_url())
             res = urllib2.urlopen(req)
             response = res.read()
             self.__last_call = time.time()
