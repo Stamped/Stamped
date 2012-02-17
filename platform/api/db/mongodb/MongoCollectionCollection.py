@@ -9,6 +9,7 @@ import Globals
 import heapq
 
 from utils                          import lazyProperty
+from LRUCache                       import lru_cache
 
 from MongoUserStampsCollection      import MongoUserStampsCollection
 from MongoInboxStampsCollection     import MongoInboxStampsCollection
@@ -128,7 +129,7 @@ class MongoCollectionCollection(ACollectionDB):
         
         return stamp_ids
     
-    # small local LRU cache augmented by the global memcached cache
+    # small local LRU cache supplemented by the global memcached instance
     @lru_cache(maxsize=256)
     def _getCachedFriendsStampIds(self, userId):
         # TODO: add friendsSlice params if / once they're actually used
