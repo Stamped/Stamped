@@ -456,7 +456,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - STMapScopeSliderDelegate methods.
 
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
-  NSLog(@"Load data from network...");
   [self loadDataFromNetwork];
 }
 
