@@ -1068,12 +1068,15 @@ typedef enum {
   if (stamp_.blurb.length == 0)
     blurb = [stamp_.entityObject.title stringByAppendingString:@"."];
   
-  NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
+  BOOL hasImage = stamp_.imageURL != nil;
+
+  NSString* substring = [blurb substringToIndex:MIN(blurb.length, hasImage ? 98 : 104)];
   if (blurb.length > substring.length)
     blurb = [substring stringByAppendingString:@"..."];
   
-  // Stamped: [blurb] [link]
-  [twitter setInitialText:[NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp_.URL]];
+  NSString* initial = hasImage ? @"Stamped [pic]:" : @"Stamped:";
+  // Stamped ([pic]): [blurb] [link]
+  [twitter setInitialText:[NSString stringWithFormat:@"%@ %@ %@", initial, blurb, stamp_.URL]];
   
   if ([TWTweetComposeViewController canSendTweet]) {
     [self presentViewController:twitter animated:YES completion:nil];

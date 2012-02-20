@@ -361,12 +361,15 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if (stamp.blurb.length == 0)
     blurb = [stamp.entityObject.title stringByAppendingString:@"."];
 
-  NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
+  BOOL hasImage = stamp.imageURL != nil;
+  
+  NSString* substring = [blurb substringToIndex:MIN(blurb.length, hasImage ? 98 : 104)];
   if (blurb.length > substring.length)
     blurb = [substring stringByAppendingString:@"..."];
   
-  // Stamped: [blurb] [link]
-  NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
+  NSString* initial = hasImage ? @"Stamped [pic]:" : @"Stamped:";
+  // Stamped ([pic]): [blurb] [link]
+  NSString* tweet = [NSString stringWithFormat:@"%@ %@ %@", initial, blurb, stamp.URL];
   [self requestTwitterPostWithStatus:tweet];
 }
 
@@ -387,6 +390,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [request.URLRequest setHTTPMethod:@"POST"];
     status = [status stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     status = [status stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
+    status = [status stringByReplacingOccurrencesOfString:@"+" withString:@"%2B"];  // FUCK YOU.
     NSString* body = [NSString stringWithFormat:@"status=%@", status];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.authentication authorizeRequest:request.URLRequest];
