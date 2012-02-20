@@ -324,7 +324,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   pinView.rightCalloutAccessoryView = disclosureButton;
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
 
   Stamp* stamp = [(STPlaceAnnotation*)annotation stamp];
   if (stamp) {
