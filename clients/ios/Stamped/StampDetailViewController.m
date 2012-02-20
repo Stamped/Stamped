@@ -383,7 +383,7 @@ typedef enum {
   for (NSUInteger i = 0; i < stampsArray.count; ++i) {
     s = [stampsArray objectAtIndex:i];
     UserImageView* userImage = [[UserImageView alloc] initWithFrame:userImgFrame];
-    
+
     if (i > 1 && i % 6 == 0) {
       alsoStampedByScrollView_.contentSize =
           CGSizeMake(alsoStampedByScrollView_.contentSize.width + alsoStampedByScrollView_.frame.size.width,
@@ -958,8 +958,9 @@ typedef enum {
 
   NSString* urlString = url.absoluteString;
   User* user = nil;
+  NSString* screenName = nil;
   if ([urlString hasPrefix:@"@"]) {
-    NSString* screenName = [urlString substringFromIndex:1];
+    screenName = [urlString substringFromIndex:1];
     user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"ANY screenName LIKE[c] %@", screenName]]; 
   } else if (urlString.length == 24) {
     NSString* userID = url.absoluteString;
@@ -972,11 +973,14 @@ typedef enum {
   } else if ([urlString isEqualToString:@"likes"]) {
     [self showLikesPane];
   }
-  if (!user)
+  if (!user && !screenName)
     return;
 
   ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
-  profileViewController.user = user;
+  if (user)
+    profileViewController.user = user;
+  else if (screenName)
+    profileViewController.screenName = screenName;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
 }

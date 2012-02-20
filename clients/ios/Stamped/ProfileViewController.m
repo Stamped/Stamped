@@ -30,7 +30,7 @@
 #import "Alerts.h"
 
 static NSString* const kUserStampsPath = @"/collections/user.json";
-static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kUserShowPath = @"/users/show.json";
 static NSString* const kFriendshipCheckPath = @"/friendships/check.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
@@ -42,6 +42,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)loadStampsFromDataStore;
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
+- (void)userObjectUpdated;
 - (void)loadRelationshipData;
 - (void)addStampsRemainingLayer;
 - (void)updateStampCounterLayer;
@@ -113,74 +114,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  userImageView_.imageURL = [user_ profileImageURLForSize:ProfileImageSize72];
-  userImageView_.enabled = YES;
-  [userImageView_ addTarget:self
-                     action:@selector(userImageTapped:)
-           forControlEvents:UIControlEventTouchUpInside];
+  if (user_.screenName)
+    self.screenName = user_.screenName;
 
   stampLayer_ = [[CALayer alloc] init];
   stampLayer_.frame = CGRectMake(58, -10, 60, 60);
   stampLayer_.opacity = 0.95;
-  stampLayer_.contents = (id)[user_ stampImageWithSize:StampImageSize60].CGImage;
   [userImageView_.superview.layer insertSublayer:stampLayer_ above:userImageView_.layer];
   [stampLayer_ release];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
   bioLabel_.textColor = [UIColor stampedGrayColor];
-
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:user_.screenName]
-                                                                 style:UIBarButtonItemStyleBordered
-                                                                target:nil
-                                                                action:nil];
-  [[self navigationItem] setBackBarButtonItem:backButton];
-  [backButton release];
-  
-  User* currentUser = [AccountManager sharedManager].currentUser;
-  if ([user_.screenName isEqualToString:currentUser.screenName]) {
-    UIBarButtonItem* editButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
-                                                                   style:UIBarButtonItemStylePlain
-                                                                  target:self
-                                                                  action:@selector(editButtonPressed:)];
-    [self.navigationItem setRightBarButtonItem:editButton];
-    [editButton release];
-    [self addStampsRemainingLayer];
-  } else {
-    if ([currentUser.following containsObject:user_]) {
-      unfollowButton_.hidden = NO;
-      self.stampsAreTemporary = NO;
-    } else {
-      followButton_.hidden = NO;
-      self.stampsAreTemporary = YES;
-    }
-  }
-
-  if (user_.name)
-    [self fillInUserData];
-
-  self.highlightView.backgroundColor = [UIColor whiteColor];
-  CAGradientLayer* highlightGradientLayer = [[CAGradientLayer alloc] init];
-  highlightGradientLayer.frame = CGRectMake(0, 0, 320, 20);
-  CGFloat r1, g1, b1, r2, g2, b2;
-  [Util splitHexString:user_.primaryColor toRed:&r1 green:&g1 blue:&b1];
-  
-  if (user_.secondaryColor) {
-    [Util splitHexString:user_.secondaryColor toRed:&r2 green:&g2 blue:&b2];
-  } else {
-    r2 = r1;
-    g2 = g1;
-    b2 = b1;
-  }
-  highlightGradientLayer.colors =
-      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0].CGColor,
-           (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:1.0].CGColor, nil];
-  
-  highlightGradientLayer.startPoint = CGPointMake(0.0, 0.5);
-  highlightGradientLayer.endPoint = CGPointMake(1.0, 0.5);
-  [self.highlightView.layer addSublayer:highlightGradientLayer];
-  [highlightGradientLayer release];
-  self.highlightView.alpha = 1.0;
   
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
   toolbarGradient.colors = [NSArray arrayWithObjects:
@@ -189,14 +134,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarGradient.frame = toolbarView_.bounds;
   [toolbarView_.layer addSublayer:toolbarGradient];
   [toolbarGradient release];
-  
+
   toolbarView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:toolbarView_.bounds].CGPath;
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
-  [self loadUserInfoFromNetwork];
   [self loadStampsFromDataStore];
-  [self loadStampsFromNetwork];
+  [self loadUserInfoFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -418,12 +362,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  if ([objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
-    self.user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", user_.screenName]];
-    [self fillInUserData];
-    id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-    if (user_.numStamps.unsignedIntValue > 0 && [sectionInfo numberOfObjects] == 0)
-      [self loadStampsFromNetwork];
+  if ([objectLoader.resourcePath rangeOfString:kUserShowPath].location != NSNotFound) {
+    self.user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", self.screenName]];
+    [self userObjectUpdated];
+    return;
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
@@ -460,6 +402,25 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [objectLoader send];
     return;
   }
+  if ([objectLoader.resourcePath rangeOfString:kUserShowPath].location != NSNotFound) {
+    NSString* error = [NSString stringWithFormat:@"There was a problem loading info for the user \u201c%@\u201d.", self.screenName];
+    if (objectLoader.response.isNotFound)
+      error = [NSString stringWithFormat:@"The user \u201c%@\u201d was not found.", self.screenName];
+    UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Sorry", nil)
+                                                         message:NSLocalizedString(error, nil)
+                                                        delegate:self
+                                               cancelButtonTitle:nil
+                                               otherButtonTitles:NSLocalizedString(@"OK", nil), nil] autorelease];
+    [alertView show];
+    return;
+  }
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  // Currently only handling case where the user was not found.
+  [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - RKRequestDelegate methods.
@@ -478,7 +439,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
           break;
         }
         case 200: {
-          UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Already Following"
+          UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Already Following", nil)
                                                               message:@""
                                                              delegate:nil
                                                     cancelButtonTitle:@"Fair Enough"
@@ -544,7 +505,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   NSLog(@"Error %@ for request %@", error, request.resourcePath);
 }
 
-- (void)requestDidTimeout:(RKRequest *)request {
+- (void)requestDidTimeout:(RKRequest*)request {
   if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound) {
     [followIndicator_ stopAnimating];
     followButton_.hidden = NO;
@@ -695,6 +656,68 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [request send];
 }
 
+- (void)userObjectUpdated {
+  userImageView_.imageURL = [user_ profileImageURLForSize:ProfileImageSize72];
+  userImageView_.enabled = YES;
+  [userImageView_ addTarget:self
+                     action:@selector(userImageTapped:)
+           forControlEvents:UIControlEventTouchUpInside];
+  
+  stampLayer_.contents = (id)[user_ stampImageWithSize:StampImageSize60].CGImage;
+
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:user_.screenName]
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
+  
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if ([user_.screenName isEqualToString:currentUser.screenName]) {
+    UIBarButtonItem* editButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
+                                                                   style:UIBarButtonItemStylePlain
+                                                                  target:self
+                                                                  action:@selector(editButtonPressed:)];
+    [self.navigationItem setRightBarButtonItem:editButton];
+    [editButton release];
+    [self addStampsRemainingLayer];
+  } else {
+    if ([currentUser.following containsObject:user_]) {
+      unfollowButton_.hidden = NO;
+      self.stampsAreTemporary = NO;
+    } else {
+      followButton_.hidden = NO;
+      self.stampsAreTemporary = YES;
+    }
+  }
+
+  [self fillInUserData];
+  self.highlightView.backgroundColor = [UIColor whiteColor];
+  CAGradientLayer* highlightGradientLayer = [[CAGradientLayer alloc] init];
+  highlightGradientLayer.frame = CGRectMake(0, 0, 320, 20);
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:user_.primaryColor toRed:&r1 green:&g1 blue:&b1];
+  
+  if (user_.secondaryColor) {
+    [Util splitHexString:user_.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+  highlightGradientLayer.colors =
+  [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0].CGColor,
+   (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:1.0].CGColor, nil];
+  
+  highlightGradientLayer.startPoint = CGPointMake(0.0, 0.5);
+  highlightGradientLayer.endPoint = CGPointMake(1.0, 0.5);
+  [self.highlightView.layer addSublayer:highlightGradientLayer];
+  [highlightGradientLayer release];
+  self.highlightView.alpha = 1.0;
+
+  [self loadStampsFromNetwork];
+}
+
 - (void)fillInUserData {
   fullNameLabel_.text = user_.name;
   if (!user_.location)
@@ -706,18 +729,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
-  stampLayer_.contents = (id)[user_ stampImageWithSize:StampImageSize60].CGImage;
   [self updateStampCounterLayer];
 }
 
 - (void)loadUserInfoFromNetwork {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
-  NSString* username = user_.screenName;
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
-  objectLoader.method = RKRequestMethodPOST;
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserShowPath delegate:self];
   objectLoader.objectMapping = userMapping;
-  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
+  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_name", self.screenName, nil];
   [objectLoader send];
 }
 
@@ -738,7 +758,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.screenName == %@", self.screenName]];
     [request setFetchLimit:5];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request

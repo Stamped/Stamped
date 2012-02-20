@@ -284,6 +284,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {
+  if ([loader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadDataFromNetwork];
+    return;
+  }
+
   NSLog(@"Error loading map data: %@. Error code: %d", error.localizedDescription, loader.response.statusCode);
 }
 
