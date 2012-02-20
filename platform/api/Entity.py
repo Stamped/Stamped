@@ -92,6 +92,56 @@ subcategories = {
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
 year_re = re.compile(r'([0-9]{4})')
 
+def getGenericSubtitle(entity):
+    return str(entity.subcategory).replace('_', ' ').title()
+
+def getLocationSubtitle(entity, detailed=False):
+    # Return detailed address data if requested
+    if detailed:
+        if entity.address_country is not None and entity.address_locality is not None and entity.address_street is not None:
+
+            # Expand street if necessary
+            street = entity.address_street
+            if entity.address_street_ext is not None:
+                street = "%s %s" % (street, entity.address_street_ext)
+
+            # Use state if in US
+            if entity.address_country == 'US':
+                if entity.address_region is not None:
+                    return "%s, %s, %s" % (street, entity.address_locality, entity.address_region)
+
+            # Use country if outside US
+            else:
+                return "%s, %s, %s" % (street, entity.address_locality, entity.address_country)
+
+        if entity.address is not None:
+            return entity.address
+        
+        if entity.neighborhood is not None:
+            return entity.neighborhood
+        
+        return getGenericSubtitle(entity)
+
+
+    # Check if address components exist
+    if entity.address_country is not None and entity.address_locality is not None:
+        if entity.address_country == 'US':
+            if entity.address_region is not None:
+                return "%s, %s" % (entity.address_locality, entity.address_region)
+        else:
+            return "%s, %s" % (entity.address_locality, entity.address_country)
+
+    # Extract city / state with regex as fallback
+    if entity.address is not None:
+        match = city_state_re.match(entity.address)
+        
+        if match is not None:
+            # city, state
+            return "%s, %s" % match.groups()
+    
+    # Use generic subtitle as last resort
+    return getGenericSubtitle(entity)
+
 def setSubtitle(entity):
     entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
 
@@ -105,30 +155,7 @@ def setFields(entity, detailed=False):
     
     # Subtitle
     if entity.category == 'food':
-        
-        if detailed:
-            if entity.address is not None:
-                entity.subtitle = entity.address
-            elif entity.neighborhood is not None:
-                entity.subtitle = entity.neighborhood
-            else:
-                setSubtitle(entity)
-        else:
-            address = entity.address
-            is_set = False
-            
-            if address is not None:
-                # attempt to parse the city, state from the address
-                match = city_state_re.match(address)
-                
-                if match is not None:
-                    # city, state
-                    entity.subtitle = "%s, %s" % match.groups()
-                    is_set = True
-            
-            if not is_set:
-                # else fall back to the generic subcategory
-                setSubtitle(entity)
+        entity.subtitle = getLocationSubtitle(entity, detailed)
     
     elif entity.category == 'book':
         if entity.author is not None:
@@ -167,12 +194,7 @@ def setFields(entity, detailed=False):
         if entity.subcategory == 'app' and entity.artist_display_name is not None:
             entity.subtitle = 'App (%s)' % entity.artist_display_name
         elif entity.address is not None:
-            match = city_state_re.match(entity.address)
-            if match is not None:
-                # city, state
-                entity.subtitle = "%s, %s" % match.groups()
-            else:
-                setSubtitle(entity)
+            entity.subtitle = getLocationSubtitle(entity, detailed)
         elif entity.subtitle is None:
             setSubtitle(entity)
     
