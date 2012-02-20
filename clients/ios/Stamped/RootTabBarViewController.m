@@ -202,6 +202,10 @@
 
 - (void)currentUserUpdated:(NSNotification*)notification {
   [self fillStampImageView];
+  BOOL showTooltip = (tooltipImageView_ && ![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+                      [AccountManager sharedManager].currentUser.numStamps.intValue == 0);
+  if (!showTooltip)
+    tooltipImageView_.alpha = 0;
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
