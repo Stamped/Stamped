@@ -36,6 +36,12 @@ static NSString* const kStampedSuggestedUsersURI = @"/users/suggested.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 static NSString* const kInvitePath = @"/friendships/invite.json";
+static NSString* const kContactListAccessGranted = @"kContactListAccessGranted";
+
+typedef enum {
+  FindFriendsAlertTypeContactList = 0,
+  FindFriendsAlertTypePendingInvites
+} FindFriendsAlertType;
 
 @interface FindFriendsViewController ()
 
@@ -44,6 +50,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)followButtonPressed:(id)sender;
 - (void)unfollowButtonPressed:(id)sender;
 - (void)inviteButtonPressed:(id)sender;
+- (void)loadContactFriendsFromServer;
 - (UITableViewCell*)cellFromSubview:(UIView*)view;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
@@ -277,6 +284,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                                                         delegate:self
                                                cancelButtonTitle:@"Review"
                                                otherButtonTitles:@"Close", nil] autorelease];
+    alertView.tag = FindFriendsAlertTypePendingInvites;
     [alertView show];
   } else {
     [invitedSet_ removeAllObjects];
@@ -311,6 +319,20 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (IBAction)findFromContacts:(id)sender {
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:kContactListAccessGranted]) {
+    [self performSelector:@selector(loadContactFriendsFromServer) withObject:nil afterDelay:0];
+  } else {
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Allow Access to Contacts?", nil)
+                                                     message:NSLocalizedString(@"To search for friends, emails and phone numbers need to be sent to Stamp's server.\n\nEmails and phone numbers are sent securely and never saved.", nil)
+                                                    delegate:self
+                                           cancelButtonTitle:NSLocalizedString(@"Don't Allow", nil)
+                                           otherButtonTitles:NSLocalizedString(@"OK", nil), nil] autorelease];
+    alert.tag = FindFriendsAlertTypeContactList;
+    [alert show];
+  }
+}
+
+- (void)loadContactFriendsFromServer {
   self.findSource = FindFriendsSourceContacts;
   [inviteSet_ removeAllObjects];
   [self inviteSetHasChanged];
@@ -336,42 +358,38 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
   [tableView_ reloadData];
   [self scrollViewDidScroll:tableView_];
-  // Fetch the address book 
-  // Perform this on the next cycle to avoid a hang when tapping the Contacts button.
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_current_queue(), ^{
-    ABAddressBookRef addressBook = ABAddressBookCreate();
-    CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
-    CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
-    NSMutableArray* allNumbers = [NSMutableArray array];
-    NSMutableArray* allEmails = [NSMutableArray array];
-    for (NSUInteger i = 0; i < numPeople; ++i) {
-      ABRecordRef person = CFArrayGetValueAtIndex(people, i);
-      ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
-      NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
-      CFRelease(phoneNumberProperty);
-      [allNumbers addObjectsFromArray:phoneNumbers];
-      [phoneNumbers release];
-
-      ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
-      NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
-      CFRelease(emailProperty);
-      [allEmails addObjectsFromArray:emails];
-      [emails release];
-    }
-    CFRelease(addressBook);
-    CFRelease(people);
-    NSMutableArray* sanitizedNumbers = [NSMutableArray array];
-    for (NSString* num in allNumbers) {
-      NSString* sanitized = [Util sanitizedPhoneNumberFromString:num];
-      if (sanitized)
-        [sanitizedNumbers addObject:sanitized];
-    }
-    RKClient* client = [RKClient sharedClient];
-    if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
-      [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
-    [tableView_ reloadData];
-    [self scrollViewDidScroll:tableView_];
-  });
+  ABAddressBookRef addressBook = ABAddressBookCreate();
+  CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+  CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
+  NSMutableArray* allNumbers = [NSMutableArray array];
+  NSMutableArray* allEmails = [NSMutableArray array];
+  for (NSUInteger i = 0; i < numPeople; ++i) {
+    ABRecordRef person = CFArrayGetValueAtIndex(people, i);
+    ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
+    NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
+    CFRelease(phoneNumberProperty);
+    [allNumbers addObjectsFromArray:phoneNumbers];
+    [phoneNumbers release];
+    
+    ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
+    NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
+    CFRelease(emailProperty);
+    [allEmails addObjectsFromArray:emails];
+    [emails release];
+  }
+  CFRelease(addressBook);
+  CFRelease(people);
+  NSMutableArray* sanitizedNumbers = [NSMutableArray array];
+  for (NSString* num in allNumbers) {
+    NSString* sanitized = [Util sanitizedPhoneNumberFromString:num];
+    if (sanitized)
+      [sanitizedNumbers addObject:sanitized];
+  }
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable)
+    [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
+  [tableView_ reloadData];
+  [self scrollViewDidScroll:tableView_];
 }
 
 - (IBAction)findFromTwitter:(id)sender {
@@ -1414,11 +1432,18 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 #pragma mark - UIAlertViewDelegate methods.
 
 - (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  // Currently only used to alert the user that there are pending invitations.
-  if (alertView.cancelButtonIndex == buttonIndex)
-    return;
-  
-  [self dismissSelf];
+  if (alertView.tag == FindFriendsAlertTypePendingInvites) {
+    if (buttonIndex != alertView.cancelButtonIndex)
+      [self dismissSelf];
+  } else if (alertView.tag == FindFriendsAlertTypeContactList) {
+    if (buttonIndex != alertView.cancelButtonIndex) {
+      [self loadContactFriendsFromServer];
+      [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kContactListAccessGranted];
+      [[NSUserDefaults standardUserDefaults] synchronize];
+    } else {
+      [self findFromStamped:nil];
+    }
+  }
 }
 
 @end
