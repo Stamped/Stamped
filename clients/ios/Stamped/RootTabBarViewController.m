@@ -303,8 +303,8 @@
     [earnMore addSubview:creditLeft];
     [creditLeft release];
     UIImageView* creditRight = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_solid"]
-                                                                    withPrimaryColor:currentUser.primaryColor
-                                                                           secondary:currentUser.secondaryColor]];
+                                                                     withPrimaryColor:currentUser.primaryColor
+                                                                            secondary:currentUser.secondaryColor]];
     creditRight.frame = CGRectOffset(creditLeft.frame, 14, 0);
     [earnMore addSubview:creditRight];
     [creditRight release];
