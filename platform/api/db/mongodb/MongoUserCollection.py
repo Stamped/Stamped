@@ -47,7 +47,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def getUser(self, userId):
         documentId = self._getObjectIdFromString(userId)
         document   = self._getMongoDocumentFromId(documentId)
-        
+        if document is None:
+            raise StampedUnavailableError("Unable to find user (%s)" % userId)
         return self._convertFromMongo(document)
     
     def getUserByScreenName(self, screenName):
