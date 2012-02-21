@@ -686,7 +686,7 @@ class MongoEntitySearcher(EntitySearcher):
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
-            tasks.invoke(tasks.APITasks._saveTempEntity, args=[map(lambda r: r.value, results)])
+            tasks.invoke(tasks.APITasks._saveTempEntity, args=[map(lambda r: (r[0].value, r[1]), results)])
         
         return results
     

@@ -2939,7 +2939,7 @@ class StampedAPI(AStampedAPI):
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
     
     def _saveTempEntityAsync(self, results):
-        results = map(Entity, results)
+        results = map(lambda r: (Entity(r[0]), r[1]), results)
         self._entitySearcher._add_temp(results)
     
     def _addEntity(self, entity):
