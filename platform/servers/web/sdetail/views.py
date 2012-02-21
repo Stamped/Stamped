@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, json, utils, random, time, hashlib, logs
+import os, json, utils, random, time, hashlib, logs, traceback, string
 
 from datetime           import *
 from errors             import *
@@ -39,10 +39,12 @@ def show(request, **kwargs):
     mobile      = kwargs.pop('mobile', False)
 
     try:
+        logs.info('%s/%s/%s' % (screenName, stampNum, stampTitle))
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
 
         template = 'sdetail.html'
         if mobile:
+            logs.info('mobile=True')
             template = 'sdetail-mobile.html'
 
         encodedStampTitle = encodeStampTitle(stamp.entity.title)
@@ -53,7 +55,7 @@ def show(request, **kwargs):
                 encodedStampTitle = encodedStampTitle[:i]
             
             if encodedStampTitle != stampTitle:
-                raise Exception("invalid stamp title: '%s' vs '%s'" % (stampTitle, encodedStampTitle))
+                raise Exception("Invalid stamp title: '%s' (received) vs '%s' (stored)" % (stampTitle, encodedStampTitle))
 
         entity = stampedAPI.getEntity({'entity_id': stamp.entity_id})
         opentable_url = None
@@ -78,10 +80,14 @@ def show(request, **kwargs):
         return response
 
     except Exception as e:
-        logs.begin()
-        logs.request(request)
-        logs.warning("500 Error: %s" % e)
-        logs.error(500)
+        logs.warning("Error: %s" % e)
+        try:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            f = string.joinfields(f, '')
+            logs.warning(f)
+        except:
+            pass
         raise Http404
 
 def mobile(request, **kwargs):

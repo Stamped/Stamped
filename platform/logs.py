@@ -14,7 +14,7 @@ log = logging.getLogger('stamped')
 log.setLevel(logging.DEBUG)
 
 # Formatter
-formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%H:%M:%S')
+formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 # Stream handler
 stream_handler = logging.StreamHandler()
