@@ -377,9 +377,11 @@ class HTTPSuggestedUsers(Schema):
             schema.importData(data, overflow=True)
             
             if coordinates:
-                schema.coordinates    = _coordinatesDictToFlat(coordinates)
+                schema.coordinates    = _coordinatesFlatToDict(coordinates)
         else:
             raise NotImplementedError
+        
+        return schema
 
 class HTTPUserRelationship(Schema):
     def setSchema(self):
