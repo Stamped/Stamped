@@ -154,6 +154,7 @@ typedef enum PeopleSearchCorpus {
   [super viewWillAppear:animated];
   [self.navigationController setNavigationBarHidden:(self.searchField.text.length > 0)
                                            animated:animated];
+  NSLog(@"Nav bar hidden on appear? %d", self.navigationController.navigationBarHidden);
   [self loadFriendsFromDataStore];
 }
 
@@ -169,6 +170,7 @@ typedef enum PeopleSearchCorpus {
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
   [self.navigationController setNavigationBarHidden:NO animated:animated];
+  NSLog(@"Nav bar hidden on disappear? %d", self.navigationController.navigationBarHidden);
 }
 
 - (void)userPulledToReload {
