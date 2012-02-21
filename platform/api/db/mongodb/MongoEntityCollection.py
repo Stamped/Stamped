@@ -20,13 +20,6 @@ try:
     from MongoMenuCollection            import MongoMenuCollection
     from AEntityDB                      import AEntityDB
     from difflib                        import SequenceMatcher
-    from libs.Factual                   import Factual
-    from libs.CleanerSource             import CleanerSource
-    from libs.FactualSource             import FactualSource
-    from libs.GooglePlacesSource        import GooglePlacesSource
-    from libs.SinglePlatformSource      import SinglePlatformSource
-    from libs.TMDBSource                import TMDBSource
-    from libs.ExternalSourceController  import ExternalSourceController
     from ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
     from logs                           import log
@@ -49,30 +42,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def __menu_db(self):
         return MongoMenuCollection()
 
-    @lazyProperty
-    def factual(self):
-        return Factual()
-    
-    @lazyProperty
-    def __factual(self):
-        return FactualSource()
-
-    @lazyProperty
-    def __googleplaces(self):
-        return GooglePlacesSource()
-
-    @lazyProperty
-    def __singleplatform(self):
-        return SinglePlatformSource()
-
-    @lazyProperty
-    def __cleaner(self):
-        return CleanerSource()
-    
-    @lazyProperty
-    def __sources(self):
-        return [self.__cleaner,self.__factual,self.__googleplaces,self.__singleplatform, TMDBSource()]
-    
     ### PUBLIC
     
     def _convertFromMongo(self, document):
@@ -104,53 +73,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for item in data:
             result.append(self._convertFromMongo(item))
         return result
-    
-    def enrichEntity(self, entity, resolve=True, enrich=True, decorate=True,max_cycles=4,controller=None):
-        if controller is None:
-            controller = ExternalSourceController()
-        update_required_total = False
-        for i in range(max_cycles):
-            update_required = False
-            if resolve:
-                for source in self.__sources:
-                    try:
-                        modified = source.resolveEntity(entity, controller)
-                        if modified:
-                            log.info('%s resolved %s',source.sourceName,entity.title)
-                        update_required |= modified
-                    except Exception:
-                        report("Unexpected resolve error from %s" % source.sourceName)
-            if enrich:
-                for source in self.__sources:
-                    try:
-                        modified = source.enrichEntity(entity, controller)
-                        if modified:
-                            log.info('%s enriched %s',source.sourceName,entity.title)
-                        update_required |= modified
-                    except Exception:
-                        report("Unexpected enrich error from %s" % source.sourceName)
-            if decorate:
-                for source in self.__sources:
-                    try:
-                        modified = source.decorateEntity(entity, controller, self)
-                        if modified:
-                            log.info('%s decorated %s',source.sourceName,entity.title)
-                        update_required |= modified
-                    except Exception:
-                        report("Unexpected decorate error from %s" % source.sourceName)
-            update_required_total |= update_required
-            if update_required is False:
-                break
-        return update_required_total
 
     def getMenu(self, entityId):
         menu = self.__menu_db.getMenu(entityId)
         if menu is None:
-            entity = self.getEntity(entityId)
-            modified = self.enrichEntity(entity)
-            if modified:
-                self.updateEntity(entity)
-            menu = self.__menu_db.getMenu(entityId)
+            pass
         if menu is None:
             raise StampedUnavailableError("Unable to find menu (id = %s)" % entityId)
         return menu

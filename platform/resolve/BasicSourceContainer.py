@@ -34,7 +34,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__groups = {}
         self.__sources = []
         self.__default_max_iterations = 10
-        self.__global_max_age = timedelta(30)
+        self.__global_max_age = timedelta(7)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2

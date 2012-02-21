@@ -70,6 +70,7 @@ class StampedAPIPlacesSearch(StampedAPIPlaceTest):
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
 
+"""
 _ino = {
     "title": "Ino Cafe and Wine Bar",
     "subtitle": "New York, NY",
@@ -102,6 +103,7 @@ class StampedAPIPlacesMenu(_FactualTestCase):
         self.assertEqual(result, result2)
         if _verbose:
             pprint(result)
+"""
 
 if __name__ == '__main__':
     _verbose = True

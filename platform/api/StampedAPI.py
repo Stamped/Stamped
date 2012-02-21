@@ -40,6 +40,7 @@ try:
     from Schemas         import *
 
     # third-party search API wrappers
+    from resolve            import FullResolveContainer
     from GooglePlaces    import GooglePlaces
     from libs.apple      import AppleAPI
     from libs.AmazonAPI  import AmazonAPI
@@ -1167,7 +1168,7 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
         ### TODO: Check if user has access to this entity?
         if self.__is_prod is False:
-            modified = self._entityDB.enrichEntity(entity,decorate=False)
+            modified = self._enrichEntity(entity)
             if modified:
                 self._entityDB.update(entity)
         else:
@@ -2882,11 +2883,20 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         
         return entity.entity_id
+    
+    @lazyProperty
+    def __full_resolve(self):
+        return FullResolveContainer.FullResolveContainer()
+
+    def _enrichEntity(self, entity):
+        decorations = {}
+        modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
+        return modified
 
     def _enrichEntityAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
         if entity is not None:
-            modified  = self._entityDB.enrichEntity(entity)
+            modified  = self._enrichEntity(entity)
             if modified:
                 self._entityDB.update(entity)
         else:

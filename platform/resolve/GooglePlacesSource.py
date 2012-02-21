@@ -60,6 +60,8 @@ class GooglePlacesSource(BasicSource):
         return GooglePlaces()
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        for group in self.groups:
+            timestamps[group] = controller.now
         details = self.__details(entity)
         if details is None:
             return False
@@ -152,6 +154,8 @@ class GooglePlacesSource(BasicSource):
             data['address_street'] = "%s %s" % (number, route)
         data2 = {}
         for k,v in data.items():
+            if v is None:
+                return None
             data2[tuple(k.split('.'))] = _constant(v)
         return data2
     

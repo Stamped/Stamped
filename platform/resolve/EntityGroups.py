@@ -115,3 +115,12 @@ class AlcoholFlagGroup(ARestaurantGroup):
         self.addNameField()
 
 
+class SubtitleGroup(BasicFieldGroup):
+
+    def __init__(self, *args, **kwargs):
+        BasicFieldGroup.__init__(self, 'subtitle')
+        self.addNameField()
+
+    def eligible(self, entity):
+        return True
+
