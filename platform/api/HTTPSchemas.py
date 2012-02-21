@@ -307,8 +307,8 @@ class HTTPUser(Schema):
             self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
-            self.num_likes          = stats.pop('num_credits', 0)
-            self.num_likes_given    = stats.pop('num_credits_given', 0)
+            self.num_likes          = stats.pop('num_likes', 0)
+            self.num_likes_given    = stats.pop('num_likes_given', 0)
 
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
 
@@ -1167,8 +1167,10 @@ class HTTPActivity(Schema):
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = HTTPUserMini()
         self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
         self.subject            = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
+        self.blurb_format       = SchemaElement(basestring)
         self.linked_user        = HTTPUserMini()
         self.linked_stamp       = HTTPStamp()
         self.linked_entity      = HTTPEntity()

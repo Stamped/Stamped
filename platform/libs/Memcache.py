@@ -52,6 +52,10 @@ class Memcache(object):
         
         return True
     
+    def set(self, key, value, *args, **kwargs):
+        value = self._import_value(value)
+        self._client.set(key, value, *args, **kwargs)
+    
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
         if self._client:
