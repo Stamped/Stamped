@@ -2930,19 +2930,21 @@ class StampedAPI(AStampedAPI):
 
     def _enrichEntityAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
+        
         if entity is not None:
             modified  = self._enrichEntity(entity)
             if modified:
                 self._entityDB.update(entity)
         else:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
-
-    def _saveTempEntityAsync(self,results):
+    
+    def _saveTempEntityAsync(self, results):
         self._entitySearcher._add_temp(results)
     
     def _addEntity(self, entity):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
+            
             try:
                 #self._entityMatcher.addOne(entity)
                 entity2 = self._entityDB.addEntity(entity)

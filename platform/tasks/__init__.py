@@ -95,8 +95,10 @@ def invoke(task, args=None, kwargs=None, **options):
                         body += "\n" + pprint.pformat(dict(libs.ec2_utils.get_stack())) + "\n"
                         
                         handler.email(subject, body)
+        
+        logs.warn("async failed: %s" % error)
     
     # broker is not responding so attempt to invoke the task synchronously / locally
-    logs.warn("async failed; running locally")
+    logs.warn("running async task locally '%s'" % task)
     return task.apply(args, kwargs, **options)
 

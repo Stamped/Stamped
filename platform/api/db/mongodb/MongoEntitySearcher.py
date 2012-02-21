@@ -682,6 +682,7 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
+        # TODO: make more readable
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
