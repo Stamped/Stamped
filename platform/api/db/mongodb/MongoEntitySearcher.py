@@ -295,10 +295,13 @@ class MongoEntitySearcher(EntitySearcher):
         input_query     = query.lower()
         national_query  = input_query
         original_coords = True
+        is_possible_location_query = self._is_possible_location_query(category_filter, 
+                                                                      subcategory_filter, 
+                                                                      local, prefix)
         
         query = input_query
         
-        if not self._is_possible_location_query(category_filter, subcategory_filter, local, prefix):
+        if not is_possible_location_query:
             # if we're filtering by category / subcategory and the filtered results 
             # couldn't possibly contain a location, then ensure that coords is disabled
             coords = None
@@ -376,7 +379,6 @@ class MongoEntitySearcher(EntitySearcher):
         
         input_query = input_query.encode('utf-8')
         
-        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -386,7 +388,6 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
-        """
         
         results     = {}
         wrapper     = {}
@@ -443,7 +444,7 @@ class MongoEntitySearcher(EntitySearcher):
             #if self._is_possible_tv_query(category_filter, subcategory_filter, local):
             #    pool.spawn(_find_tv)
             
-            if not local:
+            if is_possible_location_query and not local:
                 pool.spawn(_find_google_national)
         
         if len(query) > 0:
@@ -692,7 +693,7 @@ class MongoEntitySearcher(EntitySearcher):
     
     def _add_temp(self, results):
         """ retain a copy of all external entities in the 'tempentities' collection """
-        #logs.debug('Saving tempentities')
+        
         for result in results:
             entity = result[0]
             
@@ -1141,7 +1142,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             # search for matching artists
             if subcategory_filter is None or subcategory_filter == 'artist':
-                apple_pool.spawn(_find_apple_specific, media='all', entity='allArtist')
+                apple_pool.spawn(_find_apple_specific, media='music', entity='musicArtist')
             
             # search for matching albums
             if subcategory_filter is None or subcategory_filter == 'album':
