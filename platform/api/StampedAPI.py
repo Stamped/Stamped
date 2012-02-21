@@ -2703,6 +2703,8 @@ class StampedAPI(AStampedAPI):
                 if entity is not None:
                     self._enrichEntity(entity)
                     menu = self.__menuDB.getMenu(entityId)
+            except Exception:
+                pass
         if menu is None:
             raise StampedUnavailableError()
         else:
