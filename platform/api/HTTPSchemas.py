@@ -462,7 +462,7 @@ class HTTPEntity(Schema):
         self.hours              = SchemaElement(basestring)
         
         # Cross-Category
-        self.release_date       = SchemaElement(datetime)
+        self.release_date       = SchemaElement(basestring)
         self.length             = SchemaElement(basestring)
         self.rating             = SchemaElement(basestring)
         
@@ -559,12 +559,22 @@ class HTTPEntity(Schema):
                 self.length         = schema.num_pages
             
             elif self.category == 'film':
+
                 try:
-                    dateString = schema.original_release_date
-                    release_date = date(int(dateString[0:4]), \
-                                        int(dateString[5:7]), \
-                                        int(dateString[8:10]))
-                    self.release_date   = release_date
+                    cleanDate = schema.release_date
+                    if cleanDate is not None:
+                        self.release_date = str(cleanDate)
+                    else:
+                        dateString = schema.original_release_date
+                        if len(dateString) == 10:
+                            release_date = datetime(int(dateString[0:4]), \
+                                                int(dateString[5:7]), \
+                                                int(dateString[8:10]))
+                            self.release_date   = str(release_date)
+                        elif len(dateString) == 4:
+                            self.release_date = str(datetime(int(dateString),1,1))
+                        else:
+                            self.release_date = None
                 except:
                     self.release_date   = None
                 
