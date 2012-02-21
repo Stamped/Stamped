@@ -56,7 +56,7 @@ class FullResolveContainer(BasicSourceContainer):
             FactualSource(),
             GooglePlacesSource(),
             SinglePlatformSource(),
-            #TMDBSource(),
+            TMDBSource(),
         ]
         for source in sources:
             self.addSource(source)
