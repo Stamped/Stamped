@@ -563,16 +563,16 @@ class HTTPEntity(Schema):
                 try:
                     cleanDate = schema.release_date
                     if cleanDate is not None:
-                        self.release_date = str(cleanDate)
+                        self.release_date = str(cleanDate)[:10]
                     else:
                         dateString = schema.original_release_date
                         if len(dateString) == 10:
                             release_date = datetime(int(dateString[0:4]), \
                                                 int(dateString[5:7]), \
                                                 int(dateString[8:10]))
-                            self.release_date   = str(release_date)
+                            self.release_date   = str(release_date)[:10]
                         elif len(dateString) == 4:
-                            self.release_date = str(datetime(int(dateString),1,1))
+                            self.release_date = dateString
                         else:
                             self.release_date = None
                 except:
