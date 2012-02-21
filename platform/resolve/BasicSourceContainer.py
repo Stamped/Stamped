@@ -60,7 +60,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         if self.shouldEnrich(group, source.sourceName, entity, self.now):
                             targetGroups.add(group)
                     if len(targetGroups) > 0:
-                        copy = Entity().importData(entity.value)
+                        copy = Entity()
+                        copy.importData(entity.value)
+                        print(pformat(copy.value))
                         timestamps = {}
                         localDecorations = {}
                         try:
@@ -82,7 +84,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                             modified = True
                             self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                         except Exception:
-                            logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) )
+                            logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
                             failedSources.add(source)
                             self.__failedValues[source] += self.failedIncrement
                             if self.__failedValues[source] < self.failedCutoff:

@@ -92,9 +92,6 @@ class FactualSource(BasicSource):
         
         # all further enrichments require place/restaurant data so return if not present
         data = self.__factual.data(factual_id,entity=entity)
-        for group in self.group:
-            if group != 'factual' and group != 'singleplatform':
-                timestamps[group] = controller.now
 
         if data is None:
             return True
@@ -109,7 +106,7 @@ class FactualSource(BasicSource):
 
         if 'price' in data:
             try:
-                price = int(data['price'])
+                price = int(float(data['price']))
                 entity['price_range'] = price
             except:
                 logs.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)
