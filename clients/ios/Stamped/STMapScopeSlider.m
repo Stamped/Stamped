@@ -17,12 +17,15 @@
 - (void)dragBegan:(id)sender;
 - (void)updateImage;
 - (void)updateTooltipPosition;
+- (void)updateTooltipString;
 
 @property (nonatomic, readonly) STTooltipView* tooltipView;
+@property (nonatomic, retain) NSMutableArray* trackButtons;
 @end
 
 @implementation STMapScopeSlider
 
+@synthesize trackButtons = trackButtons_;
 @synthesize tooltipView = tooltipView_;
 @synthesize granularity = granularity_;
 @synthesize delegate = delegate_;
@@ -46,11 +49,11 @@
 - (void)dealloc {
   delegate_ = nil;
   tooltipView_ = nil;
+  self.trackButtons = nil;
   [super dealloc];
 }
 
 - (void)commonInit {
-  [self setGranularity:STMapScopeSliderGranularityFriends animated:NO];
   UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
   trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
   [self insertSubview:trackImageView atIndex:0];
@@ -60,12 +63,22 @@
   [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
   [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
   [self addTarget:self action:@selector(dragBegan:) forControlEvents:UIControlEventTouchDown];
-  tooltipView_ = [[STTooltipView alloc] initWithText:@"friends of friends"];
+  tooltipView_ = [[STTooltipView alloc] initWithText:@"your friends"];
   tooltipView_.center = self.center;
   tooltipView_.frame = CGRectOffset(tooltipView_.frame, 0, -57);
   tooltipView_.alpha = 0;
   [self addSubview:tooltipView_];
   [tooltipView_ release];
+  self.trackButtons = [NSMutableArray array];
+  for (NSUInteger i = 0; i <= STMapScopeSliderGranularityEveryone; ++i) {
+    UIButton* b = [UIButton buttonWithType:UIButtonTypeCustom];
+    b.tag = i;
+    b.frame = CGRectMake((i / 4.0) * (CGRectGetWidth(self.bounds) + 30) - 2, -10, 40, 40);
+    [b addTarget:self action:@selector(trackTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:b];
+    [trackButtons_ addObject:b];
+  }
+  [self setGranularity:STMapScopeSliderGranularityFriends animated:NO];
 }
 
 - (void)updateTooltipPosition {
@@ -77,26 +90,31 @@
 - (void)valueChanged:(id)sender {
   [self updateTooltipPosition];
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
-  STMapScopeSliderGranularity granularity = quotient;
+  granularity_ = quotient;
+  [self updateImage];
+  [self updateTooltipString];
+}
+
+- (void)updateTooltipString {
   NSString* string = nil;
-  switch (granularity) {
+  switch (granularity_) {
     case STMapScopeSliderGranularityYou:
-      string = @"you";
+      string = NSLocalizedString(@"you", nil);
       break;
     case STMapScopeSliderGranularityFriends:
-      string = @"friends";
+      string = NSLocalizedString(@"your friends", nil);
       break;
     case STMapScopeSliderGranularityFriendsOfFriends:
-      string = @"friends of friends";
+      string = NSLocalizedString(@"friends of friends", nil);
       break;
     case STMapScopeSliderGranularityEveryone:
-      string = @"popular";
+      string = NSLocalizedString(@"popular", nil);
       break;
     default:
       break;
   }
   if (string)
-    [tooltipView_ setText:string animated:NO];
+    [tooltipView_ setText:string animated:YES];
 }
 
 - (void)dragBegan:(id)sender {
@@ -111,28 +129,41 @@
 - (void)dragEnded:(id)sender {
   NSInteger quotient = (self.value / 0.333f) + 0.5f;
   [self setGranularity:quotient animated:YES];
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
-                   animations:^{ tooltipView_.alpha = 0.0; }
-                   completion:nil];
+}
+
+- (void)trackTapped:(id)sender {
+  [self setGranularity:[sender tag] animated:YES];
 }
 
 - (void)setGranularity:(STMapScopeSliderGranularity)granularity animated:(BOOL)animated {
   if (granularity != granularity_) {
     granularity_ = granularity;
-    
-    if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
-      [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
-    
-    [self updateImage];
   }
+
+  for (UIButton* b in trackButtons_)
+    b.hidden = b.tag == granularity;
+  
+  if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
+    [delegate_ mapScopeSlider:self didChangeGranularity:granularity];
+  
+  [self updateImage];
 
   CGFloat value = granularity == 3 ? 1.0 : granularity * 0.333;
   [self setValue:value animated:animated];
   if (animated) {
-    [UIView animateWithDuration:0.1 animations:^{
+    [UIView animateWithDuration:0.1 
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+      tooltipView_.alpha = 1.0;
+      [self updateTooltipString];
       [self updateTooltipPosition];
+    } completion:^(BOOL finished) {
+      [UIView animateWithDuration:0.3
+                            delay:2
+                          options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                       animations:^{ tooltipView_.alpha = 0.0; }
+                       completion:nil];
     }];
   } else {
     [self updateTooltipPosition];

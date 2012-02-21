@@ -576,6 +576,8 @@ class MongoEntitySearcher(EntitySearcher):
                         entity.entity_id = entity.search_id
                     else:
                         return
+                elif entity.search_id is not None:
+                    del entity.search_id
                 
                 # if local search and result is too far away, discard it
                 if local and abs(result[1]) > 30 :
@@ -677,6 +679,9 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
+        #
+        # STYLE maybe unpack result into named variables for clarity -Landon
+        #
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
@@ -687,7 +692,7 @@ class MongoEntitySearcher(EntitySearcher):
     
     def _add_temp(self, results):
         """ retain a copy of all external entities in the 'tempentities' collection """
-        logs.debug('Saving tempentities')
+        #logs.debug('Saving tempentities')
         for result in results:
             entity = result[0]
             
@@ -699,7 +704,7 @@ class MongoEntitySearcher(EntitySearcher):
                     #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
                     self.tempDB.addEntity(entity)
                     entity.entity_id = entity.search_id
-                    logs.info('Added %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
+                    #logs.info('Added %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                 except:
                     # TODO: why is this occasionally failing?
                     if entity.search_id is not None:
@@ -709,7 +714,8 @@ class MongoEntitySearcher(EntitySearcher):
                     logs.warning('Error trying to add %s to tempentities:\n%s\n' % (entity.entity_id,pformat(entity.value)))
                     pass
             else:
-                logs.info('did not add %s to tempentities:\n%s\n'%(entity.entity_id,pformat(entity.value)))
+                pass
+                #logs.info('did not add %s to tempentities:\n%s\n'%(entity.entity_id,pformat(entity.value)))
     
     def _prune_results(self, results, limit, prefix):
         """ limit the number of results returned and remove obvious duplicates """

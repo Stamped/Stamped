@@ -383,7 +383,7 @@ typedef enum {
   for (NSUInteger i = 0; i < stampsArray.count; ++i) {
     s = [stampsArray objectAtIndex:i];
     UserImageView* userImage = [[UserImageView alloc] initWithFrame:userImgFrame];
-    
+
     if (i > 1 && i % 6 == 0) {
       alsoStampedByScrollView_.contentSize =
           CGSizeMake(alsoStampedByScrollView_.contentSize.width + alsoStampedByScrollView_.frame.size.width,
@@ -958,8 +958,9 @@ typedef enum {
 
   NSString* urlString = url.absoluteString;
   User* user = nil;
+  NSString* screenName = nil;
   if ([urlString hasPrefix:@"@"]) {
-    NSString* screenName = [urlString substringFromIndex:1];
+    screenName = [urlString substringFromIndex:1];
     user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"ANY screenName LIKE[c] %@", screenName]]; 
   } else if (urlString.length == 24) {
     NSString* userID = url.absoluteString;
@@ -972,11 +973,14 @@ typedef enum {
   } else if ([urlString isEqualToString:@"likes"]) {
     [self showLikesPane];
   }
-  if (!user)
+  if (!user && !screenName)
     return;
 
   ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
-  profileViewController.user = user;
+  if (user)
+    profileViewController.user = user;
+  else if (screenName)
+    profileViewController.screenName = screenName;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
 }
@@ -1068,12 +1072,15 @@ typedef enum {
   if (stamp_.blurb.length == 0)
     blurb = [stamp_.entityObject.title stringByAppendingString:@"."];
   
-  NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
+  BOOL hasImage = stamp_.imageURL != nil;
+
+  NSString* substring = [blurb substringToIndex:MIN(blurb.length, hasImage ? 98 : 104)];
   if (blurb.length > substring.length)
     blurb = [substring stringByAppendingString:@"..."];
   
-  // Stamped: [blurb] [link]
-  [twitter setInitialText:[NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp_.URL]];
+  NSString* initial = hasImage ? @"Stamped [pic]:" : @"Stamped:";
+  // Stamped ([pic]): [blurb] [link]
+  [twitter setInitialText:[NSString stringWithFormat:@"%@ %@ %@", initial, blurb, stamp_.URL]];
   
   if ([TWTweetComposeViewController canSendTweet]) {
     [self presentViewController:twitter animated:YES completion:nil];

@@ -16,6 +16,7 @@
 
 @interface ProfileViewController : STViewController <RKObjectLoaderDelegate,
                                                      RKRequestDelegate,
+                                                     UIAlertViewDelegate,
                                                      UITableViewDelegate,
                                                      UITableViewDataSource,
                                                      NSFetchedResultsControllerDelegate>

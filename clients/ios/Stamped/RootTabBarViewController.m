@@ -149,6 +149,22 @@
 }
 
 - (void)finishViewInit {
+  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+      [AccountManager sharedManager].currentUser.numStamps.intValue == 0 &&
+      !tooltipImageView_) {
+    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
+    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame,
+                                           (CGRectGetWidth(self.view.frame) - CGRectGetWidth(tooltipImageView_.frame)) / 2, 245);
+    tooltipImageView_.alpha = 0.0;
+    tooltipImageView_.userInteractionEnabled = YES;
+    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(tooltipTapped:)];
+    [tooltipImageView_ addGestureRecognizer:recognizer];
+    [recognizer release];
+    [self.view addSubview:tooltipImageView_];
+    [tooltipImageView_ release];
+  }
+  
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
   
@@ -186,6 +202,10 @@
 
 - (void)currentUserUpdated:(NSNotification*)notification {
   [self fillStampImageView];
+  BOOL showTooltip = (tooltipImageView_ && ![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+                      [AccountManager sharedManager].currentUser.numStamps.intValue == 0);
+  if (!showTooltip)
+    tooltipImageView_.alpha = 0;
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
@@ -252,6 +272,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  tooltipImageView_.alpha = 0.0;
   if (mapViewShown_)
     [self.mapViewController viewWillAppear:animated];
   else
@@ -286,8 +307,8 @@
     [earnMore addSubview:creditLeft];
     [creditLeft release];
     UIImageView* creditRight = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_solid"]
-                                                                    withPrimaryColor:currentUser.primaryColor
-                                                                           secondary:currentUser.secondaryColor]];
+                                                                     withPrimaryColor:currentUser.primaryColor
+                                                                            secondary:currentUser.secondaryColor]];
     creditRight.frame = CGRectOffset(creditLeft.frame, 14, 0);
     [earnMore addSubview:creditRight];
     [creditRight release];
@@ -309,28 +330,12 @@
   }
 
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
-      [AccountManager sharedManager].currentUser.numStamps &&
-      [AccountManager sharedManager].currentUser.numStamps.intValue == 0) { 
-    if (!tooltipImageView_) {
-      tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
-      tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame,
-          (CGRectGetWidth(self.view.frame) - CGRectGetWidth(tooltipImageView_.frame)) / 2, 245);
-      tooltipImageView_.alpha = 0.0;
-      tooltipImageView_.userInteractionEnabled = YES;
-      UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                   action:@selector(tooltipTapped:)];
-      [tooltipImageView_ addGestureRecognizer:recognizer];
-      [recognizer release];
-      [self.view addSubview:tooltipImageView_];
-      [tooltipImageView_ release];
-    }
-
-    if (self.selectedViewController == [viewControllers_ objectAtIndex:0])
-      [UIView animateWithDuration:0.3
-                            delay:1.0
-                          options:UIViewAnimationOptionAllowUserInteraction
-                       animations:^{tooltipImageView_.alpha = 1.0;}
-                       completion:nil];
+      [AccountManager sharedManager].currentUser.numStamps.intValue == 0) {
+    [UIView animateWithDuration:0.3
+                          delay:1.0
+                        options:UIViewAnimationOptionAllowUserInteraction
+                     animations:^{tooltipImageView_.alpha = 1.0;}
+                     completion:nil];
   }
 }
 
@@ -522,6 +527,17 @@
 #pragma mark - UITabBarDelegate Methods.
 
 - (void)tabBar:(UITabBar*)tabBar didSelectItem:(UITabBarItem*)item {
+  BOOL showTooltip = (tooltipImageView_ && ![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+                      [AccountManager sharedManager].currentUser.numStamps.intValue == 0);
+    
+  if (showTooltip) {
+    [UIView animateWithDuration:0.3
+                          delay:0.0
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{tooltipImageView_.alpha = item == stampsTabBarItem_ ? 1.0 : 0.0;}
+                     completion:nil];
+  }
+
   UIViewController* newViewController = nil;
   if (item == stampsTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:0];

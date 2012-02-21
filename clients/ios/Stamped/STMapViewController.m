@@ -46,6 +46,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) BOOL zoomToLocation;
 @property (nonatomic, assign) MKMapRect lastMapRect;
 @property (nonatomic, copy) NSArray* resultsArray;
+@property (nonatomic, assign) BOOL hideToolbar;
 @end
 
 @implementation STMapViewController
@@ -63,6 +64,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize selectedAnnotation = selectedAnnotation_;
 @synthesize lastMapRect = lastMapRect_;
 @synthesize toolbar = toolbar_;
+@synthesize hideToolbar = hideToolbar_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -102,6 +104,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   [recognizer release];
 
   zoomToLocation_ = YES;
+  toolbar_.hidden = hideToolbar_;
+  CGRect frame = mapView_.frame;
+  frame.size.height = toolbar_.hidden ? 372 : 323;
+  mapView_.frame = frame;
 }
 
 - (void)viewDidUnload {
@@ -130,9 +136,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  toolbar_.hidden = hideToolbar_;
   CGRect frame = mapView_.frame;
   frame.size.height = toolbar_.hidden ? 372 : 323;
   mapView_.frame = frame;
+  [mapView_ setNeedsDisplay];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -155,16 +163,15 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     source_ = source;
   }
 
+  hideToolbar_ = (source_ != STMapViewControllerSourceInbox);
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
     searchField_.placeholder = NSLocalizedString(@"Search stamps", nil);
-    toolbar_.hidden = NO;
     if (source_ == STMapViewControllerSourceInbox)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityFriends animated:NO];
     else if (source_ == STMapViewControllerSourceUser)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityYou animated:NO];
   } else if (source_ == STMapViewControllerSourceTodo) {
     searchField_.placeholder = NSLocalizedString(@"Search to-dos", nil);
-    toolbar_.hidden = YES;
   }
   [self removeAllAnnotations];
 }
@@ -277,6 +284,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {
+  if ([loader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadDataFromNetwork];
+    return;
+  }
+
   NSLog(@"Error loading map data: %@. Error code: %d", error.localizedDescription, loader.response.statusCode);
 }
 
@@ -317,7 +330,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   pinView.rightCalloutAccessoryView = disclosureButton;
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
 
   Stamp* stamp = [(STPlaceAnnotation*)annotation stamp];
   if (stamp) {
