@@ -69,7 +69,7 @@ class GooglePlacesSource(BasicSource):
         if details is None:
             entity['googleplaces_id'] = None
             timestamps['googleplaces'] = controller.now
-            return False
+            return True
         else:
             entity['googleplaces_id'] = details['reference']
 
