@@ -14,11 +14,28 @@ except:
     report()
     raise
 
-class APlaceGroup(BasicFieldGroup):
-
+class ASubcategoryGroup(BasicFieldGroup):
     def __init__(self, *args, **kwargs):
         BasicFieldGroup.__init__(self, *args, **kwargs)
-        self.__eligible = set( [
+        self.__eligible = set( )
+        
+    def addEligible(self, subcategory):
+        self.__eligible.add(subcategory)
+
+    def removeEligible(self, subcategory):
+        self.__eligible.remove(subcategory)
+    
+    def eligible(self, entity):
+        if 'subcategory' in entity and entity['subcategory'] in self.__eligible:
+            return True
+        else:
+            return False  
+
+class APlaceGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        eligible = set( [
             'restaurant',
             'bar', 
             'bakery',
@@ -28,32 +45,35 @@ class APlaceGroup(BasicFieldGroup):
             'night_club',
             'establishment',
         ] )
-
-    def eligible(self, entity):
-        if 'subcategory' in entity and entity['subcategory'] in self.__eligible:
-            return True
-        else:
-            return False
+        for v in eligible:
+            self.addEligible(v)
 
 class ARestaurantGroup(APlaceGroup):
 
     def __init__(self, *args, **kwargs):
         APlaceGroup.__init__(self, *args, **kwargs)
-        self.__eligible = set( [
-            'restaurant',
-            'bar', 
-            'bakery',
-            'cafe', 
-            'market',
-            'food',
-            'night_club',
-        ] )
+        self.removeEligible('establishment')
 
-    def eligible(self, entity):
-        if APlaceGroup.eligible(self, entity):
-            if 'subcategory' in entity and entity['subcategory'] in self.__eligible:
-                return True
-        return False
+class AMediaGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        eligible = set( [
+            'book',
+            'movie',
+            'tv',
+            'song',
+            'album',
+            'app',
+        ] )
+        for v in eligible:
+            self.addEligible(v)
+
+class AMovieGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        self.addEligible('movie')
 
 class FactualGroup(APlaceGroup):
 
@@ -67,7 +87,17 @@ class SinglePlatformGroup(APlaceGroup):
         APlaceGroup.__init__(self, 'singleplatform')
         self.addField(['singleplatform_id'])
 
+class GooglePlacesGroup(APlaceGroup):
 
+    def __init__(self):
+        APlaceGroup.__init__(self, 'googleplaces')
+        self.addField(['googleplaces_id'])
+
+class TMDBGroup(AMovieGroup):
+
+    def __init__(self):
+        AMovieGroup.__init__(self, 'tmdb')
+        self.addField(['tmdb_id'])
 
 class AddressGroup(APlaceGroup):
 
@@ -114,6 +144,17 @@ class AlcoholFlagGroup(ARestaurantGroup):
         ARestaurantGroup.__init__(self, 'alcohol_flag')
         self.addNameField()
 
+class MenuGroup(ARestaurantGroup):
+
+    def __init__(self):
+        ARestaurantGroup.__init__(self, 'menu')
+        self.addDecoration(['menu'])
+
+class ReleaseDateGroup(AMediaGroup):
+
+    def __init__(self):
+        AMediaGroup.__init__(self, 'release_date')
+        self.addNameField()
 
 class SubtitleGroup(BasicFieldGroup):
 

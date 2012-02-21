@@ -62,7 +62,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                     if len(targetGroups) > 0:
                         copy = Entity()
                         copy.importData(entity.value)
-                        print(pformat(copy.value))
                         timestamps = {}
                         localDecorations = {}
                         try:
@@ -76,9 +75,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                         groupObj = self.getGroup(group)
                                         assert( groupObj is not None )
                                         fieldsChanged = groupObj.syncFields(copy, entity)
-                                        if group in localDecorations:
-                                            decorations[group] = localDecorations[group]
-                                        if fieldsChanged or group in timestamps or group in localDecorations:
+                                        decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
+                                        if fieldsChanged or group in timestamps or decorationsChanged:
                                             groupObj.setTimestamp(entity, localTimestamp)
                                             groupObj.setSource(entity, source.sourceName)
                                             modified = True

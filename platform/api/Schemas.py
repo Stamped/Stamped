@@ -828,6 +828,9 @@ class GooglePlacesSchema(Schema):
         self.gid                = SchemaElement(basestring)
         self.gurl               = SchemaElement(basestring)
         self.reference          = SchemaElement(basestring)
+        self.googleplaces_id         = SchemaElement(basestring)
+        self.googleplaces_timestamp  = SchemaElement(datetime)
+        self.googleplaces_source     = SchemaElement(basestring)
 
 class GoogleLocalSchema(Schema):
     def setSchema(self):
@@ -849,7 +852,6 @@ class FactualSchema(Schema):
         self.factual_timestamp  = SchemaElement(datetime)
         self.factual_source     = SchemaElement(basestring)
         self.factual_crosswalk  = SchemaElement(datetime)
-        
 
 class SinglePlatformSchema(Schema):
     def setSchema(self):

@@ -83,6 +83,10 @@ class FactualSource(BasicSource):
             factual_id = self.__factual.factual_from_entity(entity)
             entity['factual_id'] = factual_id
             timestamps['factual'] = controller.now
+        else:
+            # Only populate fields when factual id is refreshed
+            return False
+
         if factual_id is None:
             return True
         if controller.shouldEnrich('singleplatform', self.sourceName, entity):

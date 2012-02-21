@@ -48,6 +48,10 @@ class AFieldGroup(object):
     @abstractmethod
     def syncFields(self, entity, destination):
         pass
+
+    @abstractmethod
+    def syncDecorations(self, entity, destination):
+        pass
     
     @abstractmethod
     def eligible(self, entity):
