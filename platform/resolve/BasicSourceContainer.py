@@ -62,7 +62,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                     if len(targetGroups) > 0:
                         copy = Entity()
                         copy.importData(entity.value)
-                        print(pformat(copy.value))
                         timestamps = {}
                         localDecorations = {}
                         try:

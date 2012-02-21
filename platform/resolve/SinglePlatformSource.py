@@ -44,9 +44,9 @@ class SinglePlatformSource(BasicSource):
                     if menu is not None:
                         menu['entity_id'] = entity['entity_id']
                         decorations['menu'] = menu
-                        log.info('Regenerated menu for %s',singleplatform_id)
+                        logs.info('Regenerated menu for %s',singleplatform_id)
         except HTTPError as e:
-            log.warning("HttpError %s from SinglePlatform for %s",e.code,singleplatform_id)
+            logs.warning("HttpError %s from SinglePlatform for %s",e.code,singleplatform_id)
         except Exception:
             report("unexpected SinglePlatformSource error")
         return True

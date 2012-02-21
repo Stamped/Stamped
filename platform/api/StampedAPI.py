@@ -2690,10 +2690,24 @@ class StampedAPI(AStampedAPI):
     #     # #      #    ## #     #
     #     # ###### #     #  #####
     """
+
+    @lazyProperty
+    def __menuDB(self):
+        return MongoMenuCollection()
     
-    def getMenu(self,entityId):
-        return self._entityDB.getMenu(entityId)
-    
+    def getMenu(self, entityId):
+        menu = self.__menuDB.getMenu(entityId)
+        if menu is None:
+            try:
+                entity = self._entityDB.getEntity(entity_id)
+                if entity is not None:
+                    self._enrichEntity(entity)
+                    menu = self.__menuDB.getMenu(entityId)
+        if menu is None:
+            raise StampedUnavailableError()
+        else:
+            return menu
+
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -2891,6 +2905,12 @@ class StampedAPI(AStampedAPI):
     def _enrichEntity(self, entity):
         decorations = {}
         modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
+        for k,v in decorations.items():
+            if k == 'menu' and isinstance(v,MenuSchema):
+                try:
+                    self.__menuDB.update(v)
+                except Exception
+                    report()
         return modified
 
     def _enrichEntityAsync(self,entity_id):

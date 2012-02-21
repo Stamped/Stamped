@@ -38,10 +38,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def places_collection(self):
         return MongoPlacesEntityCollection()
 
-    @lazyProperty
-    def __menu_db(self):
-        return MongoMenuCollection()
-
     ### PUBLIC
     
     def _convertFromMongo(self, document):
@@ -73,14 +69,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for item in data:
             result.append(self._convertFromMongo(item))
         return result
-
-    def getMenu(self, entityId):
-        menu = self.__menu_db.getMenu(entityId)
-        if menu is None:
-            pass
-        if menu is None:
-            raise StampedUnavailableError("Unable to find menu (id = %s)" % entityId)
-        return menu
     
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
