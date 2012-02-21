@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import logs, re
 import unicodedata, utils
+import libs.CountryData
 
 from difflib    import SequenceMatcher
 
@@ -89,6 +90,8 @@ subcategories = {
     'video_game'        : 'other', 
 }
 
+countries = libs.CountryData.countries
+
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
 year_re = re.compile(r'([0-9]{4})')
 
@@ -112,7 +115,10 @@ def getLocationSubtitle(entity, detailed=False):
 
             # Use country if outside US
             else:
-                return "%s, %s, %s" % (street, entity.address_locality, entity.address_country)
+                country = entity.address_country
+                if entity.address_country in countries:
+                    country = countries[entity.address_country]
+                return "%s, %s, %s" % (street, entity.address_locality, country)
 
         if entity.address is not None:
             return entity.address
@@ -129,7 +135,10 @@ def getLocationSubtitle(entity, detailed=False):
             if entity.address_region is not None:
                 return "%s, %s" % (entity.address_locality, entity.address_region)
         else:
-            return "%s, %s" % (entity.address_locality, entity.address_country)
+            country = entity.address_country
+            if entity.address_country in countries:
+                country = countries[entity.address_country]
+            return "%s, %s" % (entity.address_locality, country)
 
     # Extract city / state with regex as fallback
     if entity.address is not None:

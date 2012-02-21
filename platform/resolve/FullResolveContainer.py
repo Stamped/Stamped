@@ -37,6 +37,8 @@ class FullResolveContainer(BasicSourceContainer):
             SiteGroup(),
             PriceRangeGroup(),
             CuisineGroup(),
+
+            SubtitleGroup(),
         ]
         for group in groups:
             self.addGroup(group)

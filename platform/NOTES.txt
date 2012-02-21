@@ -1,20 +1,12 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
-
-Searching Approaches:
-    * Separate reverse-index table; query term => entities / stamps?
-    * Augment stamp with cache of entity data (e.g., title, category, subcategory, etc.)
-    * Augment stamp with cache of extracted entity keywords
-
-*** How to handle restricting search to a subset of stamps or entities?
-    * break search up into buckets w/ each bucket containing at most n items
+* change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"
+* incorporate other signals (fb, twitter, current location, user freshness / quality) into friend suggest
+* normalize existing friend suggest signals
 
 
     * add viewport sanity checking in HTTPGenericSlice => GenericSlice conversion
-    * test map reduce sorting extensively, including targeted unit tests
     * improve error messages for get_dns_by_node_name
-    * popbar => po special case of name checking; make fuzzy name deduping based on name prefix s.t. leniancy is inversely proportional to string length (e.g., shorter strings should have harsher requirements for matching)
-    * possibly also do prefix-based matching after breaking up into words
     * cleanup userRequest instances; enforce screen_name if given in addition to user_id
     * what happens if user_id or screen_name lookup fails?
 

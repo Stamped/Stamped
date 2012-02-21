@@ -82,14 +82,17 @@ class FactualSource(BasicSource):
         if controller.shouldEnrich('factual', self.sourceName, entity):
             factual_id = self.__factual.factual_from_entity(entity)
             entity['factual_id'] = factual_id
+            timestamps['factual'] = controller.now
         if factual_id is None:
             return True
         if controller.shouldEnrich('singleplatform', self.sourceName, entity):
             singleplatform_id = self.__factual.singleplatform(factual_id)
             entity['singleplatform_id'] = singleplatform_id
+            timestamps['singleplatform'] = controller.now
         
         # all further enrichments require place/restaurant data so return if not present
         data = self.__factual.data(factual_id,entity=entity)
+
         if data is None:
             return True
         
@@ -103,7 +106,7 @@ class FactualSource(BasicSource):
 
         if 'price' in data:
             try:
-                price = int(data['price'])
+                price = int(float(data['price']))
                 entity['price_range'] = price
             except:
                 logs.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)

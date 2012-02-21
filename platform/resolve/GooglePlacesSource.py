@@ -152,6 +152,8 @@ class GooglePlacesSource(BasicSource):
             data['address_street'] = "%s %s" % (number, route)
         data2 = {}
         for k,v in data.items():
+            if v is None and k != 'address_street_ext':
+                return None
             data2[tuple(k.split('.'))] = _constant(v)
         return data2
     

@@ -17,6 +17,8 @@ try:
     from datetime               import timedelta
     from copy                   import deepcopy
     from pprint                 import pformat
+    from Schemas                import Entity
+    import logs                 
 except:
     report()
     raise
@@ -34,7 +36,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__groups = {}
         self.__sources = []
         self.__default_max_iterations = 10
-        self.__global_max_age = timedelta(30)
+        self.__global_max_age = timedelta(7)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2
@@ -58,7 +60,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         if self.shouldEnrich(group, source.sourceName, entity, self.now):
                             targetGroups.add(group)
                     if len(targetGroups) > 0:
-                        copy = deepcopy(entity)
+                        copy = Entity()
+                        copy.importData(entity.value)
+                        print(pformat(copy.value))
                         timestamps = {}
                         localDecorations = {}
                         try:
@@ -80,7 +84,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                             modified = True
                             self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                         except Exception:
-                            logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) )
+                            logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
                             failedSources.add(source)
                             self.__failedValues[source] += self.failedIncrement
                             if self.__failedValues[source] < self.failedCutoff:
