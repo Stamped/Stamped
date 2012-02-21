@@ -98,6 +98,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  searchField_.placeholder = NSLocalizedString(@"Try \u201cpizza\u201d or \u201cbar\u201d)", nil);
+
   UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                action:@selector(overlayTapped:)];
   [overlayView_ addGestureRecognizer:recognizer];
@@ -165,13 +167,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
   hideToolbar_ = (source_ != STMapViewControllerSourceInbox);
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    searchField_.placeholder = NSLocalizedString(@"Search stamps", nil);
     if (source_ == STMapViewControllerSourceInbox)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityFriends animated:NO];
     else if (source_ == STMapViewControllerSourceUser)
       [scopeSlider_ setGranularity:STMapScopeSliderGranularityYou animated:NO];
-  } else if (source_ == STMapViewControllerSourceTodo) {
-    searchField_.placeholder = NSLocalizedString(@"Search to-dos", nil);
   }
   [self removeAllAnnotations];
 }
