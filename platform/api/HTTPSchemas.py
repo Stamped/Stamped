@@ -356,7 +356,30 @@ class HTTPUserSearch(Schema):
 
 class HTTPSuggestedUsers(Schema):
     def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int, default=10)
+        self.offset             = SchemaElement(int, default=0)
+        
         self.personalized       = SchemaElement(bool, default=False)
+        self.coordinates        = SchemaElement(basestring)
+        
+        # third party keys for optionally augmenting friend suggestions with 
+        # knowledge from other social networks
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
+        self.facebook_token     = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'SuggestedUserRequest':
+            data = self.exportSparse()
+            coordinates         = data.pop('coordinates', None)
+            schema.importData(data, overflow=True)
+            
+            if coordinates:
+                schema.coordinates    = _coordinatesDictToFlat(coordinates)
+        else:
+            raise NotImplementedError
 
 class HTTPUserRelationship(Schema):
     def setSchema(self):

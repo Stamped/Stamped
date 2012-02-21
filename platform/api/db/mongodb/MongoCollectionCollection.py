@@ -55,26 +55,26 @@ class MongoCollectionCollection(ACollectionDB):
         raise NotImplementedError
     
     # TODO: optimize this function; find more efficient alternative to heapq?
-    # TODO: cache results of this function locally and in Memcached
     
     def getFriendsStampIds(self, userId, friendsSlice):
         inclusive       = friendsSlice.inclusive
         max_distance    = friendsSlice.distance
-        cache           = (inclusive and max_distance == 2)
+        cacheable       = (inclusive and max_distance == 2)
         
-        if cache:
+        if cacheable:
+            # check if result was cached
             stamp_ids   = self._getCachedFriendsStampIds(userId)
             
             if stamp_ids is not None:
                 return stamp_ids
         
+        if max_distance == 0:
+            # stamps at distance 0 from the seed user are just the seed user's own stamps
+            return self.getUserStampIds(userId)
+        
         visited_users   = set()
         stamp_ids       = []
         todo            = []
-        
-        if max_distance == 0:
-            stamp_ids.update(self.getUserStampIds(userId))
-            return stamp_ids
         
         # TODO: possible optimization; inboxstamps contains all stamp_ids for 
         # a given user and all users they follow, so this function could 
@@ -90,6 +90,7 @@ class MongoCollectionCollection(ACollectionDB):
                 if distance < max_distance:
                     heapq.heappush(todo, (distance, user_id))
         
+        # use the inboxstamps cache for a given user to speed up finding stamps during the BFS
         def visit_user_cached(user_id, distance):
             if user_id not in visited_users and distance < max_distance:
                 stamp_ids.update(self.getInboxStampIds(user_id))
@@ -124,12 +125,12 @@ class MongoCollectionCollection(ACollectionDB):
         if max_distance <= 2:
             stamp_ids = list(stamp_ids)
         
-        if cache:
+        if cacheable:
             self._cacheFriendsStampIds(userId, stamp_ids)
         
         return stamp_ids
     
-    # small local LRU cache supplemented by the global memcached instance
+    # small local LRU cache backed by memcached
     @lru_cache(maxsize=256)
     def _getCachedFriendsStampIds(self, userId):
         # TODO: add friendsSlice params if / once they're actually used

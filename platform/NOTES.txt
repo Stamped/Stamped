@@ -1,3 +1,5 @@
+not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
+
 
 Searching Approaches:
     * Separate reverse-index table; query term => entities / stamps?

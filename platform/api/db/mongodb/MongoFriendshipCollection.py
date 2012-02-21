@@ -7,6 +7,7 @@ __license__   = 'TODO'
 
 import Globals, logs, utils
 import heapq, math
+import libs.worldcities
 
 from collections                import defaultdict
 from utils                      import lazyProperty
@@ -50,6 +51,10 @@ class MongoFriendshipCollection(AFriendshipDB):
         from MongoCollectionCollection  import MongoCollectionCollection
         
         return MongoCollectionCollection()
+    
+    @lazyProperty
+    def world_cities(self):
+        return libs.worldcities.get_world_cities_kdtree()
     
     def addFriendship(self, friendship):
         userId      = friendship.user_id
@@ -141,7 +146,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     def getBlocks(self, userId):
         return self.block_collection.getBlocks(userId)
     
-    def getSuggestedUserIds(self, userId, limit=20):
+    def getSuggestedUserIds(self, userId, request):
         friends_of_friends  = {}
         visited_users       = set()
         todo                = []
@@ -232,11 +237,12 @@ class MongoFriendshipCollection(AFriendshipDB):
             values['category_overlap'] = category_dist
             
             earthRadius = 3959.0 # miles
-            sum0  = len(user_entity_ids)
-            sum1  = len(entity_ids)
-            sum0  = 1.0 / sum0 if sum0 > 0 else 0.0
-            sum1  = 1.0 / sum1 if sum1 > 0 else 0.0
-            score = -1
+            sum0    = len(user_entity_ids)
+            sum1    = len(entity_ids)
+            sum0    = 1.0 / sum0 if sum0 > 0 else 0.0
+            sum1    = 1.0 / sum1 if sum1 > 0 else 0.0
+            score   = -1
+            max_val = [ (0, None), (0, None) ]
             
             # compare seed user's stamp clusters with this user's stamp clusters
             for cluster0 in user_clusters:
@@ -257,7 +263,15 @@ class MongoFriendshipCollection(AFriendshipDB):
                         min_len  = len1
                 
                 if min_len >= 0:
-                    score = score + len0 * min_len * min_dist
+                    value = len0 * min_len * min_dist
+                    score = score + value
+                    
+                    if max_val[0][1] is None or value < max_val[0][0]:
+                        if max_val[1][1] is None or value < max_val[1][0]:
+                            max_val[0] = max_val[1]
+                            max_val[1] = (value, ll0)
+                        else:
+                            max_val[0] = (value, ll0)
             
             if score >= 0 and len(user_clusters) > 0:
                 score = score / len(user_clusters)
@@ -268,32 +282,17 @@ class MongoFriendshipCollection(AFriendshipDB):
                 score = -math.log(score)
             
             values['proximity'] = score
+            values['clusters']  = max_val
         
-        utils.log("potential friends:  %d" % len(potential_friends))
-        utils.log("friends of friends: %d" % len(friends_of_friends))
-        utils.log("processed: %d; pruned: %d" % (count, prune))
+        logs.info("potential friends:  %d" % len(potential_friends))
+        logs.info("friends of friends: %d" % len(friends_of_friends))
+        logs.info("processed: %d; pruned: %d" % (count, prune))
         
-        """
-        #for k, v in potential_friends.iteritems():
-        #    utils.log("%s) %s" % (k, v))
-        
-        def print_top(key, reverse=True, default=-1):
-            print("-" * 40)
-            users = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
-            for user in users:
-                pprint(user)
-        
-        print_top('friend_overlap')
-        print_top('stamp_overlap')
-        print_top('category_overlap')
-        print_top('proximity')
-        
-        return []
-        """
-        # TODO: integrate other signals into ranking function
         # TODO: support ignoring a friend suggestion
+        # TODO: ignore previously followed friends that you've since unfollowed
         # TODO: better support for new users w/out stamps or friends
         
+        # TODO: integrate other signals into ranking function
         # SIGNALS:
         #    * friend overlap
         #       * TODO: normalize to be independent of #friends
@@ -307,11 +306,12 @@ class MongoFriendshipCollection(AFriendshipDB):
         #    * TODO: current coordinates
         #    * TODO: global user popularity / freshness
         
-        # friends of friends sorted by overlap
+        limit  = request.limit  if request.limit  is not None else 10
+        offset = request.offset if request.offset is not None else 0
+        
         # TODO: optimize this sorted loop to only retain the top n results
-        users = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
-        if limit is not None:
-            users = users[:limit]
+        users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
+        users  = users[offset : offset + limit]
         
         return map(lambda kv: (kv[0], self._get_potential_friend_score(kv, explain=True)[1]), users)
     
@@ -319,17 +319,17 @@ class MongoFriendshipCollection(AFriendshipDB):
         values = kv[1]
         
         try:
-            friend_overlap_value    = values['friend_overlap']
+            friend_overlap_value    = int(values['friend_overlap'])
         except:
             friend_overlap_value    = 0
         
         try:
-            stamp_overlap_value     = values['stamp_overlap']
+            stamp_overlap_value     = int(values['stamp_overlap'])
         except:
             stamp_overlap_value     = 0
         
         try:
-            category_overlap_value  = values['category_overlap']
+            category_overlap_value  = float(values['category_overlap'])
         except:
             category_overlap_value  = 0
         
@@ -337,6 +337,11 @@ class MongoFriendshipCollection(AFriendshipDB):
             proximity_value         = float(values['proximity'])
         except:
             proximity_value         = 0
+        
+        try:
+            clusters                = values['clusters']
+        except:
+            clusters                = [ (0, None), (0, None) ]
         
         friend_overlap_weight       = 1.0
         stamp_overlap_weight        = 2.0
@@ -371,13 +376,38 @@ class MongoFriendshipCollection(AFriendshipDB):
             explanations = {
                 'friend_overlap'    : "%d friend%s in common" % \
                     (friend_overlap_value, '' if friend_overlap_value == 1 else 's'), 
-                'stamp_overlap'     : "%d stamps in common" % \
+                'stamp_overlap'     : "%d stamp%s in common" % \
                     (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
-                'category_overlap'  : "tend to stamp similar categories", 
+                'category_overlap'  : "Tend to stamp similar categories", 
                 
                 # TODO: naive lookup to convert cluster lat/lng => high level region (e.g., NYC or San Francisco)
-                'proximity'         : "tend to stamp in similar areas", 
+                'proximity'         : "Tend to stamp in similar areas", 
             }
+            
+            try:
+                if max_val[1][1] == 'proximity' or max_val[0][1] == 'proximity':
+                    cities = []
+                    ll = []
+                    
+                    if clusters[1][1] is not None:
+                        ll.append(clusters[1][1])
+                    
+                    if clusters[0][1] is not None:
+                        ll.append(clusters[0][1])
+                    
+                    for coords in ll:
+                        ret = self.world_cities.query(coords, k=1)
+                        if ret:
+                            cities.append(ret[0][1]['city'])
+                    
+                    if cities:
+                        explanation = "Tend to stamp in %s" % cities[0]
+                        if len(cities) > 1:
+                            explanation = "%s and %s" % (explanation, cities[1])
+                        
+                        explanations['proximity'] = explanation
+            except:
+                utils.printException()
             
             return score, (explanations[max_val[1][1]], explanations[max_val[0][1]])
         
@@ -442,4 +472,23 @@ class MongoFriendshipCollection(AFriendshipDB):
                     clusters2.append(cluster)
         
         return entity_ids, categories, clusters2
+        
+        """
+        # very useful for debugging suggested friend ranks...
+        #for k, v in potential_friends.iteritems():
+        #    utils.log("%s) %s" % (k, v))
+        
+        def print_top(key, reverse=True, default=-1):
+            print("-" * 40)
+            users = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
+            for user in users:
+                pprint(user)
+        
+        print_top('friend_overlap')
+        print_top('stamp_overlap')
+        print_top('category_overlap')
+        print_top('proximity')
+        
+        return []
+        """
 

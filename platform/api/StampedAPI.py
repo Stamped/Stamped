@@ -10,7 +10,6 @@ import Globals
 from logs import report
 
 try:
-
     import utils
     import os, logs, re, time, urlparse
 
@@ -47,7 +46,6 @@ try:
     from libs.Factual    import Factual
     from libs.ec2_utils  import is_prod_stack
     from pprint          import pformat
-
 except:
     report()
     raise
@@ -871,9 +869,9 @@ class StampedAPI(AStampedAPI):
         return self._userDB.searchUsers(authUserId, query, limit, relationship)
     
     @API_CALL
-    def getSuggestedUsers(self, authUserId, personalized):
-        if personalized:
-            suggestions = self._friendshipDB.getSuggestedUserIds(authUserId)
+    def getSuggestedUsers(self, authUserId, request):
+        if request.personalized:
+            suggestions = self._friendshipDB.getSuggestedUserIds(authUserId, request)
             output      = []
             
             for suggestion in suggestions:
