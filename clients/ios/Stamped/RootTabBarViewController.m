@@ -37,7 +37,6 @@
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
 - (void)pushNotificationReceived:(NSNotification*)notification;
-- (void)applicationDidBecomeActive:(NSNotification*)notification;
 - (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
@@ -119,10 +118,6 @@
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(reloadPanes:)
                                                name:UIApplicationSignificantTimeChangeNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(applicationDidBecomeActive:)
-                                               name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(userLoggedOut:)
@@ -498,13 +493,6 @@
   }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
   [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];
-}
-
-- (void)applicationDidBecomeActive:(NSNotification*)notification {
-  // Force the view to load.
-  [self.selectedViewController viewWillAppear:NO];
-  [self.selectedViewController view];
-  [self.selectedViewController viewDidAppear:NO];
 }
 
 #pragma mark - AccountManagerDelegate Methods.
