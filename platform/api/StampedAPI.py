@@ -41,13 +41,13 @@ try:
 
     # third-party search API wrappers
     from resolve            import FullResolveContainer
-    from GooglePlaces    import GooglePlaces
-    from libs.apple      import AppleAPI
-    from libs.AmazonAPI  import AmazonAPI
-    from libs.TheTVDB    import TheTVDB
-    from libs.Factual    import Factual
-    from libs.ec2_utils  import is_prod_stack
-    from pprint          import pformat
+    from GooglePlaces       import GooglePlaces
+    from libs.apple         import AppleAPI
+    from libs.AmazonAPI     import AmazonAPI
+    from libs.TheTVDB       import TheTVDB
+    from libs.Factual       import Factual
+    from libs.ec2_utils     import is_prod_stack
+    from pprint             import pformat
 
 except:
     report()
