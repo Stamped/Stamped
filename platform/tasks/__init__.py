@@ -68,6 +68,8 @@ def invoke(task, args=None, kwargs=None, **options):
                 time.sleep(0.1)
         
         if error is not None:
+            logs.warn("async failed: (%s) %s" % (type(error), error))
+            
             if num_errors < max_errors * 5:
                 __broker_status__.errors.append(error)
                 num_errors = len(__broker_status__.errors)
@@ -99,8 +101,6 @@ def invoke(task, args=None, kwargs=None, **options):
                         body += "\n" + pprint.pformat(dict(libs.ec2_utils.get_stack())) + "\n"
                         
                         handler.email(subject, body)
-        
-        logs.warn("async failed: (%s) %s" % (type(error), error))
     
     # broker is not responding so attempt to invoke the task synchronously / locally
     logs.warn("running async task locally '%s'" % task)
