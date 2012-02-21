@@ -173,6 +173,22 @@ class UserTiny(Schema):
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
 
+class SuggestedUserRequest(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int, default=10)
+        self.offset             = SchemaElement(int, default=0)
+        
+        self.personalized       = SchemaElement(bool, default=False)
+        self.coordinates        = CoordinatesSchema()
+        
+        # third party keys for optionally augmenting friend suggestions with 
+        # knowledge from other social networks
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
+        self.facebook_token     = SchemaElement(basestring)
+
 class Invite(Schema):
     def setSchema(self):
         self.invite_id          = SchemaElement(basestring)
@@ -272,6 +288,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):
@@ -670,11 +687,16 @@ class VideoSchema(Schema):
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
+        self.cast_source        = SchemaElement(basestring)
+        self.cast_timestamp     = SchemaElement(datetime)
         self.cast_list                  = SchemaList(CastEntrySchema())
         self.cast_list_source           = SchemaElement(basestring)
         self.cast_list_timestamp        = SchemaElement(datetime)
         
         self.director           = SchemaElement(basestring)
+        self.director_source    = SchemaElement(basestring)
+        self.director_timestamp = SchemaElement(datetime)
+
         self.in_theaters        = SchemaElement(bool)
         
         self.v_retail_price     = SchemaElement(basestring)

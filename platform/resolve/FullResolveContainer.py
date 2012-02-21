@@ -44,6 +44,8 @@ class FullResolveContainer(BasicSourceContainer):
             CuisineGroup(),
             MenuGroup(),
             ReleaseDateGroup(),
+            DirectorGroup(),
+            CastGroup(),
             SubtitleGroup(),
         ]
         for group in groups:

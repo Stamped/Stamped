@@ -254,7 +254,7 @@ def parseCommandLine():
                       help="Media type you want to search for")
     
     parser.add_option("-e", "--entity", action="store", type="string", default=None, 
-                      help="Type of results you want returned, relative to the specified media type. For example, movieArtist for amovie media type search.")
+                      help="Type of results you want returned, relative to the specified media type. For example, movieArtist for a movie media type search.")
     
     parser.add_option("-a", "--attribute", action="store", type="string", default=None, 
                       help="The attribute you want to search for in the stores, relative to the specified media type. For example, if you wnat to search for an artist by name, specify --entity=allArtist --attribute=allArtistTerm")

@@ -14,7 +14,7 @@ try:
     import sys
     import json
     import urllib2
-    from logs       import log
+    import logs
     from utils      import getFile
     from urllib2    import HTTPError
     from gevent     import sleep
@@ -78,14 +78,14 @@ class TMDB(object):
             params['api_key'] = self.__key
         pairs = [ '%s=%s' % (k,urllib2.quote(str(v))) for k,v in params.items() ]
         url = 'http://api.themoviedb.org/3/%s?%s' % (service,'&'.join(pairs))
-        log.info(url)
+        logs.info(url)
         try:
             req = urllib2.Request(url,headers={ 'Accept' : 'application/json' })
             response = urllib2.urlopen(req).read()
             data = json.loads(response)
             return data
         except HTTPError as e:
-            log.warning('error',exc_info=1)
+            logs.warning('error',exc_info=1)
             if e.code == 403:
                 sleep(1)
                 if max_retries > 0:

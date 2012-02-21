@@ -10,13 +10,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import copy, logs
-from datetime import datetime
-from errors import *
-from utils import normalize
+import copy, logs, pprint, weakref
 
-# used for parent reference
-import weakref
+from datetime   import datetime
+from errors     import *
+from utils      import normalize
 
 
 # adding generic validation for email, username, etc. on a per-element basis
@@ -813,4 +811,7 @@ resort.
     
     def getDataAsDict(self):
         return self.value
+    
+    def __str__(self):
+        return pprint.pformat(self.value)
 

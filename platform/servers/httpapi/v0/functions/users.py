@@ -56,9 +56,9 @@ def search(request):
 @require_http_methods(["GET"])
 def suggested(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPSuggestedUsers(), request)
+    schema      = parseRequest(HTTPSuggestedUsers(), request).exportSchema(SuggestedUserRequest())
     
-    results     = stampedAPI.getSuggestedUsers(authUserId, schema.personalized)
+    results     = stampedAPI.getSuggestedUsers(authUserId, schema)
     output      = []
     
     if schema.personalized:

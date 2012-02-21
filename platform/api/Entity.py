@@ -127,8 +127,7 @@ def getLocationSubtitle(entity, detailed=False):
             return entity.neighborhood
         
         return getGenericSubtitle(entity)
-
-
+    
     # Check if address components exist
     if entity.address_country is not None and entity.address_locality is not None:
         if entity.address_country == 'US':
@@ -139,7 +138,7 @@ def getLocationSubtitle(entity, detailed=False):
             if entity.address_country in countries:
                 country = countries[entity.address_country]
             return "%s, %s" % (entity.address_locality, country)
-
+    
     # Extract city / state with regex as fallback
     if entity.address is not None:
         match = city_state_re.match(entity.address)

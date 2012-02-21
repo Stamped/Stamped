@@ -307,8 +307,8 @@ class HTTPUser(Schema):
             self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
-            self.num_likes          = stats.pop('num_credits', 0)
-            self.num_likes_given    = stats.pop('num_credits_given', 0)
+            self.num_likes          = stats.pop('num_likes', 0)
+            self.num_likes_given    = stats.pop('num_likes_given', 0)
 
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
 
@@ -356,7 +356,32 @@ class HTTPUserSearch(Schema):
 
 class HTTPSuggestedUsers(Schema):
     def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int, default=10)
+        self.offset             = SchemaElement(int, default=0)
+        
         self.personalized       = SchemaElement(bool, default=False)
+        self.coordinates        = SchemaElement(basestring)
+        
+        # third party keys for optionally augmenting friend suggestions with 
+        # knowledge from other social networks
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
+        self.facebook_token     = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'SuggestedUserRequest':
+            data = self.exportSparse()
+            coordinates         = data.pop('coordinates', None)
+            schema.importData(data, overflow=True)
+            
+            if coordinates:
+                schema.coordinates    = _coordinatesFlatToDict(coordinates)
+        else:
+            raise NotImplementedError
+        
+        return schema
 
 class HTTPUserRelationship(Schema):
     def setSchema(self):
@@ -439,7 +464,7 @@ class HTTPEntity(Schema):
         self.hours              = SchemaElement(basestring)
         
         # Cross-Category
-        self.release_date       = SchemaElement(datetime)
+        self.release_date       = SchemaElement(basestring)
         self.length             = SchemaElement(basestring)
         self.rating             = SchemaElement(basestring)
         
@@ -536,12 +561,22 @@ class HTTPEntity(Schema):
                 self.length         = schema.num_pages
             
             elif self.category == 'film':
+
                 try:
-                    dateString = schema.original_release_date
-                    release_date = date(int(dateString[0:4]), \
-                                        int(dateString[5:7]), \
-                                        int(dateString[8:10]))
-                    self.release_date   = release_date
+                    cleanDate = schema.release_date
+                    if cleanDate is not None:
+                        self.release_date = str(cleanDate)[:10]
+                    else:
+                        dateString = schema.original_release_date
+                        if len(dateString) == 10:
+                            release_date = datetime(int(dateString[0:4]), \
+                                                int(dateString[5:7]), \
+                                                int(dateString[8:10]))
+                            self.release_date   = str(release_date)[:10]
+                        elif len(dateString) == 4:
+                            self.release_date = dateString
+                        else:
+                            self.release_date = None
                 except:
                     self.release_date   = None
                 
@@ -846,8 +881,9 @@ class HTTPStamp(Schema):
         self.like_threshold_hit = SchemaElement(bool)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
+        self.via                = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
-
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
             data                = schema.exportSparse()
@@ -855,7 +891,7 @@ class HTTPStamp(Schema):
             comments            = data.pop('comment_preview', [])
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
-
+            
             comment_preview = []
             for comment in comments:
                 comment = Comment(comment)
@@ -898,11 +934,11 @@ class HTTPStamp(Schema):
             stamp_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
-
+        
         else:
             logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
-            
             raise NotImplementedError
+        
         return self
 
 class HTTPImageUpload(Schema):
@@ -1133,8 +1169,10 @@ class HTTPActivity(Schema):
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = HTTPUserMini()
         self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
         self.subject            = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
+        self.blurb_format       = SchemaElement(basestring)
         self.linked_user        = HTTPUserMini()
         self.linked_stamp       = HTTPStamp()
         self.linked_entity      = HTTPEntity()

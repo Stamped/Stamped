@@ -31,7 +31,11 @@ class TMDBSource(BasicSource):
     def __init__(self):
         BasicSource.__init__(self, 'tmdb',
             'tmdb',
+
+            'director',
+            'cast',
         )
+        self.__max_cast = 6
 
     @lazyProperty
     def __tmdb(self):
@@ -54,6 +58,7 @@ class TMDBSource(BasicSource):
         if controller.shouldEnrich('tmdb',self.sourceName,entity):
             title = entity['title']
             if title is not None:
+                tmdb_id = None
                 timestamps['tmdb'] = controller.now
                 movies = self.__tmdb.movie_search(title)['results']
                 if len(movies) > 5:
@@ -88,6 +93,36 @@ class TMDBSource(BasicSource):
                     if score < -5:
                         break
                 if best_movie is not None:
-                    entity['tmdb_id'] = str(best_movie['id'])
+                    tmdb_id = str(best_movie['id'])
+                entity['tmdb_id'] = tmdb_id
+                if tmdb_id is not None:
+                    try:
+                        casts = self.__tmdb.movie_casts(tmdb_id)
+                        if 'cast' in casts:
+                            cast = casts['cast']
+                            cast_order = {}
+                            for entry in cast:
+                                name = entry['name']
+                                order = int(entry['order'])
+                                cast_order[order] = name
+                            sorted_cast = [ cast_order[k] for k in sorted(cast_order.keys()) ]
+                            if len( sorted_cast ) > self.__max_cast:
+                                sorted_cast = sorted_cast[:self.__max_cast]
+                            cast_string = ', '.join(sorted_cast)
+                            if entity['cast'] == None:
+                                entity['cast'] = cast_string
+                        if 'crew' in casts:
+                            crew = casts['crew']
+                            director = None
+                            for entry in crew:
+                                name = entry['name']
+                                job = entry['job']
+                                if job == 'Director':
+                                    director = name
+                            if director is not None:
+                                entity['director'] = director
+                            
+                    except Exception:
+                        pass
         return True
 
