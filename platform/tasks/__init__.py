@@ -57,11 +57,11 @@ def invoke(task, args=None, kwargs=None, **options):
             except Exception, e:
                 retries += 1
                 
-                if retries > max_errors:
+                if retries > max_retries:
                     error = e
                     break
                 
-                time.sleep(0.01)
+                time.sleep(0.1)
         
         if error is not None:
             if num_errors < max_errors * 5:
