@@ -322,8 +322,8 @@ typedef enum {
   if ([[NSUserDefaults standardUserDefaults] boolForKey:kContactListAccessGranted]) {
     [self performSelector:@selector(loadContactFriendsFromServer) withObject:nil afterDelay:0];
   } else {
-    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Allow Access to Contacts?", nil)
-                                                     message:NSLocalizedString(@"To search for friends, Stamped needs to send emails and phone numbers to its server.\n\nEmails and phone numbers are sent securely and never saved.", nil)
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Allow Access to Your\nAddress Book?", nil)
+                                                     message:NSLocalizedString(@"Contacts are sent securely and never stored.", nil)
                                                     delegate:self
                                            cancelButtonTitle:NSLocalizedString(@"Don't Allow", nil)
                                            otherButtonTitles:NSLocalizedString(@"OK", nil), nil] autorelease];
