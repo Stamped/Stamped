@@ -288,6 +288,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):

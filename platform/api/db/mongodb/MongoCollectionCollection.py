@@ -8,6 +8,7 @@ __license__   = 'TODO'
 import Globals
 import heapq
 
+from collections                    import defaultdict
 from utils                          import lazyProperty
 from LRUCache                       import lru_cache
 
@@ -56,14 +57,14 @@ class MongoCollectionCollection(ACollectionDB):
     
     # TODO: optimize this function; find more efficient alternative to heapq?
     
-    def getFriendsStampIds(self, userId, friendsSlice):
+    def getFriendsStamps(self, userId, friendsSlice):
         inclusive       = friendsSlice.inclusive
         max_distance    = friendsSlice.distance
         cacheable       = (inclusive and max_distance == 2)
         
         if cacheable:
             # check if result was cached
-            stamp_ids   = self._getCachedFriendsStampIds(userId)
+            stamp_ids   = self._getCachedFriendsStamps(userId)
             
             if stamp_ids is not None:
                 return stamp_ids
@@ -93,7 +94,10 @@ class MongoCollectionCollection(ACollectionDB):
         # use the inboxstamps cache for a given user to speed up finding stamps during the BFS
         def visit_user_cached(user_id, distance):
             if user_id not in visited_users and distance < max_distance:
-                stamp_ids.update(self.getInboxStampIds(user_id))
+                ids = self.getInboxStampIds(user_id)
+                
+                for stamp_id in ids:
+                    stamp_ids[stamp_id].append(user_id)
                 
                 visited_users.add(user_id)
                 
@@ -102,7 +106,7 @@ class MongoCollectionCollection(ACollectionDB):
         
         if max_distance <= 2:
             visit_user = visit_user_cached
-            stamp_ids  = set()
+            stamp_ids  = defaultdict(list)
         else:
             visit_user = visit_user_naive
         
@@ -122,17 +126,18 @@ class MongoCollectionCollection(ACollectionDB):
                 for friend_id in friend_ids:
                     visit_user(friend_id, distance)
         
-        if max_distance <= 2:
-            stamp_ids = list(stamp_ids)
+        if max_distance > 2:
+            stamp_ids = dict(map(lambda k: (k, None), stamp_ids))
         
         if cacheable:
-            self._cacheFriendsStampIds(userId, stamp_ids)
+            self._cacheFriendsStamps(userId, stamp_ids)
         
+        #print list(stamp_ids.iteritems())[:10]
         return stamp_ids
     
     # small local LRU cache backed by memcached
     @lru_cache(maxsize=256)
-    def _getCachedFriendsStampIds(self, userId):
+    def _getCachedFriendsStamps(self, userId):
         # TODO: add friendsSlice params if / once they're actually used
         if self.api is not None:
             try:
@@ -142,7 +147,7 @@ class MongoCollectionCollection(ACollectionDB):
             except:
                 pass
     
-    def _cacheFriendsStampIds(self, userId, value):
+    def _cacheFriendsStamps(self, userId, value):
         if self.api is not None:
             try:
                 key = self._getFoFCacheKey(userId)

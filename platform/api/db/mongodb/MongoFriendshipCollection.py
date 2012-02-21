@@ -396,12 +396,17 @@ class MongoFriendshipCollection(AFriendshipDB):
                         ll.append(clusters[0][1])
                     
                     for coords in ll:
-                        ret = self.world_cities.query(coords, k=1)
+                        ret = self.world_cities.query(coords, k=2)
+                        
                         if ret:
-                            cities.append(ret[0][1]['city'])
+                            if len(ret) >= 2 and ret[1][1]['population'] > 5 * ret[0][1]['population']:
+                                cities.append(ret[1][1]['city'])
+                            else:
+                                cities.append(ret[0][1]['city'])
                     
                     if cities:
                         explanation = "Tend to stamp in %s" % cities[0]
+                        
                         if len(cities) > 1:
                             explanation = "%s and %s" % (explanation, cities[1])
                         

@@ -869,8 +869,9 @@ class HTTPStamp(Schema):
         self.like_threshold_hit = SchemaElement(bool)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
+        self.via                = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
-
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
             data                = schema.exportSparse()
@@ -878,7 +879,7 @@ class HTTPStamp(Schema):
             comments            = data.pop('comment_preview', [])
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
-
+            
             comment_preview = []
             for comment in comments:
                 comment = Comment(comment)
@@ -921,11 +922,11 @@ class HTTPStamp(Schema):
             stamp_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
-
+        
         else:
             logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
-            
             raise NotImplementedError
+        
         return self
 
 class HTTPImageUpload(Schema):

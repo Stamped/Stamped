@@ -12,42 +12,33 @@ from logs import report
 try:
     import utils
     import os, logs, re, time, urlparse
-
+    
     import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
-
-    from pprint          import pprint, pformat
-    from datetime        import datetime
-    from auth            import convertPasswordForStorage
-    from utils           import lazyProperty
-    from functools       import wraps
-    from errors          import *
-
-    from AStampedAPI     import AStampedAPI
-    from AAccountDB      import AAccountDB
-    from AEntityDB       import AEntityDB
-    from APlacesEntityDB import APlacesEntityDB
-    from AUserDB         import AUserDB
-    from AStampDB        import AStampDB
-    from ACommentDB      import ACommentDB
-    from AFavoriteDB     import AFavoriteDB
-    from ACollectionDB   import ACollectionDB
-    from AFriendshipDB   import AFriendshipDB
-    from AActivityDB     import AActivityDB
-    from Schemas         import *
-
+    
+    from pprint             import pprint, pformat
+    from datetime           import datetime
+    from auth               import convertPasswordForStorage
+    from utils              import lazyProperty
+    from functools          import wraps
+    from errors             import *
+    
+    from AStampedAPI        import AStampedAPI
+    from AAccountDB         import AAccountDB
+    from AEntityDB          import AEntityDB
+    from APlacesEntityDB    import APlacesEntityDB
+    from AUserDB            import AUserDB
+    from AStampDB           import AStampDB
+    from ACommentDB         import ACommentDB
+    from AFavoriteDB        import AFavoriteDB
+    from ACollectionDB      import ACollectionDB
+    from AFriendshipDB      import AFriendshipDB
+    from AActivityDB        import AActivityDB
+    from Schemas            import *
+    
     # third-party search API wrappers
-<<<<<<< HEAD
-    from GooglePlaces    import GooglePlaces
-    from libs.apple      import AppleAPI
-    from libs.AmazonAPI  import AmazonAPI
-    from libs.TheTVDB    import TheTVDB
-    from libs.Factual    import Factual
-    from libs.ec2_utils  import is_prod_stack
-    from pprint          import pformat
-=======
     from resolve            import FullResolveContainer
     from GooglePlaces       import GooglePlaces
     from libs.apple         import AppleAPI
@@ -56,8 +47,6 @@ try:
     from libs.Factual       import Factual
     from libs.ec2_utils     import is_prod_stack
     from pprint             import pformat
-
->>>>>>> 1a859e6f32207497f175bb48759f89694000d789
 except:
     report()
     raise
@@ -2446,9 +2435,25 @@ class StampedAPI(AStampedAPI):
         if friendsSlice.distance > 3 or friendsSlice.distance < 0:
             raise StampedInputError("Unsupported value for distance")
         
-        stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
+        friend_stamps = self._collectionDB.getFriendsStamps(authUserId, friendsSlice)
+        stamp_ids = friend_stamps.keys()
         
-        return self._getStampCollection(authUserId, stampIds, friendsSlice)
+        stamps    = self._getStampCollection(authUserId, stamp_ids, friendsSlice)
+        
+        for stamp in stamps:
+            try:
+                friends = friend_stamps[stamp.stamp_id]
+                
+                if friends is not None:
+                    if len(friends) > 2:
+                        stamp.via = "%d friends" % len(friends)
+                    else:
+                        names = map(lambda user_id: self._userDB.getUser(user_id)['screen_name'], friends)
+                        stamp.via = ' and '.join(names)
+            except:
+                utils.printException()
+        
+        return stamps
     
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericSlice):
