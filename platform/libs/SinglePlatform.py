@@ -12,6 +12,7 @@ import Globals
 import base64, hashlib, hmac
 import json, urllib, urllib2, utils
 import sys
+import logs
 
 
 from pprint import pprint
@@ -160,7 +161,7 @@ class SinglePlatform(object):
         request = urllib2.Request(url)
         request.add_header('Accept-encoding', 'gzip')
         request.add_header('Accept', 'application/json')
-        
+        logs.info(url)
         result = None
         try:
             with self.__lock:
