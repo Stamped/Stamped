@@ -99,6 +99,37 @@ _cases = [
          'subcategory': 'restaurant',
          'title': 'Peter Luger Steak House'}
     ),
+    (
+        {
+            "subcategory" : "movie",
+            "title" : "Up",
+            "sources" : {
+            },
+            "details" : {
+                "media" : {
+                    "original_release_date" : "2009-05-29T07:00:00Z",
+                    "copyright" : "Disney",
+                    "artist_display_name" : "Pixar",
+                    "mpaa_rating" : "PG",
+                    "genre" : "Kids & Family",
+                },
+            },
+        },
+        {'category': 'film',
+         'details': {'media': {'artist_display_name': 'Pixar',
+                               'copyright': 'Disney',
+                               'genre': 'Kids & Family',
+                               'mpaa_rating': 'PG',
+                               'original_release_date': '2009-05-29T07:00:00Z',
+                               'release_date': datetime(2009, 5, 29, 0, 0),
+                               'release_date_source': 'format',
+                               'release_date_timestamp': _now}},
+         'sources': {'tmdb': {'tmdb_id': '14160',
+                              'tmdb_source': 'tmdb',
+                              'tmdb_timestamp': _now}},
+         'subcategory': 'movie',
+         'title': 'Up'}
+    ),
 ]
 
 class AResolveTest(AStampedAPITestCase):

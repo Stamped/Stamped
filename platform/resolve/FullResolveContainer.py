@@ -18,6 +18,8 @@ try:
     from FactualSource          import FactualSource
     from GooglePlacesSource     import GooglePlacesSource
     from SinglePlatformSource   import SinglePlatformSource
+    from TMDBSource             import TMDBSource
+    from FormatSource           import FormatSource
 except:
     report()
     raise
@@ -33,6 +35,7 @@ class FullResolveContainer(BasicSourceContainer):
             FactualGroup(),
             SinglePlatformGroup(),
             GooglePlacesGroup(),
+            TMDBGroup(),
 
             AddressGroup(),
             PhoneGroup(),
@@ -40,16 +43,18 @@ class FullResolveContainer(BasicSourceContainer):
             PriceRangeGroup(),
             CuisineGroup(),
             MenuGroup(),
-
+            ReleaseDateGroup(),
             SubtitleGroup(),
         ]
         for group in groups:
             self.addGroup(group)
 
         sources = [
+            FormatSource(),
             FactualSource(),
             GooglePlacesSource(),
             SinglePlatformSource(),
+            TMDBSource(),
         ]
         for source in sources:
             self.addSource(source)
