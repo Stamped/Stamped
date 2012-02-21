@@ -563,16 +563,16 @@ class HTTPEntity(Schema):
                 try:
                     cleanDate = schema.release_date
                     if cleanDate is not None:
-                        self.release_date = date( cleanDate.year, cleanDate.month, cleanDate.day)
+                        self.release_date = cleanDate
                     else:
                         dateString = schema.original_release_date
                         if len(dateString) == 10:
-                            release_date = date(int(dateString[0:4]), \
+                            release_date = datetime(int(dateString[0:4]), \
                                                 int(dateString[5:7]), \
                                                 int(dateString[8:10]))
                             self.release_date   = release_date
                         elif len(dateString) == 4:
-                            self.release_date = date(int(dateString),1,1)
+                            self.release_date = datetime(int(dateString),1,1)
                         else:
                             self.release_date = None
                 except:
@@ -592,7 +592,7 @@ class HTTPEntity(Schema):
             elif self.category == 'music':
                 try:
                     dateString = schema.original_release_date
-                    release_date = date(int(dateString[0:4]), \
+                    release_date = datetime(int(dateString[0:4]), \
                                         int(dateString[5:7]), \
                                         int(dateString[8:10]))
                     self.release_date   = release_date
