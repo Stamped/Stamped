@@ -379,6 +379,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         input_query = input_query.encode('utf-8')
         
+        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -388,6 +389,7 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
+        """
         
         results     = {}
         wrapper     = {}
@@ -562,7 +564,7 @@ class MongoEntitySearcher(EntitySearcher):
         # 
         # note: timeout is specified in seconds
         # TODO: drive this timout number down to speed up search results!
-        pool.join(timeout=6.5)
+        pool.join() #timeout=6.5)
         
         # ----------------- #
         # parse all results #
