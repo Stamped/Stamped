@@ -17,6 +17,7 @@ try:
 
     from FactualSource          import FactualSource
     from GooglePlacesSource     import GooglePlacesSource
+    from SinglePlatformSource   import SinglePlatformSource
 except:
     report()
     raise
@@ -31,12 +32,14 @@ class FullResolveContainer(BasicSourceContainer):
         groups = [
             FactualGroup(),
             SinglePlatformGroup(),
+            GooglePlacesGroup(),
 
             AddressGroup(),
             PhoneGroup(),
             SiteGroup(),
             PriceRangeGroup(),
             CuisineGroup(),
+            MenuGroup(),
 
             SubtitleGroup(),
         ]
@@ -45,7 +48,8 @@ class FullResolveContainer(BasicSourceContainer):
 
         sources = [
             FactualSource(),
-            GooglePlacesSource()
+            GooglePlacesSource(),
+            SinglePlatformSource(),
         ]
         for source in sources:
             self.addSource(source)

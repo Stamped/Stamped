@@ -27,6 +27,7 @@ class BasicFieldGroup(AFieldGroup):
             timestamp_path = [ '%s_timestamp' % name ]
         self.__name = name
         self.__fields = [ list(field) for field in fields ]
+        self.__decorations = [ ]
         self.__source = list(source_path)
         self.__timestamp = list(timestamp_path)
 
@@ -56,14 +57,33 @@ class BasicFieldGroup(AFieldGroup):
                 modified = True
         return modified
 
+    def syncDecorations(self, entity, destination):
+        modified = False
+        for field in self.__decorations:
+            old_value = self.getValue(destination, field)
+            new_value = self.getValue(entity, field)
+            if old_value != new_value:
+                self.setValue(destination, field, new_value)
+                modified = True
+        return modified
+
     def addField(self, path):
         self.__fields.append(list(path))
+
+    def addDecoration(self, path):
+        self.__decorations.append(list(path))
     
     def getValue(self, entity, path):
         cur = entity
         for p in path[:-1]:
-            cur = cur[p]
-        return cur[path[-1]]
+            if p in cur:
+                cur = cur[p]
+            else:
+                return None
+        if path[-1] in cur:
+            return cur[path[-1]]
+        else:
+            return None
 
     def setValue(self, entity, path, value):
         cur = entity

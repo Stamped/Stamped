@@ -130,12 +130,14 @@ class ResolveCasesTest(AResolveTest):
     def test_cases_resolve(self):
         now = _now
         for before, after in self.cases:
+            decorations = {}
             if _verbose:
                 before_string = 'Before:\n%s' % (pformat(before.value),)
-            modified = self.container.enrichEntity(before,{},timestamp=_now)
+            modified = self.container.enrichEntity(before,decorations,timestamp=_now)
             if _verbose:
                 print(before_string)
                 print('After\n%s' % (pformat(before.value),))
+                print(pformat(decorations))
             self.compare(before, after)
 
 if __name__ == '__main__':

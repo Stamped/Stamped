@@ -67,7 +67,11 @@ class SinglePlatformGroup(APlaceGroup):
         APlaceGroup.__init__(self, 'singleplatform')
         self.addField(['singleplatform_id'])
 
+class GooglePlacesGroup(APlaceGroup):
 
+    def __init__(self):
+        APlaceGroup.__init__(self, 'googleplaces')
+        self.addField(['googleplaces_id'])
 
 class AddressGroup(APlaceGroup):
 
@@ -114,6 +118,11 @@ class AlcoholFlagGroup(ARestaurantGroup):
         ARestaurantGroup.__init__(self, 'alcohol_flag')
         self.addNameField()
 
+class MenuGroup(ARestaurantGroup):
+
+    def __init__(self):
+        ARestaurantGroup.__init__(self, 'menu')
+        self.addDecoration(['menu'])
 
 class SubtitleGroup(BasicFieldGroup):
 

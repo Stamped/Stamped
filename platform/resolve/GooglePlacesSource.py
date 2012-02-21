@@ -20,6 +20,7 @@ try:
     from datetime               import datetime
     from functools              import partial
     from LibUtils               import states
+    from pprint                 import pformat
 except:
     report()
     raise
@@ -48,6 +49,7 @@ class GooglePlacesSource(BasicSource):
     """
     def __init__(self):
         BasicSource.__init__(self, 'googleplaces',
+            'googleplaces',
 
             'address',
             'phone',
@@ -60,9 +62,15 @@ class GooglePlacesSource(BasicSource):
         return GooglePlaces()
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        if not controller.shouldEnrich('googleplaces', self.sourceName, entity):
+            return False
+    
         details = self.__details(entity)
         if details is None:
+            entity['googleplaces_id'] = None
             return False
+        else:
+            entity['googleplaces_id'] = details['reference']
 
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:
@@ -89,6 +97,7 @@ class GooglePlacesSource(BasicSource):
                     if 'reference' in gdatum:
                         ref = gdatum['reference']
                         details = self.__places.getPlaceDetails(ref)
+                        details['reference'] = ref
             return details
         except:
             return None
