@@ -44,6 +44,8 @@ class FullResolveContainer(BasicSourceContainer):
             CuisineGroup(),
             MenuGroup(),
             ReleaseDateGroup(),
+            DirectorGroup(),
+            CastGroup(),
             SubtitleGroup(),
         ]
         for group in groups:
@@ -54,7 +56,7 @@ class FullResolveContainer(BasicSourceContainer):
             FactualSource(),
             GooglePlacesSource(),
             SinglePlatformSource(),
-            TMDBSource(),
+            #TMDBSource(),
         ]
         for source in sources:
             self.addSource(source)
