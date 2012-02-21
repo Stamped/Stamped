@@ -75,6 +75,13 @@ class AMovieGroup(ASubcategoryGroup):
         ASubcategoryGroup.__init__(self, *args, **kwargs)
         self.addEligible('movie')
 
+class AFilmGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        self.addEligible('movie')
+        self.addEligible('tv')
+
 class FactualGroup(APlaceGroup):
 
     def __init__(self):
@@ -154,6 +161,18 @@ class ReleaseDateGroup(AMediaGroup):
 
     def __init__(self):
         AMediaGroup.__init__(self, 'release_date')
+        self.addNameField()
+
+class DirectorGroup(AFilmGroup):
+
+    def __init__(self):
+        AFilmGroup.__init__(self, 'director')
+        self.addNameField()
+
+class CastGroup(AFilmGroup):
+
+    def __init__(self):
+        AFilmGroup.__init__(self, 'cast')
         self.addNameField()
 
 class SubtitleGroup(BasicFieldGroup):

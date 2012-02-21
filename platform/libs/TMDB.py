@@ -85,7 +85,7 @@ class TMDB(object):
             data = json.loads(response)
             return data
         except HTTPError as e:
-            log.warning('error',exc_info=1)
+            logs.warning('error',exc_info=1)
             if e.code == 403:
                 sleep(1)
                 if max_retries > 0:

@@ -687,11 +687,16 @@ class VideoSchema(Schema):
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
+        self.cast_source        = SchemaElement(basestring)
+        self.cast_timestamp     = SchemaElement(datetime)
         self.cast_list                  = SchemaList(CastEntrySchema())
         self.cast_list_source           = SchemaElement(basestring)
         self.cast_list_timestamp        = SchemaElement(datetime)
         
         self.director           = SchemaElement(basestring)
+        self.director_source    = SchemaElement(basestring)
+        self.director_timestamp = SchemaElement(datetime)
+
         self.in_theaters        = SchemaElement(bool)
         
         self.v_retail_price     = SchemaElement(basestring)
