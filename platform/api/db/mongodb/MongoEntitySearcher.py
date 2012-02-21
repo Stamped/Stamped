@@ -564,7 +564,7 @@ class MongoEntitySearcher(EntitySearcher):
         # 
         # note: timeout is specified in seconds
         # TODO: drive this timout number down to speed up search results!
-        pool.join() #timeout=6.5)
+        pool.join(timeout=6.5)
         
         # ----------------- #
         # parse all results #
@@ -1157,7 +1157,7 @@ class MongoEntitySearcher(EntitySearcher):
             # search for misc matches that might not have been returned above
             apple_pool.spawn(_find_apple_specific, media='all', entity=None)
             
-            apple_pool.join() #timeout=6.5)
+            apple_pool.join(timeout=6.5)
         except:
             utils.printException()
         
