@@ -2911,7 +2911,7 @@ class StampedAPI(AStampedAPI):
             if k == 'menu' and isinstance(v,MenuSchema):
                 try:
                     self.__menuDB.update(v)
-                except Exception
+                except Exception:
                     report()
         return modified
 
