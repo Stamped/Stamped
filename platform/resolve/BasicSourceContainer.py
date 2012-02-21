@@ -17,6 +17,7 @@ try:
     from datetime               import timedelta
     from copy                   import deepcopy
     from pprint                 import pformat
+    from Schemas                import Entity
 except:
     report()
     raise
@@ -58,7 +59,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         if self.shouldEnrich(group, source.sourceName, entity, self.now):
                             targetGroups.add(group)
                     if len(targetGroups) > 0:
-                        copy = deepcopy(entity)
+                        copy = Entity().importData(entity.value)
                         timestamps = {}
                         localDecorations = {}
                         try:
