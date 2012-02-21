@@ -682,13 +682,9 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
-        #
-        # STYLE maybe unpack result into named variables for clarity -Landon
-        #
         results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
-            #gevent.spawn(self._add_temp, results)
             tasks.invoke(tasks.APITasks._saveTempEntity, args=[results])
         
         return results
@@ -1161,7 +1157,7 @@ class MongoEntitySearcher(EntitySearcher):
             # search for misc matches that might not have been returned above
             apple_pool.spawn(_find_apple_specific, media='all', entity=None)
             
-            apple_pool.join(timeout=6.5)
+            apple_pool.join() #timeout=6.5)
         except:
             utils.printException()
         
