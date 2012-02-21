@@ -18,6 +18,7 @@ try:
     from copy                   import deepcopy
     from pprint                 import pformat
     from Schemas                import Entity
+    import logs                 
 except:
     report()
     raise
