@@ -173,6 +173,22 @@ class UserTiny(Schema):
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
 
+class SuggestedUserRequest(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int, default=10)
+        self.offset             = SchemaElement(int, default=0)
+        
+        self.personalized       = SchemaElement(bool, default=False)
+        self.coordinates        = CoordinatesSchema()
+        
+        # third party keys for optionally augmenting friend suggestions with 
+        # knowledge from other social networks
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
+        self.facebook_token     = SchemaElement(basestring)
+
 class Invite(Schema):
     def setSchema(self):
         self.invite_id          = SchemaElement(basestring)
@@ -272,6 +288,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):

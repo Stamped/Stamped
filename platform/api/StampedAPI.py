@@ -10,35 +10,34 @@ import Globals
 from logs import report
 
 try:
-
     import utils
     import os, logs, re, time, urlparse
-
+    
     import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
-
-    from pprint          import pprint, pformat
-    from datetime        import datetime
-    from auth            import convertPasswordForStorage
-    from utils           import lazyProperty
-    from functools       import wraps
-    from errors          import *
-
-    from AStampedAPI     import AStampedAPI
-    from AAccountDB      import AAccountDB
-    from AEntityDB       import AEntityDB
-    from APlacesEntityDB import APlacesEntityDB
-    from AUserDB         import AUserDB
-    from AStampDB        import AStampDB
-    from ACommentDB      import ACommentDB
-    from AFavoriteDB     import AFavoriteDB
-    from ACollectionDB   import ACollectionDB
-    from AFriendshipDB   import AFriendshipDB
-    from AActivityDB     import AActivityDB
-    from Schemas         import *
-
+    
+    from pprint             import pprint, pformat
+    from datetime           import datetime
+    from auth               import convertPasswordForStorage
+    from utils              import lazyProperty
+    from functools          import wraps
+    from errors             import *
+    
+    from AStampedAPI        import AStampedAPI
+    from AAccountDB         import AAccountDB
+    from AEntityDB          import AEntityDB
+    from APlacesEntityDB    import APlacesEntityDB
+    from AUserDB            import AUserDB
+    from AStampDB           import AStampDB
+    from ACommentDB         import ACommentDB
+    from AFavoriteDB        import AFavoriteDB
+    from ACollectionDB      import ACollectionDB
+    from AFriendshipDB      import AFriendshipDB
+    from AActivityDB        import AActivityDB
+    from Schemas            import *
+    
     # third-party search API wrappers
     from resolve            import FullResolveContainer
     from GooglePlaces       import GooglePlaces
@@ -48,7 +47,6 @@ try:
     from libs.Factual       import Factual
     from libs.ec2_utils     import is_prod_stack
     from pprint             import pformat
-
 except:
     report()
     raise
@@ -871,9 +869,9 @@ class StampedAPI(AStampedAPI):
         return self._userDB.searchUsers(authUserId, query, limit, relationship)
     
     @API_CALL
-    def getSuggestedUsers(self, authUserId, personalized):
-        if personalized:
-            suggestions = self._friendshipDB.getSuggestedUserIds(authUserId)
+    def getSuggestedUsers(self, authUserId, request):
+        if request.personalized:
+            suggestions = self._friendshipDB.getSuggestedUserIds(authUserId, request)
             output      = []
             
             for suggestion in suggestions:
@@ -2429,7 +2427,6 @@ class StampedAPI(AStampedAPI):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
-        #logs.info("STAMP IDS: %s" % stampIds)
         
         return self._getStampCollection(authUserId, stampIds, userSlice)
     
@@ -2438,9 +2435,25 @@ class StampedAPI(AStampedAPI):
         if friendsSlice.distance > 3 or friendsSlice.distance < 0:
             raise StampedInputError("Unsupported value for distance")
         
-        stampIds = self._collectionDB.getFriendsStampIds(authUserId, friendsSlice)
+        friend_stamps = self._collectionDB.getFriendsStamps(authUserId, friendsSlice)
+        stamp_ids = friend_stamps.keys()
         
-        return self._getStampCollection(authUserId, stampIds, friendsSlice)
+        stamps    = self._getStampCollection(authUserId, stamp_ids, friendsSlice)
+        
+        for stamp in stamps:
+            try:
+                friends = friend_stamps[stamp.stamp_id]
+                
+                if friends is not None:
+                    if len(friends) > 2:
+                        stamp.via = "%d friends" % len(friends)
+                    else:
+                        names = map(lambda user_id: self._userDB.getUser(user_id)['screen_name'], friends)
+                        stamp.via = ' and '.join(names)
+            except:
+                utils.printException()
+        
+        return stamps
     
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericSlice):

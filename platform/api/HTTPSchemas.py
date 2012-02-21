@@ -356,7 +356,30 @@ class HTTPUserSearch(Schema):
 
 class HTTPSuggestedUsers(Schema):
     def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int, default=10)
+        self.offset             = SchemaElement(int, default=0)
+        
         self.personalized       = SchemaElement(bool, default=False)
+        self.coordinates        = SchemaElement(basestring)
+        
+        # third party keys for optionally augmenting friend suggestions with 
+        # knowledge from other social networks
+        self.twitter_key        = SchemaElement(basestring)
+        self.twitter_secret     = SchemaElement(basestring)
+        
+        self.facebook_token     = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'SuggestedUserRequest':
+            data = self.exportSparse()
+            coordinates         = data.pop('coordinates', None)
+            schema.importData(data, overflow=True)
+            
+            if coordinates:
+                schema.coordinates    = _coordinatesDictToFlat(coordinates)
+        else:
+            raise NotImplementedError
 
 class HTTPUserRelationship(Schema):
     def setSchema(self):
@@ -856,8 +879,9 @@ class HTTPStamp(Schema):
         self.like_threshold_hit = SchemaElement(bool)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
+        self.via                = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
-
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
             data                = schema.exportSparse()
@@ -865,7 +889,7 @@ class HTTPStamp(Schema):
             comments            = data.pop('comment_preview', [])
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
-
+            
             comment_preview = []
             for comment in comments:
                 comment = Comment(comment)
@@ -908,11 +932,11 @@ class HTTPStamp(Schema):
             stamp_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
-
+        
         else:
             logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
-            
             raise NotImplementedError
+        
         return self
 
 class HTTPImageUpload(Schema):
