@@ -54,6 +54,10 @@ def invoke(task, args=None, kwargs=None, **options):
                 __broker_status__['errors'] = []
                 
                 return retval
+            except TypeError, e:
+                logs.warn("invalid async call (%s); args=%s; kwargs=%s" % (e, args, kwargs))
+                error = e
+                break
             except Exception, e:
                 retries += 1
                 
