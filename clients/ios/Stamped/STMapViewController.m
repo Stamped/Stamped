@@ -408,11 +408,15 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.selectedAnnotation = nil;
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    for (Stamp* s in resultsArray_)
-      [self addAnnotationForStamp:s];
+    for (Stamp* s in resultsArray_) {
+      if (s.entityObject.coordinates.length > 0)
+        [self addAnnotationForStamp:s];
+    }
   } else if (source_ == STMapViewControllerSourceTodo) {
-    for (Favorite* f in resultsArray_)
-      [self addAnnotationForEntity:f.entityObject];
+    for (Favorite* f in resultsArray_) {
+      if (f.entityObject.coordinates.length > 0)
+        [self addAnnotationForEntity:f.entityObject];
+    }
   }
 
   if (selectedAnnotation_ && searchField_.text.length > 0)
