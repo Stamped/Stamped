@@ -33,6 +33,9 @@ class RdioSource(BasicSource):
     @lazyProperty
     def __rdio(self):
         return Rdio(('bzj2pmrs283kepwbgu58aw47','xJSZwBZxFp'))
+    
+    def resolveSong(self, entity):
+        pass        
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich('rdio',self.sourceName,entity):
