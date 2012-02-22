@@ -1239,18 +1239,20 @@ class HTTPActivity(Schema):
             linked_stamp        = data.pop('linked_stamp', None)
             linked_user         = data.pop('linked_user', None)
             linked_url          = data.pop('linked_url', None)
-            user                = UserMini(data.pop('user', None))
-            data['user']        = HTTPUserMini().importSchema(user).value 
+            user                = data.pop('user', None)
 
             self.importData(data, overflow=True)
+
+            if user is not None:
+                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
             
-            if linked_stamp != None:
+            if linked_stamp is not None:
                 self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
-            elif linked_user != None:
+            elif linked_user is not None:
                 self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
-            elif linked_entity != None:
+            elif linked_entity is not None:
                 self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
-            elif linked_url != None:
+            elif linked_url is not None:
                 self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
 
             self.created = schema.timestamp.created
