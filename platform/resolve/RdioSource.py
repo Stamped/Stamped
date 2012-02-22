@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    from libs.rdio                  import Rdio
+    from libs.Rdio                  import Rdio
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
     import logs
@@ -32,7 +32,7 @@ class RdioSource(BasicSource):
 
     @lazyProperty
     def __rdio(self):
-        return Rdio(('bzj2pmrs283kepwbgu58aw47','xJSZwBZxFp'))
+        return Rdio('bzj2pmrs283kepwbgu58aw47','xJSZwBZxFp')
     
     def resolveSong(self, entity):
         pass        
@@ -58,10 +58,10 @@ class RdioSource(BasicSource):
                 if not failed:
                     timestamps['rdio'] = controller.now
                     try:
-                        result = self.__rdio.call('search',{
-                            'query':' '.join(query_list),
-                            'types':', '.join(type_list),
-                        })
+                        result = self.__rdio.method('search',
+                            query=' '.join(query_list),
+                            types=', '.join(type_list),
+                        )
                         if result['status'] == 'ok':
                             entries = result['result']['results']
                             length = min(10,len(entries))
