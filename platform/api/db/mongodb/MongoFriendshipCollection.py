@@ -24,6 +24,9 @@ from api.AFriendshipDB          import AFriendshipDB
 
 class MongoFriendshipCollection(AFriendshipDB):
     
+    def __init__(self, api):
+        self.api = api
+    
     ### PUBLIC
     
     @lazyProperty
@@ -198,6 +201,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         #for cluster in user_clusters:
         #    print "(%s) %d %s" % (cluster['avg'], len(cluster['data']), cluster['data'])
         
+        # seed potential friends with users who have stamped at least one of the same entities
         for entity_id in user_entity_ids:
             stamps = self.stamp_collection.getStampsFromEntity(entity_id, limit=200)
             
@@ -210,14 +214,33 @@ class MongoFriendshipCollection(AFriendshipDB):
                     except:
                         potential_friends[user_id]['stamp_overlap'] = 1
         
+        # seed potential friends with facebook friends
+        if request.facebook_token is not None:
+            facebook_friends = self.api._getFacebookFriends(request.facebook_token)
+            
+            for friend in facebook_friends:
+                user_id = friend.user_id
+                
+                if user_id not in friends:
+                    potential_friends[user_id]['facebook_friend'] = True
+        
+        # seed potential friends with twitter friends
+        if request.twitter_key is not None and request.twitter_secret is not None:
+            twitter_friends = self.api._getTwitterFriends(request.facebook_token)
+            
+            for friend in twitter_friends:
+                user_id = friend.user_id
+                
+                if user_id not in friends:
+                    potential_friends[user_id]['twitter_friend'] = True
+        
         count = 0
         prune = 0
         
         for user_id, values in potential_friends.iteritems():
             try:
                 if 'friend_overlap' not in values and values['stamp_overlap'] <= 1:
-                    prune = prune + 1
-                    continue
+                    raise
             except:
                 prune = prune + 1
                 continue
@@ -339,6 +362,16 @@ class MongoFriendshipCollection(AFriendshipDB):
             proximity_value         = 0
         
         try:
+            facebook_friend_value   = int(values['facebook_friend'])
+        except:
+            facebook_friend_value   = 0
+        
+        try:
+            twitter_friend_value    = 1(values['twitter_friend'])
+        except:
+            twitter_friend_value    = 0
+        
+        try:
             clusters                = values['clusters']
         except:
             clusters                = [ (0, None), (0, None) ]
@@ -347,6 +380,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         stamp_overlap_weight        = 2.0
         category_overlap_weight     = 1.0
         proximity_weight            = 3.0
+        facebook_friend_weight      = 2.0
+        twitter_friend_weight       = 2.0
         
         max_val = [ (0, None), (0, None) ]
         score   = 0.0
@@ -356,6 +391,8 @@ class MongoFriendshipCollection(AFriendshipDB):
             'stamp_overlap'     : stamp_overlap_value     * stamp_overlap_weight, 
             'category_overlap'  : category_overlap_value  * category_overlap_weight, 
             'proximity'         : proximity_value         * proximity_weight, 
+            'facebook_friend'   : facebook_friend_value   * facebook_friend_weight, 
+            'twitter_friend'    : twitter_friend_value    * twitter_friend_weight, 
         }
         
         #if explain:
@@ -382,6 +419,8 @@ class MongoFriendshipCollection(AFriendshipDB):
                 
                 # TODO: naive lookup to convert cluster lat/lng => high level region (e.g., NYC or San Francisco)
                 'proximity'         : "Tend to stamp in similar areas", 
+                'facebook_friend'   : "Friends on Facebook", 
+                'twitter_friend'    : "Follow on Twitter", 
             }
             
             try:

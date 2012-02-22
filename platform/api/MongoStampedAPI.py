@@ -88,7 +88,7 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
+        return MongoFriendshipCollection(self)
     
     @lazyProperty
     def _activityDB(self):

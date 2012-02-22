@@ -267,15 +267,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
     def findUsersByFacebook(self, facebookIds, limit=0):
         facebookIds = map(str, facebookIds)
-
+        
         data = self._collection.find(
             {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
         ).limit(limit)
-            
+        
         result = []
         for item in data:
             user = self._convertFromMongo(item)
             user.identifier = item['linked_accounts']['facebook']['facebook_id']
             result.append(user)
+        
         return result
 

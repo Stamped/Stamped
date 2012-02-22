@@ -41,7 +41,7 @@ class MongoCollectionCollection(ACollectionDB):
     
     @lazyProperty
     def friendship_collection(self):
-        return MongoFriendshipCollection()
+        return MongoFriendshipCollection(self.api)
     
     def getInboxStampIds(self, userId):
         return self.inbox_stamps_collection.getInboxStampIds(userId)

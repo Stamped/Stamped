@@ -1,17 +1,18 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
 * normalize existing friend suggest signals
-* consistency across city recommendations
 * incorporate other signals (fb, twitter, current location, user freshness / quality) into friend suggest
+* support HTTPGenericSlice interface for favorites
 * autocomplete cron job
 
 OLD:
     * change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"
+    * consistency across city recommendations
 
-    * add viewport sanity checking in HTTPGenericSlice => GenericSlice conversion
-    * improve error messages for get_dns_by_node_name
-    * cleanup userRequest instances; enforce screen_name if given in addition to user_id
-    * what happens if user_id or screen_name lookup fails?
+* add viewport sanity checking in HTTPGenericSlice => GenericSlice conversion
+* improve error messages for get_dns_by_node_name
+* cleanup userRequest instances; enforce screen_name if given in addition to user_id
+* what happens if user_id or screen_name lookup fails?
 
 API v1:
     * entrypoints:
@@ -20,37 +21,6 @@ API v1:
         * favorites/show
         * todo's
 
-class HTTPGenericSlice(Schema):
-    def setSchema(self):
-        # paging
-        self.limit              = SchemaElement(int)
-        self.offset             = SchemaElement(int)
-        
-        # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
-        self.sort               = SchemaElement(basestring)
-        self.reverse            = SchemaElement(bool)
-        self.center             = SchemaElement(basestring) # "lat,lng"
-        
-        # filtering
-        self.query              = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
-        self.deleted            = SchemaElement(bool)
-        self.viewport           = SchemaElement(basestring) # "lat0,lng0;lat1,lng1"
-        
-        # misc options
-        self.quality            = SchemaElement(int)
-        self.comments           = SchemaElement(bool)
-
-class HTTPUserCollectionSlice(HTTPGenericSlice):
-    def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
-        
-        self.user_id            = SchemaElement(basestring)
-        self.screen_name        = SchemaElement(basestring)
 
 API:
     * standardize handleHTTPRequest to take in a parameter for whether or not auth is required and input schema
