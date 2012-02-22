@@ -65,7 +65,7 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             raise Exception
     
     def getFavorites(self, userId, genericCollectionSlice):
-        query = { '_id' : self._getObjectIdFromString(userId) }
+        query = { 'user_id' : userId }
         
         return self._getSlice(query, genericCollectionSlice)
     

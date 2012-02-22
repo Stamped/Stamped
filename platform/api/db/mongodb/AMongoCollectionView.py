@@ -10,7 +10,7 @@ import bson, logs, pprint, pymongo
 
 from AMongoCollection   import AMongoCollection
 
-class MongoStampCollection(AMongoCollection):
+class AMongoCollectionView(AMongoCollection):
     
     def _getSlice(self, query, genericCollectionSlice):
         time_filter = 'timestamp.created'
@@ -109,8 +109,8 @@ class MongoStampCollection(AMongoCollection):
             add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
                            { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
         
-        #utils.log(pprint.pformat(query))
-        #utils.log(pprint.pformat(genericCollectionSlice.value))
+        utils.log(pprint.pformat(query))
+        utils.log(pprint.pformat(genericCollectionSlice.value))
         
         # find, sort, and truncate results
         # --------------------------------
