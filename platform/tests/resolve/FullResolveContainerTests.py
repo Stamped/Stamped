@@ -130,6 +130,44 @@ _cases = [
          'subcategory': 'movie',
          'title': 'Up'}
     ),
+    (
+        {
+            "category" : "music",
+            "details" : {
+                "media" : {
+                    "artist_display_name" : "Breathe Carolina",
+                    "genre" : "Alternative",
+                    "original_release_date" : "2011-07-12T07:00:00Z",
+                    "track_length" : 231
+                },
+                "song" : {
+                    "album_name" : "Hell Is What You Make It",
+                }
+            },
+            "subcategory" : "song",
+            "title" : "Sweat It Out",
+        },
+        {
+            "category" : "music",
+            "details" : {
+                "media" : {
+                    "artist_display_name" : "Breathe Carolina",
+                    "genre" : "Alternative",
+                    "original_release_date" : "2011-07-12T07:00:00Z",
+                    'release_date': datetime(2011, 7, 12, 0, 0),
+                    'release_date_source': 'format',
+                    'release_date_timestamp': _now,
+                    "track_length" : '231'
+                },
+                "song" : {
+                    "album_name" : "Hell Is What You Make It",
+                }
+            },
+            "subcategory" : "song",
+            "title" : "Sweat It Out",
+        },
+    )
+
 ]
 
 class AResolveTest(AStampedAPITestCase):

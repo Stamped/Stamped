@@ -68,7 +68,6 @@ class FormatSource(BasicSource):
                             pass
                     if new_date is not None:
                         entity['release_date'] = new_date
-                    else:
                         logs.info('created release date (%s) from %s' % (new_date, date))
         return True
 

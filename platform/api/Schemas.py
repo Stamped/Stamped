@@ -794,6 +794,7 @@ class MediaSchema(Schema):
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
+        self.rdio               = RdioSchema()
         self.tmdb               = TMDBSchema()
         self.singleplatform     = SinglePlatformSchema()
         self.googlePlaces       = GooglePlacesSchema()
@@ -869,6 +870,12 @@ class TMDBSchema(Schema):
         self.tmdb_id            = SchemaElement(basestring)
         self.tmdb_source        = SchemaElement(basestring)
         self.tmdb_timestamp     = SchemaElement(datetime)
+
+class RdioSchema(Schema):
+    def setSchema(self):
+        self.rdio_id            = SchemaElement(basestring)
+        self.rdio_timestamp     = SchemaElement(datetime)
+        self.rdio_source        = SchemaElement(basestring)
 
 class AppleSchema(Schema):
     def setSchema(self):

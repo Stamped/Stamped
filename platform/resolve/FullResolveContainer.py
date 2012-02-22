@@ -20,6 +20,7 @@ try:
     from SinglePlatformSource   import SinglePlatformSource
     from TMDBSource             import TMDBSource
     from FormatSource           import FormatSource
+    from RdioSource             import RdioSource
 except:
     report()
     raise
@@ -47,6 +48,7 @@ class FullResolveContainer(BasicSourceContainer):
             DirectorGroup(),
             CastGroup(),
             SubtitleGroup(),
+            RdioGroup(),
         ]
         for group in groups:
             self.addGroup(group)
@@ -57,6 +59,7 @@ class FullResolveContainer(BasicSourceContainer):
             GooglePlacesSource(),
             SinglePlatformSource(),
             TMDBSource(),
+            RdioSource(),
         ]
         for source in sources:
             self.addSource(source)

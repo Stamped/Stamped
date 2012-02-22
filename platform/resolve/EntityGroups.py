@@ -106,6 +106,15 @@ class TMDBGroup(AMovieGroup):
         AMovieGroup.__init__(self, 'tmdb')
         self.addField(['tmdb_id'])
 
+class RdioGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'rdio')
+        self.addField(['rdio_id'])
+        self.addEligible('song')
+        self.addEligible('artist')
+        self.addEligible('album')
+
 class AddressGroup(APlaceGroup):
 
     def __init__(self):
