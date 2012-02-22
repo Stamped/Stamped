@@ -54,16 +54,22 @@ def invoke(task, args=None, kwargs=None, **options):
                 __broker_status__['errors'] = []
                 
                 return retval
+            except TypeError, e:
+                logs.warn("invalid async call (%s); args=%s; kwargs=%s" % (e, args, kwargs))
+                error = e
+                break
             except Exception, e:
                 retries += 1
                 
-                if retries > max_errors:
+                if retries > max_retries:
                     error = e
                     break
                 
-                time.sleep(0.01)
+                time.sleep(0.1)
         
         if error is not None:
+            logs.warn("async failed: (%s) %s" % (type(error), error))
+            
             if num_errors < max_errors * 5:
                 __broker_status__.errors.append(error)
                 num_errors = len(__broker_status__.errors)
@@ -97,6 +103,6 @@ def invoke(task, args=None, kwargs=None, **options):
                         handler.email(subject, body)
     
     # broker is not responding so attempt to invoke the task synchronously / locally
-    logs.warn("async failed; running locally")
+    logs.warn("running async task locally '%s'" % task)
     return task.apply(args, kwargs, **options)
 
