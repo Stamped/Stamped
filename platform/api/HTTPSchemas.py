@@ -1041,7 +1041,7 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
         self.unique             = SchemaElement(bool, default=False)
 
     def _convertData(self, data):
-        data = HTTPGenericSlice()._convertData(data)
+        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
         if 'viewport' in data:
             try:
                 lat0, lng0, lat1, lng1 = data['viewport'].split(',')
