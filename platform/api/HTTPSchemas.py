@@ -1203,20 +1203,29 @@ class HTTPFavoriteNew(Schema):
 
 class HTTPActivity(Schema):
     def setSchema(self):
+        # Metadata
         self.activity_id        = SchemaElement(basestring, required=True)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = HTTPUserMini()
+        self.created            = SchemaElement(basestring)
+        self.benefit            = SchemaElement(int)
+
+        # Image
         self.image              = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
+
+        # Text
         self.subject            = SchemaElement(basestring)
+        self.subject_objects    = SchemaList(ActivityObjectSchema())
         self.blurb              = SchemaElement(basestring)
         self.blurb_format       = SchemaElement(basestring)
+        self.blurb_objects      = SchemaList(ActivityObjectSchema())
+
+        # Links
         self.linked_user        = HTTPUserMini()
         self.linked_stamp       = HTTPStamp()
         self.linked_entity      = HTTPEntity()
-        self.linked_url         = SchemaElement(basestring)
-        self.created            = SchemaElement(basestring)
-        self.benefit            = SchemaElement(int)
+        self.linked_url         = HTTPLinkedURL()
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Activity':
@@ -1237,7 +1246,7 @@ class HTTPActivity(Schema):
             elif linked_entity != None:
                 self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
             elif linked_url != None:
-                self.linked_url = linked_url
+                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
 
             self.created = schema.timestamp.created
         else:
@@ -1247,6 +1256,18 @@ class HTTPActivity(Schema):
 class HTTPActivitySlice(HTTPGenericSlice):
     def setSchema(self):
         HTTPGenericSlice.setSchema(self)
+
+class HTTPLinkedURL(Schema):
+    def setSchema(self):
+        self.url                = SchemaElement(basestring, required=True)
+        self.browser            = SchemaElement(bool, default=True)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'LinkedURL':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
 
 
 # #### #

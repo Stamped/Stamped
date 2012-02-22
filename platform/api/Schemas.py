@@ -367,6 +367,13 @@ class ActivityLink(Schema):
         self.linked_comment_id  = SchemaElement(basestring)
         self.linked_url         = SchemaElement(basestring)
 
+class ActivityObjectSchema(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.indices            = SchemaList(SchemaElement(int))
+
 class Alert(Schema):
     def setSchema(self):
         self.alert_id           = SchemaElement(basestring)
@@ -375,6 +382,11 @@ class Alert(Schema):
         self.user_id            = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
+
+class LinkedURL(Schema):
+    def setSchema(self):
+        self.url                = SchemaElement(basestring, required=True)
+        self.browser            = SchemaElement(bool)
 
 
 # ########## #
