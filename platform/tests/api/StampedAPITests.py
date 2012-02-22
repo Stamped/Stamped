@@ -114,8 +114,8 @@ class StampedAPIStampTests(StampedAPITest):
         if self._run:
             self._dropCollection("stamps")
     
-    def _getStamps(self, httpGenericSlice):
-        self._params['genericSlice'] = httpGenericSlice.exportSchema(GenericSlice())
+    def _getStamps(self, httpGenericCollectionSlice):
+        self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportSchema(GenericCollectionSlice())
         
         ret = self.stampedAPI._getStampCollection(**self._params)
         self.assertIsInstance(ret, list)
@@ -129,10 +129,10 @@ class StampedAPIStampTests(StampedAPITest):
         self.assertEqual(s0["entity"]["title"],     s1["entity"]["title"])
         self.assertEqual(s0["entity"]["entity_id"], s1["entity"]["entity_id"])
     
-    def _test_reverse(self, genericSlice, results0):
-        genericSlice.reverse    = True
+    def _test_reverse(self, genericCollectionSlice, results0):
+        genericCollectionSlice.reverse    = True
         
-        results1 = self._getStamps(genericSlice)
+        results1 = self._getStamps(genericCollectionSlice)
         self.assertEqual(len(results0), len(results1))
         
         # test reverse to ensure stamps are exactly mirrored
@@ -149,113 +149,113 @@ class StampedAPIStampTests(StampedAPITest):
         if not self._run:
             return
         
-        genericSlice            = HTTPGenericSlice()
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
         
-        genericSlice.limit      = 10
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.limit      = 10
+        ret = self._getStamps(genericCollectionSlice)
         self.assertTrue(len(ret) <= 10)
         
-        genericSlice.offset     = 10
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.offset     = 10
+        ret = self._getStamps(genericCollectionSlice)
         self.assertTrue(len(ret) <= 10)
         
-        genericSlice.subcategory = "restaurant"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.subcategory = "restaurant"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.subcategory = None
-        genericSlice.query      = "speakeasy"
-        genericSlice.sort       = "relevance"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.subcategory = None
+        genericCollectionSlice.query      = "speakeasy"
+        genericCollectionSlice.sort       = "relevance"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.category   = "food"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.category   = "food"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.category   = None
-        genericSlice.query      = None
-        genericSlice.sort       = "alphabetical"
-        genericSlice.reverse    = True
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.category   = None
+        genericCollectionSlice.query      = None
+        genericCollectionSlice.sort       = "alphabetical"
+        genericCollectionSlice.reverse    = True
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "created"
-        genericSlice.reverse    = False
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.sort       = "created"
+        genericCollectionSlice.reverse    = False
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "proximity"
-        genericSlice.center     = "44,-80"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.sort           = "proximity"
+        genericCollectionSlice.coordinates    = "44,-80"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "popularity"
-        genericSlice.center     = None
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.sort           = "popularity"
+        genericCollectionSlice.coordinates    = None
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "relevance"
-        genericSlice.viewport   = "44,-80,40,-70"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.sort       = "relevance"
+        genericCollectionSlice.viewport   = "44,-80,40,-70"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "relevance"
-        genericSlice.query      = "tacos"
-        genericSlice.viewport   = "44,-80,40,-70"
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.sort       = "relevance"
+        genericCollectionSlice.query      = "tacos"
+        genericCollectionSlice.viewport   = "44,-80,40,-70"
+        ret = self._getStamps(genericCollectionSlice)
         
-        genericSlice.since      = 1000
-        genericSlice.before     = 100000000
-        genericSlice.viewport   = None
-        ret = self._getStamps(genericSlice)
+        genericCollectionSlice.since      = 1000
+        genericCollectionSlice.before     = 100000000
+        genericCollectionSlice.viewport   = None
+        ret = self._getStamps(genericCollectionSlice)
     
     def test_relevance_sort(self):
-        genericSlice            = HTTPGenericSlice()
-        genericSlice.sort       = "relevance"
-        genericSlice.query      = "aWeSoMe" # test case insensitivity
-        genericSlice.offset     = 0
-        genericSlice.limit      = 10
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
+        genericCollectionSlice.sort       = "relevance"
+        genericCollectionSlice.query      = "aWeSoMe" # test case insensitivity
+        genericCollectionSlice.offset     = 0
+        genericCollectionSlice.limit      = 10
         
-        ret0 = self._getStamps(genericSlice)
+        ret0 = self._getStamps(genericCollectionSlice)
         self.assertLength(ret0, 5)
         
-        genericSlice.offset     = 2
-        genericSlice.limit      = len(ret0) - genericSlice.offset + 1
+        genericCollectionSlice.offset     = 2
+        genericCollectionSlice.limit      = len(ret0) - genericCollectionSlice.offset + 1
         
-        ret1 = self._getStamps(genericSlice)
-        self.assertLength(ret1, len(ret0) - genericSlice.offset)
+        ret1 = self._getStamps(genericCollectionSlice)
+        self.assertLength(ret1, len(ret0) - genericCollectionSlice.offset)
         
         # ensure overlapping stamps across slice match up
-        for i in xrange(genericSlice.offset, len(ret0)):
+        for i in xrange(genericCollectionSlice.offset, len(ret0)):
             s0 = ret0[i]
-            s1 = ret1[i - genericSlice.offset]
+            s1 = ret1[i - genericCollectionSlice.offset]
             
             self._assertStampsEqual(s0, s1)
         
         # test reverse
-        genericSlice.offset     = 0
-        genericSlice.limit      = 10
+        genericCollectionSlice.offset     = 0
+        genericCollectionSlice.limit      = 10
         
-        self._test_reverse(genericSlice, ret0)
+        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_popularity_sort(self):
-        genericSlice            = HTTPGenericSlice()
-        genericSlice.sort       = "popularity"
-        genericSlice.offset     = 0
-        genericSlice.limit      = 50
-        expected_len            = min(len(self._params["stampIds"]), genericSlice.limit)
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
+        genericCollectionSlice.sort       = "popularity"
+        genericCollectionSlice.offset     = 0
+        genericCollectionSlice.limit      = 50
+        expected_len            = min(len(self._params["stampIds"]), genericCollectionSlice.limit)
         
-        ret0 = self._getStamps(genericSlice)
+        ret0 = self._getStamps(genericCollectionSlice)
         self.assertLength(ret0, expected_len)
         
         self.assertTrue(ret0[0].stats.num_credit   >= ret0[-1].stats.num_credit)
         self.assertTrue(ret0[0].stats.num_likes    >= ret0[-1].stats.num_likes)
         self.assertTrue(ret0[0].stats.num_comments >= ret0[-1].stats.num_comments)
         
-        self._test_reverse(genericSlice, ret0)
+        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_proximity_sort(self):
-        genericSlice            = HTTPGenericSlice()
-        center                  = (40.73, -73.99) # ~NYC
-        genericSlice.sort       = "proximity"
-        genericSlice.offset     = 0
-        genericSlice.limit      = 10
-        genericSlice.center     = "%s,%s" % (center[0], center[1])
+        genericCollectionSlice                = HTTPGenericCollectionSlice()
+        center                      = (40.73, -73.99) # ~NYC
+        genericCollectionSlice.sort           = "proximity"
+        genericCollectionSlice.offset         = 0
+        genericCollectionSlice.limit          = 10
+        genericCollectionSlice.coordinates    = "%s,%s" % (center[0], center[1])
         
-        ret0 = self._getStamps(genericSlice)
+        ret0 = self._getStamps(genericCollectionSlice)
         self.assertLength(ret0, 9)
         
         earthRadius = 3959.0 # miles
@@ -273,16 +273,16 @@ class StampedAPIStampTests(StampedAPITest):
             prev_dist = dist
         
         # test reverse
-        self._test_reverse(genericSlice, ret0)
+        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_alphabetical_sort(self):
-        genericSlice            = HTTPGenericSlice()
-        genericSlice.sort       = "alphabetical"
-        genericSlice.offset     = 0
-        genericSlice.limit      = 50
-        expected_len            = min(len(self._params["stampIds"]), genericSlice.limit)
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
+        genericCollectionSlice.sort       = "alphabetical"
+        genericCollectionSlice.offset     = 0
+        genericCollectionSlice.limit      = 50
+        expected_len            = min(len(self._params["stampIds"]), genericCollectionSlice.limit)
         
-        ret0 = self._getStamps(genericSlice)
+        ret0 = self._getStamps(genericCollectionSlice)
         self.assertLength(ret0, expected_len)
         
         prev_title = None
@@ -296,17 +296,17 @@ class StampedAPIStampTests(StampedAPITest):
             
             prev_title = title
         
-        self._test_reverse(genericSlice, ret0)
+        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_viewport_filter(self):
-        genericSlice            = HTTPGenericSlice()
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
         viewport                = (40.8, -74.05, 40.5, -73.5) # ~NYC
-        genericSlice.sort       = "modified"
-        genericSlice.offset     = 0
-        genericSlice.limit      = 10
-        genericSlice.viewport   = ",".join(map(str, viewport))
+        genericCollectionSlice.sort       = "modified"
+        genericCollectionSlice.offset     = 0
+        genericCollectionSlice.limit      = 10
+        genericCollectionSlice.viewport   = ",".join(map(str, viewport))
         
-        ret0 = self._getStamps(genericSlice)
+        ret0 = self._getStamps(genericCollectionSlice)
         self.assertLength(ret0, 4)
         
         # ensure all results fall within the desired viewport
@@ -318,39 +318,39 @@ class StampedAPIStampTests(StampedAPITest):
             self.assertTrue(s.lng >= viewport[1] and s.lng <= viewport[3])
         
         # test reverse
-        self._test_reverse(genericSlice, ret0)
+        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_invalid_params(self):
-        genericSlice            = HTTPGenericSlice()
-        genericSlice.sort       = "popularity"
-        genericSlice.query      = "noop"
+        genericCollectionSlice            = HTTPGenericCollectionSlice()
+        genericCollectionSlice.sort       = "popularity"
+        genericCollectionSlice.query      = "noop"
         
         # ensure that we can't include a search query for non-relevance-based sorts
         with expected_exception():
-            self._getStamps(genericSlice)
+            self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "alphabetical"
+        genericCollectionSlice.sort       = "alphabetical"
         with expected_exception():
-            self._getStamps(genericSlice)
+            self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "created"
+        genericCollectionSlice.sort       = "created"
         with expected_exception():
-            self._getStamps(genericSlice)
+            self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "modified"
+        genericCollectionSlice.sort       = "modified"
         with expected_exception():
-            self._getStamps(genericSlice)
+            self._getStamps(genericCollectionSlice)
         
-        genericSlice.sort       = "proximity"
-        genericSlice.query      = None
+        genericCollectionSlice.sort       = "proximity"
+        genericCollectionSlice.query      = None
         
         # ensure that we must have a center point for proximity sort
         with expected_exception():
-            self._getStamps(genericSlice)
+            self._getStamps(genericCollectionSlice)
         
         # reset to a valid state
-        genericSlice.sort       = "created"
-        self._getStamps(genericSlice)
+        genericCollectionSlice.sort       = "created"
+        self._getStamps(genericCollectionSlice)
         
         invalid_centers = [
             "30;40.2", 
@@ -364,14 +364,14 @@ class StampedAPIStampTests(StampedAPITest):
         
         # ensure that we catch improperly formatted center points
         for center in invalid_centers:
-            genericSlice.center = center
+            genericCollectionSlice.coordinates = center
             
             with expected_exception():
-                self._getStamps(genericSlice)
+                self._getStamps(genericCollectionSlice)
         
         # reset to a valid state
-        genericSlice.center     = None
-        self._getStamps(genericSlice)
+        genericCollectionSlice.coordinates     = None
+        self._getStamps(genericCollectionSlice)
         
         invalid_viewports = [
             "30,40.2,,20", 
@@ -388,14 +388,14 @@ class StampedAPIStampTests(StampedAPITest):
         
         # ensure that we catch improperly formatted viewports
         for viewport in invalid_viewports:
-            genericSlice.viewport   = viewport
+            genericCollectionSlice.viewport   = viewport
             
             with expected_exception():
-                self._getStamps(genericSlice)
+                self._getStamps(genericCollectionSlice)
         
         # reset to a valid state
-        genericSlice.viewport   = None
-        self._getStamps(genericSlice)
+        genericCollectionSlice.viewport   = None
+        self._getStamps(genericCollectionSlice)
         
         invalid_timestamps = [
             "a", 
@@ -413,28 +413,28 @@ class StampedAPIStampTests(StampedAPITest):
         for timestamp in invalid_timestamps:
             # test since parameter alone
             with expected_exception():
-                genericSlice.since = timestamp
-                self._getStamps(genericSlice)
+                genericCollectionSlice.since = timestamp
+                self._getStamps(genericCollectionSlice)
             
             # reset to a valid state
-            genericSlice.since  = None
-            self._getStamps(genericSlice)
+            genericCollectionSlice.since  = None
+            self._getStamps(genericCollectionSlice)
             
             # test before parameter alone
             with expected_exception():
-                genericSlice.before = timestamp
-                self._getStamps(genericSlice)
+                genericCollectionSlice.before = timestamp
+                self._getStamps(genericCollectionSlice)
             
             # reset to a valid state
-            genericSlice.before = None
-            self._getStamps(genericSlice)
+            genericCollectionSlice.before = None
+            self._getStamps(genericCollectionSlice)
             
             # test both before and since parameters
             with expected_exception():
-                genericSlice.before = timestamp
-                genericSlice.since  = timestamp
+                genericCollectionSlice.before = timestamp
+                genericCollectionSlice.since  = timestamp
                 
-                self._getStamps(genericSlice)
+                self._getStamps(genericCollectionSlice)
 
 if __name__ == '__main__':
     main()
