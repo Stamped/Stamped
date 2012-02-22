@@ -613,7 +613,7 @@ class StampedAPI(AStampedAPI):
         facebookAuth    = kwargs.pop('facebookAuth', None)
         
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
-
+        
         # Alert Facebook asynchronously
         if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
             kwargs = {'facebookToken': facebookAuth.facebook_token}
@@ -2311,8 +2311,8 @@ class StampedAPI(AStampedAPI):
         except:
             return cap
     
-    def _getStampCollection(self, authUserId, stampIds, genericSlice, enrich=True):
-        quality         = genericSlice.quality
+    def _getStampCollection(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
+        quality         = genericCollectionSlice.quality
         
         # Set quality
         if quality == 1:        # wifi
@@ -2325,13 +2325,13 @@ class StampedAPI(AStampedAPI):
             stampCap    = 20
             commentCap  = 4
         
-        if genericSlice.limit is None:
-            genericSlice.limit = stampCap
+        if genericCollectionSlice.limit is None:
+            genericCollectionSlice.limit = stampCap
         
-        stampData = self._stampDB.getStampsSlice(stampIds, genericSlice)
+        stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
         commentPreviews = {}
         
-        if genericSlice.comments:
+        if genericCollectionSlice.comments:
             # Only grab comments for slice
             realizedStampIds = []
             for stamp in stampData:
@@ -2357,23 +2357,23 @@ class StampedAPI(AStampedAPI):
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         
-        if genericSlice.deleted and (genericSlice.sort == 'modified' or genericSlice.sort == 'created'):
-            deleted = self._stampDB.getDeletedStamps(stampIds, genericSlice)
+        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
+            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
             
             if len(deleted) > 0:
                 stamps = stamps + deleted
-                stamps.sort(key=lambda k: k.timestamp[genericSlice.sort], reverse=not genericSlice.reverse)
+                stamps.sort(key=lambda k: k.timestamp[genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
     
     @API_CALL
-    def getInboxStamps(self, authUserId, genericSlice):
+    def getInboxStamps(self, authUserId, genericCollectionSlice):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
         
         # TODO: deprecate with new clients going forward
-        genericSlice.deleted = True
+        genericCollectionSlice.deleted = True
         
-        return self._getStampCollection(authUserId, stampIds, genericSlice)
+        return self._getStampCollection(authUserId, stampIds, genericCollectionSlice)
     
     @API_CALL
     def getUserStamps(self, authUserId, userSlice):
@@ -2456,8 +2456,8 @@ class StampedAPI(AStampedAPI):
         return stamps
     
     @API_CALL
-    def getSuggestedStamps(self, authUserId, genericSlice):
-        return self._getStampCollection(authUserId, None, genericSlice)
+    def getSuggestedStamps(self, authUserId, genericCollectionSlice):
+        return self._getStampCollection(authUserId, None, genericCollectionSlice)
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):

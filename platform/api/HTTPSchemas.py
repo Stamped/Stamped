@@ -976,17 +976,62 @@ class HTTPGenericSlice(Schema):
         self.offset             = SchemaElement(int)
         
         # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
         self.sort               = SchemaElement(basestring, default='modified')
         self.reverse            = SchemaElement(bool,       default=False)
-        self.center             = SchemaElement(basestring) # "lat,lng"
+        self.coordinates        = SchemaElement(basestring) # "lat,lng"
+
+        # filtering
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+
+    def _convertData(self, data):
+        if 'coordinates' in data:
+            try:
+                lat, lng = data['coordinates'].split(',')
+                data['coordinates'] = {
+                    'lat' : float(lat), 
+                    'lng' : float(lng)
+                }
+            except:
+                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
+        
+        if 'since' in data:
+            try: 
+                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
+            except:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+        
+        if 'before' in data:
+            try: 
+                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
+            except:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+        
+        if 'offset' not in data:
+            data['offset'] = 0
+
+        return data
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'GenericSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+
+        return schema
+
+class HTTPGenericCollectionSlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
         
         # filtering
         self.query              = SchemaElement(basestring)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
         self.viewport           = SchemaElement(basestring) # "lat0,lng0,lat1,lng1"
         
         # misc options
@@ -994,75 +1039,68 @@ class HTTPGenericSlice(Schema):
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
         self.unique             = SchemaElement(bool, default=False)
+
+    def _convertData(self, data):
+        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
+        if 'viewport' in data:
+            try:
+                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
+                
+                data['viewport'] = {
+                    'upperLeft' : {
+                        'lat' : float(lat0), 
+                        'lng' : float(lng0), 
+                    }, 
+                    'lowerRight' : {
+                        'lat' : float(lat1), 
+                        'lng' : float(lng1), 
+                    }
+                }
+            except:
+                raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
+
+        return data
     
     def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'GenericSlice' or \
-           schema.__class__.__name__ == 'UserCollectionSlice' or \
-           schema.__class__.__name__ == 'FriendsSlice':
-            data = self.exportSparse()
-            
-            if 'center' in data:
-                try:
-                    lat, lng = data['center'].split(',')
-                    data['center'] = {
-                        'lat' : float(lat), 
-                        'lng' : float(lng)
-                    }
-                except:
-                    raise StampedInputError("invalid center parameter; format \"lat,lng\"")
-            
-            if 'viewport' in data:
-                try:
-                    lat0, lng0, lat1, lng1 = data['viewport'].split(',')
-                    
-                    data['viewport'] = {
-                        'upperLeft' : {
-                            'lat' : float(lat0), 
-                            'lng' : float(lng0), 
-                        }, 
-                        'lowerRight' : {
-                            'lat' : float(lat1), 
-                            'lng' : float(lng1), 
-                        }
-                    }
-                except:
-                    raise StampedInputError("invalid center parameter; format \"lat0,lng0,lat1,lng1\"")
-            
-            if 'since' in data:
-                try: 
-                    data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
-                except:
-                    raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-            
-            if 'before' in data:
-                try: 
-                    data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
-                except:
-                    raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-            
-            if 'offset' not in data:
-                data['offset'] = 0
-            
-            #import pprint; utils.log(pprint.pformat(data))
+        if schema.__class__.__name__ == 'GenericCollectionSlice':
+            data = self._convertData(self.exportSparse())
             schema.importData(data)
         else:
             raise NotImplementedError
         
         return schema
 
-class HTTPUserCollectionSlice(HTTPGenericSlice):
+class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
     def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
+        HTTPGenericCollectionSlice.setSchema(self)
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
 
-class HTTPFriendsSlice(HTTPGenericSlice):
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'UserCollectionSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPFriendsSlice(HTTPGenericCollectionSlice):
     def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
+        HTTPGenericCollectionSlice.setSchema(self)
         
         self.distance           = SchemaElement(int)
         self.inclusive          = SchemaElement(bool)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'FriendsSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+
+        return schema
 
 class HTTPStampImage(Schema):
     def setSchema(self):
@@ -1205,6 +1243,11 @@ class HTTPActivity(Schema):
         else:
             raise NotImplementedError
         return self
+
+class HTTPActivitySlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+
 
 # #### #
 # Menu #

@@ -63,7 +63,7 @@
   background.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CGRectGetWidth(background.frame), CGRectGetHeight(background.frame));
   [self.superview insertSubview:background belowSubview:self];
   [background release];
-  [UIView animateWithDuration:1 animations:^{
+  [UIView animateWithDuration:0.75 animations:^{
     [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromRight forView:self cache:YES];
     [sender removeFromSuperview];
     [self addSubview:listButton_];
@@ -78,7 +78,7 @@
   background.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CGRectGetWidth(background.frame), CGRectGetHeight(background.frame));
   [self.superview insertSubview:background belowSubview:self];
   [background release];
-  [UIView animateWithDuration:1 animations:^ {
+  [UIView animateWithDuration:0.75 animations:^ {
     [UIView setAnimationTransition:UIViewAnimationTransitionFlipFromLeft forView:self cache:YES];
     [sender removeFromSuperview];
     [self addSubview:mapButton_];

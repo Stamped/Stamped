@@ -24,6 +24,9 @@ from api.AFriendshipDB          import AFriendshipDB
 
 class MongoFriendshipCollection(AFriendshipDB):
     
+    def __init__(self, api):
+        self.api = api
+    
     ### PUBLIC
     
     @lazyProperty
@@ -151,7 +154,13 @@ class MongoFriendshipCollection(AFriendshipDB):
         visited_users       = set()
         todo                = []
         max_distance        = 2
+        count               = 0
+        prune               = 0
         friends             = None
+        coords              = None
+        
+        if request.coordinates.lat is not None and request.coordinates.lng is not None:
+            coords = (request.coordinates.lat, request.coordinates.lng)
         
         def visit_user(user_id, distance):
             if user_id in visited_users:
@@ -194,10 +203,13 @@ class MongoFriendshipCollection(AFriendshipDB):
                 potential_friends[user_id]['friend_overlap'] = friend_overlap
         
         user_entity_ids, user_categories, user_clusters = self._get_stamp_info(userId)
+        inv_len_user_entity_ids = len(user_entity_ids)
+        inv_len_user_entity_ids = 1.0 / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
         
         #for cluster in user_clusters:
         #    print "(%s) %d %s" % (cluster['avg'], len(cluster['data']), cluster['data'])
         
+        # seed potential friends with users who have stamped at least one of the same entities
         for entity_id in user_entity_ids:
             stamps = self.stamp_collection.getStampsFromEntity(entity_id, limit=200)
             
@@ -210,14 +222,31 @@ class MongoFriendshipCollection(AFriendshipDB):
                     except:
                         potential_friends[user_id]['stamp_overlap'] = 1
         
-        count = 0
-        prune = 0
+        # seed potential friends with facebook friends
+        if request.facebook_token is not None:
+            facebook_friends = self.api._getFacebookFriends(request.facebook_token)
+            
+            for friend in facebook_friends:
+                user_id = friend.user_id
+                
+                if user_id not in friends:
+                    potential_friends[user_id]['facebook_friend'] = True
         
+        # seed potential friends with twitter friends
+        if request.twitter_key is not None and request.twitter_secret is not None:
+            twitter_friends = self.api._getTwitterFriends(request.facebook_token)
+            
+            for friend in twitter_friends:
+                user_id = friend.user_id
+                
+                if user_id not in friends:
+                    potential_friends[user_id]['twitter_friend'] = True
+        
+        # process each potential friend
         for user_id, values in potential_friends.iteritems():
             try:
-                if 'friend_overlap' not in values and values['stamp_overlap'] <= 1:
-                    prune = prune + 1
-                    continue
+                if 'friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
+                    raise
             except:
                 prune = prune + 1
                 continue
@@ -226,7 +255,15 @@ class MongoFriendshipCollection(AFriendshipDB):
             entity_ids, categories, clusters = self._get_stamp_info(user_id)
             
             #common_entity_ids = user_entity_ids & entity_ids
-            #values['stamp_overlap'] = len(common_entity_ids)
+            """
+            # TODO: normalize stamp_overlap
+            # TODO: normalize friend_overlap
+            
+            try:
+                values['stamp_overlap'] = values['stamp_overlap'] * inv_len_user_entity_ids
+            except:
+                pass
+            """
             
             summation = 0.0
             for category in [ 'food', 'music', 'film', 'book', 'other' ]:
@@ -283,6 +320,18 @@ class MongoFriendshipCollection(AFriendshipDB):
             
             values['proximity'] = score
             values['clusters']  = max_val
+            
+            if coords is not None:
+                min_dist = None
+                
+                for cluster in clusters:
+                    ll0  = cluster['avg']
+                    #len0 = len(cluster['data']) * sum1
+                    dist = earthRadius * utils.get_spherical_distance(coords, ll0)
+                    
+                    if min_dist is None or dist < min_dist:
+                        min_dist = dist
+                        values['current_proximity'] = dist
         
         logs.info("potential friends:  %d" % len(potential_friends))
         logs.info("friends of friends: %d" % len(friends_of_friends))
@@ -313,9 +362,10 @@ class MongoFriendshipCollection(AFriendshipDB):
         users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
         users  = users[offset : offset + limit]
         
-        return map(lambda kv: (kv[0], self._get_potential_friend_score(kv, explain=True)[1]), users)
+        func   = lambda kv: (kv[0], self._get_potential_friend_score(kv, explain=True, coords=coords)[1])
+        return map(func, users)
     
-    def _get_potential_friend_score(self, kv, explain=False):
+    def _get_potential_friend_score(self, kv, explain=False, coords=None):
         values = kv[1]
         
         try:
@@ -339,14 +389,32 @@ class MongoFriendshipCollection(AFriendshipDB):
             proximity_value         = 0
         
         try:
+            current_proximity_value = float(values['current_proximity'])
+        except:
+            current_proximity_value = 0
+        
+        try:
+            facebook_friend_value   = int(values['facebook_friend'])
+        except:
+            facebook_friend_value   = 0
+        
+        try:
+            twitter_friend_value    = int(values['twitter_friend'])
+        except:
+            twitter_friend_value    = 0
+        
+        try:
             clusters                = values['clusters']
         except:
             clusters                = [ (0, None), (0, None) ]
         
         friend_overlap_weight       = 1.0
         stamp_overlap_weight        = 2.0
-        category_overlap_weight     = 1.0
+        category_overlap_weight     = 0.0
         proximity_weight            = 3.0
+        current_proximity_weight    = 3.0
+        facebook_friend_weight      = 2.0
+        twitter_friend_weight       = 2.0
         
         max_val = [ (0, None), (0, None) ]
         score   = 0.0
@@ -356,6 +424,9 @@ class MongoFriendshipCollection(AFriendshipDB):
             'stamp_overlap'     : stamp_overlap_value     * stamp_overlap_weight, 
             'category_overlap'  : category_overlap_value  * category_overlap_weight, 
             'proximity'         : proximity_value         * proximity_weight, 
+            'current_proximity' : current_proximity_value * current_proximity_weight, 
+            'facebook_friend'   : facebook_friend_value   * facebook_friend_weight, 
+            'twitter_friend'    : twitter_friend_value    * twitter_friend_weight, 
         }
         
         #if explain:
@@ -364,7 +435,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         for key, value in metrics.iteritems():
             score += value
             
-            if explain:
+            if explain and value > 0:
                 if max_val[0][1] is None or value > max_val[0][0]:
                     if max_val[1][1] is None or value > max_val[1][0]:
                         max_val[0] = max_val[1]
@@ -378,43 +449,68 @@ class MongoFriendshipCollection(AFriendshipDB):
                     (friend_overlap_value, '' if friend_overlap_value == 1 else 's'), 
                 'stamp_overlap'     : "%d stamp%s in common" % \
                     (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
-                'category_overlap'  : "Tend to stamp similar categories", 
+                'category_overlap'  : "Tends to stamp similar categories", 
                 
                 # TODO: naive lookup to convert cluster lat/lng => high level region (e.g., NYC or San Francisco)
-                'proximity'         : "Tend to stamp in similar areas", 
+                'proximity'         : "Tends to stamp in similar areas", 
+                'facebook_friend'   : "Facebook Friend", 
+                'twitter_friend'    : "Twitter Follower", # TODO: what to display here?
+                'current_proximity' : "Tends to stamp nearby", 
             }
+            
+            def _get_city(ll):
+                ret = self.world_cities.query(ll, k=2)
+                
+                if ret:
+                    if len(ret) >= 2 and ret[1][1]['population'] > 5 * ret[0][1]['population']:
+                        return ret[1][1]['city']
+                    else:
+                        return ret[0][1]['city']
+                
+                return None
             
             try:
                 if max_val[1][1] == 'proximity' or max_val[0][1] == 'proximity':
                     cities = []
-                    ll = []
+                    lls = []
                     
                     if clusters[1][1] is not None:
-                        ll.append(clusters[1][1])
+                        lls.append(clusters[1][1])
                     
                     if clusters[0][1] is not None:
-                        ll.append(clusters[0][1])
+                        lls.append(clusters[0][1])
                     
-                    for coords in ll:
-                        ret = self.world_cities.query(coords, k=2)
+                    for ll in lls:
+                        city = _get_city(ll)
                         
-                        if ret:
-                            if len(ret) >= 2 and ret[1][1]['population'] > 5 * ret[0][1]['population']:
-                                cities.append(ret[1][1]['city'])
-                            else:
-                                cities.append(ret[0][1]['city'])
+                        if city is not None:
+                            cities.append(city)
                     
                     if cities:
-                        explanation = "Tend to stamp in %s" % cities[0]
-                        
-                        if len(cities) > 1:
-                            explanation = "%s and %s" % (explanation, cities[1])
-                        
+                        explanation = "Tends to stamp in %s" % (" and ".join(cities), )
                         explanations['proximity'] = explanation
             except:
                 utils.printException()
             
-            return score, (explanations[max_val[1][1]], explanations[max_val[0][1]])
+            try:
+                if coords is not None and (max_val[1][1] == 'current_proximity' or \
+                                           max_val[0][1] == 'current_proximity'):
+                    city = _get_city(coords)
+                    
+                    if city is not None:
+                        explanation = "Tends to stamp nearby (in %s)" % city
+                        explanations['current_proximity'] = explanation
+            except:
+                utils.printException()
+            
+            ret_explanations = []
+            for val in reversed(max_val):
+                name = val[1]
+                
+                if name is not None:
+                    ret_explanations.append(explanations[name])
+            
+            return score, ret_explanations
         
         return score
     

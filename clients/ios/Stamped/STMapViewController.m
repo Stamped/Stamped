@@ -15,8 +15,10 @@
 #import "Stamp.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
+#import "STMapIndicatorView.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
+
 #import "STToolbar.h"
 #import "UserImageView.h"
 #import "User.h"
@@ -47,6 +49,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) MKMapRect lastMapRect;
 @property (nonatomic, copy) NSArray* resultsArray;
 @property (nonatomic, assign) BOOL hideToolbar;
+@property (nonatomic, readonly) STMapIndicatorView* indicatorView;
 @end
 
 @implementation STMapViewController
@@ -65,6 +68,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize lastMapRect = lastMapRect_;
 @synthesize toolbar = toolbar_;
 @synthesize hideToolbar = hideToolbar_;
+@synthesize indicatorView = indicatorView_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -86,6 +90,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.resultsArray = nil;
   self.selectedAnnotation = nil;
   self.toolbar = nil;
+  indicatorView_ = nil;
   [super dealloc];
 }
 
@@ -98,7 +103,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  searchField_.placeholder = NSLocalizedString(@"Try \u201cpizza\u201d or \u201cbar\u201d)", nil);
+  searchField_.placeholder = NSLocalizedString(@"Try \u201cpizza\u201d or \u201cbar\u201d", nil);
 
   UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                action:@selector(overlayTapped:)];
@@ -110,6 +115,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   CGRect frame = mapView_.frame;
   frame.size.height = toolbar_.hidden ? 372 : 323;
   mapView_.frame = frame;
+  
+  indicatorView_ = [[STMapIndicatorView alloc] init];
+  indicatorView_.frame = CGRectOffset(indicatorView_.frame, 1, CGRectGetMinY(mapView_.frame) + 4);
+  [self.view insertSubview:indicatorView_ belowSubview:overlayView_];
+  [indicatorView_ release];
 }
 
 - (void)viewDidUnload {
@@ -125,6 +135,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.scopeSlider = nil;
   self.selectedAnnotation = nil;
   self.toolbar = nil;
+  indicatorView_ = nil;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -177,15 +188,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 #pragma mark - UITextFieldDelegate methods.
 
-- (BOOL)textFieldShouldClear:(UITextField*)textField {
-  textField.text = nil;
-  [self loadDataFromNetwork];
-  return YES;
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
-  [self loadDataFromNetwork];
   return YES;
 }
 
@@ -216,6 +220,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   } completion:^(BOOL finished) {
     cancelButton_.alpha = 0;
   }];
+  [self loadDataFromNetwork];
 }
 
 #pragma mark - Actions.
@@ -280,6 +285,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)objectLoader:(RKObjectLoader*)loader didLoadObjects:(NSArray*)objects {
   self.resultsArray = objects;
   [self addAllAnnotations];
+  if (searchField_.text.length > 0) {
+    indicatorView_.mode = resultsArray_.count > 0 ? STMapIndicatorViewModeHidden : STMapIndicatorViewModeNoResults;
+  } else {
+    indicatorView_.mode = STMapIndicatorViewModeHidden;
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {
@@ -288,7 +298,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     [self loadDataFromNetwork];
     return;
   }
-
+  indicatorView_.mode = STMapIndicatorViewModeHidden;  // TODO(andybons): Add error mode?
   NSLog(@"Error loading map data: %@. Error code: %d", error.localizedDescription, loader.response.statusCode);
 }
 
@@ -390,6 +400,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
   objectLoader.params = params;
   [objectLoader send];
+  indicatorView_.mode = STMapIndicatorViewModeLoading;
 }
 
 - (void)addAllAnnotations {
@@ -397,11 +408,15 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.selectedAnnotation = nil;
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    for (Stamp* s in resultsArray_)
-      [self addAnnotationForStamp:s];
+    for (Stamp* s in resultsArray_) {
+      if (s.entityObject.coordinates.length > 0)
+        [self addAnnotationForStamp:s];
+    }
   } else if (source_ == STMapViewControllerSourceTodo) {
-    for (Favorite* f in resultsArray_)
-      [self addAnnotationForEntity:f.entityObject];
+    for (Favorite* f in resultsArray_) {
+      if (f.entityObject.coordinates.length > 0)
+        [self addAnnotationForEntity:f.entityObject];
+    }
   }
 
   if (selectedAnnotation_ && searchField_.text.length > 0)
