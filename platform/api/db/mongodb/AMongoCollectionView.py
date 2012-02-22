@@ -333,11 +333,17 @@ class AMongoCollectionView(AMongoCollection):
             ret  = []
             
             for result in results:
-                entity_id = result.entity_id
-                
-                if entity_id not in seen:
+                try:
+                    entity_id = result.entity_id
+                    
+                    if entity_id in seen:
+                        continue
+                    
                     seen.add(entity_id)
-                    ret.append(result)
+                except:
+                    logs.warn(utils.getFormattedException())
+                
+                ret.append(result)
             
             results = ret
         
