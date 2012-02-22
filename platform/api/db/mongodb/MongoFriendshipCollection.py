@@ -150,6 +150,24 @@ class MongoFriendshipCollection(AFriendshipDB):
         return self.block_collection.getBlocks(userId)
     
     def getSuggestedUserIds(self, userId, request):
+        # TODO: support ignoring a friend suggestion
+        # TODO: ignore previously followed friends that you've since unfollowed
+        # TODO: better support for new users w/out stamps or friends
+        
+        # TODO: integrate other signals into ranking function
+        # SIGNALS:
+        #    * friend overlap
+        #       * TODO: normalize to be independent of #friends
+        #    * stamped entity overlap
+        #       * would need fast entity_id => list(stamp_id) lookups
+        #       * TODO: normalize to be independent of #stamps
+        #    * stamp category overlap
+        #    * quality signals for potential friends
+        #    * geographical proximity
+        #    * TODO: small boost if other user is following you
+        #    * TODO: current coordinates
+        #    * TODO: global user popularity / freshness
+        
         friends_of_friends  = {}
         visited_users       = set()
         todo                = []
@@ -337,28 +355,10 @@ class MongoFriendshipCollection(AFriendshipDB):
         logs.info("friends of friends: %d" % len(friends_of_friends))
         logs.info("processed: %d; pruned: %d" % (count, prune))
         
-        # TODO: support ignoring a friend suggestion
-        # TODO: ignore previously followed friends that you've since unfollowed
-        # TODO: better support for new users w/out stamps or friends
-        
-        # TODO: integrate other signals into ranking function
-        # SIGNALS:
-        #    * friend overlap
-        #       * TODO: normalize to be independent of #friends
-        #    * stamped entity overlap
-        #       * would need fast entity_id => list(stamp_id) lookups
-        #       * TODO: normalize to be independent of #stamps
-        #    * stamp category overlap
-        #    * quality signals for potential friends
-        #    * geographical proximity
-        #    * TODO: small boost if other user is following you
-        #    * TODO: current coordinates
-        #    * TODO: global user popularity / freshness
-        
         limit  = request.limit  if request.limit  is not None else 10
         offset = request.offset if request.offset is not None else 0
         
-        # TODO: optimize this sorted loop to only retain the top n results
+        # TODO: optimize this sorted loop to only retain the top n results?
         users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
         users  = users[offset : offset + limit]
         
@@ -451,13 +451,13 @@ class MongoFriendshipCollection(AFriendshipDB):
                     (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
                 'category_overlap'  : "Tends to stamp similar categories", 
                 
-                # TODO: naive lookup to convert cluster lat/lng => high level region (e.g., NYC or San Francisco)
                 'proximity'         : "Tends to stamp in similar areas", 
                 'facebook_friend'   : "Facebook Friend", 
                 'twitter_friend'    : "Twitter Follower", # TODO: what to display here?
                 'current_proximity' : "Tends to stamp nearby", 
             }
             
+            # naive conversion from lat/lng to closest large city (e.g., NYC or San Francisco)
             def _get_city(ll):
                 ret = self.world_cities.query(ll, k=2)
                 
@@ -580,15 +580,19 @@ class MongoFriendshipCollection(AFriendshipDB):
         #    utils.log("%s) %s" % (k, v))
         
         def print_top(key, reverse=True, default=-1):
-            print("-" * 40)
-            users = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
-            for user in users:
+            print "%s %s %s" % ("-" * 40, key, "-" * 40)
+            users2 = sorted(users, key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
+            
+            for user in users2:
                 pprint(user)
         
         print_top('friend_overlap')
         print_top('stamp_overlap')
         print_top('category_overlap')
         print_top('proximity')
+        print_top('current_proximity')
+        #print_top('facebook_friend')
+        #print_top('twitter_friend')
         
         return []
         """

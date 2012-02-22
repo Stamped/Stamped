@@ -48,21 +48,22 @@ class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
 
 class StampedAPIFavoritesAlreadyComplete(StampedAPIFavoriteTest):
     def test_create_completed(self):
-        self.entityB = self.createEntity(self.tokenB)
-        self.stampB = self.createStamp(self.tokenB, self.entityB['entity_id'])
-        self.favoriteB = self.createFavorite(self.tokenB, self.entityB['entity_id'])
-
+        self.entityB    = self.createEntity(self.tokenB)
+        self.stampB     = self.createStamp(self.tokenB, self.entityB['entity_id'])
+        self.favoriteB  = self.createFavorite(self.tokenB, self.entityB['entity_id'])
+        
         path = "favorites/show.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 2)
+        
         if result[0]['entity']['entity_id'] == self.entityB['entity_id']:
             self.assertTrue(result[0]['complete'])
         else:
             self.assertTrue(result[1]['complete'])
-
+        
         self.deleteFavorite(self.tokenB, self.entityB['entity_id'])
         self.deleteStamp(self.tokenB, self.stampB['stamp_id'])
         self.deleteEntity(self.tokenB, self.entityB['entity_id'])

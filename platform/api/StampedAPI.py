@@ -2555,8 +2555,8 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def getFavorites(self, authUserId, **kwargs):
-        quality     = kwargs.pop('quality', 3)
+    def getFavorites(self, authUserId, genericCollectionSlice):
+        quality     = genericCollectionSlice.quality
         
         # Set quality
         if quality == 1:
@@ -2565,19 +2565,25 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
-
-        kwargs['sort'] = 'created'
         
-        # Limit slice of data returned
-        params = self._setSliceParams(kwargs, favCap)
+        if genericCollectionSlice.limit is None:
+            genericCollectionSlice.limit = favCap
         
-        favoriteData = self._favoriteDB.getFavorites(authUserId, **params)
+        # TODO: remove this temporary restriction since all client builds before 
+        # v1.1 assume an implicit sort on created date
+        if genericCollectionSlice.sort == 'modified':
+            genericCollectionSlice.sort = 'created'
+        
+        favoriteData = self._favoriteDB.getFavorites(authUserId, genericCollectionSlice)
         
         # Extract entities & stamps
         entityIds   = {}
         stampIds    = {}
+        favorites   = []
+        
         for favorite in favoriteData:
             entityIds[str(favorite.entity.entity_id)] = 1
+            
             if favorite.stamp_id is not None:
                 stampIds[str(favorite.stamp_id)] = 1
         
@@ -2594,25 +2600,24 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
         
-        favorites = []
         for favorite in favoriteData:
             # Enrich Entity
             if entityIds[favorite.entity.entity_id] != 1:
                 favorite.entity = entityIds[favorite.entity.entity_id]
             else:
-                logs.warning('FAV (%s) MISSING ENTITY (%s)' % \
-                    (favorite.favorite_id, favorite.entity.entity_id))
+                logs.warning('FAV (%s) MISSING ENTITY (%s)' % (favorite.favorite_id, favorite.entity.entity_id))
+            
             # Add Stamp
             if favorite.stamp_id is not None:
                 if stampIds[favorite.stamp_id] != 1:
                     favorite.stamp = stampIds[favorite.stamp_id]
                 else:
                     ### TODO: Clean these up if they're missing
-                    logs.warning('FAV (%s) MISSING STAMP (%s)' % \
-                        (favorite.favorite_id, favorite.stamp_id))
+                    logs.warning('FAV (%s) MISSING STAMP (%s)' % (favorite.favorite_id, favorite.stamp_id))
                     favorite.stamp = Stamp()
+            
             favorites.append(favorite)
-
+        
         return favorites
     
     """

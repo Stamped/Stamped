@@ -7,19 +7,18 @@ __license__   = "TODO"
 
 import Globals, pymongo
 
-from datetime import datetime
-from utils import lazyProperty
+from datetime                       import datetime
+from utils                          import lazyProperty
 
-from AMongoCollection import AMongoCollection
+from AFavoriteDB                    import AFavoriteDB
+from AMongoCollectionView           import AMongoCollectionView
 from MongoUserFavEntitiesCollection import MongoUserFavEntitiesCollection
-from AFavoriteDB import AFavoriteDB
+from Schemas                        import *
 
-from Schemas import *
-
-class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
+class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
+        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
         AFavoriteDB.__init__(self)
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
@@ -65,40 +64,15 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
             logs.warning("Cannot get document")
             raise Exception
     
-    def getFavorites(self, userId, **kwargs):
-        since       = kwargs.pop('since', None)
-        before      = kwargs.pop('before', None)
-        sort        = kwargs.pop('sort', None)
-        limit       = kwargs.pop('limit', 0)
-
-        if sort in ['modified', 'created']:
-            sort = 'timestamp.%s' % sort
-        else:
-            sort = 'timestamp.created'
-
-        ### TODO: Make sure this is indexed
-        params = {'user_id': userId}
+    def getFavorites(self, userId, genericCollectionSlice):
+        query = { 'user_id' : userId }
         
-        if since != None and before != None:
-            params[sort] = {'$gte': since, '$lte': before}
-        elif since != None:
-            params[sort] = {'$gte': since}
-        elif before != None:
-            params[sort] = {'$lte': before}
-        
-        documents = self._collection.find(params).sort(sort, \
-            pymongo.DESCENDING).limit(limit)
-        
-        favorites = []
-        for document in documents:
-            favorites.append(self._convertFromMongo(document))
-        
-        return favorites
-
+        return self._getSlice(query, genericCollectionSlice)
+    
     def countFavorites(self, userId):
         n = self._collection.find({'user_id': userId}).count()
         return n
-
+    
     def getFavoriteEntityIds(self, userId):
         return self.user_fav_entities_collection.getUserFavoriteEntities(userId)
     
