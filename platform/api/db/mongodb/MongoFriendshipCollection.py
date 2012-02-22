@@ -399,7 +399,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             facebook_friend_value   = 0
         
         try:
-            twitter_friend_value    = 1(values['twitter_friend'])
+            twitter_friend_value    = int(values['twitter_friend'])
         except:
             twitter_friend_value    = 0
         
