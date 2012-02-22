@@ -1215,6 +1215,8 @@
 		7ECAB0AB14F4616100E854D4 /* map_loading_overlay.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECAB0A414F4616100E854D4 /* map_loading_overlay.png */; };
 		7ECAB0AC14F4616100E854D4 /* map_loading_overlay@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECAB0A514F4616100E854D4 /* map_loading_overlay@2x.png */; };
 		7ECAB0AD14F4616100E854D4 /* map_loading_overlay@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECAB0A514F4616100E854D4 /* map_loading_overlay@2x.png */; };
+		7ECAB0B014F46A9200E854D4 /* STMapIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECAB0AF14F46A9200E854D4 /* STMapIndicatorView.m */; };
+		7ECAB0B114F46A9200E854D4 /* STMapIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECAB0AF14F46A9200E854D4 /* STMapIndicatorView.m */; };
 		7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */; };
@@ -2299,6 +2301,8 @@
 		7ECAB0A314F4616100E854D4 /* map_inbox_tooltip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_inbox_tooltip@2x.png"; sourceTree = "<group>"; };
 		7ECAB0A414F4616100E854D4 /* map_loading_overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map_loading_overlay.png; sourceTree = "<group>"; };
 		7ECAB0A514F4616100E854D4 /* map_loading_overlay@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_loading_overlay@2x.png"; sourceTree = "<group>"; };
+		7ECAB0AE14F46A9200E854D4 /* STMapIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMapIndicatorView.h; sourceTree = "<group>"; };
+		7ECAB0AF14F46A9200E854D4 /* STMapIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMapIndicatorView.m; sourceTree = "<group>"; };
 		7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuggestedUserTableViewCell.h; sourceTree = "<group>"; };
 		7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuggestedUserTableViewCell.m; sourceTree = "<group>"; };
@@ -2871,6 +2875,8 @@
 				7E1213CF14D0CDFF00B32729 /* STMapViewController.xib */,
 				7EDC8FCB14E82E5500E1FEEC /* STMapScopeSlider.h */,
 				7EDC8FCC14E82E5500E1FEEC /* STMapScopeSlider.m */,
+				7ECAB0AE14F46A9200E854D4 /* STMapIndicatorView.h */,
+				7ECAB0AF14F46A9200E854D4 /* STMapIndicatorView.m */,
 			);
 			name = "Map View";
 			sourceTree = "<group>";
@@ -5826,6 +5832,7 @@
 				7E6C257414D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
 				7EDC8FCE14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
 				7E43FECF14EB08E500C6AC9D /* STTooltipView.m in Sources */,
+				7ECAB0B114F46A9200E854D4 /* STMapIndicatorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5971,6 +5978,7 @@
 				7E6C257314D9F7FF00FE7419 /* STNoResultsTableViewCell.m in Sources */,
 				7EDC8FCD14E82E5500E1FEEC /* STMapScopeSlider.m in Sources */,
 				7E43FECE14EB08E500C6AC9D /* STTooltipView.m in Sources */,
+				7ECAB0B014F46A9200E854D4 /* STMapIndicatorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
