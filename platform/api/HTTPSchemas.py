@@ -1223,7 +1223,7 @@ class HTTPActivity(Schema):
         self.subject            = SchemaElement(basestring)
         self.subject_objects    = SchemaList(ActivityObjectSchema())
         self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = SchemaElement(basestring)
+        self.blurb_format       = ActivityFormatSchema()
         self.blurb_objects      = SchemaList(ActivityObjectSchema())
 
         # Links
