@@ -15,6 +15,7 @@
 #import "Stamp.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
+#import "STClosableOverlayView.h"
 #import "STMapIndicatorView.h"
 #import "STPlaceAnnotation.h"
 #import "STSearchField.h"
@@ -159,6 +160,16 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"])
+    return;
+  STClosableOverlayView* overlayView = [[[STClosableOverlayView alloc] init] autorelease];
+  UIImageView* content = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"popup_maps_welcome"]];
+  [overlayView.contentView addSubview:content];
+  [content release];
+  [overlayView show];
+  
+  [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenNewMapsView"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -395,8 +406,13 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   if (searchField_.text.length > 0)
     [params setValue:searchField_.text forKey:@"query"];
 
-  if (scopeSlider_.granularity == STMapScopeSliderGranularityYou)
-    [params setValue:[AccountManager sharedManager].currentUser.screenName forKey:@"screen_name"];
+  if (scopeSlider_.granularity == STMapScopeSliderGranularityYou) {
+    if (source_ == STMapViewControllerSourceInbox) {
+      [params setValue:[AccountManager sharedManager].currentUser.screenName forKey:@"screen_name"];
+    } else if (source_ == STMapViewControllerSourceUser) {
+      [params setValue:user_.screenName forKey:@"screen_name"];
+    }
+  }
 
   objectLoader.params = params;
   [objectLoader send];

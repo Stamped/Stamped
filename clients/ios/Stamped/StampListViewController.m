@@ -202,11 +202,11 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)showMapView {
+  mapViewController_.user = user_;
   [mapViewController_ view];
   mapViewController_.source = STMapViewControllerSourceUser;
   [mapViewController_ viewWillAppear:YES];
   [self viewWillDisappear:YES];
-  mapViewController_.user = user_;
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:self.view
                       toView:mapViewController_.view
