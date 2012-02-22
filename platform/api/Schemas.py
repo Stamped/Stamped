@@ -376,7 +376,7 @@ class ActivityLink(Schema):
         self.linked_entity_id   = SchemaElement(basestring)
         self.linked_comment     = Comment()
         self.linked_comment_id  = SchemaElement(basestring)
-        self.linked_url         = SchemaElement(basestring)
+        self.linked_url         = LinkedURL()
 
 class ActivityObjectSchema(Schema):
     def setSchema(self):
