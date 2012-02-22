@@ -23,12 +23,24 @@ except:
     raise
 
 class Rdio:
-    def __init__(self, key, secret):
-        self.__consumer = oauth.Consumer(key,secret)
-        self.__client = oauth.Client(self.__consumer)
+    def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp'):
+        self.__key = key
+        self.__secret = secret
+        self.__reinit()
+    
+    def __reinit(self):
+        self.__consumer = oauth.Consumer(self.__key,self.__secret)
 
     def method(self, method, **kwargs):
         kwargs['method'] = method 
         # create the OAuth consumer credentials
-        response = self.__client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
+        client = oauth.Client(self.__consumer)
+        response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
+        return json.loads(response[1])
+
+    def userMethod(self, token, token_secret, method, **kwargs): 
+        kwargs['method'] = method 
+        access_token = oauth.Token(token, token_secret)   
+        client = oauth.Client(self.__consumer, access_token)
+        response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
         return json.loads(response[1])

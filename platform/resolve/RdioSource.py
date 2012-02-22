@@ -32,7 +32,7 @@ class RdioSource(BasicSource):
 
     @lazyProperty
     def __rdio(self):
-        return Rdio('bzj2pmrs283kepwbgu58aw47','xJSZwBZxFp')
+        return Rdio()
     
     def resolveSong(self, entity):
         pass        
