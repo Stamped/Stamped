@@ -210,7 +210,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   mapViewController_.view.hidden = NO;
   [UIView transitionFromView:self.view
                       toView:mapViewController_.view
-                    duration:1
+                    duration:0.75
                      options:UIViewAnimationOptionTransitionFlipFromRight
                   completion:^(BOOL finished) {
                     [self viewDidDisappear:YES];
@@ -225,7 +225,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
                       toView:self.view
-                    duration:1
+                    duration:0.75
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
                   completion:^(BOOL finished) {
                     [mapViewController_ viewDidDisappear:YES];
