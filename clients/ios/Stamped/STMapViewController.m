@@ -118,7 +118,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   
   indicatorView_ = [[STMapIndicatorView alloc] init];
   indicatorView_.frame = CGRectOffset(indicatorView_.frame, 1, CGRectGetMinY(mapView_.frame) + 4);
-  [self.view addSubview:indicatorView_];
+  [self.view insertSubview:indicatorView_ belowSubview:overlayView_];
   [indicatorView_ release];
 }
 
@@ -188,15 +188,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 #pragma mark - UITextFieldDelegate methods.
 
-- (BOOL)textFieldShouldClear:(UITextField*)textField {
-  textField.text = nil;
-  [self loadDataFromNetwork];
-  return YES;
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
-  [self loadDataFromNetwork];
   return YES;
 }
 
@@ -227,6 +220,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   } completion:^(BOOL finished) {
     cancelButton_.alpha = 0;
   }];
+  [self loadDataFromNetwork];
 }
 
 #pragma mark - Actions.
@@ -291,7 +285,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)objectLoader:(RKObjectLoader*)loader didLoadObjects:(NSArray*)objects {
   self.resultsArray = objects;
   [self addAllAnnotations];
-  indicatorView_.mode = resultsArray_.count > 0 ? STMapIndicatorViewModeHidden : STMapIndicatorViewModeNoResults;
+  if (searchField_.text.length > 0) {
+    indicatorView_.mode = resultsArray_.count > 0 ? STMapIndicatorViewModeHidden : STMapIndicatorViewModeNoResults;
+  } else {
+    indicatorView_.mode = STMapIndicatorViewModeHidden;
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {

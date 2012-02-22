@@ -74,24 +74,27 @@
     case STMapIndicatorViewModeHidden: {
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
                        animations:^{ self.alpha = 0.0; }
                        completion:^(BOOL finished) {
                          [indicatorView_ stopAnimating];
+                         noResultsLabel_.alpha = 0.0;
                        }];
       break;
     }
     case STMapIndicatorViewModeLoading: {
       CGRect frame = self.frame;
       frame.size.width = 44;
-      if (((CALayer*)self.layer.presentationLayer).opacity == 0)
+      if (((CALayer*)self.layer.presentationLayer).opacity == 0) {
         self.frame = frame;
+        noResultsLabel_.alpha = 0.0;
+      }
 
       [indicatorView_ startAnimating];
       
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
                        animations:^{
                          self.frame = frame;
                          self.alpha = 1.0;
@@ -110,26 +113,12 @@
       [indicatorView_ stopAnimating];
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
                        animations:^{
                          self.frame = frame;
                          self.alpha = 1.0;
                          noResultsLabel_.alpha = 1.0;
-                       }
-                       completion:^(BOOL finished) {
-                         [UIView animateWithDuration:0.3
-                                               delay:2
-                                             options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
-                                          animations:^{
-                                            self.alpha = 0.0;
-                                            noResultsLabel_.alpha = 0.0;
-                                          }
-                                          completion:^(BOOL finished) {
-                                            CGRect loadingFrame = self.frame;
-                                            loadingFrame.size.width = 44;
-                                            self.frame = loadingFrame;
-                                          }];
-                       }];
+                       } completion:nil];
       break;
     }
     
