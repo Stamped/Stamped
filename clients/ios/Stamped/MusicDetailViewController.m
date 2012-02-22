@@ -31,11 +31,12 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
+  // Capitalized artist
   if ([detailedEntity_.subcategory isEqualToString:@"artist"]) {
-    self.descriptionLabel.text = detailedEntity_.subcategory;
+    self.descriptionLabel.text = [detailedEntity_.subcategory capitalizedString];
   } else if ([detailedEntity_.subcategory isEqualToString:@"album"] || [detailedEntity_.subcategory isEqualToString:@"song"]) {
     if (!detailedEntity_.artist)
-      self.descriptionLabel.text = detailedEntity_.subcategory;
+      self.descriptionLabel.text = [detailedEntity_.subcategory capitalizedString];
     else
       self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", detailedEntity_.artist];
   }
