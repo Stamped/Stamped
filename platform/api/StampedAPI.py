@@ -613,7 +613,7 @@ class StampedAPI(AStampedAPI):
         facebookAuth    = kwargs.pop('facebookAuth', None)
         
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
-
+        
         # Alert Facebook asynchronously
         if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
             kwargs = {'facebookToken': facebookAuth.facebook_token}
