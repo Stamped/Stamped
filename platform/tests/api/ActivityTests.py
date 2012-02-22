@@ -64,6 +64,17 @@ class StampedAPIActivityShow(StampedAPIActivityTest):
                    lambda x: self.assertEqual(len(x), 2), 
         ])
 
+    def test_show_coordinates(self):
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "coordinates": "40.745498,-73.977612",
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 2), 
+        ])
+
 class StampedAPIActivityMentions(StampedAPIActivityTest):
     def test_show_stamp_mention(self):
         entity = self.createEntity(self.tokenA)
