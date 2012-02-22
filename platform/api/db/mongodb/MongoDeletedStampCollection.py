@@ -42,13 +42,13 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
         documentId = self._getObjectIdFromString(stampId)
         return self._removeMongoDocument(documentId)
 
-    def getStamps(self, stampIds, genericSlice):
+    def getStamps(self, stampIds, genericCollectionSlice):
         # NOTE: only supports sorting by 'modified' and 'created'
         params = {
-            'since':    genericSlice.since, 
-            'before':   genericSlice.before, 
-            'limit':    genericSlice.limit, 
-            'sort':     "timestamp.%s" % genericSlice.sort, 
+            'since':    genericCollectionSlice.since, 
+            'before':   genericCollectionSlice.before, 
+            'limit':    genericCollectionSlice.limit, 
+            'sort':     "timestamp.%s" % genericCollectionSlice.sort, 
         }
         
         ids = map(self._getObjectIdFromString, stampIds)

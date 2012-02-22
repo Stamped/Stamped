@@ -408,17 +408,25 @@ class GenericSlice(Schema):
         self.offset             = SchemaElement(int, default=0)
         
         # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
         self.sort               = SchemaElement(basestring, default='modified')
         self.reverse            = SchemaElement(bool,       default=False)
-        self.center             = CoordinatesSchema()
+        self.coordinates        = CoordinatesSchema()
         
+        # filtering
+        self.since              = SchemaElement(datetime)
+        self.before             = SchemaElement(datetime)
+
+class GenericCollectionSlice(GenericSlice):
+    def setSchema(self):
+        GenericSlice.setSchema(self)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+
         # filtering
         self.query              = SchemaElement(basestring)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
-        self.since              = SchemaElement(datetime)
-        self.before             = SchemaElement(datetime)
         self.viewport           = ViewportSchema()
         
         # misc options
@@ -427,16 +435,16 @@ class GenericSlice(Schema):
         self.comments           = SchemaElement(bool, default=True)
         self.unique             = SchemaElement(bool, default=False)
 
-class UserCollectionSlice(GenericSlice):
+class UserCollectionSlice(GenericCollectionSlice):
     def setSchema(self):
-        GenericSlice.setSchema(self)
+        GenericCollectionSlice.setSchema(self)
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
 
-class FriendsSlice(GenericSlice):
+class FriendsSlice(GenericCollectionSlice):
     def setSchema(self):
-        GenericSlice.setSchema(self)
+        GenericCollectionSlice.setSchema(self)
         
         self.distance           = SchemaElement(int,  default=2)
         self.inclusive          = SchemaElement(bool, default=True)

@@ -12,7 +12,7 @@ from httpapi.v0.helpers import *
 @require_http_methods(["GET"])
 def show(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericSlice(), request)
+    schema      = parseRequest(HTTPActivitySlice(), request)
 
     activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
     

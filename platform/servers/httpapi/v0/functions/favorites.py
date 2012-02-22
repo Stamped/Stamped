@@ -49,7 +49,7 @@ def remove(request):
 @require_http_methods(["GET"])
 def show(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericSlice(), request)
+    schema      = parseRequest(HTTPGenericCollectionSlice(), request)
 
     favorites   = stampedAPI.getFavorites(authUserId, **schema.exportSparse())
 

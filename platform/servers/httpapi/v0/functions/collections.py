@@ -25,7 +25,7 @@ def transform_stamps(stamps):
 @require_http_methods(["GET"])
 def inbox(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericSlice(), request).exportSchema(GenericSlice())
+    schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
     stamps      = stampedAPI.getInboxStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
@@ -61,7 +61,7 @@ def friends(request):
 @require_http_methods(["GET"])
 def suggested(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericSlice(), request).exportSchema(GenericSlice())
+    schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
     stamps      = stampedAPI.getSuggestedStamps(authUserId, schema)
     
     return transformOutput(transform_stamps(stamps))
