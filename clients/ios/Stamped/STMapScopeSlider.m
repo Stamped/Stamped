@@ -182,12 +182,13 @@
       [self updateTooltipPosition];
     } completion:^(BOOL finished) {
       [UIView animateWithDuration:0.3
-                            delay:2
+                            delay:0.7
                           options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
                        animations:^{ tooltipView_.alpha = 0.0; }
                        completion:nil];
     }];
   } else {
+    [self updateTooltipString];
     [self updateTooltipPosition];
   }
 }
