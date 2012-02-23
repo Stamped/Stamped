@@ -48,7 +48,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, retain) id<MKAnnotation> selectedAnnotation;
 @property (nonatomic, assign) BOOL zoomToLocation;
 @property (nonatomic, assign) MKMapRect lastMapRect;
-@property (nonatomic, copy) NSArray* resultsArray;
+@property (nonatomic, retain) NSMutableArray* resultsArray;
+@property (nonatomic, retain) NSMutableArray* cachedCoordinates;
 @property (nonatomic, assign) BOOL hideToolbar;
 @property (nonatomic, readonly) STMapIndicatorView* indicatorView;
 @end
@@ -70,6 +71,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize toolbar = toolbar_;
 @synthesize hideToolbar = hideToolbar_;
 @synthesize indicatorView = indicatorView_;
+@synthesize cachedCoordinates = cachedCoordinates_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -91,6 +93,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.resultsArray = nil;
   self.selectedAnnotation = nil;
   self.toolbar = nil;
+  self.cachedCoordinates = nil;
   indicatorView_ = nil;
   [super dealloc];
 }
@@ -294,7 +297,15 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)loader didLoadObjects:(NSArray*)objects {
-  self.resultsArray = objects;
+  if (!resultsArray_)
+    self.resultsArray = [NSMutableArray array];
+
+  for (id obj in objects) {
+    if ([resultsArray_ containsObject:obj])
+      continue;
+    [resultsArray_ addObject:obj];
+  }
+
   [self addAllAnnotations];
   if (searchField_.text.length > 0) {
     indicatorView_.mode = resultsArray_.count > 0 ? STMapIndicatorViewModeHidden : STMapIndicatorViewModeNoResults;
@@ -364,6 +375,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
       userImageView.imageURL = [user_ profileImageURLForSize:ProfileImageSize37];
 
     pinView.leftCalloutAccessoryView = userImageView;
+    pinView.animatesDrop = searchField_.text.length > 0;
     [userImageView release];
   }
 
@@ -373,7 +385,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - Other private methods.
 
 - (void)loadDataFromNetwork {
-  [self removeAllAnnotations];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   NSString* keyPath = source_ == STMapViewControllerSourceTodo ? @"Favorite" : @"Stamp";
@@ -403,8 +414,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   objectLoader.objectMapping = mapping;
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"quality",
                                     [self viewportAsString], @"viewport", @"relevance", @"sort", @"true", @"unique", nil];
-  if (searchField_.text.length > 0)
+  if (searchField_.text.length > 0) {
+    [self removeAllAnnotations];
+    self.resultsArray = nil;
+    self.cachedCoordinates = nil;
     [params setValue:searchField_.text forKey:@"query"];
+  }
 
   if (scopeSlider_.granularity == STMapScopeSliderGranularityYou) {
     if (source_ == STMapViewControllerSourceInbox) {
@@ -412,15 +427,16 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     } else if (source_ == STMapViewControllerSourceUser) {
       [params setValue:user_.screenName forKey:@"screen_name"];
     }
+  } else if (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends) {
+    [params setValue:@"false" forKey:@"inclusive"];
   }
-
+  
   objectLoader.params = params;
   [objectLoader send];
   indicatorView_.mode = STMapIndicatorViewModeLoading;
 }
 
 - (void)addAllAnnotations {
-  [self removeAllAnnotations];
   self.selectedAnnotation = nil;
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
@@ -435,8 +451,17 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     }
   }
 
-  if (selectedAnnotation_ && searchField_.text.length > 0)
+  if (selectedAnnotation_ && searchField_.text.length > 0) {
+    CLLocation* currentLocation = [[[CLLocation alloc] initWithLatitude:mapView_.centerCoordinate.latitude
+                                                              longitude:mapView_.centerCoordinate.longitude] autorelease];
+    CLLocation* newLocation = [[[CLLocation alloc] initWithLatitude:selectedAnnotation_.coordinate.latitude
+                                                          longitude:selectedAnnotation_.coordinate.longitude] autorelease];
+    
+    CGFloat latitudeMeters = mapView_.region.span.latitudeDelta * 111000.0;
+    [mapView_ setCenterCoordinate:selectedAnnotation_.coordinate
+                         animated:([currentLocation distanceFromLocation:newLocation] < (latitudeMeters * 2))];
     [mapView_ selectAnnotation:selectedAnnotation_ animated:YES];
+  }
 }
 
 - (void)removeAllAnnotations {
@@ -451,7 +476,14 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)addAnnotationForEntity:(Entity*)entity {
+  if (!cachedCoordinates_)
+    self.cachedCoordinates = [NSMutableArray array];
+
   NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
+  if ([cachedCoordinates_ containsObject:coordinates])
+    return;
+
+  [cachedCoordinates_ addObject:coordinates];
   CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
@@ -465,7 +497,14 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)addAnnotationForStamp:(Stamp*)stamp {
+  if (!cachedCoordinates_)
+    self.cachedCoordinates = [NSMutableArray array];
+  
   NSArray* coordinates = [stamp.entityObject.coordinates componentsSeparatedByString:@","];
+  if ([cachedCoordinates_ containsObject:coordinates])
+    return;
+  
+  [cachedCoordinates_ addObject:coordinates];
   CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
@@ -495,9 +534,16 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   return [NSString stringWithFormat:@"%f,%f,%f,%f", topLeft.latitude, topLeft.longitude, bottomRight.latitude, bottomRight.longitude];
 }
 
+- (void)reset {
+  self.resultsArray = nil;
+  self.cachedCoordinates = nil;
+  [self removeAllAnnotations];
+}
+
 #pragma mark - STMapScopeSliderDelegate methods.
 
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
+  [self reset];
   [self loadDataFromNetwork];
 }
 
