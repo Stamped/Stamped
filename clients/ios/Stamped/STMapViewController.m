@@ -163,6 +163,9 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
+  if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
+    [scopeSlider_ flashTooltip];
+
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"])
     return;
   STClosableOverlayView* overlayView = [[[STClosableOverlayView alloc] init] autorelease];
