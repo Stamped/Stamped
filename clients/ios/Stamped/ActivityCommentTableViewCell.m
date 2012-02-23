@@ -19,13 +19,11 @@
 
 @interface ActivityCommentTableViewCell ()
 
-@property (nonatomic, readonly) UILabel* mainLabel;
 @property (nonatomic, readonly) UILabel* textLabel;
 @end
 
 @implementation ActivityCommentTableViewCell
 
-@synthesize mainLabel = mainLabel_;
 @synthesize textLabel = textLabel_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {

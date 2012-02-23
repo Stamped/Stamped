@@ -26,6 +26,8 @@
 #import "Stamp.h"
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
+#import "WebViewController.h"
+#import "Util.h"
 
 static NSString* const kActivityLookupPath = @"/activity/show.json";
 
@@ -252,6 +254,28 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
                          constrainedToSize:CGSizeMake(210, MAXFLOAT)
                              lineBreakMode:UILineBreakModeWordWrap];
     return fmaxf(52.0, stringSize.height + 42);
+  } else if ([event.genre isEqualToString:@"generic"]) {
+    CGFloat stringHeight = 0.0;
+    if (event.subject) {
+      CGSize stringSize = [event.subject sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
+                                    constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                        lineBreakMode:UILineBreakModeWordWrap];
+      stringHeight += stringSize.height;
+      if (event.blurb)
+        stringHeight += 2;
+    }
+    if (event.blurb) {
+      CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
+                                  constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                      lineBreakMode:UILineBreakModeWordWrap];
+      stringHeight += stringSize.height;
+    }
+    // Large image.
+    if (event.image && !event.icon) {      
+      return fmaxf(64.0, stringHeight + 42);
+    } else {
+      return fmaxf(52.0, stringHeight + 42);
+    }
   }
 
   return 55.0;
@@ -264,12 +288,19 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     return;
 
   UIViewController* detailViewController = nil;
-  if ([event.genre isEqualToString:@"follower"] || [event.genre isEqualToString:@"friend"]) {
-    detailViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-    [(ProfileViewController*)detailViewController setUser:event.user];
-  } else {
+  if (event.stamp) {
     detailViewController = [[StampDetailViewController alloc] initWithStamp:event.stamp];
+  } else if (event.user) {
+    detailViewController = [[ProfileViewController alloc] init];
+    [(ProfileViewController*)detailViewController setUser:event.user];
+  } else if (event.URL) {
+    detailViewController = [[WebViewController alloc] initWithURL:[NSURL URLWithString:event.URL]];
+  } else if (event.entityObject) {
+    detailViewController = [Util detailViewControllerForEntity:event.entityObject];
   }
+  if (!detailViewController)
+    return;
+
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];

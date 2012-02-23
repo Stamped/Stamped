@@ -66,6 +66,28 @@ static const CGFloat kActivityStampSize = 16.0;
     iconImageView_.hidden = YES;
     [self.contentView addSubview:iconImageView_];
     [iconImageView_ release];
+    
+    subjectLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(70, 29, 210, 20)];
+    subjectLabel_.numberOfLines = 0;
+    subjectLabel_.backgroundColor = [UIColor clearColor];
+    subjectLabel_.textColor = [UIColor stampedGrayColor];
+    subjectLabel_.highlightedTextColor = [UIColor whiteColor];
+    subjectLabel_.lineBreakMode = UILineBreakModeWordWrap;
+    subjectLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+    subjectLabel_.hidden = YES;
+    [self.contentView addSubview:subjectLabel_];
+    [subjectLabel_ release];
+    
+    blurbLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectMake(70, 29, 210, 20)];
+    blurbLabel_.numberOfLines = 0;
+    blurbLabel_.backgroundColor = [UIColor clearColor];
+    blurbLabel_.textColor = [UIColor stampedBlackColor];
+    blurbLabel_.highlightedTextColor = [UIColor whiteColor];
+    blurbLabel_.lineBreakMode = UILineBreakModeWordWrap;
+    blurbLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+    blurbLabel_.hidden = YES;
+    [self.contentView addSubview:blurbLabel_];
+    [blurbLabel_ release];
   }
   return self;
 }
@@ -80,18 +102,28 @@ static const CGFloat kActivityStampSize = 16.0;
 }
 
 - (void)prepareForReuse {
+  subjectLabel_.hidden = YES;
   subjectLabel_.text = nil;
+  blurbLabel_.hidden = YES;
   blurbLabel_.text = nil;
   stampImageView_.hidden = YES;
   iconImageView_.hidden = YES;
   largeImageView_.hidden = YES;
   userImageView_.frame = CGRectMake(15, 10, 33, 33);
   userImageView_.hidden = YES;
+  disclosureArrowImageView_.hidden = NO;
   [super prepareForReuse];
+  self.selectionStyle = UITableViewCellSelectionStyleBlue;
 }
 
 - (void)setEvent:(Event*)event {
   [super setEvent:event];
+  
+  if (!event.stamp && !event.entityObject && !event.user && !event.URL) {
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+    disclosureArrowImageView_.hidden = YES;
+  }
+  
   if ([event.icon isEqualToString:@"stamp"]) {
     stampImageView_.image = [event.user stampImageWithSize:StampImageSize16];
     stampImageView_.hidden = NO;
@@ -113,9 +145,33 @@ static const CGFloat kActivityStampSize = 16.0;
   if (!userImageView_.hidden)
     userImageView_.imageURL = [event.user profileImageURLForSize:ProfileImageSize37];
 
-  NSLog(@"Image: %@", event.image);
-  NSLog(@"Icon: %@\n--", event.icon);
+  if (event.subject) {
+    subjectLabel_.text = event.subject;
+    CGSize stringSize = [event.subject sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
+                                  constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                      lineBreakMode:UILineBreakModeWordWrap];
+    CGRect textFrame = subjectLabel_.frame;
+    textFrame.origin.y = 12;
+    textFrame.size = stringSize;
+    subjectLabel_.frame = textFrame;
+    subjectLabel_.hidden = NO;
+  }
   
+  if (event.blurb) {
+    blurbLabel_.text = event.blurb;
+    CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
+                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                    lineBreakMode:UILineBreakModeWordWrap];
+    CGRect textFrame = blurbLabel_.frame;
+    if (subjectLabel_.text) {
+      textFrame.origin.y = CGRectGetMaxY(subjectLabel_.frame) + 2;
+    } else {
+      textFrame.origin.y = 12;
+    }
+    textFrame.size = stringSize;
+    blurbLabel_.frame = textFrame;
+    blurbLabel_.hidden = NO;
+  }
 }
 
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
