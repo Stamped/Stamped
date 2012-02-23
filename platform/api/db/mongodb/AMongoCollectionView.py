@@ -13,6 +13,8 @@ from AMongoCollection   import AMongoCollection
 class AMongoCollectionView(AMongoCollection):
     
     def _getSlice(self, query, genericCollectionSlice):
+        # initialize params
+        # -----------------
         time_filter = 'timestamp.created'
         sort        = None
         reverse     = genericCollectionSlice.reverse
