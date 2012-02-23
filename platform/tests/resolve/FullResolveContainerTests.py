@@ -163,11 +163,82 @@ _cases = [
                     "album_name" : "Hell Is What You Make It",
                 }
             },
+            'sources': {
+                'rdio':
+                {
+                    'rdio_id': 't9664977',
+                    'rdio_source': 'rdio',
+                    'rdio_timestamp': _now,
+                }
+            },
             "subcategory" : "song",
             "title" : "Sweat It Out",
         },
-    )
+    ),
+    (
+        {
+            "details" : {
+                "album" : {
+                    "tracks" : [
+                        "Once",
+                        "Even Flow",
+                        "Alive",
+                        "Why Go",
+                        "Black",
+                        "Jeremy",
+                        "Oceans",
+                        "Porch",
+                        "Garden",
+                        "Deep",
+                        "Release"
+                    ],
+                    "track_count" : 11
+                },
+                "media" : {
+                    "genre" : "Rock",
+                    "artist_id" : 467464,
+                    "original_release_date" : "1992-01-13T08:00:00Z",
+                    "copyright" : "1991 Sony Music Entertainment Inc.",
+                    "artist_display_name" : "Pearl Jam"
+                }
+            },
+            "subcategory" : "album",
+            "title" : "Ten",
+        },
+        {
+            "details" : {
+                "album" : {
+                    "tracks" : [
+                        "Once",
+                        "Even Flow",
+                        "Alive",
+                        "Why Go",
+                        "Black",
+                        "Jeremy",
+                        "Oceans",
+                        "Porch",
+                        "Garden",
+                        "Deep",
+                        "Release"
+                    ],
+                    "track_count" : 11
+                },
+                "media" : {
+                    "genre" : "Rock",
+                    "artist_id" : '467464',
+                    "original_release_date" : "1992-01-13T08:00:00Z",
+                    "copyright" : "1991 Sony Music Entertainment Inc.",
+                    "artist_display_name" : "Pearl Jam"
+                }
+            },
+             'sources': {'rdio': {'rdio_id': u'a237673',
+                      'rdio_source': 'rdio',
+                      'rdio_timestamp': _now}},
+            "subcategory" : "album",
+            "title" : "Ten",
+        },
 
+    ),
 ]
 
 class AResolveTest(AStampedAPITestCase):
@@ -207,7 +278,7 @@ class ResolveCasesTest(AResolveTest):
                 print(before_string)
                 print('After\n%s' % (pformat(before.value),))
                 print(pformat(decorations))
-            self.compare(before, after)
+            self.compare(before.value, after)
 
 if __name__ == '__main__':
     _verbose = True

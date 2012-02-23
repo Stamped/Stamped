@@ -1,6 +1,13 @@
 #!/usr/bin/python
 
 """
+Rdio wrapper
+
+Notes:
+to get tracks in playlists use: extras='trackKeys'
+
+Sample user key (don't use much, it's mine -Landon)
+('dnrkqfbtek39678h37y5u2ke38rzxvkeywfhgsbqn8s9z45rx9mjrmagcds6cf3w', 'fpdNE4EgBHgz')
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -14,6 +21,7 @@ try:
     import TwitterOAuth as oauth
     import urllib2, urllib
     from urlparse import parse_qsl
+    import logs
     try:
         import json
     except ImportError:
@@ -35,6 +43,7 @@ class Rdio:
         kwargs['method'] = method 
         # create the OAuth consumer credentials
         client = oauth.Client(self.__consumer)
+        logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
         response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
         return json.loads(response[1])
 
@@ -42,5 +51,6 @@ class Rdio:
         kwargs['method'] = method 
         access_token = oauth.Token(token, token_secret)   
         client = oauth.Client(self.__consumer, access_token)
+        logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
         response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
         return json.loads(response[1])
