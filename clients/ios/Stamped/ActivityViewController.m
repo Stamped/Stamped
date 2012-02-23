@@ -17,6 +17,7 @@
 #import "ActivityLikeTableViewCell.h"
 #import "ActivityTodoTableViewCell.h"
 #import "ActivityFollowTableViewCell.h"
+#import "ActivityGenericTableViewCell.h"
 #import "ProfileViewController.h"
 #import "Comment.h"
 #import "Notifications.h"
@@ -96,7 +97,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     NSFetchRequest* request = [Event fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    NSArray* genres = [NSArray arrayWithObjects:@"comment", @"reply", @"mention", @"like", @"favorite", @"follower", @"friend", @"restamp", nil];
+    NSArray* genres = [NSArray arrayWithObjects:@"generic", @"comment", @"reply", @"mention", @"like", @"favorite", @"follower", @"friend", @"restamp", nil];
     NSMutableArray* preds = [NSMutableArray array];
     for (NSString* genre in genres)
       [preds addObject:[NSString stringWithFormat:@"genre == '%@'", genre]];
@@ -196,6 +197,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     reuseIdentifier = @"FollowIdentifier";
   } else if ([event.genre isEqualToString:@"friend"]) {
     reuseIdentifier = @"FriendIdentifier";
+  } else if ([event.genre isEqualToString:@"generic"]) {
+    reuseIdentifier = @"GenericIdentifier";
   }
 
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
@@ -212,6 +215,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
       cell = [[[ActivityFollowTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
     } else if ([reuseIdentifier isEqualToString:@"FriendIdentifier"]) {
       cell = [[[ActivityFriendTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else if ([reuseIdentifier isEqualToString:@"GenericIdentifier"]) {
+      cell = [[[ActivityGenericTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
     }
   }
 

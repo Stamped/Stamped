@@ -301,7 +301,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [userMapping mapRelationship:@"credits" withMapping:stampMapping];
   
   RKManagedObjectMapping* eventMapping = [RKManagedObjectMapping mappingForClass:[Event class]];
-  [eventMapping mapAttributes:@"created", @"genre", @"subject", @"blurb", @"benefit", nil];
+  [eventMapping mapAttributes:@"created", @"genre", @"subject", @"blurb", @"benefit", @"icon", @"image", nil];
   [eventMapping mapKeyPath:@"activity_id" toAttribute:@"eventID"];
   [eventMapping mapKeyPath:@"linked_url" toAttribute:@"URL"];
   eventMapping.primaryKeyAttribute = @"eventID";

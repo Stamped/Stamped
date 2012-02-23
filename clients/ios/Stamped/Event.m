@@ -19,6 +19,8 @@
 @dynamic blurb;
 @dynamic benefit;
 @dynamic subject;
+@dynamic icon;
+@dynamic image;
 @dynamic eventID;
 @dynamic stamp;
 @dynamic user;
