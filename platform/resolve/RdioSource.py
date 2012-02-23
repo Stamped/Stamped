@@ -22,25 +22,110 @@ try:
     from pprint                     import pprint, pformat
     import sys
     from Entity                     import getSimplifiedTitle
+    from gevent.pool                import Pool
+    from Resolver                   import Resolver, ResolverArtist
 except:
     report()
     raise
 
 _verbose = False
-_suffix_regexes = [
-    re.compile('^(.*) \[[^\]]+\] *$'), 
-    re.compile('^(.*) \([^)]+\) *$'), 
-    re.compile('^(.*) \([^)]+\) *by +[A-Za-z. -]+$'), 
+_very_verbose = False
+
+_general_regex_removals = [
+    (r'.*(\(.*\)).*'    , [1]),     # a name ( with parens ) anywhere
+    (r'.*(\[.*]).*'     , [1]),     # a name [ with brackets ] anywhere
+    (r'.*(\(.*)'        , [1]),     # a name ( bad parathetical
+    (r'.*(\[.*)'        , [1]),     # a name [ bad brackets
+    (r'.*(\.\.\.).*'    , [1]),     # ellipsis ... anywhere
 ]
+
+_track_removals = [
+    (r'.*(-.* (remix|mix|version|edit|dub)$)'  , [1]),
+]
+
+_album_removals = [
+    (r'.*((-|,)( the)? remixes.*$)'    , [1]),
+    (r'.*(- ep$)'                   , [1]),
+    (r'.*( the (\w+ )?remixes$)'     , [1]),
+    (r'.*(- remix ep)' , [1]),
+]
+
+def _regexRemoval(string, patterns):
+    modified = True
+    while modified:
+        modified = False
+        for pattern, groups in patterns:
+            while True:
+                match = re.match(pattern, string)
+                if match is None:
+                    break
+                else:
+                    for group in groups:
+                        string2 = string.replace(match.group(group),'')
+                        if _very_verbose:
+                            print('Replaced %s with %s' % (string, string2))
+                        string = string2
+                        modified = True
+    return string
+
+def _format(string):
+    modified = True
+    li = [ '\t' , '\n', '\r', '  ' ]
+    while modified:
+        modified = False
+        for ch in li:
+            string2 = string.replace(ch,' ')
+            if string2 != string:
+                modified = True
+                string = string2
+    return string.strip()
 
 def _simplify(string):
     string = getSimplifiedTitle(string)
-    for regex in _suffix_regexes:
-        match = regex.match(string)
-        
-        if match is not None:
-            string = match.groups()[0]
-    return string.strip()
+    string = _format(string)
+    string = _regexRemoval(string, _general_regex_removals)
+    return _format(string)
+
+def _trackSimplify(string):
+    string = _simplify(string)
+    string = _regexRemoval(string, _track_removals)
+    return _format(string)
+
+def _albumSimplify(string):
+    string = _simplify(string)
+    string = _regexRemoval(string, _album_removals)
+    return _format(string)
+
+class RdioArtist(ResolverArtist):
+    def __init__(self, artist, rdio):
+        ResolverArtist.__init__(self)
+        self.__rdio = rdio
+        self.__data = artist
+
+    @lazyProperty
+    def name(self):
+        return self.__data['name']
+
+    @lazyProperty
+    def key(self):
+        return self.__data['key']
+
+    @property 
+    def source(self):
+        return "rdio"
+
+    @lazyProperty
+    def albums(self):
+        album_list = self.__rdio.method('getAlbumsForArtist',artist=self.__data['key'],count=100)['result']
+        return [ entry['name'] for entry in album_list ]
+
+    @lazyProperty
+    def tracks(self):
+        track_list = self.__rdio.method('getTracksForArtist',artist=self.__data['key'],count=100)['result']
+        return [ entry['name'] for entry in track_list ]
+
+    def __repr__(self):
+        return pformat( self.__data )
 
 class RdioSource(BasicSource):
     """
@@ -181,119 +266,26 @@ class RdioSource(BasicSource):
                 report()
         return None
 
+
     def resolveArtist(self, entity, minSimilarity=0, nameMin=.4, albumMin=.25, trackMin=.25):
-        results = []
-        try:
+        resolver = Resolver()
+        def source(start, count):
             response = self.__rdio.method('search',
                 query=entity['title'],
                 types='Artist',
                 extras='albumCount',
+                start=start,
+                count=count,
             )
             if response['status'] == 'ok':
                 entries = response['result']['results']
-                matches = []
-                entity_album_set = set( [ _simplify(album_entity['album_name']) for album_entity in entity['albums'] ] )
-                entity_track_set = set( [ _simplify(song_entity['song_name']) for song_entity in entity['songs'] ] )
-                for entry in entries:
-                    try:
-                        if entry['type'] == 'r':
-                            artistSimilarity = self.similarity(entry['name'], entity['title'])
-                            if artistSimilarity >= nameMin:
-                                entry['nameSimilarity'] = artistSimilarity
-                                results.append(entry)
-                    except KeyError:
-                        pass
-                def nameSimilarityKey(entry):
-                    return -entry['nameSimilarity']
-                results = sorted(results, key=nameSimilarityKey)
+                if _verbose:
+                    pprint(entries)
+                return [ RdioArtist( entry, self.__rdio ) for entry in entries ]
+            else:
+                return []
 
-                if len( entity_album_set ) > 0:
-                    it = results
-                    results = []
-                    for match in it:
-                        try:
-                            albums = self.__rdio.method('getAlbumsForArtist',artist=match['key'],count=100)['result']
-                            album_set = set()
-                            for album in albums:
-                                album_set.add(_simplify(album['name']))
-                            album_intersection = album_set & entity_album_set
-                            if len(album_intersection) < 10:
-                                album_similarity = min(len(album_intersection)*2.0 / len(entity_album_set), 1.0)
-                            else:
-                                #if there are 10 common albums and the names are close, it's a match
-                                album_similarity = 1.00
-
-                            if album_similarity >= albumMin:
-                                match['albumSimilarity'] = album_similarity
-                                results.append(match)
-                        except KeyError:
-                            pass
-
-                def albumSimilarityKey(entry):
-                    return -(entry['albumSimilarity'] * entry['nameSimilarity'])
-                results = sorted(results, key=albumSimilarityKey)
-
-                if len( entity_track_set ) > 0:
-                    it = results
-                    results = []
-                    for match in it:
-                        try:
-                            tracks = self.__rdio.method('getTracksForArtist',artist=match['key'],count=300)['result']
-                            track_set = set()
-                            for track in tracks:
-                                track_set.add(_simplify(track['name']))
-                            track_intersection = track_set & entity_track_set
-                            if len(track_intersection) < 20:
-                                track_similarity = min( len(track_intersection)*2.0 / len(entity_track_set) , 1.0)
-                            else:
-                                #if there are 40 common tracks and the names and albums are close, it's a match
-                                track_similarity = 1.00
-                            if track_similarity > trackMin:
-                                match['trackSimilarity'] = track_similarity
-                                results.append(match)
-                        except KeyError:
-                            pass
-
-                it = results
-                results = []
-
-                tags = ['trackSimilarity','nameSimilarity','albumSimilarity']
-                for match in it:
-                    try:
-                        stats = {}
-                        for tag in tags:
-                            if tag in match:
-                                stats[tag] = match[tag]
-                        total = 0
-                        for k,v in stats.items():
-                            total += v
-                        total = total / len(stats)
-                        if total >= minSimilarity:
-                            match['similarity'] = total
-                            match['resolved'] = False
-                            results.append(match)
-                    except KeyError:
-                        pass
-
-                def finalSort(match):
-                    return -match['similarity']
-
-                results = sorted(results, key=finalSort)
-                if len(results) == 1:
-                    result = results[0]
-                    if result['similarity'] > .90:
-                        result['resolved'] = True
-                elif len(results) > 1:
-                    result1 = results[0]
-                    result2 = results[1]
-                    if result1['similarity'] > .90 and result1['similarity'] - result2['similarity'] > .3:
-                        result1['resolved'] = True
-
-                return results
-
-        except Exception:
-            report()
-        return None
+        return resolver.resolveArtist( resolver.artistFromEntity(entity), source)
 
     #TODO improve
     def mangle(self, string):
@@ -319,23 +311,28 @@ class RdioSource(BasicSource):
                     return len(mb)*.5 /len(ma)
         return 0.0
 
-def demo(title='Katy Perry',subcategory=None):
+def demo(title='Katy Perry',subcategory='artist',short=False):
+    import Resolver
+    Resolver._verbose = True
     rdio = RdioSource()
     from MongoStampedAPI import MongoStampedAPI
-    api =MongoStampedAPI()
+    api = MongoStampedAPI()
     db = api._entityDB
     query = {'title':title}
     if subcategory is not None:
         query['subcategory'] = subcategory
     cursor = db._collection.find(query)
     if cursor.count() == 0:
-        print("Could not find a matching entity")
+        print("Could not find a matching entity for %s" % title)
         return
     result = cursor[0]
     entity = db._convertFromMongo(result)
     rdio_id = None
     if entity['subcategory'] == 'artist':
-        rdio_id = rdio.resolveArtist(entity,0,0,0,0)
+        if short:
+            rdio_id = rdio.resolveArtist(entity)
+        else:
+            rdio_id = rdio.resolveArtist(entity,0,0,0,0)
     elif entity['subcategory'] == 'album':
         rdio_id = rdio.resolveAlbum(entity)
     elif entity['subcategory'] == 'song':
@@ -345,11 +342,15 @@ def demo(title='Katy Perry',subcategory=None):
 
 if __name__ == '__main__':
     _verbose = True
+    short = False
+    if '-s' in sys.argv:
+        sys.argv.remove('-s')
+        short = True
     if len(sys.argv) == 1:
-        demo()
+        demo(short=short)
     elif len(sys.argv) == 2:
-        demo(sys.argv[1])
+        demo(sys.argv[1],short=short)
     elif len(sys.argv) == 3:
-        demo(sys.argv[1], sys.argv[2])
+        demo(sys.argv[1], sys.argv[2],short=short)
     else:
         print('bad usage')

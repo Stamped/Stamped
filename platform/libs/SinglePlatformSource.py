@@ -57,7 +57,7 @@ class SinglePlatformSource(AExternalSource):
                         decoration_db.updateDecoration('menu', menu)
                         log.info('Regenerated menu for %s',singleplatform_id)
                         result = True
-        except HttpError as e:
+        except HTTPError as e:
             log.warning("HttpError %s from SinglePlatform for %s",e.code,singleplatform_id)
         except Exception:
             report("unexpected SinglePlatformSource error")
