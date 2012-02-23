@@ -8,6 +8,8 @@
 
 #import "STMapScopeSlider.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "STTooltipView.h"
 
 @interface STMapScopeSlider ()
@@ -79,6 +81,26 @@
     [trackButtons_ addObject:b];
   }
   [self setGranularity:STMapScopeSliderGranularityFriends animated:NO];
+}
+
+- (void)flashTooltip {
+  if ([tooltipView_.layer animationForKey:@"opacity"])
+    return;
+
+  [tooltipView_.layer removeAllAnimations];
+  tooltipView_.alpha = 0;
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction
+                   animations:^{ tooltipView_.alpha = 1.0; }
+                   completion:^(BOOL finished) {
+                     [UIView animateWithDuration:0.3
+                                           delay:2
+                                         options:UIViewAnimationOptionAllowUserInteraction
+                                      animations:^{ tooltipView_.alpha = 0; }
+                                      completion:nil];
+                   }];
+  
 }
 
 - (void)updateTooltipPosition {
