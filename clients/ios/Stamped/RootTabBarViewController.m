@@ -391,6 +391,7 @@
 }
 
 - (void)showMapView {
+  [mapViewController_ reset];
   if ([selectedViewController_ isMemberOfClass:[InboxViewController class]])
     mapViewController_.source = STMapViewControllerSourceInbox;
   else if ([selectedViewController_ isMemberOfClass:[TodoViewController class]])

@@ -976,14 +976,15 @@ class HTTPGenericSlice(Schema):
         self.offset             = SchemaElement(int)
         
         # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
         self.sort               = SchemaElement(basestring, default='modified')
         self.reverse            = SchemaElement(bool,       default=False)
         self.coordinates        = SchemaElement(basestring) # "lat,lng"
-
+        
         # filtering
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
-
+    
     def _convertData(self, data):
         if 'coordinates' in data:
             try:
@@ -1007,26 +1008,25 @@ class HTTPGenericSlice(Schema):
             except:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
         
+        # TODO: validate since <= before
+        
         if 'offset' not in data:
             data['offset'] = 0
-
+        
         return data
-
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'GenericSlice':
             data = self._convertData(self.exportSparse())
             schema.importData(data)
         else:
             raise NotImplementedError
-
+        
         return schema
 
 class HTTPGenericCollectionSlice(HTTPGenericSlice):
     def setSchema(self):
         HTTPGenericSlice.setSchema(self)
-        
-        # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
         
         # filtering
         self.query              = SchemaElement(basestring)
@@ -1039,9 +1039,10 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
         self.deleted            = SchemaElement(bool, default=False)
         self.comments           = SchemaElement(bool, default=True)
         self.unique             = SchemaElement(bool, default=False)
-
+    
     def _convertData(self, data):
         data = super(HTTPGenericCollectionSlice, self)._convertData(data)
+        
         if 'viewport' in data:
             try:
                 lat0, lng0, lat1, lng1 = data['viewport'].split(',')
@@ -1056,9 +1057,11 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
                         'lng' : float(lng1), 
                     }
                 }
+                
+                # TODO: validate viewport
             except:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
-
+        
         return data
     
     def exportSchema(self, schema):
@@ -1076,7 +1079,7 @@ class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
         
         self.user_id            = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
-
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'UserCollectionSlice':
             data = self._convertData(self.exportSparse())
@@ -1092,14 +1095,14 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
         
         self.distance           = SchemaElement(int)
         self.inclusive          = SchemaElement(bool)
-
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'FriendsSlice':
             data = self._convertData(self.exportSparse())
             schema.importData(data)
         else:
             raise NotImplementedError
-
+        
         return schema
 
 class HTTPStampImage(Schema):
@@ -1112,13 +1115,14 @@ class HTTPDeletedStamp(Schema):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.modified           = SchemaElement(basestring)
         self.deleted            = SchemaElement(bool)
-
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'DeletedStamp':
             self.importData(schema.exportSparse(), overflow=True)
             self.modified       = schema.timestamp.modified
         else:
             raise NotImplementedError
+        
         return self
 
 # ######## #
@@ -1188,6 +1192,7 @@ class HTTPFavorite(Schema):
             self.created = schema.timestamp.created
         else:
             raise NotImplementedError
+        
         return self
 
 class HTTPFavoriteNew(Schema):
@@ -1218,7 +1223,7 @@ class HTTPActivity(Schema):
         self.subject            = SchemaElement(basestring)
         self.subject_objects    = SchemaList(ActivityObjectSchema())
         self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = SchemaElement(basestring)
+        self.blurb_format       = ActivityFormatSchema()
         self.blurb_objects      = SchemaList(ActivityObjectSchema())
 
         # Links
@@ -1234,18 +1239,20 @@ class HTTPActivity(Schema):
             linked_stamp        = data.pop('linked_stamp', None)
             linked_user         = data.pop('linked_user', None)
             linked_url          = data.pop('linked_url', None)
-            user                = UserMini(data.pop('user', None))
-            data['user']        = HTTPUserMini().importSchema(user).value 
+            user                = data.pop('user', None)
 
             self.importData(data, overflow=True)
+
+            if user is not None:
+                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
             
-            if linked_stamp != None:
+            if linked_stamp is not None:
                 self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
-            elif linked_user != None:
+            elif linked_user is not None:
                 self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
-            elif linked_entity != None:
+            elif linked_entity is not None:
                 self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
-            elif linked_url != None:
+            elif linked_url is not None:
                 self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
 
             self.created = schema.timestamp.created
@@ -1260,7 +1267,7 @@ class HTTPActivitySlice(HTTPGenericSlice):
 class HTTPLinkedURL(Schema):
     def setSchema(self):
         self.url                = SchemaElement(basestring, required=True)
-        self.browser            = SchemaElement(bool, default=True)
+        self.browser            = SchemaElement(bool)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedURL':

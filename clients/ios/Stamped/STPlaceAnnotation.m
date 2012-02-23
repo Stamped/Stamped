@@ -11,7 +11,7 @@
 #import "Entity.h"
 #import "Stamp.h"
 
-const CGFloat kStandardLatLongSpan = 400.0f / 111000.0f;
+const CGFloat kStandardLatLongSpan = 600.0f / 111000.0f;
 
 @implementation STPlaceAnnotation
 @synthesize stamp = stamp_;

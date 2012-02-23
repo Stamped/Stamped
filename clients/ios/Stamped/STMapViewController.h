@@ -38,6 +38,7 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet STToolbar* toolbar;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
 
+- (void)reset;
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)locationButtonPressed:(id)sender;
 

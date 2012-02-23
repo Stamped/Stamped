@@ -344,16 +344,27 @@ class Comment(Schema):
 
 class Activity(Schema):
     def setSchema(self):
+        # Metadata
         self.activity_id        = SchemaElement(basestring)
         self.recipient_id       = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = UserMini()
-        self.image              = SchemaElement(basestring)
-        self.subject            = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring)
-        self.link               = ActivityLink()
         self.timestamp          = TimestampSchema()
         self.benefit            = SchemaElement(int)
+
+        # Image
+        self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
+        # Text
+        self.subject            = SchemaElement(basestring)
+        self.subject_objects    = SchemaList(ActivityObjectSchema())
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_format       = ActivityFormatSchema()
+        self.blurb_objects      = SchemaList(ActivityObjectSchema())
+
+        # Links
+        self.link               = ActivityLink()
 
 class ActivityLink(Schema):
     def setSchema(self):
@@ -365,7 +376,7 @@ class ActivityLink(Schema):
         self.linked_entity_id   = SchemaElement(basestring)
         self.linked_comment     = Comment()
         self.linked_comment_id  = SchemaElement(basestring)
-        self.linked_url         = SchemaElement(basestring)
+        self.linked_url         = LinkedURL()
 
 class ActivityObjectSchema(Schema):
     def setSchema(self):
@@ -373,6 +384,10 @@ class ActivityObjectSchema(Schema):
         self.stamp_id           = SchemaElement(basestring)
         self.entity_id          = SchemaElement(basestring)
         self.indices            = SchemaList(SchemaElement(int))
+
+class ActivityFormatSchema(Schema):
+    def setSchema(self):
+        self.title              = SchemaElement(bool)
 
 class Alert(Schema):
     def setSchema(self):

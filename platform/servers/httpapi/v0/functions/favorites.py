@@ -13,18 +13,17 @@ from httpapi.v0.helpers import *
 @require_http_methods(["POST"])
 def create(request):
     authUserId  = checkOAuth(request)
-
     schema      = parseRequest(HTTPFavoriteNew(), request)
-
+    
     stampId     = schema.stamp_id
     entityRequest = {
         'entity_id': schema.entity_id,
         'search_id': schema.search_id,
     }
-
+    
     favorite    = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
     favorite    = HTTPFavorite().importSchema(favorite)
-
+    
     return transformOutput(favorite.exportSparse())
 
 
@@ -33,15 +32,15 @@ def create(request):
 def remove(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityId(), request)
-
+    
     favorite    = stampedAPI.removeFavorite(authUserId, schema.entity_id)
     favorite    = HTTPFavorite().importSchema(favorite)
-
+    
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
     result      = favorite.exportSparse()
     result['entity'] = None
-
+    
     return transformOutput(result)
 
 
@@ -49,10 +48,10 @@ def remove(request):
 @require_http_methods(["GET"])
 def show(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPGenericCollectionSlice(), request)
-
-    favorites   = stampedAPI.getFavorites(authUserId, **schema.exportSparse())
-
+    schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
+    
+    favorites   = stampedAPI.getFavorites(authUserId, schema)
+    
     result = []
     for favorite in favorites:
         result.append(HTTPFavorite().importSchema(favorite).exportSparse())
