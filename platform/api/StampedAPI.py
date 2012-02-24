@@ -2684,10 +2684,10 @@ class StampedAPI(AStampedAPI):
                 
                 if item.user.user_id is not None:
                     item.user = userIds[item.user.user_id]
-                if item.linked_user_id is not None:
-                    item.linked_user = userIds[item.linked_user_id]
+                if item.link.linked_user_id is not None:
+                    item.link.linked_user = userIds[item.linked_user_id]
                 if item.linked_stamp_id is not None:
-                    item.linked_stamp = stampIds[item.linked_stamp_id]
+                    item.link.linked_stamp = stampIds[item.linked_stamp_id]
             except:
                 utils.printException()
                 continue

@@ -1235,10 +1235,11 @@ class HTTPActivity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Activity':
             data                = schema.value
-            linked_entity       = data.pop('linked_entity', None)
-            linked_stamp        = data.pop('linked_stamp', None)
-            linked_user         = data.pop('linked_user', None)
-            linked_url          = data.pop('linked_url', None)
+            link                = data.pop('link', {})
+            linked_entity       = link.pop('linked_entity', None)
+            linked_stamp        = link.pop('linked_stamp', None)
+            linked_user         = link.pop('linked_user', None)
+            linked_url          = link.pop('linked_url', None)
             user                = data.pop('user', None)
 
             self.importData(data, overflow=True)
