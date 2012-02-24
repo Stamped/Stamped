@@ -11,6 +11,7 @@
 @interface STClosableOverlayView : UIView
 
 - (void)show;
+- (void)showWithOnCloseHandler:(void (^)(void))block;
 
 @property (nonatomic, readonly) UIView* contentView;
 

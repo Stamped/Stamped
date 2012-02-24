@@ -8,12 +8,16 @@
 
 #import "STClosableOverlayView.h"
 
+typedef void(^OnCloseBlock)(void);
+
 @interface STClosableOverlayView ()
 - (void)closeButtonPressed:(id)sender;
+- (void)runCloseBlock;
 
 @property (nonatomic, readonly) UIImageView* topRibbonView;
 @property (nonatomic, readonly) UIImageView* bottomRibbonView;
 @property (nonatomic, readonly) UIButton* closeButton;
+@property (nonatomic, copy) OnCloseBlock closeBlock;
 @end
 
 @implementation STClosableOverlayView
@@ -22,6 +26,7 @@
 @synthesize topRibbonView = topRibbonView_;
 @synthesize bottomRibbonView = bottomRibbonView_;
 @synthesize closeButton = closeButton_;
+@synthesize closeBlock = closeBlock_;
 
 - (id)init {
   UIWindow* window = [[UIApplication sharedApplication] delegate].window;
@@ -64,6 +69,7 @@
   contentView_ = nil;
   topRibbonView_ = nil;
   bottomRibbonView_ = nil;
+  self.closeBlock = nil;
   [super dealloc];
 }
 
@@ -119,11 +125,21 @@
   }];
 }
 
+- (void)showWithOnCloseHandler:(void (^)(void))block {
+  [self show];
+}
+
+- (void)runCloseBlock {
+  if (self.closeBlock)
+    [self closeBlock]();
+}
+
 - (void)closeButtonPressed:(id)sender {
   [UIView animateWithDuration:0.3 animations:^{
     self.alpha = 0;
   } completion:^(BOOL finished) {
     [self removeFromSuperview];
+    [self performSelectorOnMainThread:@selector(runCloseBlock) withObject:nil waitUntilDone:NO];
   }];
 }
 
