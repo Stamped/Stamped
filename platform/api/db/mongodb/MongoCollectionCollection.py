@@ -72,8 +72,9 @@ class MongoCollectionCollection(ACollectionDB):
             stamp_ids = self.getUserStampIds(userId)
             return dict(map(lambda k: (k, None), stamp_ids))
         
-        visited_users   = {}
         stamp_ids       = defaultdict(list)
+        visited_users   = set()
+        fof             = {}
         todo            = []
         
         # TODO: possible optimization; inboxstamps contains all stamp_ids for 
@@ -81,30 +82,28 @@ class MongoCollectionCollection(ACollectionDB):
         # potentially use inboxstamps to expand the BFS more efficiently
         
         def visit_user(user_id, friend_id, distance):
-            def add_stamp_refs(ids):
-                if distance >= 2 and (user_id not in visited_users or len(visited_users[user_id]) > 0):
+            if user_id in visited_users:
+                try:
+                    ids = fof[user_id]
+                    
                     for stamp_id in ids:
                         stamp_ids[stamp_id].append(friend_id)
-                else:
-                    for stamp_id in ids:
-                        if stamp_id not in stamp_ids:
-                            stamp_ids[stamp_id] = []
-            
-            add_stamps = (inclusive or distance == max_distance)
-            
-            if user_id in visited_users:
-                if add_stamps:
-                    add_stamp_refs(visited_users[user_id])
+                except KeyError:
+                    pass
             elif distance <= max_distance:
-                visited_users[user_id] = []
-                
-                if add_stamps:
+                if inclusive or distance == max_distance:
                     ids = self.getUserStampIds(user_id)
-                    add_stamp_refs(ids)
                     
                     if distance >= 2:
-                        visited_users[user_id] = ids
+                        fof[user_id] = ids
+                        
+                        for stamp_id in ids:
+                            stamp_ids[stamp_id].append(friend_id)
+                    else:
+                        for stamp_id in ids:
+                            stamp_ids[stamp_id] = [ ]
                 
+                visited_users.add(user_id)
                 if distance < max_distance:
                     heapq.heappush(todo, (distance, user_id))
         
