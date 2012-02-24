@@ -29,6 +29,8 @@
 }
 
 - (void)dealloc {
+  if ([webView_ respondsToSelector:@selector(scrollView)])
+    webView_.scrollView.delegate = nil;
   self.webView.delegate = nil;
   self.webView = nil;
   self.url = nil;
@@ -67,7 +69,8 @@
   else
     navBarWasHidden = NO;
   [super viewDidLoad];
-
+  if ([webView_ respondsToSelector:@selector(scrollView)])
+    webView_.scrollView.delegate = self;
   toolbar_.hidden = hideToolbar_;
   CGRect frame = webView_.frame;
   frame.size.height = toolbar_.hidden ? 412 : 371;
@@ -76,6 +79,8 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  if ([webView_ respondsToSelector:@selector(scrollView)])
+    webView_.scrollView.delegate = nil;
   self.webView.delegate = nil;
   self.webView = nil;
   self.url = nil;

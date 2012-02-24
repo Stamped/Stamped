@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface WebViewController : UIViewController <UIWebViewDelegate, UIActionSheetDelegate> {
-  @private 
+#import "STViewController.h"
+
+@interface WebViewController : STViewController <UIWebViewDelegate, UIActionSheetDelegate> {
+ @private 
   BOOL navBarWasHidden;
 }
 
