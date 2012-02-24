@@ -2442,14 +2442,18 @@ class StampedAPI(AStampedAPI):
         
         for stamp in stamps:
             try:
-                friends = friend_stamps[stamp.stamp_id]
+                friends     = friend_stamps[stamp.stamp_id]
+                screen_name = stamp.user.screen_name.lower()
+                stamp.via   = screen_name
                 
                 if friends is not None:
-                    if len(friends) > 2:
-                        stamp.via = "%d friends" % len(friends)
+                    if len(friends) == 0:
+                        stamp.via = screen_name
+                    elif len(friends) > 2:
+                        stamp.via = "%s via %d friends" % (screen_name, len(friends))
                     else:
-                        names = map(lambda user_id: self._userDB.getUser(user_id)['screen_name'], friends)
-                        stamp.via = ' and '.join(names)
+                        names = map(lambda user_id: self._userDB.getUser(user_id)['screen_name'].lower(), friends)
+                        stamp.via = "%s via %s" % (screen_name, ' and '.join(names))
             except:
                 utils.printException()
         
@@ -2921,7 +2925,7 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def __full_resolve(self):
         return FullResolveContainer.FullResolveContainer()
-
+    
     def _enrichEntity(self, entity):
         decorations = {}
         modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
@@ -2932,7 +2936,7 @@ class StampedAPI(AStampedAPI):
                 except Exception:
                     report()
         return modified
-
+    
     def _enrichEntityAsync(self,entity_id):
         entity = self._entityDB.getEntity(entity_id)
         

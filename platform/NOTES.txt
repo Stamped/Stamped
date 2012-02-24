@@ -1,13 +1,15 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
 * normalize existing friend suggest signals
-* incorporate other signals (fb, twitter, current location, user freshness / quality) into friend suggest
-* support HTTPGenericSlice interface for favorites
+* incorporate user freshness / quality signal into friend suggest and fix / test current location signal
+    * add unit tests tests
 * autocomplete cron job
 
 OLD:
     * change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"
     * consistency across city recommendations
+    * support HTTPGenericSlice interface for favorites
+    * incorporate signals (fb, twitter, current location) into friend suggest
 
 * add viewport sanity checking in HTTPGenericSlice => GenericSlice conversion
 * improve error messages for get_dns_by_node_name
