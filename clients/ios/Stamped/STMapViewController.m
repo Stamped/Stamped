@@ -161,6 +161,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  NSLog(@"View did appear...");
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
   if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)

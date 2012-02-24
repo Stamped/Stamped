@@ -137,8 +137,7 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
-  
-  self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+
   [self setTabBarIcons];
   [self updateNavBar];
 }
@@ -162,7 +161,8 @@
   
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
-  
+  self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+
   InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
@@ -212,6 +212,9 @@
   self.tabBar.selectedItem = nil;
   [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"hasStamped"];
   [[NSUserDefaults standardUserDefaults] synchronize];
+  self.viewControllers = nil;
+  self.mapViewController = nil;
+  self.tabBarItems = nil;
 }
 
 - (void)setTabBarIcons {
@@ -406,8 +409,12 @@
                     duration:0.75
                      options:UIViewAnimationOptionTransitionFlipFromRight
                   completion:^(BOOL finished) {
-                    [selectedViewController_ viewDidDisappear:YES];
-                    [mapViewController_ viewDidAppear:YES];
+                    [selectedViewController_ performSelectorOnMainThread:@selector(viewDidDisappear:)
+                                                              withObject:[NSNumber numberWithBool:YES]
+                                                           waitUntilDone:NO];
+                    [mapViewController_ performSelectorOnMainThread:@selector(viewDidAppear:)
+                                                         withObject:[NSNumber numberWithBool:YES]
+                                                      waitUntilDone:NO];
                     mapViewShown_ = YES;
                   }];
 }
@@ -423,8 +430,12 @@
                     duration:0.75
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
                   completion:^(BOOL finished) {
-                    [mapViewController_ viewDidDisappear:YES];
-                    [selectedViewController_ viewDidAppear:YES];
+                    [mapViewController_ performSelectorOnMainThread:@selector(viewDidDisappear:)
+                                                         withObject:[NSNumber numberWithBool:YES]
+                                                      waitUntilDone:NO];
+                    [selectedViewController_ performSelectorOnMainThread:@selector(viewDidAppear:)
+                                                              withObject:[NSNumber numberWithBool:YES]
+                                                           waitUntilDone:NO];
                     mapViewShown_ = NO;
                   }];
 }
