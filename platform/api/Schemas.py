@@ -401,7 +401,7 @@ class Alert(Schema):
 class LinkedURL(Schema):
     def setSchema(self):
         self.url                = SchemaElement(basestring, required=True)
-        self.browser            = SchemaElement(bool)
+        self.chrome             = SchemaElement(bool)
 
 
 # ########## #
