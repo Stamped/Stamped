@@ -74,10 +74,10 @@
     case STMapIndicatorViewModeHidden: {
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                        animations:^{ self.alpha = 0.0; }
                        completion:^(BOOL finished) {
-                         [indicatorView_ stopAnimating];
+                         [indicatorView_ performSelectorOnMainThread:@selector(stopAnimating) withObject:nil waitUntilDone:NO];
                          noResultsLabel_.alpha = 0.0;
                        }];
       break;
@@ -94,7 +94,7 @@
       
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                        animations:^{
                          self.frame = frame;
                          self.alpha = 1.0;
@@ -113,7 +113,7 @@
       [indicatorView_ stopAnimating];
       [UIView animateWithDuration:0.3
                             delay:0
-                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowAnimatedContent
+                          options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                        animations:^{
                          self.frame = frame;
                          self.alpha = 1.0;

@@ -161,7 +161,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  NSLog(@"View did appear...");
   [super viewDidAppear:animated];
   mapView_.showsUserLocation = YES;
   if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
@@ -309,13 +308,13 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
       continue;
     [resultsArray_ addObject:obj];
   }
-
-  [self addAllAnnotations];
   if (searchField_.text.length > 0) {
     indicatorView_.mode = resultsArray_.count > 0 ? STMapIndicatorViewModeHidden : STMapIndicatorViewModeNoResults;
   } else {
     indicatorView_.mode = STMapIndicatorViewModeHidden;
   }
+
+  [self addAllAnnotations];
 }
 
 - (void)objectLoader:(RKObjectLoader*)loader didFailWithError:(NSError*)error {
@@ -389,6 +388,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - Other private methods.
 
 - (void)loadDataFromNetwork {
+  indicatorView_.mode = STMapIndicatorViewModeLoading;
+
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   NSString* keyPath = source_ == STMapViewControllerSourceTodo ? @"Favorite" : @"Stamp";
@@ -437,7 +438,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   
   objectLoader.params = params;
   [objectLoader send];
-  indicatorView_.mode = STMapIndicatorViewModeLoading;
 }
 
 - (void)addAllAnnotations {
