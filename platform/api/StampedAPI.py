@@ -2437,7 +2437,6 @@ class StampedAPI(AStampedAPI):
         
         friend_stamps = self._collectionDB.getFriendsStamps(authUserId, friendsSlice)
         stamp_ids = friend_stamps.keys()
-        
         stamps    = self._getStampCollection(authUserId, stamp_ids, friendsSlice)
         
         for stamp in stamps:

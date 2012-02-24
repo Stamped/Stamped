@@ -77,10 +77,6 @@ class MongoCollectionCollection(ACollectionDB):
         fof             = {}
         todo            = []
         
-        # TODO: possible optimization; inboxstamps contains all stamp_ids for 
-        # a given user and all users they follow, so this function could 
-        # potentially use inboxstamps to expand the BFS more efficiently
-        
         def visit_user(user_id, friend_id, distance):
             if user_id in visited_users:
                 try:

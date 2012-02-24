@@ -12,7 +12,14 @@ import argparse, pymongo
 from pymongo.errors import AutoReconnect
 from collections    import defaultdict
 from pprint         import pprint
- 
+
+
+components:
+    * poll mongo for changes in ns
+    * list of indices
+    * list of mappings
+
+
 """
 {
     'title': {
@@ -31,12 +38,6 @@ from pprint         import pprint
     },
 }
 """
-
-#import pysolr
-#solr  = pysolr.Solr(solr_url)
-#solr.add([__extract_fields(obj, fields) for obj in coll.find()])
-#solr.delete(id=id)
-#solr.add(solr_docs)
 
 class AMongoNotificationHandler(object):
     
