@@ -69,7 +69,8 @@ class MongoCollectionCollection(ACollectionDB):
         
         if max_distance == 0:
             # stamps at distance 0 from the seed user are just the seed user's own stamps
-            return self.getUserStampIds(userId)
+            stamp_ids = self.getUserStampIds(userId)
+            return dict(map(lambda k: (k, None), stamp_ids))
         
         visited_users   = {}
         stamp_ids       = defaultdict(list)
