@@ -26,6 +26,7 @@
 @property (nonatomic, retain) NSString * stampID;
 @property (nonatomic, retain) NSNumber * temporary;
 @property (nonatomic, retain) NSString * URL;
+@property (nonatomic, retain) NSString * via;
 @property (nonatomic, retain) NSSet *comments;
 @property (nonatomic, retain) NSSet *credits;
 @property (nonatomic, retain) Entity *entityObject;

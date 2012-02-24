@@ -45,9 +45,12 @@ const CGFloat kStandardLatLongSpan = 600.0f / 111000.0f;
 }
 
 - (NSString*)subtitle {
-  if (stamp_)
-    return stamp_.entityObject.subtitle;
+  if (stamp_) {
+    if (stamp_.via.length > 0)
+      return stamp_.via;
 
+    return stamp_.entityObject.subtitle;
+  }
   return entityObject_.subtitle;
 }
 
