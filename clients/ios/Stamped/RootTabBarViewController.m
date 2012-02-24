@@ -213,6 +213,7 @@
   [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"hasStamped"];
   [[NSUserDefaults standardUserDefaults] synchronize];
   self.viewControllers = nil;
+  [self.mapViewController.view removeFromSuperview];
   self.mapViewController = nil;
   self.tabBarItems = nil;
 }

@@ -292,7 +292,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"image_url", @"imageURL",
      @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", @"modified", @"deleted", nil];
+  [stampMapping mapAttributes:@"blurb", @"modified", @"deleted", @"via", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];

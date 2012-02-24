@@ -35,5 +35,6 @@
 @dynamic events;
 @dynamic favorites;
 @dynamic user;
+@dynamic via;
 
 @end
