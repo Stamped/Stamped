@@ -52,10 +52,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, retain) NSMutableArray* cachedCoordinates;
 @property (nonatomic, assign) BOOL hideToolbar;
 @property (nonatomic, readonly) STMapIndicatorView* indicatorView;
+@property (nonatomic, retain) STClosableOverlayView* mapOverlayView;
 @end
 
 @implementation STMapViewController
 
+@synthesize mapOverlayView = mapOverlayView_;
 @synthesize overlayView = overlayView_;
 @synthesize locationButton = locationButton_;
 @synthesize cancelButton = cancelButton_;
@@ -95,6 +97,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.toolbar = nil;
   self.cachedCoordinates = nil;
   indicatorView_ = nil;
+  self.mapOverlayView = nil;
   [super dealloc];
 }
 
@@ -140,6 +143,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.selectedAnnotation = nil;
   self.toolbar = nil;
   indicatorView_ = nil;
+  self.mapOverlayView = nil;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -162,20 +166,31 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  mapView_.showsUserLocation = YES;
-  if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
-    [scopeSlider_ flashTooltip];
 
-  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"])
+  if (mapOverlayView_)
     return;
-  STClosableOverlayView* overlayView = [[[STClosableOverlayView alloc] init] autorelease];
-  UIImageView* content = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"popup_maps_welcome"]];
-  [overlayView.contentView addSubview:content];
-  [content release];
-  [overlayView show];
-  
-  [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenNewMapsView"];
-  [[NSUserDefaults standardUserDefaults] synchronize];
+
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"]) {
+    mapView_.showsUserLocation = YES;
+    if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
+      [scopeSlider_ flashTooltip];
+  } else {
+    self.mapOverlayView = [[[STClosableOverlayView alloc] init] autorelease];
+    UIImageView* content = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"popup_maps_welcome"]];
+    [mapOverlayView_.contentView addSubview:content];
+    [content release];
+    [mapOverlayView_ showWithOnCloseHandler:^{
+      [self performSelectorOnMainThread:@selector(setMapOverlayView:) withObject:nil waitUntilDone:NO];
+      [mapView_ performSelectorOnMainThread:@selector(setShowsUserLocation:)
+                                 withObject:[NSNumber numberWithBool:YES]
+                              waitUntilDone:NO];
+      if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
+        [scopeSlider_ performSelectorOnMainThread:@selector(flashTooltip) withObject:nil waitUntilDone:NO];
+    }];
+    
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenNewMapsView"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

@@ -126,6 +126,7 @@ typedef void(^OnCloseBlock)(void);
 }
 
 - (void)showWithOnCloseHandler:(void (^)(void))block {
+  self.closeBlock = block;
   [self show];
 }
 
