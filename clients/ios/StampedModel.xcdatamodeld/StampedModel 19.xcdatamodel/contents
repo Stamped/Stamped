@@ -72,12 +72,14 @@
     <entity name="Event" representedClassName="Event">
         <attribute name="benefit" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="blurb" optional="YES" attributeType="String"/>
+        <attribute name="blurbObjects" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="created" optional="YES" attributeType="Date"/>
         <attribute name="eventID" optional="YES" attributeType="String"/>
         <attribute name="genre" optional="YES" attributeType="String"/>
         <attribute name="icon" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="image" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="subject" optional="YES" attributeType="String"/>
+        <attribute name="subjectObjects" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="URL" optional="YES" attributeType="String"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="events" inverseEntity="Entity"/>
         <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="events" inverseEntity="Stamp"/>
@@ -139,7 +141,7 @@
         <element name="Comment" positionX="169" positionY="-108" width="128" height="150"/>
         <element name="DetailedEntity" positionX="160" positionY="192" width="128" height="720"/>
         <element name="Entity" positionX="558" positionY="81" width="128" height="750"/>
-        <element name="Event" positionX="88" positionY="135" width="128" height="225"/>
+        <element name="Event" positionX="88" positionY="135" width="128" height="240"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>
         <element name="Stamp" positionX="252" positionY="333" width="128" height="330"/>
         <element name="User" positionX="-101" positionY="102" width="128" height="375"/>

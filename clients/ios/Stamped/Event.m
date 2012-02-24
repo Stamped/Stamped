@@ -17,8 +17,10 @@
 @dynamic genre;
 @dynamic URL;
 @dynamic blurb;
+@dynamic blurbObjects;
 @dynamic benefit;
 @dynamic subject;
+@dynamic subjectObjects;
 @dynamic icon;
 @dynamic image;
 @dynamic eventID;

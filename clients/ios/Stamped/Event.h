@@ -20,9 +20,11 @@
 @property (nonatomic, retain) NSString* eventID;
 @property (nonatomic, retain) NSNumber* benefit;
 @property (nonatomic, retain) NSString* blurb;
+@property (nonatomic, retain) id blurbObjects;
 @property (nonatomic, retain) NSString* image;
 @property (nonatomic, retain) NSString* icon;
 @property (nonatomic, retain) NSString* subject;
+@property (nonatomic, retain) id subjectObjects;
 @property (nonatomic, retain) NSString* URL;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, retain) User* user;

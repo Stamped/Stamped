@@ -111,8 +111,9 @@ static const CGFloat kActivityStampSize = 16.0;
   largeImageView_.hidden = YES;
   userImageView_.frame = CGRectMake(15, 10, 33, 33);
   userImageView_.hidden = YES;
-  disclosureArrowImageView_.hidden = NO;
+
   [super prepareForReuse];
+  disclosureArrowImageView_.hidden = NO;
   self.selectionStyle = UITableViewCellSelectionStyleBlue;
 }
 
@@ -146,7 +147,24 @@ static const CGFloat kActivityStampSize = 16.0;
     userImageView_.imageURL = [event.user profileImageURLForSize:ProfileImageSize37];
 
   if (event.subject) {
-    subjectLabel_.text = event.subject;
+    if (event.subjectObjects) {
+      [subjectLabel_ setText:event.subject afterInheritingLabelAttributesAndConfiguringWithBlock:^(NSMutableAttributedString* mutableAttributedString) {
+        CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+        if (font) {
+          for (id obj in event.subjectObjects) {
+            NSArray* indices = [obj objectForKey:@"indices"];
+            NSNumber* index1 = [indices objectAtIndex:0];
+            NSNumber* index2 = [indices objectAtIndex:1];
+            NSRange boldRange = NSMakeRange(index1.unsignedIntegerValue, index2.unsignedIntegerValue - index1.unsignedIntegerValue);
+            [mutableAttributedString addAttribute:(NSString*)kCTFontAttributeName value:(id)font range:boldRange];
+          }
+          CFRelease(font);
+        }
+        return mutableAttributedString;
+      }];
+    } else {
+      subjectLabel_.text = event.subject;
+    }
     CGSize stringSize = [event.subject sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
                                   constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                       lineBreakMode:UILineBreakModeWordWrap];
@@ -158,6 +176,24 @@ static const CGFloat kActivityStampSize = 16.0;
   }
   
   if (event.blurb) {
+//    if (event.blurbObjects) {
+//      [blurbLabel_ setText:event.blurb afterInheritingLabelAttributesAndConfiguringWithBlock:^(NSMutableAttributedString* mutableAttributedString) {
+//        CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+//        if (font) {
+//          for (id obj in event.blurbObjects) {
+//            NSArray* indices = [obj objectForKey:@"indices"];
+//            NSNumber* index1 = [indices objectAtIndex:0];
+//            NSNumber* index2 = [indices objectAtIndex:1];
+//            NSRange boldRange = NSMakeRange(index1.unsignedIntegerValue, index2.unsignedIntegerValue - index1.unsignedIntegerValue);
+//            [mutableAttributedString addAttribute:(NSString*)kCTFontAttributeName value:(id)font range:boldRange];
+//          }
+//          CFRelease(font);
+//        }
+//        return mutableAttributedString;
+//      }];
+//    } else {
+//      blurbLabel_.text = event.blurb;
+//    }
     blurbLabel_.text = event.blurb;
     CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]
                                 constrainedToSize:CGSizeMake(210, MAXFLOAT)

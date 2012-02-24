@@ -310,6 +310,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSLog(@"response: %@", objectLoader.response.bodyAsString);
   Event* oldestEventInBatch = objects.lastObject;
   if (oldestEventInBatch.created) {
     [[NSUserDefaults standardUserDefaults] setObject:oldestEventInBatch.created
