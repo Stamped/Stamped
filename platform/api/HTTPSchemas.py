@@ -1268,7 +1268,7 @@ class HTTPActivitySlice(HTTPGenericSlice):
 class HTTPLinkedURL(Schema):
     def setSchema(self):
         self.url                = SchemaElement(basestring, required=True)
-        self.browser            = SchemaElement(bool)
+        self.chrome             = SchemaElement(bool)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedURL':
