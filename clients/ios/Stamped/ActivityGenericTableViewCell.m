@@ -120,7 +120,7 @@ static const CGFloat kActivityStampSize = 16.0;
 - (void)setEvent:(Event*)event {
   [super setEvent:event];
   
-  if (!event.stamp && !event.entityObject && !event.user && !event.URL) {
+  if (!event.stamp && !event.entityObject && !event.user && !event.urlObject) {
     self.selectionStyle = UITableViewCellSelectionStyleNone;
     disclosureArrowImageView_.hidden = YES;
   }

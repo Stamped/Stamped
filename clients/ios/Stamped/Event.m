@@ -15,7 +15,7 @@
 
 @dynamic created;
 @dynamic genre;
-@dynamic URL;
+@dynamic urlObject;
 @dynamic blurb;
 @dynamic blurbObjects;
 @dynamic benefit;

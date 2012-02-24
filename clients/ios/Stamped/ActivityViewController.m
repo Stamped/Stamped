@@ -293,8 +293,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   } else if (event.user) {
     detailViewController = [[ProfileViewController alloc] init];
     [(ProfileViewController*)detailViewController setUser:event.user];
-  } else if (event.URL) {
-    detailViewController = [[WebViewController alloc] initWithURL:[NSURL URLWithString:event.URL]];
+  } else if (event.urlObject) {
+    detailViewController = [[WebViewController alloc] initWithURL:[NSURL URLWithString:[event.urlObject objectForKey:@"url"]]];
+    NSNumber* showChrome = [event.urlObject objectForKey:@"chrome"];
+    [(WebViewController*)detailViewController setHideToolbar:!showChrome.boolValue];
   } else if (event.entityObject) {
     detailViewController = [Util detailViewControllerForEntity:event.entityObject];
   }

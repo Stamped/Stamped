@@ -26,5 +26,6 @@
 @property (nonatomic, retain) IBOutlet UIButton* shareButton;
 @property (nonatomic, retain) IBOutlet UIView* toolbar;
 
+@property (nonatomic, assign) BOOL hideToolbar;
 @property (nonatomic, retain) NSURL* url;
 @end

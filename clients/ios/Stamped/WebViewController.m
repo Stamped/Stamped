@@ -18,6 +18,7 @@
 @synthesize reloadButton = reloadButton_;
 @synthesize shareButton = shareButton_;
 @synthesize toolbar = toolbar_;
+@synthesize hideToolbar = hideToolbar_;
 
 - (id)initWithURL:(NSURL*)url {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -66,6 +67,11 @@
   else
     navBarWasHidden = NO;
   [super viewDidLoad];
+
+  toolbar_.hidden = hideToolbar_;
+  CGRect frame = webView_.frame;
+  frame.size.height = toolbar_.hidden ? 412 : 371;
+  webView_.frame = frame;
 }
 
 - (void)viewDidUnload {

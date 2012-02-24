@@ -25,7 +25,7 @@
 @property (nonatomic, retain) NSString* icon;
 @property (nonatomic, retain) NSString* subject;
 @property (nonatomic, retain) id subjectObjects;
-@property (nonatomic, retain) NSString* URL;
+@property (nonatomic, retain) id urlObject;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) Entity* entityObject;

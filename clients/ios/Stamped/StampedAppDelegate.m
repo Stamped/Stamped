@@ -305,7 +305,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [eventMapping mapKeyPath:@"activity_id" toAttribute:@"eventID"];
   [eventMapping mapKeyPath:@"subject_objects" toAttribute:@"subjectObjects"];
   [eventMapping mapKeyPath:@"blurb_objects" toAttribute:@"blurbObjects"];
-  [eventMapping mapKeyPath:@"linked_url" toAttribute:@"URL"];
+  [eventMapping mapKeyPath:@"linked_url" toAttribute:@"urlObject"];
   eventMapping.primaryKeyAttribute = @"eventID";
   [eventMapping mapKeyPath:@"linked_entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [eventMapping mapKeyPath:@"linked_stamp" toRelationship:@"stamp" withMapping:stampMapping];
