@@ -5,23 +5,22 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals, logs
 import argparse, time
 import pyes, pymongo
 
 from abc            import ABCMeta, abstractmethod
+from collections    import defaultdict
 from pymongo.errors import AutoReconnect
 
-class AElasticMongoError(Exception):
-    pass
+class AElasticMongoError    (Exception):          pass
+class InvalidNamespaceError (AElasticMongoError): pass
+class InvalidMappingError   (AElasticMongoError): pass
+class InvalidIndexError     (AElasticMongoError): pass
 
-class InvalidNamespaceError(AElasticMongoError):
-    pass
-
-class InvalidMappingError(AElasticMongoError):
-    pass
-
-class InvalidIndexError(AElasticMongoError):
-    pass
+# TODO: utilize mappings to convert / strip newly added documents
+# TODO: enforce required mappings and type checking of newly added documents
+# TODO: test!
 
 class AElasticMongoObject(object):
     
@@ -33,37 +32,61 @@ class AElasticMongoObject(object):
             collection = collection[component]
         
         return collection
+    
+    def __str__(self):
+        return self.__class__.__name__
+
+class AMongoCollectionSink(object):
+    
+    """
+        Abstract base class for handling collection modifications.
+    """
+    
+    __metaclass__ = ABCMeta
+    
+    def __init__(self, elasticmongo):
+        self._elasticmongo = elasticmongo
+    
+    @abstractmethod
+    def add(self, ns, documents):
+        pass
+    
+    @abstractmethod
+    def remove(self, ns, id):
+        pass
 
 class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
     
     def __init__(self, 
-                 mongo_host     = 'localhost', 
-                 mongo_port     = 27017, 
-                 mongo_config_ns= "local.elasticmongo", 
+                 mongo_host       = 'localhost', 
+                 mongo_port       = 27017, 
+                 mongo_config_ns  = "local.elasticmongo", 
+                 poll_interval_ms = 1000, 
                  *args, **kwargs):
         
-        self._mongo_host        = mongo_host
-        self._mongo_port        = mongo_port
-        self._mongo_config_ns   = mongo_config_ns
+        self._mongo_host          = mongo_host
+        self._mongo_port          = mongo_port
+        self._mongo_config_ns     = mongo_config_ns
+        self._poll_interval       = poll_interval_ms / 1000.0 # convert milliseconds to seconds
         
         self._init_mongo_conn()
         self._init_elastic_conn(*args, **kwargs)
     
     def _init_mongo_conn(self):
         self._conn          = pymongo.Connection(self._mongo_host, self._mongo_port)
-        self._oplog         = self._conn.local.rs
+        self._oplog         = self._conn.local.oplog.rs
         self._config_source = MongoCollectionSource(self, self._mongo_config_ns)
+        self._config_sink   = ElasticMongoConfigSink(self)
         
         self._indices       = { } # _id => basestring
-        self._mappings      = { } # _id => tuple(indices, type)
+        self._mappings      = { } # _id => tuple(indices, type, ns)
         self._sources       = { } # ns  => { 'source' : MongoCollectionSource, 'mappings' : list(basestring) }
     
     def _init_elastic_conn(self, *args, **kwargs):
         self._elasticsearch = pyes.ES(*args, **kwargs)
     
     def run(self):
-        self._config_source.run()
-        raise NotImplementedError
+        self._config_source.run(self._config_sink)
     
     def add_indices(self, documents):
         """
@@ -276,21 +299,6 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                 if key != '_id' and key not in schema:
                     raise error(doc)
 
-class AMongoCollectionSink(AElasticMongoObject):
-    
-    __metaclass__ = ABCMeta
-    
-    def __init__(self, elasticmongo):
-        self._elasticmongo = elasticmongo
-    
-    @abstractmethod
-    def add(self, ns, documents):
-        pass
-    
-    @abstractmethod
-    def remove(self, ns, id):
-        pass
-
 class ElasticMongoConfigSink(AMongoCollectionSink):
     
     def __init__(self, elasticmongo):
@@ -318,11 +326,21 @@ class ElasticMongoConfigSink(AMongoCollectionSink):
 
 class MongoCollectionSource(AElasticMongoObject):
     
+    """
+        Monitors the given Mongo namespace, notifying an AMongoCollectionSink whenever 
+        documents are added, modified, or removed.  Monitoring is done via a tailable 
+        oplog cursor, and monitoring state is cached in a separate collection specific 
+        to ElasticMongo, thereby enabling efficient incremental monitoring (e.g., if 
+        ElasticMongo is killed for any reason, the most recent oplog timestamp will 
+        implicitly be used upon restart to efficiently start monitoring from the 
+        exact place ElasticMongo left off).
+    """
+    
     def __init__(self, elasticmongo, ns, state_ns=None):
         assert isinstance(elasticmongo, ElasticMongo)
         
         if state_ns is None:
-            state_ns = "%s.state.%s" % (elasticmongo._mongo_config_ns, ns)
+            state_ns = "%s.state" % elasticmongo._mongo_config_ns
         
         self._ns                = ns
         self._elasticmongo      = elasticmongo
@@ -333,7 +351,7 @@ class MongoCollectionSource(AElasticMongoObject):
     def run(self, sink):
         assert isinstance(sink, AMongoCollectionSink)
         
-        state  = self._state_collection.find_one({'_id': 'state'})
+        state  = self._state_collection.find_one({ '_id': self._ns })
         oplog  = self._elasticmongo._oplog
         cursor = None
         spec   = {}
@@ -344,7 +362,9 @@ class MongoCollectionSource(AElasticMongoObject):
             if first['ts'].time > state['ts'].time and first['ts'].inc > state['ts'].inc:
                 self._initial_export(sink)
             else:
-                spec['ts'] = { '$gt': state['ts'] }
+                ts = state['ts']
+                logs.info("[%s] fast-forwarding sync of collection %s to %s" % (self, self._ns, ts.as_datetime()))
+                spec['ts'] = { '$gt': ts }
         else:
             self._initial_export(sink)
         
@@ -352,10 +372,10 @@ class MongoCollectionSource(AElasticMongoObject):
         
         if not 'ts' in spec:
             try:
-                # attempt to start pulling at the last occurrence of the target namespaces
-                s = {"ns" : { "$in" : map(str, schemas.keys()) } }
+                # attempt to start pulling at the last occurrence of the target namespace
+                query = { "ns" : self._ns }
+                last  = list(oplog.find(query).sort("$natural", -1).limit(1))[0]
                 
-                last = list(oplog.find(s).sort("$natural", -1).limit(1))[0]
                 spec['ts'] = { '$gt': last['ts'] }
             except:
                 # fallback to starting at the end of the oplog
@@ -372,38 +392,46 @@ class MongoCollectionSource(AElasticMongoObject):
                 if not cursor or not cursor.alive:
                     cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
                 
-                docs    = []
+                docs    = defaultdict(list)
                 index   = 0
                 
                 for op in cursor:
                     ns = op['ns']
                     
-                    if ns == self._ns:
+                    if ns.startswith(self._ns):
                         spec['ts'] = { '$gt': op['ts'] }
                         
                         if op['op'] == 'd':
                             id = self._extract_id(op['o']['_id'])
                             
-                            sink.remove(self._ns, id)
+                            sink.remove(ns, id)
                         elif op['op'] in ['i', 'u']:
-                            docs.append(op['o'])
+                            docs[ns].append(op['o'])
                     
                     index += 1
                     
                 if len(docs) > 0:
-                    sink.add(self._ns, docs)
+                    for ns, documents in docs.iteritems():
+                        sink.add(ns, documents)
                 
-                self._state_collection.save({ '_id': 'state', 'ts': spec['ts']['$gt'] })
+                self._state_collection.save({ '_id': self._ns, 'ts': spec['ts']['$gt'] })
             except AutoReconnect as e:
                 pass
             
-            time.sleep(1)
+            time.sleep(self._elasticmongo._poll_interval)
     
     def stop(self):
         self._stopped = True
     
     def _initial_export(self, sink):
-        sink.add(self._collection.find())
+        documents = self._collection.find()
+        count     = documents.count()
+        
+        if count > 0:
+            logs.info("[%s] performing initial sync of %s (%d documents)" % (self, self._ns, count))
+            sink.add(self._ns, documents)
+        else:
+            logs.info("[%s] skipping initial sync of empty collection %s" % (self, self._ns))
     
     @staticmethod
     def _extract_id(id):
@@ -411,4 +439,28 @@ class MongoCollectionSource(AElasticMongoObject):
             return id
         else:
             return repr(id)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('-m', '--mongo_host', type=str, default="localhost",
+                        help=("hostname or IP address of mongod server"))
+    parser.add_argument('-p', '--mongo_port', type=int, default=27017,
+                        help="port number of mongod server")
+    parser.add_argument('-e', '--es_host', type=str, default="localhost",
+                        help=("hostname or IP address of elasticsearch server"))
+    parser.add_argument('-P', '--es_port', type=int, default=9200,
+                        help=("port number of elasticsearch server"))
+    parser.add_argument('-i', '--poll_interval', type=int, default=1000,
+                        help=("delay between successive mongo oplog polls (in milliseconds)"))
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+    
+    args   = parser.parse_args()
+    server = '%s:%s' % (args.es_host, args.es_port)
+    em     = ElasticMongo(mongo_host=args.mongo_host, 
+                          mongo_port=args.mongo_port, 
+                          poll_interval_ms=args.poll_interval, 
+                          server=server)
+    
+    em.run()
 
