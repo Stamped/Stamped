@@ -34,7 +34,7 @@ class AElasticMongoObject(object):
         
         return collection
 
-class ElasticMongo(AElasticMongoObject):
+class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
     
     def __init__(self, 
                  mongo_host     = 'localhost', 
@@ -54,10 +54,9 @@ class ElasticMongo(AElasticMongoObject):
         self._oplog         = self._conn.local.rs
         self._config_source = MongoCollectionSource(self, self._mongo_config_ns)
         
-        self._namespaces    = { }
-        self._indices       = { }
-        self._mappings      = { }
-        self._sources       = [ ]
+        self._indices       = { } # _id => basestring
+        self._mappings      = { } # _id => tuple(indices, type)
+        self._sources       = { } # ns  => { 'source' : MongoCollectionSource, 'mappings' : list(basestring) }
     
     def _init_elastic_conn(self, *args, **kwargs):
         self._elasticsearch = pyes.ES(*args, **kwargs)
@@ -67,6 +66,11 @@ class ElasticMongo(AElasticMongoObject):
         raise NotImplementedError
     
     def add_indices(self, documents):
+        """
+            Registers indices for each of the given documents with the underlying 
+            elasticsearch instance.
+        """
+        
         for doc in documents:
             self._validate_index(doc)
             
@@ -78,23 +82,48 @@ class ElasticMongo(AElasticMongoObject):
             self._indices[doc['_id']] = index
     
     def add_mappings(self, documents):
+        """ 
+            Registers mappings for each of the given documents with the underlying 
+            elasticsearch instance.
+        """
+        
         for doc in documents:
             self._validate_mapping(doc)
             
             doc_type = doc['type']
+            ns       = doc['ns']
+            doc_id   = doc['_id']
             indices  = doc.pop('indices', None)
+            
             if isinstance(indices, basestring):
                 indices = [ indices ]
             
             self._elasticsearch.put_mapping(doc_type, doc['mapping'], indices)
             
-            source = MongoCollectionSource(self, doc['ns'])
-            source.run()
-            self._sources.append(source)
+            if indices is None:
+                indices = []
             
-            self._mappings[doc['_id']] = (indices, doc_type)
+            mapping  = (indices, doc_type, ns)
+            self._mappings[doc_id] = mapping
+            
+            try:
+                self._sources[ns]['mappings'][doc_id] = mapping
+            except KeyError:
+                source = MongoCollectionSource(self, ns)
+                source.run(self)
+                
+                self._sources['ns'] = {
+                    'mappings' : {
+                        doc_id : mapping, 
+                    }, 
+                    'source'   : source, 
+                }
     
     def remove_index(self, id):
+        """ 
+            Removes a single index from the underlying elasticsearch instance.
+        """
+        
         try:
             index = self._indices[id]
         except KeyError:
@@ -104,22 +133,93 @@ class ElasticMongo(AElasticMongoObject):
         del self._indices[id]
     
     def remove_mapping(self, id):
+        """ 
+            Removes a single mapping from the underlying elasticsearch instance and stops any 
+            outstanding mongo listeners from needlessly continuing to poll changes if no more 
+            mappings exist.
+        """
+        
         try:
-            indices, doc_type = self._mappings[id]
+            indices, doc_type, ns = self._mappings[id]
         except KeyError:
             raise InvalidMappingError(id)
         
-        if indices is None:
-            self._elasticsearch.delete_mapping(None, doc_type)
-        else:
+        if ns not in self._sources:
+            raise InvalidMappingError(id)
+        
+        wrapper = self._sources[ns]
+        del wrapper['mappings'][id]
+        
+        if len(wrapper['mappings']) == 0:
+            source = wrapper['source']
+            source.stop()
+            del self._sources[ns]
+        
+        if indices:
             for index in indices:
                 self._elasticsearch.delete_mapping(index, doc_type)
+        else:
+            self._elasticsearch.delete_mapping(None, doc_type)
         
         del self._mappings[id]
-        # TODO: stop sources dependent on this mapping
+    
+    def add(self, ns, documents):
+        """
+            Indexes all documents in the given namespace with elasticsearch.
+        """
+        
+        try:
+            wrapper = self._sources[ns]
+        except KeyError:
+            raise InvalidMappingError(ns)
+        
+        mappings = wrapper['mappings']
+        bulk     = len(documents) > 1
+        
+        for mapping in mappings:
+            doc_type = mapping[1]
+            
+            for index in mapping[0]:
+                for doc in documents:
+                    id = doc.pop('_id')
+                    self._elasticsearch.index(doc, index, doc_type, id=id, bulk=bulk)
+        
+        if bulk:
+            self._elasticsearch.flush_bulk()
+    
+    def remove(self, ns, id):
+        """
+            Removes a single document in the given namespace from any underlying 
+            elasticsearch indices.
+        """
+        
+        try:
+            wrapper = self._sources[ns]
+        except KeyError:
+            raise InvalidMappingError(ns)
+        
+        todo = []
+        
+        for mapping in wrapper['mappings']:
+            doc_type = mapping[1]
+            
+            for index in mapping[0]:
+                todo.append([ index, doc_type, id ])
+        
+        bulk = len(todo) > 2
+        
+        for item in todo:
+            self._elasticsearch.delete(*item, bulk=bulk)
+        
+        if bulk:
+            self._elasticsearch.flush_bulk()
     
     @staticmethod
     def _validate_mapping(doc):
+        """
+            Validates the correctness of a mapping document.
+        """
+        
         ElasticMongo._validate_dict(doc, False, InvalidMappingError, {
             'mapping'       : {
                 'required'  : True, 
@@ -141,6 +241,10 @@ class ElasticMongo(AElasticMongoObject):
     
     @staticmethod
     def _validate_index(doc):
+        """
+            Validates the correctness of an index document.
+        """
+        
         ElasticMongo._validate_dict(doc, False, InvalidIndexError, {
             'index'         : {
                 'required'  : True, 
@@ -154,6 +258,11 @@ class ElasticMongo(AElasticMongoObject):
     
     @staticmethod
     def _validate_dict(doc, allow_overflow, error, schema):
+        """
+            Performs simple existence and type-checking of the source dict against 
+            a reference schema dict.
+        """
+        
         for key, value in schema.iteritems():
             if key in doc:
                 if not isinstance(doc[key], value):
@@ -219,6 +328,7 @@ class MongoCollectionSource(AElasticMongoObject):
         self._elasticmongo      = elasticmongo
         self._collection        = self._get_collection(elasticmongo._conn, ns)
         self._state_collection  = self._get_collection(elasticmongo._conn, state_ns)
+        self._stopped           = False
     
     def run(self, sink):
         assert isinstance(sink, AMongoCollectionSink)
@@ -257,7 +367,7 @@ class MongoCollectionSource(AElasticMongoObject):
                     pass
         
         # poll the mongo oplog indefinitely
-        while True:
+        while not self._stopped:
             try:
                 if not cursor or not cursor.alive:
                     cursor = oplog.find(spec, tailable=True).sort("$natural", 1)
@@ -288,6 +398,9 @@ class MongoCollectionSource(AElasticMongoObject):
                 pass
             
             time.sleep(1)
+    
+    def stop(self):
+        self._stopped = True
     
     def _initial_export(self, sink):
         sink.add(self._collection.find())
