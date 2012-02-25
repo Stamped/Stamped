@@ -23,7 +23,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = ['Rdio']
+__all__ = ['Rdio','globalRdio']
 
 import Globals
 from logs   import report
@@ -35,6 +35,7 @@ try:
     from urllib2            import HTTPError
     from errors             import StampedHTTPError
     from urllib import quote_plus
+    import urllib
     from django.utils.encoding import iri_to_uri
     import logs
     try:
@@ -47,18 +48,20 @@ except:
 
 
 def urlencode_utf8(params):
+    return urllib.urlencode(params)
+    """
     return '&'.join(
         (quote_plus(k, safe='/') + '=' + iri_to_uri(v)
             for k, v in params.items()))
-
+    """
 
 class Rdio(object):
     def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp', cps=5, cpd=15000):
         self.__key = key
         self.__secret = secret
         self.__reinit()
-        self.__limiter = RateLimiter(cps=cps,cpd=cpd)
-    
+        self.__limiter = RateLimiter(cps=cps,cpd=cpd)    
+
     def __reinit(self):
         self.__consumer = oauth.Consumer(self.__key,self.__secret)
 
@@ -69,6 +72,8 @@ class Rdio(object):
         for k,v in kwargs.items():
             if isinstance(v,int) or isinstance(v,float):
                 kwargs[k] = str(v)
+            elif isinstance(v,unicode):
+                kwargs[k] = v.encode('utf-8')
         urlish = 'http://api.rdio.com/1/ POST %s' % urlencode_utf8(kwargs)
         try:
             with self.__limiter:
@@ -90,6 +95,29 @@ class Rdio(object):
             logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
             response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
         return json.loads(response[1])
+
+_globalRdio = Rdio()
+
+def globalRdio():
+    return _globalRdio
+
+def demo(method, **params):
+    import pprint
+    rdio = globalRdio()
+    pprint.pprint(rdio.method(method, **params))
+
+if __name__ == '__main__':
+    import sys
+    method = 'search'
+    params = {'query':'Katy Perry','types':'Artist'}
+    if len(sys.argv) > 1:
+        method = sys.argv[1]
+    if len(sys.argv) > 2:
+        params = {}
+        for arg in sys.argv[2:]:
+            pair = arg.split('=')
+            params[pair[0]] = pair[1]
+    demo(method, **params)
 
 
 

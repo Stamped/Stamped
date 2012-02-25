@@ -320,7 +320,7 @@ class OrderedDict(dict, MutableMapping):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
         return dict.__eq__(self, other)
 
-def getFile(url, request=None, params=None):
+def getFile(url, request=None, params=None, logging=False):
     """
         Wrapper around urllib2.urlopen(url).read(), which attempts to increase 
         the success rate by sidestepping server-side issues and usage limits by
@@ -343,6 +343,8 @@ def getFile(url, request=None, params=None):
     
     while True:
         try:
+            if logging:
+                logs.info(request.get_full_url())
             response = urllib2.urlopen(request)
             data = response.read()
             break
