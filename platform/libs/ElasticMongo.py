@@ -154,6 +154,8 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         
         self._elasticsearch.delete_index(index)
         del self._indices[id]
+        
+        # TODO: should we clear the state cache of affected sources here?
     
     def remove_mapping(self, id):
         """ 
