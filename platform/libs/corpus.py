@@ -9,7 +9,7 @@ import Globals, utils
 import os, re
 
 from gevent.pool    import Pool
-from pprint         import pprint, pformat
+from pprint         import pprint
 from BeautifulSoup  import BeautifulSoup
 
 def parse_work(title, genre, link, output):
@@ -41,7 +41,7 @@ def parse_work(title, genre, link, output):
         }
         
         output.append(document)
-        #pprint(document)
+        pprint(document)
 
 pool    = Pool(16)
 seed    = "http://shakespeare.mit.edu"
@@ -50,13 +50,14 @@ output  = [ ]
 
 table   = soup.find('table', {'cellpadding' : '5'})
 rows    = table.findAll('tr')
-genres  = map(lambda td: td.getText(), rows[0].findAll('td'))
 cols    = rows[1].findAll('td')
+genres  = map(lambda td: td.getText(), rows[0].findAll('td'))
 
 assert len(cols) == len(genres)
 assert len(rows) == 2
 
-for i in xrange(len(genres)):
+# note: we're only interested in plays so we're skipping the last genre, poetry
+for i in xrange(len(genres) - 1):
     genre = genres[i]
     col   = cols[i]
     works = col.findAll('a')
@@ -71,7 +72,4 @@ for i in xrange(len(genres)):
             pool.spawn(parse_work, title, genre, link, output)
 
 pool.join()
-
-for document in output:
-    pprint(document)
 
