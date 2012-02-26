@@ -17,6 +17,7 @@
 @interface StampListViewController : STTableViewController <RKObjectLoaderDelegate,
                                                             MKMapViewDelegate,
                                                             NSFetchedResultsControllerDelegate>
+@property (nonatomic, retain) IBOutlet UIView* listView;
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, retain) User* user;
 
