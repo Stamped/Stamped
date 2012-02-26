@@ -199,6 +199,9 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (UINavigationController*)navigationController {
+  if ([super navigationController])
+    return [super navigationController];
+
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   return delegate.navigationController;
 }
@@ -352,10 +355,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-  // Calculate delta of origins.
+  // Calculate delta of origins across longitudinal distance.
   CGFloat originDelta = MKMetersBetweenMapPoints(lastMapRect_.origin, mapView.visibleMapRect.origin);
-  MKMapPoint lowerRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMaxY(lastMapRect_));
-  CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, lowerRight);
+  MKMapPoint upperRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMinY(lastMapRect_));
+  CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, upperRight);
 
   if ((originDelta / span) < kMapSpanHysteresisPercentage)
     return;
