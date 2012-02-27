@@ -282,25 +282,9 @@ class AMongoCollectionView(AMongoCollection):
                 var min = 0.0;
                 var out = [];
                 
-                function sortOut(a, b) {
-                    if (a.score > 0) { scoreA = a.score } else { scoreA = 0 }
-                    if (b.score > 0) { scoreB = b.score } else { scoreB = 0 }
-                    return scoreB - scoreA;
-                }
                 values.forEach(function(v) {
-                    if (out.length < offset + limit) {
-                        out[out.length] = { score : v.score, obj : v.obj }
-                        if (v.score < min) { min = v.score; }
-                    } else {
-                        if (v.score > min) {
-                            out[out.length] = { score : v.score, obj : v.obj }
-                            out.sort(sortOut);
-                            out.pop();
-                        }
-                    }
-                });
-                
-                out.sort(sortOut);
+                    out[out.length] = { score : v.score, obj : v.obj }
+                })
                 var obj = new Object();
                 obj.data = out;
                 
