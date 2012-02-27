@@ -78,6 +78,8 @@ class AMongoCollectionView(AMongoCollection):
                 query["entity.coordinates.lat"] = { "$exists" : True}
                 query["entity.coordinates.lng"] = { "$exists" : True}
             else:
+                pass
+                """
                 query["entity.coordinates.lat"] = { 
                     "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
                     "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
@@ -101,6 +103,7 @@ class AMongoCollectionView(AMongoCollection):
                             }, 
                         }, 
                     ])
+                """
         
         # handle search query filter
         # --------------------------
@@ -282,9 +285,25 @@ class AMongoCollectionView(AMongoCollection):
                 var min = 0.0;
                 var out = [];
                 
+                function sortOut(a, b) {
+                    if (a.score > 0) { scoreA = a.score } else { scoreA = 0 }
+                    if (b.score > 0) { scoreB = b.score } else { scoreB = 0 }
+                    return scoreB - scoreA;
+                }
                 values.forEach(function(v) {
-                    out[out.length] = { score : v.score, obj : v.obj }
-                })
+                    if (out.length < offset + limit) {
+                        out[out.length] = { score : v.score, obj : v.obj }
+                        if (v.score < min) { min = v.score; }
+                    } else {
+                        if (v.score > min) {
+                            out[out.length] = { score : v.score, obj : v.obj }
+                            out.sort(sortOut);
+                            out.pop();
+                        }
+                    }
+                });
+                
+                out.sort(sortOut);
                 var obj = new Object();
                 obj.data = out;
                 
