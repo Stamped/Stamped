@@ -21,6 +21,12 @@ class AMongoCollectionView(AMongoCollection):
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         
+        if relaxed:
+            center = {
+                'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
+                'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
+            }
+        
         # handle setup for sorting
         # ------------------------
         if genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created':
@@ -71,6 +77,30 @@ class AMongoCollectionView(AMongoCollection):
                 
                 query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
+        # handle search query filter
+        # --------------------------
+        if genericCollectionSlice.query is not None:
+            # TODO: make query regex better / safeguarded
+            user_query = genericCollectionSlice.query.lower().strip()
+            
+            # process 'in' or 'near' location hint
+            result = libs.worldcities.try_get_region(user_query)
+            
+            if result is not None:
+                user_query, coords, region_name = result
+                utils.log("using region %s at %s" % (region_name, coords))
+                
+                relaxed = True
+                center  = {
+                    'lat' : coords[0], 
+                    'lng' : coords[1], 
+                }
+            else:
+                utils.log("using default coordinates")
+            
+            add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
+                           { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
+        
         # handle viewport filter
         # ----------------------
         if viewport:
@@ -101,15 +131,6 @@ class AMongoCollectionView(AMongoCollection):
                             }, 
                         }, 
                     ])
-        
-        # handle search query filter
-        # --------------------------
-        if genericCollectionSlice.query is not None:
-            # TODO: make query regex better / safeguarded
-            user_query = genericCollectionSlice.query.lower().strip()
-            
-            add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
-                           { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
         
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
@@ -180,10 +201,7 @@ class AMongoCollectionView(AMongoCollection):
                 # ---------------------------
                 
                 if relaxed:
-                    scope['center'] = {
-                        'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
-                        'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
-                    }
+                    scope['center'] = center
                 
                 # TODO: incorporate more complicated relevancy metrics into this 
                 # weighting function, including possibly:
@@ -309,7 +327,6 @@ class AMongoCollectionView(AMongoCollection):
             
             result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             
-            logs.debug(pprint.pformat(result))
             try:
                 value = result[-1]['value'] 
                 if 'data' in value:

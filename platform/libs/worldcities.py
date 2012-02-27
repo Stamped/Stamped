@@ -9,6 +9,10 @@ import math, os, re
 
 from pprint import pprint, pformat
 from kdtree import KDTree
+import data.CityList
+
+__regions = None
+__region_suffixes = None
 
 def parse_worldcities():
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/worldcities.txt")
@@ -45,6 +49,68 @@ def get_world_cities_kdtree():
     kdtree = KDTree(cities)
     
     return kdtree
+
+def __init_regions(self):
+    """
+        Initialize the list of regions used to guide searches with location hints.
+    """
+    
+    global __regions, __region_suffixes
+    
+    city_in_state = {}
+    __regions     = {}
+    
+    for k, v in data.CityList.popular_cities.iteritems():
+        if 'synonyms' in v:
+            for synonym in v['synonyms']:
+                __regions[synonym.lower()] = v
+        
+        v['name'] = k
+        __regions[k.lower()] = v
+        
+        state = v['state'].lower()
+        if not state in city_in_state or v['population'] > city_in_state[state]['population']:
+            city_in_state[state] = v
+    
+    # push lat/lng as best candidate for state
+    for state, v in city_in_state.iteritems():
+        __regions[state] = v
+        
+        abbreviation = data.CityList.state_abbreviations[state]
+        if abbreviation not in __regions:
+            __regions[abbreviation] = v
+    
+    __region_suffixes = []
+    
+    for region_name in __regions:
+        __region_suffixes.append((' in %s'   % region_name, region_name))
+        __region_suffixes.append((' near %s' % region_name, region_name))
+
+def try_get_region(query):
+    if __regions is None:
+        __init_regions()
+    
+    query = query.lower()
+    
+    # process 'in' or 'near' location hint
+    if ' in ' in query or ' near ' in query:
+        for suffix in __region_suffixes:
+            if query.endswith(suffix[0]):
+                region_name = suffix[1]
+                region = __regions[region_name]
+                query  = query[:-len(region_name)]
+                
+                if query.endswith('in '):
+                    query = query[:-3]
+                elif query.endswith('near '):
+                    query = query[:-5]
+                
+                query  = query.strip()
+                coords = [ region['lat'], region['lng'], ]
+                
+                return (query, coords, region_name)
+    
+    return None
 
 if __name__ == '__main__':
     #for city in parse_worldcities():

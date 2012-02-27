@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 import logs, math, pymongo, random, re, string
 import unicodedata, gevent
-import CityList
+import libs.worldcities
 
 from EntitySearcher import EntitySearcher
 from Schemas        import Entity
@@ -213,38 +213,7 @@ class MongoEntitySearcher(EntitySearcher):
         self.entityDB._collection.ensure_index([("titlel", pymongo.ASCENDING)])
         self.cacheDB._collection.ensure_index([("query", pymongo.ASCENDING)])
         
-        self._init_cities()
-    
-    # initialize the list of cities used to guide searches with location hints
-    def _init_cities(self):
-        self._regions = {}
-        city_in_state = {}
-        
-        for k, v in CityList.popular_cities.iteritems():
-            if 'synonyms' in v:
-                for synonym in v['synonyms']:
-                    self._regions[synonym.lower()] = v
-            
-            v['name'] = k
-            self._regions[k.lower()] = v
-            
-            state = v['state'].lower()
-            if not state in city_in_state or v['population'] > city_in_state[state]['population']:
-                city_in_state[state] = v
-        
-        # push lat/lng as best candidate for state
-        for state, v in city_in_state.iteritems():
-            self._regions[state] = v
-            
-            abbreviation = CityList.state_abbreviations[state]
-            if abbreviation not in self._regions:
-                self._regions[abbreviation] = v
-        
-        self._region_suffixes = []
-        
-        for region_name in self._regions:
-            self._region_suffixes.append((' in %s'   % region_name, region_name))
-            self._region_suffixes.append((' near %s' % region_name, region_name))
+        libs.worldcities.try_get_region('ny')
     
     @lazyProperty
     def _googlePlaces(self):
@@ -307,25 +276,12 @@ class MongoEntitySearcher(EntitySearcher):
             coords = None
         else:
             # process 'in' or 'near' location hint
-            if ' in ' in query or ' near ' in query:
-                for suffix in self._region_suffixes:
-                    if query.endswith(suffix[0]):
-                        region_name = suffix[1]
-                        region = self._regions[region_name]
-                        query  = query[:-len(region_name)]
-                        
-                        if query.endswith('in '):
-                            query = query[:-3]
-                        elif query.endswith('near '):
-                            query = query[:-5]
-                        
-                        query = query.strip()
-                        input_query = query
-                        
-                        coords = [ region['lat'], region['lng'], ]
-                        original_coords = False
-                        utils.log("[search] using region %s at %s" % (region_name, coords))
-                        break
+            result = libs.worldcities.try_get_region(query)
+            
+            if result is not None:
+                query, coords, region_name = result
+                input_query = query
+                utils.log("[search] using region %s at %s" % (region_name, coords))
         
         # attempt to replace accented characters with their ascii equivalents
         query = unicodedata.normalize('NFKD', unicode(query)).encode('ascii', 'ignore')
