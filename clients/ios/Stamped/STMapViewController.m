@@ -189,6 +189,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     }];
     
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenNewMapsView"];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
 }

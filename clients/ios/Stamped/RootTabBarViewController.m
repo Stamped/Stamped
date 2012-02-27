@@ -36,10 +36,12 @@
 - (void)reloadPanes:(NSNotification*)notification;
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
+- (void)mapTooltipTapped:(UITapGestureRecognizer*)recognizer;
 - (void)pushNotificationReceived:(NSNotification*)notification;
 - (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
+@property (nonatomic, readonly) UIImageView* mapButtonTooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
 @property (nonatomic, retain) STMapViewController* mapViewController;
 @property (nonatomic, assign) BOOL mapViewShown;
@@ -61,6 +63,7 @@
 @synthesize tabBarItems = tabBarItems_;
 @synthesize mapViewController = mapViewController_;
 @synthesize mapViewShown = mapViewShown_;
+@synthesize mapButtonTooltipImageView = mapButtonTooltipImageView_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -80,6 +83,7 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
+  mapButtonTooltipImageView_ = nil;
   [super dealloc];
 }
 
@@ -143,22 +147,6 @@
 }
 
 - (void)finishViewInit {
-  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
-      [AccountManager sharedManager].currentUser.numStamps.intValue == 0 &&
-      !tooltipImageView_) {
-    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
-    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame,
-                                           (CGRectGetWidth(self.view.frame) - CGRectGetWidth(tooltipImageView_.frame)) / 2, 245);
-    tooltipImageView_.alpha = 0.0;
-    tooltipImageView_.userInteractionEnabled = YES;
-    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                 action:@selector(tooltipTapped:)];
-    [tooltipImageView_ addGestureRecognizer:recognizer];
-    [recognizer release];
-    [self.view addSubview:tooltipImageView_];
-    [tooltipImageView_ release];
-  }
-  
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
   self.mapViewController = [[[STMapViewController alloc] init] autorelease];
@@ -187,6 +175,33 @@
     self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
 
   [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
+
+  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] && !tooltipImageView_) {
+    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
+    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame,
+                                           (CGRectGetWidth(self.view.frame) - CGRectGetWidth(tooltipImageView_.frame)) / 2, 245);
+    tooltipImageView_.alpha = 0.0;
+    tooltipImageView_.userInteractionEnabled = YES;
+    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(tooltipTapped:)];
+    [tooltipImageView_ addGestureRecognizer:recognizer];
+    [recognizer release];
+    [self.view addSubview:tooltipImageView_];
+    [tooltipImageView_ release];
+  }
+  
+  if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hideMapButtonTooltip"] && !mapButtonTooltipImageView_) {
+    mapButtonTooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_inbox_tooltip"]];
+    mapButtonTooltipImageView_.center = CGPointMake(CGRectGetMidX(self.view.bounds), 10 + CGRectGetHeight(mapButtonTooltipImageView_.bounds));
+    mapButtonTooltipImageView_.userInteractionEnabled = YES;
+    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(mapTooltipTapped:)];
+    [mapButtonTooltipImageView_ addGestureRecognizer:recognizer];
+    [recognizer release];
+    mapButtonTooltipImageView_.alpha = 0;
+    [self.navigationController.view.window addSubview:mapButtonTooltipImageView_];
+    [mapButtonTooltipImageView_ release];
+  }
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
@@ -197,10 +212,6 @@
 
 - (void)currentUserUpdated:(NSNotification*)notification {
   [self fillStampImageView];
-  BOOL showTooltip = (tooltipImageView_ && ![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
-                      [AccountManager sharedManager].currentUser.numStamps.intValue == 0);
-  if (!showTooltip)
-    tooltipImageView_.alpha = 0;
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
@@ -266,12 +277,13 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
+  mapButtonTooltipImageView_ = nil;
   mapViewShown_ = NO;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  tooltipImageView_.alpha = 0.0;
+  tooltipImageView_.alpha = 0;
   if (mapViewShown_)
     [self.mapViewController viewWillAppear:animated];
   else
@@ -329,11 +341,18 @@
   }
 
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
+      [AccountManager sharedManager].currentUser.numStamps &&
       [AccountManager sharedManager].currentUser.numStamps.intValue == 0) {
     [UIView animateWithDuration:0.3
                           delay:1.0
                         options:UIViewAnimationOptionAllowUserInteraction
                      animations:^{tooltipImageView_.alpha = 1.0;}
+                     completion:nil];
+  } else if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hideMapButtonTooltip"] && mapButtonTooltipImageView_) {
+    [UIView animateWithDuration:0.3
+                          delay:1.0
+                        options:UIViewAnimationOptionAllowUserInteraction
+                     animations:^{mapButtonTooltipImageView_.alpha = 1.0;}
                      completion:nil];
   }
 }
@@ -405,6 +424,16 @@
   [selectedViewController_ viewWillDisappear:YES];
   
   mapViewController_.view.hidden = NO;
+  [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction
+                   animations:^{ mapButtonTooltipImageView_.alpha = 0; }
+                   completion:^(BOOL finished) {
+                     mapButtonTooltipImageView_ = nil;
+                   }];
+  
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
                     duration:0.75
@@ -450,12 +479,27 @@
     [UIView animateWithDuration:0.3 
                           delay:0 
                         options:(UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState)
-                     animations:^{ tooltipImageView_.alpha = 0.0; }
+                     animations:^{ tooltipImageView_.alpha = 0; }
                      completion:^(BOOL finished) {
                        [tooltipImageView_ removeFromSuperview];
                        tooltipImageView_ = nil;
                      }];
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasStamped"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+}
+
+- (void)mapTooltipTapped:(UITapGestureRecognizer*)recognizer {
+  if (mapButtonTooltipImageView_) {
+    [UIView animateWithDuration:0.3 
+                          delay:0 
+                        options:(UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState)
+                     animations:^{ mapButtonTooltipImageView_.alpha = 0; }
+                     completion:^(BOOL finished) {
+                       [mapButtonTooltipImageView_ removeFromSuperview];
+                       mapButtonTooltipImageView_ = nil;
+                     }];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
 }
@@ -537,6 +581,14 @@
                         options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                      animations:^{tooltipImageView_.alpha = item == stampsTabBarItem_ ? 1.0 : 0.0;}
                      completion:nil];
+  }
+  
+  if (item != stampsTabBarItem_) {
+    mapButtonTooltipImageView_.alpha = 0;
+    [mapButtonTooltipImageView_ removeFromSuperview];
+    mapButtonTooltipImageView_ = nil;
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
   }
 
   UIViewController* newViewController = nil;
