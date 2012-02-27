@@ -24,7 +24,7 @@ class InvalidIndexError     (AElasticMongoError): pass
 
 
 # TODO: fix oplog state caching to work with config mappings / indices
-
+# TODO: how does modifying an existing mapping or index work?
 
 class AElasticMongoObject(object):
     
@@ -93,11 +93,12 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                                                     force     = self._force, 
                                                     noop      = True)
         
+                                  # let mapping := tuple(indices, type, ns, mapping)
         self._indices       = { } # _id => basestring
-        self._mappings      = { } # _id => tuple(indices, type, ns)
+        self._mappings      = { } # _id => mapping
         self._sources       = { } # ns  => { 
                                   #    'source' : MongoCollectionSource, 
-                                  #    'mappings' : { _id => tuple(indices, type, ns) }, 
+                                  #    'mappings' : { _id => mapping }, 
                                   # }
     
     def _init_elastic_conn(self, *args, **kwargs):
@@ -156,17 +157,17 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
             if indices is None:
                 indices = []
             
-            mapping  = (indices, doc_type, ns)
-            self._mappings[doc_id] = mapping
+            payload  = (indices, doc_type, ns, mapping)
+            self._mappings[doc_id] = payload
             
             try:
-                self._sources[ns]['mappings'][doc_id] = mapping
+                self._sources[ns]['mappings'][doc_id] = payload
             except KeyError:
                 source = MongoCollectionSource(self, self, ns, force = self._force)
                 
                 self._sources[ns] = {
                     'mappings' : {
-                        doc_id : mapping, 
+                        doc_id : payload, 
                     }, 
                     'source'   : source, 
                 }
@@ -237,17 +238,20 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
             inserts  = 0
             
             for mapping_id, mapping in mappings.iteritems():
+                indices    = mapping[0]
                 doc_type   = mapping[1]
                 mapping_ns = mapping[2]
+                properties = mapping[3]
                 
                 if ns == mapping_ns:
-                    for index in mapping[0]:
+                    for index in indices:
                         for doc in documents:
                             id = str(doc.pop('_id'))
                             
                             #utils.log("[%s] index(ns=%s, index=%s, type=%s, %s)" % 
                             #          (self, ns, index, doc_type, pformat(doc)))
                             
+                            # TODO: validate doc against mapping properties
                             inserts += 1
                             self._elasticsearch.index(doc, index, doc_type, id=id, bulk=bulk)
             

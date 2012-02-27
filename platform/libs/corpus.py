@@ -147,8 +147,8 @@ def export_config(coll, ns, drop = True):
     
     mappings = [
         {
-            'type'      : 'line', 
             'ns'        : ns, 
+            'type'      : 'line', 
             'indices'   : [ 'plays', ], 
             'mapping'   : {
                 'title' : {
