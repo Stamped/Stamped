@@ -76,6 +76,7 @@ class FormatSource(BasicSource):
                 match = re.match(r'.*Release Date:(\d\d|\d)/(\d\d|\d)/(\d\d\d\d)$',desc)
                 if match is not None:
                     month, day, year = int(match.group(1)), int(match.group(2)), int(match.group(3))
+                    logs.info("%s/%s/%s" %( month, day, year) )
                     if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:
                         entity['release_date'] = datetime(year, month, day)
                         logs.info('created release_date (%s) from Fandango description' % entity['release_date'] )
