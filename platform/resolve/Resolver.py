@@ -695,11 +695,12 @@ class Resolver(object):
     def __tracksWeight(self, query, match):
         return self.__setWeight(self.tracksSet(query), self.tracksSet(match))
 
-    def __resolveArtistBatch(self, query, source, start, count, mins):
+    def __resolveArtistBatch(self, query, source, start, count, options):
         results = []
         entries = source(start, count)
 
-        def checkArtist(query, match, mins):
+        def checkArtist(query, match, options):
+            mins = options['mins']
             if _verbose:
                 print("Comparing %s and %s" % (match.name,query.name))
             similarities = {}
@@ -738,23 +739,25 @@ class Resolver(object):
 
         pool = Pool(10)
         for entry in entries:
-            pool.spawn(checkArtist, query, entry, mins)
+            pool.spawn(checkArtist, query, entry, options)
         pool.join()
 
         return results
 
     def resolveArtist(self, query, source):
-        mins = {
-            'total' : -1,
-            'name' : -1,
-            'albums' : -1,
-            'tracks' : -1,
+        options = {
+            'mins' : {
+                'total' : -1,
+                'name' : -1,
+                'albums' : -1,
+                'tracks' : -1,
+            }
         }
         groups = [1, 4, 10, 25]
         results = []
         index = 0
         for i in groups:
-            batch = self.__resolveArtistBatch(query, source, index, i , mins)
+            batch = self.__resolveArtistBatch(query, source, index, i , options)
             for result in batch:
                 result[0]['resolved'] = False
             index += i

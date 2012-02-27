@@ -82,6 +82,7 @@ class StampedAPI(AStampedAPI):
         except Exception:
             logs.warning('is_prod_stack threw an exception; defaulting to True',exc_info=1)
             self.__is_prod = True
+        self.__is_prod = True
     
     @property
     def node_name(self):

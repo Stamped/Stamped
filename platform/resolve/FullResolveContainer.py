@@ -48,7 +48,7 @@ class FullResolveContainer(BasicSourceContainer):
             DirectorGroup(),
             CastGroup(),
             SubtitleGroup(),
-            RdioGroup(),
+            #RdioGroup(),
         ]
         for group in groups:
             self.addGroup(group)
@@ -59,7 +59,7 @@ class FullResolveContainer(BasicSourceContainer):
             GooglePlacesSource(),
             SinglePlatformSource(),
             TMDBSource(),
-            RdioSource(),
+            #RdioSource(),
         ]
         for source in sources:
             self.addSource(source)
