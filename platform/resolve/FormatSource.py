@@ -34,6 +34,7 @@ class FormatSource(BasicSource):
         )
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        logs.info("here2")
         if controller.shouldEnrich('release_date',self.sourceName,entity):
             if 'original_release_date' in entity:
                 date = entity['original_release_date']
@@ -70,6 +71,7 @@ class FormatSource(BasicSource):
                         entity['release_date'] = new_date
                         logs.info('created release date (%s) from %s' % (new_date, date))
             elif 'fid' in entity:
+                logs.info("here1")
                 desc = entity['desc']
                 match = re.match(r'.*Release Date:(\d\d|\d)/(\d\d|\d)/(\d\d\d\d)$',desc)
                 if match is not None:
