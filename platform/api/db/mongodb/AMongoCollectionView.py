@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import bson, logs, pprint, pymongo
+import libs.worldcities
 
 from AMongoCollection   import AMongoCollection
 
