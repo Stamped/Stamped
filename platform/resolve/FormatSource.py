@@ -69,5 +69,14 @@ class FormatSource(BasicSource):
                     if new_date is not None:
                         entity['release_date'] = new_date
                         logs.info('created release date (%s) from %s' % (new_date, date))
+            elif 'fid' in entity:
+                desc = entity['desc'].replace('\n',' ')
+                match = re.match(r'.*Release Date:(\d\d|\d)/(\d\d|\d)/(\d\d\d\d)$',desc)
+                if match is not None:
+                    month, day, year = int(match.group(1)), int(match.group(2)), int(match.group(3))
+                    if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:
+                        entity['release_date'] = datetime(year, month, day)
+                        logs.info('created release_date (%s) from Fandango description' % entity['release_date'] )
+
         return True
 
