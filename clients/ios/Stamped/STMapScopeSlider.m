@@ -227,7 +227,9 @@
   }
   CGFloat xPos = (background.size.width - inner.size.width) / 2;
   CGFloat yPos = ((background.size.height - inner.size.height) / 2) - 2;  // Account for shadow.
-  if (granularity_ == STMapScopeSliderGranularityYou && userImageView_.image) {
+  if (granularity_ == STMapScopeSliderGranularityYou &&
+      ![[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"] &&
+      userImageView_.image) {
     CGPathRef maskPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(xPos, yPos, 26, 26)].CGPath;
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSaveGState(ctx);
