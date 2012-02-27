@@ -97,7 +97,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         for doc in documents:
             self._validate_index(doc)
             
-            index    = doc['index']
+            index    = doc['name']
             settings = doc.pop('settings', None)
             
             # TODO: special-case if index already exists
@@ -246,14 +246,6 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         """
         
         ElasticMongo._validate_dict(doc, False, InvalidMappingError, {
-            'mapping'       : {
-                'required'  : True, 
-                'type'      : dict, 
-            }, 
-            'indices'       : {
-                'required'  : False, 
-                'type'      : (list, tuple, basestring), 
-            }, 
             'type'          : {
                 'required'  : True, 
                 'type'      : basestring, 
@@ -261,6 +253,14 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
             'ns'            : {
                 'required'  : True, 
                 'type'      : basestring, 
+            }, 
+            'indices'       : {
+                'required'  : False, 
+                'type'      : (list, tuple, basestring), 
+            }, 
+            'mapping'       : {
+                'required'  : True, 
+                'type'      : dict, 
             }, 
         })
     
@@ -271,7 +271,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         """
         
         ElasticMongo._validate_dict(doc, False, InvalidIndexError, {
-            'index'         : {
+            'name'          : {
                 'required'  : True, 
                 'type'      : basestring, 
             }, 
@@ -287,6 +287,9 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
             Performs simple existence and type-checking of the source dict against 
             a reference schema dict.
         """
+        
+        if not isinstance(doc, dict):
+            raise error(doc)
         
         for key, value in schema.iteritems():
             if key in doc:
