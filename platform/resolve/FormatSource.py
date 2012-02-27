@@ -71,8 +71,8 @@ class FormatSource(BasicSource):
                         entity['release_date'] = new_date
                         logs.info('created release date (%s) from %s' % (new_date, date))
             elif 'fid' in entity:
-                logs.info("here1")
                 desc = entity['desc']
+                logs.info(desc)
                 match = re.match(r'.*Release Date:(\d\d|\d)/(\d\d|\d)/(\d\d\d\d)$',desc)
                 if match is not None:
                     month, day, year = int(match.group(1)), int(match.group(2)), int(match.group(3))
