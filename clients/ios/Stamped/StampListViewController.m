@@ -41,6 +41,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @implementation StampListViewController
 
+@synthesize listView = listView_;
 @synthesize mapViewController = mapViewController_;
 @synthesize mapViewShown = mapViewShown_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
@@ -54,7 +55,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self = [self initWithNibName:@"StampListViewController" bundle:nil];
   if (self) {
     self.disableReload = YES;
-    self.mapViewController = [[[STMapViewController alloc] init] autorelease];
+    mapViewController_ = [[STMapViewController alloc] init];
   }
   return self;
 }
@@ -66,6 +67,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.mapViewController = nil;
+  self.listView = nil;
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
@@ -129,6 +131,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.listView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -207,9 +210,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [mapViewController_ view];
   mapViewController_.source = STMapViewControllerSourceUser;
   [mapViewController_ viewWillAppear:YES];
-  [self viewWillDisappear:YES];
   mapViewController_.view.hidden = NO;
-  [UIView transitionFromView:self.view
+  [UIView transitionFromView:listView_
                       toView:mapViewController_.view
                     duration:0.75
                      options:UIViewAnimationOptionTransitionFlipFromRight
@@ -221,16 +223,14 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)showListView {
-  [mapViewController_.view.superview insertSubview:self.view atIndex:0];
-  [self viewWillAppear:YES];
+  [self.view insertSubview:listView_ atIndex:0];
   [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
-                      toView:self.view
+                      toView:listView_
                     duration:0.75
                      options:(UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionShowHideTransitionViews)
                   completion:^(BOOL finished) {
                     [mapViewController_ viewDidDisappear:YES];
-                    [self viewDidAppear:YES];
                     mapViewShown_ = NO;
                   }];
 }

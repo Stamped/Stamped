@@ -54,7 +54,7 @@ static const CGFloat kTriangleWidth = 12.0;
     gradientLayer.mask = shapeLayer_;
     [self.layer addSublayer:gradientLayer];
 
-    textLayer_ = [CATextLayer layer];
+    self.textLayer = [CATextLayer layer];
     textLayer_.alignmentMode = kCAAlignmentCenter;
     textLayer_.foregroundColor = [UIColor whiteColor].CGColor;
     textLayer_.shadowOffset = CGSizeMake(0, -1);

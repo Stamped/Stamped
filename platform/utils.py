@@ -69,7 +69,7 @@ def lazyProperty(undecorated):
 def log(s=""):
     s = _formatLog(s) + "\n"
     
-    logs.info(s)
+    logs.debug(s)
     sys.stderr.write(s)
     sys.stdout.flush()
     sys.stderr.flush()

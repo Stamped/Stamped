@@ -49,9 +49,7 @@
 }
 
 - (void)dealloc {
-  nameLabel_.delegate = nil;
   nameLabel_ = nil;
-  commentLabel_.delegate = nil;
   commentLabel_ = nil;
   deleteButton_ = nil;
   userImage_ = nil;
