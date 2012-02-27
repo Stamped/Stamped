@@ -123,7 +123,7 @@ class AMongoCollectionView(AMongoCollection):
                 utils.log("using region %s at %s" % (region_name, coords))
                 
                 relaxed  = True
-                viewport = None
+                
                 center   = {
                     'lat' : coords[0], 
                     'lng' : coords[1], 
