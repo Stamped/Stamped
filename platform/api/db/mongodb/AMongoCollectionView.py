@@ -78,37 +78,6 @@ class AMongoCollectionView(AMongoCollection):
                 
                 query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
-        # handle viewport filter
-        # ----------------------
-        if viewport:
-            if relaxed:
-                query["entity.coordinates.lat"] = { "$exists" : True}
-                query["entity.coordinates.lng"] = { "$exists" : True}
-            else:
-                query["entity.coordinates.lat"] = { 
-                    "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
-                    "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
-                }
-                
-                if genericCollectionSlice.viewport.upperLeft.lng <= genericCollectionSlice.viewport.lowerRight.lng:
-                    query["entity.coordinates.lng"] = { 
-                        "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
-                        "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
-                    }
-                else:
-                    # handle special case where the viewport crosses the +180 / -180 mark
-                    add_or_query([  {
-                            "entity.coordinates.lng" : {
-                                "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
-                            }, 
-                        }, 
-                        {
-                            "entity.coordinates.lng" : {
-                                "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
-                            }, 
-                        }, 
-                    ])
-        
         # handle search query filter
         # --------------------------
         if genericCollectionSlice.query is not None:
@@ -123,7 +92,7 @@ class AMongoCollectionView(AMongoCollection):
                 utils.log("using region %s at %s" % (region_name, coords))
                 
                 relaxed  = True
-                
+                viewport = None
                 center   = {
                     'lat' : coords[0], 
                     'lng' : coords[1], 
@@ -134,6 +103,36 @@ class AMongoCollectionView(AMongoCollection):
             add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
                            { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
         
+        # handle viewport filter
+        # ----------------------
+        if relaxed:
+            query["entity.coordinates.lat"] = { "$exists" : True}
+            query["entity.coordinates.lng"] = { "$exists" : True}
+        elif viewport:
+            query["entity.coordinates.lat"] = { 
+                "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
+                "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
+            }
+            
+            if genericCollectionSlice.viewport.upperLeft.lng <= genericCollectionSlice.viewport.lowerRight.lng:
+                query["entity.coordinates.lng"] = { 
+                    "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
+                    "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                add_or_query([  {
+                        "entity.coordinates.lng" : {
+                            "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "entity.coordinates.lng" : {
+                            "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ])
+
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         
