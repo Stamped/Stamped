@@ -50,7 +50,7 @@ def get_world_cities_kdtree():
     
     return kdtree
 
-def __init_regions(self):
+def __init_regions():
     """
         Initialize the list of regions used to guide searches with location hints.
     """
