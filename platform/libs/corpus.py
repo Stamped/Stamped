@@ -52,7 +52,7 @@ def parse_work(title, genre, link, output):
         output.append(document)
         #pprint(document)
 
-def get_shakespeare_works():
+def process_shakespeare_works():
     """ 
         Downloads, parses, and returns a list of lines aggregated across all of 
         Shakespeare's plays, where each line is represented by a simple dict 
@@ -108,7 +108,8 @@ def export_documents(coll, documents, drop = True, batch_size = 64):
     if drop:
         coll.drop()
     
-    utils.log("exporting %d documents... (%d batches of %d documents)" % (num_docs, num_batches, batch_size))
+    utils.log("exporting %d documents... (%d batches of %d documents)" % 
+              (num_docs, num_batches, batch_size))
     
     for i in xrange(num_batches):
         offset  = i * batch_size
@@ -193,6 +194,7 @@ def export_config(coll, ns, drop = True):
     if drop:
         coll.indices.drop()
         coll.mappings.drop()
+        coll.state.drop()
     
     m = "indices"  if len(indices)  != 1 else "index"
     i = "mappings" if len(mappings) != 1 else "mapping"
@@ -232,10 +234,9 @@ if __name__ == '__main__':
         export_config(coll, args.output_namespace, args.drop)
     
     if not args.noshakespeare:
-        output  = get_shakespeare_works()
+        output  = process_shakespeare_works()
     
     if output:
         coll    = __get_collection(conn, args.output_namespace)
-        
         export_documents(coll, output, args.drop)
 
