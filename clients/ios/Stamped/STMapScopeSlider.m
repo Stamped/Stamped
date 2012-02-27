@@ -10,7 +10,10 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "AccountManager.h"
+#import "User.h"
 #import "STTooltipView.h"
+#import "STImageView.h"
 
 @interface STMapScopeSlider ()
 - (void)commonInit;
@@ -21,12 +24,14 @@
 - (void)updateTooltipPosition;
 - (void)updateTooltipString;
 
+@property (nonatomic, retain) STImageView* userImageView;
 @property (nonatomic, readonly) STTooltipView* tooltipView;
 @property (nonatomic, retain) NSMutableArray* trackButtons;
 @end
 
 @implementation STMapScopeSlider
 
+@synthesize userImageView = userImageView_;
 @synthesize trackButtons = trackButtons_;
 @synthesize tooltipView = tooltipView_;
 @synthesize granularity = granularity_;
@@ -51,11 +56,17 @@
 - (void)dealloc {
   delegate_ = nil;
   tooltipView_ = nil;
+  self.userImageView = nil;
   self.trackButtons = nil;
   [super dealloc];
 }
 
 - (void)commonInit {
+  userImageView_ = [[STImageView alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
+  userImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
+  userImageView_.layer.shadowOpacity = 0;
+  userImageView_.backgroundColor = [UIColor clearColor];
+
   UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
   trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
   [self insertSubview:trackImageView atIndex:0];
@@ -216,7 +227,17 @@
   }
   CGFloat xPos = (background.size.width - inner.size.width) / 2;
   CGFloat yPos = ((background.size.height - inner.size.height) / 2) - 2;  // Account for shadow.
-  [inner drawInRect:CGRectMake(xPos, yPos, inner.size.width, inner.size.height)];
+  if (granularity_ == STMapScopeSliderGranularityYou && userImageView_.image) {
+    CGPathRef maskPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(xPos, yPos, 26, 26)].CGPath;
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(ctx);
+    CGContextAddPath(ctx, maskPath);
+    CGContextClip(ctx);
+    [userImageView_.image drawInRect:CGRectMake(xPos, yPos, 26, 26)];
+    CGContextRestoreGState(ctx);
+  } else {
+    [inner drawInRect:CGRectMake(xPos, yPos, inner.size.width, inner.size.height)];
+  }
   UIImage* cover = [UIImage imageNamed:@"scope_drag_inner_cover"];
   [cover drawInRect:CGRectMake(xPos, yPos, cover.size.width, cover.size.height)];
   UIImage* final = UIGraphicsGetImageFromCurrentImageContext();
