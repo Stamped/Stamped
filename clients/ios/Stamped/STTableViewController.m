@@ -88,7 +88,7 @@ static const CGFloat kReloadHeight = 60.0;
                                                                                  action:@selector(overlayTapped:)];
     [searchOverlay_ addGestureRecognizer:recognizer];
     [recognizer release];
-    [self.view insertSubview:searchOverlay_ belowSubview:self.shelfView];
+    [self.view insertSubview:searchOverlay_ aboveSubview:self.tableView];
   }
 
   if (!disableReload_) {

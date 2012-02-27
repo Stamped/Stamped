@@ -39,24 +39,34 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)addAnnotationForEntity:(Entity*)entity;
 - (void)addAnnotationForStamp:(Stamp*)stamp;
 - (void)loadDataFromNetwork;
+- (void)loadDataFromDataStore;
 - (void)addAllAnnotations;
 - (void)removeAllAnnotations;
 - (void)zoomToCurrentLocation;
 - (void)centerOnCurrentLocation;
+- (void)resetCaches;
 - (NSString*)viewportAsString;
 
 @property (nonatomic, retain) id<MKAnnotation> selectedAnnotation;
 @property (nonatomic, assign) BOOL zoomToLocation;
 @property (nonatomic, assign) MKMapRect lastMapRect;
+@property (nonatomic, copy) NSArray* personalStampsArray;
+@property (nonatomic, copy) NSArray* todosArray;
+@property (nonatomic, copy) NSArray* friendResultsCache;
+@property (nonatomic, copy) NSArray* friendsOfFriendsResultsCache;
+@property (nonatomic, copy) NSArray* popularResultsCache;
 @property (nonatomic, retain) NSMutableArray* resultsArray;
 @property (nonatomic, retain) NSMutableArray* cachedCoordinates;
 @property (nonatomic, assign) BOOL hideToolbar;
+@property (nonatomic, assign) STMapScopeSliderGranularity currentGranularity;
 @property (nonatomic, readonly) STMapIndicatorView* indicatorView;
 @property (nonatomic, retain) STClosableOverlayView* mapOverlayView;
 @end
 
 @implementation STMapViewController
 
+@synthesize todosArray = todosArray_;
+@synthesize personalStampsArray = personalStampsArray_;
 @synthesize mapOverlayView = mapOverlayView_;
 @synthesize overlayView = overlayView_;
 @synthesize locationButton = locationButton_;
@@ -74,6 +84,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @synthesize hideToolbar = hideToolbar_;
 @synthesize indicatorView = indicatorView_;
 @synthesize cachedCoordinates = cachedCoordinates_;
+@synthesize currentGranularity = currentGranularity_;
+@synthesize friendResultsCache = friendResultsCache_;
+@synthesize popularResultsCache = popularResultsCache_;
+@synthesize friendsOfFriendsResultsCache = friendsOfFriendsResultsCache_;
 
 - (id)init {
   self = [super initWithNibName:@"STMapViewController" bundle:nil];
@@ -98,6 +112,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.cachedCoordinates = nil;
   indicatorView_ = nil;
   self.mapOverlayView = nil;
+  self.personalStampsArray = nil;
+  self.todosArray = nil;
+  self.friendResultsCache = nil;
+  self.popularResultsCache = nil;
+  self.friendsOfFriendsResultsCache = nil;
   [super dealloc];
 }
 
@@ -127,6 +146,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   indicatorView_.frame = CGRectOffset(indicatorView_.frame, 1, CGRectGetMinY(mapView_.frame) + 4);
   [self.view insertSubview:indicatorView_ belowSubview:overlayView_];
   [indicatorView_ release];
+  
+  self.currentGranularity = scopeSlider_.granularity;
 }
 
 - (void)viewDidUnload {
@@ -368,6 +389,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     return;
 
   lastMapRect_ = mapView.visibleMapRect;
+  [self resetCaches];
   [self loadDataFromNetwork];
 }
 
@@ -406,7 +428,27 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 #pragma mark - Other private methods.
 
+- (void)loadDataFromDataStore {
+  if (scopeSlider_.granularity == STMapScopeSliderGranularityYou && !personalStampsArray_)
+    self.personalStampsArray = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", [AccountManager sharedManager].currentUser.userID]];
+  if (source_ == STMapViewControllerSourceTodo)
+    self.todosArray = [Favorite objectsWithPredicate:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
+
+  [self addAllAnnotations];
+}
+
 - (void)loadDataFromNetwork {
+  if (searchField_.text.length == 0) {
+    if ((scopeSlider_.granularity == STMapScopeSliderGranularityYou || source_ == STMapViewControllerSourceTodo) ||
+        (scopeSlider_.granularity == STMapScopeSliderGranularityFriends && friendResultsCache_) ||
+        (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends && friendsOfFriendsResultsCache_) ||
+        (scopeSlider_.granularity == STMapScopeSliderGranularityEveryone && popularResultsCache_)) {
+      NSLog(@"Loading from datastore...");
+      [self loadDataFromDataStore];
+      return;
+    }
+  }
+
   indicatorView_.mode = STMapIndicatorViewModeLoading;
 
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -463,12 +505,43 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.selectedAnnotation = nil;
 
   if (source_ == STMapViewControllerSourceInbox || source_ == STMapViewControllerSourceUser) {
-    for (Stamp* s in resultsArray_) {
+    NSArray* stamps = nil;
+    if (searchField_.text.length > 0) {
+      stamps = resultsArray_;
+    } else if (scopeSlider_.granularity == STMapScopeSliderGranularityYou) {
+      stamps = personalStampsArray_;
+    } else if (scopeSlider_.granularity == STMapScopeSliderGranularityFriends) {
+      if (!friendResultsCache_)
+        self.friendResultsCache = [NSArray arrayWithArray:resultsArray_];
+
+      stamps = friendResultsCache_;      
+    } else if (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends) {
+      if (!friendsOfFriendsResultsCache_)
+        self.friendsOfFriendsResultsCache = [NSArray arrayWithArray:resultsArray_];
+      
+      stamps = friendsOfFriendsResultsCache_;
+    } else if (scopeSlider_.granularity == STMapScopeSliderGranularityEveryone) {
+      if (!popularResultsCache_)
+        self.popularResultsCache = [NSArray arrayWithArray:resultsArray_];
+
+      stamps = popularResultsCache_;
+    } else {
+      stamps = [NSArray arrayWithArray:resultsArray_];
+    }
+
+    for (Stamp* s in stamps) {
       if (s.entityObject.coordinates.length > 0)
         [self addAnnotationForStamp:s];
     }
   } else if (source_ == STMapViewControllerSourceTodo) {
-    for (Favorite* f in resultsArray_) {
+    NSArray* entities = nil;
+    if (searchField_.text.length > 0) {
+      entities = resultsArray_;
+    } else {
+      entities = todosArray_;
+    }
+
+    for (Favorite* f in entities) {
       if (f.entityObject.coordinates.length > 0)
         [self addAnnotationForEntity:f.entityObject];
     }
@@ -563,11 +636,20 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   [self removeAllAnnotations];
 }
 
+- (void)resetCaches {
+  self.friendResultsCache = nil;
+  self.popularResultsCache = nil;
+  self.friendsOfFriendsResultsCache = nil;
+}
+
 #pragma mark - STMapScopeSliderDelegate methods.
 
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
-  [self reset];
-  [self loadDataFromNetwork];
+  if (currentGranularity_ != granularity) {
+    currentGranularity_ = granularity;
+    [self reset];
+    [self loadDataFromNetwork];
+  }
 }
 
 @end

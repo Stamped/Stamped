@@ -312,6 +312,9 @@
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"firstStamp"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
+  
+  if (![[AccountManager sharedManager] authenticated])
+    return;
 
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] && !tooltipImageView_) {
     tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
