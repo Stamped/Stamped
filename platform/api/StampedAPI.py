@@ -1494,7 +1494,7 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp                       = Stamp()
         stamp.user_id               = user.user_id
-        stamp.entity_id             = entity.entity_id
+        stamp.entity                = entity.exportSchema(EntityMini())
         stamp.timestamp.created     = datetime.utcnow()
         stamp.timestamp.modified    = datetime.utcnow()
         stamp.stamp_num             = user.num_stamps_total + 1
