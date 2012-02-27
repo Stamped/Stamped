@@ -478,6 +478,12 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   takePhotoButton_.selected = NO;
   mainCommentContainer_.frame = [ribbonedContainerView_ convertRect:mainCommentContainer_.frame
                                                              toView:self.view];
+  if (tapHereImageView_) {
+    tapHereImageView_.alpha = 0.0;
+    [tapHereImageView_ removeFromSuperview];
+    tapHereImageView_ = nil;
+  }
+
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   [UIView animateWithDuration:0.2 
                         delay:0 
@@ -488,14 +494,12 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
                          CGRectMake(0, 0, 320, 246 - CGRectGetHeight(reasoningTextView_.inputAccessoryView.frame));
                      deletePhotoButton_.alpha = 1.0;
                      editingMask_.alpha = 1.0;
-                     tapHereImageView_.alpha = 0.0;
                    }
                    completion:^(BOOL finished) {
                      reasoningTextView_.scrollEnabled = YES;
                      [self adjustTextViewContentSize];
-                     [tapHereImageView_ removeFromSuperview];
-                     tapHereImageView_ = nil;
                    }];
+
 }
 
 - (void)textViewDidEndEditing:(UITextView*)textView {

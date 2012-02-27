@@ -119,8 +119,8 @@ NSString* const kStampColors[7][2] = {
                                                              secondary:kStampColors[i][1]]
                              forState:UIControlStateNormal];
   }
+
   User* currentUser = [AccountManager sharedManager].currentUser;
-  self.userImageView.imageURL = [currentUser profileImageURLForSize:ProfileImageSize72];
   self.largeStampColorImageView.image = [Util gradientImage:largeStampColorImageView_.image
                                            withPrimaryColor:currentUser.primaryColor
                                                   secondary:currentUser.secondaryColor];
@@ -331,9 +331,11 @@ NSString* const kStampColors[7][2] = {
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
-  if ((scrollView_.contentOffset.x / CGRectGetWidth(scrollView.frame) == 1) &&
-      [[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"]) {
-    [self showSocialNetworkUserPhotoChoices];
+  if ((scrollView_.contentOffset.x / CGRectGetWidth(scrollView.frame) == 1)) {
+    if ([[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"])
+      [self showSocialNetworkUserPhotoChoices];
+    else
+      self.userImageView.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize72];
   }
 }
 
