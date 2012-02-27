@@ -78,30 +78,6 @@ class AMongoCollectionView(AMongoCollection):
                 
                 query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
-        # handle search query filter
-        # --------------------------
-        if genericCollectionSlice.query is not None:
-            # TODO: make query regex better / safeguarded
-            user_query = genericCollectionSlice.query.lower().strip()
-            
-            # process 'in' or 'near' location hint
-            result = libs.worldcities.try_get_region(user_query)
-            
-            if result is not None:
-                user_query, coords, region_name = result
-                utils.log("using region %s at %s" % (region_name, coords))
-                
-                relaxed = True
-                center  = {
-                    'lat' : coords[0], 
-                    'lng' : coords[1], 
-                }
-            else:
-                utils.log("using default coordinates")
-            
-            add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
-                           { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
-        
         # handle viewport filter
         # ----------------------
         if viewport:
@@ -133,6 +109,31 @@ class AMongoCollectionView(AMongoCollection):
                         }, 
                     ])
         
+        # handle search query filter
+        # --------------------------
+        if genericCollectionSlice.query is not None:
+            # TODO: make query regex better / safeguarded
+            user_query = genericCollectionSlice.query.lower().strip()
+            
+            # process 'in' or 'near' location hint
+            result = libs.worldcities.try_get_region(user_query)
+            
+            if result is not None:
+                user_query, coords, region_name = result
+                utils.log("using region %s at %s" % (region_name, coords))
+                
+                relaxed  = True
+                
+                center   = {
+                    'lat' : coords[0], 
+                    'lng' : coords[1], 
+                }
+            else:
+                utils.log("using default coordinates")
+            
+            add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
+                           { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
+        
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         
@@ -156,8 +157,10 @@ class AMongoCollectionView(AMongoCollection):
                 'query'    : genericCollectionSlice.query, 
                 'limit'    : genericCollectionSlice.limit, 
                 'offset'   : genericCollectionSlice.offset, 
-                'viewport' : genericCollectionSlice.viewport.value, 
             }
+            
+            if viewport:
+                scope['viewport'] = genericCollectionSlice.viewport.value, 
             
             if genericCollectionSlice.sort == 'proximity':
                 # handle proximity-based sort
@@ -239,17 +242,19 @@ class AMongoCollectionView(AMongoCollection):
                     try {
                         var inside = false;
                         
-                        if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
-                            if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
-                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
-                                    inside = true;
-                                }
-                            } else {
-                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
-                                    inside = true;
+                        try {
+                            if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
+                                if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
+                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                        inside = true;
+                                    }
+                                } else {
+                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                        inside = true;
+                                    }
                                 }
                             }
-                        }
+                        } catch (e) { }
                         
                         if (inside) {
                             dist_value = 10000.0;
