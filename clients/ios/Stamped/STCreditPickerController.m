@@ -54,7 +54,6 @@
   self.peopleArray = nil;
   self.filteredPeopleArray = nil;
   self.pills = nil;
-  creditTextField_.delegate = nil;
   creditTextField_ = nil;
   creditTableView_.delegate = nil;
   creditTableView_.dataSource = nil;

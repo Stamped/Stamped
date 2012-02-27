@@ -42,7 +42,6 @@
 
 - (void)dealloc {
   titleLabel_ = nil;
-  textField_.delegate = nil;
   textField_ = nil;
   [super dealloc];
 }
