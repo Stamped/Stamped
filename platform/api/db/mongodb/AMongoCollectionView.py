@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import bson, logs, pprint, pymongo
+import libs.worldcities
 
 from AMongoCollection   import AMongoCollection
 
@@ -20,6 +21,12 @@ class AMongoCollectionView(AMongoCollection):
         reverse     = genericCollectionSlice.reverse
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
+        
+        if relaxed:
+            center = {
+                'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
+                'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
+            }
         
         # handle setup for sorting
         # ------------------------
@@ -71,46 +78,61 @@ class AMongoCollectionView(AMongoCollection):
                 
                 query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
-        # handle viewport filter
-        # ----------------------
-        if viewport:
-            if relaxed:
-                query["entity.coordinates.lat"] = { "$exists" : True}
-                query["entity.coordinates.lng"] = { "$exists" : True}
-            else:
-                query["entity.coordinates.lat"] = { 
-                    "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
-                    "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
-                }
-                
-                if genericCollectionSlice.viewport.upperLeft.lng <= genericCollectionSlice.viewport.lowerRight.lng:
-                    query["entity.coordinates.lng"] = { 
-                        "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
-                        "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
-                    }
-                else:
-                    # handle special case where the viewport crosses the +180 / -180 mark
-                    add_or_query([  {
-                            "entity.coordinates.lng" : {
-                                "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
-                            }, 
-                        }, 
-                        {
-                            "entity.coordinates.lng" : {
-                                "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
-                            }, 
-                        }, 
-                    ])
-        
         # handle search query filter
         # --------------------------
         if genericCollectionSlice.query is not None:
             # TODO: make query regex better / safeguarded
             user_query = genericCollectionSlice.query.lower().strip()
             
+            # process 'in' or 'near' location hint
+            result = libs.worldcities.try_get_region(user_query)
+            
+            if result is not None:
+                user_query, coords, region_name = result
+                utils.log("using region %s at %s" % (region_name, coords))
+                
+                relaxed  = True
+                viewport = None
+                center   = {
+                    'lat' : coords[0], 
+                    'lng' : coords[1], 
+                }
+            else:
+                utils.log("using default coordinates")
+            
             add_or_query([ { "blurb"        : { "$regex" : user_query, "$options" : 'i', } }, 
                            { "entity.title" : { "$regex" : user_query, "$options" : 'i', } } ])
         
+        # handle viewport filter
+        # ----------------------
+        if relaxed:
+            query["entity.coordinates.lat"] = { "$exists" : True}
+            query["entity.coordinates.lng"] = { "$exists" : True}
+        elif viewport:
+            query["entity.coordinates.lat"] = { 
+                "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
+                "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
+            }
+            
+            if genericCollectionSlice.viewport.upperLeft.lng <= genericCollectionSlice.viewport.lowerRight.lng:
+                query["entity.coordinates.lng"] = { 
+                    "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
+                    "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                add_or_query([  {
+                        "entity.coordinates.lng" : {
+                            "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "entity.coordinates.lng" : {
+                            "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ])
+
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         
@@ -134,8 +156,10 @@ class AMongoCollectionView(AMongoCollection):
                 'query'    : genericCollectionSlice.query, 
                 'limit'    : genericCollectionSlice.limit, 
                 'offset'   : genericCollectionSlice.offset, 
-                'viewport' : genericCollectionSlice.viewport.value, 
             }
+            
+            if viewport:
+                scope['viewport'] = genericCollectionSlice.viewport.value, 
             
             if genericCollectionSlice.sort == 'proximity':
                 # handle proximity-based sort
@@ -180,10 +204,7 @@ class AMongoCollectionView(AMongoCollection):
                 # ---------------------------
                 
                 if relaxed:
-                    scope['center'] = {
-                        'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
-                        'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
-                    }
+                    scope['center'] = center
                 
                 # TODO: incorporate more complicated relevancy metrics into this 
                 # weighting function, including possibly:
@@ -220,17 +241,19 @@ class AMongoCollectionView(AMongoCollection):
                     try {
                         var inside = false;
                         
-                        if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
-                            if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
-                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
-                                    inside = true;
-                                }
-                            } else {
-                                if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
-                                    inside = true;
+                        try {
+                            if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
+                                if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
+                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                        inside = true;
+                                    }
+                                } else {
+                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                        inside = true;
+                                    }
                                 }
                             }
-                        }
+                        } catch (e) { }
                         
                         if (inside) {
                             dist_value = 10000.0;

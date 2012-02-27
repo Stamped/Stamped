@@ -1494,7 +1494,7 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp                       = Stamp()
         stamp.user_id               = user.user_id
-        stamp.entity_id             = entity.entity_id
+        stamp.entity                = entity.exportSchema(EntityMini())
         stamp.timestamp.created     = datetime.utcnow()
         stamp.timestamp.modified    = datetime.utcnow()
         stamp.stamp_num             = user.num_stamps_total + 1
@@ -2443,7 +2443,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             try:
                 friends     = friend_stamps[stamp.stamp_id]
-                screen_name = stamp.user.screen_name.lower()
+                screen_name = "@%s" % stamp.user.screen_name.lower()
                 stamp.via   = screen_name
                 
                 if friends is not None:
@@ -2452,7 +2452,7 @@ class StampedAPI(AStampedAPI):
                     elif len(friends) > 2:
                         stamp.via = "%s via %d friends" % (screen_name, len(friends))
                     else:
-                        names = map(lambda user_id: self._userDB.getUser(user_id)['screen_name'].lower(), friends)
+                        names = map(lambda user_id: "@%s" % self._userDB.getUser(user_id)['screen_name'].lower(), friends)
                         stamp.via = "%s via %s" % (screen_name, ' and '.join(names))
             except:
                 utils.printException()
