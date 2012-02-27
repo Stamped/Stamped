@@ -459,7 +459,8 @@ class MongoCollectionSource(AElasticMongoObject):
                 try:
                     last = list(oplog.find().sort("$natural", -1).limit(1))[0]
                     spec['ts'] = { '$gt': last['ts'] }
-                except:
+                except Exception:
+                    utils.printException()
                     # fallback to starting at the beginning of the oplog
                     pass
             
@@ -467,6 +468,7 @@ class MongoCollectionSource(AElasticMongoObject):
                 state_query['ts'] = spec['ts']['$gt']
                 self._state_collection.save(state_query)
             except KeyError:
+                utils.printException()
                 pass
         
         # poll the mongo oplog indefinitely
@@ -502,7 +504,7 @@ class MongoCollectionSource(AElasticMongoObject):
                 
                 state_query['ts'] = spec['ts']['$gt']
                 self._state_collection.save(state_query)
-            except AutoReconnect as e:
+            except Exception:
                 pass
             
             time.sleep(self._elasticmongo._poll_interval)
@@ -528,16 +530,21 @@ class MongoCollectionSource(AElasticMongoObject):
         
         for coll in colls:
             ns        = "%s.%s" % (coll.database.name, coll.name)
-            documents = coll.find()
-            count     = documents.count()
+            state     = "%s.%s" % (self._ns, "state")
             
-            if count > 0:
-                docs = "documents" if count != 1 else "document"
-                utils.log("[%s] performing initial sync of %s (%d %s)" % (self, ns, count, docs))
+            if ns != state:
+                documents = coll.find()
+                count     = documents.count()
                 
-                sink.add(ns, documents, count, noop = noop)
-            else:
-                utils.log("[%s] skipping initial sync of empty collection %s" % (self, ns))
+                if count > 0:
+                    docs = "documents" if count != 1 else "document"
+                    utils.log("[%s] performing initial sync of %s (%d %s)" % (self, ns, count, docs))
+                    
+                    sink.add(ns, documents, count, noop = noop)
+                    
+                    utils.log("[%s] finished initial sync of %s (%d %s)" % (self, ns, count, docs))
+                else:
+                    utils.log("[%s] skipping initial sync of empty collection %s" % (self, ns))
     
     @staticmethod
     def _extract_id(id):
