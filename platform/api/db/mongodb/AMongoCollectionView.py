@@ -309,6 +309,7 @@ class AMongoCollectionView(AMongoCollection):
             
             result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             
+            logs.debug(pprint.pformat(result))
             try:
                 value = result[-1]['value'] 
                 if 'data' in value:
