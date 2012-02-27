@@ -78,8 +78,6 @@ class AMongoCollectionView(AMongoCollection):
                 query["entity.coordinates.lat"] = { "$exists" : True}
                 query["entity.coordinates.lng"] = { "$exists" : True}
             else:
-                pass
-                """
                 query["entity.coordinates.lat"] = { 
                     "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
                     "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
@@ -103,7 +101,6 @@ class AMongoCollectionView(AMongoCollection):
                             }, 
                         }, 
                     ])
-                """
         
         # handle search query filter
         # --------------------------
