@@ -144,7 +144,6 @@ typedef enum {
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
-  toolbar_.delegate = nil;
   toolbar_ = nil;
   
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -257,7 +256,6 @@ typedef enum {
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
-  toolbar_.delegate = nil;
   toolbar_ = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
