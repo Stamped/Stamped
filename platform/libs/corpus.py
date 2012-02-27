@@ -50,7 +50,6 @@ def parse_work(title, genre, link, output):
         }
         
         output.append(document)
-        #pprint(document)
 
 def process_shakespeare_works():
     """ 
@@ -119,7 +118,7 @@ def export_documents(coll, documents, drop = True, batch_size = 64):
 
 def safe_insert(coll, documents, retries = 5, delay = 0.25):
     """
-        Retry wrapper around a single mongo insertion call.
+        Retry wrapper around a single mongo bulk insertion.
     """
     
     while True:
