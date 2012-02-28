@@ -82,8 +82,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   if (mapViewShown_) {
-    [self.view.superview insertSubview:self.mapViewController.view atIndex:0];
-    self.view.hidden = YES;
+    [self.listView.superview insertSubview:self.mapViewController.view atIndex:0];
+    self.listView.hidden = YES;
     [self.mapViewController view];
     [self.mapViewController viewWillAppear:animated];
   } else {
@@ -226,6 +226,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)showListView {
+  NSLog(@"List view: %@", listView_);
   [self.view insertSubview:listView_ atIndex:0];
   [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
