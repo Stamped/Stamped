@@ -15,25 +15,35 @@ from logs import report
 
 try:
     from libs.iTunes                import globaliTunes
-    from MusicSource                import MusicSource
+    from GenericSource                import GenericSource
     from utils                      import lazyProperty
     import logs
     from pprint                     import pprint, pformat
     import sys
-    from Resolver                   import Resolver, iTunesArtist, iTunesAlbum, iTunesTrack
+    from Resolver                   import Resolver, iTunesArtist, iTunesAlbum, iTunesTrack, demo
 except:
     report()
     raise
 
-class iTunesSource(MusicSource):
+class iTunesSource(GenericSource):
     """
     """
     def __init__(self):
-        MusicSource.__init__(self, 'itunes')
+        GenericSource.__init__(self, 'itunes')
 
     @lazyProperty
     def __itunes(self):
         return globaliTunes()
+
+    def matchSource(self, query):
+        if query.type == 'artist':
+            return self.artistSource(query)
+        elif query.type == 'album':
+            return self.albumSource(query)
+        elif query.type == 'track':
+            return self.trackSource(query)
+        else:
+            return self.emptySource
 
     def trackSource(self, query):
         tracks = self.__itunes.method('search',term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
@@ -74,4 +84,4 @@ class iTunesSource(MusicSource):
         return source
 
 if __name__ == '__main__':
-    iTunesSource().demo()
+    demo(iTunesSource(), 'Katy Perry')

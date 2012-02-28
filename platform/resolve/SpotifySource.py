@@ -15,28 +15,33 @@ from logs import report
 
 try:
     from libs.Spotify               import globalSpotify
-    from MusicSource                import MusicSource
+    from GenericSource              import GenericSource
     from utils                      import lazyProperty
     import logs
-    from pprint                     import pprint, pformat
-    import sys
-    from Resolver                   import Resolver, SpotifyArtist, SpotifyAlbum, SpotifyTrack
+    from Resolver                   import Resolver, SpotifyArtist, SpotifyAlbum, SpotifyTrack, demo
 except:
     report()
     raise
 
-_verbose = False
-_very_verbose = False
-
-class SpotifySource(MusicSource):
+class SpotifySource(GenericSource):
     """
     """
     def __init__(self):
-        MusicSource.__init__(self, 'spotify')
+        GenericSource.__init__(self, 'spotify')
 
     @lazyProperty
     def __spotify(self):
         return globalSpotify()
+
+    def matchSource(self, query):
+        if query.type == 'artist':
+            return self.artistSource(query)
+        elif query.type == 'album':
+            return self.albumSource(query)
+        elif query.type == 'track':
+            return self.trackSource(query)
+        else:
+            return self.emptySource
 
     def trackSource(self, query):
         tracks = self.__spotify.search('track',q=query.name)['tracks']
@@ -77,4 +82,4 @@ class SpotifySource(MusicSource):
         return source
 
 if __name__ == '__main__':
-    SpotifySource().demo()
+    demo(SpotifySource(), 'Katy Perry')

@@ -8,33 +8,41 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedMusicSource' ]
+__all__ = [ 'StampedSource' ]
 
 import Globals
 from logs import report
 
 try:
-    from MusicSource                import MusicSource
+    from GenericSource              import GenericSource
     from utils                      import lazyProperty
     import logs
-    from pprint                     import pprint, pformat
-    import sys
-    from Resolver                   import Resolver, EntityArtist, EntityAlbum, EntityTrack
+    from Resolver                   import Resolver, demo
 except:
     report()
     raise
 
-class StampedMusicSource(MusicSource):
+class StampedSource(GenericSource):
     """
     """
     def __init__(self):
-        MusicSource.__init__(self, 'stamped')
+        GenericSource.__init__(self, 'stamped')
 
     @lazyProperty
     def __entityDB(self):
         import MongoStampedAPI
         api = MongoStampedAPI.MongoStampedAPI()
         return api._entityDB
+
+    def matchSource(self, query):
+        if query.type == 'artist':
+            return self.artistSource(query)
+        elif query.type == 'album':
+            return self.albumSource(query)
+        elif query.type == 'track':
+            return self.trackSource(query)
+        else:
+            return self.emptySource
 
     def trackSource(self, query):
         tracks = list(self.__entityDB._collection.find({
@@ -52,7 +60,7 @@ class StampedMusicSource(MusicSource):
                 result = tracks[start:]
             else:
                 result = []
-            return [ EntityTrack( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) ) ) for entry in result ]
+            return [ self.resolver.trackFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) ) ) for entry in result ]
         return source
     
     def albumSource(self, query):
@@ -75,7 +83,7 @@ class StampedMusicSource(MusicSource):
                 result = albums[start:]
             else:
                 result = []
-            return [ EntityAlbum( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
+            return [ self.resolver.albumFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
         return source
 
 
@@ -102,8 +110,8 @@ class StampedMusicSource(MusicSource):
                 result = artists[start:]
             else:
                 result = []
-            return [ EntityArtist( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
+            return [ self.resolver.artistFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
         return source
 
 if __name__ == '__main__':
-    StampedMusicSource().demo()
+    demo(StampedSource(), 'Katy Perry')
