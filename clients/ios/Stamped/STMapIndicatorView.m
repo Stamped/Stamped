@@ -52,6 +52,7 @@
     noResultsLabel_.frame = CGRectOffset(noResultsLabel_.frame, 15, 12);
     [self addSubview:noResultsLabel_];
     [noResultsLabel_ release];
+    self.alpha = 0;
   }
   return self;
 }

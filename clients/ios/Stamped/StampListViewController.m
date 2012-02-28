@@ -183,6 +183,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
     case StampFilterTypeOther:
       filterString = @"other";
       break;
+    case StampFilterTypeNone:
+      break;
     default:
       NSLog(@"Invalid filter string...");
       break;
