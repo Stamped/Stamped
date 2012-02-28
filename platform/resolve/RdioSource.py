@@ -15,29 +15,34 @@ from logs import report
 
 try:
     from libs.Rdio                  import Rdio, globalRdio
-    from MusicSource                import MusicSource
+    from GenericSource              import GenericSource
     from utils                      import lazyProperty
     import logs
-    from pprint                     import pprint, pformat
-    import sys
-    from Resolver                   import Resolver, RdioArtist, RdioAlbum, RdioTrack
+    from Resolver                   import Resolver, RdioArtist, RdioAlbum, RdioTrack, demo
 except:
     report()
     raise
 
-_verbose = False
-_very_verbose = False
-
-class RdioSource(MusicSource):
+class RdioSource(GenericSource):
     """
     """
     def __init__(self):
-        MusicSource.__init__(self, 'rdio')
+        GenericSource.__init__(self, 'rdio')
 
     @lazyProperty
     def __rdio(self):
         return globalRdio()
     
+    def matchSource(self, query):
+        if query.type == 'artist':
+            return self.artistSource(query)
+        elif query.type == 'album':
+            return self.albumSource(query)
+        elif query.type == 'track':
+            return self.trackSource(query)
+        else:
+            return self.emptySource
+
     def trackSource(self, query):
         name = query.name
         def source(start, count):
@@ -50,8 +55,6 @@ class RdioSource(MusicSource):
             )
             if response['status'] == 'ok':
                 entries = response['result']['results']
-                if _verbose:
-                    pprint(entries)
                 return [ RdioTrack( data=entry, rdio=self.__rdio ) for entry in entries ]
             else:
                 return []
@@ -69,13 +72,10 @@ class RdioSource(MusicSource):
             )
             if response['status'] == 'ok':
                 entries = response['result']['results']
-                if _verbose:
-                    pprint(entries)
                 return [ RdioAlbum( data=entry, rdio=self.__rdio ) for entry in entries ]
             else:
                 return []
         return source
-
 
     def artistSource(self, query):
         name = query.name
@@ -89,12 +89,10 @@ class RdioSource(MusicSource):
             )
             if response['status'] == 'ok':
                 entries = response['result']['results']
-                if _verbose:
-                    pprint(entries)
                 return [ RdioArtist( data=entry, rdio=self.__rdio ) for entry in entries ]
             else:
                 return []
         return source
 
 if __name__ == '__main__':
-    RdioSource().demo()
+    demo(RdioSource(), 'Katy Perry')

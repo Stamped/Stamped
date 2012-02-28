@@ -8,13 +8,13 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'states', 'months' ]
+__all__ = [ 'states', 'months', 'parseDateString' ]
 
 import Globals
 from logs import log, report
 
 try:
-    pass
+    import re
 except:
     report()
     raise
@@ -97,3 +97,44 @@ months = {
     'November':11,
     'December':12,
 }
+
+def parseDateString(date):
+    if date is not None:
+        new_date = None
+        match = re.match(r'^(\d\d\d\d) (\d\d) (\d\d)$',date)
+        if match is not None:
+            try:
+                return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+        match = re.match(r'^(\w+) (\d+), (\d\d\d\d)$',date)
+        if match is not None:
+            try:
+                month = match.group(1)
+                if month in months:
+                    return datetime(int(match.group(3)),months[month],int(match.group(2)))
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+        #sample 2012-02-10
+        match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date)
+        if match is not None:
+            try:
+                return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+        #sample 2009-05-29T07:00:00Z
+        match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$',date)
+        if match is not None:
+            try:
+                return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+    return None

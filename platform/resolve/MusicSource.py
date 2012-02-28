@@ -38,9 +38,15 @@ class MusicSource(BasicSource):
         BasicSource.__init__(self, *args, **kwargs)
         self.addGroup(self.sourceName)
 
-    @lazyProperty
-    def resolver(self):
-        return Resolver()
+    def matchSource(self, query):
+        if query.type == 'artist':
+            return self.artistSource(query)
+        elif query.type == 'album':
+            return self.albumSource(query)
+        elif query.type == 'track':
+            return self.trackSource(query)
+        else:
+            return self.emptySource
 
     @abstractmethod
     def artistSource(self, query):
@@ -74,16 +80,16 @@ class MusicSource(BasicSource):
     
     def resolveTrack(self, entity):
         query = self.resolver.trackFromEntity(entity)
-        return self.resolver.resolveTrack( query, self.trackSource(query))
+        return self.resolver.resolve( query, self.trackSource(query))
     
-    def resolveAlbum(self, entity):
+    def resolveAlbum(self, entity, **options):
         query = self.resolver.albumFromEntity(entity)
-        return self.resolver.resolveAlbum( query, self.albumSource(query))
+        return self.resolver.resolve( query, self.albumSource(query), **options)
 
 
     def resolveArtist(self, entity):
         query = self.resolver.artistFromEntity(entity)
-        return self.resolver.resolveArtist( query, self.artistSource(query))
+        return self.resolver.resolve( query, self.artistSource(query))
 
 
     def demo(self):
@@ -92,12 +98,15 @@ class MusicSource(BasicSource):
 
         title = 'Katy Perry'
         subcategory = None
+        count = 1
 
+        print(sys.argv)
         if len(sys.argv) > 1:
             title = sys.argv[1]
-        elif len(sys.argv) > 2:
+        if len(sys.argv) > 2:
             subcategory = sys.argv[2]
-        print('Trying to resolve %s %s' % (subcategory, title))
+        if len(sys.argv) > 3:
+            count = int(sys.argv[3])
 
         Resolver._verbose = True
         from MongoStampedAPI import MongoStampedAPI

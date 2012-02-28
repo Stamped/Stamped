@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedMusicSource' ]
+__all__ = [ 'StampedSource' ]
 
 import Globals
 from logs import report
@@ -22,7 +22,7 @@ except:
     report()
     raise
 
-class StampedMusicSource(GenericSource):
+class StampedSource(GenericSource):
     """
     """
     def __init__(self):
@@ -114,4 +114,4 @@ class StampedMusicSource(GenericSource):
         return source
 
 if __name__ == '__main__':
-    demo(StampedMusicSource(), 'Katy Perry')
+    demo(StampedSource(), 'Katy Perry')
