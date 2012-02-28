@@ -91,6 +91,8 @@ class AMongoCollectionView(AMongoCollection):
                 user_query, coords, region_name = result
                 utils.log("using region %s at %s" % (region_name, coords))
                 
+                # disregard original viewport in favor of using the region' 
+                # coordinates as a ranking hint
                 relaxed  = True
                 viewport = None
                 center   = {
@@ -132,7 +134,7 @@ class AMongoCollectionView(AMongoCollection):
                         }, 
                     }, 
                 ])
-
+        
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         

@@ -1,9 +1,10 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
+* refresh autocomplete
+* autocomplete cron job
 * normalize existing friend suggest signals
 * incorporate user freshness / quality signal into friend suggest and fix / test current location signal
     * add unit tests tests
-* autocomplete cron job
 
 OLD:
     * change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"

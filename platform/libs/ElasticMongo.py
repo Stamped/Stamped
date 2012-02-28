@@ -20,8 +20,6 @@ class InvalidIndexError     (AElasticMongoError): pass
 
 # TODO: utilize mappings to convert / strip newly added documents
 # TODO: enforce required mappings and type checking of newly added documents
-# TODO: test!
-
 
 # TODO: fix oplog state caching to work with config mappings / indices
 # TODO: how does modifying an existing mapping or index work?
@@ -401,8 +399,8 @@ class MongoCollectionSource(Greenlet, AElasticMongoObject):
                  state_ns   = None, 
                  inclusive  = False, 
                  force      = False, 
-                 noop       = False, 
-                 ):
+                 noop       = False):
+        
         assert isinstance(elasticmongo, ElasticMongo)
         assert isinstance(sink, AMongoCollectionSink)
         

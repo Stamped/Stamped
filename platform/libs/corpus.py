@@ -202,10 +202,10 @@ def export_config(coll, ns, drop = True):
     safe_insert(coll.indices,  indices)
     safe_insert(coll.mappings, mappings)
 
-if __name__ == '__main__':
-    parser  = argparse.ArgumentParser()
+def export(*args):
+    parser  = argparse.ArgumentParser(description="exports structured works of shakespeare to mongo, optionally including elasticmongo configuration for searching via elasticsearch")
     
-    parser.add_argument('-n', '--noshakespeare', type=bool, default=False,
+    parser.add_argument('-n', '--noshakespeare', action="store_true", default=False,
                         help=("disable exporting complete works of shakespeare"))
     parser.add_argument('-c', '--config', action="store_true", default=False,
                         help="export elasticmongo mapping and index metadata to "
@@ -224,9 +224,13 @@ if __name__ == '__main__':
                               "mapping and index metadata"))
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
-    args    = parser.parse_args()
-    conn    = pymongo.Connection(args.mongo_host, args.mongo_port)
-    output  = None
+    if args:
+        args    = parser.parse_args(args = args)
+    else:
+        args    = parser.parse_args()
+    
+    conn        = pymongo.Connection(args.mongo_host, args.mongo_port)
+    output      = None
     
     if args.config:
         coll    = __get_collection(conn, args.state_namespace)
@@ -238,4 +242,7 @@ if __name__ == '__main__':
     if output:
         coll    = __get_collection(conn, args.output_namespace)
         export_documents(coll, output, args.drop)
+
+if __name__ == '__main__':
+    export()
 
