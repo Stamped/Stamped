@@ -343,6 +343,9 @@
     [mapButtonTooltipImageView_ release];
   }
 
+  if (tabBar_.selectedItem != stampsTabBarItem_)
+    return;
+
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"] &&
       [AccountManager sharedManager].currentUser.numStamps &&
       [AccountManager sharedManager].currentUser.numStamps.intValue == 0) {
