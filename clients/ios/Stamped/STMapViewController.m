@@ -45,6 +45,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)zoomToCurrentLocation;
 - (void)centerOnCurrentLocation;
 - (void)resetCaches;
+- (void)showNoLocationAlert;
 - (NSString*)viewportAsString;
 
 @property (nonatomic, retain) id<MKAnnotation> selectedAnnotation;
@@ -62,10 +63,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) STMapScopeSliderGranularity currentGranularity;
 @property (nonatomic, readonly) STMapIndicatorView* indicatorView;
 @property (nonatomic, retain) STClosableOverlayView* mapOverlayView;
+@property (nonatomic, assign) BOOL alertShown;
 @end
 
 @implementation STMapViewController
 
+@synthesize alertShown = alertShown_;
 @synthesize userStampsCache = userStampsCache_;
 @synthesize todosArray = todosArray_;
 @synthesize personalStampsArray = personalStampsArray_;
@@ -186,6 +189,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   frame.size.height = toolbar_.hidden ? 372 : 323;
   mapView_.frame = frame;
   [mapView_ setNeedsDisplay];
+  [self loadDataFromNetwork];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -195,6 +199,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     return;
 
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"]) {
+    if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+        [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized &&
+        !alertShown_) {
+      [self showNoLocationAlert];
+    }
     mapView_.showsUserLocation = YES;
     if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
       [scopeSlider_ flashTooltip];
@@ -257,6 +266,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
   cancelButton_.alpha = 1;
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  indicatorView_.mode = STMapIndicatorViewModeHidden;
   [UIView animateWithDuration:0.2 animations:^{
     locationButton_.frame = CGRectOffset(locationButton_.frame, offset, 0);
     cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
@@ -290,6 +301,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
+  if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+      [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+    [self showNoLocationAlert];
+    return;
+  }
   [self centerOnCurrentLocation];
 }
 
@@ -453,6 +469,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
       [self loadDataFromDataStore];
       return;
     }
+  }
+
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
+    indicatorView_.mode = STMapIndicatorViewModeNoConnection;
+    return;
   }
 
   indicatorView_.mode = STMapIndicatorViewModeLoading;
@@ -673,6 +695,24 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.friendResultsCache = nil;
   self.popularResultsCache = nil;
   self.friendsOfFriendsResultsCache = nil;
+}
+
+- (void)showNoLocationAlert {
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
+                                                   message:NSLocalizedString(@"Location services aren't available to Stamped. You can enable them within the Settings app.", nil)
+                                                  delegate:self
+                                         cancelButtonTitle:nil
+                                         otherButtonTitles:NSLocalizedString(@"Dismiss", nil), NSLocalizedString(@"Settings", nil), nil] autorelease];
+  [alert show];
+  alertShown_ = YES;
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  alertShown_ = NO;
+  if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Settings", nil)])
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"prefs:root=LOCATION_SERVICES"]];
 }
 
 #pragma mark - STMapScopeSliderDelegate methods.

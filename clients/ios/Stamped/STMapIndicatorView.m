@@ -47,8 +47,6 @@
     noResultsLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.4];
     noResultsLabel_.shadowOffset = CGSizeMake(0, -1);
     noResultsLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
-    noResultsLabel_.text = NSLocalizedString(@"No results", nil);
-    [noResultsLabel_ sizeToFit];
     noResultsLabel_.frame = CGRectOffset(noResultsLabel_.frame, 15, 12);
     [self addSubview:noResultsLabel_];
     [noResultsLabel_ release];
@@ -92,7 +90,7 @@
       }
 
       [indicatorView_ startAnimating];
-      
+
       [UIView animateWithDuration:0.3
                             delay:0
                           options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
@@ -104,9 +102,12 @@
                        completion:nil];
       break;
     }
+    case STMapIndicatorViewModeNoConnection:
     case STMapIndicatorViewModeNoResults: {
+      noResultsLabel_.text = (mode == STMapIndicatorViewModeNoConnection) ? NSLocalizedString(@"No connection", nil) : NSLocalizedString(@"No results", nil);
+      [noResultsLabel_ sizeToFit];
       CGRect frame = self.frame;
-      frame.size.width = 84;
+      frame.size.width = CGRectGetWidth(noResultsLabel_.bounds) + 30;
 
       if (((CALayer*)self.layer.presentationLayer).opacity == 0)
         self.frame = frame;
