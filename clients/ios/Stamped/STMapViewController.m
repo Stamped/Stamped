@@ -52,6 +52,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) MKMapRect lastMapRect;
 @property (nonatomic, copy) NSArray* personalStampsArray;
 @property (nonatomic, copy) NSArray* todosArray;
+@property (nonatomic, copy) NSArray* userStampsCache;
 @property (nonatomic, copy) NSArray* friendResultsCache;
 @property (nonatomic, copy) NSArray* friendsOfFriendsResultsCache;
 @property (nonatomic, copy) NSArray* popularResultsCache;
@@ -65,6 +66,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 @implementation STMapViewController
 
+@synthesize userStampsCache = userStampsCache_;
 @synthesize todosArray = todosArray_;
 @synthesize personalStampsArray = personalStampsArray_;
 @synthesize mapOverlayView = mapOverlayView_;
@@ -117,6 +119,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.friendResultsCache = nil;
   self.popularResultsCache = nil;
   self.friendsOfFriendsResultsCache = nil;
+  self.userStampsCache = nil;
   [super dealloc];
 }
 
@@ -429,8 +432,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - Other private methods.
 
 - (void)loadDataFromDataStore {
+  if (source_ == STMapViewControllerSourceUser && !userStampsCache_)
+    self.userStampsCache = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+
   if (scopeSlider_.granularity == STMapScopeSliderGranularityYou && !personalStampsArray_)
     self.personalStampsArray = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", [AccountManager sharedManager].currentUser.userID]];
+
   if (source_ == STMapViewControllerSourceTodo)
     self.todosArray = [Favorite objectsWithPredicate:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
 
@@ -439,7 +446,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)loadDataFromNetwork {
   if (searchField_.text.length == 0) {
-    if ((scopeSlider_.granularity == STMapScopeSliderGranularityYou || source_ == STMapViewControllerSourceTodo) ||
+    if ((scopeSlider_.granularity == STMapScopeSliderGranularityYou || source_ == STMapViewControllerSourceTodo || source_ == STMapViewControllerSourceUser) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriends && friendResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends && friendsOfFriendsResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityEveryone && popularResultsCache_)) {
@@ -507,6 +514,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     NSArray* stamps = nil;
     if (searchField_.text.length > 0) {
       stamps = resultsArray_;
+    } else if (source_ == STMapViewControllerSourceUser) {
+      stamps = userStampsCache_;
     } else if (scopeSlider_.granularity == STMapScopeSliderGranularityYou) {
       stamps = personalStampsArray_;
     } else if (scopeSlider_.granularity == STMapScopeSliderGranularityFriends) {
@@ -586,6 +595,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   
   for (STPlaceAnnotation* annotation in toRemove)
     [mapView_ removeAnnotation:annotation];
+  
+  self.cachedCoordinates = nil;
 }
 
 - (void)addAnnotationForEntity:(Entity*)entity {
@@ -658,6 +669,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)resetCaches {
+  self.userStampsCache = nil;
   self.friendResultsCache = nil;
   self.popularResultsCache = nil;
   self.friendsOfFriendsResultsCache = nil;

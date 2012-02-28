@@ -84,6 +84,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   if (mapViewShown_) {
     [self.view.superview insertSubview:self.mapViewController.view atIndex:0];
     self.view.hidden = YES;
+    [self.mapViewController view];
     [self.mapViewController viewWillAppear:animated];
   } else {
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
