@@ -11,7 +11,8 @@
 typedef enum {
   STMapIndicatorViewModeHidden = 0,
   STMapIndicatorViewModeLoading,
-  STMapIndicatorViewModeNoResults
+  STMapIndicatorViewModeNoResults,
+  STMapIndicatorViewModeNoConnection
 } STMapIndicatorViewMode;
 
 @interface STMapIndicatorView : UIView

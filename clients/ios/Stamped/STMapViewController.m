@@ -45,6 +45,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)zoomToCurrentLocation;
 - (void)centerOnCurrentLocation;
 - (void)resetCaches;
+- (void)showNoLocationAlert;
 - (NSString*)viewportAsString;
 
 @property (nonatomic, retain) id<MKAnnotation> selectedAnnotation;
@@ -52,6 +53,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) MKMapRect lastMapRect;
 @property (nonatomic, copy) NSArray* personalStampsArray;
 @property (nonatomic, copy) NSArray* todosArray;
+@property (nonatomic, copy) NSArray* userStampsCache;
 @property (nonatomic, copy) NSArray* friendResultsCache;
 @property (nonatomic, copy) NSArray* friendsOfFriendsResultsCache;
 @property (nonatomic, copy) NSArray* popularResultsCache;
@@ -61,10 +63,13 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) STMapScopeSliderGranularity currentGranularity;
 @property (nonatomic, readonly) STMapIndicatorView* indicatorView;
 @property (nonatomic, retain) STClosableOverlayView* mapOverlayView;
+@property (nonatomic, assign) BOOL alertShown;
 @end
 
 @implementation STMapViewController
 
+@synthesize alertShown = alertShown_;
+@synthesize userStampsCache = userStampsCache_;
 @synthesize todosArray = todosArray_;
 @synthesize personalStampsArray = personalStampsArray_;
 @synthesize mapOverlayView = mapOverlayView_;
@@ -117,6 +122,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.friendResultsCache = nil;
   self.popularResultsCache = nil;
   self.friendsOfFriendsResultsCache = nil;
+  self.userStampsCache = nil;
   [super dealloc];
 }
 
@@ -183,6 +189,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   frame.size.height = toolbar_.hidden ? 372 : 323;
   mapView_.frame = frame;
   [mapView_ setNeedsDisplay];
+  [self loadDataFromNetwork];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -192,6 +199,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     return;
 
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"hasSeenNewMapsView"]) {
+    if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+        [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized &&
+        !alertShown_) {
+      [self showNoLocationAlert];
+    }
     mapView_.showsUserLocation = YES;
     if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
       [scopeSlider_ flashTooltip];
@@ -254,6 +266,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   CGFloat offset = (CGRectGetWidth(cancelButton_.frame) + 5) * -1;
   cancelButton_.alpha = 1;
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  indicatorView_.mode = STMapIndicatorViewModeHidden;
   [UIView animateWithDuration:0.2 animations:^{
     locationButton_.frame = CGRectOffset(locationButton_.frame, offset, 0);
     cancelButton_.frame = CGRectOffset(cancelButton_.frame, offset, 0);
@@ -287,6 +301,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
+  if ([[CLLocationManager class] respondsToSelector:@selector(authorizationStatus)] &&
+      [CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+    [self showNoLocationAlert];
+    return;
+  }
   [self centerOnCurrentLocation];
 }
 
@@ -429,8 +448,12 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 #pragma mark - Other private methods.
 
 - (void)loadDataFromDataStore {
+  if (source_ == STMapViewControllerSourceUser && !userStampsCache_)
+    self.userStampsCache = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+
   if (scopeSlider_.granularity == STMapScopeSliderGranularityYou && !personalStampsArray_)
     self.personalStampsArray = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", [AccountManager sharedManager].currentUser.userID]];
+
   if (source_ == STMapViewControllerSourceTodo)
     self.todosArray = [Favorite objectsWithPredicate:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
 
@@ -439,13 +462,19 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 - (void)loadDataFromNetwork {
   if (searchField_.text.length == 0) {
-    if ((scopeSlider_.granularity == STMapScopeSliderGranularityYou || source_ == STMapViewControllerSourceTodo) ||
+    if ((scopeSlider_.granularity == STMapScopeSliderGranularityYou || source_ == STMapViewControllerSourceTodo || source_ == STMapViewControllerSourceUser) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriends && friendResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends && friendsOfFriendsResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityEveryone && popularResultsCache_)) {
       [self loadDataFromDataStore];
       return;
     }
+  }
+
+  RKClient* client = [RKClient sharedClient];
+  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
+    indicatorView_.mode = STMapIndicatorViewModeNoConnection;
+    return;
   }
 
   indicatorView_.mode = STMapIndicatorViewModeLoading;
@@ -507,6 +536,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     NSArray* stamps = nil;
     if (searchField_.text.length > 0) {
       stamps = resultsArray_;
+    } else if (source_ == STMapViewControllerSourceUser) {
+      stamps = userStampsCache_;
     } else if (scopeSlider_.granularity == STMapScopeSliderGranularityYou) {
       stamps = personalStampsArray_;
     } else if (scopeSlider_.granularity == STMapScopeSliderGranularityFriends) {
@@ -586,6 +617,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   
   for (STPlaceAnnotation* annotation in toRemove)
     [mapView_ removeAnnotation:annotation];
+  
+  self.cachedCoordinates = nil;
 }
 
 - (void)addAnnotationForEntity:(Entity*)entity {
@@ -658,9 +691,28 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 }
 
 - (void)resetCaches {
+  self.userStampsCache = nil;
   self.friendResultsCache = nil;
   self.popularResultsCache = nil;
   self.friendsOfFriendsResultsCache = nil;
+}
+
+- (void)showNoLocationAlert {
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
+                                                   message:NSLocalizedString(@"Location services aren't available to Stamped. You can enable them within the Settings app.", nil)
+                                                  delegate:self
+                                         cancelButtonTitle:nil
+                                         otherButtonTitles:NSLocalizedString(@"Dismiss", nil), NSLocalizedString(@"Settings", nil), nil] autorelease];
+  [alert show];
+  alertShown_ = YES;
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  alertShown_ = NO;
+  if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Settings", nil)])
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"prefs:root=LOCATION_SERVICES"]];
 }
 
 #pragma mark - STMapScopeSliderDelegate methods.
