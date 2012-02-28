@@ -128,7 +128,8 @@ typedef enum PeopleSearchCorpus {
   button.frame = CGRectMake(CGRectGetMidX(self.view.frame) - (CGRectGetWidth(button.frame) / 2), 67,
                             CGRectGetWidth(button.frame),
                             CGRectGetHeight(button.frame));
-  button.layer.shadowPath = [UIBezierPath bezierPathWithRect:button.bounds].CGPath;
+  button.frame = CGRectInset(button.frame, -80, -60);
+  button.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectInset(button.bounds, 80, 60)].CGPath;
   button.layer.shadowOpacity = 0.2;
   button.layer.shadowOffset = CGSizeMake(0, 2);
   [button addTarget:self action:@selector(showAddFriendsPane) forControlEvents:UIControlEventTouchUpInside];
