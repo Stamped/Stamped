@@ -208,7 +208,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
       if (mapView_.selectedAnnotations.count == 0 && !hideToolbar_)
         [scopeSlider_ performSelectorOnMainThread:@selector(flashTooltip) withObject:nil waitUntilDone:NO];
     }];
-    
+
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasSeenNewMapsView"];
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -650,7 +650,11 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)reset {
   self.resultsArray = nil;
   self.cachedCoordinates = nil;
+  self.searchField.text = nil;
+  [self resetCaches];
   [self removeAllAnnotations];
+  zoomToLocation_ = YES;
+  lastMapRect_ = MKMapRectNull;
 }
 
 - (void)resetCaches {
@@ -664,7 +668,9 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
   if (currentGranularity_ != granularity) {
     currentGranularity_ = granularity;
-    [self reset];
+    self.resultsArray = nil;
+    self.cachedCoordinates = nil;
+    [self removeAllAnnotations];
     [self loadDataFromNetwork];
   }
 }
