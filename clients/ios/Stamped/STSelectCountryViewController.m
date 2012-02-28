@@ -853,6 +853,7 @@ static NSDictionary* countryCodeToNameDictionary_ = nil;
   [delegate_ viewController:self didSelectCountry:country code:code];
 
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
+  [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (NSArray*)sectionIndexTitlesForTableView:(UITableView*)tableView {
