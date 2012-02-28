@@ -449,6 +449,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     tapHereImageView_.center = self.view.center;
     tapHereImageView_.frame = CGRectOffset(tapHereImageView_.frame, 0, -35);
     tapHereImageView_.alpha = 0;
+    tapHereImageView_.userInteractionEnabled = YES;
     [scrollView_ addSubview:tapHereImageView_];
     [tapHereImageView_ release];
     [UIView animateWithDuration:0.3

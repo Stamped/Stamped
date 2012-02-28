@@ -443,7 +443,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriends && friendResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityFriendsOfFriends && friendsOfFriendsResultsCache_) ||
         (scopeSlider_.granularity == STMapScopeSliderGranularityEveryone && popularResultsCache_)) {
-      NSLog(@"Loading from datastore...");
       [self loadDataFromDataStore];
       return;
     }
@@ -548,14 +547,32 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   }
 
   if (selectedAnnotation_ && searchField_.text.length > 0) {
-    CLLocation* currentLocation = [[[CLLocation alloc] initWithLatitude:mapView_.centerCoordinate.latitude
-                                                              longitude:mapView_.centerCoordinate.longitude] autorelease];
-    CLLocation* newLocation = [[[CLLocation alloc] initWithLatitude:selectedAnnotation_.coordinate.latitude
-                                                          longitude:selectedAnnotation_.coordinate.longitude] autorelease];
-    
-    CGFloat latitudeMeters = mapView_.region.span.latitudeDelta * 111000.0;
-    [mapView_ setCenterCoordinate:selectedAnnotation_.coordinate
-                         animated:([currentLocation distanceFromLocation:newLocation] < (latitudeMeters * 2))];
+    // Search result. Let's zoom in/out to encompass all stamps with some padding...
+    CLLocationCoordinate2D maxCoord = {-90.0f, -180.0f};
+    CLLocationCoordinate2D minCoord = {90.0f, 180.0f};
+    for (id<MKAnnotation> annotation in mapView_.annotations) {
+      if (![annotation isMemberOfClass:[STPlaceAnnotation class]])
+        continue;
+
+      CLLocationCoordinate2D coord = annotation.coordinate;
+      if (coord.longitude > maxCoord.longitude)
+        maxCoord.longitude = coord.longitude;
+
+      if (coord.latitude > maxCoord.latitude)
+        maxCoord.latitude = coord.latitude;
+
+      if (coord.longitude < minCoord.longitude)
+        minCoord.longitude = coord.longitude;
+      
+      if (coord.latitude < minCoord.latitude)
+        minCoord.latitude = coord.latitude;
+    }
+    MKCoordinateRegion region = {{0.0f, 0.0f}, {0.0f, 0.0f}};
+    region.center.longitude = (minCoord.longitude + maxCoord.longitude) / 2.0;
+    region.center.latitude = (minCoord.latitude + maxCoord.latitude) / 2.0;
+    region.span.longitudeDelta = maxCoord.longitude - minCoord.longitude;
+    region.span.latitudeDelta = maxCoord.latitude - minCoord.latitude;
+    [mapView_ setRegion:region animated:YES];
     [mapView_ selectAnnotation:selectedAnnotation_ animated:YES];
   }
 }
