@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'SpotifySource' ]
+__all__ = [ 'SpotifySource', 'SpotifyArtist', 'SpotifyAlbum', 'SpotifyTrack' ]
 
 import Globals
 from logs import report
@@ -18,10 +18,148 @@ try:
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     import logs
-    from Resolver                   import Resolver, SpotifyArtist, SpotifyAlbum, SpotifyTrack, demo
+    from Resolver                   import *
 except:
     report()
     raise
+
+
+class _SpotifyObject(object):
+    """
+    Abstract superclass (mixin) for Spotify objects.
+
+    _SpotifyObjects must be instantiated with their valid spotify_id.
+
+    Attributes:
+
+    spotify - an instance of Spotify (API wrapper)
+    """
+
+    def __init__(self, spotify_id, spotify=None):
+        if spotify is None:
+            spotify = globalSpotify()
+        self.__spotify = spotify
+        self.__spotify_id = spotify_id
+
+    @property
+    def spotify(self):
+        return self.__spotify
+
+    @lazyProperty
+    def key(self):
+        return self.__spotify_id
+
+    @property 
+    def source(self):
+        return "spotify"
+
+    def __repr__(self):
+        return "<%s %s %s>" % (self.source, self.type, self.name)
+
+
+class SpotifyArtist(_SpotifyObject, ResolverArtist):
+    """
+    Spotify artist wrapper
+    """
+    def __init__(self, spotify_id):
+        _SpotifyObject.__init__(self, spotify_id)  
+        ResolverArtist.__init__(self)
+
+    @lazyProperty
+    def name(self):
+        result = self.spotify.lookup(self.key)
+        return result['artist']['name']
+
+    @lazyProperty
+    def albums(self):
+        result = self.spotify.lookup(self.key, "albumdetail")
+        album_list = result['artist']['albums']
+        return [
+            {
+                'name':entry['album']['name'],
+                'key':entry['album']['href'],
+            }
+                for entry in album_list
+                    if entry['album']['artist'] == self.name and entry['album']['availability']['territories'].find('US') != -1
+        ]
+
+    @lazyProperty
+    def tracks(self):
+        tracks = {}
+        for album in self.albums:
+            key = album['key']
+            result = self.spotify.lookup(key, 'trackdetail')
+            track_list = result['album']['tracks']
+            for track in track_list:
+                track_key = track['href']
+                if track_key not in tracks:
+                    tracks[track_key] = {
+                        'name': track['name'],
+                    }
+        return list(tracks.values())
+
+
+class SpotifyAlbum(_SpotifyObject, ResolverAlbum):
+    """
+    Spotify album wrapper
+    """
+    def __init__(self, spotify_id):
+        _SpotifyObject.__init__(self, spotify_id)  
+        ResolverAlbum.__init__(self)
+
+    @lazyProperty
+    def name(self):
+        result = self.spotify.lookup(self.key)
+        return result['album']['name']
+
+    @lazyProperty
+    def artist(self):
+        result = self.spotify.lookup(self.key)
+        return { 'name': result['album']['artist'] }
+
+    @lazyProperty
+    def tracks(self):
+        result = self.spotify.lookup(self.key, 'trackdetail')
+        track_list = result['album']['tracks']
+        return [
+            {
+                'name':track['name'],
+            }
+                for track in track_list
+        ]
+
+
+class SpotifyTrack(_SpotifyObject, ResolverTrack):
+    """
+    Spotify track wrapper
+    """
+    def __init__(self, spotify_id):
+        _SpotifyObject.__init__(self, spotify_id)  
+        ResolverTrack.__init__(self)
+
+    @lazyProperty
+    def data(self):
+        return self.spotify.lookup(self.key)['track']
+
+    @lazyProperty
+    def name(self):
+        return self.data['name']
+
+    @lazyProperty
+    def artist(self):
+        try:
+            return {'name': self.data['artists'][0]['name'] }
+        except Exception:
+            return {'name':''}
+
+    @lazyProperty
+    def album(self):
+        return {'name':self.data['album']['name']}
+
+    @lazyProperty
+    def length(self):
+        return float(self.data['length'])
+
 
 class SpotifySource(GenericSource):
     """

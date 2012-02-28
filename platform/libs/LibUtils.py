@@ -15,6 +15,7 @@ from logs import log, report
 
 try:
     import re
+    from datetime       import datetime
 except:
     report()
     raise

@@ -8,30 +8,140 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'TMDBSource' ]
+__all__ = [ 'TMDBSource', 'TMDBMovie' ]
 
 import Globals
 from logs import report
 
 try:
-    from libs.TMDB                  import TMDB
-    from BasicSource                import BasicSource
+    from libs.TMDB                  import globalTMDB
+    from GenericSource              import GenericSource
     from utils                      import lazyProperty
+    from abc                        import ABCMeta, abstractproperty
     import logs
     from urllib2                    import HTTPError
     from datetime                   import datetime
+    from Resolver                   import *
+    from pprint                     import pformat
+    from libs.LibUtils              import parseDateString
     import re
 except:
     report()
     raise
 
-class TMDBSource(BasicSource):
+class _TMDBObject(object):
+    __metaclass__ = ABCMeta
+    """
+    Abstract superclass (mixin) for TMDB objects.
+
+    _TMDBObjects must be instantiated with their tmdb_id.
+
+    Attributes:
+
+    tmdb - an instance of TMDB (API wrapper)
+    info (abstract) - the type-specific TMDB data for the object
+    """
+    def __init__(self, tmdb_id):
+        self.__key = tmdb_id
+
+    @property
+    def key(self):
+        return self.__key
+
+    @property
+    def source(self):
+        return "tmdb"
+
+    @lazyProperty
+    def tmdb(self):
+        return globalTMDB()
+
+    @abstractproperty
+    def info(self):
+        pass
+
+    def __repr__(self):
+        return pformat( self.info )
+
+
+#TODO finish
+class TMDBMovie(_TMDBObject, ResolverMovie):
+    """
+    TMDB movie wrapper
+    """
+    def __init__(self, tmdb_id):
+        _TMDBObject.__init__(self, tmdb_id)
+        ResolverMovie.__init__(self)
+
+    @lazyProperty
+    def info(self):
+        return self.tmdb.movie_info(self.key)
+
+    @lazyProperty
+    def castsRaw(self):
+        return self.tmdb.movie_casts(self.key)
+
+    @lazyProperty
+    def name(self):
+        return self.info['title']
+
+    @lazyProperty
+    def cast(self):
+        return [
+            {
+                'name':entry['name'],
+                'character':entry['character'],
+                'source':self.source,
+                'key':entry['id'],
+            }
+                for entry in self.castsRaw['cast']
+        ]
+
+    @lazyProperty
+    def director(self):
+        try:
+            crew = self.castsRaw['crew']
+            for entry in crew:
+                if entry['job'] == 'Director':
+                    return {
+                        'name': entry['name'],
+                        'source': self.source,
+                        'key': entry['id'],
+                    }
+        except Exception:
+            pass
+        return { 'name':'' }
+
+    @lazyProperty
+    def date(self):
+        try:
+            string = self.info['release_date']
+            return parseDateString(string)
+        except KeyError:
+            pass
+        return None
+
+    @lazyProperty
+    def length(self):
+        try:
+            return self.info['runtime'] * 60
+        except Exception:
+            pass
+        return -1
+
+    @lazyProperty 
+    def genres(self):
+        try:
+            return [ entry['name'] for entry in self.info['genres'] ]
+        except KeyError:
+            logs.info('no genres for %s (%s:%s)' % (self.name, self.source, self.key))
+            return []
+
+class TMDBSource(GenericSource):
     """
     """
     def __init__(self):
-        BasicSource.__init__(self, 'tmdb',
-            'tmdb',
-
+        GenericSource.__init__(self, 'tmdb',
             'director',
             'cast',
         )
@@ -39,7 +149,47 @@ class TMDBSource(BasicSource):
 
     @lazyProperty
     def __tmdb(self):
-        return TMDB()
+        return globalTMDB()
+
+    def matchSource(self, query):
+        if query.type == 'movie':
+            return self.movieSource(query)
+        else:
+            return self.emptySource
+
+    def movieSource(self, query):
+        def gen():
+            try:
+                results = self.__tmdb.movie_search(query.name)
+                for movie in results['results']:
+                    yield movie
+                pages = results['total_pages']
+
+                if pages > 1:
+                    for p in range(1,pages):
+                        results = self.__tmdb.movie_search(query.name, page=p+1)
+                        for movie in results['results']:
+                            yield movie
+            except GeneratorExit:
+                pass
+        generator = gen()
+        movies = []
+        def source(start, count):
+            total = start + count
+            while total - len(movies) > 0:
+                try:
+                    movies.append(generator.next())
+                except StopIteration:
+                    break
+
+            if start + count <= len(movies):
+                result = movies[start:start+count]
+            elif start < len(movies):
+                result = movies[start:]
+            else:
+                result = []
+            return [ TMDBMovie( entry['id'] ) for entry in result ]
+        return source
 
     def __release_date(self, movie):
         result = None
@@ -55,6 +205,7 @@ class TMDBSource(BasicSource):
         return result
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
         if controller.shouldEnrich('tmdb',self.sourceName,entity):
             title = entity['title']
             if title is not None:
@@ -126,3 +277,5 @@ class TMDBSource(BasicSource):
                         pass
         return True
 
+if __name__ == '__main__':
+    demo(TMDBSource(), 'Avatar')

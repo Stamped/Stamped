@@ -10,37 +10,20 @@ __license__   = "TODO"
 
 __all__ = [
     'Resolver',
-
+    'ResolverObject',
     'ResolverArtist',
-    'RdioArtist',
-    'SpotifyArtist',
-    'iTunesArtist',
-    'EntityArtist',
-
     'ResolverAlbum',
-    'RdioAlbum',
-    'SpotifyAlbum',
-    'iTunesAlbum',
-    'EntityAlbum',
-
     'ResolverTrack',
-    'RdioTrack',
-    'SpotifyTrack',
-    'iTunesTrack',
-    'EntityTrack',
+    'ResolverMovie',
+    'demo',
 ]
 
 import Globals
 from logs import report
 
 try:
-    from libs.Rdio                  import globalRdio
-    from libs.Spotify               import globalSpotify
-    from libs.iTunes                import globaliTunes
-    from libs.TMDB                  import globalTMDB
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
-    from Schemas                    import Entity
     import logs
     import re
     from pprint                     import pprint, pformat
@@ -50,6 +33,7 @@ try:
     import math
     from abc                        import ABCMeta, abstractmethod, abstractproperty
     from libs.LibUtils              import parseDateString
+    from datetime                   import datetime
 except:
     report()
     raise
@@ -217,196 +201,6 @@ class ResolverObject(object):
     def type(self):
         pass
 
-class _EntityObject(object):
-    """
-    Abstract superclass (mixin) for Entity based objects.
-
-    Creates a deepcopy of the entity, accessible via the 'entity' attribute.
-    """
-
-    def __init__(self, entity):
-        self.__entity = Entity()
-        self.__entity.importData(entity.value)
-
-    @property
-    def entity(self):
-        return self.__entity
-
-    @lazyProperty
-    def name(self):
-        return self.entity['title']
-
-    @lazyProperty
-    def key(self):
-        return self.entity['entity_id']
-
-    @property 
-    def source(self):
-        return "stamped"
-
-    def __repr__(self):
-        return pformat( self.entity.value )
-
-class _RdioObject(object):
-    """
-    Abstract superclass (mixin) for Rdio objects.
-
-    _RdioObjects can be instatiated with either the rdio_id or the rdio data for an entity.
-    If both are provided, they must match. extras may be used to retrieve additional data
-    when instantiating an object using only its id.
-
-    Attributes:
-
-    data - the type-specific rdio data for the entity
-    rdio - an instance of Rdio (API wrapper)
-    """
-
-    def __init__(self, data=None, rdio_id=None, rdio=None, extras=''):
-        if rdio is None:
-            rdio = globalRdio()
-        if data == None:
-            if rdio_id is None:
-                raise ValueError('data or rdio_id must not be None')
-            try:
-                data = rdio.method('get',keys=rdio_id,extras=extras)['result'][rdio_id]
-            except KeyError:
-                raise ValueError('bad rdio_id')
-        elif rdio_id is not None:
-            if rdio_id != data['key']:
-                raise ValueError('rdio_id does not match data["key"]')
-        self.__rdio = rdio
-        self.__data = data
-
-    @property
-    def rdio(self):
-        return self.__rdio
-
-    @property
-    def data(self):
-        return self.__data
-
-    @lazyProperty
-    def name(self):
-        return self.data['name']
-
-    @lazyProperty
-    def key(self):
-        return self.data['key']
-
-    @property 
-    def source(self):
-        return "rdio"
-
-    def __repr__(self):
-        return pformat( self.data )
-
-
-class _SpotifyObject(object):
-    """
-    Abstract superclass (mixin) for Spotify objects.
-
-    _SpotifyObjects must be instantiated with their valid spotify_id.
-
-    Attributes:
-
-    spotify - an instance of Spotify (API wrapper)
-    """
-
-    def __init__(self, spotify_id, spotify=None):
-        if spotify is None:
-            spotify = globalSpotify()
-        self.__spotify = spotify
-        self.__spotify_id = spotify_id
-
-    @property
-    def spotify(self):
-        return self.__spotify
-
-    @lazyProperty
-    def key(self):
-        return self.__spotify_id
-
-    @property 
-    def source(self):
-        return "spotify"
-
-    def __repr__(self):
-        return "<%s %s %s>" % (self.source, self.type, self.name)
-
-
-class _iTunesObject(object):
-    """
-    Abstract superclass (mixin) for iTunes objects.
-
-    _iTunesObjects may be instantiated with either their iTunes data or their id.
-    If both are provided, they must match.
-
-    Attributes:
-
-    data - the type specific iTunes data for the object.
-    itunes - an instance of iTunes (API wrapper)
-    """
-
-    def __init__(self, itunes_id=None, data=None, itunes=None):
-        if itunes is None:
-            itunes = globaliTunes()
-        self.__itunes = itunes
-        if data == None:
-            self.__data = itunes.method('lookup',id=itunes_id)['results'][0]
-        else:
-            self.__data = data
-            if itunes_id is not None and itunes_id != self.__data['artistId']:
-                raise ValueError('data does not match id')
-
-    @property
-    def data(self):
-        return self.__data
-
-    @property 
-    def itunes(self):
-        return self.__itunes
-
-    @property 
-    def source(self):
-        return "itunes"
-
-    def __repr__(self):
-        return pformat( self.data )
-
-
-class _TMDBObject(object):
-    """
-    Abstract superclass (mixin) for TMDB objects.
-
-    _TMDBObjects must be instantiated with their tmdb_id.
-
-    Attributes:
-
-    tmdb - an instance of TMDB (API wrapper)
-    info (abstract) - the type-specific TMDB data for the object
-    """
-    def __init__(self, tmdb_id):
-        self.__key = tmdb_id
-
-    @property
-    def key(self):
-        return self.__key
-
-    @property
-    def source(self):
-        return "tmdb"
-
-    @lazyProperty
-    def tmdb(self):
-        return globalTMDB()
-
-    @abstractproperty
-    def info(self):
-        pass
-
-    def __repr__(self):
-        return pformat( self.info )
-
 #
 # Artist
 #
@@ -433,109 +227,6 @@ class ResolverArtist(ResolverObject):
     def type(self):
         return 'artist'
 
-class RdioArtist(_RdioObject, ResolverArtist):
-    """
-    Rdio artist wrapper
-    """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')  
-        ResolverArtist.__init__(self)
-
-    @lazyProperty
-    def albums(self):
-        album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
-        return [ {'name':entry['name']} for entry in album_list ]
-
-    @lazyProperty
-    def tracks(self):
-        track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
-        return [ {'name':entry['name']} for entry in track_list ]
-
-
-class SpotifyArtist(_SpotifyObject, ResolverArtist):
-    """
-    Spotify artist wrapper
-    """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverArtist.__init__(self)
-
-    @lazyProperty
-    def name(self):
-        result = self.spotify.lookup(self.key)
-        return result['artist']['name']
-
-    @lazyProperty
-    def albums(self):
-        result = self.spotify.lookup(self.key, "albumdetail")
-        album_list = result['artist']['albums']
-        return [
-            {
-                'name':entry['album']['name'],
-                'key':entry['album']['href'],
-            }
-                for entry in album_list
-                    if entry['album']['artist'] == self.name and entry['album']['availability']['territories'].find('US') != -1
-        ]
-
-    @lazyProperty
-    def tracks(self):
-        tracks = {}
-        for album in self.albums:
-            key = album['key']
-            result = self.spotify.lookup(key, 'trackdetail')
-            track_list = result['album']['tracks']
-            for track in track_list:
-                track_key = track['href']
-                if track_key not in tracks:
-                    tracks[track_key] = {
-                        'name': track['name'],
-                    }
-        return list(tracks.values())
-
-
-class iTunesArtist(_iTunesObject, ResolverArtist):
-    """
-    iTunes artist wrapper
-    """
-    def __init__(self, itunes_id=None, data=None, itunes=None):
-        _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverArtist.__init__(self)
-
-    @lazyProperty
-    def name(self):
-        return self.data['artistName']
-
-    @lazyProperty
-    def key(self):
-        return self.data['artistId']
-
-    @lazyProperty
-    def albums(self):
-        results = self.itunes.method('lookup',id=self.key,entity='album')['results']
-        return [ {'name':album['collectionName']} for album in results if album.pop('collectionType',None) == 'Album' ]
-
-    @lazyProperty
-    def tracks(self):
-        results = self.itunes.method('lookup',id=self.key,entity='song')['results']
-        return [ {'name':track['trackName']} for track in results if track.pop('wrapperType',None) == 'track' ]
-
-
-class EntityArtist(_EntityObject, ResolverArtist):
-    """
-    Entity artist wrapper
-    """
-    def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
-        ResolverArtist.__init__(self)
-
-    @lazyProperty
-    def albums(self):
-        return [ {'name':album['album_name']} for album in self.entity['albums'] ]
-
-    @lazyProperty
-    def tracks(self):
-        return [ {'name':song['song_name']} for song in self.entity['songs'] ]
 
 #
 #       #       #       ######  #       # #     #
@@ -568,97 +259,6 @@ class ResolverAlbum(ResolverObject):
     def type(self):
         return 'album'
 
-class RdioAlbum(_RdioObject, ResolverAlbum):
-    """
-    Rdio album wrapper
-    """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverAlbum.__init__(self)
-
-    @lazyProperty
-    def artist(self):
-        return { 'name' : self.data['artist'] }
-
-    @lazyProperty
-    def tracks(self):
-        keys = ','.join(self.data['trackKeys'])
-        track_dict = self.rdio.method('get',keys=keys)['result']
-        return [ {'name':entry['name']} for k, entry in track_dict.items() ]
-
-
-class SpotifyAlbum(_SpotifyObject, ResolverAlbum):
-    """
-    Spotify album wrapper
-    """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverAlbum.__init__(self)
-
-    @lazyProperty
-    def name(self):
-        result = self.spotify.lookup(self.key)
-        return result['album']['name']
-
-    @lazyProperty
-    def artist(self):
-        result = self.spotify.lookup(self.key)
-        return { 'name': result['album']['artist'] }
-
-    @lazyProperty
-    def tracks(self):
-        result = self.spotify.lookup(self.key, 'trackdetail')
-        track_list = result['album']['tracks']
-        return [
-            {
-                'name':track['name'],
-            }
-                for track in track_list
-        ]
-
-
-class iTunesAlbum(_iTunesObject, ResolverAlbum):
-    """
-    iTunes album wrapper
-    """
-    def __init__(self, itunes_id=None, data=None, itunes=None):
-        _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverAlbum.__init__(self)
-
-    @lazyProperty
-    def name(self):
-        return self.data['collectionName']
-
-    @lazyProperty
-    def key(self):
-        return self.data['collectionId']
-
-    @lazyProperty
-    def artist(self):
-        return {'name' : self.data['artistName'] }
-
-    @lazyProperty
-    def tracks(self):
-        results = self.itunes.method('lookup', id=self.key, entity='song')['results']
-        return [ {'name':track['trackName']} for track in results if track.pop('wrapperType',None) == 'track' ]
-
-
-class EntityAlbum(_EntityObject, ResolverAlbum):
-    """
-    Entity album wrapper
-    """
-    def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
-        ResolverAlbum.__init__(self)
-
-    @lazyProperty
-    def artist(self):
-        return { 'name' : self.entity['artist_display_name'] }
-
-    @lazyProperty
-    def tracks(self):
-        return [ {'name':entry.value} for entry in self.entity['tracks'] ]
-
 #
 # Tracks
 #
@@ -688,116 +288,6 @@ class ResolverTrack(ResolverObject):
     @property 
     def type(self):
         return 'track'
-
-
-class RdioTrack(_RdioObject, ResolverTrack):
-    """
-    Rdio track wrapper
-    """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverTrack.__init__(self)
-
-    @lazyProperty
-    def artist(self):
-        return {'name':self.data['artist']}
-
-    @lazyProperty
-    def album(self):
-        return {'name':self.data['album']}
-
-    @lazyProperty
-    def length(self):
-        return float(self.data['duration'])
-
-
-class SpotifyTrack(_SpotifyObject, ResolverTrack):
-    """
-    Spotify track wrapper
-    """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverTrack.__init__(self)
-
-    @lazyProperty
-    def data(self):
-        return self.spotify.lookup(self.key)['track']
-
-    @lazyProperty
-    def name(self):
-        return self.data['name']
-
-    @lazyProperty
-    def artist(self):
-        try:
-            return {'name': self.data['artists'][0]['name'] }
-        except Exception:
-            return {'name':''}
-
-    @lazyProperty
-    def album(self):
-        return {'name':self.data['album']['name']}
-
-    @lazyProperty
-    def length(self):
-        return float(self.data['length'])
-
-
-class iTunesTrack(_iTunesObject, ResolverTrack):
-    """
-    iTunes track wrapper
-    """
-    def __init__(self, itunes_id=None, data=None, itunes=None):
-        _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverTrack.__init__(self)
-
-    @lazyProperty
-    def name(self):
-        return self.data['trackName']
-
-    @lazyProperty
-    def key(self):
-        return self.data['trackId']
-
-    @lazyProperty
-    def artist(self):
-        try:
-            return {'name' : self.data['artistName'] }
-        except:
-            return {'name' : ''}
-
-    @lazyProperty
-    def album(self):
-        try:
-            return {'name' : self.data['collectionName'] }
-        except Exception:
-            return {'name' : ''}
-
-    @lazyProperty
-    def length(self):
-        return float(self.data['trackTimeMillis']) / 1000
-
-
-class EntityTrack(_EntityObject, ResolverTrack):
-    """
-    Entity track wrapper
-    """
-    def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
-        ResolverTrack.__init__(self)
-
-    @lazyProperty
-    def artist(self):
-        return {'name':self.entity['artist_display_name']}
-
-    @lazyProperty
-    def album(self):
-        return {'name':self.entity['album_name']}
-
-    @lazyProperty
-    def length(self):
-        return float(self.entity['track_length'])
-
 
 #
 # Movie
@@ -843,76 +333,6 @@ class ResolverMovie(ResolverObject):
     @property 
     def type(self):
         return 'movie'
-
-#TODO finish
-class TMDBMovie(_TMDBObject, ResolverMovie):
-    """
-    TMDB movie wrapper
-    """
-    def __init__(self, tmdb_id):
-        _TMDBObject.__init__(self, tmdb_id)
-        ResolverMovie.__init__(self)
-
-    @lazyProperty
-    def info(self):
-        return self.tmdb.movie_info(self.key)
-
-    @lazyProperty
-    def castsRaw(self):
-        return self.tmdb.movie_casts(self.key)
-
-    @lazyProperty
-    def cast(self):
-        return [
-            {
-                'name':entry['name'],
-                'character':entry['character'],
-                'source':self.source,
-                'key':entry['id'],
-            }
-                for entry in self.castsRaw['cast']
-        ]
-
-    @lazyProperty
-    def directory(self):
-        try:
-            crew = self.castsRaw['crew']
-            for entry in crew:
-                if entry['job'] == 'Directory':
-                    return {
-                        'name': entry['name'],
-                        'source': self.source,
-                        'key': entry['id'],
-                    }
-        except Exception:
-            pass
-        return { 'name':'' }
-
-    @lazyProperty
-    def date(self):
-        try:
-            string = self.info['release_date']
-            return parseDateString(string)
-        except KeyError:
-            pass
-        return None
-
-    @lazyProperty
-    def length(self):
-        try:
-            return self.info['runtime'] * 60
-        except Exception:
-            pass
-        return -1
-
-    @lazyProperty 
-    def genres(self):
-        try:
-            return [ entry['name'] for entry in self.info['genres'] ]
-        except KeyError:
-            logs.info('no genres for %s (%s:%s)' % (self.name, self.source, self.key))
-            return []
-
 ##
 # Main Resolver class
 ##
@@ -932,59 +352,6 @@ class Resolver(object):
     """
     def __init__(self):
         pass
-
-    def artistFromEntity(self, entity):
-        """
-        ResolverArtist factory method for entities.
-
-        This method may or may not return a simple EntityArtist or
-        it could return a different implementation of ResolverArtist.
-        This method should be used optimistically with the hope that
-        should an entity be deficient in some way, the Resolver may be
-        able to safely enrich it.
-        """
-        return EntityArtist(entity)
-
-    def albumFromEntity(self, entity):
-        """
-        ResolverAlbum factory method for entities.
-
-        This method may or may not return a simple EntityAlbum or
-        it could return a different implementation of ResolverAlbum.
-        This method should be used optimistically with the hope that
-        should an entity be deficient in some way, the Resolver may be
-        able to safely enrich it.
-        """
-        return EntityAlbum(entity)
-
-    def trackFromEntity(self, entity):
-        """
-        ResolverTrack factory method for entities.
-
-        This method may or may not return a simple EntityTrack or
-        it could return a different implementation of ResolverTrack.
-        This method should be used optimistically with the hope that
-        should an entity be deficient in some way, the Resolver may be
-        able to safely enrich it.
-        """
-        return EntityTrack(entity)
-
-    def wrapperFromEntity(self, entity):
-        """
-        Generic ResolverObject factory method for entities.
-
-        This method will create a type specific ResolverObject
-        based on the type of the given entity.
-        """
-        sub = entity['subcategory']
-        if sub == 'song':
-            return self.trackFromEntity(entity)
-        elif sub == 'album':
-            return self.albumFromEntity(entity)
-        elif sub == 'artist':
-            return self.artistFromEntity(entity)
-        else:
-            raise ValueError('Unrecognized subcategory %s for %s' % (sub, entity['title']))
 
     def setSimilarity(self, a, b):
         """
@@ -1028,6 +395,10 @@ class Resolver(object):
 
         Returns a similarity decimal [0,1]
         """
+        if a is None or b is None:
+            return 0
+        if a == '' or b == '':
+            return 0
         if len(a) < len(b):
             b, a = a, b
         if a == b:
@@ -1081,6 +452,36 @@ class Resolver(object):
         diff = abs(q - m)
         return (1 - (float(diff)/max(q, m)))**2
 
+    def dateSimilarity(self, q, m):
+        """
+        Date specific similarity metric.
+        """
+        if q is None or m is None:
+            return 0
+        diff = abs((q - m).total_seconds()) / (60*60*24)
+        v = 0
+        if diff <= 1:
+            v = 1.0
+        elif diff <= 31:
+            v = .90
+        elif diff <= 100:
+            v = .80
+        elif diff <= 365:
+            v = .70
+        elif diff <= 700:
+            v = .30
+        else:
+            v = 0
+        if q.year != m.year:
+            v *= .8
+        return v
+
+    def directorSimilarity(self, q, m):
+        """
+        Director specific similarity metric.
+        """
+        return self.nameSimilarity(q.director['name'], m.director['name'])
+
     def checkArtist(self, results, query, match, options):
         tests = [
             ('name', lambda q, m, s, o: self.artistSimilarity(q.name, m.name)),
@@ -1123,18 +524,20 @@ class Resolver(object):
         self.genericCheck(tests, weights, results, query, match, options)
 
 
-    def checkMovie(query, match, options):
+    def checkMovie(self, results, query, match, options):
         tests = [
             ('name', lambda q, m, s, o: self.movieSimilarity(q.name, m.name)),
             ('cast', lambda q, m, s, o: self.castSimilarity(q, m)),
             ('director', lambda q, m, s, o: self.directorSimilarity(q, m)),
-            ('length', lambda q, m, s, o: self.lengthSimilarity(q, m)),
+            ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
+            ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
             'cast': lambda q, m, s, o: self.__castWeight(q, m),
-            'director': lambda q, m, s, o: self.__nameWeight(q.director, m.director),
-            'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length),
+            'director': lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
+            'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * 3,
+            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) ,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1145,7 +548,7 @@ class Resolver(object):
         success, similarities = self.__compareAll(query, match, tests, options)
         if success:
             self.__addTotal(similarities, weights, query, match, options)
-            if similarities['total'] >= mins['total']:
+            if 'total' not in mins or similarities['total'] >= mins['total']:
                 results.append((similarities,match))
 
     def resolve(self, query, source, **options):
@@ -1211,7 +614,7 @@ class Resolver(object):
         if _verbose:
             self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
 
-        return self.setSimilarity(query_track_set, match_track_set)
+        return self.setSimilarity(query_cast_set, match_cast_set)
 
 
     def parseGeneralOptions(self, query, options):
@@ -1293,6 +696,8 @@ class Resolver(object):
                 options['check'] = self.checkAlbum
             elif query.type =='artist':
                 options['check'] = self.checkArtist
+            elif query.type =='movie':
+                options['check'] = self.checkMovie
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
@@ -1300,6 +705,8 @@ class Resolver(object):
         return options
 
     def __nameWeight(self, a, b):
+        if a is None or a == '':
+            return 1
         la = len(a)
         lb = len(b)
         if la == 0 or lb == 0:
@@ -1309,6 +716,12 @@ class Resolver(object):
     def __lengthWeight(self, q, m):
         #TODO improve
         return 4
+
+    def __dateWeight(self, q, m):
+        if q == None:
+            return 2
+        else:
+            return 5
 
     def __setWeight(self, q, m):
         size = len( q | m )
@@ -1324,6 +737,12 @@ class Resolver(object):
 
     def __tracksWeight(self, query, match):
         return self.__setWeight(self.tracksSet(query), self.tracksSet(match))
+
+    def __castWeight(self, query, match):
+        if query.cast == []:
+            return 1
+        else:
+            return self.__setWeight(self.castSet(query), self.castSet(match))
 
     def __sortedPairs(self, results, batch):
         results.extend(batch)
@@ -1403,13 +822,36 @@ class Resolver(object):
             print( "%s: %s" % (source, item))
 
 def demo(generic_source, default_title):
+    """
+    Generic command-line demo function
+
+    usage:
+    python SOURCE_MODULE.py [ title [ subcategory [ count ] ] ]
+
+    This demo queries the EntityDB for an entity matching the
+    given title (or default_title). If a subcategory is given,
+    the query is restricted to that category. Othewise, the
+    query is title-based and the type is determined by the 
+    results subcategory.
+
+    Once an entity is selected, it is converted to a query and
+    resolved against the given source, with extemely verbose 
+    output enabled (not necessarilly to logger, possibly stdout).
+    The count option (1 by default) will be passed to resolve.
+
+    If the entity was successfully resolved, demo() will attempt to
+    invert it using a StampedSource. The result of this inversion 
+    will also be verbosely outputted. 
+    """
     import sys
+    import StampedSource
 
     title = default_title
     subcategory = None
     count = 1
 
     resolver = Resolver()
+    entity_source = StampedSource.StampedSource()
 
     print(sys.argv)
     if len(sys.argv) > 1:
@@ -1432,6 +874,28 @@ def demo(generic_source, default_title):
         return
     result = cursor[0]
     entity = db._convertFromMongo(result)
-    query = resolver.wrapperFromEntity(entity)
-    results = resolver.resolve(query, generic_source.matchSource(query), count=1)
+    query = entity_source.wrapperFromEntity(entity)
+    results = resolver.resolve(query, generic_source.matchSource(query), count=count)
     pprint(results)
+    print("\n\nFinal result:\n")
+    print(query)
+    if len(results) > 0:
+        best = results[0]
+        pprint(best[0])
+        pprint(best[1])
+        if best[0]['resolved']:
+            print("\nAttempting to invert")
+            new_query = best[1]
+            new_results = resolver.resolve(new_query, entity_source.matchSource(new_query), count=1)
+            print('Inversion results:\n%s' % pformat(new_results) )
+            if len(new_results) > 0 and new_results[0][0]['resolved']:
+                best = new_results[0][1]
+                if best.key == query.key:
+                    print("Inversion succesful")
+                else:
+                    print("Inverted to different entity! (dup or false positive)")
+            else:
+                print("Inversion failed! (low asymetric similarity?)")
+
+    else:
+        print("No results")

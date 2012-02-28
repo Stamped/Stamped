@@ -39,6 +39,9 @@ class TMDB(object):
     def person_search(self, query, page=1):
         return self.__tmdb('search/person',query=query,page=page)
 
+    def person_info(self, tmdb_id):
+        return self.__tmdb('person/%s' %(tmdb_id,))
+
     def person_credits(self, tmdb_id):
         return self.__tmdb('person/%s/credits' %(tmdb_id,))
 
