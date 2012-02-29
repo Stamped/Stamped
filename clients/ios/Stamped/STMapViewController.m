@@ -189,7 +189,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   frame.size.height = toolbar_.hidden ? 372 : 323;
   mapView_.frame = frame;
   [mapView_ setNeedsDisplay];
-  [self loadDataFromNetwork];
+  if (mapView_.selectedAnnotations.count == 0)
+    [self loadDataFromNetwork];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -684,6 +685,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   self.resultsArray = nil;
   self.cachedCoordinates = nil;
   self.searchField.text = nil;
+  self.selectedAnnotation = nil;
   [self resetCaches];
   [self removeAllAnnotations];
   zoomToLocation_ = YES;
