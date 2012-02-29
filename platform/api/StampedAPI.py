@@ -2371,7 +2371,7 @@ class StampedAPI(AStampedAPI):
                 # stamps is less than the limit
                 if num_stamps >= genericCollectionSlice.limit:
                     for i in reversed(xrange(len(stamps))):
-                        if not stamp.deleted:
+                        if 'deleted' not in stamp:
                             break
                         
                         stamps.pop(i)
