@@ -2362,7 +2362,7 @@ class StampedAPI(AStampedAPI):
         
         if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
             if num_stamps >= genericCollectionSlice.limit:
-                genericCollectionSlice.since = stamps[-1]['timestamp'][ts] 
+                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
 
             deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
             
