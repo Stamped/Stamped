@@ -111,7 +111,7 @@ class AMongoCollectionView(AMongoCollection):
             query["entity.coordinates.lat"] = { "$exists" : True}
             query["entity.coordinates.lng"] = { "$exists" : True}
         elif viewport:
-            query["entity.coordinates.lat"] = { 
+            query["entity.coordinates.lat"] = {
                 "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
                 "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
             }
@@ -294,8 +294,7 @@ class AMongoCollectionView(AMongoCollection):
                             
                             if (dist < 0) {
                                 dist_value = 0;
-                            }
-                            else {
+                            } else {
                                 var x = (dist - 50);
                                 var a = -0.4;
                                 var b = 2.8;
@@ -377,6 +376,31 @@ class AMongoCollectionView(AMongoCollection):
             results = map(lambda d: d['obj'], data)
             if reverse:
                 results = list(reversed(results))
+            
+            if relaxed:
+                def _within_viewport(result):
+                    if result.coordinates.lat >= scope['viewport']['lowerRight']['lat'] and 
+                        result.coordinates.lat <= scope['viewport']['upperLeft']['lat']:
+                        
+                        if scope['viewport']['upperLeft']['lng'] <= scope['viewport']['lowerRight']['lng']:
+                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] and 
+                                result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
+                                return True
+                        else:
+                            # handle special case where the viewport crosses the +180 / -180 mark
+                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] or 
+                                result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
+                                return True
+                    
+                    return False
+                
+                inside = filter(_within_viewport, results)
+                
+                if len(inside) > 0:
+                    logs.debug("%d results inside viewport; pruning %d results outside" % (len(inside), len(results) - len(inside)))
+                    results = inside
+                else:
+                    logs.debug("no results inside viewport; %d results outside" % (len(results), ))
             
             results = results[genericCollectionSlice.offset : genericCollectionSlice.offset + genericCollectionSlice.limit]
         
