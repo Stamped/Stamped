@@ -378,7 +378,7 @@ class AMongoCollectionView(AMongoCollection):
             if reverse:
                 results = list(reversed(results))
             
-            if relaxed:
+            if viewport and relaxed:
                 scope = AttributeDict(scope)
                 
                 def _within_viewport(result):
