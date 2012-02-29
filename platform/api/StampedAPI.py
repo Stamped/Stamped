@@ -2358,12 +2358,23 @@ class StampedAPI(AStampedAPI):
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         
+        num_stamps = len(stamps)
+        
         if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
             deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
             
             if len(deleted) > 0:
                 stamps = stamps + deleted
                 stamps.sort(key=lambda k: k.timestamp[genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+                
+                # HACK (1.1): delete all trailing stamps if the number of normal 
+                # stamps is less than the limit
+                if num_stamps >= genericCollectionSlice.limit:
+                    for i in reversed(xrange(len(stamps))):
+                        if not stamp.deleted:
+                            break
+                        
+                        stamps.pop(i)
         
         return stamps
     

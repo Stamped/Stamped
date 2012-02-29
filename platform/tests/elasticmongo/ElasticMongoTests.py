@@ -53,3 +53,58 @@ class ElasticMongoTests(AElasticMongoTest):
 if __name__ == '__main__':
     StampedTestRunner().run()
 
+# need to handle stamp-specific info (e.g., blurbs) separately from entities
+
+"""
+indices  = [
+    { 'name' : 'entities', }, 
+    { 'name' : 'stamps', }, 
+]
+
+mappings = [
+    {
+        'ns'        : ns, 
+        'type'      : 'line', 
+        'indices'   : [ 'plays', ], 
+        'mapping'   : {
+            'title' : {
+                'boost' : 1.0, 
+                'index' : 'analyzed', 
+                'store' : 'yes', 
+                'type'  : 'string', 
+                'term_vector' : 'with_position_offsets', 
+            }, 
+            'genre' : {
+                'index' : 'analyzed', 
+                'store' : 'yes', 
+                'type'  : 'string', 
+                'term_vector' : 'with_position_offsets', 
+            }, 
+            'speaker' : {
+                'index' : 'analyzed', 
+                'store' : 'yes', 
+                'type'  : 'string', 
+                'term_vector' : 'with_position_offsets', 
+            }, 
+            'lines' : {
+                'properties' : {
+                    'ref'   : {
+                        'index' : 'analyzed', 
+                        'store' : 'yes', 
+                        'type'  : 'string', 
+                    }, 
+                    'line'  : {
+                        'boost' : 2.0, 
+                        'index' : 'analyzed', 
+                        'store' : 'yes', 
+                        'type'  : 'string', 
+                        'term_vector' : 'with_position_offsets', 
+                    }, 
+                }, 
+            }, 
+        }, 
+    }, 
+]
+
+"""
+
