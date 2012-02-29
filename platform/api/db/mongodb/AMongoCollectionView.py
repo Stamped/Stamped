@@ -9,6 +9,7 @@ import Globals, utils
 import bson, logs, pprint, pymongo
 import libs.worldcities
 
+from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
 
 class AMongoCollectionView(AMongoCollection):
@@ -378,18 +379,21 @@ class AMongoCollectionView(AMongoCollection):
                 results = list(reversed(results))
             
             if relaxed:
+                scope = AttributeDict(scope)
+                
                 def _within_viewport(result):
-                    if result.coordinates.lat >= scope['viewport']['lowerRight']['lat'] and \
-                        result.coordinates.lat <= scope['viewport']['upperLeft']['lat']:
+                    result = AttributeDict(result)
+                    if result.entity.coordinates.lat >= scope.viewport.lowerRight.lat and \
+                        result.entity.coordinates.lat <= scope.viewport.upperLeft.lat:
                         
-                        if scope['viewport']['upperLeft']['lng'] <= scope['viewport']['lowerRight']['lng']:
-                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] and \
-                                result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
+                        if scope.viewport.upperLeft.lng <= scope.viewport.lowerRight.lng:
+                            if result.entity.coordinates.lng >= scope.viewport.upperLeft.lng and \
+                                result.entity.coordinates.lng <= scope.viewport.lowerRight.lng:
                                 return True
                         else:
                             # handle special case where the viewport crosses the +180 / -180 mark
-                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] or \
-                                result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
+                            if result.entity.coordinates.lng >= scope.viewport.upperLeft.lng or \
+                                result.entity.coordinates.lng <= scope.viewport.lowerRight.lng:
                                 return True
                     
                     return False
