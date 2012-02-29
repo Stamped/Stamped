@@ -1166,12 +1166,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         ### TODO: Check if user has access to this entity?
-        if self.__is_prod is False:
-            modified = self._enrichEntity(entity)
-            if modified:
-                self._entityDB.update(entity)
-        else:
-            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
     
     @API_CALL

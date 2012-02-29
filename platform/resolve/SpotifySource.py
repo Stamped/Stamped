@@ -17,6 +17,7 @@ try:
     from libs.Spotify               import globalSpotify
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
+    from gevent.pool                import Pool
     import logs
     from Resolver                   import *
 except:
@@ -66,14 +67,17 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
         ResolverArtist.__init__(self)
 
     @lazyProperty
+    def data(self):
+        result = self.spotify.lookup(self.key, "albumdetail")
+        return result['artist']
+
+    @lazyProperty
     def name(self):
-        result = self.spotify.lookup(self.key)
-        return result['artist']['name']
+        return self.data['name']
 
     @lazyProperty
     def albums(self):
-        result = self.spotify.lookup(self.key, "albumdetail")
-        album_list = result['artist']['albums']
+        album_list = self.data['albums']
         return [
             {
                 'name':entry['album']['name'],
@@ -86,8 +90,7 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
     @lazyProperty
     def tracks(self):
         tracks = {}
-        for album in self.albums:
-            key = album['key']
+        def lookupTrack(key):
             result = self.spotify.lookup(key, 'trackdetail')
             track_list = result['album']['tracks']
             for track in track_list:
@@ -96,6 +99,11 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
                     tracks[track_key] = {
                         'name': track['name'],
                     }
+        pool = Pool(min(len(self.albums),20))
+        for album in self.albums:
+            key = album['key']
+            pool.spawn(lookupTrack, key)
+        pool.join()
         return list(tracks.values())
 
 
@@ -108,19 +116,20 @@ class SpotifyAlbum(_SpotifyObject, ResolverAlbum):
         ResolverAlbum.__init__(self)
 
     @lazyProperty
+    def data(self):
+        return self.spotify.lookup(self.key, 'trackdetail')['album']
+
+    @lazyProperty
     def name(self):
-        result = self.spotify.lookup(self.key)
-        return result['album']['name']
+        return self.data['name']
 
     @lazyProperty
     def artist(self):
-        result = self.spotify.lookup(self.key)
-        return { 'name': result['album']['artist'] }
+        return { 'name': self.data['artist'] }
 
     @lazyProperty
     def tracks(self):
-        result = self.spotify.lookup(self.key, 'trackdetail')
-        track_list = result['album']['tracks']
+        track_list = self.data['tracks']
         return [
             {
                 'name':track['name'],
@@ -203,7 +212,7 @@ class SpotifySource(GenericSource):
                 result = albums[start:]
             else:
                 result = []
-            return [ SpotifyAlbum( entry['href'] ) for entry in result ]
+            return [ SpotifyAlbum( entry['href'] ) for entry in result if entry['availability']['territories'].find('US') != -1 ]
         return source
 
 
