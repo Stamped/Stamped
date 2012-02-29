@@ -259,6 +259,7 @@ class ResolverAlbum(ResolverObject):
     def type(self):
         return 'album'
 
+
 #
 # Tracks
 #
@@ -680,7 +681,7 @@ class Resolver(object):
             if query.type == 'artist':
                 groups.extend([4, 20, 30])
             elif query.type == 'album':
-                groups.extend([10, 20, 50])
+                groups.extend([5, 10, 50])
             elif query.type == 'track':
                 groups.extend([20, 50, 100])
             elif query.type == 'movie':

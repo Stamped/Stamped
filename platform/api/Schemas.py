@@ -494,11 +494,18 @@ class Entity(Schema):
         self.titlel             = SchemaElement(basestring)
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
+        self.subtitle_source    = SchemaElement(basestring)
+        self.subtitle_timestamp = SchemaElement(datetime)
+
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
         # Not present in existing database
         self.locale             = SchemaElement(basestring)
+        
         self.desc               = SchemaElement(basestring)
+        self.desc_source        = SchemaElement(basestring)
+        self.desc_timestamp     = SchemaElement(datetime)
+
         self.image              = SchemaElement(basestring)
         self.popularity         = SchemaElement(int)
         self.timestamp          = TimestampSchema()
@@ -788,7 +795,10 @@ class AlbumSchema(Schema):
         self.a_availability_date        = SchemaElement(basestring)
         
         self.track_count                = SchemaElement(int)
+
         self.tracks                     = SchemaList(SchemaElement(basestring))
+        self.tracks_source              = SchemaElement(basestring)
+        self.tracks_timestamp           = SchemaElement(datetime)
 
 class ProductSchema(Schema):
     def setSchema(self):
@@ -808,34 +818,62 @@ class MediaSchema(Schema):
         self.release_date               = SchemaElement(datetime)
         self.release_date_source        = SchemaElement(basestring)
         self.release_date_timestamp     = SchemaElement(datetime)
+        self.track_length               = SchemaElement(basestring)
+        self.track_length_source        = SchemaElement(basestring)
+        self.track_length_timestamp     = SchemaElement(datetime)
 
         self.title_version              = SchemaElement(basestring)
         self.search_terms               = SchemaElement(basestring)
         self.parental_advisory_id       = SchemaElement(basestring)
-        self.artist_display_name        = SchemaElement(basestring)
         self.collection_display_name    = SchemaElement(basestring)
         self.original_release_date      = SchemaElement(basestring)
         self.itunes_release_date        = SchemaElement(basestring)
-        self.track_length               = SchemaElement(basestring)
         self.copyright                  = SchemaElement(basestring)
         self.p_line                     = SchemaElement(basestring)
         self.content_provider_name      = SchemaElement(basestring)
         self.media_type_id              = SchemaElement(basestring)
         self.artwork_url                = SchemaElement(basestring)
+
         self.mpaa_rating                = SchemaElement(basestring)
+        self.mpaa_rating_source         = SchemaElement(basestring)
+        self.mpaa_rating_timestamp      = SchemaElement(datetime)
+
+        self.artist_display_name        = SchemaElement(basestring)
+        self.artist_display_name_source = SchemaElement(basestring)
+        self.artist_display_name_timestamp = SchemaElement(datetime)
+
         self.genre                      = SchemaElement(basestring)
+        self.genre_source               = SchemaElement(basestring)
+        self.genre_timestamp            = SchemaElement(datetime)
+
         self.artist_id                  = SchemaElement(basestring)
         self.screenshots                = SchemaList(SchemaElement(basestring))
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
-        self.rdio               = RdioSchema()
-        self.tmdb               = TMDBSchema()
+        #new resolve fields
         self.singleplatform     = SinglePlatformSchema()
+        self.factual            = FactualSchema()
+
+        self.tmdb_id            = SchemaElement(basestring)
+        self.tmdb_source        = SchemaElement(basestring)
+        self.tmdb_timestamp     = SchemaElement(datetime)
+
+        self.spotify_id         = SchemaElement(basestring)
+        self.spotify_timestamp  = SchemaElement(datetime)
+        self.spotify_source     = SchemaElement(basestring)
+
+        self.itunes_id          = SchemaElement(basestring)
+        self.itunes_timestamp   = SchemaElement(datetime)
+        self.itunes_source      = SchemaElement(basestring)
+
+        self.rdio_id            = SchemaElement(basestring)
+        self.rdio_timestamp     = SchemaElement(datetime)
+        self.rdio_source        = SchemaElement(basestring)
+
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
         self.openTable          = OpenTableSchema()
-        self.factual            = FactualSchema()
         self.apple              = AppleSchema()
         self.zagat              = ZagatSchema()
         self.yelp               = YelpSchema()
@@ -899,18 +937,6 @@ class SinglePlatformSchema(Schema):
         self.singleplatform_id  = SchemaElement(basestring)
         self.singleplatform_timestamp  = SchemaElement(datetime)
         self.singleplatform_source = SchemaElement(basestring)
-
-class TMDBSchema(Schema):
-    def setSchema(self):
-        self.tmdb_id            = SchemaElement(basestring)
-        self.tmdb_source        = SchemaElement(basestring)
-        self.tmdb_timestamp     = SchemaElement(datetime)
-
-class RdioSchema(Schema):
-    def setSchema(self):
-        self.rdio_id            = SchemaElement(basestring)
-        self.rdio_timestamp     = SchemaElement(datetime)
-        self.rdio_source        = SchemaElement(basestring)
 
 class AppleSchema(Schema):
     def setSchema(self):

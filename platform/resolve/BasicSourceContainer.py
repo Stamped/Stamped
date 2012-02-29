@@ -16,7 +16,7 @@ try:
     from datetime               import datetime
     from datetime               import timedelta
     from copy                   import deepcopy
-    from pprint                 import pformat
+    from pprint                 import pformat, pprint
     from Schemas                import Entity
     import logs                 
 except:

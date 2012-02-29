@@ -115,6 +115,25 @@ class RdioGroup(ASubcategoryGroup):
         self.addEligible('artist')
         self.addEligible('album')
 
+class SpotifyGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'spotify')
+        self.addField(['spotify_id'])
+        self.addEligible('song')
+        self.addEligible('artist')
+        self.addEligible('album')
+
+class iTunesGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'itunes')
+        self.addField(['itunes_id'])
+        self.addEligible('song')
+        self.addEligible('artist')
+        self.addEligible('album')
+        self.addEligible('movie')
+
 class AddressGroup(APlaceGroup):
 
     def __init__(self):
@@ -172,6 +191,39 @@ class ReleaseDateGroup(AMediaGroup):
         AMediaGroup.__init__(self, 'release_date')
         self.addNameField()
 
+class MPAARatingGroup(AMediaGroup):
+
+    def __init__(self):
+        AMediaGroup.__init__(self, 'mpaa_rating')
+        self.addNameField()
+
+class GenreGroup(AMediaGroup):
+
+    def __init__(self):
+        AMediaGroup.__init__(self, 'genre')
+        self.addNameField()
+        self.addEligible('artist')
+
+class ArtistDisplayNameGroup(AMediaGroup):
+
+    def __init__(self):
+        AMediaGroup.__init__(self, 'artist_display_name')
+
+class TracksGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'tracks')
+        self.addNameField()
+        self.addEligible('album')
+
+class TrackLengthGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'track_length')
+        self.addNameField()
+        self.addEligible('song')
+        self.addEligible('movie')
+
 class DirectorGroup(AFilmGroup):
 
     def __init__(self):
@@ -192,4 +244,14 @@ class SubtitleGroup(BasicFieldGroup):
 
     def eligible(self, entity):
         return True
+
+class DescGroup(BasicFieldGroup):
+
+    def __init__(self, *args, **kwargs):
+        BasicFieldGroup.__init__(self, 'desc')
+        self.addNameField()
+
+    def eligible(self, entity):
+        return True
+
 

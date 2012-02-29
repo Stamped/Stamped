@@ -12,6 +12,8 @@ from logs import log, report
 
 try:
     from AFieldGroup    import AFieldGroup
+    from pprint         import pformat
+    from schema         import SchemaElement
 except:
     report()
     raise
@@ -89,7 +91,11 @@ class BasicFieldGroup(AFieldGroup):
         cur = entity
         for p in path[:-1]:
             cur = cur[p]
-        cur[path[-1]] = value
+        # weird schema error work-around
+        if isinstance(value, SchemaElement):
+            cur[path[-1]] = value.value
+        else:
+            cur[path[-1]] = value
 
     def addNameField(self):
         self.addField([self.groupName])
