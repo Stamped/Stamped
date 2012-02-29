@@ -623,14 +623,14 @@ const CGFloat kKeyboardHeight = 217.0;
   
   NSString* street = [[NSArray arrayWithObjects:detailedEntity_.street, detailedEntity_.substreet, nil] componentsJoinedByString:@" "];
   NSString* cityStateZip = [[NSArray arrayWithObjects:detailedEntity_.city, detailedEntity_.state, detailedEntity_.zipcode, nil] componentsJoinedByString:@" "];
-  street = [street stringByTrimmingCharactersInSet:
-      [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-  cityStateZip = [cityStateZip stringByTrimmingCharactersInSet:
-      [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  street = [street stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  cityStateZip = [cityStateZip stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
   if (street.length > 0 && cityStateZip.length > 0) {
     detailedEntity_.address = [[NSArray arrayWithObjects:street, cityStateZip, nil] componentsJoinedByString:@", "];
-  } else {
-    detailedEntity_.address = street.length > 0 ? street : cityStateZip;
+  } else if (street) {
+    detailedEntity_.address = street;
+  } else if (cityStateZip) {
+    detailedEntity_.address = cityStateZip;
   }
   
   if (detailedEntity_.address)

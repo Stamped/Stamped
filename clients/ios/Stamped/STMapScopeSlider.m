@@ -135,7 +135,7 @@
       string = NSLocalizedString(@"you", nil);
       break;
     case STMapScopeSliderGranularityFriends:
-      string = NSLocalizedString(@"your friends", nil);
+      string = NSLocalizedString(@"you + friends", nil);
       break;
     case STMapScopeSliderGranularityFriendsOfFriends:
       string = NSLocalizedString(@"friends of friends", nil);

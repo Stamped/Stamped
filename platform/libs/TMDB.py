@@ -8,6 +8,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+
+__all__ = ['TMDB', 'globalTMDB']
+
 import Globals
 from logs   import report
 try:
@@ -19,6 +22,7 @@ try:
     from urllib2    import HTTPError
     from gevent     import sleep
     from pprint     import pprint
+    from RateLimiter            import RateLimiter, RateException
 except:
     report()
     raise
@@ -27,12 +31,16 @@ class TMDB(object):
 
     def __init__(self):
         self.__key = 'b4aaa79e39e12f8d066903b8574ee538'
+        self.__limiter = RateLimiter(cps=10)
 
     def configuration(self):
         return self.__tmdb('configuration')
 
     def person_search(self, query, page=1):
         return self.__tmdb('search/person',query=query,page=page)
+
+    def person_info(self, tmdb_id):
+        return self.__tmdb('person/%s' %(tmdb_id,))
 
     def person_credits(self, tmdb_id):
         return self.__tmdb('person/%s/credits' %(tmdb_id,))
@@ -80,10 +88,11 @@ class TMDB(object):
         url = 'http://api.themoviedb.org/3/%s?%s' % (service,'&'.join(pairs))
         logs.info(url)
         try:
-            req = urllib2.Request(url,headers={ 'Accept' : 'application/json' })
-            response = urllib2.urlopen(req).read()
-            data = json.loads(response)
-            return data
+            with self.__limiter:
+                req = urllib2.Request(url,headers={ 'Accept' : 'application/json' })
+                response = urllib2.urlopen(req).read()
+                data = json.loads(response)
+                return data
         except HTTPError as e:
             logs.warning('error',exc_info=1)
             if e.code == 403:
@@ -94,6 +103,11 @@ class TMDB(object):
                     return None
             else:
                 return None
+
+_globalTMDB = TMDB()
+
+def globalTMDB():
+    return _globalTMDB
 
 def demo(query='Star Trek'):
     db = TMDB()

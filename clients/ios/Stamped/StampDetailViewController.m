@@ -719,7 +719,7 @@ typedef enum {
   
   if ([TWTweetComposeViewController canSendTweet] &&
       [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
-    [sheet addButtonWithTitle:@"Share to Twitter..."];
+    [sheet addButtonWithTitle:NSLocalizedString(@"Share to Twitter", nil)];
   }
   
   if ([MFMailComposeViewController canSendMail])
@@ -1040,7 +1040,7 @@ typedef enum {
     }
     if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
       [UIPasteboard generalPasteboard].string = stamp_.URL;
-    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Share to Twitter..."] && canTweet) {  // Twitter or cancel depending...
+    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
       [self showTweetViewController];
     } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
       [self showEmailViewController];
