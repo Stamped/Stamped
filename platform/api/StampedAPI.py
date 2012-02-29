@@ -2368,7 +2368,7 @@ class StampedAPI(AStampedAPI):
             
             if len(deleted) > 0:
                 stamps = stamps + deleted
-                stamps.sort(key=lambda k: k['timestamp'][ts], reverse=not genericCollectionSlice.reverse)
+                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
     
