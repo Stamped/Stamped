@@ -854,10 +854,7 @@ class EntitySourcesSchema(Schema):
         #new resolve fields
         self.singleplatform     = SinglePlatformSchema()
         self.factual            = FactualSchema()
-
-        self.tmdb_id            = SchemaElement(basestring)
-        self.tmdb_source        = SchemaElement(basestring)
-        self.tmdb_timestamp     = SchemaElement(datetime)
+        self.tmdb               = TMDBSchema()
 
         self.spotify_id         = SchemaElement(basestring)
         self.spotify_timestamp  = SchemaElement(datetime)
@@ -910,6 +907,12 @@ class GooglePlacesSchema(Schema):
         self.googleplaces_id         = SchemaElement(basestring)
         self.googleplaces_timestamp  = SchemaElement(datetime)
         self.googleplaces_source     = SchemaElement(basestring)
+
+class TMDBSchema(Schema):
+    def setSchema(self):
+        self.tmdb_id            = SchemaElement(basestring)
+        self.tmdb_source        = SchemaElement(basestring)
+        self.tmdb_timestamp     = SchemaElement(datetime)
 
 class GoogleLocalSchema(Schema):
     def setSchema(self):
