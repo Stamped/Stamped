@@ -379,16 +379,16 @@ class AMongoCollectionView(AMongoCollection):
             
             if relaxed:
                 def _within_viewport(result):
-                    if result.coordinates.lat >= scope['viewport']['lowerRight']['lat'] and 
+                    if result.coordinates.lat >= scope['viewport']['lowerRight']['lat'] and \
                         result.coordinates.lat <= scope['viewport']['upperLeft']['lat']:
                         
                         if scope['viewport']['upperLeft']['lng'] <= scope['viewport']['lowerRight']['lng']:
-                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] and 
+                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] and \
                                 result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
                                 return True
                         else:
                             # handle special case where the viewport crosses the +180 / -180 mark
-                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] or 
+                            if result.coordinates.lng >= scope['viewport']['upperLeft']['lng'] or \
                                 result.coordinates.lng <= scope['viewport']['lowerRight']['lng']:
                                 return True
                     
