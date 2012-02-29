@@ -2364,14 +2364,14 @@ class StampedAPI(AStampedAPI):
             deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
             
             if len(deleted) > 0:
-                ts = 'timestamp.%s' % genericCollectionSlice.sort
+                ts = genericCollectionSlice.sort
                 
                 if num_stamps >= genericCollectionSlice.limit:
-                    last_stamp_ts = stamps[-1][ts]
+                    last_stamp_ts = stamps[-1]['timestamp'][ts]
                     deleted = filter(lambda d: 'deleted' in d and d[ts] < last_stamp_ts, deleted)
                 
                 stamps = stamps + deleted
-                stamps.sort(key=lambda k: k[ts], reverse=not genericCollectionSlice.reverse)
+                stamps.sort(key=lambda k: k['timestamp'][ts], reverse=not genericCollectionSlice.reverse)
                 
                 # HACK (1.1): delete all trailing stamps if the number of normal 
                 # stamps is less than the limit
