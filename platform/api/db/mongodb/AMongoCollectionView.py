@@ -94,7 +94,7 @@ class AMongoCollectionView(AMongoCollection):
                 # disregard original viewport in favor of using the region' 
                 # coordinates as a ranking hint
                 relaxed  = True
-                viewport = None
+                viewport = False
                 center   = {
                     'lat' : coords[0], 
                     'lng' : coords[1], 
@@ -161,7 +161,35 @@ class AMongoCollectionView(AMongoCollection):
             }
             
             if viewport:
-                scope['viewport'] = genericCollectionSlice.viewport.value, 
+                if relaxed:
+                    earthRadius = 3959.0 # miles
+                    _viewport   = genericCollectionSlice.viewport
+                    ll0         = (_viewport.upperLeft.lat,  _viewport.upperLeft.lng)
+                    ll1         = (_viewport.lowerRight.lat, _viewport.lowerRight.lng)
+                    
+                    lat_diff    = (ll0[0] - ll1[0]) * 0.05
+                    lng_diff    = (ll0[1] - ll1[1]) * 0.05
+                    
+                    ll2_lat     = max(-90,  ll0[0] + lat_diff)
+                    ll2_lng     = max(-180, ll0[1] + lng_diff)
+                    
+                    ll3_lat     = min(90,   ll1[0] - lat_diff)
+                    ll3_lng     = min(180,  ll1[1] - lng_diff)
+                    
+                    scope['viewport'] = {
+                        'upperLeft' : {
+                            'lat' : ll2_lat, 
+                            'lng' : ll2_lng, 
+                        }, 
+                        'lowerRight' : {
+                            'lat' : ll3_lat, 
+                            'lng' : ll3_lng, 
+                        }, 
+                    }
+                else:
+                    scope['viewport'] = genericCollectionSlice.viewport.value
+            
+            logs.debug("js scope: %s" % pprint.pformat(scope))
             
             if genericCollectionSlice.sort == 'proximity':
                 # handle proximity-based sort
