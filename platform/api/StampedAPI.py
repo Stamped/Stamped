@@ -2368,7 +2368,9 @@ class StampedAPI(AStampedAPI):
                 
                 if num_stamps >= genericCollectionSlice.limit:
                     last_stamp_ts = stamps[-1]['timestamp'][ts]
+                    logs.info('DELETED: %s' % len(deleted))
                     deleted = filter(lambda d: 'deleted' in d and d['timestamp'][ts] < last_stamp_ts, deleted)
+                    logs.info('DELETED: %s' % len(deleted))
                 
                 stamps = stamps + deleted
                 stamps.sort(key=lambda k: k['timestamp'][ts], reverse=not genericCollectionSlice.reverse)
