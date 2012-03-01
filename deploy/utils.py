@@ -73,7 +73,7 @@ def logRaw(s, includeFormat=False):
 def _formatLog(s):
     try:
         return "%s" % str(s)
-    except:
+    except Exception:
         return "__error__ printout"
 
 def printException():

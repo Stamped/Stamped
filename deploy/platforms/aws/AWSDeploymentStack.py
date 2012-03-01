@@ -188,7 +188,7 @@ class AWSDeploymentStack(ADeploymentStack):
                     try:
                         result = run(cmd, pty=False, shell=True)
                         status = result.return_code
-                    except:
+                    except Exception:
                         # if run fails, ask the user whether or not to continue instead of aborting
                         status = 1
                 
@@ -309,7 +309,7 @@ class AWSDeploymentStack(ADeploymentStack):
                                     raise Fail(result['errmsg'])
                             except Fail:
                                 raise
-                            except:
+                            except Exception:
                                 if verbose:
                                     utils.log("[%s] error interpreting results of mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
                                     utils.printException()
@@ -320,7 +320,7 @@ class AWSDeploymentStack(ADeploymentStack):
                         return result
             except Fail:
                 raise
-            except:
+            except Exception:
                 if verbose:
                     utils.log("[%s] error running mongo cmd on instance '%s' (%s)" % (self, instance, mongo_cmd))
                 raise
@@ -539,7 +539,7 @@ class AWSDeploymentStack(ADeploymentStack):
                         utils.log("[%s] replica set '%s' is online!" % (self, status.set))
                         pprint(status)
                         break
-                except:
+                except Exception:
                     pass
         
         # group replica set members by state
@@ -764,7 +764,7 @@ class AWSDeploymentStack(ADeploymentStack):
         if 2 == len(args):
             try:
                 count = int(args[1])
-            except:
+            except Exception:
                 raise Fail("last argument should be number of %s instances to add" % add)
         
         sim = []
@@ -829,7 +829,7 @@ class AWSDeploymentStack(ADeploymentStack):
             try:
                 instance.create()
                 instances.append(instance)
-            except:
+            except Exception:
                 utils.printException()
                 utils.log("error adding instance %s" % instance)
                 raise

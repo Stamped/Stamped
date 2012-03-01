@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import bson, logs, pprint, pymongo
-import libs.worldcities
+import libs.worldcities, unicodedata
 
 from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
@@ -20,8 +20,10 @@ class AMongoCollectionView(AMongoCollection):
         time_filter = 'timestamp.created'
         sort        = None
         reverse     = genericCollectionSlice.reverse
+        user_query  = genericCollectionSlice.query
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
+        orig_coords = True
         
         if relaxed:
             center = {
@@ -81,9 +83,10 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle search query filter
         # --------------------------
-        if genericCollectionSlice.query is not None:
+        if user_query is not None:
             # TODO: make query regex better / safeguarded
-            user_query = genericCollectionSlice.query.lower().strip()
+            user_query = user_query.lower().strip()
+            user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
             
             # process 'in' or 'near' location hint
             result = libs.worldcities.try_get_region(user_query)
@@ -92,11 +95,12 @@ class AMongoCollectionView(AMongoCollection):
                 user_query, coords, region_name = result
                 utils.log("using region %s at %s" % (region_name, coords))
                 
-                # disregard original viewport in favor of using the region' 
+                # disregard original viewport in favor of using the region's 
                 # coordinates as a ranking hint
-                relaxed  = True
-                viewport = False
-                center   = {
+                orig_coords = False
+                relaxed     = True
+                viewport    = False
+                center      = {
                     'lat' : coords[0], 
                     'lng' : coords[1], 
                 }
@@ -156,9 +160,10 @@ class AMongoCollectionView(AMongoCollection):
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------
             scope = {
-                'query'    : genericCollectionSlice.query, 
-                'limit'    : genericCollectionSlice.limit, 
-                'offset'   : genericCollectionSlice.offset, 
+                'query'         : user_query, 
+                'limit'         : genericCollectionSlice.limit, 
+                'offset'        : genericCollectionSlice.offset, 
+                'orig_coords'   : orig_coords, 
             }
             
             if viewport:
@@ -315,6 +320,16 @@ class AMongoCollectionView(AMongoCollection):
                                 
                                 dist_value = value;
                             }
+                            
+                            if (!orig_coords) {
+                                var earthRadius = 3959.0;
+                                var dist2 = dist * earthRadius;
+                                
+                                if (dist2 >= 500) {
+                                    dist_value = 0;
+                                    return;
+                                }
+                            }
                         }
                     }
                     catch (e) {
@@ -401,7 +416,8 @@ class AMongoCollectionView(AMongoCollection):
                 inside = filter(_within_viewport, results)
                 
                 if len(inside) > 0:
-                    logs.debug("%d results inside viewport; pruning %d results outside" % (len(inside), len(results) - len(inside)))
+                    logs.debug("%d results inside viewport; pruning %d results outside" % 
+                               (len(inside), len(results) - len(inside)))
                     results = inside
                 else:
                     logs.debug("no results inside viewport; %d results outside" % (len(results), ))

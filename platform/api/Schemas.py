@@ -849,6 +849,18 @@ class MediaSchema(Schema):
         self.artist_id                  = SchemaElement(basestring)
         self.screenshots                = SchemaList(SchemaElement(basestring))
 
+class TMDBSchema(Schema):
+    def setSchema(self):
+        self.tmdb_id            = SchemaElement(basestring)
+        self.tmdb_source        = SchemaElement(basestring)
+        self.tmdb_timestamp     = SchemaElement(datetime)
+
+class RdioSchema(Schema):
+    def setSchema(self):
+        self.rdio_id            = SchemaElement(basestring)
+        self.rdio_timestamp     = SchemaElement(datetime)
+        self.rdio_source        = SchemaElement(basestring)
+
 class EntitySourcesSchema(Schema):
     def setSchema(self):
         #new resolve fields
@@ -867,7 +879,17 @@ class EntitySourcesSchema(Schema):
         self.rdio_id            = SchemaElement(basestring)
         self.rdio_timestamp     = SchemaElement(datetime)
         self.rdio_source        = SchemaElement(basestring)
-
+        
+        
+        # TODO: remove these three lines -- temporary workaround!
+        # (and the TMDBSchema and RdioSchema above)
+        self.rdio               = RdioSchema()
+        self.tmdb               = TMDBSchema()
+        self.factual            = FactualSchema()
+        # TODO: remove these three lines -- temporary workaround!
+        # (and the TMDBSchema and RdioSchema above)
+        
+        
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
         self.openTable          = OpenTableSchema()

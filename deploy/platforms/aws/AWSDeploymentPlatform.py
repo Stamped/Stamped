@@ -139,6 +139,18 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                 ], 
             }, 
             {
+                'name' : 'search', 
+                'desc' : 'ElasticSearch security group', 
+                'rules' : [
+                    {
+                        'ip_protocol' : 'tcp', 
+                        'from_port'   : 9200, 
+                        'to_port'     : 9200, 
+                        'cidr_ip'     : '0.0.0.0/0', 
+                    }, 
+                ], 
+            }, 
+            {
                 'name' : 'monitor', 
                 'desc' : 'Monitor security group', 
                 'rules' : [
@@ -177,7 +189,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                 try:
                     ret = sg.authorize(**rule)
                     assert ret
-                except:
+                except Exception:
                     #utils.log("error initializing security group '%s'" % name)
                     #utils.printException()
                     break
@@ -243,7 +255,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                 else:
                     utils.log("[%s] warning: found AMI %s with unexpected state (%s)" % \
                               self, image, image.state)
-            except:
+            except Exception:
                 utils.printException()
         
         if recent is not None:
@@ -269,7 +281,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
             try:
                 images = self.conn.get_all_images(image_ids=[ ami_id ])
                 image  = images[0]
-            except:
+            except Exception:
                 time.sleep(1)
         
         success = False
