@@ -30,7 +30,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         if api is not None:
             request = SuggestedUserRequest({ 'personalized' : False })
-            self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
+            self._suggested = set(list(user.user_id for user in api.getSuggestedUsers(None, request)))
         else:
             self._suggested = set()
     
@@ -489,12 +489,14 @@ class MongoFriendshipCollection(AFriendshipDB):
             'twitter_friend'    : twitter_friend_value    * twitter_friend_weight, 
         }
         
+        """
         if explain:
             import pprint as p
             utils.log('-' * 40)
             utils.log("%s)" % kv[0])
             utils.log(p.pformat(values))
             utils.log(p.pformat(metrics))
+        """
         
         for key, value in metrics.iteritems():
             score += value
