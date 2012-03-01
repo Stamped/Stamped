@@ -1,5 +1,7 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
+
+* prune iTunes artists which have no AMG id or genre? *landon
 * suggested users => generic news items
 * prune national outliers when location hinting is turned on
     * e.g., maybe just prune results more than N threshold miles away

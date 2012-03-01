@@ -220,7 +220,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             if friend_overlap > 1:
                 potential_friends[user_id]['friend_overlap'] = friend_overlap
         
-        user_entity_ids, user_categories, user_clusters = self._get_stamp_info(userId)
+        user_entity_ids, user_categories, user_clusters user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
         inv_len_user_entity_ids = 1.0 / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
         
@@ -270,7 +270,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 continue
             
             count = count + 1
-            entity_ids, categories, clusters = self._get_stamp_info(user_id)
+            entity_ids, categories, clusters, potential_friend = self._get_stamp_info(user_id)
             
             #common_entity_ids = user_entity_ids & entity_ids
             """
@@ -351,6 +351,11 @@ class MongoFriendshipCollection(AFriendshipDB):
                         min_dist = dist
                         values['current_proximity'] = dist
         
+        
+        num_stamps = user.num_stamps if 'num_stamps' in user else 0
+        values['has_stamps'] = (num_stamps >= 1)
+        values['num_stamps'] = math.log(num_stamps) if num_stamps >= 1 else 0.0
+        
         logs.info("potential friends:  %d" % len(potential_friends))
         logs.info("friends of friends: %d" % len(friends_of_friends))
         logs.info("processed: %d; pruned: %d" % (count, prune))
@@ -404,6 +409,16 @@ class MongoFriendshipCollection(AFriendshipDB):
             twitter_friend_value    = 0
         
         try:
+            has_stamps_value        = int(values['has_stamps'])
+        except:
+            has_stamps_value        = False
+        
+        try:
+            num_stamps_value        = float(values['num_stamps'])
+        except:
+            num_stamps_value        = 0.0
+        
+        try:
             clusters                = values['clusters']
         except:
             clusters                = [ (0, None), (0, None) ]
@@ -415,6 +430,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         current_proximity_weight    = 3.0
         facebook_friend_weight      = 2.0
         twitter_friend_weight       = 2.0
+        num_stamps_weight           = 1.0
+        has_stamps_weight           = 100.0
         
         max_val = [ (0, None), (0, None) ]
         score   = 0.0
@@ -429,8 +446,8 @@ class MongoFriendshipCollection(AFriendshipDB):
             'twitter_friend'    : twitter_friend_value    * twitter_friend_weight, 
         }
         
-        #if explain:
-        #    pprint(metrics)
+        if explain:
+            pprint(metrics)
         
         for key, value in metrics.iteritems():
             score += value
@@ -442,6 +459,14 @@ class MongoFriendshipCollection(AFriendshipDB):
                         max_val[1] = (value, key)
                     else:
                         max_val[0] = (value, key)
+        
+        private_metrics = {
+            'num_stamps'        : num_stamps_value  * num_stamps_weight, 
+            'has_stamps'        : has_stamps_weight * has_stamps_value, 
+        }
+        
+        for key, value in private_metrics.iteritems():
+            score += value
         
         if explain:
             explanations = {
@@ -517,6 +542,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     def _get_stamp_info(self, user_id):
         stampIds    = self.collection_collection.getUserStampIds(user_id)
         stamps      = self.stamp_collection.getStamps(stampIds, limit=1000, sort='modified')
+        user        = self.user_collection.getUser(user_id)
         
         categories  = defaultdict(int)
         num_stamps  = len(stamps)
@@ -572,7 +598,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 if len(cluster['data']) > 1:
                     clusters2.append(cluster)
         
-        return entity_ids, categories, clusters2
+        return entity_ids, categories, clusters2, user
         
         """
         # very useful for debugging suggested friend ranks...
