@@ -27,7 +27,7 @@ for (user, explanations) in users:
     subject2 = '\'s tastes.'
     subject  = subject0 + subject1 + subject2
     ls0      = len(subject0)
-    indices  = (ls0, ls0 + len(subject1))
+    indices  = [ ls0, ls0 + len(subject1) ]
     usermini = user.exportSchema(UserMini())
     user_id2 = user.user_id
     
@@ -40,7 +40,7 @@ for (user, explanations) in users:
         user            = usermini, 
         icon            = 'http://static.stamped.com/assets/activity/follower.png', 
         subject         = subject, 
-        subject_objects = [ { 'user_id' : user_id2, 'indices' : indices } ], 
+        subject_objects = [ ActivityObjectSchema({ 'user_id' : user_id2, 'indices' : indices }) ], 
         blurb           = ' and '.join(explanations), 
         linked_user_id  = user_id2)
 
