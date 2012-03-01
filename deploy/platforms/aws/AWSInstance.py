@@ -253,17 +253,14 @@ class AWSInstance(AInstance):
     
     def _post_create(self, block):
         """
-            block until all public interfaces to this instance are up & running
+            block until all public interfaces to this instance are up and running
         """
         
         # wait for ssh service to come online
         self._validate_port(22, desc="ssh service", timeout=60)
         
         if block:
-            if 'bootstrap' in self.roles:
-                # wait for init script to finish
-                self._validate_port(8649, desc="init script", timeout=1800)
-            elif 'db' in self.roles:
+            if 'db' in self.roles:
                 self._block_mongo()
             elif 'webServer' in self.roles:
                 self._validate_port(80, desc="server", timeout=100)
@@ -271,6 +268,9 @@ class AWSInstance(AInstance):
                 self._validate_port(5000, desc="server", timeout=100)
             elif 'monitor' in self.roles:
                 self._validate_port(8080, desc="monitor",  timeout=100)
+            else:
+                # wait for init script to finish
+                self._validate_port(8649, desc="init script", timeout=1800)
     
     def start(self):
         self.update()

@@ -138,6 +138,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 nf = (nf != null) ? log(nf) : 0;
                 return _score + ns / 4.0 + nf / 8.0
             """)
+            
             if domain:
                 q = FilteredQuery(q, IdsFilter('user', list(domain)))
         
@@ -255,7 +256,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         queryPhone = []
         for number in phone:
             queryPhone.append(int(number))
-
+        
         ### TODO: Add Index
         data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
         
