@@ -474,6 +474,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         if explain:
             import pprint as p
+            utils.log('-' * 40)
+            utils.log("%s)" % kv[0])
+            utils.log(p.pformat(values))
             utils.log(p.pformat(metrics))
         
         for key, value in metrics.iteritems():
