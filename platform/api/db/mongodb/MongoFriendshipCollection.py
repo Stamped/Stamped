@@ -229,7 +229,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         for user_id, friend_overlap in friends_of_friends.iteritems():
             if friend_overlap > 1:
-                value = math.sqrt(friend_overlap) * friend_overlap * weight
+                value = friend_overlap * friend_overlap * weight
                 
                 potential_friends[user_id]['num_friend_overlap'] = friend_overlap
                 potential_friends[user_id]['friend_overlap']     = value
@@ -464,8 +464,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         except:
             clusters                = [ (0, None), (0, None) ]
         
-        friend_overlap_weight       = 15.0
-        stamp_overlap_weight        = 30.0
+        friend_overlap_weight       = 10.0
+        stamp_overlap_weight        = 15.0
         category_overlap_weight     = 1.0
         proximity_weight            = 2.0
         current_proximity_weight    = 2.0
