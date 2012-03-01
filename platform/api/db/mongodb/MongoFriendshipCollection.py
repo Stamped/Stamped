@@ -33,6 +33,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
+        utils.log(str(self._suggested))
     
     ### PUBLIC
     
@@ -271,6 +272,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         for user_id, values in potential_friends.iteritems():
             try:
                 if user_id in self._suggested:
+                    utils.log("PRUNING suggested user: " % user_id)
                     raise
                 
                 if 'friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
