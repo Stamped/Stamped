@@ -33,9 +33,6 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
-        
-        utils.log(list(self._suggested))
-        assert '4e972d8dfe4a1d22d30002d1' in self._suggested
     
     ### PUBLIC
     
@@ -280,6 +277,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         # process each potential friend
         for user_id, values in potential_friends.iteritems():
             try:
+                utils.log(user_id)
+                utils.log(self._suggested)
                 if user_id in self._suggested:
                     utils.log("PRUNING suggested user: " % user_id)
                     raise
