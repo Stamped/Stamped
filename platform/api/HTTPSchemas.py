@@ -588,7 +588,7 @@ class HTTPEntity(Schema):
                 elif schema.ngenres is not None:
                     self.genre = string.join((str(i) for i in schema.ngenres), '; ')
                 
-                if schema.short_description != None:
+                if schema.short_description != None and schema.short_description != '':
                     self.desc = schema.short_description
             
             elif self.category == 'music':
