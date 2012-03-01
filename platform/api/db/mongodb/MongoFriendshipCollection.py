@@ -443,7 +443,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         friend_overlap_weight       = 1.0
         stamp_overlap_weight        = 2.0
-        category_overlap_weight     = 0.0
+        category_overlap_weight     = 1.5
         proximity_weight            = 3.0
         current_proximity_weight    = 3.0
         facebook_friend_weight      = 2.0
