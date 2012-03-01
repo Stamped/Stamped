@@ -99,7 +99,7 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
                     tracks[track_key] = {
                         'name': track['name'],
                     }
-        pool = Pool(min(len(self.albums),20))
+        pool = Pool(min(1+len(self.albums),20))
         for album in self.albums:
             key = album['key']
             pool.spawn(lookupTrack, key)
