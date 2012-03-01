@@ -19,6 +19,7 @@ try:
     from pprint                 import pformat, pprint
     from Schemas                import Entity
     import logs                 
+    from libs.ec2_utils         import is_prod_stack
 except:
     report()
     raise
@@ -36,7 +37,10 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__groups = {}
         self.__sources = []
         self.__default_max_iterations = 10
-        self.__global_max_age = timedelta(7)
+        if is_prod_stack():
+            self.__global_max_age = timedelta(7)
+        else:
+            self.__global_max_age = timedelta(0)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2
