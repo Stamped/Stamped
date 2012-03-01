@@ -33,6 +33,9 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
+        
+        utils.log(list(self._suggested))
+        assert '4e972d8dfe4a1d22d30002d1' in self._suggested
     
     ### PUBLIC
     
