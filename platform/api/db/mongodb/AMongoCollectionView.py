@@ -22,6 +22,7 @@ class AMongoCollectionView(AMongoCollection):
         reverse     = genericCollectionSlice.reverse
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
+        orig_coords = True
         
         if relaxed:
             center = {
@@ -92,8 +93,9 @@ class AMongoCollectionView(AMongoCollection):
                 user_query, coords, region_name = result
                 utils.log("using region %s at %s" % (region_name, coords))
                 
-                # disregard original viewport in favor of using the region' 
+                # disregard original viewport in favor of using the region's 
                 # coordinates as a ranking hint
+                orig_coords = False
                 relaxed  = True
                 viewport = False
                 center   = {
@@ -156,9 +158,10 @@ class AMongoCollectionView(AMongoCollection):
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------
             scope = {
-                'query'    : genericCollectionSlice.query, 
-                'limit'    : genericCollectionSlice.limit, 
-                'offset'   : genericCollectionSlice.offset, 
+                'query'         : genericCollectionSlice.query, 
+                'limit'         : genericCollectionSlice.limit, 
+                'offset'        : genericCollectionSlice.offset, 
+                'orig_coords'   : orig_coords, 
             }
             
             if viewport:
@@ -314,6 +317,15 @@ class AMongoCollectionView(AMongoCollection):
                                 }
                                 
                                 dist_value = value;
+                            }
+                            
+                            if (!orig_coords) {
+                                var earthRadius = 3959.0;
+                                var dist2 = dist * earthRadius;
+                                
+                                if (dist2 > 500) {
+                                    dist_value = 0;
+                                }
                             }
                         }
                     }
