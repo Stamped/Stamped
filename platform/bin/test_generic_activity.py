@@ -11,7 +11,15 @@ from datetime           import datetime
 from Schemas            import *
 from MongoStampedAPI    import MongoStampedAPI
 
-user_id = "4e57048dccc2175fca000005"
+user_ids = set([ 
+    "4e57048dccc2175fca000005", # travis
+    "4e57048accc2175fcd000001", # robby
+    "4e570489ccc2175fcd000000", # kevin
+    "4e57048bccc2175fcd000002", # bart
+    "4e57048eccc2175fca000006", # andybons
+    "4e57048cccc2175fca000003", # edmuki
+    "4eca8944e8ef21799d0001b3", # landon
+])
 
 request = SuggestedUserRequest(dict(
     limit           = 5, 
@@ -23,17 +31,19 @@ userDB  = api._userDB
 
 rs = userDB._collection.find({'email' : { '$regex' : r'.*@stamped\.com', '$options' : 'i' }}, output=list)
 for result in rs:
-    user = userDB._convertFromMongo(result)
+    user    = userDB._convertFromMongo(result)
     user_id = user.user_id
+    
+    if user_id not in user_ids:
+        continue # only process team members
     
     utils.log('-' * 40)
     utils.log('%s) %s' % (user.screen_name, user_id))
     
-    continue
     users   = api.getSuggestedUsers(user_id, request)
-
+    
     for (user, explanations) in users:
-        subject0 = 'Friend suggestion: '
+        subject0 = 'Are you interested in '
         subject1 = user.screen_name
         subject2 = '\'s tastes?'
         subject  = subject0 + subject1 + subject2
