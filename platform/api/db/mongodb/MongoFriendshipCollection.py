@@ -33,6 +33,10 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
+        try:
+            dlkfj
+        except:
+            utils.printException()
         utils.log(str(self._suggested))
     
     ### PUBLIC
