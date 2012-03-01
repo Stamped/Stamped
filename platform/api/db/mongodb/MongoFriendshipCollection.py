@@ -388,7 +388,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             users2 = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
             
             for user in users2:
-                from pprint import p
+                import pprint as p
                 p.pprint(user)
         
         print_top('friend_overlap')
