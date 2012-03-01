@@ -1,5 +1,8 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
+* suggested users => generic news items
+* create test html / js web client
+    * create stamped.js client library :)
 * refresh autocomplete
 * autocomplete cron job
 * normalize existing friend suggest signals
