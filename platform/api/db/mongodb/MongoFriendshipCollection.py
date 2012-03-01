@@ -350,8 +350,6 @@ class MongoFriendshipCollection(AFriendshipDB):
             
             if score < 0:
                 score = None
-            elif score > 0:
-                score = -math.log(score)
             
             values['proximity'] = score
             values['clusters']  = max_val
