@@ -459,7 +459,7 @@ class Resolver(object):
         """
         if q is None or m is None:
             return 0
-        diff = abs((q - m).total_seconds()) / (60*60*24)
+        diff = abs((q - m).days)
         v = 0
         if diff <= 1:
             v = 1.0
