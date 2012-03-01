@@ -237,7 +237,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
-        inv_len_user_entity_ids = 1.0 / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
+        inv_len_user_entity_ids = math.log(inv_len_user_entity_ids) / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
         
         #for cluster in user_clusters:
         #    print "(%s) %d %s" % (cluster['avg'], len(cluster['data']), cluster['data'])
