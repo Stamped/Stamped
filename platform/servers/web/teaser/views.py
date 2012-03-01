@@ -80,6 +80,9 @@ def download(request):
     return response
     return HttpResponsePermanentRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
 
+def blog(request):
+    return HttpResponseRedirect('http://blog.stamped.com/')
+
 
 ### MOBILE
 

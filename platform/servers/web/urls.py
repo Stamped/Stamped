@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     url(R'^faq$',                           'teaser.views.faq'),
     url(R'^privacy$',                       'teaser.views.privacy'),
     url(R'^terms-of-service$',              'teaser.views.terms'),
+    url(R'^blog$',                          'teaser.views.blog'),
 
     # Index
     url(R'$',                               'teaser.views.index'), 

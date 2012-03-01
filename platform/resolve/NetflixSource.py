@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'SpotifySource', 'SpotifyArtist', 'SpotifyAlbum', 'SpotifyTrack' ]
+__all__ = [ 'NetflixSource', 'NetflixMovie' ]
 
 import Globals
 from logs import report
