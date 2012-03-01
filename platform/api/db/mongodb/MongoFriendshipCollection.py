@@ -449,12 +449,12 @@ class MongoFriendshipCollection(AFriendshipDB):
                     (friend_overlap_value, '' if friend_overlap_value == 1 else 's'), 
                 'stamp_overlap'     : "%d stamp%s in common" % \
                     (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
-                'category_overlap'  : "Tends to stamp similar categories", 
+                'category_overlap'  : "tends to stamp similar categories", 
                 
-                'proximity'         : "Tends to stamp in similar areas", 
-                'facebook_friend'   : "Facebook Friend", 
-                'twitter_friend'    : "Twitter Follower", # TODO: what to display here?
-                'current_proximity' : "Tends to stamp nearby", 
+                'proximity'         : "tends to stamp in similar areas", 
+                'facebook_friend'   : "facebook friend", 
+                'twitter_friend'    : "twitter Follower", # TODO: what to display here?
+                'current_proximity' : "tends to stamp nearby", 
             }
             
             # naive conversion from lat/lng to closest large city (e.g., NYC or San Francisco)
