@@ -29,13 +29,13 @@ class MongoFriendshipCollection(AFriendshipDB):
         self.api = api
         
         if api:
+
             request = SuggestedUserRequest({ 'personalized' : False })
+            utils.log("NUM_SUG: %d" % len(api.getSuggestedUsers(None, request)))
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
         
-        import traceback
-        traceback.print_exc()
         utils.log(str(self._suggested))
     
     ### PUBLIC
