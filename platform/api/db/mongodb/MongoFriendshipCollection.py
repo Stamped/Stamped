@@ -375,7 +375,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         limit  = request.limit  if request.limit  is not None else 10
         offset = request.offset if request.offset is not None else 0
         
-        if count - prune >= offset + limit
+        if count - prune >= offset + limit:
             potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
         
         # TODO: optimize this sorted loop to only retain the top n results?
