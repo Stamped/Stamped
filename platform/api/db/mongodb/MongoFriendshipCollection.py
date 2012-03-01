@@ -385,7 +385,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         def print_top(key, reverse=True, default=-1):
             print "%s %s %s" % ("-" * 40, key, "-" * 40)
-            users2 = sorted(users, key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
+            users2 = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
             
             for user in users2:
                 pprint(user)
