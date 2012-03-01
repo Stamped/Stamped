@@ -277,7 +277,6 @@ class MongoFriendshipCollection(AFriendshipDB):
         for user_id, values in potential_friends.iteritems():
             try:
                 if user_id in self._suggested:
-                    utils.log("PRUNING suggested user: %s" % user_id)
                     raise
                 
                 if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['num_stamp_overlap'] <= 1:
@@ -489,14 +488,12 @@ class MongoFriendshipCollection(AFriendshipDB):
             'twitter_friend'    : twitter_friend_value    * twitter_friend_weight, 
         }
         
-        """
         if explain:
             import pprint as p
             utils.log('-' * 40)
             utils.log("%s)" % kv[0])
             utils.log(p.pformat(values))
             utils.log(p.pformat(metrics))
-        """
         
         for key, value in metrics.iteritems():
             score += value
