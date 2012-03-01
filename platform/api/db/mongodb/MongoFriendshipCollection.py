@@ -381,6 +381,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             logs.debug("removed %d potential friends (now %d)" % (len(pruned), len(potential_friends)))
         
         """
+        # debugging utility to view top scores across certain categories
         def print_top(key, reverse=True, default=-1):
             print "%s %s %s" % ("-" * 40, key, "-" * 40)
             users2 = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
