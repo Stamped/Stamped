@@ -880,9 +880,15 @@ class EntitySourcesSchema(Schema):
         self.rdio_timestamp     = SchemaElement(datetime)
         self.rdio_source        = SchemaElement(basestring)
         
+        
+        # TODO: remove these three lines -- temporary workaround!
+        # (and the TMDBSchema and RdioSchema above)
         self.rdio               = RdioSchema()
         self.tmdb               = TMDBSchema()
         self.factual            = FactualSchema()
+        # TODO: remove these three lines -- temporary workaround!
+        # (and the TMDBSchema and RdioSchema above)
+        
         
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
