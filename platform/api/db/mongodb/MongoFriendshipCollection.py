@@ -464,7 +464,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         except:
             clusters                = [ (0, None), (0, None) ]
         
-        friend_overlap_weight       = 10.0
+        friend_overlap_weight       = 15.0
         stamp_overlap_weight        = 15.0
         category_overlap_weight     = 1.0
         proximity_weight            = 2.0
