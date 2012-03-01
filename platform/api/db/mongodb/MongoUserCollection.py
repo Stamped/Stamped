@@ -18,8 +18,8 @@ from MongoFollowersCollection   import MongoFollowersCollection
 from MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
 
-from pyes.filters               import *
-from pyes.query                 import *
+#from pyes.filters               import *
+#from pyes.query                 import *
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
