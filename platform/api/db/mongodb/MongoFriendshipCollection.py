@@ -334,7 +334,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                         min_len  = len1
                 
                 if min_len > 0:
-                    inv_dist = 1.0 / math.log(min_dist) if min_dist > 1.0 else 0.0
+                    inv_dist = math.log(1.0 / math.log(min_dist)) if min_dist > 1.0 else 0.0
                     value    = len0 * min_len * dist
                     score    = score + value
                     
