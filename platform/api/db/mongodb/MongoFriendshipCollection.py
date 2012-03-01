@@ -224,9 +224,16 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         potential_friends = defaultdict(dict)
         
+        total = sum(friends_of_friends.itervalues())
+        if total > 0:
+            weight = math.log(total) / total
+        else:
+            weight = 0.0
+        
         for user_id, friend_overlap in friends_of_friends.iteritems():
             if friend_overlap > 1:
-                potential_friends[user_id]['friend_overlap'] = friend_overlap
+                potential_friends[user_id]['num_friend_overlap']   = friend_overlap
+                potential_friends[user_id]['friend_overlap_value'] = friend_overlap * weight
         
         user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
@@ -275,7 +282,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     utils.log("PRUNING suggested user: " % user_id)
                     raise
                 
-                if 'friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
+                if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
                     raise
             except:
                 prune = prune + 1
@@ -285,16 +292,10 @@ class MongoFriendshipCollection(AFriendshipDB):
             count = count + 1
             entity_ids, categories, clusters, friend = self._get_stamp_info(user_id)
             
-            #common_entity_ids = user_entity_ids & entity_ids
-            """
-            # TODO: normalize stamp_overlap
-            # TODO: normalize friend_overlap
-            
             try:
                 values['stamp_overlap'] = values['stamp_overlap'] * inv_len_user_entity_ids
             except:
                 pass
-            """
             
             summation = 0.0
             for category in [ 'food', 'music', 'film', 'book', 'other' ]:
@@ -389,12 +390,17 @@ class MongoFriendshipCollection(AFriendshipDB):
         values = kv[1]
         
         try:
-            friend_overlap_value    = int(values['friend_overlap'])
+            friend_overlap_value    = float(values['friend_overlap_value'])
         except:
             friend_overlap_value    = 0
         
         try:
-            stamp_overlap_value     = int(values['stamp_overlap'])
+            num_friend_overlap      = int(values['num_friend_overlap'])
+        except:
+            num_friend_overlap      = 0
+        
+        try:
+            stamp_overlap_value     = float(values['stamp_overlap'])
         except:
             stamp_overlap_value     = 0
         
@@ -487,7 +493,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         if explain:
             explanations = {
                 'friend_overlap'    : "%d friend%s in common" % \
-                    (friend_overlap_value, '' if friend_overlap_value == 1 else 's'), 
+                    (num_friend_overlap, '' if num_friend_overlap == 1 else 's'), 
                 'stamp_overlap'     : "%d stamp%s in common" % \
                     (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
                 'category_overlap'  : "tends to stamp similar categories", 
