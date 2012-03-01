@@ -457,7 +457,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         }
         
         if explain:
-            pprint(metrics)
+            import pprint as p
+            utils.log(p.pformat(metrics))
         
         for key, value in metrics.iteritems():
             score += value
