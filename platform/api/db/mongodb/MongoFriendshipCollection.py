@@ -33,8 +33,6 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
-        
-        assert '4e972d8dfe4a1d22d30002d1' in self._suggested
     
     ### PUBLIC
     
@@ -179,7 +177,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         friends_of_friends  = {}
         visited_users       = set()
-        pruned              = set([])
+        pruned              = set()
         todo                = []
         max_distance        = 2
         count               = 0
@@ -277,13 +275,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         # process each potential friend
         for user_id, values in potential_friends.iteritems():
-            assert '4e972d8dfe4a1d22d30002d1' in self._suggested
-            if user_id == '4e972d8dfe4a1d22d30002d1':
-                utils.log("HERE!")
-            
             try:
                 if user_id in self._suggested:
-                    utils.log("PRUNING suggested user: " % user_id)
+                    utils.log("PRUNING suggested user: %s" % user_id)
                     raise
                 
                 if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['num_stamp_overlap'] <= 1:
@@ -382,10 +376,10 @@ class MongoFriendshipCollection(AFriendshipDB):
         limit  = request.limit  if request.limit  is not None else 10
         offset = request.offset if request.offset is not None else 0
         
-        if len(pruned) > 0 and count - len(pruned) >= offset + limit:
-            logs.info("pruning %d potential friends (out of %d)" % len(pruned), len(potential_friends))
+        if len(pruned) > 0 and len(potential_friends) - len(pruned) >= offset + limit:
+            logs.debug("pruning %d potential friends (out of %d)" % (len(pruned), len(potential_friends)))
             potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
-            logs.info("ed %d potential friends (now %d)" % len(potential_friends))
+            logs.debug("removed %d potential friends (now %d)" % (len(pruned), len(potential_friends)))
         
         """
         def print_top(key, reverse=True, default=-1):
