@@ -232,8 +232,8 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         for user_id, friend_overlap in friends_of_friends.iteritems():
             if friend_overlap > 1:
-                potential_friends[user_id]['num_friend_overlap']   = friend_overlap
-                potential_friends[user_id]['friend_overlap_value'] = friend_overlap * weight
+                potential_friends[user_id]['num_friend_overlap'] = friend_overlap
+                potential_friends[user_id]['friend_overlap']     = friend_overlap * weight
         
         user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
@@ -251,9 +251,9 @@ class MongoFriendshipCollection(AFriendshipDB):
                 
                 if user_id not in friends:
                     try:
-                        potential_friends[user_id]['stamp_overlap'] = potential_friends[user_id]['stamp_overlap'] + 1
+                        potential_friends[user_id]['num_stamp_overlap'] = potential_friends[user_id]['num_stamp_overlap'] + 1
                     except:
-                        potential_friends[user_id]['stamp_overlap'] = 1
+                        potential_friends[user_id]['num_stamp_overlap'] = 1
         
         # seed potential friends with facebook friends
         if request.facebook_token is not None:
@@ -282,7 +282,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     utils.log("PRUNING suggested user: " % user_id)
                     raise
                 
-                if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
+                if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['num_stamp_overlap'] <= 1:
                     raise
             except:
                 prune = prune + 1
@@ -293,7 +293,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             entity_ids, categories, clusters, friend = self._get_stamp_info(user_id)
             
             try:
-                values['stamp_overlap'] = values['stamp_overlap'] * inv_len_user_entity_ids
+                values['stamp_overlap'] = values['num_stamp_overlap'] * inv_len_user_entity_ids
             except:
                 pass
             
@@ -390,7 +390,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         values = kv[1]
         
         try:
-            friend_overlap_value    = float(values['friend_overlap_value'])
+            friend_overlap_value    = float(values['friend_overlap'])
         except:
             friend_overlap_value    = 0
         
@@ -403,6 +403,11 @@ class MongoFriendshipCollection(AFriendshipDB):
             stamp_overlap_value     = float(values['stamp_overlap'])
         except:
             stamp_overlap_value     = 0
+        
+        try:
+            num_stamp_overlap       = int(values['num_stamp_overlap'])
+        except:
+            num_stamp_overlap       = 0
         
         try:
             category_overlap_value  = float(values['category_overlap'])
@@ -495,7 +500,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 'friend_overlap'    : "%d friend%s in common" % \
                     (num_friend_overlap, '' if num_friend_overlap == 1 else 's'), 
                 'stamp_overlap'     : "%d stamp%s in common" % \
-                    (stamp_overlap_value, '' if stamp_overlap_value == 1 else 's'), 
+                    (num_stamp_overlap, '' if num_stamp_overlap == 1 else 's'), 
                 'category_overlap'  : "tends to stamp similar categories", 
                 
                 'proximity'         : "tends to stamp in similar areas", 
