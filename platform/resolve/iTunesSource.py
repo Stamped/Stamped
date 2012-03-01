@@ -195,30 +195,54 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
         except Exception:
             return -1
 
-    @property
+    @lazyProperty
     def rating(self):
         try:
             return self.data['contentAdvisoryRating']
         except KeyError:
             return None
 
-    @property 
+    @lazyProperty 
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
         except KeyError:
             return []
 
+    @lazyProperty
+    def desc(self):
+        try:
+            return self.data['longDescription']
+        except KeyError:
+            return None
 
 class iTunesSource(GenericSource):
     """
     """
     def __init__(self):
-        GenericSource.__init__(self, 'itunes')
+        GenericSource.__init__(self, 'itunes',
+
+            'mpaa_rating',
+            'genre',
+            'desc',
+        )
 
     @lazyProperty
     def __itunes(self):
         return globaliTunes()
+
+    def enrichEntity(self, entity, controller, decorations, timestamps):
+        GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
+        if entity['subcategory'] == 'movie' and entity['itunes_id'] is not None:
+            movie = iTunesMovie(entity['itunes_id'])
+            if movie.rating is not None:
+                entity['mpaa_rating'] = movie.rating
+            if len(movie.genres) > 0:
+                entity['genre'] = movie.genres[0]
+            if movie.desc is not None:
+                entity['desc'] = movie.desc
+
+        return True
 
     def matchSource(self, query):
         if query.type == 'artist':

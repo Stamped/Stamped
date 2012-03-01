@@ -39,6 +39,7 @@ class SeedSource(BasicSource):
             'desc',
             'subtitle',
             'track_length',
+            'cast',
         ]
         for group in self.__simple_groups:
             self.addGroup(group)
