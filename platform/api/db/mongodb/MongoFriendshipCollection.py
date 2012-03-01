@@ -220,7 +220,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             if friend_overlap > 1:
                 potential_friends[user_id]['friend_overlap'] = friend_overlap
         
-        user_entity_ids, user_categories, user_clusters user = self._get_stamp_info(userId)
+        user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
         inv_len_user_entity_ids = 1.0 / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
         
@@ -270,7 +270,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 continue
             
             count = count + 1
-            entity_ids, categories, clusters, potential_friend = self._get_stamp_info(user_id)
+            entity_ids, categories, clusters, friend = self._get_stamp_info(user_id)
             
             #common_entity_ids = user_entity_ids & entity_ids
             """
@@ -352,7 +352,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                         values['current_proximity'] = dist
         
         
-        num_stamps = user.num_stamps if 'num_stamps' in user else 0
+        num_stamps = friend.num_stamps if 'num_stamps' in friend else 0
         values['has_stamps'] = (num_stamps >= 1)
         values['num_stamps'] = math.log(num_stamps) if num_stamps >= 1 else 0.0
         
