@@ -237,7 +237,7 @@ class AWSInstance(AInstance):
                 assert 3 == ret['startupStatus']
                 
                 break
-            except:
+            except Exception:
                 pass
             
             tries += 1
@@ -295,7 +295,7 @@ class AWSInstance(AInstance):
             while True:
                 try:
                     return self._instance.update(validate)
-                except:
+                except Exception:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
@@ -311,7 +311,7 @@ class AWSInstance(AInstance):
             while True:
                 try:
                     return self._instance.add_tag(key, value)
-                except:
+                except Exception:
                     num_retries += 1
                     if num_retries >= 5:
                         raise
@@ -370,12 +370,12 @@ class AWSInstance(AInstance):
         try:
             if key in self.__dict__:
                 return self.__dict__[key]
-        except:
+        except Exception:
             pass
         
         try:
             return self.tags[key]
-        except:
+        except Exception:
             # TODO: make this less hacky...
             return eval("self._instance.%s" % key)
 

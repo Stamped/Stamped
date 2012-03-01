@@ -72,7 +72,7 @@ __stack = {
         'count' : 1, 
         
         'template' : {
-            'roles' : [ 'work', 'mem', ], 
+            'roles' : [ 'work', 'mem', 'search' ], 
         }, 
     }, 
     
@@ -102,7 +102,8 @@ def getInstances():
     config = []
     
     for nodeType in __stack:
-        count = __stack[nodeType]['count'] if 'count' in v else 1
+        value = __stack[nodeType]
+        count = value['count'] if 'count' in value else 1
         
         for i in xrange(count):
             instance = getInstance(nodeType)
