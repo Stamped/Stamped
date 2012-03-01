@@ -30,9 +30,11 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         if api is not None:
             request = SuggestedUserRequest({ 'personalized' : False })
-            self._suggested = set(list(user.user_id for user in api.getSuggestedUsers(None, request)))
+            self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
+        
+        assert '4e972d8dfe4a1d22d30002d1' in self._suggested
     
     ### PUBLIC
     
@@ -275,6 +277,10 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         # process each potential friend
         for user_id, values in potential_friends.iteritems():
+            assert '4e972d8dfe4a1d22d30002d1' in self._suggested
+            if user_id == '4e972d8dfe4a1d22d30002d1':
+                utils.log("HERE!")
+            
             try:
                 if user_id in self._suggested:
                     utils.log("PRUNING suggested user: " % user_id)
