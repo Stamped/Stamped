@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import Globals, utils
 
 from datetime           import datetime
 from Schemas            import *
@@ -31,6 +31,7 @@ for (user, explanations) in users:
     usermini = user.exportSchema(UserMini())
     user_id2 = user.user_id
     
+    utils.log("%s) %s" % (user, explanations))
     
     api._addActivity(
         genre           = 'generic', 
@@ -41,7 +42,5 @@ for (user, explanations) in users:
         subject         = subject, 
         subject_objects = [ { 'user_id' : user_id2, 'indices' : indices } ], 
         blurb           = ' and '.join(explanations), 
-        link            = dict(
-            linked_user_id  = user_id2, 
-        ))
+        linked_user_id  = user_id2)
 
