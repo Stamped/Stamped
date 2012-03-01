@@ -383,6 +383,18 @@ class MongoFriendshipCollection(AFriendshipDB):
         if count - prune >= offset + limit:
             potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
         
+        def print_top(key, reverse=True, default=-1):
+            print "%s %s %s" % ("-" * 40, key, "-" * 40)
+            users2 = sorted(users, key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
+            
+            for user in users2:
+                pprint(user)
+        
+        print_top('friend_overlap')
+        print_top('stamp_overlap')
+        print_top('category_overlap')
+        print_top('proximity')
+        
         # TODO: optimize this sorted loop to only retain the top n results?
         users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
         users  = users[offset : offset + limit]
