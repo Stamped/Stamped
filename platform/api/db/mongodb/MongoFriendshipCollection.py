@@ -291,9 +291,11 @@ class MongoFriendshipCollection(AFriendshipDB):
             
             count = count + 1
             entity_ids, categories, clusters, friend = self._get_stamp_info(user_id)
+            overlap = 0
             
             try:
-                values['stamp_overlap'] = values['num_stamp_overlap'] * inv_len_user_entity_ids
+                overlap = values['num_stamp_overlap']
+                values['stamp_overlap'] = overlap * inv_len_user_entity_ids
             except:
                 pass
             
@@ -365,7 +367,9 @@ class MongoFriendshipCollection(AFriendshipDB):
                         min_dist = dist
                         values['current_proximity'] = dist
             
-            num_stamps = friend.num_stamps if 'num_stamps' in friend else 0
+            num_stamps  = friend.num_stamps if 'num_stamps' in friend else 0
+            num_stamps -= overlap
+            
             values['has_stamps'] = (num_stamps >= 1)
             values['num_stamps'] = math.log(num_stamps) if num_stamps >= 1 else 0.0
         
@@ -449,9 +453,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         except:
             clusters                = [ (0, None), (0, None) ]
         
-        friend_overlap_weight       = 1.0
-        stamp_overlap_weight        = 2.0
-        category_overlap_weight     = 1.5
+        friend_overlap_weight       = 5.0
+        stamp_overlap_weight        = 8.0
+        category_overlap_weight     = 1.0
         proximity_weight            = 3.0
         current_proximity_weight    = 3.0
         facebook_friend_weight      = 2.0
