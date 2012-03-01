@@ -28,8 +28,8 @@ class MongoFriendshipCollection(AFriendshipDB):
     def __init__(self, api):
         self.api = api
         
-        if api:
-
+        utils.log("api: %s" % api)
+        if api is not None:
             request = SuggestedUserRequest({ 'personalized' : False })
             utils.log("NUM_SUG: %d" % len(api.getSuggestedUsers(None, request)))
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
