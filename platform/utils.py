@@ -344,7 +344,7 @@ def getFile(url, request=None, params=None, logging=False):
     while True:
         try:
             if logging:
-                logs.info(request.get_full_url())
+                log(request.get_full_url())
             response = urllib2.urlopen(request)
             data = response.read()
             break

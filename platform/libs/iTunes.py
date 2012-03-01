@@ -34,7 +34,10 @@ class iTunes(object):
 
     def method(self, method, **params):
         try:
-            result = getFile('http://itunes.apple.com/%s' % method, params=params, logging=True)
+            url = 'http://itunes.apple.com/%s' % method
+            from pprint import pprint
+            pprint(params)
+            result = getFile(url, params=params, logging=True)
         except HTTPError as e:
             raise StampedHTTPError('itunes threw an exception',e.code,e.message)
         return json.loads(result)

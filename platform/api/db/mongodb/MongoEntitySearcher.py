@@ -1099,6 +1099,9 @@ class MongoEntitySearcher(EntitySearcher):
             if subcategory_filter is None or subcategory_filter == 'artist':
                 apple_pool.spawn(_find_apple_specific, media='music', entity='musicArtist')
             
+            # search for misc matches that might not have been returned above
+            apple_pool.spawn(_find_apple_specific, media='all', entity=None)
+            
             # search for matching albums
             if subcategory_filter is None or subcategory_filter == 'album':
                 apple_pool.spawn(_find_apple_specific, media='music', entity='album')
@@ -1110,9 +1113,6 @@ class MongoEntitySearcher(EntitySearcher):
             # search for matching apps
             if subcategory_filter is None or subcategory_filter == 'app':
                 apple_pool.spawn(_find_apple_specific, media='software', entity=None)
-            
-            # search for misc matches that might not have been returned above
-            apple_pool.spawn(_find_apple_specific, media='all', entity=None)
             
             apple_pool.join(timeout=6.5)
         except:

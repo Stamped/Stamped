@@ -237,7 +237,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
-        inv_len_user_entity_ids = math.log(inv_len_user_entity_ids) / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
+        inv_len_user_entity_ids = 1.0 / inv_len_user_entity_ids if inv_len_user_entity_ids > 0 else 0.0
         
         #for cluster in user_clusters:
         #    print "(%s) %d %s" % (cluster['avg'], len(cluster['data']), cluster['data'])
@@ -295,7 +295,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             
             try:
                 overlap = values['num_stamp_overlap']
-                values['stamp_overlap'] = overlap * inv_len_user_entity_ids
+                values['stamp_overlap'] = overlap * math.sqrt(overlap + 1) * inv_len_user_entity_ids
             except:
                 pass
             
@@ -333,12 +333,13 @@ class MongoFriendshipCollection(AFriendshipDB):
                         min_dist = dist
                         min_len  = len1
                 
-                if min_len >= 0:
-                    value = len0 * min_len * min_dist
-                    score = score + value
+                if min_len > 0:
+                    inv_dist = 1.0 / math.log(min_dist) if min_dist > 1.0 else 0.0
+                    value    = len0 * min_len * dist
+                    score    = score + value
                     
-                    if max_val[0][1] is None or value < max_val[0][0]:
-                        if max_val[1][1] is None or value < max_val[1][0]:
+                    if max_val[0][1] is None or value > max_val[0][0]:
+                        if max_val[1][1] is None or value > max_val[1][0]:
                             max_val[0] = max_val[1]
                             max_val[1] = (value, ll0)
                         else:
