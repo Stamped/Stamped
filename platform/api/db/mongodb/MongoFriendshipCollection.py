@@ -12,6 +12,7 @@ import libs.worldcities
 from collections                import defaultdict
 from utils                      import lazyProperty
 from pprint                     import pprint
+from Schemas                    import *
 
 from AMongoCollection           import AMongoCollection
 from MongoUserCollection        import MongoUserCollection
@@ -26,6 +27,12 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     def __init__(self, api):
         self.api = api
+        
+        if api:
+            request = SuggestedUserRequest({ 'personalized' = False })
+            self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
+        else:
+            self._suggested = set()
     
     ### PUBLIC
     
@@ -263,6 +270,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         # process each potential friend
         for user_id, values in potential_friends.iteritems():
             try:
+                if user_id in self._suggested:
+                    raise
+                
                 if 'friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['stamp_overlap'] <= 1:
                     raise
             except:
