@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import bson, logs, pprint, pymongo
-import libs.worldcities
+import libs.worldcities, unicodedata
 
 from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
@@ -20,6 +20,7 @@ class AMongoCollectionView(AMongoCollection):
         time_filter = 'timestamp.created'
         sort        = None
         reverse     = genericCollectionSlice.reverse
+        user_query  = genericCollectionSlice.query
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         orig_coords = True
@@ -82,9 +83,10 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle search query filter
         # --------------------------
-        if genericCollectionSlice.query is not None:
+        if user_query is not None:
             # TODO: make query regex better / safeguarded
-            user_query = genericCollectionSlice.query.lower().strip()
+            user_query = user_query.lower().strip()
+            user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
             
             # process 'in' or 'near' location hint
             result = libs.worldcities.try_get_region(user_query)
@@ -96,9 +98,9 @@ class AMongoCollectionView(AMongoCollection):
                 # disregard original viewport in favor of using the region's 
                 # coordinates as a ranking hint
                 orig_coords = False
-                relaxed  = True
-                viewport = False
-                center   = {
+                relaxed     = True
+                viewport    = False
+                center      = {
                     'lat' : coords[0], 
                     'lng' : coords[1], 
                 }
@@ -158,7 +160,7 @@ class AMongoCollectionView(AMongoCollection):
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------
             scope = {
-                'query'         : genericCollectionSlice.query, 
+                'query'         : user_query, 
                 'limit'         : genericCollectionSlice.limit, 
                 'offset'        : genericCollectionSlice.offset, 
                 'orig_coords'   : orig_coords, 
@@ -323,8 +325,9 @@ class AMongoCollectionView(AMongoCollection):
                                 var earthRadius = 3959.0;
                                 var dist2 = dist * earthRadius;
                                 
-                                if (dist2 > 500) {
+                                if (dist2 >= 500) {
                                     dist_value = 0;
+                                    return;
                                 }
                             }
                         }
