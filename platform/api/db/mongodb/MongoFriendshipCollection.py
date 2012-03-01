@@ -465,11 +465,11 @@ class MongoFriendshipCollection(AFriendshipDB):
         except:
             clusters                = [ (0, None), (0, None) ]
         
-        friend_overlap_weight       = 5.0
-        stamp_overlap_weight        = 8.0
+        friend_overlap_weight       = 15.0
+        stamp_overlap_weight        = 30.0
         category_overlap_weight     = 1.0
-        proximity_weight            = 3.0
-        current_proximity_weight    = 3.0
+        proximity_weight            = 2.0
+        current_proximity_weight    = 2.0
         facebook_friend_weight      = 2.0
         twitter_friend_weight       = 2.0
         num_stamps_weight           = 1.0
@@ -558,7 +558,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                             cities.append(city)
                     
                     if cities:
-                        explanation = "Tends to stamp in %s" % (" and ".join(cities), )
+                        explanation = "tends to stamp in %s" % (" and ".join(cities), )
                         explanations['proximity'] = explanation
             except:
                 utils.printException()
@@ -569,7 +569,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     city = _get_city(coords)
                     
                     if city is not None:
-                        explanation = "Tends to stamp nearby (in %s)" % city
+                        explanation = "tends to stamp nearby (in %s)" % city
                         explanations['current_proximity'] = explanation
             except:
                 utils.printException()
