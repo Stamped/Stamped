@@ -18,6 +18,9 @@ from MongoFollowersCollection   import MongoFollowersCollection
 from MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
 
+from pyes.filters               import *
+from pyes.query                 import *
+
 class MongoUserCollection(AMongoCollection, AUserDB):
     
     def __init__(self):
@@ -125,6 +128,18 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 users.append(user)
         except:
             pass
+        
+        if False:
+            q = StringQuery(query, default_operator="AND", search_fields=[ "name", "screen_name" ])
+            q = CustomScoreQuery(q, lang="mvel", script="""
+                ns = doc.?num_stamps.value;
+                ns = (ns != null) ? log(ns) : 0;
+                nf = doc.?num_friends.value;
+                nf = (nf != null) ? log(nf) : 0;
+                return _score + ns / 4.0 + nf / 8.0
+            """)
+            if domain:
+                q = FilteredQuery(q, IdsFilter('user', list(domain)))
         
         m = bson.code.Code("""function () {
             var score = 0.0;

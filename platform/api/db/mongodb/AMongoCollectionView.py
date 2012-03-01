@@ -401,7 +401,8 @@ class AMongoCollectionView(AMongoCollection):
                 inside = filter(_within_viewport, results)
                 
                 if len(inside) > 0:
-                    logs.debug("%d results inside viewport; pruning %d results outside" % (len(inside), len(results) - len(inside)))
+                    logs.debug("%d results inside viewport; pruning %d results outside" % 
+                               (len(inside), len(results) - len(inside)))
                     results = inside
                 else:
                     logs.debug("no results inside viewport; %d results outside" % (len(results), ))

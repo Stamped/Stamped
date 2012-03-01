@@ -249,9 +249,35 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                             #utils.log("[%s] index(ns=%s, index=%s, type=%s, %s)" % 
                             #          (self, ns, index, doc_type, pformat(doc)))
                             
-                            # TODO: validate doc against mapping properties
-                            inserts += 1
+                            def _validate_doc(d, schema):
+                                for k, v in schema.iteritems():
+                                    try:
+                                        dv = d[k]
+                                        
+                                        if isinstance(dv, dict):
+                                            _validate_doc(dv, v)
+                                    except KeyError:
+                                        try:
+                                            null_value = v['null_value']
+                                            d[k] = null_value
+                                        except KeyError:
+                                            pass
+                            
+                            # validate doc against mapping properties
+                            _validate_doc(doc, properties)
+                            
+                            if ns == 'stamped.users':
+                                if not 'stats' in doc:
+                                    doc['stats'] = {
+                                        'num_stamps'    : 0, 
+                                        'num_followers' : 0, 
+                                    }
+                                
+                                assert 'num_stamps'     in doc['stats']
+                                assert 'num_followers'  in doc['stats']
+                            
                             self._elasticsearch.index(doc, index, doc_type, id=id, bulk=bulk)
+                            inserts += 1
             
             if bulk:
                 utils.log("[%s] flushing bulk indexing job of %d '%s' documents" % 
