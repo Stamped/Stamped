@@ -224,16 +224,15 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         potential_friends = defaultdict(dict)
         
-        total = sum(friends_of_friends.itervalues())
-        if total > 0:
-            weight = math.log(total) / total
-        else:
-            weight = 0.0
+        total  = sum(friends_of_friends.itervalues())
+        weight = 1.0 / total if total > 0 else 0.0
         
         for user_id, friend_overlap in friends_of_friends.iteritems():
             if friend_overlap > 1:
+                value = math.sqrt(friend_overlap) * friend_overlap * weight
+                
                 potential_friends[user_id]['num_friend_overlap'] = friend_overlap
-                potential_friends[user_id]['friend_overlap']     = friend_overlap * weight
+                potential_friends[user_id]['friend_overlap']     = value
         
         user_entity_ids, user_categories, user_clusters, user = self._get_stamp_info(userId)
         inv_len_user_entity_ids = len(user_entity_ids)
@@ -295,7 +294,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             
             try:
                 overlap = values['num_stamp_overlap']
-                values['stamp_overlap'] = overlap * math.sqrt(overlap + 1) * inv_len_user_entity_ids
+                values['stamp_overlap'] = overlap * overlap * inv_len_user_entity_ids
             except:
                 pass
             
