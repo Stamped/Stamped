@@ -383,7 +383,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         offset = request.offset if request.offset is not None else 0
         
         if len(pruned) > 0 and len(potential_friends) - len(pruned) >= offset + limit:
-            logs.info("pruning %d potential friends (out of %d)" % len(pruned), len(potential_friends))
+            logs.info("pruning %d potential friends (out of %d)" % (len(pruned), len(potential_friends)))
             potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
             logs.info("ed %d potential friends (now %d)" % len(potential_friends))
         
