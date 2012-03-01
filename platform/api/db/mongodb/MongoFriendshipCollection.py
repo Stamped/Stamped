@@ -181,7 +181,6 @@ class MongoFriendshipCollection(AFriendshipDB):
         todo                = []
         max_distance        = 2
         count               = 0
-        prune               = 0
         friends             = None
         coords              = None
         
@@ -277,8 +276,6 @@ class MongoFriendshipCollection(AFriendshipDB):
         # process each potential friend
         for user_id, values in potential_friends.iteritems():
             try:
-                utils.log(user_id)
-                utils.log(self._suggested)
                 if user_id in self._suggested:
                     utils.log("PRUNING suggested user: " % user_id)
                     raise
@@ -286,7 +283,6 @@ class MongoFriendshipCollection(AFriendshipDB):
                 if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['num_stamp_overlap'] <= 1:
                     raise
             except:
-                prune = prune + 1
                 pruned.add(user_id)
                 continue
             
@@ -375,14 +371,17 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         logs.info("potential friends:  %d" % len(potential_friends))
         logs.info("friends of friends: %d" % len(friends_of_friends))
-        logs.info("processed: %d; pruned: %d" % (count, prune))
+        logs.info("processed: %d; pruned: %d" % (count, len(pruned)))
         
         limit  = request.limit  if request.limit  is not None else 10
         offset = request.offset if request.offset is not None else 0
         
-        if count - prune >= offset + limit:
+        if count - len(pruned) >= offset + limit:
+            logs.info("pruning %d potential friends (out of %d)" % len(pruned), len(potential_friends))
             potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
+            logs.info("ed %d potential friends (now %d)" % len(potential_friends))
         
+        """
         def print_top(key, reverse=True, default=-1):
             print "%s %s %s" % ("-" * 40, key, "-" * 40)
             users2 = sorted(potential_friends.iteritems(), key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
@@ -395,6 +394,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         print_top('stamp_overlap')
         print_top('category_overlap')
         print_top('proximity')
+        """
         
         # TODO: optimize this sorted loop to only retain the top n results?
         users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
