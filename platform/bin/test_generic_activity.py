@@ -19,7 +19,7 @@ request = SuggestedUserRequest(dict(
 ))
 
 api     = MongoStampedAPI()
-userDB  = stampedAPI._userDB
+userDB  = api._userDB
 
 rs = userDB._collection.find({'email' : { '$regex' : r'.*@stamped\.com', '$options' : 'i' }}, output=list)
 for result in rs:
@@ -29,6 +29,7 @@ for result in rs:
     utils.log('-' * 40)
     utils.log('%s) %s' % (user.screen_name, user_id))
     
+    continue
     users   = api.getSuggestedUsers(user_id, request)
 
     for (user, explanations) in users:
