@@ -33,8 +33,6 @@ class MongoFriendshipCollection(AFriendshipDB):
             self._suggested = set(user.user_id for user in api.getSuggestedUsers(None, request))
         else:
             self._suggested = set()
-        
-        assert '4e792021d6970356a5000042' in self._suggested
     
     ### PUBLIC
     
@@ -179,6 +177,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         friends_of_friends  = {}
         visited_users       = set()
+        pruned              = set([])
         todo                = []
         max_distance        = 2
         count               = 0
@@ -280,6 +279,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     raise
             except:
                 prune = prune + 1
+                pruned.add(user_id)
                 continue
             
             count = count + 1
@@ -363,11 +363,10 @@ class MongoFriendshipCollection(AFriendshipDB):
                     if min_dist is None or dist < min_dist:
                         min_dist = dist
                         values['current_proximity'] = dist
-        
-        
-        num_stamps = friend.num_stamps if 'num_stamps' in friend else 0
-        values['has_stamps'] = (num_stamps >= 1)
-        values['num_stamps'] = math.log(num_stamps) if num_stamps >= 1 else 0.0
+            
+            num_stamps = friend.num_stamps if 'num_stamps' in friend else 0
+            values['has_stamps'] = (num_stamps >= 1)
+            values['num_stamps'] = math.log(num_stamps) if num_stamps >= 1 else 0.0
         
         logs.info("potential friends:  %d" % len(potential_friends))
         logs.info("friends of friends: %d" % len(friends_of_friends))
@@ -375,6 +374,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         limit  = request.limit  if request.limit  is not None else 10
         offset = request.offset if request.offset is not None else 0
+        
+        if count - prune >= offset + limit
+            potential_friends = dict(filter(lambda f: f[0] not in pruned, potential_friends.iteritems()))
         
         # TODO: optimize this sorted loop to only retain the top n results?
         users  = sorted(potential_friends.iteritems(), key=self._get_potential_friend_score, reverse=True)
