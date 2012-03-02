@@ -492,6 +492,9 @@ class Entity(Schema):
         self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
         self.titlel             = SchemaElement(basestring)
+        self.mangled_title              = SchemaElement(basestring)
+        self.mangled_title_source       = SchemaElement(basestring)
+        self.mangled_title_timestamp    = SchemaElement(datetime) 
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
         self.subtitle_source    = SchemaElement(basestring)
@@ -513,6 +516,9 @@ class Entity(Schema):
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
         self.stats              = StatsSchema()
+        self.successor          = SchemaElement(basestring)
+        self.successor_source   = SchemaElement(basestring)
+        self.successor_timestamp= SchemaElement(datetime)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
@@ -724,7 +730,11 @@ class VideoSchema(Schema):
         self.studio_name        = SchemaElement(basestring)
         self.studio_url         = SchemaElement(basestring)
         self.network_name       = SchemaElement(basestring)
+        
         self.short_description  = SchemaElement(basestring)
+        self.short_description_source = SchemaElement(basestring)
+        self.short_description_timestamp = SchemaElement(datetime)
+
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)
@@ -761,6 +771,8 @@ class ArtistSchema(Schema):
     def setSchema(self):
         self.artist_type        = SchemaElement(basestring)
         self.albums             = SchemaList(ArtistAlbumsSchema())
+        self.albums_source      = SchemaElement(basestring)
+        self.albums_timestamp   = SchemaElement(datetime)
         self.songs              = SchemaList(ArtistSongsSchema())
 
 class ArtistAlbumsSchema(Schema):
@@ -769,6 +781,9 @@ class ArtistAlbumsSchema(Schema):
         self.rank               = SchemaElement(int)
         self.genre_id           = SchemaElement(int)
         self.album_name         = SchemaElement(basestring)
+        self.source             = SchemaElement(basestring)
+        self.id                 = SchemaElement(basestring)
+        self.timestamp          = SchemaElement(datetime)
 
 class ArtistSongsSchema(Schema):
     def setSchema(self):

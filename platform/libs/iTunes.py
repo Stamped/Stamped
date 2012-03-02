@@ -19,6 +19,7 @@ try:
     from urllib2                import HTTPError
     from errors                 import StampedHTTPError
     import logs
+    import urllib
     try:
         import json
     except ImportError:
@@ -35,9 +36,11 @@ class iTunes(object):
     def method(self, method, **params):
         try:
             url = 'http://itunes.apple.com/%s' % method
-            from pprint import pprint
-            pprint(params)
-            result = getFile(url, params=params, logging=True)
+            try:
+                logs.info("%s?%s" % (url, urllib.urlencode(params)))
+            except Exception:
+                report()
+            result = getFile(url, params=params)
         except HTTPError as e:
             raise StampedHTTPError('itunes threw an exception',e.code,e.message)
         return json.loads(result)

@@ -277,6 +277,7 @@ class StampedSource(GenericSource):
             'subcategory':'song',
             '$or': [
                 { 'title':query.name },
+                { 'mangled_title':trackSimplify(query.name) },
                 { 'details.media.artist_display_title':query.artist['name'] },
                 { 'details.song.album.name': query.album['name'] },
             ]
@@ -294,6 +295,7 @@ class StampedSource(GenericSource):
     def albumSource(self, query):
         options = [
             { 'title':query.name },
+            { 'mangled_title':albumSimplify(query.name) },
             { 'details.media.artist_display_title':query.artist['name'] },
         ]
         for track in query.tracks:
@@ -318,6 +320,7 @@ class StampedSource(GenericSource):
     def artistSource(self, query):
         options = [
             { 'title':query.name },
+            { 'mangled_title':artistSimplify(query.name) },
         ]
         for track in query.tracks:
             options.append( {

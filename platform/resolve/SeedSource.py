@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'FormatSource' ]
+__all__ = [ 'SeedSource' ]
 
 import Globals
 from logs import report
@@ -40,6 +40,7 @@ class SeedSource(BasicSource):
             'subtitle',
             'track_length',
             'cast',
+            'short_description',
         ]
         for group in self.__simple_groups:
             self.addGroup(group)

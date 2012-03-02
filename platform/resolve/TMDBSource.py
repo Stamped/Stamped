@@ -22,7 +22,7 @@ try:
     from urllib2                    import HTTPError
     from datetime                   import datetime
     from Resolver                   import *
-    from pprint                     import pformat
+    from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
     import re
 except:
@@ -145,6 +145,7 @@ class TMDBSource(GenericSource):
             'director',
             'cast',
             'desc',
+            'short_description',
         )
         self.__max_cast = 6
 
@@ -239,8 +240,17 @@ class TMDBSource(GenericSource):
                         
                 except Exception:
                     pass
-                info = self.__tmdb.movie_info(tmdb_id)['overview']
-                entity['desc'] = info
+                info = self.__tmdb.movie_info(tmdb_id)
+                if 'tagline' in info:
+                    tagline = info['tagline']
+                    if tagline is not None and tagline != '':
+
+                        entity['short_description'] = tagline
+                if 'overview' in info:
+                    overview = info['overview']
+                    if overview is not None and overview != '':
+                        entity['desc'] = overview
+
 
         return True
 

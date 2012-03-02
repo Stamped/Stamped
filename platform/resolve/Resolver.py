@@ -60,16 +60,24 @@ _general_regex_removals = [
 
 # track-specific removal patterns
 _track_removals = [
+    (r'^(the ).*$'      , [1]),
     (r'.*(-.* (remix|mix|version|edit|dub)$)'  , [1]),
 ]
 
 # album-specific removal patterns
 _album_removals = [
+    (r'^(the ).*$'      , [1]),
     (r'.*((-|,)( the)? remixes.*$)'    , [1]),
     (r'.*(- ep$)'                   , [1]),
     (r'.*( the (\w+ )?remixes$)'     , [1]),
     (r'.*(- remix ep)' , [1]),
     (r'.*(- single$)' , [1]),
+]
+
+# artist-specific removal patterns
+_artist_removals = [
+    (r'^(the ).*$'      , [1]),
+    (r'^.*( band)'      , [1]),
 ]
 
 def regexRemoval(string, patterns):
@@ -151,6 +159,16 @@ def albumSimplify(string):
     """
     string = simplify(string)
     string = regexRemoval(string, _album_removals)
+    return format(string)
+
+def artistSimplify(string):
+    """
+    Album specific simplification for fuzzy comparisons.
+
+    Multipass safe and partially optimized
+    """
+    string = simplify(string)
+    string = regexRemoval(string, _artist_removals)
     return format(string)
 
 def nameSimplify(string):
@@ -351,8 +369,12 @@ class Resolver(object):
 
     Resolver objects are virtually stateless so many can be instatiated or a few can be shared.
     """
-    def __init__(self):
-        pass
+    def __init__(self,verbose=False):
+        self.__verbose = verbose
+
+    @property 
+    def verbose(self):
+        return self.__verbose
 
     def setSimilarity(self, a, b):
         """
@@ -383,6 +405,12 @@ class Resolver(object):
         Reduces a track name to a simplied form for fuzzy comparison.
         """
         return trackSimplify(track)
+
+    def artistSimplify(self, artist):
+        """
+        Reduces an artist name to a simplied form for fuzzy comparison.
+        """
+        return artistSimplify(artist)
 
     def actorSimplify(self, actor):
         """
@@ -544,7 +572,7 @@ class Resolver(object):
 
     def genericCheck(self, tests, weights, results, query, match, options):
         mins = options['mins']
-        if _verbose:
+        if self.verbose:
             print("Comparing %s and %s" % (match.name,query.name))
         success, similarities = self.__compareAll(query, match, tests, options)
         if success:
@@ -578,16 +606,8 @@ class Resolver(object):
         query_album_set = self.albumsSet(query)
         match_album_set = self.albumsSet(match)
 
-        if _verbose:
-            diff = sorted(query_album_set ^ match_album_set)
-            print('%s Album difference for %s and %s (%s %s vs %s %s)' % (
-                len(diff), match.name , query.name, len(match_album_set), match.source, len(query_album_set), query.source
-            ))
-            for album in diff:
-                source = match.source
-                if album in query_album_set:
-                    source = query.source
-                print( "%s: %s" % (source, album))
+        if self.verbose:
+            self.__differenceLog('Album', query_album_set, match_album_set, query, match)
 
         return self.setSimilarity(query_album_set, match_album_set)
 
@@ -595,16 +615,8 @@ class Resolver(object):
         query_track_set = self.tracksSet(query)
         match_track_set = self.tracksSet(match)
 
-        if _verbose:
-            diff = sorted(query_track_set ^ match_track_set)
-            print('%s Track difference for %s and %s (%s %s vs %s %s)' % (
-                len(diff), match.name , query.name, len(match_track_set), match.source, len(query_track_set), query.source
-            ))
-            for track in diff:
-                source = match.source
-                if track in query_track_set:
-                    source = query.source
-                print( "%s: %s" % (source, track))
+        if self.verbose:
+            self.__differenceLog('Track', query_track_set, match_track_set, query, match)
 
         return self.setSimilarity(query_track_set, match_track_set)
 
@@ -612,7 +624,7 @@ class Resolver(object):
         query_cast_set = self.castSet(query)
         match_cast_set = self.castSet(match)
 
-        if _verbose:
+        if self.verbose:
             self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
 
         return self.setSimilarity(query_cast_set, match_cast_set)
@@ -844,6 +856,7 @@ def demo(generic_source, default_title):
     invert it using a StampedSource. The result of this inversion 
     will also be verbosely outputted. 
     """
+    _verbose = True
     import sys
     import StampedSource
 
@@ -851,7 +864,7 @@ def demo(generic_source, default_title):
     subcategory = None
     count = 1
 
-    resolver = Resolver()
+    resolver = Resolver(verbose=True)
     entity_source = StampedSource.StampedSource()
 
     print(sys.argv)
@@ -862,13 +875,20 @@ def demo(generic_source, default_title):
     if len(sys.argv) > 3:
         count = int(sys.argv[3])
 
-    _verbose = True
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
     query = {'title':title}
     if subcategory is not None:
         query['subcategory'] = subcategory
+        if subcategory == 'artist':
+            query['mangled_title'] = artistSimplify(title)
+        elif subcategory == 'song':
+            query['mangled_title'] = trackSimplify(title)
+        elif subcategory == 'album':
+            query['mangled_title'] = albumSimplify(title)
+    else:
+        query['mangled_title'] = simplify(title)
     cursor = db._collection.find(query)
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)

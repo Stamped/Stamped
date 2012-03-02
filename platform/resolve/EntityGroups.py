@@ -224,6 +224,22 @@ class TrackLengthGroup(ASubcategoryGroup):
         self.addEligible('song')
         self.addEligible('movie')
 
+class ShortDescriptionGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'short_description')
+        self.addNameField()
+        self.addEligible('movie')
+        self.addEligible('tv')
+
+class AlbumsGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'albums')
+        self.addNameField()
+        self.addEligible('artist')
+
+
 class DirectorGroup(AFilmGroup):
 
     def __init__(self):
@@ -249,6 +265,15 @@ class DescGroup(BasicFieldGroup):
 
     def __init__(self, *args, **kwargs):
         BasicFieldGroup.__init__(self, 'desc')
+        self.addNameField()
+
+    def eligible(self, entity):
+        return True
+
+class MangledTitleGroup(BasicFieldGroup):
+
+    def __init__(self, *args, **kwargs):
+        BasicFieldGroup.__init__(self, 'mangled_title')
         self.addNameField()
 
     def eligible(self, entity):
