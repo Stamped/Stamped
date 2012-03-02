@@ -13,7 +13,7 @@ if len(sys.argv) < 1:
 query   = sys.argv[1]
 api     = MongoStampedAPI(lite_mode = True)
 user_id = '4e57048dccc2175fca000005'
-users   = api._userDB.searchUsers(user_id, query, limit = 10, relationship='following')
+users   = api._userDB.searchUsers(user_id, query, limit = 10)
 
 for user in users:
     pprint(user.value)
