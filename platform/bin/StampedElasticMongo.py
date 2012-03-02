@@ -8,6 +8,8 @@ __license__   = "TODO"
 import Globals, utils, sys
 import libs.ec2_utils
 
+from libs.ElasticMongo import ElasticMongo
+
 if __name__ == '__main__':
     config_ns  = 'local.elasticmongo'
     es_port    = 9200
