@@ -66,7 +66,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                  mongo_config_ns  = "local.elasticmongo", 
                  poll_interval_ms = 1000, 
                  force            = False, 
-                 *args, **kwargs):
+                 **kwargs):
         
         AElasticMongoObject.__init__(self)
         AMongoCollectionSink.__init__(self, self)
@@ -87,7 +87,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         self._force               = force
         
         self._init_mongo_conn()
-        self._init_elastic_conn(*args, **kwargs)
+        self._init_elastic_conn(**kwargs)
     
     def _init_mongo_conn(self):
         if self._mongo_conn:
@@ -112,16 +112,19 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                                   #    'mappings' : { _id => mapping }, 
                                   # }
     
-    def _init_elastic_conn(self, *args, **kwargs):
-        utils.log("pyes: %s, %s" % (str(args), str(kwargs)))
+    def _init_elastic_conn(self, **kwargs):
+        utils.log("pyes: %s" % str(kwargs))
         retries = 5
         
-        while retries >= 0:
+        while True:
             try:
-                self._elasticsearch = pyes.ES(*args, **kwargs)
+                self._elasticsearch = pyes.ES(**kwargs)
                 utils.log("[%s] pyes: %s" % (self, pformat(self._elasticsearch.collect_info())))
             except Exception:
                 retries -= 1
+                if retries <= 0:
+                    raise
+                
                 time.sleep(1)
     
     def run(self):
