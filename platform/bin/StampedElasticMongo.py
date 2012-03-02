@@ -8,7 +8,8 @@ __license__   = "TODO"
 import Globals, utils, sys
 import libs.ec2_utils
 
-from libs.ElasticMongo import ElasticMongo
+from libs.ElasticMongo      import ElasticMongo
+from api.MongoStampedAPI    import MongoStampedAPI
 
 if __name__ == '__main__':
     config_ns  = 'local.elasticmongo'
@@ -25,27 +26,24 @@ if __name__ == '__main__':
             sys.exit(1)
         
         es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
-        db_servers = filter(lambda node: 'db' in node.roles, stack.nodes)
-        
         es_servers = map(lambda node: "%s:%d" % (node.private_ip_address, es_port), es_servers)
-        db_servers = map(lambda node: node.private_ip_address, db_servers)
         
         if len(es_servers) == 0:
             utils.log("error: no elasticsearch servers found")
             sys.exit(1)
         
-        if len(db_servers) == 0:
-            utils.log("error: no db servers found")
-            sys.exit(1)
+        api  = MongoStampedAPI(lite_mode=True)
+        conn = api._entityDB._collection._connection
+        coll = __get_collection(conn, args.state_namespace)
+        
+        em   = ElasticMongo(mongo_conn        = conn, 
+                            mongo_config_ns   = config_ns, 
+                            server            = es_servers)
     else:
-        es_servers = "%s:%d" % ('localhost', es_port)
-        db_servers = [ 'localhost' ]
-    
-    db_host = db_servers[0]
-    em      = ElasticMongo(mongo_host        = db_host, 
-                           mongo_port        = db_port, 
-                           mongo_config_ns   = config_ns, 
-                           server            = es_servers)
+        em   = ElasticMongo(mongo_host        = 'localhost', 
+                            mongo_port        = db_port, 
+                            mongo_config_ns   = config_ns, 
+                            server            = "%s:%d" % ('localhost', es_port))
     
     em.run()
 
