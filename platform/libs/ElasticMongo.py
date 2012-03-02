@@ -62,6 +62,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
     def __init__(self, 
                  mongo_host       = 'localhost', 
                  mongo_port       = 27017, 
+                 mongo_conn       = None, 
                  mongo_config_ns  = "local.elasticmongo", 
                  poll_interval_ms = 1000, 
                  force            = False, 
@@ -73,6 +74,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         self._mongo_host          = mongo_host
         self._mongo_port          = mongo_port
         self._mongo_config_ns     = mongo_config_ns
+        self._mongo_conn          = mongo_conn
         self._poll_interval       = poll_interval_ms / 1000.0 # convert milliseconds to seconds
         self._force               = force
         
@@ -80,9 +82,12 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         self._init_elastic_conn(*args, **kwargs)
     
     def _init_mongo_conn(self):
-        self._conn          = pymongo.Connection(self._mongo_host, self._mongo_port)
-        self._oplog         = self._conn.local.oplog.rs
+        if self._mongo_conn:
+            self._conn      = self._mongo_conn
+        else:
+            self._conn      = pymongo.Connection(self._mongo_host, self._mongo_port)
         
+        self._oplog         = self._conn.local.oplog.rs
         self._config_sink   = ElasticMongoConfigSink(self)
         self._config_source = MongoCollectionSource(self, 
                                                     self._config_sink, 
