@@ -11,6 +11,11 @@ import libs.ec2_utils
 from libs.ElasticMongo      import ElasticMongo
 from api.MongoStampedAPI    import MongoStampedAPI
 
+import pyes
+es   = pyes.ES('10.85.105.209:9200')
+info = es.collect_info()
+from pprint import pprint; pprint(info)
+
 if __name__ == '__main__':
     config_ns  = 'local.elasticmongo'
     es_port    = 9200
@@ -33,7 +38,7 @@ if __name__ == '__main__':
         conn = api._entityDB._collection._connection
         em   = ElasticMongo(mongo_conn          = conn, 
                             mongo_config_ns     = config_ns, 
-                            server              = es_servers[0], 
+                            server              = es_servers, 
                             dump_curl           = '/stamped/logs/elasticsearch_es.log')
     else:
         em   = ElasticMongo(mongo_host          = 'localhost', 
