@@ -28,7 +28,7 @@ if __name__ == '__main__':
             sys.exit(1)
         
         es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
-        es_servers = map(lambda node: "%s:%d" % (node.private_ip_address, es_port), es_servers)
+        es_servers = map(lambda node: str("%s:%d" % (node.private_ip_address, es_port)), es_servers)
         
         if len(es_servers) == 0:
             utils.log("error: no elasticsearch servers found")
