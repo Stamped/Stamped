@@ -6,7 +6,7 @@ import time
 from api.MongoStampedAPI    import MongoStampedAPI
 from api.Schemas            import *
 
-api = MongoStampedAPI()
+api = MongoStampedAPI(lite_mode = True)
 user_ids = [ 
     "4e57048dccc2175fca000005", # travis
     #"4e57048accc2175fcd000001", # robby

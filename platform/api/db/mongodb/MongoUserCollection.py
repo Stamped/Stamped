@@ -5,12 +5,14 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs, re, bson
+import Globals, utils
+import logs, re, bson
 
 from logs                       import report
 from datetime                   import datetime
 from math                       import log10
 from utils                      import lazyProperty
+from pprint                     import pformat
 from errors                     import *
 
 from Schemas                    import *
@@ -27,10 +29,11 @@ except:
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
-    def __init__(self):
+    def __init__(self, api):
         AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User, overflow=True)
         AUserDB.__init__(self)
         
+        self.api = api
         self._collection.ensure_index('phone')
         self._collection.ensure_index('linked_accounts.twitter.twitter_id')
         self._collection.ensure_index('linked_accounts.facebook.facebook_id')
@@ -72,7 +75,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         except:
             return False
     
-    def lookupUsers(self, userIds, screenNames, limit=0):
+    def lookupUsers(self, userIds, screenNames=None, limit=0):
         assert userIds is None or isinstance(userIds, list)
         assert screenNames is None or isinstance(screenNames, list)
         
@@ -114,6 +117,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             return []
         
         users  = []
+        seen   = set()
         domain = None
         
         if relationship is not None:
@@ -129,98 +133,46 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         try:
             user = self.getUserByScreenName(query)
             if user is not None and (domain is None or user.user_id in domain):
+                seen.add(user.user_id)
                 users.append(user)
         except:
             pass
         
-        if False:
-            q = StringQuery(query, default_operator="AND", search_fields=[ "name", "screen_name" ])
-            q = CustomScoreQuery(q, lang="mvel", script="""
-                ns = doc.?num_stamps.value;
-                ns = (ns != null) ? log(ns) : 0;
-                nf = doc.?num_friends.value;
-                nf = (nf != null) ? log(nf) : 0;
-                return _score + ns / 4.0 + nf / 8.0
-            """)
-            
-            if domain:
-                q = FilteredQuery(q, IdsFilter('user', list(domain)))
+        q = StringQuery(query, default_operator="AND", search_fields=[ "name", "screen_name" ])
+        q = CustomScoreQuery(q, lang="mvel", script="""
+            ns = doc.?num_stamps.value;
+            ns = (ns != null) ? log(ns) : 0;
+            nf = doc.?num_friends.value;
+            nf = (nf != null) ? log(nf) : 0;
+            return _score + ns / 4.0 + nf / 8.0
+        """)
         
-        m = bson.code.Code("""function () {
-            var score = 0.0;
-            score = (20.0 - this.screen_name.length) / 40.0;
-            if (this.stats.num_stamps > 0) {
-                score = score + Math.log(this.stats.num_stamps) / 4.0;
-            }
-            if (this.stats.num_followers > 0) {
-                score = score + Math.log(this.stats.num_followers) / 8.0;
-            }
-            if (this.screen_name_lower == queryString) {
-                score = score + 10.0;
-            }
-            emit('query', {user: this, score:score});
-        }""")
+        if domain:
+            q = FilteredQuery(q, IdsFilter('user', list(domain)))
         
-        r = bson.code.Code("""function(key, values) {
-            var out = [];
-            var min = 0.0;
-            function sortOut(a, b) {
-                if (a.score > 0) { scoreA = a.score } else { scoreA = 0 }
-                if (b.score > 0) { scoreB = b.score } else { scoreB = 0 }
-                return scoreB - scoreA;
-            }
-            values.forEach(function(v) {
-                if (out.length < 20) {
-                    out[out.length] = {score:v.score, user:v.user}
-                    if (v.score < min) { min = v.score; }
-                } else {
-                    if (v.score > min) {
-                        out[out.length] = {score:v.score, user:v.user}
-                        out.sort(sortOut);
-                        out.pop()
-                    }
-                }
-            });
-            out.sort(sortOut);
-            var obj = new Object();
-            obj.data = out
-            return obj;
-        }""")
-        
-        user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
-                              {"name_lower": {"$regex": query}}]}
-        
-        if domain is not None:
-            user_query["_id"] = { "$in" : map(bson.objectid.ObjectId, list(domain)) }
-        
-        result = self._collection.inline_map_reduce(m, r, query=user_query, 
-                                                    scope={'queryString':query}, limit=1000)
+        results = self.api._elasticsearch.search(q, 
+                                                 indexes = [ 'users' ], 
+                                                 doc_types = [ 'user' ], 
+                                                 size = limit)
         
         try:
-            # Parse out the data from the result depending on how many results exist
-            # If one user found, result is in format:
-            #   [{u'_id': u'query', u'value': <user>}]
-            # If multiple users found, result is in format:
-            #   [{u'_id': u'query', u'value': {u'data': [<user1>, ..., <userN>]}}]
+            user_ids = map(lambda result: result['_id'], results['hits']['hits'])
+            users2   = self.lookupUsers(user_ids)
+            id_user  = {}
             
-            value = result[-1]['value'] 
-            if 'data' in value:
-                data = value['data']
-            else:
-                data = [value]
-            assert(isinstance(data, list))
-        except:
-            return users
+            for user in users2:
+                id_user[user.user_id] = user
+            
+            for user_id in user_ids:
+                if user_id not in seen:
+                    seen.add(user_id)
+                    users.append(id_user[user_id])
+        except Exception:
+            logs.warn("received invalid results from pyes")
+            logs.warn(pformat(results))
+            return []
         
-        for i in data:
-            try:
-                user = self._convertFromMongo(i['user'])
-                if user.screen_name.lower() != query:
-                    users.append(user)
-            except:
-                continue
-        
-        return users[:20]
+        return users
     
     def flagUser(self, user):
         ### TODO

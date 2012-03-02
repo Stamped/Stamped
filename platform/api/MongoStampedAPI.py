@@ -69,7 +69,7 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return MongoUserCollection(self)
     
     @lazyProperty
     def _stampDB(self):
