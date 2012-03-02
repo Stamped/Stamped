@@ -172,7 +172,7 @@ class MongoStampedAPI(StampedAPI):
                 return None
             
             es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
-            es_servers = map(lambda node: "%s:%d" % (node.private_ip_address, es_port), es_servers)
+            es_servers = map(lambda node: str("%s:%d") % (node.private_ip_address, es_port), es_servers)
             
             if len(es_servers) == 0:
                 logs.warn("error: no elasticsearch servers found")
