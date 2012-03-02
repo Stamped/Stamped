@@ -31,14 +31,15 @@ if __name__ == '__main__':
         
         api  = MongoStampedAPI(lite_mode=True)
         conn = api._entityDB._collection._connection
-        em   = ElasticMongo(mongo_conn        = conn, 
-                            mongo_config_ns   = config_ns, 
-                            server            = es_servers)
+        em   = ElasticMongo(mongo_conn          = conn, 
+                            mongo_config_ns     = config_ns, 
+                            server              = es_servers, 
+                            dump_curl           = '/stamped/logs/elasticsearch_es.log')
     else:
-        em   = ElasticMongo(mongo_host        = 'localhost', 
-                            mongo_port        = db_port, 
-                            mongo_config_ns   = config_ns, 
-                            server            = "%s:%d" % ('localhost', es_port))
+        em   = ElasticMongo(mongo_host          = 'localhost', 
+                            mongo_port          = db_port, 
+                            mongo_config_ns     = config_ns, 
+                            server              = "%s:%d" % ('localhost', es_port))
     
     em.run()
 
