@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import json, logs
+import json, logs, time
 import libs.ec2_utils
 
 from Entity                 import *
