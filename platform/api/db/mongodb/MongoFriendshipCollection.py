@@ -161,20 +161,6 @@ class MongoFriendshipCollection(AFriendshipDB):
         # TODO: ignore previously followed friends that you've since unfollowed
         # TODO: better support for new users w/out stamps or friends
         
-        # TODO: integrate other signals into ranking function
-        # SIGNALS:
-        #    * friend overlap
-        #       * TODO: normalize to be independent of #friends
-        #    * stamped entity overlap
-        #       * would need fast entity_id => list(stamp_id) lookups
-        #       * TODO: normalize to be independent of #stamps
-        #    * stamp category overlap
-        #    * quality signals for potential friends
-        #    * geographical proximity
-        #    * TODO: small boost if other user is following you
-        #    * TODO: current coordinates
-        #    * TODO: global user popularity / freshness
-        
         friends_of_friends  = {}
         visited_users       = set()
         pruned              = set()
@@ -587,6 +573,13 @@ class MongoFriendshipCollection(AFriendshipDB):
         return score
     
     def _get_stamp_info(self, user_id):
+        """
+            Processes a single user, returning aggregate statistics about their 
+            stamp behavior, including all entity_id's that the user's stamped, 
+            a histogram of the categories those stamps fall into, a description 
+            of their geographical stamp clusters, and the user object itself.
+        """
+        
         stampIds    = self.collection_collection.getUserStampIds(user_id)
         stamps      = self.stamp_collection.getStamps(stampIds, limit=1000, sort='modified')
         user        = self.user_collection.getUser(user_id)
@@ -646,27 +639,4 @@ class MongoFriendshipCollection(AFriendshipDB):
                     clusters2.append(cluster)
         
         return entity_ids, categories, clusters2, user
-        
-        """
-        # very useful for debugging suggested friend ranks...
-        #for k, v in potential_friends.iteritems():
-        #    utils.log("%s) %s" % (k, v))
-        
-        def print_top(key, reverse=True, default=-1):
-            print "%s %s %s" % ("-" * 40, key, "-" * 40)
-            users2 = sorted(users, key=lambda kv: kv[1][key] if key in kv[1] else default, reverse=True)[:10]
-            
-            for user in users2:
-                pprint(user)
-        
-        print_top('friend_overlap')
-        print_top('stamp_overlap')
-        print_top('category_overlap')
-        print_top('proximity')
-        print_top('current_proximity')
-        #print_top('facebook_friend')
-        #print_top('twitter_friend')
-        
-        return []
-        """
 
