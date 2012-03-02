@@ -71,6 +71,14 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         AElasticMongoObject.__init__(self)
         AMongoCollectionSink.__init__(self, self)
         
+        utils.log("[%s] %s %s" % (self, pformat(dict(
+            mongo_host = mongo_host, 
+            mongo_port = mongo_port, 
+            mongo_conn = mongo_conn, 
+            mongo_config_ns  = mongo_config_ns, 
+            poll_interval_ms = poll_interval_ms, 
+            force            = force)), pformat(kwargs)))
+        
         self._mongo_host          = mongo_host
         self._mongo_port          = mongo_port
         self._mongo_config_ns     = mongo_config_ns

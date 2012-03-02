@@ -16,9 +16,6 @@ if __name__ == '__main__':
     es_port    = 9200
     db_port    = 27017
     
-    es_servers = []
-    db_servers = []
-    
     if libs.ec2_utils.is_ec2():
         stack  = libs.ec2_utils.get_stack()
         if stack is None:
