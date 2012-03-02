@@ -540,8 +540,8 @@ def is_ec2():
     
     return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
-def init_db_config(conf):
-    """ initializes MongoDB with proper host configuration """
+def get_db_config(conf):
+    """ returns MongoDB host configuration """
     
     if ':' in conf:
         host, port = conf.split(':')
@@ -560,6 +560,12 @@ def init_db_config(conf):
                 else:
                     host = instance.public_dns_name
     
+    return host, port
+
+def init_db_config(conf):
+    """ initializes MongoDB with proper host configuration """
+    
+    host, port = get_db_config(conf)
     config = {
         'mongodb' : {
             'host' : host, 

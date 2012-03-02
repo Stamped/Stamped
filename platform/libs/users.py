@@ -96,7 +96,7 @@ def export_config(coll, ns, drop = True):
 
 def export():
     import argparse
-    parser  = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     
     parser.add_argument('-D', '--drop', action="store_true", default=False,
                         help="drop existing collections before performing any insertions")
