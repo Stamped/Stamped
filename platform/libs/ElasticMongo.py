@@ -120,6 +120,7 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
         while True:
             try:
                 self._elasticsearch = pyes.ES(server, **kwargs)
+                time.sleep(0.5)
                 utils.log("[%s] pyes: %s" % (self, pformat(self._elasticsearch.collect_info())))
             except Exception:
                 retries -= 1
