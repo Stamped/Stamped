@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #SFGate only maintains a list of the top 100 restaurants in the SF area
 
