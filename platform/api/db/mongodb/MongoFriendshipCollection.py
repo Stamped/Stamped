@@ -157,6 +157,13 @@ class MongoFriendshipCollection(AFriendshipDB):
         return self.block_collection.getBlocks(userId)
     
     def getSuggestedUserIds(self, userId, request):
+        """
+            Returns personalized user suggestions based on several weighting 
+            signals, namely:  friend overlap, stamp overlap, stamp category 
+            overlap, geographical proximity of stamp clusters, FB / Twitter 
+            friendship, as well as several smaller quality signals.
+        """
+        
         # TODO: support ignoring a friend suggestion
         # TODO: ignore previously followed friends that you've since unfollowed
         # TODO: better support for new users w/out stamps or friends

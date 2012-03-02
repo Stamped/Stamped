@@ -1,17 +1,13 @@
 not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
-
 * prune iTunes artists which have no AMG id or genre? *landon
-* suggested users => generic news items
 * prune national outliers when location hinting is turned on
     * e.g., maybe just prune results more than N threshold miles away
 * create test html / js web client
     * create stamped.js client library :)
 * refresh autocomplete
 * autocomplete cron job
-* normalize existing friend suggest signals
-* incorporate user freshness / quality signal into friend suggest and fix / test current location signal
-    * add unit tests tests
+* suggested users => generic news items
 
 OLD:
     * change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"
@@ -125,7 +121,10 @@ OLD:
     * improve deploy update script to rollout updates one node at a time and be ELB-aware
     * generic, private logging endpoint for clients
     * change bootstrap/bin/update.py to return non-zero exit status if WARNINGs encountered
-    
+    * normalize existing friend suggest signals
+        * incorporate user freshness / quality signal into friend suggest and fix / test current location signal
+        * add unit tests tests
+ 
     34.026401,-118.38947899
 
 gman () {
