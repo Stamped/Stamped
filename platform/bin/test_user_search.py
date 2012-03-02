@@ -10,9 +10,10 @@ if len(sys.argv) < 1:
     utils.log("must include query")
     sys.exit(1)
 
-query = sys.argv[1]
-api   = MongoStampedAPI(lite_mode = True)
-users = api._userDB.searchUsers(None, query, limit = 10, relationship='following')
+query   = sys.argv[1]
+api     = MongoStampedAPI(lite_mode = True)
+user_id = '4e57048dccc2175fca000005'
+users   = api._userDB.searchUsers(user_id, query, limit = 10, relationship='following')
 
 for user in users:
     pprint(user.value)
