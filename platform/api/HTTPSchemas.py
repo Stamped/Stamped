@@ -741,15 +741,29 @@ class HTTPEntityNew(Schema):
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
             })
-            schema.address      = self.address 
-            schema.director     = self.director
-            schema.cast         = self.cast
-            schema.album_name   = self.album
-            schema.author       = self.author
-            schema.artist_display_name = self.artist
-            schema.original_release_date = self.release_date
 
-            if _coordinatesFlatToDict(self.coordinates) != None:
+            if self.address is not None:
+                schema.address = self.address 
+
+            if self.director is not None:
+                schema.director = self.director
+
+            if self.cast is not None:
+                schema.cast = self.cast
+
+            if self.album is not None:
+                schema.album_name = self.album
+
+            if self.author is not None:
+                schema.author = self.author
+
+            if self.artist is not None:
+                schema.artist_display_name = self.artist
+
+            if self.release_date is not None:
+                schema.original_release_date = self.release_date
+
+            if _coordinatesFlatToDict(self.coordinates) is not None:
                 schema.coordinates = _coordinatesFlatToDict(self.coordinates)
         else:
             raise NotImplementedError
