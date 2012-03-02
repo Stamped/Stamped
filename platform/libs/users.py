@@ -115,7 +115,7 @@ def export():
         utils.init_db_config(args.db)
     
     api  = MongoStampedAPI(lite_mode=True)
-    db   = api._entityDB._collection._database
+    db   = api._entityDB._collection._connection
     coll = __get_collection(db, args.state_namespace)
     
     export_config(coll, args.output_namespace, args.drop)
