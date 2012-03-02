@@ -48,6 +48,9 @@ class StampedAuth(AStampedAuth):
             if clientId == 'stampedtest' and clientSecret == 'august1ftw':
                 logs.info("Client approved")
                 return True
+            if clientId == 'ios8' and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
+                logs.info("Client approved: ios8")
+                return True
             raise
         except:
             raise StampedHTTPError('invalid_client', 401, "Invalid client credentials")
