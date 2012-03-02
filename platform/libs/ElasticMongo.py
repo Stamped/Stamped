@@ -115,13 +115,14 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
     def _init_elastic_conn(self, **kwargs):
         utils.log("pyes: %s" % str(kwargs))
         retries = 5
-        server  = kwargs.pop('server')
         
         while True:
             try:
-                self._elasticsearch = pyes.ES(server, **kwargs)
+                self._elasticsearch = pyes.ES(**kwargs)
                 info = self._elasticsearch.collect_info()
                 utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                import sys;sys.exit(0)
+                break
             except Exception:
                 retries -= 1
                 if retries <= 0:
