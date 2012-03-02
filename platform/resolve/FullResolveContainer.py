@@ -59,6 +59,7 @@ class FullResolveContainer(BasicSourceContainer):
             SubtitleGroup(),
             DescGroup(),
             TrackLengthGroup(),
+            ShortDescriptionGroup(),
 
             MPAARatingGroup(),
             ArtistDisplayNameGroup(),

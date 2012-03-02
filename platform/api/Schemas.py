@@ -724,7 +724,11 @@ class VideoSchema(Schema):
         self.studio_name        = SchemaElement(basestring)
         self.studio_url         = SchemaElement(basestring)
         self.network_name       = SchemaElement(basestring)
+        
         self.short_description  = SchemaElement(basestring)
+        self.short_description_source = SchemaElement(basestring)
+        self.short_description_timestamp = SchemaElement(datetime)
+
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
         ### TODO: modify these based on crawler logic (only for custom entities currently)

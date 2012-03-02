@@ -224,6 +224,14 @@ class TrackLengthGroup(ASubcategoryGroup):
         self.addEligible('song')
         self.addEligible('movie')
 
+class ShortDescriptionGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'short_description')
+        self.addNameField()
+        self.addEligible('movie')
+        self.addEligible('tv')
+
 class DirectorGroup(AFilmGroup):
 
     def __init__(self):

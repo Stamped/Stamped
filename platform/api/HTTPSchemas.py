@@ -590,7 +590,7 @@ class HTTPEntity(Schema):
                 
                 if schema.short_description != None:
                     new_desc = schema.short_description
-                    if new_desc != '' and new_desc != None:
+                    if new_desc != '' and new_desc != None  and ( self.desc == None or self.desc == '' ):
                         self.desc = new_desc
             
             elif self.category == 'music':
