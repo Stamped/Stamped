@@ -150,6 +150,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if domain:
             q = FilteredQuery(q, IdsFilter('user', list(domain)))
         
+        utils.log(str(domain))
+        
         results = self.api._elasticsearch.search(q, 
                                                  indexes = [ 'users' ], 
                                                  doc_types = [ 'user' ], 
