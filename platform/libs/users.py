@@ -100,8 +100,7 @@ def export():
     
     parser.add_argument('-d', '--drop', action="store_true", default=False,
                         help="drop existing collections before performing any insertions")
-    parser.add_argument("-d", "--db", default=None, type="string", 
-                        action="store", help="db to connect to")
+    parser.add_argument("-d", "--db", default=None, type="string", help="db to connect to")
     parser.add_argument('-o', '--output_namespace', type=str, default="stamped.users",
                         help=("mongo db and collection namespace to store output to "
                               "in dot-notation (e.g., defaults to stamped.users)"))
