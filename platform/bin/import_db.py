@@ -11,9 +11,6 @@ import pymongo, os, utils
 from subprocess import Popen, PIPE
 from api.db.mongodb.AMongoCollection import MongoDBConfig
 
-OLD_HOST            = None
-NEW_HOST            = None
-
 def main():
     import argparse
     parser = argparse.ArgumentParser()
@@ -25,13 +22,13 @@ def main():
     
     args = parser.parse_args()
     host, port = utils.get_db_config(args.source)
-    OLD_HOST        = host
+    old_host        = host
     
     old_connection  = pymongo.Connection(host, port)
     old_database    = old_connection['stamped']
     collections     = old_database.collection_names()
     dest            = MongoDBConfig.getInstance()
-    NEW_HOST        = dest.host
+    new_host        = dest.host
     
     if not os.path.isdir('/stamped/tmp/stamped/'):
        os.makedirs('/stamped/tmp/stamped')
@@ -46,7 +43,7 @@ def main():
         if collection in ignore:
             print 'PASS'
         else:
-            ret = mongoExportImport(collection)
+            ret = mongoExportImport(collection, old_host, new_host)
             
             if 0 == ret:
                 print 'COMPLETE'
@@ -55,18 +52,16 @@ def main():
         
         print 
     
-    convertEntities()
-    
     try:
         utils.runMongoCommand('db.runCommand( {createCollection:"logs", capped:true, size:500000} )')
     except:
         utils.printException()
 
-def mongoExportImport(collection):
+def mongoExportImport(collection, old_host, new_host):
     cmdExport = "mongodump --db stamped --collection %s --host %s --out /stamped/tmp" % \
-                (collection, OLD_HOST)
+                (collection, old_host)
     cmdImport = "mongorestore --db stamped --collection %s --host %s /stamped/tmp/stamped/%s.bson" % \
-                (collection, NEW_HOST, collection)
+                (collection, new_host, collection)
     
     out = open("/stamped/tmp/convert_%s.log" % collection, "w")
     cmd = "%s && %s && rm -rf /stamped/tmp/stamped/%s.bson" % \
@@ -74,24 +69,6 @@ def mongoExportImport(collection):
     pp  = Popen(cmd, shell=True, stdout=out, stderr=out)
     
     return pp.wait()
-
-def mongoExportJSON(collection):
-    collection = collection.lower()
-    cmdExport = "mongoexport --db stamped --collection %s --host %s --out /stamped/tmp/stamped/%s.json" % \
-                (collection, OLD_HOST, collection)
-    pp = Popen(cmdExport, shell=True, stdout=PIPE)
-    return pp.wait()
-
-def mongoImportJSON(collection):
-    collection = collection.lower()
-    cmdImport = "mongoimport --db stamped --collection %s --host %s /stamped/tmp/stamped/%s_out.json" % \
-                (collection, NEW_HOST, collection)
-    pp = Popen(cmdImport, shell=True, stdout=PIPE)
-    return pp.wait()
-
-def convertEntities():
-    # no-op
-    return
 
 if __name__ == '__main__':  
     main()
