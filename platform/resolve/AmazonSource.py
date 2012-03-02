@@ -49,7 +49,7 @@ class AmazonSource(BasicSource):
             asin = entity['asin']
             if asin is not None and asin != '':
                 info = loads(self.__amazon.ItemLookup(
-                    ItemId = 'B003WC7JOS',
+                    ItemId = asin,
                     Style = "http://xml2json-xslt.googlecode.com/svn/trunk/xml2json.xslt",
                     ResponseGroup='ItemAttributes,RelatedItems',
                     RelationshipType='Tracks'
