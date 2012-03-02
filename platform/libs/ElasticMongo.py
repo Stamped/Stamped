@@ -121,7 +121,6 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                 self._elasticsearch = pyes.ES(**kwargs)
                 info = self._elasticsearch.collect_info()
                 utils.log("[%s] pyes: %s" % (self, pformat(info)))
-                import sys;sys.exit(0)
                 break
             except Exception:
                 retries -= 1
