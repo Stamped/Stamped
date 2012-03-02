@@ -172,7 +172,7 @@ class MongoStampedAPI(StampedAPI):
                 return None
             
             es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
-            es_servers = map(lambda node: str("%s:%d") % (node.private_ip_address, es_port), es_servers)
+            es_servers = map(lambda node: str("%s:%d" % (node.private_ip_address, es_port)), es_servers)
             
             if len(es_servers) == 0:
                 logs.warn("error: no elasticsearch servers found")
@@ -180,7 +180,21 @@ class MongoStampedAPI(StampedAPI):
         else:
             es_servers = "%s:%d" % ('localhost', es_port)
         
-        return pyes.ES(es_servers)
+        retries = 5
+        
+        while True:
+            try:
+                es = pyes.ES(es_servers)
+                info = self._elasticsearch.collect_info()
+                utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                return es
+            except Exception:
+                retries -= 1
+                if retries <= 0:
+                    raise
+                
+                utils.printException()
+                time.sleep(1)
     
     def getStats(self, store=False):
         unique_user_stats = {}
