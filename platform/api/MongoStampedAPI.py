@@ -163,6 +163,7 @@ class MongoStampedAPI(StampedAPI):
             utils.printException()
         
         es_port = 9200
+        retries = 5
         
         if libs.ec2_utils.is_ec2():
             stack = libs.ec2_utils.get_stack()
@@ -180,13 +181,12 @@ class MongoStampedAPI(StampedAPI):
         else:
             es_servers = "%s:%d" % ('localhost', es_port)
         
-        retries = 5
-        
         while True:
             try:
-                es = pyes.ES(es_servers)
-                info = self._elasticsearch.collect_info()
+                es   = pyes.ES(es_servers)
+                info = es.collect_info()
                 utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                
                 return es
             except Exception:
                 retries -= 1
