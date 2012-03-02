@@ -98,7 +98,7 @@ def export():
     import argparse
     parser  = argparse.ArgumentParser()
     
-    parser.add_argument('-d', '--drop', action="store_true", default=False,
+    parser.add_argument('-D', '--drop', action="store_true", default=False,
                         help="drop existing collections before performing any insertions")
     parser.add_argument("-d", "--db", default=None, type=str, help="db to connect to")
     parser.add_argument('-o', '--output_namespace', type=str, default="stamped.users",
