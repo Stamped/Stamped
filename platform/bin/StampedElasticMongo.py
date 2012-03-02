@@ -34,8 +34,6 @@ if __name__ == '__main__':
         
         api  = MongoStampedAPI(lite_mode=True)
         conn = api._entityDB._collection._connection
-        coll = __get_collection(conn, args.state_namespace)
-        
         em   = ElasticMongo(mongo_conn        = conn, 
                             mongo_config_ns   = config_ns, 
                             server            = es_servers)
