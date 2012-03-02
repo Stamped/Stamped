@@ -12,6 +12,7 @@ import libs.ec2_utils
 from Entity                 import *
 from Schemas                import *
 from utils                  import lazyProperty
+from pprint                 import pformat
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
