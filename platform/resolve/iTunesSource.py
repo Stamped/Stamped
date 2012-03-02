@@ -84,7 +84,12 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     @lazyProperty
     def albums(self):
         results = self.itunes.method('lookup',id=self.key,entity='album')['results']
-        return [ {'name':album['collectionName']} for album in results if album.pop('collectionType',None) == 'Album' ]
+        return [
+            {
+                'name'  : album['collectionName'],
+                'key'   : str(album['collectionId']),
+            }
+                for album in results if album.pop('collectionType',None) == 'Album' ]
 
     @lazyProperty
     def tracks(self):
@@ -114,7 +119,12 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
     @lazyProperty
     def tracks(self):
         results = self.itunes.method('lookup', id=self.key, entity='song')['results']
-        return [ {'name':track['trackName']} for track in results if track.pop('wrapperType',None) == 'track' ]
+        return [
+            {
+                'name':track['trackName'],
+            }
+                for track in results if track.pop('wrapperType',None) == 'track' 
+        ]
 
 
 class iTunesTrack(_iTunesObject, ResolverTrack):
@@ -221,15 +231,27 @@ class iTunesSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'itunes',
-
             'mpaa_rating',
             'genre',
             'desc',
+            'albums',
         )
 
     @lazyProperty
     def __itunes(self):
         return globaliTunes()
+
+    def __repopulateAlbums(self, entity, artist, controller):
+        new_albums = [
+            {
+                'album_name'    : album['name'],
+                'source'        : self.sourceName,
+                'id'            : album['key'],
+                'timestamp'     : controller.now,
+            }
+                for album in artist.albums
+        ]
+        entity['albums'] = new_albums
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
@@ -247,7 +269,7 @@ class iTunesSource(GenericSource):
                 artist = iTunesArtist(itunes_id)
                 aid = entity['aid']
                 if aid == itunes_id:
-                    pass
+                    self.__repopulateAlbums(entity, artist, controller) 
         return True
 
     def matchSource(self, query):

@@ -19,6 +19,8 @@ try:
     import re
     from datetime       import datetime
     from libs.LibUtils  import months
+    from Resolver       import artistSimplify
+    from utils          import lazyProperty
 except:
     report()
     raise
@@ -31,9 +33,12 @@ class FormatSource(BasicSource):
     def __init__(self):
         BasicSource.__init__(self, 'format',
             'release_date',
+            'mangled_title',
         )
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        if entity['subcategory'] == 'artist':
+            entity['mangled_title'] = artistSimplify(entity['title'])
         if controller.shouldEnrich('release_date',self.sourceName,entity):
             if 'original_release_date' in entity:
                 date = entity['original_release_date']

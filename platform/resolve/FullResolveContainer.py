@@ -58,8 +58,10 @@ class FullResolveContainer(BasicSourceContainer):
             CastGroup(),
             SubtitleGroup(),
             DescGroup(),
+            MangledTitleGroup(),
             TrackLengthGroup(),
             ShortDescriptionGroup(),
+            AlbumsGroup(),
 
             MPAARatingGroup(),
             ArtistDisplayNameGroup(),

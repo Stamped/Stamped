@@ -12,7 +12,7 @@ from logs import log, report
 
 try:
     from AFieldGroup    import AFieldGroup
-    from pprint         import pformat
+    from pprint         import pformat, pprint
     from schema         import SchemaElement
 except:
     report()
@@ -54,6 +54,10 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__fields:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
+            if isinstance(old_value, SchemaElement):
+                old_value = old_value.value
+            if isinstance(new_value, SchemaElement):
+                new_value = new_value.value
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True
@@ -64,6 +68,10 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__decorations:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
+            if isinstance(old_value, SchemaElement):
+                old_value = old_value.value
+            if isinstance(new_value, SchemaElement):
+                new_value = new_value.value
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True
