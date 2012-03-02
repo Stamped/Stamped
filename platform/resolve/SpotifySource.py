@@ -205,6 +205,7 @@ class SpotifySource(GenericSource):
     
     def albumSource(self, query):
         albums = self.__spotify.search('album',q=query.name)['albums']
+        albums = [ antry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
         def source(start, count):
             if start + count <= len(albums):
                 result = albums[start:start+count]
@@ -212,7 +213,7 @@ class SpotifySource(GenericSource):
                 result = albums[start:]
             else:
                 result = []
-            return [ SpotifyAlbum( entry['href'] ) for entry in result if entry['availability']['territories'].find('US') != -1 ]
+            return [ SpotifyAlbum( entry['href'] ) for entry in result ]
         return source
 
 

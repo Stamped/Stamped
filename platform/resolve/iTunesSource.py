@@ -245,7 +245,9 @@ class iTunesSource(GenericSource):
                     entity['desc'] = movie.desc
             if entity['subcategory'] == 'artist':
                 artist = iTunesArtist(itunes_id)
-
+                aid = entity['aid']
+                if aid == itunes_id:
+                    pass
         return True
 
     def matchSource(self, query):
