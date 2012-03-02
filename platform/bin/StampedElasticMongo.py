@@ -33,7 +33,7 @@ if __name__ == '__main__':
         conn = api._entityDB._collection._connection
         em   = ElasticMongo(mongo_conn          = conn, 
                             mongo_config_ns     = config_ns, 
-                            server              = es_servers, 
+                            server              = es_servers[0], 
                             dump_curl           = '/stamped/logs/elasticsearch_es.log')
     else:
         em   = ElasticMongo(mongo_host          = 'localhost', 
