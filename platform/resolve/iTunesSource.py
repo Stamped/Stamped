@@ -233,14 +233,18 @@ class iTunesSource(GenericSource):
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        if entity['subcategory'] == 'movie' and entity['itunes_id'] is not None:
-            movie = iTunesMovie(entity['itunes_id'])
-            if movie.rating is not None:
-                entity['mpaa_rating'] = movie.rating
-            if len(movie.genres) > 0:
-                entity['genre'] = movie.genres[0]
-            if movie.desc is not None:
-                entity['desc'] = movie.desc
+        itunes_id = entity['itunes_id']
+        if itunes_id != None:
+            if entity['subcategory'] == 'movie':
+                movie = iTunesMovie(itunes_id)
+                if movie.rating is not None:
+                    entity['mpaa_rating'] = movie.rating
+                if len(movie.genres) > 0:
+                    entity['genre'] = movie.genres[0]
+                if movie.desc is not None:
+                    entity['desc'] = movie.desc
+            if entity['subcategory'] == 'artist':
+                artist = iTunesArtist(itunes_id)
 
         return True
 

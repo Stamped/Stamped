@@ -15,6 +15,7 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		6385B42714FEED8000189B1A /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6385B42014FEED8000189B1A /* libRestKit.a */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -136,8 +137,6 @@
 		7E22D6B013DDA34100C4005E /* CreateStampViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */; };
 		7E22F6B214BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22F6B114BCE2D200D4BC92 /* FindFriendsToolbar.m */; };
 		7E22F6B314BCE2D300D4BC92 /* FindFriendsToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22F6B114BCE2D200D4BC92 /* FindFriendsToolbar.m */; };
-		7E260F3F14BB535200D9F7F0 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB7E31414AB9A5D00DBED08 /* libRestKit.a */; };
-		7E260F4014BB535800D9F7F0 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB7E31414AB9A5D00DBED08 /* libRestKit.a */; };
 		7E260F8B14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E260F8A14BB77BB00D9F7F0 /* UIButton+Stamped.m */; };
 		7E260F8C14BB77BC00D9F7F0 /* UIButton+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E260F8A14BB77BB00D9F7F0 /* UIButton+Stamped.m */; };
 		7E260FA514BB89A400D9F7F0 /* buttonBG_addEmail.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E260F8D14BB89A400D9F7F0 /* buttonBG_addEmail.png */; };
@@ -1611,6 +1610,34 @@
 			remoteGlobalIDString = 4F35138613EA1FF500E12259;
 			remoteInfo = OAuthTouchNonGoogleStaticLib;
 		};
+		6385B41F14FEED8000189B1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D1614564E810060A5C5;
+			remoteInfo = RestKit;
+		};
+		6385B42114FEED8000189B1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D2614564E820060A5C5;
+			remoteInfo = RestKitTests;
+		};
+		6385B42314FEED8000189B1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E62145651060060A5C5;
+			remoteInfo = RestKitFramework;
+		};
+		6385B42514FEED8000189B1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E78145651060060A5C5;
+			remoteInfo = RestKitFrameworkTests;
+		};
 		7E5893B3147C468B002268C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
@@ -1624,34 +1651,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4F35138613EA1FF500E12259;
 			remoteInfo = OAuthTouchNonGoogleStaticLib;
-		};
-		7EB7E31314AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D1614564E810060A5C5;
-			remoteInfo = RestKit;
-		};
-		7EB7E31514AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D2614564E820060A5C5;
-			remoteInfo = RestKitTests;
-		};
-		7EB7E31714AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E62145651060060A5C5;
-			remoteInfo = RestKitFramework;
-		};
-		7EB7E31914AB9A5D00DBED08 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E78145651060060A5C5;
-			remoteInfo = RestKitFrameworkTests;
 		};
 		7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2633,7 +2632,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E07EC1E14C73FDF00A2B5F0 /* libz.dylib in Frameworks */,
-				7E260F4014BB535800D9F7F0 /* libRestKit.a in Frameworks */,
 				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
 				7E589422147C468B002268C4 /* MessageUI.framework in Frameworks */,
@@ -2660,8 +2658,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6385B42714FEED8000189B1A /* libRestKit.a in Frameworks */,
 				7E07EC1D14C73FD400A2B5F0 /* libz.dylib in Frameworks */,
-				7E260F3F14BB535200D9F7F0 /* libRestKit.a in Frameworks */,
 				7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */,
 				7EB03FD414672B40004F7A1C /* MessageUI.framework in Frameworks */,
@@ -4004,10 +4002,10 @@
 		7EE1190C13CE0C4100378139 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7EB7E31414AB9A5D00DBED08 /* libRestKit.a */,
-				7EB7E31614AB9A5D00DBED08 /* RestKitTests.octest */,
-				7EB7E31814AB9A5D00DBED08 /* RestKit.framework */,
-				7EB7E31A14AB9A5D00DBED08 /* RestKitFrameworkTests.octest */,
+				6385B42014FEED8000189B1A /* libRestKit.a */,
+				6385B42214FEED8000189B1A /* RestKitTests.octest */,
+				6385B42414FEED8000189B1A /* RestKit.framework */,
+				6385B42614FEED8000189B1A /* RestKitFrameworkTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -4394,32 +4392,32 @@
 			remoteRef = 1E5AFFC2141D29EC00772F11 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EB7E31414AB9A5D00DBED08 /* libRestKit.a */ = {
+		6385B42014FEED8000189B1A /* libRestKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRestKit.a;
-			remoteRef = 7EB7E31314AB9A5D00DBED08 /* PBXContainerItemProxy */;
+			remoteRef = 6385B41F14FEED8000189B1A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EB7E31614AB9A5D00DBED08 /* RestKitTests.octest */ = {
+		6385B42214FEED8000189B1A /* RestKitTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitTests.octest;
-			remoteRef = 7EB7E31514AB9A5D00DBED08 /* PBXContainerItemProxy */;
+			remoteRef = 6385B42114FEED8000189B1A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EB7E31814AB9A5D00DBED08 /* RestKit.framework */ = {
+		6385B42414FEED8000189B1A /* RestKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = RestKit.framework;
-			remoteRef = 7EB7E31714AB9A5D00DBED08 /* PBXContainerItemProxy */;
+			remoteRef = 6385B42314FEED8000189B1A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EB7E31A14AB9A5D00DBED08 /* RestKitFrameworkTests.octest */ = {
+		6385B42614FEED8000189B1A /* RestKitFrameworkTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitFrameworkTests.octest;
-			remoteRef = 7EB7E31914AB9A5D00DBED08 /* PBXContainerItemProxy */;
+			remoteRef = 6385B42514FEED8000189B1A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -6370,8 +6368,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6391,8 +6389,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1855E2B1-BFAB-455F-94B0-B99EF10AEF6E";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

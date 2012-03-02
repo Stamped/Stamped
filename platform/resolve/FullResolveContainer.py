@@ -83,6 +83,7 @@ class FullResolveContainer(BasicSourceContainer):
         for source in sources:
             self.addSource(source)
         self.setGlobalPriority('seed',seedPriority)
+        self.setGlobalPriority('itunes',1)
 
 def demo(default_title='Katy Perry'):
     import sys
