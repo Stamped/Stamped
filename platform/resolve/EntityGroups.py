@@ -208,6 +208,7 @@ class ArtistDisplayNameGroup(AMediaGroup):
 
     def __init__(self):
         AMediaGroup.__init__(self, 'artist_display_name')
+        self.addNameField()
 
 class TracksGroup(ASubcategoryGroup):
 
@@ -238,6 +239,13 @@ class AlbumsGroup(ASubcategoryGroup):
         ASubcategoryGroup.__init__(self, 'albums')
         self.addNameField()
         self.addEligible('artist')
+
+class AlbumNameGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'album_name')
+        self.addNameField()
+        self.addEligible('song')
 
 
 class DirectorGroup(AFilmGroup):

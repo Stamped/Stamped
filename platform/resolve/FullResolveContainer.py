@@ -24,6 +24,7 @@ try:
     from RdioSource             import RdioSource
     from SpotifySource          import SpotifySource
     from iTunesSource           import iTunesSource
+    from AmazonSource           import AmazonSource
     from pprint                 import pformat
 except:
     report()
@@ -62,6 +63,7 @@ class FullResolveContainer(BasicSourceContainer):
             TrackLengthGroup(),
             ShortDescriptionGroup(),
             AlbumsGroup(),
+            AlbumNameGroup(),
 
             MPAARatingGroup(),
             ArtistDisplayNameGroup(),
@@ -77,6 +79,7 @@ class FullResolveContainer(BasicSourceContainer):
             FactualSource(),
             GooglePlacesSource(),
             SinglePlatformSource(),
+            AmazonSource(),
             TMDBSource(),
             RdioSource(),
             SpotifySource(),
@@ -89,6 +92,7 @@ class FullResolveContainer(BasicSourceContainer):
 
 def demo(default_title='Katy Perry'):
     import sys
+    import bson
 
     title = default_title
     subcategory = None
@@ -103,9 +107,13 @@ def demo(default_title='Katy Perry'):
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
-    query = {'title':title}
-    if subcategory is not None:
-        query['subcategory'] = subcategory
+    try:
+        query = {'_id':bson.ObjectId(title)}
+    except Exception:
+        query = {'title':title}
+        if subcategory is not None:
+            query['subcategory'] = subcategory
+    print("Query: %s" % query)
     cursor = db._collection.find(query)
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)

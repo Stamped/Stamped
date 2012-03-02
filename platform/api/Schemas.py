@@ -797,6 +797,8 @@ class SongSchema(Schema):
         
         ### TODO: modify this based on crawler logic (only for custom entities currently)
         self.album_name         = SchemaElement(basestring) 
+        self.album_name_source  = SchemaElement(basestring)
+        self.album_name_timestamp = SchemaElement(datetime)
         self.song_album_id      = SchemaElement(basestring) 
 
 class AlbumSchema(Schema):
