@@ -739,8 +739,10 @@ class HTTPEntityNew(Schema):
                 'subtitle':     self.subtitle,
                 'category':     self.category,
                 'subcategory':  self.subcategory,
-                'desc':         self.desc
             })
+
+            if self.desc is not None:
+                schema.desc = self.desc
 
             if self.address is not None:
                 schema.address = self.address 
