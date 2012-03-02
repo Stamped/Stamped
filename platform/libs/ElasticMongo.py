@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import argparse, pyes, pymongo, re, time
+import pyes, pymongo, re, time
 
 from abc            import ABCMeta, abstractmethod
 from pprint         import pprint, pformat
@@ -596,6 +596,7 @@ class MongoCollectionSource(Greenlet, AElasticMongoObject):
             return repr(id)
 
 if __name__ == '__main__':
+    import argparse
     parser = argparse.ArgumentParser()
     
     parser.add_argument('-n', '--ns', type=str, default="local.elasticmongo",

@@ -90,7 +90,7 @@ class StampedAPI(AStampedAPI):
             try:
                 stack_info = libs.ec2_utils.get_stack()
                 self._node_name = stack_info.instance.name
-            except:
+            except Exception:
                 pass
         
         return self._node_name
@@ -137,7 +137,7 @@ class StampedAPI(AStampedAPI):
             s._rollback = []
             try:
                 return f(*args, **kwargs)
-            except:
+            except Exception:
                 rollback = s._rollback
                 rollback.reverse()
                 for fn, params in rollback:
@@ -262,7 +262,7 @@ class StampedAPI(AStampedAPI):
                 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
                 template = open(path, 'r')
-            except:
+            except Exception:
                 ### TODO: Add error logging?
                 raise
             
@@ -522,7 +522,7 @@ class StampedAPI(AStampedAPI):
             else:
                 raise
             return user
-        except:
+        except Exception:
             if valid == True:
                 msg = "Login info does not exist"
                 logs.debug(msg)
@@ -797,14 +797,14 @@ class StampedAPI(AStampedAPI):
             for userId in userIds:
                 try:
                     result.append(usersByUserIds[userId])
-                except:
+                except Exception:
                     pass
         
         if isinstance(screenNames, list):
             for screenName in screenNames:
                 try:
                     result.append(usersByScreenNames[screenName])
-                except:
+                except Exception:
                     pass
         
         if len(result) != len(users):
@@ -880,6 +880,7 @@ class StampedAPI(AStampedAPI):
                 explanations = suggestion[1]
                 user         = self._userDB.getUser(user_id)
                 
+                # TODO: use user's bio if no explanations are available
                 output.append([ user, explanations ])
             
             return output
@@ -1290,7 +1291,7 @@ class StampedAPI(AStampedAPI):
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
                 data['screen_name'] = user.screen_name
-            except:
+            except Exception:
                 logs.warning("User not found (%s)" % data['screen_name'])
             
             if data['screen_name'] not in screenNames:
@@ -1589,7 +1590,7 @@ class StampedAPI(AStampedAPI):
         # If stamped entity is on the to do list, mark as complete
         try:
             self._favoriteDB.completeFavorite(entity.entity_id, authUserId)
-        except:
+        except Exception:
             pass
         
         creditedUserIds = []
@@ -1866,7 +1867,7 @@ class StampedAPI(AStampedAPI):
         # Remove as favorite if necessary
         try:
             self._favoriteDB.completeFavorite(stamp.entity_id, authUserId, complete=False)
-        except:
+        except Exception:
             pass
         
         ### TODO: Remove reference in other people's favorites
@@ -2274,13 +2275,13 @@ class StampedAPI(AStampedAPI):
         # Since
         try: 
             since = datetime.utcfromtimestamp(int(data.pop('since', None)) - 2)
-        except:
+        except Exception:
             since = None
         
         # Before
         try: 
             before = datetime.utcfromtimestamp(int(data.pop('before', None)) + 2)
-        except:
+        except Exception:
             before = None
         
         try:
@@ -2288,7 +2289,7 @@ class StampedAPI(AStampedAPI):
             
             if default_limit is not None and limit > default_limit:
                 limit = default_limit
-        except:
+        except Exception:
             limit = default_limit
         
         sort = data.pop('sort', default_sort)
@@ -2304,7 +2305,7 @@ class StampedAPI(AStampedAPI):
         try:
             if int(limit) < cap:
                 return int(limit)
-        except:
+        except Exception:
             return cap
     
     def _getStampCollection(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
@@ -2454,7 +2455,7 @@ class StampedAPI(AStampedAPI):
                     else:
                         names = map(lambda user_id: "@%s" % self._userDB.getUser(user_id)['screen_name'].lower(), friends)
                         stamp.via = "%s via %s" % (screen_name, ' and '.join(names))
-            except:
+            except Exception:
                 utils.printException()
         
         return stamps
@@ -2497,7 +2498,7 @@ class StampedAPI(AStampedAPI):
             if fav.favorite_id is None:
                 raise
             exists = True
-        except:
+        except Exception:
             exists = False
         
         if exists:
@@ -2692,7 +2693,7 @@ class StampedAPI(AStampedAPI):
                     item.link.linked_user = userIds[item.linked_user_id]
                 if item.linked_stamp_id is not None:
                     item.link.linked_stamp = stampIds[item.linked_stamp_id]
-            except:
+            except Exception:
                 utils.printException()
                 continue
             

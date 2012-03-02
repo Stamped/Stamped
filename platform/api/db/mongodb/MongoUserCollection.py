@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, logs, re, bson
 
+from logs                       import report
 from datetime                   import datetime
 from math                       import log10
 from utils                      import lazyProperty
@@ -18,8 +19,11 @@ from MongoFollowersCollection   import MongoFollowersCollection
 from MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
 
-#from pyes.filters               import *
-#from pyes.query                 import *
+try:
+    from pyes.filters           import *
+    from pyes.query             import *
+except:
+    report()
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     

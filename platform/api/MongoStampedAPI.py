@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import json, logs
+import libs.ec2_utils
 
 from Entity                 import *
 from Schemas                import *
@@ -153,6 +154,33 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _factualDB(self):
         return MongoFactualCollection()
+    
+    @lazyProperty
+    def _elasticsearch(self):
+        try:
+            import pyes
+        except:
+            utils.printException()
+        
+        es_port = 9200
+        
+        if libs.ec2_utils.is_ec2():
+            stack = libs.ec2_utils.get_stack()
+            
+            if stack is None:
+                logs.warn("error: unable to find stack info")
+                return None
+            
+            es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
+            es_servers = map(lambda node: "%s:%d" % (node.private_ip_address, es_port), es_servers)
+            
+            if len(es_servers) == 0:
+                logs.warn("error: no elasticsearch servers found")
+                return None
+        else:
+            es_servers = "%s:%d" % ('localhost', es_port)
+        
+        return pyes.ES(es_servers)
     
     def getStats(self, store=False):
         unique_user_stats = {}
