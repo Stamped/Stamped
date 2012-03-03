@@ -47,6 +47,7 @@ class FullResolveContainer(BasicSourceContainer):
             RdioGroup(),
             SpotifyGroup(),
             iTunesGroup(),
+            AmazonGroup(),
 
             AddressGroup(),
             PhoneGroup(),
@@ -63,6 +64,7 @@ class FullResolveContainer(BasicSourceContainer):
             TrackLengthGroup(),
             ShortDescriptionGroup(),
             AlbumsGroup(),
+            SongsGroup(),
             AlbumNameGroup(),
 
             MPAARatingGroup(),

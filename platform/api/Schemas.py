@@ -781,14 +781,19 @@ class ArtistAlbumsSchema(Schema):
         self.rank               = SchemaElement(int)
         self.genre_id           = SchemaElement(int)
         self.album_name         = SchemaElement(basestring)
+        self.album_mangled      = SchemaElement(basestring)
         self.source             = SchemaElement(basestring)
         self.id                 = SchemaElement(basestring)
         self.timestamp          = SchemaElement(datetime)
 
 class ArtistSongsSchema(Schema):
     def setSchema(self):
-        self.song_id           = SchemaElement(int)
-        self.song_name         = SchemaElement(basestring)
+        self.song_id            = SchemaElement(int)
+        self.song_name          = SchemaElement(basestring)
+        self.song_mangled       = SchemaElement(basestring)
+        self.source             = SchemaElement(basestring)
+        self.id                 = SchemaElement(basestring)
+        self.timestamp          = SchemaElement(datetime)
 
 class SongSchema(Schema):
     def setSchema(self):
@@ -891,6 +896,9 @@ class EntitySourcesSchema(Schema):
         self.rdio_timestamp     = SchemaElement(datetime)
         self.rdio_source        = SchemaElement(basestring)
         
+        self.amazon_id          = SchemaElement(basestring)
+        self.amazon_source      = SchemaElement(basestring)
+        self.amazon_timestamp   = SchemaElement(datetime)
         
         # TODO: remove these three lines -- temporary workaround!
         # (and the TMDBSchema and RdioSchema above)

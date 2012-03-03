@@ -94,7 +94,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     @lazyProperty
     def tracks(self):
         results = self.itunes.method('lookup',id=self.key,entity='song')['results']
-        return [ {'name':track['trackName']} for track in results if track.pop('wrapperType',None) == 'track' ]
+        return [
+            {
+                'name':track['trackName'],
+                'key':track['trackId'],
+            }
+                for track in results if track.pop('wrapperType',None) == 'track'
+        ]
 
 class iTunesAlbum(_iTunesObject, ResolverAlbum):
     """
@@ -235,6 +241,7 @@ class iTunesSource(GenericSource):
             'genre',
             'desc',
             'albums',
+            'songs',
         )
 
     @lazyProperty
@@ -248,10 +255,24 @@ class iTunesSource(GenericSource):
                 'source'        : self.sourceName,
                 'id'            : album['key'],
                 'timestamp'     : controller.now,
+                'album_mangled' : albumSimplify(album['name']),
             }
                 for album in artist.albums
         ]
         entity['albums'] = new_albums
+
+    def __repopulateSongs(self, entity, artist, controller):
+        new_songs = [
+            {
+                'song_name'    : track['name'],
+                'source'        : self.sourceName,
+                'id'            : track['key'],
+                'timestamp'     : controller.now,
+                'song_mangled' : trackSimplify(track['name']),
+            }
+                for track in artist.tracks
+        ]
+        entity['songs'] = new_songs
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
@@ -270,6 +291,7 @@ class iTunesSource(GenericSource):
                 aid = entity['aid']
                 if aid == itunes_id:
                     self.__repopulateAlbums(entity, artist, controller) 
+                    self.__repopulateSongs(entity, artist, controller)
         return True
 
     def matchSource(self, query):

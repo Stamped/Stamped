@@ -174,24 +174,7 @@ class TMDBSource(GenericSource):
                             yield movie
             except GeneratorExit:
                 pass
-        generator = gen()
-        movies = []
-        def source(start, count):
-            total = start + count
-            while total - len(movies) > 0:
-                try:
-                    movies.append(generator.next())
-                except StopIteration:
-                    break
-
-            if start + count <= len(movies):
-                result = movies[start:start+count]
-            elif start < len(movies):
-                result = movies[start:]
-            else:
-                result = []
-            return [ TMDBMovie( entry['id'] ) for entry in result ]
-        return source
+        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
     def __release_date(self, movie):
         result = None
@@ -244,7 +227,6 @@ class TMDBSource(GenericSource):
                 if 'tagline' in info:
                     tagline = info['tagline']
                     if tagline is not None and tagline != '':
-
                         entity['short_description'] = tagline
                 if 'overview' in info:
                     overview = info['overview']
