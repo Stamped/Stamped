@@ -50,6 +50,30 @@ class GenericSource(BasicSource):
     def emptySource(self, start, count):
         return []
 
+    def generatorSource(self, generator, constructor=None):
+        if constructor is None:
+            constructor = lambda x: x
+        results = []
+        def source(start, count):
+            total = start + count
+            while total - len(results) > 0:
+                try:
+                    results.append(generator.next())
+                except StopIteration:
+                    break
+
+            if start + count <= len(results):
+                result = results[start:start+count]
+            elif start < len(results):
+                result = results[start:]
+            else:
+                result = []
+            return [
+                constructor(entry)
+                    for entry in result
+            ]
+        return source
+
     @property
     def idField(self):
         return "%s_id" % self.sourceName

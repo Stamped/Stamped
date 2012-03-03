@@ -240,12 +240,28 @@ class AlbumsGroup(ASubcategoryGroup):
         self.addNameField()
         self.addEligible('artist')
 
+class SongsGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'songs')
+        self.addNameField()
+        self.addEligible('artist')
+
 class AlbumNameGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
         ASubcategoryGroup.__init__(self, 'album_name')
         self.addNameField()
         self.addEligible('song')
+
+class AmazonGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'amazon')
+        self.addField(['amazon_id'])
+        self.addEligible('book')
+        self.addEligible('song')
+        self.addEligible('album')
 
 
 class DirectorGroup(AFilmGroup):

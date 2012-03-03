@@ -273,94 +273,112 @@ class StampedSource(GenericSource):
             return self.emptySource
 
     def trackSource(self, query):
-        tracks = list(self.__entityDB._collection.find({
-            'subcategory':'song',
-            '$or': [
-                { 'title':query.name },
-                { 'mangled_title':trackSimplify(query.name) },
-                { 'details.media.artist_display_title':query.artist['name'] },
-                { 'details.song.album.name': query.album['name'] },
-            ]
-        }, {'_id':1} ))
-        def source(start, count):
-            if start + count <= len(tracks):
-                result = tracks[start:start+count]
-            elif start < len(tracks):
-                result = tracks[start:]
-            else:
-                result = []
-            return [ self.trackFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) ) ) for entry in result ]
-        return source
-    
-    def albumSource(self, query):
-        options = [
-            { 'title':query.name },
-            { 'mangled_title':albumSimplify(query.name) },
-            { 'details.media.artist_display_title':query.artist['name'] },
-        ]
-        for track in query.tracks:
-            options.append( {
-                'details.album.tracks': track['name'],
-            })
-        albums = list(self.__entityDB._collection.find({
-            'subcategory':'album',
-            '$or': options,
-        }, {'_id':1} ))
-        def source(start, count):
-            if start + count <= len(albums):
-                result = albums[start:start+count]
-            elif start < len(albums):
-                result = albums[start:]
-            else:
-                result = []
-            return [ self.albumFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
-        return source
+        def query_gen():
+            try:
+                yield {
+                    'title' : query.name,
+                }
+                yield {
+                    'mangled_title' : trackSimplify( query.name ),
+                }
+                yield {
+                    'details.media.artist_display_title' : query.artist['name'],
+                }
+                yield {
+                    'details.song.album.name': query.album['name'],
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), subcategory='song')
 
+    def albumSource(self, query):
+        def query_gen():
+            try:
+                yield {
+                    'title' : query.name,
+                }
+                yield {
+                    'mangled_title' : albumSimplify( query.name ),
+                }
+                yield {
+                    'details.media.artist_display_title' : query.artist['name'],
+                } 
+                yield {
+                    '$or': [
+                        { 'details.album.tracks': track['name'] }
+                            for track in query.tracks
+                    ]
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), subcategory='album')
 
     def artistSource(self, query):
-        options = [
-            { 'title':query.name },
-            { 'mangled_title':artistSimplify(query.name) },
-        ]
-        for track in query.tracks:
-            options.append( {
-                'details.artist.songs': track['name'],
-            })
-        for album in query.albums:
-            options.append( {
-                'details.artist.albums': album['name'],
-            })
-        artists = list(self.__entityDB._collection.find({
-            'subcategory':'artist',
-            '$or': options,
-        }, {'_id':1} ))
-        def source(start, count):
-            if start + count <= len(artists):
-                result = artists[start:start+count]
-            elif start < len(artists):
-                result = artists[start:]
-            else:
-                result = []
-            return [ self.artistFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
-        return source
+        def query_gen():
+            try:
+                yield {
+                    'title' : query.name,
+                }
+                yield {
+                    'mangled_title' : artistSimplify( query.name ),
+                }
+                yield {
+                    '$or': [
+                        { 'details.artist.albums': {'$elemMatch':{ 'album_name': album['name'] } } }
+                            for album in query.albums
+                    ]
+                }
+                yield {
+                    '$or': [
+                        { 'details.artist.songs': {'$elemMatch':{ 'song_name': track['name'] } } }
+                            for track in query.tracks
+                    ]
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), subcategory='artist')
 
     def movieSource(self, query):
-        options = [
-            { 'title':query.name },
-        ]
-        artists = list(self.__entityDB._collection.find({
-            'subcategory':'movie',
-            '$or': options,
-        }, {'_id':1} ))
-        def source(start, count):
-            if start + count <= len(artists):
-                result = artists[start:start+count]
-            elif start < len(artists):
-                result = artists[start:]
-            else:
-                result = []
-            return [ self.movieFromEntity( self.__entityDB.getEntity( self.__entityDB._getStringFromObjectId(entry['_id']) )  ) for entry in result ]
-        return source
+        def query_gen():
+            try:
+                yield {
+                    'title' : query.name,
+                }
+                yield {
+                    'mangled_title' : movieSimplify( query.name ),
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), subcategory='movie')
+
+    def __id_query(self, mongo_query):
+        return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ))
+
+    def __querySource(self, query_gen, **kwargs):
+        def gen():
+            try:
+                id_set = set()
+                for query in query_gen:
+                    for k,v in kwargs.items():
+                        query[k] = v
+                    matches = self.__id_query(query )
+                    for match in matches:
+                        entity_id = match['_id']
+                        if entity_id not in id_set:
+                            yield entity_id
+                            id_set.add(entity_id)
+            except GeneratorExit:
+                pass
+        generator = gen()
+
+        def constructor(entity_id):
+            return self.wrapperFromEntity(
+                self.__entityDB.getEntity(
+                    self.__entityDB._getStringFromObjectId(entity_id)
+                )
+            )
+        return self.generatorSource(generator, constructor)
+
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')

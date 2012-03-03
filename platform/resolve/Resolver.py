@@ -16,6 +16,13 @@ __all__ = [
     'ResolverTrack',
     'ResolverMovie',
     'demo',
+    'regexRemoval',
+    'simplify',
+    'format',
+    'trackSimplify',
+    'albumSimplify',
+    'artistSimplify',
+    'nameSimplify',
 ]
 
 import Globals
@@ -56,6 +63,8 @@ _general_regex_removals = [
     (r'.*(\(.*)'        , [1]),     # a name ( bad parathetical
     (r'.*(\[.*)'        , [1]),     # a name [ bad brackets
     (r'.*(\.\.\.).*'    , [1]),     # ellipsis ... anywhere
+    (r".*(').*"         , [1]),
+    (r'.*(").*'         , [1]),
 ]
 
 # track-specific removal patterns
@@ -76,6 +85,12 @@ _album_removals = [
 
 # artist-specific removal patterns
 _artist_removals = [
+    (r'^(the ).*$'      , [1]),
+    (r'^.*( band)'      , [1]),
+]
+
+# movie-specific removal patterns
+_movie_removals = [
     (r'^(the ).*$'      , [1]),
     (r'^.*( band)'      , [1]),
 ]
@@ -169,6 +184,24 @@ def artistSimplify(string):
     """
     string = simplify(string)
     string = regexRemoval(string, _artist_removals)
+    return format(string)
+
+def movieSimplify(string):
+    """
+    Movie specific simplification for fuzzy comparisons.
+
+    Multipass safe and partially optimized
+    """
+    string = simplify(string)
+    return format(string)
+
+def bookSimplify(string):
+    """
+    book specific simplification for fuzzy comparisons.
+
+    Multipass safe and partially optimized
+    """
+    string = simplify(string)
     return format(string)
 
 def nameSimplify(string):
@@ -352,6 +385,38 @@ class ResolverMovie(ResolverObject):
     @property 
     def type(self):
         return 'movie'
+
+
+#
+# Books
+#
+
+class ResolverBook(ResolverObject):
+    """
+    Interface for track objects
+
+    Attributes:
+
+    author - an author dict containing at least a 'name' string
+    publisher - an publisher dict containing at least a 'name' string
+    length - a number (possibly float) inticating the length of the book in pages
+    """
+    @abstractproperty
+    def author(self):
+        pass
+
+    @abstractproperty
+    def album(self):
+        pass
+
+    @abstractproperty
+    def length(self):
+        pass
+
+    @property 
+    def type(self):
+        return 'book'
+
 ##
 # Main Resolver class
 ##
@@ -888,7 +953,12 @@ def demo(generic_source, default_title):
         elif subcategory == 'album':
             query['mangled_title'] = albumSimplify(title)
     else:
-        query['mangled_title'] = simplify(title)
+        query = {
+            '$or': [
+                { 'mangled_title' : simplify(title) },
+                { 'title' : title },
+            ]
+        }
     cursor = db._collection.find(query)
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)
