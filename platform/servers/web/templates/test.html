@@ -21,12 +21,14 @@
         
         <!-- Magic -->
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-        <script type="text/javascript" src="http://static.stamped.com/assets/js/api.js"></script>
+        <script type="text/javascript" src="/assets/js/api.js"></script>
     </head>
     <body>
-        <form name="request" method="POST" onSubmit="consumer.signForm(this, document.etc)">
-            username: <input name=""     type="text" size="64"/><br/>
-            password: <input name="oauth_signature_method" type="text"/>
+        <form name="request" onsubmit="return api.login(this.login.value, this.password.value)">
+            <table>
+            <tr><td>username:</td><td><input name="login"    type="text" size="30"/></td></tr>
+            <tr><td>password:</td><td><input name="password" type="password" size="30"/></td></tr>
+            </table>
             <input type="submit" value="Login"/><br/>
         </form>
         <script type="text/javascript">

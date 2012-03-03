@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
+import settings
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -41,4 +42,8 @@ urlpatterns = patterns('',
     
     # Index
     url(R'$',                               'teaser.views.index'), 
+    
+    # Static content
+    (r'^assets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
 )
+
