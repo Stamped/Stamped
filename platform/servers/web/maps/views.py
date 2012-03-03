@@ -56,9 +56,6 @@ def _transformOutput(value, **kwargs):
         
     output['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
     output['Cache-Control'] = 'max-age=600'
-    
-    # pretty_output = json.dumps(value, sort_keys=True, indent=2)
-    # logs.output(output_json)
 
     return output
 
@@ -77,11 +74,18 @@ def _transformStamps(stamps):
 
 def sxsw_json(request):
     try:
-        uSlice = UserCollectionSlice()
-        uSlice.limit = 100
-        uSlice.screen_name = 'kevin'
+        cSlice = GenericCollectionSlice()
+        cSlice.limit = 100
 
-        stamps = stampedAPI.getUserStamps('4e570489ccc2175fcd000000', uSlice)
+        cSlice.sort = 'relevance'
+        cSlice.unique = True
+        cSlice.quality = 1
+        cSlice.viewport.upperLeft.lat   = 30.309242
+        cSlice.viewport.upperLeft.lng   = -97.792286
+        cSlice.viewport.lowerRight.lat  = 30.226775
+        cSlice.viewport.lowerRight.lng  = -97.697689
+
+        stamps = stampedAPI.getSuggestedStamps('4e570489ccc2175fcd000000', cSlice)
         
         return _transformOutput(_transformStamps(stamps))
 
