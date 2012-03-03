@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Base classes for structured, type/field checked data representation that parallels common built in Python types.
 

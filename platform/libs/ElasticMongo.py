@@ -62,27 +62,40 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
     def __init__(self, 
                  mongo_host       = 'localhost', 
                  mongo_port       = 27017, 
+                 mongo_conn       = None, 
                  mongo_config_ns  = "local.elasticmongo", 
                  poll_interval_ms = 1000, 
                  force            = False, 
-                 *args, **kwargs):
+                 **kwargs):
         
         AElasticMongoObject.__init__(self)
         AMongoCollectionSink.__init__(self, self)
         
+        utils.log("[%s] %s %s" % (self, pformat(dict(
+            mongo_host = mongo_host, 
+            mongo_port = mongo_port, 
+            mongo_conn = mongo_conn, 
+            mongo_config_ns  = mongo_config_ns, 
+            poll_interval_ms = poll_interval_ms, 
+            force            = force)), pformat(kwargs)))
+        
         self._mongo_host          = mongo_host
         self._mongo_port          = mongo_port
         self._mongo_config_ns     = mongo_config_ns
+        self._mongo_conn          = mongo_conn
         self._poll_interval       = poll_interval_ms / 1000.0 # convert milliseconds to seconds
         self._force               = force
         
         self._init_mongo_conn()
-        self._init_elastic_conn(*args, **kwargs)
+        self._init_elastic_conn(**kwargs)
     
     def _init_mongo_conn(self):
-        self._conn          = pymongo.Connection(self._mongo_host, self._mongo_port)
-        self._oplog         = self._conn.local.oplog.rs
+        if self._mongo_conn:
+            self._conn      = self._mongo_conn
+        else:
+            self._conn      = pymongo.Connection(self._mongo_host, self._mongo_port)
         
+        self._oplog         = self._conn.local.oplog.rs
         self._config_sink   = ElasticMongoConfigSink(self)
         self._config_source = MongoCollectionSource(self, 
                                                     self._config_sink, 
@@ -99,8 +112,23 @@ class ElasticMongo(AElasticMongoObject, AMongoCollectionSink):
                                   #    'mappings' : { _id => mapping }, 
                                   # }
     
-    def _init_elastic_conn(self, *args, **kwargs):
-        self._elasticsearch = pyes.ES(*args, **kwargs)
+    def _init_elastic_conn(self, **kwargs):
+        utils.log("pyes: %s" % str(kwargs))
+        retries = 5
+        
+        while True:
+            try:
+                self._elasticsearch = pyes.ES(**kwargs)
+                info = self._elasticsearch.collect_info()
+                utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                break
+            except Exception:
+                retries -= 1
+                if retries <= 0:
+                    raise
+                
+                utils.printException()
+                time.sleep(1)
     
     def run(self):
         self._config_source.start()

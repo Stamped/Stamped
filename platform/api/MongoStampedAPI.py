@@ -6,12 +6,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import json, logs
+import json, logs, time
 import libs.ec2_utils
 
 from Entity                 import *
 from Schemas                import *
 from utils                  import lazyProperty
+from pprint                 import pformat
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
@@ -69,7 +70,7 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return MongoUserCollection(self)
     
     @lazyProperty
     def _stampDB(self):
@@ -163,6 +164,7 @@ class MongoStampedAPI(StampedAPI):
             utils.printException()
         
         es_port = 9200
+        retries = 5
         
         if libs.ec2_utils.is_ec2():
             stack = libs.ec2_utils.get_stack()
@@ -172,7 +174,7 @@ class MongoStampedAPI(StampedAPI):
                 return None
             
             es_servers = filter(lambda node: 'search' in node.roles, stack.nodes)
-            es_servers = map(lambda node: "%s:%d" % (node.private_ip_address, es_port), es_servers)
+            es_servers = map(lambda node: str("%s:%d" % (node.private_ip_address, es_port)), es_servers)
             
             if len(es_servers) == 0:
                 logs.warn("error: no elasticsearch servers found")
@@ -180,7 +182,20 @@ class MongoStampedAPI(StampedAPI):
         else:
             es_servers = "%s:%d" % ('localhost', es_port)
         
-        return pyes.ES(es_servers)
+        while True:
+            try:
+                es   = pyes.ES(es_servers)
+                info = es.collect_info()
+                utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                
+                return es
+            except Exception:
+                retries -= 1
+                if retries <= 0:
+                    raise
+                
+                utils.printException()
+                time.sleep(1)
     
     def getStats(self, store=False):
         unique_user_stats = {}

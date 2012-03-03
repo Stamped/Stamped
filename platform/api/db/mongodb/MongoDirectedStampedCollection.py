@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = 'Stamped (dev@stamped.com)'
 __version__   = '1.0'
@@ -23,14 +23,15 @@ from MongoBlockCollection import MongoBlockCollection
 
 class MongoDirectedStampsCollection(AMongoCollection):
     
-    def __init__(self):
+    def __init__(self, api):
         AMongoCollection.__init__(self, collection='directedstamps')
+        self.api = api
     
     ### PUBLIC
     
     @lazyProperty
     def user_collection(self):
-        return MongoUserCollection()
+        return MongoUserCollection(self.api)
     
     @lazyProperty
     def inbox_stamps_collection(self):
