@@ -72,7 +72,9 @@ def _transformStamps(stamps):
     
     return result
 
-def sxsw_json(request):
+def sxsw_json(request, **kwargs):
+    screenName  = kwargs.pop('screen_name', None)
+
     try:
         cSlice = GenericCollectionSlice()
         cSlice.limit = 100
@@ -85,7 +87,14 @@ def sxsw_json(request):
         cSlice.viewport.lowerRight.lat  = 30.226775
         cSlice.viewport.lowerRight.lng  = -97.697689
 
-        stamps = stampedAPI.getSuggestedStamps('4e570489ccc2175fcd000000', cSlice)
+
+        if screenName in ['austinchronicle']:
+            uSlice = UserCollectionSlice()
+            uSlice.importData(cSlice.exportSparse())
+            uSlice.screen_name = screenName
+            stamps = stampedAPI.getUserStamps('4e570489ccc2175fcd000000', uSlice)
+        else:
+            stamps = stampedAPI.getSuggestedStamps('4e570489ccc2175fcd000000', cSlice)
         
         return _transformOutput(_transformStamps(stamps))
 
