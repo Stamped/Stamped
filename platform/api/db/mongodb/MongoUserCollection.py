@@ -155,6 +155,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                                                  doc_types = [ 'user' ], 
                                                  size = limit)
         
+        utils.log(pformat(results))
         try:
             user_ids = map(lambda result: result['_id'], results['hits']['hits'])
             users2   = self.lookupUsers(user_ids)
