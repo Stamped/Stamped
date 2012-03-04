@@ -27,11 +27,9 @@ def token(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def login(request):
-    import HttpContext
-    HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*"); 
     client_id   = checkClient(request)
     schema      = parseRequest(OAuthLogin(), request)
-
+    
     user, token = stampedAuth.verifyUserCredentials(client_id, \
                                                     schema.login, \
                                                     schema.password)

@@ -6,7 +6,6 @@ import settings
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-
     # DOWNLOAD!
     url(R'^download$',                      'teaser.views.download'),
     url(R'^download/$',                     'teaser.views.download'),
@@ -39,13 +38,13 @@ urlpatterns = patterns('',
     
     url(R'^maps/sxsw$',                     'maps.views.sxsw'),
     url(R'^maps/test$',                     'maps.views.test'),
-
-    url(R'^maps/sxsw/(?P<screen_name>[\w-]{1,20}).json$', 'maps.views.sxsw_json'),
     
-    # Index
-    url(R'$',                               'teaser.views.index'), 
+    url(R'^maps/sxsw/(?P<screen_name>[\w-]{1,20}).json$', 'maps.views.sxsw_json'),
     
     # Static content
     (r'^assets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
+    
+    # Index
+    url(R'$',                               'teaser.views.index'), 
 )
 

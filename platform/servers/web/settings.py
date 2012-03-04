@@ -70,12 +70,12 @@ import Globals, os, libs.ec2_utils
 IS_PROD = libs.ec2_utils.is_prod_stack()
 
 if IS_PROD:
-    SITE_ROOT = "http://static.stamped.com/"
+    SITE_ROOT   = "http://static.stamped.com/"
 else:
-    SITE_ROOT = os.path.abspath(os.path.dirname(__file__))
+    SITE_ROOT   = os.path.abspath(os.path.dirname(__file__))
 
 STATIC_ROOT     = os.path.join(os.path.join(SITE_ROOT, 'assets'))
-STATIC_DOC_ROOT = os.path.join(os.path.join(SITE_ROOT, 'assets'))
+STATIC_DOC_ROOT = STATIC_ROOT
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -88,7 +88,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(STATIC_ROOT, 'js'), 
-    os.path.join(STATIC_ROOT, 'js'), 
+    os.path.join(STATIC_ROOT, 'css'), 
     os.path.join(STATIC_ROOT, 'img'), 
 )
 

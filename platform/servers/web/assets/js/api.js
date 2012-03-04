@@ -24,31 +24,53 @@ api.init = function() {
 };
 
 api.login = function(login, password) {
+    params = "login=" + login + "&password=" + password + "&client_id=" + "stampedtest" + "&client_secret=" + "august1ftw";
+    
     _api.call("/v0/oauth2/login.json", {
         login : login, 
         password : password, 
         client_id : 'stampedtest', 
         client_secret : 'august1ftw', 
-    }, function() {
-        console.log("success");
+    }, function(data) {
+        console.log("success: " + data.toSource());
+        alert("success" + data.toSource());
     });
     
     return false;
 };
 
 _api.call = function(uri, params, success) {
-    base = "http://localhost:19000";
+    var base = "http://localhost:19000";
     var url  = base + uri;
-    //var url  = "http://localhost:18000/index"
     
     console.log(url);
+    /*var request = new XMLHttpRequest();
+    
+    request.open('POST', url, true);
+    request.onreadystatechange = function() {
+        if (request.readyState != 4) {
+            return;
+        }
+        
+        if (request.status != 200) {
+            alert("error: " + request.status);
+            return;
+        }
+        
+        success(request.responseText);
+    };
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-length", params.length);
+    request.send(params);
+    return;*/
+    
+    // TODO: why doesn't this jQuery ajax request work?
     $.ajax({
         type     : "POST", 
-        dataType : "json", 
         url      : url, 
         data     : params, 
-        success  : function() { alert('SUCCESS'); }, 
-        //crossDomain : true, 
+        success  : success, 
+        crossDomain : true, 
         error    : function(jqXHR, textStatus, errorThrown) {
             console.log("error");
             console.log(jqXHR.responseText)

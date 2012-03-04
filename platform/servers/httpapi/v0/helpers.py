@@ -277,6 +277,11 @@ def transformOutput(value, **kwargs):
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
     
+    #output['Access-Control-Allow-Origin']  = 'http://localhost:18000 http://localhost:19000'
+    #output['Access-Control-Allow-Origin']  = 'x-requested-with'
+    #output['Access-Control-Allow-Headers'] = 'application/json'
+    #output['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    
     # pretty_output = json.dumps(value, sort_keys=True, indent=2)
     logs.output(output_json)
     

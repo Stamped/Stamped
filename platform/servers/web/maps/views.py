@@ -26,7 +26,7 @@ def sxsw(request):
     try:
         response = render_to_response('sxsw.html', None)
         
-        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
         
         return response
@@ -37,7 +37,7 @@ def test(request):
     try:
         response = render_to_response('test.html', None)
         
-        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
         
         return response
@@ -50,13 +50,13 @@ def test(request):
 def _transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
-
+    
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
-        
+    
     output['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
     output['Cache-Control'] = 'max-age=600'
-
+    
     return output
 
 def _transformStamps(stamps):
