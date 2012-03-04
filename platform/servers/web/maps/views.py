@@ -22,17 +22,6 @@ stampedAPI  = MongoStampedAPI()
 
 ### WEBSITE
 
-def sxsw(request):
-    try:
-        response = render_to_response('sxsw.html', None)
-        
-        response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
-        response['Cache-Control'] = 'max-age=600'
-        
-        return response
-    except:
-        raise Http404
-
 def test(request):
     try:
         response = render_to_response('test.html', None)
@@ -44,36 +33,8 @@ def test(request):
     except:
         raise Http404
 
-
-### JSON
-
-def _transformOutput(value, **kwargs):
-    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
-    kwargs.setdefault('mimetype', 'application/json')
-    
-    output_json = json.dumps(value, sort_keys=True)
-    output = HttpResponse(output_json, **kwargs)
-    
-    output['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
-    output['Cache-Control'] = 'max-age=600'
-    
-    return output
-
-def _transformStamps(stamps):
-    result = []
-    for stamp in stamps:
-        try:
-            if 'deleted' in stamp:
-                result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
-            else:
-                result.append(HTTPStamp().importSchema(stamp).exportSparse())
-        except:
-            logs.warn(utils.getFormattedException())
-    
-    return result
-
-def sxsw_json(request, **kwargs):
-    screenName  = kwargs.pop('screen_name', None)
+def sxsw(request):
+    template = 'sxsw.html'
 
     try:
         cSlice = GenericCollectionSlice()
@@ -87,18 +48,51 @@ def sxsw_json(request, **kwargs):
         cSlice.viewport.lowerRight.lat  = 30.226775
         cSlice.viewport.lowerRight.lng  = -97.697689
 
-
-        if screenName in ['austinchronicle']:
-            uSlice = UserCollectionSlice()
-            uSlice.importData(cSlice.exportSparse())
-            uSlice.screen_name = screenName
-            stamps = stampedAPI.getUserStamps('4e570489ccc2175fcd000000', uSlice)
-        else:
-            stamps = stampedAPI.getSuggestedStamps('4e570489ccc2175fcd000000', cSlice)
+        stamps = stampedAPI.getSuggestedStamps(None, cSlice)
         
-        return _transformOutput(_transformStamps(stamps))
+        return _buildMap(template, stamps)
+    except:
+        raise Http404
+
+def user(request, **kwargs):
+    screenName  = kwargs.pop('screen_name', None)
+    template = 'maps.html'
+
+    try:
+        uSlice = UserCollectionSlice()
+        uSlice.screen_name = screenName
+        uSlice.quality = 1
+        uSlice.sort = 'relevance'
+
+        stamps = stampedAPI.getUserStamps(None, uSlice)
+        
+        return _buildMap(template, stamps)
+    except:
+        raise Http404
+
+
+### PRIVATE
+
+def _buildMap(template, stamps):
+    try:
+        result = []
+
+        for stamp in stamps:
+            try:
+                if 'deleted' not in stamp:
+                    result.append(HTTPStamp().importSchema(stamp).exportSparse())
+            except:
+                logs.warn(utils.getFormattedException())
+
+        result = json.dumps(result, sort_keys=True)
+
+        response = render_to_response(template, {'stamps': result})
+        response['Expires'] = (datetime.utcnow() + timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+        
+        return response
 
     except Exception as e:
-        logs.warning(e)
+        logs.warning("Error: %s" % e)
         raise Http404
 
