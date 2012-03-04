@@ -40,6 +40,8 @@ urlpatterns = patterns('',
     url(R'^maps/test$',                     'maps.views.test'),
     
     url(R'^maps/sxsw/(?P<screen_name>[\w-]{1,20}).json$', 'maps.views.sxsw_json'),
+
+    url(R'^(?P<screen_name>[\w-]{1,20})/map$', 'maps.views.user'),
     
     # Static content
     (r'^assets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
