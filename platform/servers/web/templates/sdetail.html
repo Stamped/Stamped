@@ -43,17 +43,6 @@
         <!-- Magic --> 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
         <script type="text/javascript" src="http://static.stamped.com/assets/js/function.js"></script>
-
-        <script type="text/javascript">
-            $.ajax({
-                url: "http://localhost:18000/v0/oauth2/login.json",
-                type: "POST",
-                data: {client_id: 'stampedtest', client_secret: 'august1ftw', login: 'kevin', password: 'kat.mari'},
-                dataType: "json",
-                crossDomain: true,
-                success: function(data) { console.log(data); }
-            });
-        </script>
     </head> 
     <body> 
         <div id="entity" class="flood"> 
