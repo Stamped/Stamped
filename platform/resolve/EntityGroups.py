@@ -69,6 +69,12 @@ class AMediaGroup(ASubcategoryGroup):
         for v in eligible:
             self.addEligible(v)
 
+class ABookGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        self.addEligible('book')
+
 class AMovieGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
@@ -148,6 +154,12 @@ class AddressGroup(APlaceGroup):
         ]
         for field in fields:
             self.addField(field)
+
+class CoordinatesGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'coordinates')
+        self.addNameField()
 
 class PhoneGroup(APlaceGroup):
 
@@ -278,7 +290,7 @@ class CastGroup(AFilmGroup):
 
 class SubtitleGroup(BasicFieldGroup):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         BasicFieldGroup.__init__(self, 'subtitle')
         self.addNameField()
 
@@ -287,7 +299,7 @@ class SubtitleGroup(BasicFieldGroup):
 
 class DescGroup(BasicFieldGroup):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         BasicFieldGroup.__init__(self, 'desc')
         self.addNameField()
 
@@ -296,11 +308,53 @@ class DescGroup(BasicFieldGroup):
 
 class MangledTitleGroup(BasicFieldGroup):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         BasicFieldGroup.__init__(self, 'mangled_title')
         self.addNameField()
 
     def eligible(self, entity):
         return True
+
+class SubcategoryGroup(BasicFieldGroup):
+
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'subcategory')
+        self.addNameField()
+        self.addField(['category'])
+
+    def eligible(self, entity):
+        return True
+
+
+class AuthorGroup(ABookGroup):
+
+    def __init__(self):
+        ABookGroup.__init__(self, 'author')
+        self.addNameField()
+
+class PublisherGroup(ABookGroup):
+
+    def __init__(self):
+        ABookGroup.__init__(self, 'publisher')
+        self.addNameField()
+
+class ISBNGroup(ABookGroup):
+
+    def __init__(self):
+        ABookGroup.__init__(self, 'isbn')
+        self.addNameField()
+
+class NumPagesGroup(ABookGroup):
+
+    def __init__(self):
+        ABookGroup.__init__(self, 'num_pages')
+        self.addNameField()
+
+
+class SKUNumberGroup(ABookGroup):
+
+    def __init__(self):
+        ABookGroup.__init__(self, 'sku_number')
+        self.addNameField()
 
 

@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html class=' ' xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="https://www.facebook.com/2008/fbml">
+  <head>
+
+    <title>Rdio</title>
+    
+    
+
+    <script type="text/javascript">
+      var R = {};
+      var server_info = {"urls": {"resolveSubscription": "/management/resolve_subscription/", "subscriptions": "/management/subscriptions/", "legalTos": "/legal/tos/", "oauthGmailStart": "/invite/start_google/", "oauthLiveStart": "/invite/start_windowslive/", "legalPrivacyPolicy": "/legal/privacypolicy/", "appsMobile": "/apps/mobile/", "about": "/aboutus/", "oauthTwitter": "/connect/twitter/", "oauthFacebook": "/connect/facebook/", "legal": "/legal/", "contact": "/contact/", "oauthLastfm": "/connect/lastfm/", "oauthYahooStart": "/invite/start_yahoo/", "legalPaymentTerms": "/legal/paymentterms/"}, "fbid": "100322856680770", "various_artist_key": "r62", "countryCode": "US", "availableSubscriptionTypes": [{"subscriptionId": 1, "type": "web"}, {"subscriptionId": 2, "type": "unlimited"}, {"subscriptionId": 3, "type": "family"}], "locale": "en", "marketingTarget": "", "isAmazonBillingPermitted": true, "macAppIsLive": true, "availableCreditCardsByCountry": {"NZ": ["visa", "mastercard"], "AU": ["visa", "mastercard"], "ES": ["visa", "mastercard"], "BR": ["visa", "mastercard"], "CA": ["visa", "mastercard", "americanexpress", "discover"], "DE": ["visa", "mastercard"], "US": ["visa", "mastercard", "americanexpress", "discover"], "PT": ["visa", "mastercard"]}, "baseUrl": "www.rdio.com", "various_artist_id": 62, "stealthMode": false, "prices": {"web": 4.9900000000000002, "familySubaccount": 5.0, "unlimited": 9.9900000000000002, "family": 17.989999999999998, "familyPlusOne": 22.989999999999998}, "free_limited": true, "isFamilyPlanPermitted": true, "fallbackSWFUrl": "/media/flash/fallback.swf?8e3703531d1df94245553e2c1110b659", "flashMediaUrl": "/media/", "ignored_urls": ["/artist/Various_Artists/", "/artist/Various_Artists/bio/", "/artist/Various_Artists/albums/"], "cdnHost": "ak.rdio.com", "playerUrl": "/media/flash/player.swf?83f2ec17a16797b7a6278191e21d3cf3", "oiPaymentsLive": true, "media_address": "//ak.rdio.com/media/", "is_address": "http://ak.rdio.com/_is/", "base_url": "www.rdio.com", "apiVersion": 20120301, "availableCreditCards": ["visa", "mastercard", "americanexpress", "discover"], "isOi": false, "allow_offline": true, "rdioHelpUrl": "http://help.rdio.com", "fbLocale": "en_US", "singlePage": true, "debug": false, "prod": true, "awsFpsLive": true, "product_name": "Rdio", "secure_host": "https://www.rdio.com"};
+      var authorization_key = "eyJyYW5kIjogNDA1NTkzNTY3MywgImtleSI6ICJzLTEiLCAidGltZSI6IDEzMzA4MDQwNDF9.xQRfBTcXwZnheYMc5BE8uJJbFIA";
+    </script>
+
+    
+    <script src="//ak.rdio.com/media/js/acb53276e58129968d798603f997e03d/rdio.js"></script>
+    
+
+    
+
+    
+<script type="text/javascript">
+  var resourceVersions = {'api.swf': '611078b3dbd7298d88c473f209947bb5', 'sec.css': 'df2172dc236eb8a8adc2827ae4bc04da', 'player.swf': '83f2ec17a16797b7a6278191e21d3cf3', 'embed_loader.swf': 'caf570b31569ed3c32292cbf7d03676f', 'ie7fixes.js': 'd89ffa52c5896a953d7d23dadbe1f4fb', 'embed.swf': 'f0dbbf4b7e17b3d7e43e1245af7da392', 'oauth_c.css': '28fab3a60e2e9fde190b432a8ee42f6d', 'desktop_app.js': 'e704c45e2a2ff1d6cdf120ef1d3e94ae', 'rdio.css': '3ec7f354c76343e30dd872bf03780cd8', 'ie8.css': '3f8bf9cd61f3b2d015ad70cc4c04f946', 'sec.js': 'f0ce360d93043700e435b76dd500f111', 'pretty_stats.js': 'ee43daa2665c2a1ec53c73b9e3f1f301', 'ie7.css': '86afc1833c0b4e7f99331dbfefdaa6b3', 'admin.js': 'd41d8cd98f00b204e9800998ecf8427e', 'admin.css': 'a90e7e47a09509c87496bd3b1b831349', 'fallback.swf': '8e3703531d1df94245553e2c1110b659', 'pretty_stats.css': 'f2424f42dc2e4390b9a24379593a369b', 'rdio.js': 'acb53276e58129968d798603f997e03d', 'desktop_app.css': '3e96254d94e2404fc4ef1c511d905bb1', 'mob.css': '7010541552c2260c7900499ad8c31b40', 'oauth_c.js': '83da8f1c4bdeb2d4757ec59514b1eeff', 'circleview.swf': 'bee1b6f643a45616eec9d570ff56317c', 'mob.js': '32ccb60853cffb320a9390199ad9cd78', 'rdio.datauri.css': '678c083bfed14569ed25c0d7f9733c0e'};
+  var user = {"last_name": "", "features": [], "freeLimited": null, "new_user": true, "free_trial": {}, "has_lastfm": false, "tender_multipass": null, "authorizationKey": "eyJyYW5kIjogMjA2ODY1NTA2MSwgImtleSI6ICJzLTEiLCAidGltZSI6IDEzMzA4MDQwNDF9.Vh_T2cjKx2WuvOHY7CZ1NYdRPQ0", "available_balance": 0, "key": "s-1", "has_facebook": false, "id": -1, "has_payment_profile": false, "subscription": null, "deviceCount": 0, "first_name": "", "subscription_type": 2, "isAnonymous": true, "has_twitter": false, "vanity_name": "", "invite_count": 0, "comp": null, "facebookId": null, "prefs": {"outOfMusicTriggered": null, "rdio2_notified": null, "ca_rate_dialog": null, "sw_or": true, "locale": null, "fbScrobble": 1, "lastfmScrobble": 1, "p_c_as": null, "sw_oa": true, "fbmusicdialog": null, "p_c_ts": null, "hasSeenTour": null, "p_c_bh": null, "sw_pr": true, "compDismiss": null, "playlistsOrder": null}, "type": "s"};
+  var clientSetupCb = setupClientManager(user);
+</script>
+
+
+    
+      
+        <link type="text/css" rel="stylesheet" href="//ak.rdio.com/media/css/678c083bfed14569ed25c0d7f9733c0e/rdio.datauri.css" />
+      
+    
+    
+    <!--[if lte IE 8]>
+      <link type="text/css" rel="stylesheet" href="//ak.rdio.com/media/css/3f8bf9cd61f3b2d015ad70cc4c04f946/ie8.css" />
+    <![endif]-->
+    <!--[if lte IE 7]>
+      <link type="text/css" rel="stylesheet" href="//ak.rdio.com/media/css/86afc1833c0b4e7f99331dbfefdaa6b3/ie7.css" />
+      <script src="//ak.rdio.com/media/js/d89ffa52c5896a953d7d23dadbe1f4fb/ie7fixes.js"></script>
+    <![endif]-->
+
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="description" content="Rdio lets you listen to millions of songs ad-free wherever you are – on the web and on your phone, even offline." />
+    <meta name="application-name" content="Rdio" />
+    <meta name="application-url" content="http://www.rdio.com" />
+    <link rel="icon" href="//ak.rdio.com/media/images/icons/Rdio_32.png" sizes="32x32" />
+    <link rel="icon" href="//ak.rdio.com/media/images/icons/Rdio_48.png" sizes="48x48" />
+    
+      <link rel="icon shortcut" href="//ak.rdio.com/media/favicon_20111219.ico" type="image/x-icon" />
+    
+    <link rel="search" title="Rdio" type="application/opensearchdescription+xml" href="/opensearch.xml" />
+    
+
+    <script type="text/javascript">
+      R.BG = Bujagali;
+      $.t = R.BG; //TODO: remove this after removing $.t from everywhere
+      var T = R.BG; // TODO: remove this after removing T from everywhere
+
+      var time_pageload_init = new Date();
+      var time_pageload_ready;
+    </script>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-5484921-1']);
+
+      
+      var s_account="rdiocomprod";
+      
+      var s=s_gi(s_account);
+      s.charSet="UTF-8";
+      s.currencyCode="USD";
+      s.trackDownloadLinks=true;
+      s.trackExternalLinks=true;
+      s.trackInlineStats=true;
+      s.linkDownloadFileTypes="exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx";
+      s.linkInternalFilters="javascript:,.rdio.com,//rdio.com,127.0.0.1,127.0.0.1:8000," + window.location.host;
+      s.linkLeaveQueryString=false;
+      s.linkTrackVars="None";
+      s.linkTrackEvents="None";
+      s.visitorNamespace="rdio";
+      s.trackingServer="rdio.d1.sc.omtrdc.net";
+    </script>
+    
+      <script type="text/javascript">
+        (function() {
+          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+    
+  </head>
+  <body class="stopped">
+    <div id="fb-root"></div>
+    
+    
+
+
+
+
+
+  <object id="playerFlash" type="application/x-shockwave-flash" data="/media/flash/player.swf?83f2ec17a16797b7a6278191e21d3cf3" style="position:absolute; visibility: visible;" width="1" height="1">
+    <param name="movie" value="/media/flash/player.swf?83f2ec17a16797b7a6278191e21d3cf3" />
+    <param name="quality" value="high" />
+    <param name="wmode" value="transparent" />
+    <param name="allowScriptAccess" value="sameDomain" />
+    <param name="flashvars" value="baseURL=http://www.rdio.com/&userKey=s-1&runtimeVersion=1.5&appPubId=3DBCFCD30911C934939BC57CB763235E8F0B2837.1&scope=prod&appUrl=http://www.rdio.com/media/flash/rdioDesktop.air&appId=com.rdio.desktop&authorizationKey=eyJyYW5kIjogNDA1NTkzNTY3MywgImtleSI6ICJzLTEiLCAidGltZSI6IDEzMzA4MDQwNDF9.xQRfBTcXwZnheYMc5BE8uJJbFIA" />
+  </object>
+
+
+<div class="width_wrapper">
+  <div id="header">
+    <div id="searchContainer" class="">
+      <div id="search_box">
+        <button id="searchButton">Search</button>
+        <a href="#" id="searchClear" style="margin:0;"></a>
+        <input type="text" id="searchInput" class="textInput" title="Find music or people" />
+      </div>
+      <ul id="searchSuggestions">
+      </ul>
+    </div>
+    <div id="your_header_links" class="header_column">
+    </div>
+    <div id="loading_indicator">
+      Loading...
+    </div>
+  </div>
+  <div id="content_area" class="clearfix">
+    <div id="c_column">
+      <div id="container">
+        <div id="content" class="clearfix">
+          <noscript>
+            <h1 class="critical_error">You need to have JavaScript enabled on your browser to use this site.</h1>
+          </noscript>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+    <div class="little footer clearfix">
+      <ul>
+        <li>
+          <a href="/aboutus/">About</a>
+        </li>
+        <li>
+          <a href="http://help.rdio.com" target="_blank">Help</a>
+        </li>
+        <li>
+          
+        </li>
+        <li><a href="/apps/">Apps</a></li>
+        <li>
+          <a href="http://blog.rdio.com/" target="_blank">Blog</a>
+        </li>
+        
+        <li><a href="/careers/">Jobs</a></li>
+          <li><a href="http://developer.rdio.com/" target="_blank">API</a></li>
+        
+        
+          <li><a href="/press/">Press</a></li>
+          <li><a href="/legal/">Legal</a></li>
+        
+      </ul>
+      <div id="copyright"></div>
+    </div>
+  </div>
+</div>
+
+
+    <div id="js_templates">
+  <div class="syncmanager_install_dialog">
+    <div class="syncmanager_install_button">
+    </div>
+  </div>
+  <div class="collection_browser_song_row clearfix">
+    <div class="emblems">
+      <span class="duration"></span>
+      <span class="menu_sus"></span>
+    </div>
+    <div class="overflow_container">
+      <button class="play small"></button>
+      <a class="title"></a>
+      <a class="album"></a>
+    </div>
+  </div>
+  <div title="Error" id="rdio_requirements">
+    <span class="error">To use rdio you must first fix the following:</span>
+    <ul class="error_list"></ul>
+  </div>
+  <div id="upgrade_browser" title="Upgrade your Web Browser">
+    <p>
+      Rdio does not currently support Internet Explorer 6. We recommend using the <a target="_blank" href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a> plugin for Internet Explorer.
+    </p>
+    <p>We also support the following browsers</p>
+    <ul class="clearfix">
+      <li><a target="_blank" href="http://www.microsoft.com/ie8">Internet Explorer 8</a></li>
+      <li><a target="_blank" href="http://www.mozilla.com/en-US/firefox/personal.html">Firefox</a></li>
+      <li><a target="_blank" href="http://www.apple.com/safari/download/">Safari</a></li>
+      <li><a target="_blank" href="http://www.google.com/chrome">Chrome</a></li>
+    </ul>
+  </div>
+  
+  <div id="empty_states">
+    <div class="now_playing_empty">
+      <div class="big_empty_state empty_plays">
+        <h3>You're not playing anything right now.</h3>
+        <p>
+          Just click play anywhere on Rdio and your music will show up here. Wherever you go on the site, your music follows, so you never miss a beat.
+        </p>
+        <p class="action">
+          <a href="/browse/">See what's popular on Rdio</a> or search for something to play
+        </p>
+      </div>
+    </div>
+  </div>
+  <div id="now_playing_templates">
+    <div class="single_song clearfix">
+      <div class="emblems">
+        <span class="duration"></span>
+        <span class="menu_sus"></span>
+      </div>
+      <a href="#" class="play">
+        <div class="album_art center_overlay shadowbox_50">
+          <img class="art" />
+          <div class="play_overlay"></div>
+        </div>
+      </a>
+      <a class="title"></a>
+      <div class="info">
+        <a class="artist"></a>
+        <a class="album"></a>
+      </div>
+    </div>
+    <div class="complex_source">
+      <div class="source_info clearfix">
+        <button class="play medium"></button>
+        <div class="album_art shadowbox_50">
+          <img class="art" />
+        </div>
+        <div class="menu_holder">
+          <span class="menu_sus"></span>
+        </div>
+        <div class="main_description"><a></a></div>
+        <div class="secondary_description"></div>
+      </div>
+      <div class="song_list no_border">
+      </div>
+    </div>
+    <div class="track clearfix">
+      <div class="emblems">
+        <span class="duration"></span>
+        <span class="menu_sus"></span>
+        <span class="action remove"></span>
+      </div>
+      <div class="index">
+        <button class="play medium"></button>
+        <span></span>
+      </div>
+      <div class="title_info">
+        <a></a>
+      </div>
+    </div>
+    <div class="queue_item clearfix">
+      <div class="index">
+        <span></span>
+        <button class="play medium"></button>
+      </div>
+      <div class="album_art shadowbox_50">
+        <img />
+      </div>
+      <div class="details">
+        <span class="emblems">
+          <span class="duration" style="display:hidden;"></span>
+          <span class="menu_sus"></span>
+          <span class="action move-to-top" title="Move this item to the top of your queue."></span>
+          <span class="action remove" title="Remove this item from your queue."></span>
+        </span>
+        <div class="title">
+          <a></a>
+        </div>
+        <div class="metadata_1">
+          <span class="info_1"><a href=""></a></span><span class="separator"> - </span><span class="info_2"><a href=""></a></span>
+        </div>
+        <div class="metadata_2">
+          <span class="info_1"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sync_warning_template">
+    <div class="warning_box clearfix">
+      <img src="//ak.rdio.com/media/images/product/iphone_synced.png" style="float:left;" />
+      <div class="warning_box_inner">
+        <div class="notice upgrade_notice" style="display:none;">
+          You need an Rdio Unlimited Subscription to use sync to mobile.
+          <a href="/management/subscriptions/">Get Free Trial</a>
+        </div>
+        <div class="warning_header">
+          Synced items have a yellow check next to their name on your mobile.
+        </div>
+        <div class="warning_body">
+          Songs and albums are added to your collection and playlists are added to your Subscribed Playlists
+        </div>
+        <div class="more_info">
+          <a href="http://help.rdio.com/customer/portal/articles/58966-rdio-for-mobile" target="_blank">
+            More info about sync to mobile
+          </a>
+          <a href="/apps/mobile/" target="_blank">
+            Get Rdio mobile apps
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="warning_box_resend">
+    <h2 class="warning_title">Check your email.</h2>
+    <p style="text-align:center;margin:10px -15px 0;"><span class="sink_box self_invite_email"></span></p>
+    <p class="small_info">We sent you an email with a link to complete your registration.</p>
+    <p class="button_row"><button class="button large_button">Send Again</button></p>
+  </div>
+</div>
+
+    
+<script type="text/javascript">
+  (function() {
+    R.fbInit(false, function() {
+      R.FB.setupMusic();
+    });
+    R.BG.render('templates/player/player.bg.html', {
+      deps: {"templates/player/player.bg.html": "12fb28f140198a0db8f04a039dd6c21d"},
+      data: {}
+    }, function(data, markup) {
+        log('player template initialized');
+        $('#c_column').before(markup);
+        setupPlayer();
+    });
+
+    // TODO: Come up with an API for this kind of thing.
+    R.BG.render('templates/include.bg.html', {
+      deps: {"templates/snippets/notification_bar.bg.html": "05b06f7af45556e1dc014ac010451ee8", "templates/snippets/free.bg.html": "f5fe7ddc5cfc7caf2a1a3550e9cbc23e", "templates/snippets/now_playing.bg.html": "67e7dacfd1f684a933977b20db07ec79", "templates/include.bg.html": "8e5681a71e0836473c1a128fff8a4ec1", "templates/snippets/oi_mobile.bg.html": "1be75c4ca2efd35d4a188476e513a32e", "templates/snippets/search_suggest.bg.html": "11b76d07278708ed2cc69978740d535e", "templates/snippets/share.bg.html": "9b5d5e7772befbd4799fadeb69d697bf", "templates/snippets/signup_dialog.bg.html": "a84b0325d608d811081e6fbe6c31de5a", "templates/snippets/sources.bg.html": "2d463d23f5ddd5db2a3c1a3d14d2860a", "templates/snippets/station.bg.html": "f475949c2259e6a1832b847b5776359b", "templates/snippets/oferta.bg.html": "7111a63d33310b13967cdc7babad9b58"},
+      data: {}
+    }, function(data, markup) {
+      clientSetupCb();
+    });
+
+    
+      $('#copyright').html('&copy; ' + new Date().getFullYear() + ' Rdio, Inc.');
+    
+
+  })();
+</script>
+
+  </body>
+</html>

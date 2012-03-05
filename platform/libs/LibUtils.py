@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'states', 'months', 'parseDateString' ]
+__all__ = [ 'states', 'months', 'parseDateString', 'xmlToPython', 'xp' ]
 
 import Globals
 from logs import log, report
@@ -16,6 +16,7 @@ from logs import log, report
 try:
     import re
     from datetime       import datetime
+    import xml.dom.minidom
 except:
     report()
     raise
@@ -147,3 +148,36 @@ def parseDateString(date):
     
     return None
 
+def __coerce(element):
+    e = {}
+    if element.firstChild is not None:
+        cur = element.firstChild
+        while cur is not None:
+            tag = cur.localName
+            if tag is not None:
+                others = e.setdefault('c',{}).setdefault(tag,[])
+                others.append(__coerce(cur))
+            else:
+                text = e.setdefault('v','')
+                e['v'] = text + cur.nodeValue
+            cur = cur.nextSibling
+    if element.attributes is not None:
+        attributes = dict(element.attributes.items())
+        if len(attributes) > 0:
+            e['a'] = attributes
+    return e
+
+def xmlToPython(string=None, doc=None):
+    if string is not None:
+        doc = xml.dom.minidom.parseString(string)
+    return __coerce(doc)
+
+def xp(e, *args):
+    cur = e
+    for arg in args:
+        if isinstance(arg, tuple):
+            tag, i = arg
+            cur = cur['c'][tag][i]
+        else:
+            cur = cur['c'][arg][0]
+    return cur

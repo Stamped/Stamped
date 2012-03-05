@@ -223,6 +223,8 @@ def _combos(entity):
     """
     filters = _filters(entity,_relevant_fields.keys())
     keys = frozenset(filters.keys())
+    if 'latitude' not in keys or 'longitude' not in keys:
+        return []
     combos = set([keys])
     result = [filters]
     for combo in _field_combos:
@@ -811,6 +813,10 @@ def sourceAndTimestamp():
         entity.address_timestamp = datetime.utcnow()
         entityDB.update(entity)
 
+_globalFactual = Factual()
+
+def globalFactual():
+    return _globalFactual
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

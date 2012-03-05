@@ -146,6 +146,16 @@ class RdioSource(GenericSource):
     @lazyProperty
     def __rdio(self):
         return globalRdio()
+
+    def wrapperFromData(self, data):
+        if data['type'] == 'r':
+            return RdioArtist(data=data)
+        elif data['type'] == 'a':
+            return RdioAlbum(data=data)
+        elif data['type'] == 't':
+            return RdioTrack(data=data)
+        else:
+            return None
     
     def matchSource(self, query):
         if query.type == 'artist':

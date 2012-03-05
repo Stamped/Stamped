@@ -50,6 +50,7 @@ class FullResolveContainer(BasicSourceContainer):
             AmazonGroup(),
 
             AddressGroup(),
+            CoordinatesGroup(),
             PhoneGroup(),
             SiteGroup(),
             PriceRangeGroup(),
@@ -71,6 +72,14 @@ class FullResolveContainer(BasicSourceContainer):
             ArtistDisplayNameGroup(),
             TracksGroup(),
             GenreGroup(),
+
+            AuthorGroup(),
+            PublisherGroup(),
+            ISBNGroup(),
+            SKUNumberGroup(),
+            NumPagesGroup(),
+
+            SubcategoryGroup(),
         ]
         for group in groups:
             self.addGroup(group)
@@ -109,12 +118,9 @@ def demo(default_title='Katy Perry'):
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
-    try:
-        query = {'_id':bson.ObjectId(title)}
-    except Exception:
-        query = {'title':title}
-        if subcategory is not None:
-            query['subcategory'] = subcategory
+    query = {'title':title}
+    if subcategory is not None:
+        query['subcategory'] = subcategory
     print("Query: %s" % query)
     cursor = db._collection.find(query)
     if cursor.count() == 0:
@@ -133,7 +139,7 @@ def demo(default_title='Katy Perry'):
     if len(decorations) > 0:
         print( "With decorations:")
         for k,v in decorations.items():
-            print( "%s decoration:" )
+            print( "%s decoration:" % k )
             try:
                 print( "%s" % pformat(v.value) )
             except Exception:

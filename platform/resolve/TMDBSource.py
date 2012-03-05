@@ -42,7 +42,9 @@ class _TMDBObject(object):
     info (abstract) - the type-specific TMDB data for the object
     """
     def __init__(self, tmdb_id):
-        self.__key = tmdb_id
+        self.__key = str(tmdb_id)
+        if self.__key.startswith('tt'):
+            self.__key = str(self.info['id'])
 
     @property
     def key(self):
@@ -71,7 +73,15 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
     """
     def __init__(self, tmdb_id):
         _TMDBObject.__init__(self, tmdb_id)
-        ResolverMovie.__init__(self)
+        ResolverMovie.__init__(self)        
+
+    @property
+    def valid(self):
+        try:
+            self.info
+            return True
+        except HTTPError:
+            return False
 
     @lazyProperty
     def info(self):

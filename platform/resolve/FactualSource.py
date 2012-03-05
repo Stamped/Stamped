@@ -15,7 +15,7 @@ from logs import report
 
 try:
     from BasicSource    import BasicSource
-    from libs.Factual       import Factual
+    from libs.Factual       import globalFactual
     from utils              import lazyProperty
     from functools          import partial
     import json
@@ -70,7 +70,7 @@ class FactualSource(BasicSource):
 
     @lazyProperty
     def __factual(self):
-        return Factual()
+        return globalFactual()
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """

@@ -15,6 +15,7 @@ __all__ = [
     'ResolverAlbum',
     'ResolverTrack',
     'ResolverMovie',
+    'ResolverBook',
     'demo',
     'regexRemoval',
     'simplify',
@@ -22,6 +23,8 @@ __all__ = [
     'trackSimplify',
     'albumSimplify',
     'artistSimplify',
+    'movieSimplify',
+    'bookSimplify',
     'nameSimplify',
 ]
 
@@ -252,6 +255,10 @@ class ResolverObject(object):
     def type(self):
         pass
 
+    @property 
+    def description(self):
+        return ''
+
 #
 # Artist
 #
@@ -337,6 +344,14 @@ class ResolverTrack(ResolverObject):
     def length(self):
         pass
 
+    @property
+    def genres(self):
+        return []
+
+    @property
+    def date(self):
+        return None
+
     @property 
     def type(self):
         return 'track'
@@ -406,12 +421,28 @@ class ResolverBook(ResolverObject):
         pass
 
     @abstractproperty
-    def album(self):
+    def publisher(self):
         pass
 
-    @abstractproperty
+    @property
+    def date(self):
+        return None
+
+    @property
     def length(self):
-        pass
+        return -1
+
+    @property
+    def isbn(self):
+        return None
+
+    @property
+    def eisbn(self):
+        return None
+
+    @property
+    def sku(self):
+        return None
 
     @property 
     def type(self):
@@ -574,7 +605,19 @@ class Resolver(object):
         """
         Director specific similarity metric.
         """
-        return self.nameSimilarity(q.director['name'], m.director['name'])
+        return self.nameSimilarity(q['name'], m['name'])
+
+    def authorSimilarity(self, q, m):
+        """
+        Author specific similarity metric.
+        """
+        return self.nameSimilarity(q['name'], m['name'])
+
+    def publisherSimilarity(self, q, m):
+        """
+        Publisher specific similarity metric.
+        """
+        return self.nameSimilarity(q['name'], m['name'])
 
     def checkArtist(self, results, query, match, options):
         tests = [
@@ -622,7 +665,7 @@ class Resolver(object):
         tests = [
             ('name', lambda q, m, s, o: self.movieSimilarity(q.name, m.name)),
             ('cast', lambda q, m, s, o: self.castSimilarity(q, m)),
-            ('director', lambda q, m, s, o: self.directorSimilarity(q, m)),
+            ('director', lambda q, m, s, o: self.directorSimilarity(q.director, m.director)),
             ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
             ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
         ]
@@ -632,6 +675,23 @@ class Resolver(object):
             'director': lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * 3,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) ,
+        }
+        self.genericCheck(tests, weights, results, query, match, options)
+
+    def checkBook(self, results, query, match, options):
+        tests = [
+            ('name', lambda q, m, s, o: self.movieSimilarity(q.name, m.name)),
+            ('author', lambda q, m, s, o: self.authorSimilarity(q.author, m.author)),
+            ('publisher', lambda q, m, s, o: self.publisherSimilarity(q.publisher, m.publisher)),
+            ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
+            ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
+        ]
+        weights = {
+            'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
+            'author': lambda q, m, s, o: self.__nameWeight(q.author['name'], m.author['name'], exact_boost=3),
+            'publisher': lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'], exact_boost=2),
+            'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * .5,
+            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) * .2,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -763,6 +823,8 @@ class Resolver(object):
                 groups.extend([20, 50, 100])
             elif query.type == 'movie':
                 groups.extend([10, 20, 50]) 
+            elif query.type == 'book':
+                groups.extend([20, 50, 100])
             else:
                 #generic
                 groups.extend([10, 20, 50]) 
@@ -776,20 +838,25 @@ class Resolver(object):
                 options['check'] = self.checkArtist
             elif query.type =='movie':
                 options['check'] = self.checkMovie
+            elif query.type =='book':
+                options['check'] = self.checkBook
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
 
         return options
 
-    def __nameWeight(self, a, b):
+    def __nameWeight(self, a, b, exact_boost=1):
         if a is None or a == '':
             return 1
         la = len(a)
         lb = len(b)
         if la == 0 or lb == 0:
             return 1
-        return 2*float(la+lb)/(math.log(la+1)+math.log(lb+1))
+        weight = 2*float(la+lb)/(math.log(la+1)+math.log(lb+1))
+        if a == b:
+            weight = exact_boost * weight
+        return weight
 
     def __lengthWeight(self, q, m):
         #TODO improve
@@ -946,12 +1013,6 @@ def demo(generic_source, default_title):
     query = {'title':title}
     if subcategory is not None:
         query['subcategory'] = subcategory
-        if subcategory == 'artist':
-            query['mangled_title'] = artistSimplify(title)
-        elif subcategory == 'song':
-            query['mangled_title'] = trackSimplify(title)
-        elif subcategory == 'album':
-            query['mangled_title'] = albumSimplify(title)
     else:
         query = {
             '$or': [
@@ -959,6 +1020,7 @@ def demo(generic_source, default_title):
                 { 'title' : title },
             ]
         }
+    pprint(query)
     cursor = db._collection.find(query)
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)

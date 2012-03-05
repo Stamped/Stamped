@@ -50,15 +50,23 @@ class GenericSource(BasicSource):
     def emptySource(self, start, count):
         return []
 
-    def generatorSource(self, generator, constructor=None):
+    def generatorSource(self, generator, constructor=None, unique=False):
         if constructor is None:
             constructor = lambda x: x
         results = []
+        if unique:
+            value_set = set()
         def source(start, count):
             total = start + count
             while total - len(results) > 0:
                 try:
-                    results.append(generator.next())
+                    value = generator.next()
+                    if unique:
+                        if value not in value_set:
+                            results.append(value)
+                            value_set.add(value)
+                    else:
+                        results.append(value)
                 except StopIteration:
                     break
 

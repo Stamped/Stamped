@@ -19,6 +19,7 @@ try:
     import re
     from datetime       import datetime
     from libs.LibUtils           import months
+    from schema         import SchemaElement
 except:
     report()
     raise
@@ -41,6 +42,10 @@ class SeedSource(BasicSource):
             'track_length',
             'cast',
             'short_description',
+            'coordinates',
+            'author',
+            'publisher',
+            'isbn',
         ]
         for group in self.__simple_groups:
             self.addGroup(group)
@@ -50,7 +55,9 @@ class SeedSource(BasicSource):
             source = "%s_source" % group
             cur = entity[source]
             value = entity[group]
-            if cur == None and value is not None and value != '':
+            if isinstance(value, SchemaElement):
+                value = value.value
+            if cur == None and value is not None and value != '' and value != {} and value != []:
                 timestamps[group] = controller.now
         return True
 

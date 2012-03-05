@@ -181,6 +181,52 @@ class EntityMovie(_EntityObject, ResolverMovie):
         else:
             return None
 
+
+class EntityBook(_EntityObject, ResolverBook):
+    """
+    Entity book wrapper
+    """
+    def __init__(self, entity):
+        _EntityObject.__init__(self, entity)
+        ResolverBook.__init__(self)
+
+    @lazyProperty
+    def author(self):
+        author = self.entity['author']
+        if author is None:
+            author = ''
+        return {'name':author}
+
+    @lazyProperty
+    def publisher(self):
+        publisher = self.entity['publisher']
+        if publisher is None:
+            publisher = ''
+        return {'name':publisher}
+
+    @lazyProperty
+    def date(self):
+        try:
+            return parseDateString(self.entity['publish_date'])
+        except Exception:
+            return None
+
+    @lazyProperty
+    def length(self):
+        try:
+            return float(self.entity['num_pages'])
+        except Exception:
+            return -1
+
+    @lazyProperty
+    def isbn(self):
+        return self.entity['isbn']
+
+    @lazyProperty
+    def eisbn(self):
+        return None
+
+
 class StampedSource(GenericSource):
     """
     """
@@ -241,6 +287,11 @@ class StampedSource(GenericSource):
         """
         return EntityMovie(entity)
 
+    def bookFromEntity(self, entity):
+        """
+        """
+        return EntityBook(entity)
+
     def wrapperFromEntity(self, entity):
         """
         Generic ResolverObject factory method for entities.
@@ -257,6 +308,8 @@ class StampedSource(GenericSource):
             return self.artistFromEntity(entity)
         elif sub == 'movie':
             return self.movieFromEntity(entity)
+        elif sub == 'book':
+            return self.bookFromEntity(entity)
         else:
             raise ValueError('Unrecognized subcategory %s for %s' % (sub, entity['title']))
 
@@ -269,6 +322,8 @@ class StampedSource(GenericSource):
             return self.trackSource(query)
         elif query.type == 'movie':
             return self.movieSource(query)
+        elif query.type == 'book':
+            return self.bookSource(query)
         else:
             return self.emptySource
 
@@ -350,6 +405,22 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), subcategory='movie')
+
+    def bookSource(self, query):
+        def query_gen():
+            try:
+                yield {
+                    'title' : query.name,
+                }
+                yield {
+                    'mangled_title' : bookSimplify( query.name ),
+                }
+                yield {
+                    'details.book.author' : query.author['name'],
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), subcategory='book')
 
     def __id_query(self, mongo_query):
         return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ))

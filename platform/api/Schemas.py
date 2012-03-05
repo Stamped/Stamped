@@ -502,6 +502,8 @@ class Entity(Schema):
 
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
+        self.subcategory_source = SchemaElement(basestring)
+        self.subcategory_timestamp = SchemaElement(datetime)
         # Not present in existing database
         self.locale             = SchemaElement(basestring)
         
@@ -513,6 +515,8 @@ class Entity(Schema):
         self.popularity         = SchemaElement(int)
         self.timestamp          = TimestampSchema()
         self.coordinates        = CoordinatesSchema()
+        self.coordinates_source         = SchemaElement(basestring)
+        self.coordinates_timestamp      = SchemaElement(datetime) 
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
         self.stats              = StatsSchema()
@@ -716,14 +720,29 @@ class AppSchema(Schema):
 class BookSchema(Schema):
     def setSchema(self):
         self.isbn               = SchemaElement(basestring)
+        self.isbn_source        = SchemaElement(basestring)
+        self.isbn_timestamp     = SchemaElement(datetime)
+
         self.author             = SchemaElement(basestring)
+        self.author_source      = SchemaElement(basestring)
+        self.author_timestamp   = SchemaElement(datetime)
+
         self.sku_number         = SchemaElement(basestring)
+        self.sku_number_source  = SchemaElement(basestring)
+        self.sku_number_timestamp = SchemaElement(datetime)
+        
         self.publisher          = SchemaElement(basestring)
+        self.publisher_source   = SchemaElement(basestring)
+        self.publisher_timestamp= SchemaElement(datetime)
+
         self.publish_date       = SchemaElement(basestring)
         self.language           = SchemaElement(basestring)
         self.book_format        = SchemaElement(basestring)
         self.edition            = SchemaElement(basestring)
+
         self.num_pages          = SchemaElement(int)
+        self.num_pages_source   = SchemaElement(basestring)
+        self.num_pages_timestamp= SchemaElement(datetime)
 
 class VideoSchema(Schema):
     def setSchema(self):
@@ -774,6 +793,8 @@ class ArtistSchema(Schema):
         self.albums_source      = SchemaElement(basestring)
         self.albums_timestamp   = SchemaElement(datetime)
         self.songs              = SchemaList(ArtistSongsSchema())
+        self.songs_source       = SchemaElement(basestring)
+        self.songs_timestamp    = SchemaElement(datetime)
 
 class ArtistAlbumsSchema(Schema):
     def setSchema(self):

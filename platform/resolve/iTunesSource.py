@@ -274,6 +274,24 @@ class iTunesSource(GenericSource):
         ]
         entity['songs'] = new_songs
 
+    def wrapperFromId(self, itunes_id):
+        try:
+            data = self.__itunes.method('lookup',id=itunes_id)['results'][0]
+            if data['wrapperType'] == 'track':
+                if data['kind'].find('movie') != -1:
+                    return iTunesMovie(data=data)
+                elif data['kind'] == 'song':
+                    return iTunesTrack(data=data)
+            elif data['wrapperType'] == 'collection' and data['collectionType'] == 'Album':
+                return iTunesAlbum(data=data)
+            elif data['wrapperType'] == 'artist':
+                return iTunesArtist(data=data)
+            else:
+                pass
+        except KeyError:
+            pass
+        return None
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
         itunes_id = entity['itunes_id']

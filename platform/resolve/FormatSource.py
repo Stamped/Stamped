@@ -21,6 +21,9 @@ try:
     from libs.LibUtils  import months
     from Resolver       import *
     from utils          import lazyProperty
+    from Geocoder       import Geocoder
+    from libs.Factual   import globalFactual
+    from pprint         import pprint
 except:
     report()
     raise
@@ -34,9 +37,41 @@ class FormatSource(BasicSource):
         BasicSource.__init__(self, 'format',
             'release_date',
             'mangled_title',
+            'coordinates',
+            'subcategory',
         )
 
+    @lazyProperty
+    def __geocoder(self):
+        return Geocoder()
+
+    @lazyProperty
+    def __factual(self):
+        return globalFactual()
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        if entity['subcategory'] == 'other':
+            print('here')
+            if entity['lat'] != None and entity['lng'] != None and entity['gid'] != None:
+                factual_id = self.__factual.factual_from_entity(entity)
+                if factual_id is not None:
+                    data = self.__factual.place(factual_id)
+                    if data is not None:
+                        prefixes = [
+                            ('Arts, Entertainment & Nightlife > Bars', 'bar'),
+                            ('Food & Beverage > Restaurants', 'restaurant'),
+                            ('Food & Beverage > Bakeries', 'bakery'),
+                            ('Food & Beverage > Beer, Wine & Spirits','bar'),
+                            ('Food & Beverage > Cafes, Coffee Houses & Tea Houses','cafe'),
+                            ('Food & Beverage','restaurant'),
+                        ]
+                        category = data['category']
+                        for prefix, subcategory in prefixes:
+                            if category.startswith(prefix):
+                                entity['subcategory'] = subcategory
+                                entity['category'] = 'food'
+                                break
+
         if entity['subcategory'] == 'artist':
             entity['mangled_title'] = artistSimplify(entity['title'])
         elif entity['subcategory'] == 'song':
@@ -47,6 +82,10 @@ class FormatSource(BasicSource):
             entity['mangled_title'] = movieSimplify(entity['title'])
         else:
             entity['mangled_title'] = simplify(entity['title'])
+        if entity['lat'] == None and entity['address'] != None:
+            latLng = self.__geocoder.addressToLatLng(entity['address'])
+            if latLng is not None:
+                entity['coordinates'] = {'lat':latLng[0],'lng':latLng[1]}
         if controller.shouldEnrich('release_date',self.sourceName,entity):
             if 'original_release_date' in entity:
                 date = entity['original_release_date']
