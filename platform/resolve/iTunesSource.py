@@ -92,6 +92,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
                 for album in results if album.pop('collectionType',None) == 'Album' ]
 
     @lazyProperty
+    def genres(self):
+        try:
+            return [ self.data['primaryGenreName'] ]
+        except Exception:
+            return []
+
+    @lazyProperty
     def tracks(self):
         results = self.itunes.method('lookup',id=self.key,entity='song')['results']
         return [
@@ -121,6 +128,13 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
     @lazyProperty
     def artist(self):
         return {'name' : self.data['artistName'] }
+
+    @lazyProperty
+    def genres(self):
+        try:
+            return [ self.data['primaryGenreName'] ]
+        except Exception:
+            return []
 
     @lazyProperty
     def tracks(self):
@@ -162,6 +176,13 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
             return {'name' : self.data['collectionName'] }
         except Exception:
             return {'name' : ''}
+
+    @lazyProperty
+    def genres(self):
+        try:
+            return [ self.data['primaryGenreName'] ]
+        except Exception:
+            return []
 
     @lazyProperty
     def length(self):
@@ -355,12 +376,21 @@ class iTunesSource(GenericSource):
                     entity['genre'] = movie.genres[0]
                 #if movie.description != '':
                 #    entity['desc'] = movie.description
-            if entity['subcategory'] == 'artist':
+            elif entity['subcategory'] == 'artist':
                 artist = iTunesArtist(itunes_id)
                 aid = entity['aid']
                 if aid == itunes_id:
                     self.__repopulateAlbums(entity, artist, controller) 
                     self.__repopulateSongs(entity, artist, controller)
+            elif entity['subcategory'] == 'album':
+                album = iTunesAlbum(itunes_id)
+                if len(album.genres) > 0:
+                    entity['genre'] = album.genres[0]
+            elif entity['subcategory'] == 'song':
+                track = iTunesTrack(itunes_id)
+                if len(track.genres) > 0:
+                    entity['genre'] = track.genres[0]
+
         return True
 
     def matchSource(self, query):

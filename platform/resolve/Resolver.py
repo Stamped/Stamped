@@ -281,6 +281,10 @@ class ResolverArtist(ResolverObject):
     def tracks(self):
         pass
 
+    @property
+    def genres(self):
+        return []
+        
     @property 
     def type(self):
         return 'artist'
@@ -312,6 +316,10 @@ class ResolverAlbum(ResolverObject):
     @abstractproperty
     def tracks(self):
         pass
+
+    @property
+    def genres(self):
+        return []
 
     @property 
     def type(self):
