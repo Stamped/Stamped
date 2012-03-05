@@ -11,6 +11,7 @@ from datetime   import datetime, date, timedelta
 from errors     import *
 from schema     import *
 from Schemas    import *
+from libs.LibUtils import parseDateString
 
 # ####### #
 # PRIVATE #
@@ -467,6 +468,7 @@ class HTTPEntity(Schema):
         self.release_date       = SchemaElement(basestring)
         self.length             = SchemaElement(basestring)
         self.rating             = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring)
         
         # Food
         self.cuisine            = SchemaElement(basestring)
@@ -481,7 +483,6 @@ class HTTPEntity(Schema):
         self.edition            = SchemaElement(basestring)
         
         # Film
-        self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
         self.network            = SchemaElement(basestring)
@@ -555,31 +556,14 @@ class HTTPEntity(Schema):
             
             # Cross-Category
             
+            date_time = None
+
             ### TODO: Unify these within Schemas.py where possible
             if self.category == 'book':
                 self.release_date   = schema.publish_date
                 self.length         = schema.num_pages
             
-            elif self.category == 'film':
-
-                try:
-                    cleanDate = schema.release_date
-                    if cleanDate is not None:
-                        self.release_date = str(cleanDate)[:10]
-                    else:
-                        dateString = schema.original_release_date
-                        if len(dateString) == 10:
-                            release_date = datetime(int(dateString[0:4]), \
-                                                int(dateString[5:7]), \
-                                                int(dateString[8:10]))
-                            self.release_date   = str(release_date)[:10]
-                        elif len(dateString) == 4:
-                            self.release_date = dateString
-                        else:
-                            self.release_date = None
-                except:
-                    self.release_date   = None
-                
+            elif self.category == 'film':                
                 self.length         = schema.track_length
                 self.rating         = schema.mpaa_rating
                 
@@ -593,20 +577,26 @@ class HTTPEntity(Schema):
                     if new_desc != '' and new_desc != None  and ( self.desc == None or self.desc == '' ):
                         self.desc = new_desc
             
-            elif self.category == 'music':
-                try:
-                    dateString = schema.original_release_date
-                    release_date = date(int(dateString[0:4]), \
-                                        int(dateString[5:7]), \
-                                        int(dateString[8:10]))
-                    self.release_date   = release_date
-                except:
-                    self.release_date   = None
+            elif self.category == 'music':                
+                if schema.genre is not None:
+                    self.genre = schema.genre
                 
                 self.length         = schema.track_length
                 if schema.parental_advisory_id == 1:
                     self.rating     = "Parental Advisory"
-            
+
+            if self.category in ['music', 'film']:
+                try:
+                    if schema.release_date is not None:
+                        date_time = schema.release_date
+                    else:
+                        date_time = parseDateString(schema.original_release_date)
+                except Exception:
+                    pass
+
+            if date_time is not None:
+                self.release_date   = date_time.strftime("%h %d, %Y")
+
             # Food
             self.cuisine        = schema.cuisine
             self.price_scale    = schema.priceScale
