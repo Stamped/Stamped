@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -86,7 +87,10 @@ class AMongoCollectionView(AMongoCollection):
         if user_query is not None:
             # TODO: make query regex better / safeguarded
             user_query = user_query.lower().strip()
-            user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
+            try:
+                user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
+            except:
+                pass
             
             # process 'in' or 'near' location hint
             result = libs.worldcities.try_get_region(user_query)
