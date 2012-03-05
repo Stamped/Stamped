@@ -23,6 +23,15 @@ from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
 
+VALID_ORIGINS = [
+    'http://stamped.com',
+    'http://api.stamped.com', 
+    'http://www.stamped.com',
+    'http://dev.stamped.com',
+    'http://localhost:19000',
+    'http://localhost:18000',
+]
+
 t1 = time.time()
 
 stampedAPI  = MongoStampedAPI()
@@ -39,16 +48,35 @@ def handleHTTPRequest(fn):
     @wraps(fn)
     def handleHTTPRequest(request, *args, **kwargs):
         try:
+            try:
+                valid_origin = request.META['HTTP_ORIGIN'] if request.META['HTTP_ORIGIN'] in VALID_ORIGINS else None
+            except:
+                valid_origin = None
+
+            if request.method == 'OPTIONS' and valid_origin is not None:
+                response = HttpResponse()
+                response['Access-Control-Allow-Origin'] = valid_origin
+                response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+                response['Access-Control-Max-Age'] = 1000
+                response['Access-Control-Allow-Headers'] = '*'
+                return response
+
             logs.begin(
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 requestData=request,
                 nodeName=stampedAPI.node_name,
             )
-            # logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
+
+            if valid_origin is not None and isinstance(ret, HttpResponse):
+                ret['Access-Control-Allow-Origin'] = valid_origin
+                ret['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+                ret['Access-Control-Max-Age'] = 1000
+                ret['Access-Control-Allow-Headers'] = '*'
+
             return ret
         
         except StampedHTTPError as e:
@@ -276,13 +304,7 @@ def transformOutput(value, **kwargs):
     
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
-    
-    #output['Access-Control-Allow-Origin']  = 'http://localhost:18000 http://localhost:19000'
-    #output['Access-Control-Allow-Origin']  = 'x-requested-with'
-    #output['Access-Control-Allow-Headers'] = 'application/json'
-    #output['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    
-    # pretty_output = json.dumps(value, sort_keys=True, indent=2)
+
     logs.output(output_json)
     
     return output
