@@ -139,6 +139,7 @@ class iTunesGroup(ASubcategoryGroup):
         self.addEligible('artist')
         self.addEligible('album')
         self.addEligible('movie')
+        self.addEligible('book')
 
 class AddressGroup(APlaceGroup):
 

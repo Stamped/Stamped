@@ -226,11 +226,62 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
             return []
 
     @lazyProperty
-    def desc(self):
+    def description(self):
         try:
             return self.data['longDescription']
         except KeyError:
+            return ''
+
+class iTunesBook(_iTunesObject, ResolverBook):
+
+    def __init__(self, itunes_id=None, data=None, itunes=None):
+        _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
+        ResolverBook.__init__(self)
+
+    @lazyProperty
+    def name(self):
+        return self.data['trackName']
+
+    @lazyProperty
+    def key(self):
+        return self.data['trackId']
+
+    @lazyProperty
+    def author(self):
+        try:
+            return {
+                'name':self.data['artistName']
+            }
+        except Exception:
+            return { 'name':'' }
+
+    @lazyProperty
+    def publisher(self):
+        return {'name':''}
+
+    @property
+    def date(self):
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except Exception:
             return None
+
+    @property
+    def length(self):
+        return -1
+
+    @property
+    def isbn(self):
+        return None
+
+    @property
+    def eisbn(self):
+        return None
+
+    @property
+    def sku(self):
+        return None
+
 
 class iTunesSource(GenericSource):
     """
@@ -302,8 +353,8 @@ class iTunesSource(GenericSource):
                     entity['mpaa_rating'] = movie.rating
                 if len(movie.genres) > 0:
                     entity['genre'] = movie.genres[0]
-                if movie.desc is not None:
-                    entity['desc'] = movie.desc
+                #if movie.description != '':
+                #    entity['desc'] = movie.description
             if entity['subcategory'] == 'artist':
                 artist = iTunesArtist(itunes_id)
                 aid = entity['aid']
@@ -321,6 +372,8 @@ class iTunesSource(GenericSource):
             return self.trackSource(query)
         elif query.type == 'movie':
             return self.movieSource(query)
+        elif query.type == 'book':
+            return self.bookSource(query)
         else:
             return self.emptySource
 
@@ -373,6 +426,19 @@ class iTunesSource(GenericSource):
             else:
                 result = []
             return [ iTunesMovie( entry['trackId'] ) for entry in result ]
+        return source
+
+
+    def bookSource(self, query):
+        movies = self.__itunes.method('search',term=query.name, entity='ebook', limit=100)['results']
+        def source(start, count):
+            if start + count <= len(movies):
+                result = movies[start:start+count]
+            elif start < len(movies):
+                result = movies[start:]
+            else:
+                result = []
+            return [ iTunesBook( entry['trackId'] ) for entry in result ]
         return source
 
 if __name__ == '__main__':

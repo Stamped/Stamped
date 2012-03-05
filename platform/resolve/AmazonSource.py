@@ -93,7 +93,8 @@ class AmazonAlbum(_AmazonObject, ResolverAlbum):
             track_d = {}
             for track in tracks:
                 track_d[ int(xp(track, 'Item', 'ItemAttributes', 'TrackSequence')['v']) ] = {
-                    'name' : xp(track, 'Item', 'ItemAttributes', 'Title')['v']
+                    'name' : xp(track, 'Item', 'ItemAttributes', 'Title')['v'],
+                    'key' : xp(track, 'Item', 'ASIN')['v'],
                 }
             return [ track_d[k] for k in sorted(track_d) ]
         except Exception:

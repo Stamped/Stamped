@@ -688,8 +688,10 @@ class Resolver(object):
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
-            'author': lambda q, m, s, o: self.__nameWeight(q.author['name'], m.author['name'], exact_boost=3),
-            'publisher': lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'], exact_boost=2),
+            'author': lambda q, m, s, o: self.__nameWeight(q.author['name'], m.author['name'],
+                exact_boost=3, m_empty=7 ),
+            'publisher': lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
+                exact_boost=2, m_empty=4 ),
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * .5,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) * .2,
         }
@@ -846,13 +848,18 @@ class Resolver(object):
 
         return options
 
-    def __nameWeight(self, a, b, exact_boost=1):
-        if a is None or a == '':
+    def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
+        if a is None or b is None:
             return 1
         la = len(a)
         lb = len(b)
-        if la == 0 or lb == 0:
-            return 1
+        if la == 0:
+            if lb == 0:
+                return both_empty
+            else:
+                return q_empty
+        elif lb == 0:
+            return m_empty
         weight = 2*float(la+lb)/(math.log(la+1)+math.log(lb+1))
         if a == b:
             weight = exact_boost * weight
