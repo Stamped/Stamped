@@ -117,6 +117,109 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             return []
         
         users  = []
+        domain = None
+        
+        if relationship is not None:
+            if relationship == 'followers':
+                domain = self.followers_collection.getFollowers(authUserId)
+            elif relationship == 'following':
+                domain = self.friends_collection.getFriends(authUserId)
+            else:
+                raise StampedInputError("invalid relationship")
+            
+            domain = set(domain)
+        
+        try:
+            user = self.getUserByScreenName(query)
+            if user is not None and (domain is None or user.user_id in domain):
+                users.append(user)
+        except:
+            pass
+        
+        m = bson.code.Code("""function () {
+            var score = 0.0;
+            score = (20.0 - this.screen_name.length) / 40.0;
+            if (this.stats.num_stamps > 0) {
+                score = score + Math.log(this.stats.num_stamps) / 4.0;
+            }
+            if (this.stats.num_followers > 0) {
+                score = score + Math.log(this.stats.num_followers) / 8.0;
+            }
+            if (this.screen_name_lower == queryString) {
+                score = score + 10.0;
+            }
+            emit('query', {user: this, score:score});
+        }""")
+        
+        r = bson.code.Code("""function(key, values) {
+            var out = [];
+            var min = 0.0;
+            function sortOut(a, b) {
+                if (a.score > 0) { scoreA = a.score } else { scoreA = 0 }
+                if (b.score > 0) { scoreB = b.score } else { scoreB = 0 }
+                return scoreB - scoreA;
+            }
+            values.forEach(function(v) {
+                if (out.length < 20) {
+                    out[out.length] = {score:v.score, user:v.user}
+                    if (v.score < min) { min = v.score; }
+                } else {
+                    if (v.score > min) {
+                        out[out.length] = {score:v.score, user:v.user}
+                        out.sort(sortOut);
+                        out.pop()
+                    }
+                }
+            });
+            out.sort(sortOut);
+            var obj = new Object();
+            obj.data = out
+            return obj;
+        }""")
+        
+        user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
+                              {"name_lower": {"$regex": query}}]}
+        
+        if domain is not None:
+            user_query["_id"] = { "$in" : map(bson.objectid.ObjectId, list(domain)) }
+        
+        result = self._collection.inline_map_reduce(m, r, query=user_query, 
+                                                    scope={'queryString':query}, limit=1000)
+        
+        try:
+            # Parse out the data from the result depending on how many results exist
+            # If one user found, result is in format:
+            #   [{u'_id': u'query', u'value': <user>}]
+            # If multiple users found, result is in format:
+            #   [{u'_id': u'query', u'value': {u'data': [<user1>, ..., <userN>]}}]
+            
+            value = result[-1]['value'] 
+            if 'data' in value:
+                data = value['data']
+            else:
+                data = [value]
+            assert(isinstance(data, list))
+        except:
+            return users
+        
+        for i in data:
+            try:
+                user = self._convertFromMongo(i['user'])
+                if user.screen_name.lower() != query:
+                    users.append(user)
+            except:
+                continue
+        
+        return users[:20]
+
+    def NEWsearchUsers(self, authUserId, query, limit=0, relationship=None):
+        query = query.lower()
+        query = self._valid_re.sub('', query)
+        
+        if len(query) == 0:
+            return []
+        
+        users  = []
         seen   = set()
         domain = None
         
