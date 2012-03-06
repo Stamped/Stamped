@@ -1075,6 +1075,11 @@ class AmazonSchema(Schema):
     def setSchema(self):
         self.asin               = SchemaElement(basestring)
         self.amazon_link        = SchemaElement(basestring)
+        self.amazon_link_source = SchemaElement(basestring)
+        self.amazon_link_timestamp = SchemaElement(datetime)
+        self.amazon_underlying  = SchemaElement(basestring)
+        self.amazon_underlying_source = SchemaElement(basestring)
+        self.amazon_underlying_timestamp = SchemaElement(datetime)
 
 class ChicagoMagSchema(Schema):
     def setSchema(self):
@@ -1127,6 +1132,8 @@ class NetflixSchema(Schema):
         self.ngenres            = SchemaList(SchemaElement(basestring))
         self.nurl               = SchemaElement(basestring)
         self.images             = NetflixImageSchema()
+        self.images_source      = SchemaElement(basestring)
+        self.images_timestamp   = SchemaElement(datetime)
 
 class NetflixImageSchema(Schema):
     def setSchema(self):

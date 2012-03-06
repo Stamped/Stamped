@@ -267,16 +267,35 @@ class AlbumNameGroup(ASubcategoryGroup):
         self.addNameField()
         self.addEligible('song')
 
-class AmazonGroup(ASubcategoryGroup):
+
+class AAmazonGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'amazon')
-        self.addField(['amazon_id'])
+        ASubcategoryGroup.__init__(self, *args, **kwargs)
         self.addEligible('book')
         self.addEligible('song')
         self.addEligible('album')
 
+class AmazonGroup(AAmazonGroup):
 
+    def __init__(self):
+        AAmazonGroup.__init__(self, 'amazon')
+        self.addField(['amazon_id'])
+
+
+class AmazonLinkGroup(AAmazonGroup):
+
+    def __init__(self):
+        AAmazonGroup.__init__(self, 'amazon_link')
+        self.addNameField()
+
+class AmazonUnderlyingGroup(AAmazonGroup):
+
+    def __init__(self):
+        AAmazonGroup.__init__(self, 'amazon_underlying')
+        self.addNameField()
+ 
+ 
 class DirectorGroup(AFilmGroup):
 
     def __init__(self):
@@ -322,6 +341,17 @@ class SubcategoryGroup(BasicFieldGroup):
         BasicFieldGroup.__init__(self, 'subcategory')
         self.addNameField()
         self.addField(['category'])
+
+    def eligible(self, entity):
+        return True
+
+class ImagesGroup(BasicFieldGroup):
+
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'images')
+        self.addField(['images','large'])
+        self.addField(['images','small'])
+        self.addField(['images','tiny'])
 
     def eligible(self, entity):
         return True

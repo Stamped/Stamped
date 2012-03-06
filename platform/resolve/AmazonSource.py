@@ -63,6 +63,10 @@ class _AmazonObject(object):
     def __repr__(self):
         return pformat( self.attributes )
 
+    @property 
+    def underlying(self):
+        return self
+
 
 class AmazonAlbum(_AmazonObject, ResolverAlbum):
     """
@@ -217,6 +221,45 @@ class AmazonBook(_AmazonObject, ResolverBook):
         except Exception:
             return ""
 
+    @lazyProperty
+    def link(self):
+        try:
+            return xp(self.data, 'ItemLinks', 'ItemLink', 'URL')['v']
+        except Exception:
+            return None
+
+    @lazyProperty
+    def ebookVersion(self):
+        try:
+            versions = xp(self.data, 'AlternateVersions')['c']['AlternateVersion']
+            for version in versions:
+                if xp(version, 'Binding')['v'] == 'Kindle Edition':
+                    return AmazonBook(xp(version, 'ASIN')['v'])
+        except Exception:
+            pass
+        return None
+
+    @lazyProperty 
+    def underlying(self):
+        if self.ebookVersion is not None:
+            return self.ebookVersion
+        else:
+            try:
+                if xp(self.attributes, 'Binding')['v'] == 'Audio CD':
+                    versions = xp(self.data, 'AlternateVersions')['c']['AlternateVersion']
+                    for version in versions:
+                        if xp(version, 'Binding')['v'] == 'Hardcover':
+                            return AmazonBook(xp(version, 'ASIN')['v'])
+                    for version in versions:
+                        if xp(version, 'Binding')['v'] == 'Paperback':
+                            return AmazonBook(xp(version, 'ASIN')['v'])
+                    for version in versions:
+                        if xp(version, 'Binding')['v'] != 'Audio CD':
+                            return AmazonBook(xp(version, 'ASIN')['v'])
+            except Exception:
+                pass
+            return self
+
 class AmazonSource(GenericSource):
     """
     Amazon entities
@@ -236,6 +279,9 @@ class AmazonSource(GenericSource):
             'isbn',
             'desc',
             'sku_number',
+            'amazon_link',
+            'amazon_underlying',
+            'images',
         )
 
     def matchSource(self, query):
@@ -311,17 +357,6 @@ class AmazonSource(GenericSource):
     def __amazon(self):
         return self.__amazon_api.amazon
 
-    def __bookInfo(self, asin):
-        try:
-            loads(self.__amazon.ItemLookup(
-                ItemId=asin,
-                Style="http://xml2json-xslt.googlecode.com/svn/trunk/xml2json.xslt",
-                ResponseGroup='AlternateVersions,Large'
-            ))['ItemLookupResponse']['Items']['Item']
-        except KeyError:
-            logs.warning('Lookup failed for Amazon book %s' % asin)
-            return None
-
     def __enrichSong(self, entity, asin):
         track = AmazonTrack(asin)
         if track.artist['name'] != '':
@@ -351,6 +386,18 @@ class AmazonSource(GenericSource):
             entity['isbn'] = book.isbn
         if book.sku != None:
             entity['sku_number'] = book.sku
+        if book.ebookVersion is not None and book.ebookVersion.link is not None:
+            entity['amazon_link'] = book.ebookVersion.link
+        elif book.link != None:
+            entity['amazon_link'] = book.link
+        entity['amazon_underlying'] = book.underlying.key
+        try:
+            image_set =  xp(book.underlying.data, 'ImageSets','ImageSet')
+            entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
+            entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
+            entity['images']['tiny'] = xp(image_set,'SmallImage','URL')['v']
+        except Exception:
+            logs.warning("no image set for %s" % book.underlying.key)
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         asin = entity['asin']

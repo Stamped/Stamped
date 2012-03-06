@@ -80,6 +80,9 @@ class FullResolveContainer(BasicSourceContainer):
             NumPagesGroup(),
 
             SubcategoryGroup(),
+            AmazonLinkGroup(),
+            AmazonUnderlyingGroup(),
+            ImagesGroup(),
         ]
         for group in groups:
             self.addGroup(group)
