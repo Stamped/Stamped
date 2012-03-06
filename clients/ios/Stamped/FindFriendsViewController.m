@@ -28,6 +28,7 @@
 #import "UserImageView.h"
 #import "Alerts.h"
 #import "SocialManager.h"
+#import "RKClient.h"
 
 static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
 static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
