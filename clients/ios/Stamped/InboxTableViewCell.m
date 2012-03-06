@@ -23,6 +23,7 @@
 #import "StampedAppDelegate.h"
 #import "Notifications.h"
 #import "UIColor+Stamped.h"
+#import "STPageControl.h"
 
 NSString* const kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
@@ -472,58 +473,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 @end
 
-
-@interface PageDotsView : UIView
-@property (nonatomic, assign) NSUInteger numDots;
-@property (nonatomic, assign) NSUInteger selectedPage;
-@property (nonatomic, assign) BOOL enabled;
-@end
-
-@implementation PageDotsView
-
-@synthesize numDots = numDots_;
-@synthesize selectedPage = selectedPage_;
-@synthesize enabled = enabled_;
-
-- (id)initWithFrame:(CGRect)frame {
-  self = [super initWithFrame:frame];
-  if (self) {
-    self.backgroundColor = [UIColor clearColor];
-  }
-  return self;
-}
-
-- (void)drawRect:(CGRect)rect {
-  if (numDots_ == 0)
-    return;
-
-  CGContextRef ctx = UIGraphicsGetCurrentContext();
-  CGRect dotFrame = CGRectMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds), 3, 3);
-  NSInteger n = -1;
-  CGColorRef selectedColor = [UIColor colorWithWhite:0.35 alpha:1.0].CGColor;
-  CGColorRef defaultColor = [UIColor colorWithWhite:0.75 alpha:1.0].CGColor;
-  for (NSUInteger i = 0; i < numDots_; ++i) {
-    NSInteger offset = i > 0 ? 6 * (-1 * n) : 0;
-    offset += (numDots_ % 2) == 0 ? 3 : 0;
-    NSInteger pageNum = 1;
-    if (numDots_ == 2) {
-      pageNum = offset < 0 ? 1 : 2;
-    } else if (numDots_ == 3) {
-      pageNum = offset > 0 ? 3 : offset == 0 ? 2 : 1;
-    }
-    if (enabled_ && pageNum == selectedPage_) {
-      CGContextSetFillColorWithColor(ctx, selectedColor);
-    } else {
-      CGContextSetFillColorWithColor(ctx, defaultColor);
-    }
-    CGContextFillEllipseInRect(ctx, CGRectOffset(dotFrame, offset, 0));
-    n *= -1;
-  }
-}
-
-@end
-
-
 @interface InboxTableViewCell ()
 - (void)expandStack;
 - (void)collapseStack;
@@ -576,10 +525,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     [self.contentView addSubview:userImageScrollView_];
     [userImageScrollView_ release];
     
-    pageDotsView_ = [[PageDotsView alloc] initWithFrame:CGRectMake(22, 61, 20, 6)];
-    pageDotsView_.numDots = 1;
-    [self.contentView addSubview:pageDotsView_];
-    [pageDotsView_ release];
+    pageControl_ = [[STPageControl alloc] initWithFrame:CGRectMake(24, 61, 20, 6)];
+    pageControl_.numberOfPages = 1;
+    pageControl_.enabled = NO;
+    [self.contentView addSubview:pageControl_];
+    [pageControl_ release];
   }
   return self;
 }
@@ -611,8 +561,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
       customView_.typeImageView.image = stamp.entityObject.inboxTodoCategoryImage;
       customView_.typeImageView.highlightedImage = stamp.entityObject.highlightedInboxTodoCategoryImage;
       customView_.subtitleLabel.text = stamp.entityObject.subtitle;
-      customView_.stamps = [NSArray arrayWithObject:stamp];
-      pageDotsView_.numDots = 0;
+      customView_.stamps = [NSArray arrayWithObject:stamp];      pageControl_.numberOfPages = 0;
       [self setNeedsDisplay];
     }
   }
@@ -642,11 +591,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                selector:@selector(inboxTableDidScroll:)
                                                    name:kInboxTableDidScrollNotification
                                                  object:nil];
-      pageDotsView_.numDots = MIN(3, ceil(customView_.stamps.count / 5.0));
+      pageControl_.numberOfPages = ceil(customView_.stamps.count / 5.0);
     } else {
-      pageDotsView_.numDots = 0;
+      pageControl_.numberOfPages = 0;
     }
-    [pageDotsView_ setNeedsDisplay];
+    [pageControl_ setNeedsDisplay];
     [self setNeedsDisplay];
   }
 }
@@ -723,8 +672,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     customView_.transform = CGAffineTransformIdentity;
     stacksBackgroundView_.alpha = 0;
     stackCollapseButton_.alpha = 0;
-    pageDotsView_.transform = CGAffineTransformIdentity;
-
+    pageControl_.transform = CGAffineTransformIdentity;
+                     
     NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
       if (![view isMemberOfClass:[MediumUserImageButton class]] || view == stackCollapseButton_)
@@ -738,9 +687,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     }
   } completion:^(BOOL finished) {
     customView_.hidePhotos = NO;
-    pageDotsView_.enabled = NO;
-    [pageDotsView_ setNeedsDisplay];
-
+    pageControl_.enabled = NO;
+    [pageControl_ setNeedsDisplay];
+    
     self.selectionStyle = UITableViewCellSelectionStyleBlue;
     stackExpanded_ = NO;
     for (UIView* view in self.contentView.subviews) {
@@ -796,7 +745,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     customView_.transform = rightTransform;
     stacksBackgroundView_.alpha = 1.0;
     stackCollapseButton_.alpha = 1.0;
-    pageDotsView_.transform = CGAffineTransformMakeTranslation(151, 0);
+    pageControl_.transform = CGAffineTransformMakeTranslation(151, 0);
     
     NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
@@ -829,9 +778,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
       ++i;
     }
-    pageDotsView_.enabled = YES;
-    pageDotsView_.selectedPage = 1;
-    [pageDotsView_ setNeedsDisplay];
+    pageControl_.enabled = YES;
+    pageControl_.currentPage = 0;
+    [pageControl_ setNeedsDisplay];
     CGRect scrollBounds = userImageScrollView_.bounds;
     userImageScrollView_.contentSize =
         CGSizeMake(numPages * CGRectGetWidth(scrollBounds), CGRectGetHeight(scrollBounds));
@@ -858,7 +807,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 #pragma mark - UIScrollViewDelegate methods.
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
-  pageDotsView_.selectedPage = (scrollView.contentOffset.x / CGRectGetWidth(scrollView.bounds)) + 1;
-  [pageDotsView_ setNeedsDisplay];
+  pageControl_.currentPage = (scrollView.contentOffset.x / CGRectGetWidth(scrollView.bounds));
+  [pageControl_ setNeedsDisplay];
 }
 @end

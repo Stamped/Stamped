@@ -12,8 +12,8 @@
 
 @class InboxCellView;
 @class Entity;
-@class PageDotsView;
 @class Stamp;
+@class STPageControl;
 
 extern NSString* const kInboxTableDidScrollNotification;
 
@@ -23,7 +23,7 @@ extern NSString* const kInboxTableDidScrollNotification;
   BOOL stackExpanded_;
   UIButton* stackCollapseButton_;
   UIScrollView* userImageScrollView_;
-  PageDotsView* pageDotsView_;
+  STPageControl* pageControl_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;

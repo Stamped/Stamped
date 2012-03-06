@@ -19,6 +19,7 @@
 		6380A76315066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A7891506779C003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
+		6380A78C15069299003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1648,6 +1649,13 @@
 			remoteGlobalIDString = 25160D1514564E810060A5C5;
 			remoteInfo = RestKit;
 		};
+		6380A78A1506928F003087EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6380A77815067776003087EF /* RestKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 25160D1514564E810060A5C5;
+			remoteInfo = RestKit;
+		};
 		7E5893B5147C468B002268C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
@@ -2629,6 +2637,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6380A78C15069299003087EF /* libRestKit.a in Frameworks */,
 				7E07EC1E14C73FDF00A2B5F0 /* libz.dylib in Frameworks */,
 				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
@@ -4279,6 +4288,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6380A78B1506928F003087EF /* PBXTargetDependency */,
 				7E5893B4147C468B002268C4 /* PBXTargetDependency */,
 			);
 			name = StampedDev;
@@ -6019,6 +6029,11 @@
 			isa = PBXTargetDependency;
 			name = RestKit;
 			targetProxy = 6380A78715067796003087EF /* PBXContainerItemProxy */;
+		};
+		6380A78B1506928F003087EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = RestKit;
+			targetProxy = 6380A78A1506928F003087EF /* PBXContainerItemProxy */;
 		};
 		7E5893B4147C468B002268C4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
