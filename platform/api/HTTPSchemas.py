@@ -526,7 +526,9 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.openTable.reserveURL is not None:
-                    opentable           = HTTPEntitySourceOpenTable()
+                    opentable           = HTTPEntitySource()
+                    itunes.name         = 'OpenTable'
+                    itunes.source       = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                             schema.sources.openTable.reserveURL
@@ -540,7 +542,9 @@ class HTTPEntity(Schema):
                     mobileUrl   = 'http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166' % \
                                     schema.sources.openTable.rid
 
-                    opentable           = HTTPEntitySourceOpenTable()
+                    opentable           = HTTPEntitySource()
+                    itunes.name         = 'OpenTable'
+                    itunes.source       = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = mobileUrl # TODO: Allow API to specify?
                     opentable.link_type = 'url'
@@ -613,19 +617,25 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    itunes              = HTTPEntitySourceiTunes()
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
                     sources.append(itunes)
 
                 if schema.sources.rdio_id is not None:
-                    rdio                = HTTPEntitySourceRdio()
+                    rdio                = HTTPEntitySource()
+                    itunes.name         = 'Rdio'
+                    itunes.source       = 'rdio'
                     rdio.source_id      = schema.sources.rdio_id
                     rdio.icon           = 'http://static.stamped.com/assets/rdio.png'
                     sources.append(rdio)
 
                 if schema.sources.spotify_id is not None:
-                    spotify             = HTTPEntitySourceSpotify()
+                    spotify             = HTTPEntitySource()
+                    itunes.name         = 'Spotify'
+                    itunes.source       = 'spotify'
                     spotify.source_id   = schema.sources.spotify_id
                     spotify.icon        = 'http://static.stamped.com/assets/spotify.png'
                     sources.append(spotify)
@@ -637,12 +647,16 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.rdio_id is not None:
-                    rdio                = HTTPEntitySourceRdio()
+                    rdio                = HTTPEntitySource()
+                    itunes.name         = 'Rdio'
+                    itunes.source       = 'rdio'
                     rdio.source_id      = schema.sources.rdio_id
                     sources.append(rdio)
 
                 if schema.sources.spotify_id is not None:
-                    spotify             = HTTPEntitySourceSpotify()
+                    spotify             = HTTPEntitySource()
+                    itunes.name         = 'Spotify'
+                    itunes.source       = 'spotify'
                     spotify.source_id   = schema.sources.spotify_id
                     sources.append(spotify)
 
@@ -653,7 +667,9 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    itunes              = HTTPEntitySourceiTunes()
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.link         = 'http://itunes.apple.com/us/artist/id%s' % schema.sources.itunes_id
                     itunes.link_type    = 'url'
@@ -681,7 +697,9 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    itunes              = HTTPEntitySourceiTunes()
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
                     itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.itunes_id
@@ -689,7 +707,9 @@ class HTTPEntity(Schema):
                     sources.append(itunes)
                 ### TEMP - apple.aid should be deprecated
                 elif schema.sources.apple.aid is not None:
-                    itunes              = HTTPEntitySourceiTunes()
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.apple.aid
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
                     itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.apple.aid
@@ -853,30 +873,6 @@ class HTTPEntitySource(Schema):
         self.icon               = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
         self.link_type          = SchemaElement(basestring)
-
-class HTTPEntitySourceiTunes(HTTPEntitySource):
-    def setSchema(self):
-        super(HTTPEntitySource, self).setSchema()
-        self.source             = 'itunes'
-        self.name               = 'iTunes'
-
-class HTTPEntitySourceSpotify(HTTPEntitySource):
-    def setSchema(self):
-        super(HTTPEntitySource, self).setSchema()
-        self.source             = 'spotify'
-        self.name               = 'Spotify'
-
-class HTTPEntitySourceRdio(HTTPEntitySource):
-    def setSchema(self):
-        super(HTTPEntitySource, self).setSchema()
-        self.source             = 'rdio'
-        self.name               = 'Rdio'
-
-class HTTPEntitySourceOpenTable(HTTPEntitySource):
-    def setSchema(self):
-        super(HTTPEntitySource, self).setSchema()
-        self.source             = 'opentable'
-        self.name               = 'OpenTable'
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
