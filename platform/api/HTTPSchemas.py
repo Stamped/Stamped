@@ -446,6 +446,7 @@ class HTTPEntity(Schema):
         self.subtitle           = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
+        self.caption            = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
@@ -510,6 +511,7 @@ class HTTPEntity(Schema):
             
             self.importData(data, overflow=True)
             
+            self.caption        = self.subtitle # Default
             self.last_modified  = schema.timestamp.created
             
             # Place
@@ -670,6 +672,9 @@ class HTTPEntity(Schema):
             
 
             elif schema.subcategory == 'app':
+
+                if schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
 
                 # Actions: Download
 
