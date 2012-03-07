@@ -114,7 +114,7 @@ def _encodeAmazonURL(raw_url):
         return url
     except:
         logs.warning('Unable to encode Amazon URL: %s' % raw_url)
-        return None
+        return raw_url
 
 
 # ######### #
@@ -533,8 +533,8 @@ class HTTPEntity(Schema):
 
                 if schema.sources.openTable.reserveURL is not None:
                     opentable           = HTTPEntitySource()
-                    itunes.name         = 'OpenTable'
-                    itunes.source       = 'opentable'
+                    opentabl.name       = 'OpenTable'
+                    opentabl.source     = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                             schema.sources.openTable.reserveURL
@@ -549,8 +549,8 @@ class HTTPEntity(Schema):
                                     schema.sources.openTable.rid
 
                     opentable           = HTTPEntitySource()
-                    itunes.name         = 'OpenTable'
-                    itunes.source       = 'opentable'
+                    opentabl.name       = 'OpenTable'
+                    opentabl.source     = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = mobileUrl # TODO: Allow API to specify?
                     opentable.link_type = 'url'
@@ -576,7 +576,7 @@ class HTTPEntity(Schema):
 
                 sources = []
 
-                if schema.menu_source is not None:
+                if schema.menu is not None:
                     menu                = HTTPEntitySource()
                     menu.source         = 'menu'
                     menu.source_id      = schema.entity_id
@@ -586,19 +586,34 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category',       schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
-                self._addMetadata('Cuisine',        schema.cuisine)
-                self._addMetadata('Price',          schema.price_range * '$' if schema.price_range is not None else None)
-                self._addMetadata('Site',           _formatURL(schema.site), link=schema.site, link_type='url')
-                self._addMetadata('Description',    schema.desc)
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Cuisine', schema.cuisine)
+                self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Description', schema.desc)
 
 
             # Generic Place
             elif coordinates is not None:
                 pass
 
-            ### TODO: Unify these within Schemas.py where possible
+            # Book
             elif schema.category == 'book':
+
+                # Actions: Buy
+
+                sources = []
+
+                if schema.sources.amazon_underlying is not None:
+                    amazon              = HTTPEntitySource()
+                    amazon.name         = 'Amazon'
+                    amazon.source       = 'amazon'
+                    amazon.source_id    = schema.sources.amazon_underlying
+                    amazon.icon         = 'http://static.stamped.com/assets/amazon.png'
+                    amazon.link         = _encodeAmazonURL()
+                    sources.append(amazon)
+
+                self._addAction('buy', 'Buy now', sources)
 
                 self._addMetadata('Release Date',   schema.publish_date)
                 self._addMetadata('Length',         schema.num_pages)
@@ -633,16 +648,16 @@ class HTTPEntity(Schema):
 
                 if schema.sources.rdio_id is not None:
                     rdio                = HTTPEntitySource()
-                    itunes.name         = 'Rdio'
-                    itunes.source       = 'rdio'
+                    rdio.name           = 'Rdio'
+                    rdio.source         = 'rdio'
                     rdio.source_id      = schema.sources.rdio_id
                     rdio.icon           = 'http://static.stamped.com/assets/rdio.png'
                     sources.append(rdio)
 
                 if schema.sources.spotify_id is not None:
                     spotify             = HTTPEntitySource()
-                    itunes.name         = 'Spotify'
-                    itunes.source       = 'spotify'
+                    spotify.name        = 'Spotify'
+                    spotify.source      = 'spotify'
                     spotify.source_id   = schema.sources.spotify_id
                     spotify.icon        = 'http://static.stamped.com/assets/spotify.png'
                     sources.append(spotify)
@@ -655,15 +670,15 @@ class HTTPEntity(Schema):
 
                 if schema.sources.rdio_id is not None:
                     rdio                = HTTPEntitySource()
-                    itunes.name         = 'Rdio'
-                    itunes.source       = 'rdio'
+                    rdio.name           = 'Rdio'
+                    rdio.source         = 'rdio'
                     rdio.source_id      = schema.sources.rdio_id
                     sources.append(rdio)
 
                 if schema.sources.spotify_id is not None:
                     spotify             = HTTPEntitySource()
-                    itunes.name         = 'Spotify'
-                    itunes.source       = 'spotify'
+                    spotify.name        = 'Spotify'
+                    spotify.source      = 'spotify'
                     spotify.source_id   = schema.sources.spotify_id
                     sources.append(spotify)
 
