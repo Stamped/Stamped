@@ -719,16 +719,25 @@ class HTTPEntity(Schema):
                 self._addAction('buy', 'Buy', sources)
 
             
-            elif schema.subcategory == 'artist':
+            elif schema.category == 'music':
+
+                if schema.subcategory == 'artist':
+                    self.caption = 'Artist'
+
+                elif schema.subcategory == 'album' and schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
+
+                elif schema.subcategory == 'song' and schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
 
                 # Metadata
 
-                self._addMetadata('Category',       'Artist', icon='http://static.stamped.com/assets/music.png')
-                self._addMetadata('Biography',      schema.desc)
+                self._addMetadata('Category', 'Artist', icon='http://static.stamped.com/assets/music.png')
+                self._addMetadata('Biography', schema.desc)
 
                 self.metadata.overflow = len(self.metadata.data)
 
-                self._addMetadata('Genre',          schema.genre)
+                self._addMetadata('Genre', schema.genre)
 
                 # Actions: Listen
 
@@ -887,19 +896,6 @@ class HTTPEntity(Schema):
             
             # if 'preview_url' in schema:
             #     self.preview_url = schema.preview_url
-            
-            # # Affiliates
-            # if schema.rid is not None:
-            #     self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
-            #                           schema.rid
-            #     self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
-            #                           schema.rid
-            # if schema.reserveURL is not None:
-            #     self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-            #                           schema.reserveURL
-            
-            # if schema.sources.fandango.f_url is not None:
-            #     self.fandango_url = schema.f_url
             
             # if schema.sources.apple.view_url != None:
             #     itunes_url  = schema.sources.apple.view_url
