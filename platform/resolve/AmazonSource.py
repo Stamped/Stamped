@@ -230,35 +230,30 @@ class AmazonBook(_AmazonObject, ResolverBook):
 
     @lazyProperty
     def ebookVersion(self):
-        try:
-            versions = xp(self.data, 'AlternateVersions')['c']['AlternateVersion']
-            for version in versions:
-                if xp(version, 'Binding')['v'] == 'Kindle Edition':
-                    return AmazonBook(xp(version, 'ASIN')['v'])
-        except Exception:
-            pass
+        if xp(self.underlying.attributes, 'Binding')['v'] == 'Kindle Edition':
+            return self.underlying
         return None
 
     @lazyProperty 
     def underlying(self):
-        if self.ebookVersion is not None:
-            return self.ebookVersion
-        else:
-            try:
-                if xp(self.attributes, 'Binding')['v'] == 'Audio CD':
-                    versions = xp(self.data, 'AlternateVersions')['c']['AlternateVersion']
-                    for version in versions:
-                        if xp(version, 'Binding')['v'] == 'Hardcover':
-                            return AmazonBook(xp(version, 'ASIN')['v'])
-                    for version in versions:
-                        if xp(version, 'Binding')['v'] == 'Paperback':
-                            return AmazonBook(xp(version, 'ASIN')['v'])
-                    for version in versions:
-                        if xp(version, 'Binding')['v'] != 'Audio CD':
-                            return AmazonBook(xp(version, 'ASIN')['v'])
-            except Exception:
-                pass
-            return self
+        try:
+            versions = xp(self.data, 'AlternateVersions')['c']['AlternateVersion']
+            priorities = [
+                'Kindle Edition',
+                'Hardcover',
+                'Paperback',
+                'Audio CD',
+            ]
+            self_kind = xp(self.attributes, 'Binding')['v']
+            for kind in priorities:
+                if self_kind == kind:
+                    return self
+                for version in versions:
+                    if xp(version, 'Binding')['v'] == kind:
+                        return AmazonBook(xp(version, 'ASIN')['v'])
+        except Exception:
+            pass
+        return self
 
 class AmazonSource(GenericSource):
     """

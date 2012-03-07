@@ -37,6 +37,7 @@
 @property (nonatomic, readwrite, retain) id<STPlaylist> playlist;
 
 - (id)initWithEntityId:(NSString*)entityID;
++ (RKObjectMapping*)mapping;
 
 @property (nonatomic, readonly) BOOL loading;
 @property (nonatomic, readonly) BOOL failed;

@@ -55,6 +55,17 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   return self;
 }
 
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntityDetail class]];
+  
+  [mapping mapKeyPathsToAttributes:
+   @"title",@"title",
+   nil];
+  [mapping mapAttributes:
+   @"desc",
+   nil];
+  return mapping;
+}
 
 #pragma mark - RKObjectLoaderDelegate Methods.
 
@@ -65,7 +76,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   STSimpleEntityDetail* detail = [objects objectAtIndex:0];
-  NSLog(@"This is a %s", detail.title);
+  NSLog(@"This is %@ with desc:\n%@", detail.title, detail.desc);
 }
 
 #pragma mark - Private Methods.
@@ -78,15 +89,11 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   } 
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [RKObjectMapping mappingForClass:[STSimpleEntityDetail class]];
-  
-  [entityMapping mapKeyPathsToAttributes:
-   @"title",@"title",
-   nil];
+  RKObjectMapping* mapping = [RKO
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   
-  objectLoader.objectMapping = entityMapping;
+  objectLoader.objectMapping = mapping;
   
   NSString* key = @"entity_id";
   NSLog(@"testing string");
