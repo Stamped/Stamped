@@ -12,7 +12,7 @@
 
 @property (nonatomic, readonly, retain) NSString* name;
 @property (nonatomic, readonly, retain) NSString* source;
-@property (nonatomic, readonly, retain) NSString* source_id;
+@property (nonatomic, readonly, retain) NSString* sourceID;
 @property (nonatomic, readonly, retain) NSString* link;
 @property (nonatomic, readonly, retain) NSString* icon;
 

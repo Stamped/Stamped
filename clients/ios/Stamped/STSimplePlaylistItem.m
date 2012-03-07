@@ -1,28 +1,31 @@
 //
-//  STSimpleAction.m
+//  STSimplePlaylistItem.m
 //  Stamped
 //
 //  Created by Landon Judkins on 3/7/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STSimpleAction.h"
+#import "STSimplePlaylistItem.h"
 #import "STSimpleSource.h"
 
-@implementation STSimpleAction
+@implementation STSimplePlaylistItem
 
-@synthesize action = action_;
 @synthesize name = name_;
+@synthesize num = num_;
+@synthesize length = length_;
 @synthesize icon = icon_;
+@synthesize link = link_;
 @synthesize sources = sources_;
 
 + (RKObjectMapping*)mapping {
-  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleAction class]];
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimplePlaylistItem class]];
   
   [mapping mapAttributes:
-   @"action",
    @"name",
+   @"num",
    @"icon",
+   @"link",
    nil];
   
   [mapping mapRelationship:@"sources" withMapping:[STSimpleSource mapping]];

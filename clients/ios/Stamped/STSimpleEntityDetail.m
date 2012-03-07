@@ -7,7 +7,10 @@
 //
 
 #import "STSimpleEntityDetail.h"
+#import "STSimpleAction.h"
+#import "STSimpleMetadata.h"
 #import "STSimpleGallery.h"
+#import "STSimplePlaylist.h"
 #import "STGalleryItem.h"
 #import <RestKit/RestKit.h>
 
@@ -28,6 +31,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 @synthesize subtitle = subtitle_;
 @synthesize desc = desc_;
 @synthesize category = category_;
+@synthesize subcategory = subcategory_;
 @synthesize image = image_;
 
 @synthesize address = address_;
@@ -61,12 +65,29 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntityDetail class]];
   
   [mapping mapKeyPathsToAttributes:
-   @"title",@"title",
+   @"entity_id", @"entityID",
+   @"address_street", @"addressStreet",
+   @"address_city", @"addressCity",
+   @"address_state", @"addressState",
+   @"address_zip", @"addressZip",
+   @"address_country", @"addressCountry",
    nil];
+  
   [mapping mapAttributes:
+   @"title",
+   @"subtitle",
    @"desc",
+   @"category",
+   @"subcategory",
+   @"image",
+   @"address",
+   @"neighborhood",
+   @"coordinates",
    nil];
+  [mapping mapRelationship:@"actions" withMapping:[STSimpleAction mapping]];
+  [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadata mapping]];
   [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];
+  [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];
   return mapping;
 }
 

@@ -1,5 +1,5 @@
 //
-//  STSimpleGallery.h
+//  STSimplePlaylist.h
 //  Stamped
 //
 //  Created by Landon Judkins on 3/7/12.
@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
-#import "STGallery.h"
+#import "STPlaylist.h"
 
-@interface STSimpleGallery : NSObject<STGallery>
+@interface STSimplePlaylist : NSObject<STPlaylist>
 
 @property (nonatomic, readwrite, retain) NSString* name;
-@property (nonatomic, readwrite, retain) NSArray<STGalleryItem>* data;
+@property (nonatomic, readwrite, assign) NSInteger overflow;
+@property (nonatomic, readwrite, retain) NSArray<STPlaylistItem>* data;
 
 + (RKObjectMapping*)mapping;
 

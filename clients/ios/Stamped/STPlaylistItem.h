@@ -13,8 +13,8 @@
 @protocol STPlaylistItem <NSObject>
 
 @property (nonatomic, readonly, retain) NSString* name;
-@property (nonatomic, readonly, retain) NSInteger num;
-@property (nonatomic, readonly, retain) NSInteger length;
+@property (nonatomic, readonly, assign) NSInteger num;
+@property (nonatomic, readonly, assign) NSInteger length;
 @property (nonatomic, readonly, retain) NSString* icon;
 @property (nonatomic, readonly, retain) NSString* link;
 @property (nonatomic, readonly, retain) NSArray<STSource>* sources;

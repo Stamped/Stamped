@@ -1,0 +1,36 @@
+//
+//  STSimpleSource.m
+//  Stamped
+//
+//  Created by Landon Judkins on 3/7/12.
+//  Copyright (c) 2012 Stamped, Inc. All rights reserved.
+//
+
+#import "STSimpleSource.h"
+
+@implementation STSimpleSource
+
+@synthesize name = name_;
+@synthesize source = source_;
+@synthesize sourceID = sourceID_;
+@synthesize link = link_;
+@synthesize icon = icon_;
+
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleSource class]];
+  
+  [mapping mapAttributes:
+   @"name",
+   @"source",
+   @"link",
+   @"icon",
+   nil];
+  
+  [mapping mapKeyPathsToAttributes:
+   @"source_id",@"sourceID",
+   nil];
+  
+  return mapping;
+}
+
+@end

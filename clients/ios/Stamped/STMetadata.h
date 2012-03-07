@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol STMetadataItem
+@protocol STMetadataItem;
 
 @protocol STMetadata <NSObject>
 

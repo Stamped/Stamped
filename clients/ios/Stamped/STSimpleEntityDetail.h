@@ -18,6 +18,7 @@
 @property (nonatomic, readwrite, retain) NSString* subtitle;
 @property (nonatomic, readwrite, retain) NSString* desc;
 @property (nonatomic, readwrite, retain) NSString* category;
+@property (nonatomic, readwrite, retain) NSString* subcategory;
 @property (nonatomic, readwrite, retain) NSString* image;
 
 @property (nonatomic, readwrite, retain) NSString* address;
