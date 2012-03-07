@@ -11,7 +11,7 @@ from Schemas            import ClientLogsEntry
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema          = parseRequest(HTTPClientLogsEntry(), request)
     

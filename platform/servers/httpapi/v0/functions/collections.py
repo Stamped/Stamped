@@ -24,7 +24,7 @@ def transform_stamps(stamps):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def inbox(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
     stamps      = stampedAPI.getInboxStamps(authUserId, schema)
@@ -34,7 +34,7 @@ def inbox(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def user(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
     stamps      = stampedAPI.getUserStamps(authUserId, schema)
@@ -44,7 +44,7 @@ def user(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def credit(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
     stamps      = stampedAPI.getCreditedStamps(authUserId, schema)
@@ -54,7 +54,7 @@ def credit(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def friends(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPFriendsSlice(), request).exportSchema(FriendsSlice())
     stamps      = stampedAPI.getFriendsStamps(authUserId, schema)
@@ -64,7 +64,7 @@ def friends(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def suggested(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
     stamps      = stampedAPI.getSuggestedStamps(authUserId, schema)

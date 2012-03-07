@@ -11,7 +11,7 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPActivitySlice(), request)
 

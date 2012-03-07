@@ -46,10 +46,6 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 class AStampedAPITestCase(AStampedTestCase):
     
     _opener = StampedAPIURLOpener()
-    client_auth = {
-        'client_id': 'stampedtest',
-        'client_secret': 'august1ftw'
-    }
 
     def handleGET(self, path, data):
         global _baseurl

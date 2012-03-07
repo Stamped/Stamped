@@ -12,7 +12,7 @@ import logs
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     
@@ -30,7 +30,7 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampEdit(), request)
 
@@ -51,7 +51,7 @@ def update(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_image(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseFileUpload(HTTPStampImage(), request, 'image')
     
@@ -66,7 +66,7 @@ def update_image(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampId(), request)
 
@@ -79,7 +79,7 @@ def show(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampId(), request)
 
@@ -92,7 +92,7 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def likesCreate(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampId(), request)
 
@@ -105,7 +105,7 @@ def likesCreate(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def likesRemove(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampId(), request)
 
@@ -118,7 +118,7 @@ def likesRemove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def likesShow(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampId(), request)
 

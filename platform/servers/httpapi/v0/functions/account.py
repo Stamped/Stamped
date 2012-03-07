@@ -45,7 +45,7 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(None, request)
 
@@ -58,7 +58,7 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["POST", "GET"])
 def settings(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     if request.method == 'POST':
 
@@ -86,7 +86,7 @@ def settings(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPAccountProfile(), request)
 
@@ -106,7 +106,7 @@ def update_profile(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile_image(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
@@ -119,7 +119,7 @@ def update_profile_image(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def customize_stamp(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPCustomizeStamp(), request)
     data        = schema.exportSparse()
@@ -161,7 +161,7 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def linked_accounts(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema          = parseRequest(HTTPLinkedAccounts(), request)
 
@@ -183,7 +183,7 @@ def linked_accounts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def removeTwitter(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(None, request)
 
@@ -195,7 +195,7 @@ def removeTwitter(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def removeFacebook(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(None, request)
 
@@ -207,7 +207,7 @@ def removeFacebook(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def alertFollowersFromTwitter(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
@@ -230,7 +230,7 @@ def alertFollowersFromTwitter(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def alertFollowersFromFacebook(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
@@ -253,7 +253,7 @@ def alertFollowersFromFacebook(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def change_password(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPAccountChangePassword(), request, \
                     obfuscate=['old_password', 'new_password'])
@@ -281,7 +281,7 @@ def reset_password(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show_alerts(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(None, request)
     
@@ -294,7 +294,7 @@ def show_alerts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_alerts(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     alerts      = parseRequest(HTTPAccountAlerts(), request)
     
@@ -307,7 +307,7 @@ def update_alerts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_apns(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPAPNSToken(), request)
 
@@ -321,7 +321,7 @@ def update_apns(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove_apns(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPAPNSToken(), request)
 

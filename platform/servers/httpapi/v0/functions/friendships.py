@@ -11,7 +11,7 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -24,7 +24,7 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -37,7 +37,7 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def check(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserRelationship(), request)
 
@@ -49,7 +49,7 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def friends(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -62,7 +62,7 @@ def friends(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def followers(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -75,7 +75,7 @@ def followers(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def approve(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -88,7 +88,7 @@ def approve(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def blocksCreate(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -101,7 +101,7 @@ def blocksCreate(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def blocksCheck(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -113,7 +113,7 @@ def blocksCheck(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def blocking(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(None, request)
 
@@ -126,7 +126,7 @@ def blocking(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def blocksRemove(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -139,7 +139,7 @@ def blocksRemove(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def invite(request):
-    authUserId, clientId = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPEmail(), request)
 
