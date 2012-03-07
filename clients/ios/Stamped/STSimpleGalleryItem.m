@@ -9,16 +9,31 @@
 #import "STSimpleGalleryItem.h"
 #import "STGalleryItem.h"
 
-@implementation STSimpleGalleryItem<STGalleryItem>
+@implementation STSimpleGalleryItem
 
-@property (nonatomic, readwrite, retain) NSString* image;
-@property (nonatomic, readwrite, retain) NSString* caption;
-@property (nonatomic, readwrite, retain) NSString* link;
-@property (nonatomic, readwrite, retain) NSString* link_type;
-@property (nonatomic, readwrite, assign) CGSize size;
+@synthesize image = image_;
+@synthesize caption = caption_;
+@synthesize link = link_;
+@synthesize linkType = linkType_;
+@synthesize height = height_;
+@synthesize width = width_;
 
 + (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGalleryItem class]];
   
+  [mapping mapKeyPathsToAttributes:
+   @"link_type",@"linkType",
+   nil];
+  
+  [mapping mapAttributes:
+   @"image",
+   @"caption",
+   @"link",
+   @"height",
+   @"width",
+   nil];
+  
+  return mapping;
 }
 
 @end

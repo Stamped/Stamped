@@ -13,7 +13,8 @@
 @property (nonatomic, readonly, retain) NSString* image;
 @property (nonatomic, readonly, retain) NSString* caption;
 @property (nonatomic, readonly, retain) NSString* link;
-@property (nonatomic, readonly, retain) NSString* link_type;
-@property (nonatomic, readonly, assign) CGSize size;
+@property (nonatomic, readonly, retain) NSString* linkType;
+@property (nonatomic, readonly, assign) NSInteger height;
+@property (nonatomic, readonly, assign) NSInteger width;
 
 @end

@@ -681,7 +681,7 @@ class Resolver(object):
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
             'cast': lambda q, m, s, o: self.__castWeight(q, m),
             'director': lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
-            'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * 3,
+            'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length,q_empty=.2) * 3,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) ,
         }
         self.genericCheck(tests, weights, results, query, match, options)
@@ -873,9 +873,19 @@ class Resolver(object):
             weight = exact_boost * weight
         return weight
 
-    def __lengthWeight(self, q, m):
-        #TODO improve
-        return 4
+    def __lengthWeight(self, q, m, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
+        if q < 0:
+            if m < 0:
+                return both_empty
+            else:
+                return q_empty
+        elif m < 0:
+            return m_empty
+        #TODO
+        weight = 4
+        if q == m:
+            weight = exact_boost * weight
+        return weight
 
     def __dateWeight(self, q, m):
         if q == None:

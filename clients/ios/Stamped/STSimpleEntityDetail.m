@@ -7,6 +7,8 @@
 //
 
 #import "STSimpleEntityDetail.h"
+#import "STSimpleGallery.h"
+#import "STGalleryItem.h"
 #import <RestKit/RestKit.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
@@ -64,6 +66,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   [mapping mapAttributes:
    @"desc",
    nil];
+  [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];
   return mapping;
 }
 
@@ -77,6 +80,14 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   STSimpleEntityDetail* detail = [objects objectAtIndex:0];
   NSLog(@"This is %@ with desc:\n%@", detail.title, detail.desc);
+  if (detail.gallery) {
+    NSArray* data = detail.gallery.data;
+    if (data) {
+      for (id<STGalleryItem> item in data) {
+        NSLog(@"value %@",item.image);
+      }
+    }
+  }
 }
 
 #pragma mark - Private Methods.

@@ -27,6 +27,10 @@
 		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
+		6386EE8C150813470019F1DC /* STSimpleGallery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8B150813470019F1DC /* STSimpleGallery.m */; };
+		6386EE8D150815F30019F1DC /* STSimpleGallery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8B150813470019F1DC /* STSimpleGallery.m */; };
+		6386EE8E150815FB0019F1DC /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
+		6386EE911508182F0019F1DC /* STSimpleAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE901508182F0019F1DC /* STSimpleAction.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1701,13 +1705,17 @@
 		6380A7A71506D8DA003087EF /* STMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadata.h; sourceTree = "<group>"; };
 		6380A7A81506D907003087EF /* STMetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataItem.h; sourceTree = "<group>"; };
 		6380A7A91506DAC5003087EF /* STPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylist.h; sourceTree = "<group>"; };
-		6380A7AA1506DAFA003087EF /* STAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAction.h; sourceTree = "<group>"; };
 		6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntityDetail.h; sourceTree = "<group>"; };
 		6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntityDetail.m; sourceTree = "<group>"; };
 		6380A7B11507D0CC003087EF /* STSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSource.h; sourceTree = "<group>"; };
 		6380A7B21507E63C003087EF /* STPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistItem.h; sourceTree = "<group>"; };
 		6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleGalleryItem.h; sourceTree = "<group>"; };
 		6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleGalleryItem.m; sourceTree = "<group>"; };
+		6386EE8A150813470019F1DC /* STSimpleGallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleGallery.h; sourceTree = "<group>"; };
+		6386EE8B150813470019F1DC /* STSimpleGallery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleGallery.m; sourceTree = "<group>"; };
+		6386EE8F1508182F0019F1DC /* STSimpleAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleAction.h; sourceTree = "<group>"; };
+		6386EE901508182F0019F1DC /* STSimpleAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleAction.m; sourceTree = "<group>"; };
+		6386EE92150819270019F1DC /* STAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAction.h; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2765,9 +2773,13 @@
 			children = (
 				6380A78F1506B6E8003087EF /* STDetailScroller.h */,
 				6380A7901506B6E8003087EF /* STDetailScroller.m */,
-				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
+				6386EE8F1508182F0019F1DC /* STSimpleAction.h */,
+				6386EE901508182F0019F1DC /* STSimpleAction.m */,
 				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
 				6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */,
+				6386EE8A150813470019F1DC /* STSimpleGallery.h */,
+				6386EE8B150813470019F1DC /* STSimpleGallery.m */,
+				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
 				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
 			);
 			name = "New Entity Detail";
@@ -2778,13 +2790,13 @@
 			children = (
 				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6380A7A61506D6C2003087EF /* STEntityDetail.h */,
-				6380A7AA1506DAFA003087EF /* STAction.h */,
 				6380A7B11507D0CC003087EF /* STSource.h */,
 				6380A7A71506D8DA003087EF /* STMetadata.h */,
 				6380A7A81506D907003087EF /* STMetadataItem.h */,
 				6380A7A91506DAC5003087EF /* STPlaylist.h */,
 				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
 				6380A7A51506D44C003087EF /* STGallery.h */,
+				6386EE92150819270019F1DC /* STAction.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -5767,6 +5779,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6386EE8E150815FB0019F1DC /* STSimpleGalleryItem.m in Sources */,
+				6386EE8D150815F30019F1DC /* STSimpleGallery.m in Sources */,
 				7E5893B7147C468B002268C4 /* main.m in Sources */,
 				7E5893B8147C468B002268C4 /* StampedAppDelegate.m in Sources */,
 				7E5893B9147C468B002268C4 /* InboxViewController.m in Sources */,
@@ -6063,6 +6077,8 @@
 				6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */,
 				6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 				6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */,
+				6386EE8C150813470019F1DC /* STSimpleGallery.m in Sources */,
+				6386EE911508182F0019F1DC /* STSimpleAction.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
