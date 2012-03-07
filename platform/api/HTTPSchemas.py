@@ -117,7 +117,7 @@ def _encodeAmazonURL(raw_url):
         return raw_url
 
 def _buildAmazonURL(amazonId):
-    return "www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
+    return "http://www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
 
 
 # ######### #
@@ -602,6 +602,9 @@ class HTTPEntity(Schema):
 
             # Book
             elif schema.category == 'book':
+
+                if schema.author is not None:
+                    self.caption = 'By %s' % schema.author
 
                 # Actions: Buy
 
