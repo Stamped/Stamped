@@ -26,6 +26,7 @@
 		6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
+		6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1705,6 +1706,8 @@
 		6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntityDetail.m; sourceTree = "<group>"; };
 		6380A7B11507D0CC003087EF /* STSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSource.h; sourceTree = "<group>"; };
 		6380A7B21507E63C003087EF /* STPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistItem.h; sourceTree = "<group>"; };
+		6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleGalleryItem.h; sourceTree = "<group>"; };
+		6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleGalleryItem.m; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2763,6 +2766,8 @@
 				6380A78F1506B6E8003087EF /* STDetailScroller.h */,
 				6380A7901506B6E8003087EF /* STDetailScroller.m */,
 				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
+				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
+				6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */,
 				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
 			);
 			name = "New Entity Detail";
@@ -6057,6 +6062,7 @@
 				6380A76215066EAE003087EF /* STPageControl.m in Sources */,
 				6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */,
 				6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
+				6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

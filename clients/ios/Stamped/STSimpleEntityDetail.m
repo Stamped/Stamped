@@ -89,11 +89,10 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   } 
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* mapping = [RKO
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   
-  objectLoader.objectMapping = mapping;
+  objectLoader.objectMapping = [STSimpleEntityDetail mapping];
   
   NSString* key = @"entity_id";
   NSLog(@"testing string");

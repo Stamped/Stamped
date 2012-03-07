@@ -10,8 +10,6 @@
 #import "STEntityDetail.h"
 #import <RestKit/RestKit.h>
 
-@class Entity;
-@class SearchResult;
 
 @interface STSimpleEntityDetail : NSObject <STEntityDetail, RKObjectLoaderDelegate>
 

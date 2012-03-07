@@ -156,6 +156,7 @@ class TMDBSource(GenericSource):
             'cast',
             'desc',
             'short_description',
+            'genre',
         )
         self.__max_cast = 6
 
@@ -205,6 +206,7 @@ class TMDBSource(GenericSource):
         if title is not None:
             tmdb_id = entity['tmdb_id']
             if tmdb_id is not None:
+                movie = TMDBMovie(tmdb_id)
                 try:
                     casts = self.__tmdb.movie_casts(tmdb_id)
                     if 'cast' in casts:
@@ -242,6 +244,8 @@ class TMDBSource(GenericSource):
                     overview = info['overview']
                     if overview is not None and overview != '':
                         entity['desc'] = overview
+                if len(movie.genres) > 0:
+                    entity['genre'] = movie.genres[0]
 
 
         return True
