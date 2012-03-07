@@ -27,6 +27,7 @@
 #import "StampedAppDelegate.h"
 #import "Alerts.h"
 #import "STToolbar.h"
+#import "STSimpleEntityDetail.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -70,6 +71,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize todoButton = todoButton_;
 @synthesize toolbarView = toolbarView_;
 @synthesize referringStamp = referringStamp_;
+@synthesize entityDetail = entityDetail_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -90,6 +92,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)commonInit {
+  entityDetail_ = [[STSimpleEntityDetail alloc] initWithEntityId:entityObject_.entityID];
   [self loadEntityDataFromServer];
   sectionsDict_ = [[NSMutableDictionary alloc] init];
 }

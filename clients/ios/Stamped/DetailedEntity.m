@@ -47,6 +47,7 @@
 @dynamic rating;
 @dynamic releaseDate;
 @dynamic songs;
+//@dynamic gallery;
 @dynamic state;
 @dynamic street;
 @dynamic subcategory;

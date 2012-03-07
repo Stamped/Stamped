@@ -41,6 +41,7 @@ class SinglePlatformSource(BasicSource):
             if singleplatform_id is not None:
                 if controller.shouldEnrich('menu', self.sourceName, entity):
                     menu = self.__singleplatform.get_menu_schema(singleplatform_id)
+                    entity['menu'] = menu != None
                     if menu is not None:
                         menu['entity_id'] = entity['entity_id']
                         decorations['menu'] = menu

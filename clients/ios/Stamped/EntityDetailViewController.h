@@ -13,6 +13,7 @@
 #import "ShowImageViewController.h"
 #import "STViewController.h"
 #import "Util.h"
+#import "STEntityDetail.h"
 
 @class Entity;
 @class DetailedEntity;
@@ -49,6 +50,7 @@
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
 
 @property (nonatomic, retain) Stamp* referringStamp;
+@property (nonatomic, readonly) id<STEntityDetail> entityDetail;
 
 @property (nonatomic, retain) IBOutlet STToolbar* toolbarView;
 @property (nonatomic, retain) IBOutlet UIButton* todoButton;

@@ -660,6 +660,7 @@ class RestaurantSchema(Schema):
         self.cuisine_source     = SchemaElement(basestring)
         self.cuisine_timestamp  = SchemaElement(datetime)
 
+        self.menu               = SchemaElement(bool)
         self.menu_source        = SchemaElement(basestring)
         self.menu_timestamp     = SchemaElement(datetime)
 

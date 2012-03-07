@@ -196,6 +196,7 @@ class MenuGroup(ARestaurantGroup):
 
     def __init__(self):
         ARestaurantGroup.__init__(self, 'menu')
+        self.addNameField()
         self.addDecoration(['menu'])
 
 class ReleaseDateGroup(AMediaGroup):

@@ -232,6 +232,27 @@
     self.mainContentView.hidden = NO;
   }
   
+  
+  //section = [self makeSectionWithName:@"Gallery"];
+  NSLog(@"hererererere");
+  /*
+  if (detailedEntity_.gallery) {
+    NSArray* data = [detailedEntity_ objectForKey:@"data"];
+    for (id item in data) {
+      NSDictionary* dict = item;
+      [section addPairedLabelWithName:@"Image:"
+                                value:[dict objectForKey:@"image"]
+                               forKey:@"image"];
+    }
+  }
+  
+  if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+    [self addSection:section];
+    self.mainContentView.hidden = NO;
+  }
+   */
+  
+  
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0) {

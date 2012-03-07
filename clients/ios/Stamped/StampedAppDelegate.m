@@ -227,7 +227,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)performRestKitMappings {
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+#warning Changed to dev
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;
@@ -271,7 +272,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
      @"price", @"website", @"rating", @"isbn", @"format", 
      @"publisher", @"language", @"albums", @"songs",
-     @"image", nil];
+   @"image", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];

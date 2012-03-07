@@ -20,6 +20,12 @@
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A7891506779C003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
 		6380A78C15069299003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
+		6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
+		6380A7921506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
+		6380A7931506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
+		6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
+		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
+		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1686,6 +1692,19 @@
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
 		6380A77815067776003087EF /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = "Vendor/gtm-oauth/Source/../../../RestKit/RestKit.xcodeproj"; sourceTree = "<group>"; };
+		6380A78F1506B6E8003087EF /* STDetailScroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailScroller.h; sourceTree = "<group>"; };
+		6380A7901506B6E8003087EF /* STDetailScroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDetailScroller.m; sourceTree = "<group>"; };
+		6380A7A31506D3F8003087EF /* STGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryItem.h; sourceTree = "<group>"; };
+		6380A7A51506D44C003087EF /* STGallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGallery.h; sourceTree = "<group>"; };
+		6380A7A61506D6C2003087EF /* STEntityDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetail.h; sourceTree = "<group>"; };
+		6380A7A71506D8DA003087EF /* STMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadata.h; sourceTree = "<group>"; };
+		6380A7A81506D907003087EF /* STMetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataItem.h; sourceTree = "<group>"; };
+		6380A7A91506DAC5003087EF /* STPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylist.h; sourceTree = "<group>"; };
+		6380A7AA1506DAFA003087EF /* STAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAction.h; sourceTree = "<group>"; };
+		6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntityDetail.h; sourceTree = "<group>"; };
+		6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntityDetail.m; sourceTree = "<group>"; };
+		6380A7B11507D0CC003087EF /* STSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSource.h; sourceTree = "<group>"; };
+		6380A7B21507E63C003087EF /* STPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistItem.h; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2736,6 +2755,33 @@
 				6380A78615067776003087EF /* RestKitFrameworkTests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6380A78E1506B67D003087EF /* New Entity Detail */ = {
+			isa = PBXGroup;
+			children = (
+				6380A78F1506B6E8003087EF /* STDetailScroller.h */,
+				6380A7901506B6E8003087EF /* STDetailScroller.m */,
+				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
+				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
+			);
+			name = "New Entity Detail";
+			sourceTree = "<group>";
+		};
+		6380A7A41506D41A003087EF /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
+				6380A7A61506D6C2003087EF /* STEntityDetail.h */,
+				6380A7AA1506DAFA003087EF /* STAction.h */,
+				6380A7B11507D0CC003087EF /* STSource.h */,
+				6380A7A71506D8DA003087EF /* STMetadata.h */,
+				6380A7A81506D907003087EF /* STMetadataItem.h */,
+				6380A7A91506DAC5003087EF /* STPlaylist.h */,
+				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
+				6380A7A51506D44C003087EF /* STGallery.h */,
+			);
+			name = Protocol;
 			sourceTree = "<group>";
 		};
 		7E07EBD114C73EFA00A2B5F0 /* ASIHTTPRequest */ = {
@@ -4122,6 +4168,8 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				6380A7A41506D41A003087EF /* Protocol */,
+				6380A78E1506B67D003087EF /* New Entity Detail */,
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
 				7E3909341401975C00910F98 /* Notifications.h */,
@@ -5856,6 +5904,8 @@
 				7E33045D14F5795A00114494 /* STClosableOverlayView.m in Sources */,
 				7E31D84F14F6D1A500E42429 /* ActivityGenericTableViewCell.m in Sources */,
 				6380A76315066EAE003087EF /* STPageControl.m in Sources */,
+				6380A7921506B6E8003087EF /* STDetailScroller.m in Sources */,
+				6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6005,6 +6055,8 @@
 				7E33045C14F5795A00114494 /* STClosableOverlayView.m in Sources */,
 				7E31D84E14F6D1A500E42429 /* ActivityGenericTableViewCell.m in Sources */,
 				6380A76215066EAE003087EF /* STPageControl.m in Sources */,
+				6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */,
+				6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6014,6 +6066,8 @@
 			files = (
 				7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */,
 				6380A76415066EAE003087EF /* STPageControl.m in Sources */,
+				6380A7931506B6E8003087EF /* STDetailScroller.m in Sources */,
+				6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

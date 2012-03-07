@@ -48,6 +48,7 @@
 @property (nonatomic, retain) NSString * rating;
 @property (nonatomic, retain) NSString * releaseDate;
 @property (nonatomic, retain) id songs;
+//@property (nonatomic, retain) id gallery;
 @property (nonatomic, retain) NSString * state;
 @property (nonatomic, retain) NSString * street;
 @property (nonatomic, retain) NSString * subcategory;
