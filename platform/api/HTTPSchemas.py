@@ -57,6 +57,12 @@ def _profileImageURL(screenName, cache=None):
             (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     return url
 
+def _formatURL(url):
+    try:
+        return url.split('://')[-1].split('/')[0].split('www.')[-1]
+    except:
+        return url
+
 def encodeStampTitle(title):
     stamp_title = title.replace(' ', '-').encode('ascii', 'ignore')
     stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
@@ -583,6 +589,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Category',       schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
                 self._addMetadata('Cuisine',        schema.cuisine)
                 self._addMetadata('Price',          schema.price_range * '$' if schema.price_range is not None else None)
+                self._addMetadata('Site',           _formatURL(schema.site), link=schema.site, link_type='url')
                 self._addMetadata('Description',    schema.desc)
 
 
