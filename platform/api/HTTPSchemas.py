@@ -1805,4 +1805,16 @@ class HTTPEntity_stampedtest(Schema):
         else:
             raise NotImplementedError
         return self
+    
+    def _handle_image(self, url, is_apple):
+        if is_apple:
+            # try to return the maximum-resolution apple photo possible if we have 
+            # a lower-resolution version stored in our db
+            return url.replace('100x100', '200x200').replace('170x170', '200x200')
+        
+        if 'amazon.com' in url:
+            # strip the 'look inside' image modifier
+            return amazon_image_re.sub(r'\1.jpg', url)
+        
+        return url
 
