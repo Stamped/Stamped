@@ -633,9 +633,9 @@ class HTTPEntity(Schema):
                 self._addAction('buy', 'Buy now', sources)
 
             
-            elif self.subcategory == 'movie':
+            elif schema.category == 'film':
 
-                if schema.track_length is not None:
+                if schema.subcategory == 'movie' and schema.track_length is not None:
                     try:
                         m = (int(schema.track_length) % 3600) / 60
                         h = (int(schema.track_length) - (int(schema.track_length) % 3600)) / 3600
@@ -646,9 +646,13 @@ class HTTPEntity(Schema):
                     except:
                         pass
 
+                if schema.subcategory == 'tv' and schema.network_name is not None:
+                    self.caption = schema.network_name
+
                 # Metadata
 
-                self._addMetadata('Category', 'Movie', icon='http://static.stamped.com/assets/film.png')
+                category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
+                self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
                 self._addMetadata('Overview', schema.desc, extended=True)
                 self.metadata.overflow = len(self.metadata.data)
                 self._addMetadata('Cast', schema.cast, extended=True)
@@ -658,19 +662,20 @@ class HTTPEntity(Schema):
 
                 # Actions: Find Tickets
 
-                sources = []
+                if schema.subcategory == 'movie':
+                    sources = []
 
-                if schema.sources.fandango.fid is not None:
-                    fandango            = HTTPEntitySource()
-                    fandango.name       = 'Fandango'
-                    fandango.source     = 'fandango'
-                    fandango.source_id  = schema.sources.fandango.fid
-                    fandango.icon       = 'http://static.stamped.com/assets/fandango.png'
-                    fandango.link       = schema.sources.fandango.f_url 
-                    fandango.link_type  = 'url'
-                    sources.append(fandango)
+                    if schema.sources.fandango.fid is not None:
+                        fandango            = HTTPEntitySource()
+                        fandango.name       = 'Fandango'
+                        fandango.source     = 'fandango'
+                        fandango.source_id  = schema.sources.fandango.fid
+                        fandango.icon       = 'http://static.stamped.com/assets/fandango.png'
+                        fandango.link       = schema.sources.fandango.f_url 
+                        fandango.link_type  = 'url'
+                        sources.append(fandango)
 
-                self._addAction('tickets', 'Find tickets', sources)
+                    self._addAction('tickets', 'Find tickets', sources)
 
                 # Actions: Watch Now
 
