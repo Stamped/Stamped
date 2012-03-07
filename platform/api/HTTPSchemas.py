@@ -116,6 +116,9 @@ def _encodeAmazonURL(raw_url):
         logs.warning('Unable to encode Amazon URL: %s' % raw_url)
         return raw_url
 
+def _buildAmazonURL(amazonId):
+    return "www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
+
 
 # ######### #
 # OAuth 2.0 #
@@ -590,7 +593,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
-                self._addMetadata('Description', schema.desc)
+                self._addMetadata('Description', schema.desc, extended=True)
 
 
             # Generic Place
@@ -610,13 +613,18 @@ class HTTPEntity(Schema):
                     amazon.source       = 'amazon'
                     amazon.source_id    = schema.sources.amazon_underlying
                     amazon.icon         = 'http://static.stamped.com/assets/amazon.png'
-                    amazon.link         = _encodeAmazonURL()
+                    amazon.link         = _buildAmazonURL(schema.sources.amazon_underlying)
+                    amazon.link_type    = 'url'
                     sources.append(amazon)
 
                 self._addAction('buy', 'Buy now', sources)
 
-                self._addMetadata('Release Date',   schema.publish_date)
-                self._addMetadata('Length',         schema.num_pages)
+                # Metadata
+
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Publish Date', schema.publish_date)
+                self._addMetadata('Description', schema.desc, extended=True)
+                self._addMetadata('Publisher', schema.publisher)
             
             # elif self.category == 'film':
             #     self.length         = schema.track_length
