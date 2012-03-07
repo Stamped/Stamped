@@ -636,12 +636,15 @@ class HTTPEntity(Schema):
             elif self.subcategory == 'movie':
 
                 if schema.track_length is not None:
-                    m = (schema.track_length % 3600) / 60
-                    h = (schema.track_length - (schema.track_length % 3600)) / 3600
-                    if h > 0:
-                        self.caption = '%s hr %s min' % (h, m)
-                    else:
-                        self.caption = '%s min' % m
+                    try:
+                        m = (int(schema.track_length) % 3600) / 60
+                        h = (int(schema.track_length) - (int(schema.track_length) % 3600)) / 3600
+                        if h > 0:
+                            self.caption = '%s hr %s min' % (h, m)
+                        else:
+                            self.caption = '%s min' % m
+                    except:
+                        pass
 
                 # Metadata
 
