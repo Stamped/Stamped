@@ -151,6 +151,12 @@ def user(user_id):
     except:
         localData.log['user_id'] = 'FAIL'
 
+def client(client_id):
+    try:
+        localData.log['client_id'] = client_id
+    except:
+        localData.log['client_id'] = 'FAIL'
+
 def form(data):
     try:
         localData.log['form'] = data

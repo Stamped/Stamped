@@ -45,7 +45,8 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
 
     account     = stampedAPI.removeAccount(authUserId)
@@ -57,8 +58,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["POST", "GET"])
 def settings(request):
-    authUserId  = checkOAuth(request)
-
+    authUserId, apiVersion = checkOAuth(request)
+    
     if request.method == 'POST':
 
         ### TODO: Carve out password changes, require original password sent again?
@@ -85,7 +86,8 @@ def settings(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPAccountProfile(), request)
 
     ### TEMP: Generate list of changes. Need to do something better eventually...
@@ -104,7 +106,8 @@ def update_profile(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile_image(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
     user        = stampedAPI.updateProfileImage(authUserId, schema)
@@ -116,7 +119,8 @@ def update_profile_image(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def customize_stamp(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPCustomizeStamp(), request)
     data        = schema.exportSparse()
     
@@ -157,7 +161,8 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def linked_accounts(request):
-    authUserId      = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema          = parseRequest(HTTPLinkedAccounts(), request)
 
     linked          = schema.exportSchema(LinkedAccounts())
@@ -178,7 +183,8 @@ def linked_accounts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def removeTwitter(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
 
     result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
@@ -189,7 +195,8 @@ def removeTwitter(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def removeFacebook(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
 
     result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
@@ -200,7 +207,8 @@ def removeFacebook(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def alertFollowersFromTwitter(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
     q = schema.q.value
@@ -222,7 +230,8 @@ def alertFollowersFromTwitter(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def alertFollowersFromFacebook(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
     q = schema.q.value
@@ -244,7 +253,8 @@ def alertFollowersFromFacebook(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def change_password(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPAccountChangePassword(), request, \
                     obfuscate=['old_password', 'new_password'])
     new         = schema.new_password
@@ -271,7 +281,8 @@ def reset_password(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show_alerts(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
     
     account     = stampedAPI.getAccount(authUserId)
@@ -283,7 +294,8 @@ def show_alerts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_alerts(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     alerts      = parseRequest(HTTPAccountAlerts(), request)
     
     account     = stampedAPI.updateAlerts(authUserId, alerts)
@@ -295,7 +307,8 @@ def update_alerts(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_apns(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPAPNSToken(), request)
 
     if len(schema.token) != 64:
@@ -308,7 +321,8 @@ def update_apns(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove_apns(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPAPNSToken(), request)
 
     if len(schema.token) != 64:

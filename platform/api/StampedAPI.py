@@ -2680,7 +2680,7 @@ class StampedAPI(AStampedAPI):
         
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
-        
+
         activity = []
         for item in activityData:
             try:

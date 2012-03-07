@@ -12,7 +12,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFavoriteNew(), request)
     
     stampId     = schema.stamp_id
@@ -30,7 +31,8 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityId(), request)
     
     favorite    = stampedAPI.removeFavorite(authUserId, schema.entity_id)
@@ -47,7 +49,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
     
     favorites   = stampedAPI.getFavorites(authUserId, schema)

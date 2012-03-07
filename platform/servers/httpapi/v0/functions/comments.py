@@ -11,8 +11,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId  = checkOAuth(request)
-
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPCommentNew(), request)
     stampId     = schema.stamp_id
     blurb       = schema.blurb
@@ -26,7 +26,8 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPCommentId(), request)
 
     comment     = stampedAPI.removeComment(authUserId, schema.comment_id)
@@ -38,7 +39,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPCommentSlice(), request)
 
     data        = schema.exportSparse()

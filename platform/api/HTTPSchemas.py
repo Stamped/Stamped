@@ -57,6 +57,12 @@ def _profileImageURL(screenName, cache=None):
             (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     return url
 
+def _formatURL(url):
+    try:
+        return url.split('://')[-1].split('/')[0].split('www.')[-1]
+    except:
+        return url
+
 def encodeStampTitle(title):
     stamp_title = title.replace(' ', '-').encode('ascii', 'ignore')
     stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
@@ -124,6 +130,7 @@ class OAuthLogin(Schema):
     def setSchema(self):
         self.login              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
+
 
 # ####### #
 # Account #
@@ -439,6 +446,1187 @@ class HTTPClientLogsEntry(Schema):
 
 class HTTPEntity(Schema):
     def setSchema(self):
+        # Core
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.caption            = SchemaElement(basestring)
+        self.desc               = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.last_modified      = SchemaElement(basestring)
+        
+        # Address
+        self.address            = SchemaElement(basestring)
+        self.address_street     = SchemaElement(basestring)
+        self.address_city       = SchemaElement(basestring)
+        self.address_state      = SchemaElement(basestring)
+        self.address_country    = SchemaElement(basestring)
+        self.address_zip        = SchemaElement(basestring)
+        
+        self.neighborhood       = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+        
+        # Components
+        self.playlist           = HTTPEntityPlaylist()
+        self.actions            = SchemaList(HTTPEntityAction())
+        self.gallery            = HTTPEntityGallery()
+        self.metadata           = HTTPEntityMetadata()
+        self.stamped_by         = HTTPEntityStampedBy()
+        self.related            = HTTPEntityRelated()
+
+
+    def _addAction(self, action, name, sources, **kwargs):
+        if len(sources) > 0:
+            item = HTTPEntityAction()
+            item.action = action
+            item.name = name
+            item.sources = sources
+
+            if 'icon' in kwargs:
+                item.icon = kwargs['icon']
+
+            self.actions.append(item)
+
+    def _addMetadata(self, name, value, **kwargs):
+        if value is not None:
+            item = HTTPEntityMetadataItem()
+            item.name = name
+            item.value = value
+
+            if 'icon' in kwargs:
+                item.icon = kwargs['icon']
+
+            if 'link' in kwargs:
+                item.link = kwargs['link']
+
+            if 'extended' in kwargs:
+                item.extended = kwargs['extended']
+
+            self.metadata.data.append(item)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+
+            from Entity import setFields
+            setFields(schema)
+            
+            data                = schema.value
+            coordinates         = data.pop('coordinates', None)
+            
+            self.importData(data, overflow=True)
+            
+            self.caption        = self.subtitle # Default
+            self.last_modified  = schema.timestamp.created
+            
+            # Place
+            self.address        = schema.address
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+            
+            # Restaurant / Bar
+            if schema.category == 'food':
+
+                # Actions: Reservation
+
+                sources = []
+
+                if schema.sources.openTable.reserveURL is not None:
+                    opentable           = HTTPEntitySource()
+                    itunes.name         = 'OpenTable'
+                    itunes.source       = 'opentable'
+                    opentable.source_id = schema.sources.itunes_id
+                    opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
+                                            schema.sources.openTable.reserveURL
+                    opentable.link_type = 'url'
+                    opentable.icon      = 'http://static.stamped.com/assets/opentable.png'
+                    sources.append(opentable)
+
+                elif schema.sources.openTable.rid is not None:
+                    desktopUrl  = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
+                                    schema.sources.openTable.rid
+                    mobileUrl   = 'http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166' % \
+                                    schema.sources.openTable.rid
+
+                    opentable           = HTTPEntitySource()
+                    itunes.name         = 'OpenTable'
+                    itunes.source       = 'opentable'
+                    opentable.source_id = schema.sources.itunes_id
+                    opentable.link      = mobileUrl # TODO: Allow API to specify?
+                    opentable.link_type = 'url'
+                    opentable.icon      = 'http://static.stamped.com/assets/opentable.png'
+                    sources.append(opentable)
+
+                self._addAction('reserve', 'Reserve a table', sources)
+
+                # Actions: Call
+
+                sources = []
+
+                if schema.contact.phone is not None:
+                    phone               = HTTPEntitySource()
+                    phone.source        = 'phone'
+                    phone.link          = schema.contact.phone
+                    phone.link_type     = 'phone'
+                    sources.append(phone)
+
+                self._addAction('phone', schema.contact.phone, sources)
+
+                # Actions: View Menu
+
+                sources = []
+
+                if schema.menu_source is not None:
+                    menu                = HTTPEntitySource()
+                    menu.source         = 'menu'
+                    menu.source_id      = schema.entity_id
+                    sources.append(menu)
+
+                self._addAction('menu', 'View menu', sources)
+
+                # Metadata
+
+                self._addMetadata('Category',       schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Cuisine',        schema.cuisine)
+                self._addMetadata('Price',          schema.price_range * '$' if schema.price_range is not None else None)
+                self._addMetadata('Site',           _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Description',    schema.desc)
+
+
+            # Generic Place
+            elif coordinates is not None:
+                pass
+
+            ### TODO: Unify these within Schemas.py where possible
+            elif schema.category == 'book':
+
+                self._addMetadata('Release Date',   schema.publish_date)
+                self._addMetadata('Length',         schema.num_pages)
+            
+            # elif self.category == 'film':
+            #     self.length         = schema.track_length
+            #     self.rating         = schema.mpaa_rating
+                
+            #     if schema.genre is not None:
+            #         self.genre = schema.genre
+            #     elif schema.ngenres is not None:
+            #         self.genre = string.join((str(i) for i in schema.ngenres), '; ')
+                
+            #     if schema.short_description != None:
+            #         new_desc = schema.short_description
+            #         if new_desc != '' and new_desc != None  and ( self.desc == None or self.desc == '' ):
+            #             self.desc = new_desc
+            
+            elif schema.subcategory == 'artist':
+
+                # Actions: Listen
+
+                sources = []
+
+                if schema.sources.itunes_id is not None:
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
+                    itunes.source_id    = schema.sources.itunes_id
+                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    sources.append(itunes)
+
+                if schema.sources.rdio_id is not None:
+                    rdio                = HTTPEntitySource()
+                    itunes.name         = 'Rdio'
+                    itunes.source       = 'rdio'
+                    rdio.source_id      = schema.sources.rdio_id
+                    rdio.icon           = 'http://static.stamped.com/assets/rdio.png'
+                    sources.append(rdio)
+
+                if schema.sources.spotify_id is not None:
+                    spotify             = HTTPEntitySource()
+                    itunes.name         = 'Spotify'
+                    itunes.source       = 'spotify'
+                    spotify.source_id   = schema.sources.spotify_id
+                    spotify.icon        = 'http://static.stamped.com/assets/spotify.png'
+                    sources.append(spotify)
+
+                self._addAction('listen', 'Listen to top songs', sources)
+
+                # Actions: Add to Playlist
+
+                sources = []
+
+                if schema.sources.rdio_id is not None:
+                    rdio                = HTTPEntitySource()
+                    itunes.name         = 'Rdio'
+                    itunes.source       = 'rdio'
+                    rdio.source_id      = schema.sources.rdio_id
+                    sources.append(rdio)
+
+                if schema.sources.spotify_id is not None:
+                    spotify             = HTTPEntitySource()
+                    itunes.name         = 'Spotify'
+                    itunes.source       = 'spotify'
+                    spotify.source_id   = schema.sources.spotify_id
+                    sources.append(spotify)
+
+                self._addAction('playlist', 'Add artist to playlist', sources)
+
+                # Actions: Download
+
+                sources = []
+
+                if schema.sources.itunes_id is not None:
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
+                    itunes.source_id    = schema.sources.itunes_id
+                    itunes.link         = 'http://itunes.apple.com/us/artist/id%s' % schema.sources.itunes_id
+                    itunes.link_type    = 'url'
+                    sources.append(itunes)
+
+                self._addAction('download', 'Download artist', sources)
+
+                # Metadata
+
+                self._addMetadata('Category',       'Artist', icon='http://static.stamped.com/assets/music.png')
+                self._addMetadata('Biography',      schema.desc)
+
+                self.metadata.overflow = len(self.metadata.data)
+
+                self._addMetadata('Genre',          schema.genre)
+            
+
+            elif schema.subcategory == 'app':
+
+                if schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
+
+                # Actions: Download
+
+                sources = []
+
+                if schema.sources.itunes_id is not None:
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
+                    itunes.source_id    = schema.sources.itunes_id
+                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.itunes_id
+                    itunes.link_type    = 'url'
+                    sources.append(itunes)
+                ### TEMP - apple.aid should be deprecated
+                elif schema.sources.apple.aid is not None:
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
+                    itunes.source_id    = schema.sources.apple.aid
+                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.apple.aid
+                    itunes.link_type    = 'url'
+                    sources.append(itunes)
+
+                self._addAction('download', 'Download', sources)
+
+                # Metadata
+
+                self._addMetadata('Category',       'App', icon='http://static.stamped.com/assets/app.png')
+                self._addMetadata('Genre',          schema.genre)
+                self._addMetadata('Description',    schema.desc, extended=True)
+
+                # Gallery
+
+                if schema.details.media.screenshots is not None:
+
+                    for screenshot in schema.details.media.screenshots:
+                        item = HTTPEntityGalleryItem()
+                        item.image = screenshot
+                        self.gallery.data.append(item)
+
+
+            #     if schema.genre is not None:
+            #         self.genre = schema.genre
+                
+            #     self.length         = schema.track_length
+            #     if schema.parental_advisory_id == 1:
+            #         self.rating     = "Parental Advisory"
+
+            # if self.category in ['music', 'film']:
+            #     try:
+            #         if schema.release_date is not None:
+            #             date_time = schema.release_date
+            #         else:
+            #             date_time = parseDateString(schema.original_release_date)
+            #     except Exception:
+            #         pass
+
+            # if date_time is not None:
+            #     self.release_date   = date_time.strftime("%h %d, %Y")
+
+            # # Food
+            # self.cuisine        = schema.cuisine
+            # self.price_scale    = schema.priceScale
+
+            # # Book
+            # self.author         = schema.author
+            # self.isbn           = schema.isbn
+            # self.publisher      = schema.publisher
+            # self.format         = schema.book_format
+            # self.language       = schema.language
+            # self.edition        = schema.edition
+
+            # # Film
+            # self.cast           = schema.cast
+            # self.director       = schema.director
+            # self.network        = schema.network_name
+            # self.in_theaters    = schema.in_theaters
+            
+            # # Music
+            # self.artist_name    = schema.artist_display_name
+            # self.album_name     = schema.album_name
+            # self.label          = schema.label_studio
+            
+            # if 'preview_url' in schema:
+            #     self.preview_url = schema.preview_url
+            
+            # # Affiliates
+            # if schema.rid is not None:
+            #     self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
+            #                           schema.rid
+            #     self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
+            #                           schema.rid
+            # if schema.reserveURL is not None:
+            #     self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
+            #                           schema.reserveURL
+            
+            # if schema.sources.fandango.f_url is not None:
+            #     self.fandango_url = schema.f_url
+            
+            # if schema.sources.apple.view_url != None:
+            #     itunes_url  = schema.sources.apple.view_url
+            #     base_url    = "http://click.linksynergy.com/fs-bin/stat"
+            #     params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
+            #                    % (LINKSHARE_TOKEN)
+            #     deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
+            #                         _encodeLinkShareDeepURL(itunes_url))
+            #     short_url   = _encodeiTunesShortURL(itunes_url)
+                
+            #     self.itunes_url       = deep_url
+            #     self.itunes_short_url = short_url
+            
+            # if schema.amazon_link != None:
+            #     self.amazon_url = _encodeAmazonURL(schema.amazon_link)
+            
+            is_apple = 'apple' in schema
+            
+            # Image
+            if schema.image is not None:
+                self.image = self._handle_image(schema.image, is_apple)
+            elif schema.large is not None:
+                self.image = self._handle_image(schema.large, is_apple)
+            elif schema.small is not None:
+                self.image = self._handle_image(schema.small, is_apple)
+            elif schema.tiny is not None:
+                self.image = self._handle_image(schema.tiny, is_apple)
+            elif schema.artwork_url is not None:
+                self.image = self._handle_image(schema.artwork_url, is_apple)
+            
+            # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
+            #     songs = schema.songs
+                
+            #     # for an artist, only return up to 10 songs
+            #     if schema.subcategory == "artist":
+            #         songs = songs[0: min(10, len(songs))]
+                
+            #     songs = list(song.song_name for song in songs)
+            #     self.songs = songs
+            
+            # if schema.subcategory == "album" and schema.tracks is not None:
+            #     self.songs = schema.tracks
+            
+            # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
+            #     try:
+            #         albums = list(album.album_name for album in schema.albums)
+            #         self.albums = albums
+            #     except:
+            #         utils.printException()
+            #         pass
+
+        elif schema.__class__.__name__ == 'EntityMini':
+            data                = schema.value
+            coordinates         = data.pop('coordinates', None)
+            self.importData(data, overflow=True)
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+        else:
+            raise NotImplementedError
+        return self
+    
+    def _handle_image(self, url, is_apple):
+        if is_apple:
+            # try to return the maximum-resolution apple photo possible if we have 
+            # a lower-resolution version stored in our db
+            return url.replace('100x100', '200x200').replace('170x170', '200x200')
+        
+        if 'amazon.com' in url:
+            # strip the 'look inside' image modifier
+            return amazon_image_re.sub(r'\1.jpg', url)
+        
+        return url
+
+# HTTPEntity Components
+
+class HTTPEntitySource(Schema):
+    def setSchema(self):
+        self.name               = SchemaElement(basestring, required=True)
+        self.source             = SchemaElement(basestring, required=True)
+        self.source_id          = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+        self.link               = SchemaElement(basestring)
+        self.link_type          = SchemaElement(basestring)
+
+class HTTPEntityAction(Schema):
+    def setSchema(self):
+        self.action             = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
+        self.sources            = SchemaList(HTTPEntitySource(), required=True)
+        self.icon               = SchemaElement(basestring)
+
+class HTTPEntityMetadata(Schema):
+    def setSchema(self):
+        self.data               = SchemaList(HTTPEntityMetadataItem())
+        self.overflow           = SchemaElement(int)
+
+class HTTPEntityMetadataItem(Schema):
+    def setSchema(self):
+        self.name               = SchemaElement(basestring, required=True)
+        self.value              = SchemaElement(basestring, required=True)
+        self.key                = SchemaElement(basestring) 
+        self.link               = SchemaElement(basestring)
+        self.link_type          = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+        self.extended           = SchemaElement(bool)
+
+class HTTPEntityGallery(Schema):
+    def setSchema(self):
+        self.data               = SchemaList(HTTPEntityGalleryItem(), required=True)
+        self.name               = SchemaElement(basestring)
+
+class HTTPEntityGalleryItem(Schema):
+    def setSchema(self):
+        self.image              = SchemaElement(basestring, required=True)
+        self.link               = SchemaElement(basestring)
+        self.link_type          = SchemaElement(basestring)
+        self.caption            = SchemaElement(basestring)
+
+class HTTPEntityPlaylist(Schema):
+    def setSchema(self):
+        self.data               = SchemaList(HTTPEntityPlaylistItem(), required=True)
+        self.name               = SchemaElement(basestring)
+        self.overflow           = SchemaElement(int)
+
+class HTTPEntityPlaylistItem(Schema):
+    def setSchema(self):
+        self.name               = SchemaElement(basestring, required=True)
+        self.sources            = SchemaList(HTTPEntitySource(), required=True)
+        self.num                = SchemaElement(int)
+        self.length             = SchemaElement(int)
+        self.link               = SchemaElement(basestring)
+        self.link_type          = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
+class HTTPEntityStampedBy(Schema):
+    def setSchema(self):
+        self.friends            = SchemaElement(int, required=True)
+        self.friends_of_friends = SchemaElement(int)
+        self.everyone           = SchemaElement(int)
+
+class HTTPEntityRelated(Schema):
+    def setSchema(self):
+        self.data               = SchemaList(HTTPEntityMini(), required=True)
+        self.title              = SchemaElement(basestring)
+
+# Related
+
+class HTTPEntityMini(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.coordinates        = SchemaElement(basestring)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'EntityMini':
+            data                = schema.value
+            coordinates         = data.pop('coordinates', None)
+            self.importData(data, overflow=True)
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+        else:
+            raise NotImplementedError
+        return self
+
+
+class HTTPEntityNew(Schema):
+    def setSchema(self):
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+        self.cast               = SchemaElement(basestring)
+        self.director           = SchemaElement(basestring)
+        self.release_date       = SchemaElement(basestring)
+        self.artist             = SchemaElement(basestring)
+        self.album              = SchemaElement(basestring)
+        self.author             = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            schema.importData({
+                'title':        self.title,
+                'subtitle':     self.subtitle,
+                'category':     self.category,
+                'subcategory':  self.subcategory,
+            })
+
+            if self.desc is not None:
+                schema.desc = self.desc
+
+            if self.address is not None:
+                schema.address = self.address 
+
+            if self.director is not None:
+                schema.director = self.director
+
+            if self.cast is not None:
+                schema.cast = self.cast
+
+            if self.album is not None:
+                schema.album_name = self.album
+
+            if self.author is not None:
+                schema.author = self.author
+
+            if self.artist is not None:
+                schema.artist_display_name = self.artist
+
+            if self.release_date is not None:
+                schema.original_release_date = self.release_date
+
+            if _coordinatesFlatToDict(self.coordinates) is not None:
+                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityEdit(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring)
+        self.subtitle           = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            schema.importData({
+                'entity_id':    self.entity_id,
+                'title':        self.title,
+                'subtitle':     self.subtitle,
+                'category':     self.category,
+                'subcategory':  self.subcategory,
+                'desc':         self.desc
+            })
+            schema.details.place.address = self.address 
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityAutosuggest(Schema):
+    def setSchema(self):
+        self.search_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring, required=True)
+        self.distance           = SchemaElement(float)
+    
+    def importSchema(self, schema, distance):
+        if schema.__class__.__name__ == 'Entity':
+            from Entity import setFields
+            setFields(schema, detailed=True)
+
+            if schema.search_id is not None:
+                self.search_id = schema.search_id
+
+            else:
+                self.search_id = schema.entity_id
+            assert self.search_id is not None
+
+            self.title = schema.title
+            self.subtitle = schema.subtitle
+            self.category = schema.category
+            if isinstance(distance, float) and distance >= 0:
+                self.distance = distance
+            
+            if self.subtitle is None:
+                entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPEntityId(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+
+class HTTPEntityIdSearchId(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
+
+class HTTPEntitySearch(Schema):
+    def setSchema(self):
+        self.q                  = SchemaElement(basestring, required=True)
+        self.coordinates        = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool)
+        self.page               = SchemaElement(int, default=0)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntitySearch':
+            schema.importData({'q': self.q})
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
+            schema.importData({'local': self.local})
+            schema.importData({'page': self.page})
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityNearby(Schema):
+    def setSchema(self):
+        self.coordinates        = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.page               = SchemaElement(int, default=0)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntityNearby':
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
+            schema.importData({'page': self.page})
+        else:
+            raise NotImplementedError
+        return schema
+
+
+# ###### #
+# Stamps #
+# ###### #
+
+class HTTPStamp(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.entity             = HTTPEntityMini(required=True)
+        self.user               = HTTPUserMini(required=True)
+        self.blurb              = SchemaElement(basestring)
+        self.mentions           = SchemaList(MentionSchema())
+        self.credit             = SchemaList(CreditSchema())
+        self.comment_preview    = SchemaList(HTTPComment())
+        self.image_dimensions   = SchemaElement(basestring)
+        self.image_url          = SchemaElement(basestring)
+        self.created            = SchemaElement(basestring)
+        self.modified           = SchemaElement(basestring)
+        self.num_comments       = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.like_threshold_hit = SchemaElement(bool)
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
+        self.via                = SchemaElement(basestring)
+        self.url                = SchemaElement(basestring)
+    
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Stamp':
+            data                = schema.exportSparse()
+            coordinates         = data['entity'].pop('coordinates', None)
+            comments            = data.pop('comment_preview', [])
+            mentions            = data.pop('mentions', [])
+            credit              = data.pop('credit', [])
+            
+            comment_preview = []
+            for comment in comments:
+                comment = Comment(comment)
+                comment = HTTPComment().importSchema(comment).exportSparse()
+                comment_preview.append(comment)
+            data['comment_preview'] = comment_preview
+
+            if len(mentions) > 0:
+                data['mentions'] = mentions
+
+            if len(credit) > 0:
+                data['credit'] = credit
+
+            self.importData(data, overflow=True)
+            self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
+            self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
+            self.like_threshold_hit     = schema.like_threshold_hit
+            self.created                = schema.timestamp.created
+            self.modified               = schema.timestamp.modified
+
+            self.num_comments = 0
+            if schema.num_comments > 0:
+                self.num_comments       = schema.num_comments
+            
+            self.num_likes = 0
+            if schema.num_likes > 0:
+                self.num_likes          = schema.num_likes
+
+            self.is_liked = False
+            if schema.is_liked:
+                self.is_liked = True
+
+            self.is_fav = False
+            if schema.is_fav:
+                self.is_fav = True
+
+            if self.image_dimensions != None:
+                self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
+
+            stamp_title = encodeStampTitle(schema.entity.title)
+            self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
+                (schema.user.screen_name, schema.stamp_num, stamp_title)
+        
+        else:
+            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
+            raise NotImplementedError
+        
+        return self
+
+class HTTPImageUpload(Schema):
+    def setSchema(self):
+        self.image              = SchemaElement(basestring, normalize=False)
+        
+        # for asynchronous image uploads
+        self.temp_image_url     = SchemaElement(basestring)
+        self.temp_image_width   = SchemaElement(int)
+        self.temp_image_height  = SchemaElement(int)
+
+class HTTPStampNew(HTTPImageUpload):
+    def setSchema(self):
+        HTTPImageUpload.setSchema(self)
+        
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class HTTPStampEdit(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class HTTPStampId(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+
+class HTTPGenericSlice(Schema):
+    def setSchema(self):
+        # paging
+        self.limit              = SchemaElement(int)
+        self.offset             = SchemaElement(int)
+        
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        self.sort               = SchemaElement(basestring, default='modified')
+        self.reverse            = SchemaElement(bool,       default=False)
+        self.coordinates        = SchemaElement(basestring) # "lat,lng"
+        
+        # filtering
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+    
+    def _convertData(self, data):
+        if 'coordinates' in data:
+            try:
+                lat, lng = data['coordinates'].split(',')
+                data['coordinates'] = {
+                    'lat' : float(lat), 
+                    'lng' : float(lng)
+                }
+            except:
+                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
+        
+        if 'since' in data:
+            try: 
+                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
+            except:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+        
+        if 'before' in data:
+            try: 
+                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
+            except:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+        
+        # TODO: validate since <= before
+        
+        if 'offset' not in data:
+            data['offset'] = 0
+        
+        return data
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'GenericSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPGenericCollectionSlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
+        # filtering
+        self.query              = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.viewport           = SchemaElement(basestring) # "lat0,lng0,lat1,lng1"
+        
+        # misc options
+        self.quality            = SchemaElement(int,  default=1)
+        self.deleted            = SchemaElement(bool, default=False)
+        self.comments           = SchemaElement(bool, default=True)
+        self.unique             = SchemaElement(bool, default=False)
+    
+    def _convertData(self, data):
+        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
+        
+        if 'viewport' in data:
+            try:
+                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
+                
+                data['viewport'] = {
+                    'upperLeft' : {
+                        'lat' : float(lat0), 
+                        'lng' : float(lng0), 
+                    }, 
+                    'lowerRight' : {
+                        'lat' : float(lat1), 
+                        'lng' : float(lng1), 
+                    }
+                }
+                
+                # TODO: validate viewport
+            except:
+                raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
+        
+        return data
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'GenericCollectionSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+        
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'UserCollectionSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPFriendsSlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+        
+        self.distance           = SchemaElement(int)
+        self.inclusive          = SchemaElement(bool)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'FriendsSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPStampImage(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.image              = SchemaElement(basestring, required=True, normalize=False)
+
+class HTTPDeletedStamp(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.modified           = SchemaElement(basestring)
+        self.deleted            = SchemaElement(bool)
+    
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'DeletedStamp':
+            self.importData(schema.exportSparse(), overflow=True)
+            self.modified       = schema.timestamp.modified
+        else:
+            raise NotImplementedError
+        
+        return self
+
+
+# ######## #
+# Comments #
+# ######## #
+
+class HTTPComment(Schema):
+    def setSchema(self):
+        self.comment_id         = SchemaElement(basestring, required=True)
+        self.user               = HTTPUserMini(required=True)
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.restamp_id         = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring, required=True)
+        self.mentions           = SchemaList(MentionSchema())
+        self.created            = SchemaElement(basestring)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Comment':
+            self.importData(schema.exportSparse(), overflow=True)
+            self.created = schema.timestamp.created
+            self.user = HTTPUserMini().importSchema(schema.user).exportSparse()
+
+        else:
+            raise NotImplementedError
+
+        return self
+
+class HTTPCommentNew(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring, required=True)
+
+class HTTPCommentId(Schema):
+    def setSchema(self):
+        self.comment_id         = SchemaElement(basestring, required=True)
+
+class HTTPCommentSlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+        
+        self.stamp_id           = SchemaElement(basestring, required=True)
+
+
+# ######## #
+# Favorite #
+# ######## #
+
+class HTTPFavorite(Schema):
+    def setSchema(self):
+        self.favorite_id        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.entity             = HTTPEntityMini(required=True)
+        self.stamp              = HTTPStamp()
+        self.created            = SchemaElement(basestring)
+        self.complete           = SchemaElement(bool)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Favorite':
+            data                = schema.exportSparse()
+            entity              = EntityMini(data.pop('entity', None))
+            stamp               = Stamp(data.pop('stamp', None))
+            data['entity']      = HTTPEntityMini().importSchema(entity).exportSparse()
+            
+            if stamp.stamp_id != None:
+                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+
+            self.importData(data, overflow=True)
+            self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        
+        return self
+
+class HTTPFavoriteNew(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+
+
+# ######## #
+# Activity #
+# ######## #
+
+class HTTPActivity(Schema):
+    def setSchema(self):
+        # Metadata
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.user               = HTTPUserMini()
+        self.created            = SchemaElement(basestring)
+        self.benefit            = SchemaElement(int)
+
+        # Image
+        self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
+        # Text
+        self.subject            = SchemaElement(basestring)
+        self.subject_objects    = SchemaList(ActivityObjectSchema())
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_format       = ActivityFormatSchema()
+        self.blurb_objects      = SchemaList(ActivityObjectSchema())
+
+        # Links
+        self.linked_user        = HTTPUserMini()
+        self.linked_stamp       = HTTPStamp()
+        self.linked_entity      = HTTPEntity()
+        self.linked_url         = HTTPLinkedURL()
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Activity':
+            data                = schema.value
+            link                = data.pop('link', {})
+            linked_entity       = link.pop('linked_entity', None)
+            linked_stamp        = link.pop('linked_stamp', None)
+            linked_user         = link.pop('linked_user', None)
+            linked_url          = link.pop('linked_url', None)
+            user                = data.pop('user', None)
+
+            self.importData(data, overflow=True)
+
+            if user is not None:
+                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
+            
+            if linked_stamp is not None:
+                self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
+            elif linked_user is not None:
+                self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
+            elif linked_entity is not None:
+                self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
+            elif linked_url is not None:
+                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
+
+            self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPActivitySlice(HTTPGenericSlice):
+    def setSchema(self):
+        HTTPGenericSlice.setSchema(self)
+
+class HTTPLinkedURL(Schema):
+    def setSchema(self):
+        self.url                = SchemaElement(basestring, required=True)
+        self.chrome             = SchemaElement(bool)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'LinkedURL':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+
+# #### #
+# Menu #
+# #### #
+
+class HTTPMenu(Schema):
+    def setSchema(self):
+        self.disclaimer = SchemaElement(basestring)
+        self.attribution_image = SchemaElement(basestring)
+        self.attribution_image_link = SchemaElement(basestring)
+        self.menus = SchemaList(HTTPSubmenu())
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'MenuSchema':
+            self.disclaimer = schema.disclaimer
+            self.attribution_image = schema.attribution_image
+            self.attribution_image_link = schema.attribution_image_link
+            self.menus = schema.menus.value
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPSubmenu(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.times = HTTPTimes()
+        self.footnote = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.sections = SchemaList(HTTPMenuSection())
+
+class HTTPMenuSection(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.short_desc = SchemaElement(basestring)
+        self.items = SchemaList(HTTPMenuItem())
+
+class HTTPMenuItem(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+        self.categories = SchemaList(SchemaElement(basestring))
+        self.short_desc = SchemaElement(basestring)
+        self.spicy = SchemaElement(int)
+        self.allergens = SchemaList(SchemaElement(basestring))
+        self.allergen_free = SchemaList(SchemaElement(basestring))
+        self.restrictions = SchemaList(SchemaElement(basestring))
+        self.prices = SchemaList(HTTPMenuPrice())
+
+class HTTPMenuPrice(Schema):
+    def setSchema(self):
+        self.title = SchemaElement(basestring)
+        self.price = SchemaElement(basestring)
+        self.calories = SchemaElement(int)
+        self.unit = SchemaElement(basestring)
+        self.currency = SchemaElement(basestring)
+
+class HTTPTimes(Schema):
+    def setSchema(self):
+        self.sun = SchemaList(HTTPHours())
+        self.mon = SchemaList(HTTPHours())
+        self.tue = SchemaList(HTTPHours())
+        self.wed = SchemaList(HTTPHours())
+        self.thu = SchemaList(HTTPHours())
+        self.fri = SchemaList(HTTPHours())
+        self.sat = SchemaList(HTTPHours())
+
+class HTTPHours(Schema):
+    def setSchema(self):
+        self.open = SchemaElement(basestring)
+        self.close = SchemaElement(basestring)
+        self.desc = SchemaElement(basestring)
+
+
+# ########## #
+# Deprecated #
+# ########## #
+
+class HTTPEntity_stampedtest(Schema):
+    def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring, required=True)
@@ -705,657 +1893,4 @@ class HTTPEntity(Schema):
             return amazon_image_re.sub(r'\1.jpg', url)
         
         return url
-
-class HTTPEntityNew(Schema):
-    def setSchema(self):
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-        self.cast               = SchemaElement(basestring)
-        self.director           = SchemaElement(basestring)
-        self.release_date       = SchemaElement(basestring)
-        self.artist             = SchemaElement(basestring)
-        self.album              = SchemaElement(basestring)
-        self.author             = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            schema.importData({
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-            })
-
-            if self.desc is not None:
-                schema.desc = self.desc
-
-            if self.address is not None:
-                schema.address = self.address 
-
-            if self.director is not None:
-                schema.director = self.director
-
-            if self.cast is not None:
-                schema.cast = self.cast
-
-            if self.album is not None:
-                schema.album_name = self.album
-
-            if self.author is not None:
-                schema.author = self.author
-
-            if self.artist is not None:
-                schema.artist_display_name = self.artist
-
-            if self.release_date is not None:
-                schema.original_release_date = self.release_date
-
-            if _coordinatesFlatToDict(self.coordinates) is not None:
-                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
-
-class HTTPEntityEdit(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring)
-        self.subtitle           = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            schema.importData({
-                'entity_id':    self.entity_id,
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-                'desc':         self.desc
-            })
-            schema.details.place.address = self.address 
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
-
-class HTTPEntityAutosuggest(Schema):
-    def setSchema(self):
-        self.search_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring, required=True)
-        self.distance           = SchemaElement(float)
-    
-    def importSchema(self, schema, distance):
-        if schema.__class__.__name__ == 'Entity':
-            from Entity import setFields
-            setFields(schema, detailed=True)
-
-            if schema.search_id is not None:
-                self.search_id = schema.search_id
-
-            else:
-                self.search_id = schema.entity_id
-            assert self.search_id is not None
-
-            self.title = schema.title
-            self.subtitle = schema.subtitle
-            self.category = schema.category
-            if isinstance(distance, float) and distance >= 0:
-                self.distance = distance
-            
-            if self.subtitle is None:
-                entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
-        else:
-            raise NotImplementedError
-        return self
-
-class HTTPEntityId(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-
-class HTTPEntityIdSearchId(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
-        self.search_id          = SchemaElement(basestring)
-
-class HTTPEntitySearch(Schema):
-    def setSchema(self):
-        self.q                  = SchemaElement(basestring, required=True)
-        self.coordinates        = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.local              = SchemaElement(bool)
-        self.page               = SchemaElement(int, default=0)
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'EntitySearch':
-            schema.importData({'q': self.q})
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-            schema.importData({'category': self.category})
-            schema.importData({'subcategory': self.subcategory})
-            schema.importData({'local': self.local})
-            schema.importData({'page': self.page})
-        else:
-            raise NotImplementedError
-        return schema
-
-class HTTPEntityNearby(Schema):
-    def setSchema(self):
-        self.coordinates        = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.page               = SchemaElement(int, default=0)
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'EntityNearby':
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-            schema.importData({'category': self.category})
-            schema.importData({'subcategory': self.subcategory})
-            schema.importData({'page': self.page})
-        else:
-            raise NotImplementedError
-        return schema
-
-# ###### #
-# Stamps #
-# ###### #
-
-class HTTPStamp(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.entity             = HTTPEntity(required=True)
-        self.user               = HTTPUserMini(required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(CreditSchema())
-        self.comment_preview    = SchemaList(HTTPComment())
-        self.image_dimensions   = SchemaElement(basestring)
-        self.image_url          = SchemaElement(basestring)
-        self.created            = SchemaElement(basestring)
-        self.modified           = SchemaElement(basestring)
-        self.num_comments       = SchemaElement(int)
-        self.num_likes          = SchemaElement(int)
-        self.like_threshold_hit = SchemaElement(bool)
-        self.is_liked           = SchemaElement(bool)
-        self.is_fav             = SchemaElement(bool)
-        self.via                = SchemaElement(basestring)
-        self.url                = SchemaElement(basestring)
-    
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Stamp':
-            data                = schema.exportSparse()
-            coordinates         = data['entity'].pop('coordinates', None)
-            comments            = data.pop('comment_preview', [])
-            mentions            = data.pop('mentions', [])
-            credit              = data.pop('credit', [])
-            
-            comment_preview = []
-            for comment in comments:
-                comment = Comment(comment)
-                comment = HTTPComment().importSchema(comment).exportSparse()
-                comment_preview.append(comment)
-            data['comment_preview'] = comment_preview
-
-            if len(mentions) > 0:
-                data['mentions'] = mentions
-
-            if len(credit) > 0:
-                data['credit'] = credit
-
-            self.importData(data, overflow=True)
-            self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
-            self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
-            self.like_threshold_hit     = schema.like_threshold_hit
-            self.created                = schema.timestamp.created
-            self.modified               = schema.timestamp.modified
-
-            self.num_comments = 0
-            if schema.num_comments > 0:
-                self.num_comments       = schema.num_comments
-            
-            self.num_likes = 0
-            if schema.num_likes > 0:
-                self.num_likes          = schema.num_likes
-
-            self.is_liked = False
-            if schema.is_liked:
-                self.is_liked = True
-
-            self.is_fav = False
-            if schema.is_fav:
-                self.is_fav = True
-
-            if self.image_dimensions != None:
-                self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
-
-            stamp_title = encodeStampTitle(schema.entity.title)
-            self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
-                (schema.user.screen_name, schema.stamp_num, stamp_title)
-        
-        else:
-            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
-            raise NotImplementedError
-        
-        return self
-
-class HTTPImageUpload(Schema):
-    def setSchema(self):
-        self.image              = SchemaElement(basestring, normalize=False)
-        
-        # for asynchronous image uploads
-        self.temp_image_url     = SchemaElement(basestring)
-        self.temp_image_width   = SchemaElement(int)
-        self.temp_image_height  = SchemaElement(int)
-
-class HTTPStampNew(HTTPImageUpload):
-    def setSchema(self):
-        HTTPImageUpload.setSchema(self)
-        
-        self.entity_id          = SchemaElement(basestring)
-        self.search_id          = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring)
-        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
-
-class HTTPStampEdit(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
-
-class HTTPStampId(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-
-class HTTPGenericSlice(Schema):
-    def setSchema(self):
-        # paging
-        self.limit              = SchemaElement(int)
-        self.offset             = SchemaElement(int)
-        
-        # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
-        self.sort               = SchemaElement(basestring, default='modified')
-        self.reverse            = SchemaElement(bool,       default=False)
-        self.coordinates        = SchemaElement(basestring) # "lat,lng"
-        
-        # filtering
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
-    
-    def _convertData(self, data):
-        if 'coordinates' in data:
-            try:
-                lat, lng = data['coordinates'].split(',')
-                data['coordinates'] = {
-                    'lat' : float(lat), 
-                    'lng' : float(lng)
-                }
-            except:
-                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
-        
-        if 'since' in data:
-            try: 
-                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
-            except:
-                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-        
-        if 'before' in data:
-            try: 
-                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
-            except:
-                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-        
-        # TODO: validate since <= before
-        
-        if 'offset' not in data:
-            data['offset'] = 0
-        
-        return data
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'GenericSlice':
-            data = self._convertData(self.exportSparse())
-            schema.importData(data)
-        else:
-            raise NotImplementedError
-        
-        return schema
-
-class HTTPGenericCollectionSlice(HTTPGenericSlice):
-    def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
-        
-        # filtering
-        self.query              = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.viewport           = SchemaElement(basestring) # "lat0,lng0,lat1,lng1"
-        
-        # misc options
-        self.quality            = SchemaElement(int,  default=1)
-        self.deleted            = SchemaElement(bool, default=False)
-        self.comments           = SchemaElement(bool, default=True)
-        self.unique             = SchemaElement(bool, default=False)
-    
-    def _convertData(self, data):
-        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
-        
-        if 'viewport' in data:
-            try:
-                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
-                
-                data['viewport'] = {
-                    'upperLeft' : {
-                        'lat' : float(lat0), 
-                        'lng' : float(lng0), 
-                    }, 
-                    'lowerRight' : {
-                        'lat' : float(lat1), 
-                        'lng' : float(lng1), 
-                    }
-                }
-                
-                # TODO: validate viewport
-            except:
-                raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
-        
-        return data
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'GenericCollectionSlice':
-            data = self._convertData(self.exportSparse())
-            schema.importData(data)
-        else:
-            raise NotImplementedError
-        
-        return schema
-
-class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
-    def setSchema(self):
-        HTTPGenericCollectionSlice.setSchema(self)
-        
-        self.user_id            = SchemaElement(basestring)
-        self.screen_name        = SchemaElement(basestring)
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'UserCollectionSlice':
-            data = self._convertData(self.exportSparse())
-            schema.importData(data)
-        else:
-            raise NotImplementedError
-        
-        return schema
-
-class HTTPFriendsSlice(HTTPGenericCollectionSlice):
-    def setSchema(self):
-        HTTPGenericCollectionSlice.setSchema(self)
-        
-        self.distance           = SchemaElement(int)
-        self.inclusive          = SchemaElement(bool)
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'FriendsSlice':
-            data = self._convertData(self.exportSparse())
-            schema.importData(data)
-        else:
-            raise NotImplementedError
-        
-        return schema
-
-class HTTPStampImage(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.image              = SchemaElement(basestring, required=True, normalize=False)
-
-class HTTPDeletedStamp(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.modified           = SchemaElement(basestring)
-        self.deleted            = SchemaElement(bool)
-    
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'DeletedStamp':
-            self.importData(schema.exportSparse(), overflow=True)
-            self.modified       = schema.timestamp.modified
-        else:
-            raise NotImplementedError
-        
-        return self
-
-# ######## #
-# Comments #
-# ######## #
-
-class HTTPComment(Schema):
-    def setSchema(self):
-        self.comment_id         = SchemaElement(basestring, required=True)
-        self.user               = HTTPUserMini(required=True)
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.restamp_id         = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring, required=True)
-        self.mentions           = SchemaList(MentionSchema())
-        self.created            = SchemaElement(basestring)
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Comment':
-            self.importData(schema.exportSparse(), overflow=True)
-            self.created = schema.timestamp.created
-            self.user = HTTPUserMini().importSchema(schema.user).exportSparse()
-
-        else:
-            raise NotImplementedError
-
-        return self
-
-class HTTPCommentNew(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.blurb              = SchemaElement(basestring, required=True)
-
-class HTTPCommentId(Schema):
-    def setSchema(self):
-        self.comment_id         = SchemaElement(basestring, required=True)
-
-class HTTPCommentSlice(HTTPGenericSlice):
-    def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
-        
-        self.stamp_id           = SchemaElement(basestring, required=True)
-
-# ######## #
-# Favorite #
-# ######## #
-
-class HTTPFavorite(Schema):
-    def setSchema(self):
-        self.favorite_id        = SchemaElement(basestring, required=True)
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.entity             = HTTPEntity(required=True)
-        self.stamp              = HTTPStamp()
-        self.created            = SchemaElement(basestring)
-        self.complete           = SchemaElement(bool)
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Favorite':
-            data                = schema.exportSparse()
-            entity              = EntityMini(data.pop('entity', None))
-            stamp               = Stamp(data.pop('stamp', None))
-            data['entity']      = HTTPEntity().importSchema(entity).exportSparse()
-            
-            if stamp.stamp_id != None:
-                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
-
-            self.importData(data, overflow=True)
-            self.created = schema.timestamp.created
-        else:
-            raise NotImplementedError
-        
-        return self
-
-class HTTPFavoriteNew(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
-        self.search_id          = SchemaElement(basestring)
-        self.stamp_id           = SchemaElement(basestring)
-
-
-# ######## #
-# Activity #
-# ######## #
-
-class HTTPActivity(Schema):
-    def setSchema(self):
-        # Metadata
-        self.activity_id        = SchemaElement(basestring, required=True)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = HTTPUserMini()
-        self.created            = SchemaElement(basestring)
-        self.benefit            = SchemaElement(int)
-
-        # Image
-        self.image              = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
-
-        # Text
-        self.subject            = SchemaElement(basestring)
-        self.subject_objects    = SchemaList(ActivityObjectSchema())
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = ActivityFormatSchema()
-        self.blurb_objects      = SchemaList(ActivityObjectSchema())
-
-        # Links
-        self.linked_user        = HTTPUserMini()
-        self.linked_stamp       = HTTPStamp()
-        self.linked_entity      = HTTPEntity()
-        self.linked_url         = HTTPLinkedURL()
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Activity':
-            data                = schema.value
-            link                = data.pop('link', {})
-            linked_entity       = link.pop('linked_entity', None)
-            linked_stamp        = link.pop('linked_stamp', None)
-            linked_user         = link.pop('linked_user', None)
-            linked_url          = link.pop('linked_url', None)
-            user                = data.pop('user', None)
-
-            self.importData(data, overflow=True)
-
-            if user is not None:
-                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
-            
-            if linked_stamp is not None:
-                self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
-            elif linked_user is not None:
-                self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
-            elif linked_entity is not None:
-                self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
-            elif linked_url is not None:
-                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
-
-            self.created = schema.timestamp.created
-        else:
-            raise NotImplementedError
-        return self
-
-class HTTPActivitySlice(HTTPGenericSlice):
-    def setSchema(self):
-        HTTPGenericSlice.setSchema(self)
-
-class HTTPLinkedURL(Schema):
-    def setSchema(self):
-        self.url                = SchemaElement(basestring, required=True)
-        self.chrome             = SchemaElement(bool)
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'LinkedURL':
-            self.importData(schema.exportSparse(), overflow=True)
-        else:
-            raise NotImplementedError
-        return self
-
-
-# #### #
-# Menu #
-# #### #
-
-class HTTPMenu(Schema):
-    def setSchema(self):
-        self.disclaimer = SchemaElement(basestring)
-        self.attribution_image = SchemaElement(basestring)
-        self.attribution_image_link = SchemaElement(basestring)
-        self.menus = SchemaList(HTTPSubmenu())
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'MenuSchema':
-            self.disclaimer = schema.disclaimer
-            self.attribution_image = schema.attribution_image
-            self.attribution_image_link = schema.attribution_image_link
-            self.menus = schema.menus.value
-        else:
-            raise NotImplementedError
-        return self
-
-class HTTPSubmenu(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.times = HTTPTimes()
-        self.footnote = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.short_desc = SchemaElement(basestring)
-        self.sections = SchemaList(HTTPMenuSection())
-
-class HTTPMenuSection(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.short_desc = SchemaElement(basestring)
-        self.items = SchemaList(HTTPMenuItem())
-
-class HTTPMenuItem(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.categories = SchemaList(SchemaElement(basestring))
-        self.short_desc = SchemaElement(basestring)
-        self.spicy = SchemaElement(int)
-        self.allergens = SchemaList(SchemaElement(basestring))
-        self.allergen_free = SchemaList(SchemaElement(basestring))
-        self.restrictions = SchemaList(SchemaElement(basestring))
-        self.prices = SchemaList(HTTPMenuPrice())
-
-class HTTPMenuPrice(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.price = SchemaElement(basestring)
-        self.calories = SchemaElement(int)
-        self.unit = SchemaElement(basestring)
-        self.currency = SchemaElement(basestring)
-
-class HTTPTimes(Schema):
-    def setSchema(self):
-        self.sun = SchemaList(HTTPHours())
-        self.mon = SchemaList(HTTPHours())
-        self.tue = SchemaList(HTTPHours())
-        self.wed = SchemaList(HTTPHours())
-        self.thu = SchemaList(HTTPHours())
-        self.fri = SchemaList(HTTPHours())
-        self.sat = SchemaList(HTTPHours())
-
-class HTTPHours(Schema):
-    def setSchema(self):
-        self.open = SchemaElement(basestring)
-        self.close = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
 

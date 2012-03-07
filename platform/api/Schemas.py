@@ -27,6 +27,7 @@ class AccessToken(Schema):
         self.client_id          = SchemaElement(basestring)
         self.refresh_token      = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
+        self.api_version        = SchemaElement(int)
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 

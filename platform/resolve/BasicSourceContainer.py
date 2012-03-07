@@ -40,7 +40,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
         else:
-            self.__global_max_age = timedelta(0)
+            self.__global_max_age = timedelta(minutes=10)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2

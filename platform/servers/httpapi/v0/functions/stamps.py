@@ -12,7 +12,8 @@ import logs
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     
     data        = schema.exportSparse()
@@ -29,7 +30,8 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampEdit(), request)
 
     ### TEMP: Generate list of changes. Need to do something better eventually...
@@ -49,7 +51,8 @@ def update(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_image(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseFileUpload(HTTPStampImage(), request, 'image')
     
     ret         = stampedAPI.updateStampImage(authUserId, schema.stamp_id, \
@@ -63,7 +66,8 @@ def update_image(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.getStamp(schema.stamp_id, authUserId)
@@ -75,7 +79,8 @@ def show(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.removeStamp(authUserId, schema.stamp_id)
@@ -87,7 +92,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def likesCreate(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.addLike(authUserId, schema.stamp_id)
@@ -99,7 +105,8 @@ def likesCreate(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def likesRemove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.removeLike(authUserId, schema.stamp_id)
@@ -111,7 +118,8 @@ def likesRemove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def likesShow(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPStampId(), request)
 
     userIds     = stampedAPI.getLikes(authUserId, schema.stamp_id)

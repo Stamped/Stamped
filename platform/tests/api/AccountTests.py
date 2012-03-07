@@ -9,6 +9,9 @@ __license__   = "TODO"
 import Globals, utils
 from AStampedAPITestCase import *
 
+CLIENT_ID = DEFAULT_CLIENT_ID
+CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
+
 # ####### #
 # ACCOUNT #
 # ####### #

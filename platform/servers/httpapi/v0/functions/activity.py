@@ -11,7 +11,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPActivitySlice(), request)
 
     activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())

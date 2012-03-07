@@ -12,7 +12,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def friends(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     userIds     = stampedAPI.getFriends(schema)
@@ -28,7 +29,8 @@ def friends(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def followers(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     userIds     = stampedAPI.getFollowers(schema)
@@ -45,7 +47,8 @@ def followers(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def timeout(request):
-    authUserId  = checkOAuth(request)
+    authUserId, apiVersion = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
 
     time.sleep(55)
