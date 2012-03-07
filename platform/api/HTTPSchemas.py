@@ -648,7 +648,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', Movie, icon='http://static.stamped.com/assets/film.png')
+                self._addMetadata('Category', 'Movie', icon='http://static.stamped.com/assets/film.png')
                 self._addMetadata('Overview', schema.desc, extended=True)
                 self.metadata.overflow = len(self.metadata.data)
                 self._addMetadata('Cast', schema.cast, extended=True)
