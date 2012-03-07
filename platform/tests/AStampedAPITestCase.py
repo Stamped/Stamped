@@ -12,8 +12,12 @@ import atexit, os, json, mimetools, sys, urllib, urllib2
 from pprint           import pprint
 from StampedTestUtils import *
 
-CLIENT_ID       = "stampedtest"
-CLIENT_SECRET   = "august1ftw"
+DEFAULT_CLIENT_ID       = "stampedtest"
+CLIENT_SECRETS  = {
+    'stampedtest': 'august1ftw',
+    'ios8': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+}
+
 TWITTER_KEY     = "322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U"
 TWITTER_SECRET  = "FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ"
 FB_TOKEN        = "AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZD"
@@ -143,12 +147,14 @@ class AStampedAPITestCase(AStampedTestCase):
         global _test_case, _accounts
         _test_case = self
         
-        email = kwargs.pop('email', '%s@stamped.com' % name)
+        email       = kwargs.pop('email', '%s@stamped.com' % name)
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
         
         path = "account/create.json"
         data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
+            "client_id": c_id,
+            "client_secret": c_secret,
             "name": name,
             "email": email, 
             "password": password,

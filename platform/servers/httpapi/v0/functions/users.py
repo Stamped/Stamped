@@ -11,7 +11,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.getUser(schema, authUserId)
@@ -23,7 +24,8 @@ def show(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def lookup(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserIds(), request)
 
     users       = stampedAPI.getUsers(schema.user_ids.value, \
@@ -39,7 +41,8 @@ def lookup(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def search(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserSearch(), request)
     
     users       = stampedAPI.searchUsers(authUserId, schema.q, schema.limit, schema.relationship)
@@ -55,7 +58,8 @@ def search(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def suggested(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPSuggestedUsers(), request).exportSchema(SuggestedUserRequest())
     
     results     = stampedAPI.getSuggestedUsers(authUserId, schema)
@@ -77,7 +81,8 @@ def suggested(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def privacy(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     privacy     = stampedAPI.getPrivacy(schema)
@@ -88,7 +93,8 @@ def privacy(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def findEmail(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
     q = schema.q.value
@@ -114,7 +120,8 @@ def findEmail(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def findPhone(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
     q = schema.q.value
@@ -145,7 +152,8 @@ def findPhone(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def findTwitter(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindTwitterUser(), request, obfuscate=['q', 'twitter_key', 'twitter_secret'])
 
     users = []
@@ -181,7 +189,8 @@ def findTwitter(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def findFacebook(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPFindFacebookUser(), request, obfuscate=['q', 'facebook_token'])
 
     users = []

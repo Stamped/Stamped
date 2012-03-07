@@ -335,7 +335,7 @@ class StampedAuth(AStampedAuth):
 
             if token['expires'] > datetime.utcnow():
                 logs.info("Authenticated user id: %s" % token.user_id)
-                return token.user_id
+                return token.user_id, token.client_id
             
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(token.token_id)

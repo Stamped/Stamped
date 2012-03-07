@@ -671,15 +671,29 @@ resort.
             # Dictionary or List
             if isinstance(v, Schema) or isinstance(v, SchemaList):
                 v._overflow = self._overflow
-                
+
                 if item == None:
                     if v._required == True:
-                        msg = "Missing Nested Element (%s)" % k
+                        path = None
+                        try:
+                            path = self.name
+                            parent = self._parent
+                            while parent is not None:
+                                path = '%s > %s' % (parent.name, path)
+                                parent = parent._parent
+                        except:
+                            pass
+                        msg = "Missing Nested Element (%s, %s)" % (path, k)
                         logs.warning(msg)
                         raise SchemaValidationError(msg)
                 
                 if clear:
-                    v.setElement(k, item)
+                    if item is not None:
+                        v.setElement(k, item)
+                    elif isinstance(v, SchemaList):
+                        v._data = []
+                    else:
+                        v.setSchema()
                 else:
                     v.importData(item)
             

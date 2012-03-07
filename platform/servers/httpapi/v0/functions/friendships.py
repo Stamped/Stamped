@@ -11,7 +11,8 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.addFriendship(authUserId, schema)
@@ -23,7 +24,8 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.removeFriendship(authUserId, schema)
@@ -35,7 +37,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def check(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserRelationship(), request)
 
     result      = stampedAPI.checkFriendship(authUserId, schema)
@@ -46,7 +49,8 @@ def check(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def friends(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     userIds     = stampedAPI.getFriends(schema)
@@ -58,7 +62,8 @@ def friends(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def followers(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     userIds     = stampedAPI.getFollowers(schema)
@@ -70,7 +75,8 @@ def followers(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def approve(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.approveFriendship(authUserId, schema)
@@ -82,7 +88,8 @@ def approve(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def blocksCreate(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.addBlock(authUserId, schema)
@@ -94,7 +101,8 @@ def blocksCreate(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def blocksCheck(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     result      = stampedAPI.checkBlock(authUserId, schema)
@@ -105,7 +113,8 @@ def blocksCheck(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def blocking(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(None, request)
 
     userIds     = stampedAPI.getBlocks(authUserId)
@@ -117,7 +126,8 @@ def blocking(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def blocksRemove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPUserId(), request)
 
     user        = stampedAPI.removeBlock(authUserId, schema)
@@ -129,7 +139,8 @@ def blocksRemove(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def invite(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEmail(), request)
 
     result      = stampedAPI.inviteFriend(authUserId, schema.email)

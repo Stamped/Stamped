@@ -184,12 +184,13 @@ def checkOAuth(request):
     
     ### Validate OAuth Access Token
     try:
-        authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
+        authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id == None:
             raise
         
         logs.user(authenticated_user_id)
-        return authenticated_user_id
+        logs.client(client_id)
+        return authenticated_user_id, client_id
     except StampedHTTPError:
         raise
     except Exception:

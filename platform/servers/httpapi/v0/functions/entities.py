@@ -8,17 +8,26 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+def _convertHTTPEntity(entity, clientId=None):
+    if clientId == 'stampedtest':
+        logs.info('STAMPED TEST!!!')
+        return HTTPEntity_stampedtest().importSchema(entity)
+    else:
+        return HTTPEntity().importSchema(entity)
+
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityNew(), request)
     entity      = schema.exportSchema(Entity())
 
     entity.generated_by = authUserId
     
     entity      = stampedAPI.addEntity(entity)
-    entity      = HTTPEntity().importSchema(entity)
+    entity      = _convertHTTPEntity(entity, clientId)
 
     return transformOutput(entity.exportSparse())
 
@@ -26,17 +35,19 @@ def create(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+
     schema      = parseRequest(HTTPEntityIdSearchId(), request)
     entity      = stampedAPI.getEntity(schema, authUserId)
-    entity      = HTTPEntity().importSchema(entity)
+    entity      = _convertHTTPEntity(entity, clientId)
 
     return transformOutput(entity.exportSparse())
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityEdit(), request)
 
     ### TEMP: Generate list of changes. Need to do something better eventually...
@@ -56,7 +67,7 @@ def update(request):
         }
     
     entity      = stampedAPI.updateCustomEntity(authUserId, schema.entity_id, data)
-    entity      = HTTPEntity().importSchema(entity)
+    entity      = _convertHTTPEntity(entity, clientId)
 
     return transformOutput(entity.exportSparse())
 
@@ -64,10 +75,11 @@ def update(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityId(), request)
     entity      = stampedAPI.removeCustomEntity(authUserId, schema.entity_id)
-    entity      = HTTPEntity().importSchema(entity)
+    entity      = _convertHTTPEntity(entity, clientId)
 
     return transformOutput(entity.exportSparse())
 
@@ -75,7 +87,8 @@ def remove(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def search(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntitySearch(), request)
     search      = schema.exportSchema(EntitySearch())
     
@@ -98,7 +111,8 @@ def search(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def nearby(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityNearby(), request)
     search      = schema.exportSchema(EntityNearby())
     
@@ -118,7 +132,8 @@ def nearby(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def menu(request):
-    authUserId  = checkOAuth(request)
+    authUserId, clientId = checkOAuth(request)
+    
     schema      = parseRequest(HTTPEntityId(), request)
     menu        = stampedAPI.getMenu(schema.entity_id)
     httpMenu    = HTTPMenu().importSchema(menu)
