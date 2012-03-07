@@ -533,8 +533,8 @@ class HTTPEntity(Schema):
 
                 if schema.sources.openTable.reserveURL is not None:
                     opentable           = HTTPEntitySource()
-                    opentabl.name       = 'OpenTable'
-                    opentabl.source     = 'opentable'
+                    opentable.name       = 'OpenTable'
+                    opentable.source     = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                             schema.sources.openTable.reserveURL
@@ -549,8 +549,8 @@ class HTTPEntity(Schema):
                                     schema.sources.openTable.rid
 
                     opentable           = HTTPEntitySource()
-                    opentabl.name       = 'OpenTable'
-                    opentabl.source     = 'opentable'
+                    opentable.name       = 'OpenTable'
+                    opentable.source     = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = mobileUrl # TODO: Allow API to specify?
                     opentable.link_type = 'url'
