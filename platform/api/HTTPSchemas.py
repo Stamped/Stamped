@@ -498,6 +498,9 @@ class HTTPEntity(Schema):
             item.name = name
             item.value = value
 
+            if 'key' in kwargs:
+                item.key = kwargs['key']
+
             if 'icon' in kwargs:
                 item.icon = kwargs['icon']
 
@@ -529,6 +532,14 @@ class HTTPEntity(Schema):
             
             # Restaurant / Bar
             if schema.category == 'food':
+
+                # Metadata
+
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Cuisine', schema.cuisine)
+                self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Description', schema.desc, extended=True)
 
                 # Actions: Reservation
 
@@ -587,14 +598,6 @@ class HTTPEntity(Schema):
 
                 self._addAction('menu', 'View menu', sources)
 
-                # Metadata
-
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
-                self._addMetadata('Cuisine', schema.cuisine)
-                self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
-                self._addMetadata('Description', schema.desc, extended=True)
-
 
             # Generic Place
             elif coordinates is not None:
@@ -605,6 +608,13 @@ class HTTPEntity(Schema):
 
                 if schema.author is not None:
                     self.caption = 'By %s' % schema.author
+
+                # Metadata
+
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Publish Date', schema.publish_date)
+                self._addMetadata('Description', schema.desc, extended=True)
+                self._addMetadata('Publisher', schema.publisher)
 
                 # Actions: Buy
 
@@ -622,28 +632,103 @@ class HTTPEntity(Schema):
 
                 self._addAction('buy', 'Buy now', sources)
 
+            
+            elif schema.category == 'film':
+
+                if schema.subcategory == 'movie' and schema.track_length is not None:
+                    try:
+                        m = (int(schema.track_length) % 3600) / 60
+                        h = (int(schema.track_length) - (int(schema.track_length) % 3600)) / 3600
+                        if h > 0:
+                            self.caption = '%s hr %s min' % (h, m)
+                        else:
+                            self.caption = '%s min' % m
+                    except:
+                        pass
+
+                if schema.subcategory == 'tv' and schema.network_name is not None:
+                    self.caption = schema.network_name
+
                 # Metadata
 
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
-                self._addMetadata('Publish Date', schema.publish_date)
-                self._addMetadata('Description', schema.desc, extended=True)
-                self._addMetadata('Publisher', schema.publisher)
-            
-            # elif self.category == 'film':
-            #     self.length         = schema.track_length
-            #     self.rating         = schema.mpaa_rating
-                
-            #     if schema.genre is not None:
-            #         self.genre = schema.genre
-            #     elif schema.ngenres is not None:
-            #         self.genre = string.join((str(i) for i in schema.ngenres), '; ')
-                
-            #     if schema.short_description != None:
-            #         new_desc = schema.short_description
-            #         if new_desc != '' and new_desc != None  and ( self.desc == None or self.desc == '' ):
-            #             self.desc = new_desc
+                category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
+                self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
+                self._addMetadata('Overview', schema.desc, extended=True)
+                self.metadata.overflow = len(self.metadata.data)
+                self._addMetadata('Cast', schema.cast, extended=True)
+                self._addMetadata('Director', schema.director)
+                self._addMetadata('Genres', schema.genre)
+                self._addMetadata('Rating', schema.mpaa_rating, key='rating')
+
+                # Actions: Find Tickets
+
+                if schema.subcategory == 'movie':
+                    sources = []
+
+                    if schema.sources.fandango.fid is not None:
+                        fandango            = HTTPEntitySource()
+                        fandango.name       = 'Fandango'
+                        fandango.source     = 'fandango'
+                        fandango.source_id  = schema.sources.fandango.fid
+                        fandango.icon       = 'http://static.stamped.com/assets/fandango.png'
+                        fandango.link       = schema.sources.fandango.f_url 
+                        fandango.link_type  = 'url'
+                        sources.append(fandango)
+
+                    self._addAction('tickets', 'Find tickets', sources)
+
+                # Actions: Watch Now
+
+                sources = []
+
+                if schema.sources.itunes_id is not None:
+                    itunes              = HTTPEntitySource()
+                    itunes.name         = 'iTunes'
+                    itunes.source       = 'itunes'
+                    itunes.source_id    = schema.sources.itunes_id
+                    itunes.link         = 'http://itunes.apple.com/us/movie/id%s' % schema.sources.itunes_id
+                    # Only add icon if no movie tickets to be found
+                    if len(self.actions) == 0:
+                        itunes.icon     = 'http://static.stamped.com/assets/itunes.png'
+                    sources.append(itunes)
+
+                self._addAction('watch', 'Watch now', sources)
+
+                # Actions: Add to Queue
+
+                ### TODO: Add Netflix
+
+                # Actions: Watch Trailer
+
+                ### TODO: Add source
+
+                # Actions: Download
+
+                sources = []
+
+                if schema.sources.amazon_underlying is not None:
+                    amazon              = HTTPEntitySource()
+                    amazon.name         = 'Amazon'
+                    amazon.source       = 'amazon'
+                    amazon.source_id    = schema.sources.amazon_underlying
+                    amazon.icon         = 'http://static.stamped.com/assets/amazon.png'
+                    amazon.link         = _buildAmazonURL(schema.sources.amazon_underlying)
+                    amazon.link_type    = 'url'
+                    sources.append(amazon)
+
+                self._addAction('buy', 'Buy', sources)
+
             
             elif schema.subcategory == 'artist':
+
+                # Metadata
+
+                self._addMetadata('Category',       'Artist', icon='http://static.stamped.com/assets/music.png')
+                self._addMetadata('Biography',      schema.desc)
+
+                self.metadata.overflow = len(self.metadata.data)
+
+                self._addMetadata('Genre',          schema.genre)
 
                 # Actions: Listen
 
@@ -709,21 +794,18 @@ class HTTPEntity(Schema):
                     sources.append(itunes)
 
                 self._addAction('download', 'Download artist', sources)
-
-                # Metadata
-
-                self._addMetadata('Category',       'Artist', icon='http://static.stamped.com/assets/music.png')
-                self._addMetadata('Biography',      schema.desc)
-
-                self.metadata.overflow = len(self.metadata.data)
-
-                self._addMetadata('Genre',          schema.genre)
             
 
             elif schema.subcategory == 'app':
 
                 if schema.artist_display_name is not None:
                     self.caption = 'By %s' % schema.artist_display_name
+
+                # Metadata
+
+                self._addMetadata('Category',       'App', icon='http://static.stamped.com/assets/app.png')
+                self._addMetadata('Genre',          schema.genre)
+                self._addMetadata('Description',    schema.desc, extended=True)
 
                 # Actions: Download
 
@@ -750,12 +832,6 @@ class HTTPEntity(Schema):
                     sources.append(itunes)
 
                 self._addAction('download', 'Download', sources)
-
-                # Metadata
-
-                self._addMetadata('Category',       'App', icon='http://static.stamped.com/assets/app.png')
-                self._addMetadata('Genre',          schema.genre)
-                self._addMetadata('Description',    schema.desc, extended=True)
 
                 # Gallery
 
@@ -940,6 +1016,8 @@ class HTTPEntityGalleryItem(Schema):
         self.link               = SchemaElement(basestring)
         self.link_type          = SchemaElement(basestring)
         self.caption            = SchemaElement(basestring)
+        self.height             = SchemaElement(int)
+        self.width              = SchemaElement(int)
 
 class HTTPEntityPlaylist(Schema):
     def setSchema(self):
