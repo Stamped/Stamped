@@ -889,7 +889,7 @@ class StampedAPI(AStampedAPI):
                 'austinchronicle':  1,
                 'mariobatali':      2, 
                 'nymag':            3,
-                'urbandaddy':       4,
+                'UrbanDaddy':       4,
                 'parislemon':       5, 
                 'michaelkors':      6, 
                 'petertravers':     7,
