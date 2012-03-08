@@ -86,6 +86,9 @@ def _encodeLinkShareDeepURL(raw_url):
     return deep_url
 
 def _encodeiTunesShortURL(raw_url):
+    if raw_url is None:
+        return None
+        
     parsed_url  = urlparse.urlparse(raw_url)
     query       = "partnerId=30&siteID=%s" % LINKSHARE_TOKEN
     new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
@@ -548,18 +551,19 @@ class HTTPEntity(Schema):
             self.metadata.append(item)
     
     def _addImage(self, url):
-        domain = urlparse.urlparse(url).netloc
+        if url is not None:
+            domain = urlparse.urlparse(url).netloc
 
-        if 'amzstatic.com' in domain:
-            # try to return the maximum-resolution apple photo possible if we have 
-            # a lower-resolution version stored in our db
-            url = url.replace('100x100', '200x200').replace('170x170', '200x200')
-        
-        elif 'amazon.com' in domain:
-            # strip the 'look inside' image modifier
-            url = amazon_image_re.sub(r'\1.jpg', url)
-        
-        self.image = url
+            if 'amzstatic.com' in domain:
+                # try to return the maximum-resolution apple photo possible if we have 
+                # a lower-resolution version stored in our db
+                url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+            
+            elif 'amazon.com' in domain:
+                # strip the 'look inside' image modifier
+                url = amazon_image_re.sub(r'\1.jpg', url)
+            
+            self.image = url
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
