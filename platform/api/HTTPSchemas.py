@@ -510,6 +510,12 @@ class HTTPEntity(Schema):
             if 'extended' in kwargs:
                 item.extended = kwargs['extended']
 
+            if self.metadata.overflow is None:
+                self.metadata.overflow = 0
+
+            if 'optional' not in kwargs or kwargs['optional'] == False:
+                self.metadata.overflow = self.metadata.overflow + 1
+
             self.metadata.data.append(item)
 
     def importSchema(self, schema):
@@ -547,8 +553,8 @@ class HTTPEntity(Schema):
 
                 if schema.sources.openTable.reserveURL is not None:
                     opentable           = HTTPEntitySource()
-                    opentable.name       = 'OpenTable'
-                    opentable.source     = 'opentable'
+                    opentable.name      = 'OpenTable'
+                    opentable.source    = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                             schema.sources.openTable.reserveURL
@@ -563,8 +569,8 @@ class HTTPEntity(Schema):
                                     schema.sources.openTable.rid
 
                     opentable           = HTTPEntitySource()
-                    opentable.name       = 'OpenTable'
-                    opentable.source     = 'opentable'
+                    opentable.name      = 'OpenTable'
+                    opentable.source    = 'opentable'
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = mobileUrl # TODO: Allow API to specify?
                     opentable.link_type = 'url'
@@ -654,11 +660,10 @@ class HTTPEntity(Schema):
                 category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
                 self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
                 self._addMetadata('Overview', schema.desc, extended=True)
-                self.metadata.overflow = len(self.metadata.data)
-                self._addMetadata('Cast', schema.cast, extended=True)
-                self._addMetadata('Director', schema.director)
-                self._addMetadata('Genres', schema.genre)
-                self._addMetadata('Rating', schema.mpaa_rating, key='rating')
+                self._addMetadata('Cast', schema.cast, extended=True, optional=True)
+                self._addMetadata('Director', schema.director, optional=True)
+                self._addMetadata('Genres', schema.genre, optional=True)
+                self._addMetadata('Rating', schema.mpaa_rating, key='rating', optional=True)
 
                 # Actions: Find Tickets
 
@@ -719,16 +724,29 @@ class HTTPEntity(Schema):
                 self._addAction('buy', 'Buy', sources)
 
             
-            elif schema.subcategory == 'artist':
+            elif schema.category == 'music':
+
+                if schema.subcategory == 'artist':
+                    self.caption = 'Artist'
+
+                elif schema.subcategory == 'album' and schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
+
+                elif schema.subcategory == 'song' and schema.artist_display_name is not None:
+                    self.caption = 'By %s' % schema.artist_display_name
 
                 # Metadata
 
-                self._addMetadata('Category',       'Artist', icon='http://static.stamped.com/assets/music.png')
-                self._addMetadata('Biography',      schema.desc)
-
-                self.metadata.overflow = len(self.metadata.data)
-
-                self._addMetadata('Genre',          schema.genre)
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/music.png')
+                if schema.subcategory == 'artist':
+                    self._addMetadata('Biography', schema.desc)
+                    self._addMetadata('Genre', schema.genre, optional=True)
+                elif schema.subcategory == 'album':
+                    self._addMetadata('Genre', schema.genre)
+                    self._addMetadata('Album Details', schema.desc, optional=True)
+                elif schema.subcategory == 'song':
+                    self._addMetadata('Genre', schema.genre)
+                    self._addMetadata('Song Details', schema.desc, optional=True)
 
                 # Actions: Listen
 
@@ -758,7 +776,12 @@ class HTTPEntity(Schema):
                     spotify.icon        = 'http://static.stamped.com/assets/spotify.png'
                     sources.append(spotify)
 
-                self._addAction('listen', 'Listen to top songs', sources)
+                if schema.subcategory == 'artist':
+                    self._addAction('listen', 'Listen to top songs', sources)
+                elif schema.subcategory == 'album':
+                    self._addAction('listen', 'Listen to album', sources)
+                elif schema.subcategory == 'song':
+                    self._addAction('listen', 'Listen to song', sources)
 
                 # Actions: Add to Playlist
 
@@ -778,7 +801,12 @@ class HTTPEntity(Schema):
                     spotify.source_id   = schema.sources.spotify_id
                     sources.append(spotify)
 
-                self._addAction('playlist', 'Add artist to playlist', sources)
+                if schema.subcategory == 'artist':
+                    self._addAction('playlist', 'Add artist to playlist', sources)
+                elif schema.subcategory == 'album':
+                    self._addAction('playlist', 'Add to playlist', sources)
+                elif schema.subcategory == 'song':
+                    self._addAction('playlist', 'Add to playlist', sources)
 
                 # Actions: Download
 
@@ -793,7 +821,7 @@ class HTTPEntity(Schema):
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
-                self._addAction('download', 'Download artist', sources)
+                self._addAction('download', 'Download %s' % schema.subcategory, sources)
             
 
             elif schema.subcategory == 'app':
@@ -887,19 +915,6 @@ class HTTPEntity(Schema):
             
             # if 'preview_url' in schema:
             #     self.preview_url = schema.preview_url
-            
-            # # Affiliates
-            # if schema.rid is not None:
-            #     self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
-            #                           schema.rid
-            #     self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
-            #                           schema.rid
-            # if schema.reserveURL is not None:
-            #     self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-            #                           schema.reserveURL
-            
-            # if schema.sources.fandango.f_url is not None:
-            #     self.fandango_url = schema.f_url
             
             # if schema.sources.apple.view_url != None:
             #     itunes_url  = schema.sources.apple.view_url
