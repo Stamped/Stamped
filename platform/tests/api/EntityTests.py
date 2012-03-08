@@ -15,8 +15,7 @@ from AStampedAPITestCase import *
 
 class StampedAPIEntityTest(AStampedAPITestCase):
     def setUp(self):
-        # (self.user, self.token) = self.createAccount(client_id='ios8')
-        (self.user, self.token) = self.createAccount()
+        (self.user, self.token) = self.createAccount(client_id='ios8')
         self.entity = self.createEntity(self.token)
 
     def tearDown(self):
@@ -60,6 +59,65 @@ class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
 
 class StampedAPIEntitiesSearch(StampedAPIEntityTest):
     def test_search(self):
+        path = "entities/search.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "q": self.entity['title'], 
+        }
+        result = self.handleGET(path, data)
+        
+        self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())
+
+# ########### #
+# OLD VERSION #
+# ########### #
+
+class StampedAPIEntity0Test(AStampedAPITestCase):
+    def setUp(self):
+        (self.user, self.token) = self.createAccount(client_id='stampedtest')
+        self.entity = self.createEntity(self.token)
+
+    def tearDown(self):
+        self.deleteEntity(self.token, self.entity['entity_id'])
+        self.deleteAccount(self.token)
+
+class StampedAPIEntities0Show(StampedAPIEntity0Test):
+    def test_show_0(self):
+        path = "entities/show.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['title'], self.entity['title'])
+
+class StampedAPIEntities0Update(StampedAPIEntity0Test):
+    def test_update_0(self):
+        path = "entities/update.json"
+        desc = "Gastropub in the West Village, NYC"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id'],
+            # "category": '',
+            "desc": desc,
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['desc'], desc)
+
+class StampedAPIEntities0UTF8(StampedAPIEntity0Test):
+    def test_utf8_update_0(self):
+        path = "entities/update.json"
+        desc = "๓๙ใ1฿"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "desc": desc
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['desc'], desc.decode('utf-8'))
+
+class StampedAPIEntities0Search(StampedAPIEntity0Test):
+    def test_search_0(self):
         path = "entities/search.json"
         data = {
             "oauth_token": self.token['access_token'],
