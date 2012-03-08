@@ -696,7 +696,8 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.link         = 'http://itunes.apple.com/us/movie/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
+                    itunes.link_type    = 'url'
                     # Only add icon if no movie tickets to be found
                     if len(self.actions) == 0:
                         itunes.icon     = 'http://static.stamped.com/assets/itunes.png'
@@ -824,7 +825,7 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.link         = 'http://itunes.apple.com/us/artist/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
@@ -852,7 +853,7 @@ class HTTPEntity(Schema):
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
-                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
                 ### TEMP - apple.aid should be deprecated
@@ -862,7 +863,7 @@ class HTTPEntity(Schema):
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.apple.aid
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
-                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.apple.aid
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
@@ -878,44 +879,6 @@ class HTTPEntity(Schema):
                         self.gallery.data.append(item)
 
 
-
-            # if self.category in ['music', 'film']:
-            #     try:
-            #         if schema.release_date is not None:
-            #             date_time = schema.release_date.strftime("%h %d, %Y")
-            #         else:
-            #             date_time = parseDateString(schema.original_release_date)
-            #     except Exception:
-            #         pass
-
-            # if date_time is not None:
-            #     self.release_date   = date_time.strftime("%h %d, %Y")
-
-            # # Food
-            # self.cuisine        = schema.cuisine
-            # self.price_scale    = schema.priceScale
-
-            # # Book
-            # self.author         = schema.author
-            # self.isbn           = schema.isbn
-            # self.publisher      = schema.publisher
-            # self.format         = schema.book_format
-            # self.language       = schema.language
-            # self.edition        = schema.edition
-
-            # # Film
-            # self.cast           = schema.cast
-            # self.director       = schema.director
-            # self.network        = schema.network_name
-            # self.in_theaters    = schema.in_theaters
-            
-            # # Music
-            # self.artist_name    = schema.artist_display_name
-            # self.album_name     = schema.album_name
-            # self.label          = schema.label_studio
-            
-            # if 'preview_url' in schema:
-            #     self.preview_url = schema.preview_url
             
             # if schema.sources.apple.view_url != None:
             #     itunes_url  = schema.sources.apple.view_url
