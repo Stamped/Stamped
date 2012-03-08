@@ -36,7 +36,7 @@
 
 @property (nonatomic, readonly, retain) NSArray<STAction>* actions;
 @property (nonatomic, readonly, retain) id<STMetadata> metadata;
-@property (nonatomic, readonly, retain) id<STGallery> gallery;
+@property (nonatomic, readonly, retain) NSArray<STGalleryItem>* gallery;
 @property (nonatomic, readonly, retain) id<STPlaylist> playlist;
 
 @end

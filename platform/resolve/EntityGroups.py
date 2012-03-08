@@ -147,6 +147,7 @@ class iTunesGroup(ASubcategoryGroup):
     def __init__(self, *args, **kwargs):
         ASubcategoryGroup.__init__(self, 'itunes')
         self.addField(['itunes_id'])
+        self.addField(['itunes_url'])
         self.addEligible('song')
         self.addEligible('artist')
         self.addEligible('album')

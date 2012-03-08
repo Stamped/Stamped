@@ -78,6 +78,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
         return self.data['artistName']
 
     @lazyProperty
+    def url(self):
+        try:
+            return self.data['artistViewUrl']
+        except Exception:
+            return None
+
+    @lazyProperty
     def key(self):
         return self.data['artistId']
 
@@ -122,6 +129,13 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
         return self.data['collectionName']
 
     @lazyProperty
+    def url(self):
+        try:
+            return self.data['albumViewUrl']
+        except Exception:
+            return None
+
+    @lazyProperty
     def key(self):
         return self.data['collectionId']
 
@@ -158,6 +172,13 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
     @lazyProperty
     def name(self):
         return self.data['trackName']
+
+    @lazyProperty
+    def url(self):
+        try:
+            return self.data['trackViewUrl']
+        except Exception:
+            return None
 
     @lazyProperty
     def key(self):
@@ -199,6 +220,13 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
     @lazyProperty
     def name(self):
         return self.data['trackName']
+
+    @lazyProperty
+    def url(self):
+        try:
+            return self.data['trackViewUrl']
+        except Exception:
+            return None
 
     @lazyProperty
     def key(self):
@@ -262,6 +290,13 @@ class iTunesBook(_iTunesObject, ResolverBook):
     @lazyProperty
     def name(self):
         return self.data['trackName']
+
+    @lazyProperty
+    def url(self):
+        try:
+            return self.data['trackViewUrl']
+        except Exception:
+            return None
 
     @lazyProperty
     def key(self):
@@ -368,8 +403,10 @@ class iTunesSource(GenericSource):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
         itunes_id = entity['itunes_id']
         if itunes_id != None:
+            obj = None
             if entity['subcategory'] == 'movie':
                 movie = iTunesMovie(itunes_id)
+                obj = movie
                 if movie.rating is not None:
                     entity['mpaa_rating'] = movie.rating
                 if len(movie.genres) > 0:
@@ -378,19 +415,23 @@ class iTunesSource(GenericSource):
                 #    entity['desc'] = movie.description
             elif entity['subcategory'] == 'artist':
                 artist = iTunesArtist(itunes_id)
+                obj = artist
                 aid = entity['aid']
                 if aid == itunes_id:
                     self.__repopulateAlbums(entity, artist, controller) 
                     self.__repopulateSongs(entity, artist, controller)
             elif entity['subcategory'] == 'album':
                 album = iTunesAlbum(itunes_id)
+                obj = album
                 if len(album.genres) > 0:
                     entity['genre'] = album.genres[0]
             elif entity['subcategory'] == 'song':
                 track = iTunesTrack(itunes_id)
+                obj = track
                 if len(track.genres) > 0:
                     entity['genre'] = track.genres[0]
-
+            if obj is not None and obj.url is not None:
+                entity['itunes_url'] = obj.url
         return True
 
     def matchSource(self, query):

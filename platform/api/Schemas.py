@@ -912,6 +912,7 @@ class EntitySourcesSchema(Schema):
         self.spotify_source     = SchemaElement(basestring)
 
         self.itunes_id          = SchemaElement(basestring)
+        self.itunes_url         = SchemaElement(basestring)
         self.itunes_timestamp   = SchemaElement(datetime)
         self.itunes_source      = SchemaElement(basestring)
 
@@ -926,7 +927,7 @@ class EntitySourcesSchema(Schema):
         self.opentable_id       = SchemaElement(basestring)
         self.opentable_source   = SchemaElement(basestring)
         self.opentable_timestamp = SchemaElement(datetime)
-        
+
         self.opentable_nickname       = SchemaElement(basestring)
         self.opentable_nickname_source   = SchemaElement(basestring)
         self.opentable_nickname_timestamp= SchemaElement(datetime)

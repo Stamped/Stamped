@@ -86,7 +86,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
    nil];
   [mapping mapRelationship:@"actions" withMapping:[STSimpleAction mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadata mapping]];
-  [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];
+  [mapping mapRelationship:@"gallery" withMapping:[STSimpleGalleryItem mapping]];
   [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];
   return mapping;
 }
