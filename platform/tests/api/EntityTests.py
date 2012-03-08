@@ -15,7 +15,8 @@ from AStampedAPITestCase import *
 
 class StampedAPIEntityTest(AStampedAPITestCase):
     def setUp(self):
-        (self.user, self.token) = self.createAccount(client_id='ios8')
+        # (self.user, self.token) = self.createAccount(client_id='ios8')
+        (self.user, self.token) = self.createAccount()
         self.entity = self.createEntity(self.token)
 
     def tearDown(self):
