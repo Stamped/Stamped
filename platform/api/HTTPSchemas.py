@@ -119,6 +119,12 @@ def _encodeAmazonURL(raw_url):
 def _buildAmazonURL(amazonId):
     return "http://www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
 
+def _formatReleaseDate(date):
+    try:
+        return date.strftime("%h %d, %Y")
+    except:
+        return None
+
 
 # ######### #
 # OAuth 2.0 #
@@ -475,7 +481,7 @@ class HTTPEntity(Schema):
         self.playlist           = HTTPEntityPlaylist()
         self.actions            = SchemaList(HTTPEntityAction())
         self.gallery            = HTTPEntityGallery()
-        self.metadata           = HTTPEntityMetadata()
+        self.metadata           = SchemaList(HTTPEntityMetadataItem())
         self.stamped_by         = HTTPEntityStampedBy()
         self.related            = HTTPEntityRelated()
 
@@ -510,13 +516,10 @@ class HTTPEntity(Schema):
             if 'extended' in kwargs:
                 item.extended = kwargs['extended']
 
-            if self.metadata.overflow is None:
-                self.metadata.overflow = 0
+            if 'optional' in kwargs:
+                item.optional = kwargs['optional']
 
-            if 'optional' not in kwargs or kwargs['optional'] == False:
-                self.metadata.overflow = self.metadata.overflow + 1
-
-            self.metadata.data.append(item)
+            self.metadata.append(item)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -660,10 +663,12 @@ class HTTPEntity(Schema):
                 category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
                 self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
                 self._addMetadata('Overview', schema.desc, extended=True)
+                self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
                 self._addMetadata('Cast', schema.cast, extended=True, optional=True)
                 self._addMetadata('Director', schema.director, optional=True)
                 self._addMetadata('Genres', schema.genre, optional=True)
-                self._addMetadata('Rating', schema.mpaa_rating, key='rating', optional=True)
+                if schema.subcategory == 'movie':
+                    self._addMetadata('Rating', schema.mpaa_rating, key='rating', optional=True)
 
                 # Actions: Find Tickets
 
@@ -743,9 +748,11 @@ class HTTPEntity(Schema):
                     self._addMetadata('Genre', schema.genre, optional=True)
                 elif schema.subcategory == 'album':
                     self._addMetadata('Genre', schema.genre)
+                    self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
                     self._addMetadata('Album Details', schema.desc, optional=True)
                 elif schema.subcategory == 'song':
                     self._addMetadata('Genre', schema.genre)
+                    self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
                     self._addMetadata('Song Details', schema.desc, optional=True)
 
                 # Actions: Listen
@@ -871,17 +878,11 @@ class HTTPEntity(Schema):
                         self.gallery.data.append(item)
 
 
-            #     if schema.genre is not None:
-            #         self.genre = schema.genre
-                
-            #     self.length         = schema.track_length
-            #     if schema.parental_advisory_id == 1:
-            #         self.rating     = "Parental Advisory"
 
             # if self.category in ['music', 'film']:
             #     try:
             #         if schema.release_date is not None:
-            #             date_time = schema.release_date
+            #             date_time = schema.release_date.strftime("%h %d, %Y")
             #         else:
             #             date_time = parseDateString(schema.original_release_date)
             #     except Exception:
@@ -1005,11 +1006,6 @@ class HTTPEntityAction(Schema):
         self.sources            = SchemaList(HTTPEntitySource(), required=True)
         self.icon               = SchemaElement(basestring)
 
-class HTTPEntityMetadata(Schema):
-    def setSchema(self):
-        self.data               = SchemaList(HTTPEntityMetadataItem())
-        self.overflow           = SchemaElement(int)
-
 class HTTPEntityMetadataItem(Schema):
     def setSchema(self):
         self.name               = SchemaElement(basestring, required=True)
@@ -1019,6 +1015,7 @@ class HTTPEntityMetadataItem(Schema):
         self.link_type          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
         self.extended           = SchemaElement(bool)
+        self.optional           = SchemaElement(bool)
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
