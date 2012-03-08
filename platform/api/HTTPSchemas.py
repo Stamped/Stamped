@@ -510,7 +510,7 @@ class HTTPEntity(Schema):
             if 'extended' in kwargs:
                 item.extended = kwargs['extended']
 
-            if self.metadata.overlow is None:
+            if self.metadata.overflow is None:
                 self.metadata.overflow = 0
 
             if 'optional' not in kwargs or kwargs['optional'] == False:
