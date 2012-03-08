@@ -94,6 +94,18 @@ class FactualGroup(APlaceGroup):
         APlaceGroup.__init__(self, 'factual')
         self.addField(['factual_id'])
 
+class OpenTableGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'opentable')
+        self.addField(['opentable_id'])
+
+class OpenTableNicknameGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'opentable_nickname')
+        self.addNameField()
+
 class SinglePlatformGroup(APlaceGroup):
 
     def __init__(self):

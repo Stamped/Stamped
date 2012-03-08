@@ -77,6 +77,7 @@ import random
 from datetime           import datetime
 from datetime           import timedelta
 from utils              import lazyProperty
+from RateLimiter        import RateLimiter
 import logs
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
@@ -248,9 +249,7 @@ class Factual(object):
         self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
         self.__log_file = log
-        self.__lock = Lock()
-        self.__last_call = time.time()
-        self.__cooldown = .15
+        self.__limiter = RateLimiter(cpm=400,cpd=180000)  
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
 
@@ -512,18 +511,11 @@ class Factual(object):
 
         request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
 
-        with self.__lock:
-            elapsed = time.time() - self.__last_call
-            #in case of error, set last call
-            self.__last_call = time.time()
-            cooldown = self.__cooldown - elapsed
-            if cooldown > 0:
-                sleep(cooldown)
+        with self.__limiter:
             req = urllib2.Request(url, None, request.to_header())
             logs.info(req.get_full_url())
             res = urllib2.urlopen(req)
             response = res.read()
-            self.__last_call = time.time()
         m = json.loads(response)
         try:
             return m['response']['data']

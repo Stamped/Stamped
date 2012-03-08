@@ -48,6 +48,12 @@
 		6386EEAF150824820019F1DC /* STSimplePlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEAE150824810019F1DC /* STSimplePlaylist.m */; };
 		6386EEB0150824820019F1DC /* STSimplePlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEAE150824810019F1DC /* STSimplePlaylist.m */; };
 		6386EEB1150824820019F1DC /* STSimplePlaylist.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEAE150824810019F1DC /* STSimplePlaylist.m */; };
+		6386EEB915090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
+		6386EEBA15090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
+		6386EEBB15090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
+		6386EEBE15091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
+		6386EEBF15091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
+		6386EEC015091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1743,6 +1749,10 @@
 		6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePlaylistItem.m; sourceTree = "<group>"; };
 		6386EEAD150824810019F1DC /* STSimplePlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimplePlaylist.h; sourceTree = "<group>"; };
 		6386EEAE150824810019F1DC /* STSimplePlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePlaylist.m; sourceTree = "<group>"; };
+		6386EEB715090FB80019F1DC /* STGalleryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryView.h; sourceTree = "<group>"; };
+		6386EEB815090FB90019F1DC /* STGalleryView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGalleryView.m; sourceTree = "<group>"; };
+		6386EEBC15091EC50019F1DC /* STMetadataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataView.h; sourceTree = "<group>"; };
+		6386EEBD15091EC60019F1DC /* STMetadataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMetadataView.m; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2818,6 +2828,10 @@
 				6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */,
 				6386EEAD150824810019F1DC /* STSimplePlaylist.h */,
 				6386EEAE150824810019F1DC /* STSimplePlaylist.m */,
+				6386EEB715090FB80019F1DC /* STGalleryView.h */,
+				6386EEB815090FB90019F1DC /* STGalleryView.m */,
+				6386EEBC15091EC50019F1DC /* STMetadataView.h */,
+				6386EEBD15091EC60019F1DC /* STMetadataView.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -5968,6 +5982,8 @@
 				6386EEA51508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAB150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEB0150824820019F1DC /* STSimplePlaylist.m in Sources */,
+				6386EEBA15090FB90019F1DC /* STGalleryView.m in Sources */,
+				6386EEBF15091EC70019F1DC /* STMetadataView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6127,6 +6143,8 @@
 				6386EEA41508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAA150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEAF150824820019F1DC /* STSimplePlaylist.m in Sources */,
+				6386EEB915090FB90019F1DC /* STGalleryView.m in Sources */,
+				6386EEBE15091EC70019F1DC /* STMetadataView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6144,6 +6162,8 @@
 				6386EEA61508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAC150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEB1150824820019F1DC /* STSimplePlaylist.m in Sources */,
+				6386EEBB15090FB90019F1DC /* STGalleryView.m in Sources */,
+				6386EEC015091EC70019F1DC /* STMetadataView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

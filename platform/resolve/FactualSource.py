@@ -20,6 +20,8 @@ try:
     from functools          import partial
     import json
     import logs
+    import re
+    from urllib2             import HTTPError
 except:
     report()
     raise
@@ -51,6 +53,8 @@ class FactualSource(BasicSource):
             'site',
             'cuisine',
             'alcohol_flag',
+            'opentable_nickname',
+            'opentable',
         )
         self.__address_fields = {
             ('address_street',):_ppath('address'),
@@ -78,69 +82,89 @@ class FactualSource(BasicSource):
 
         Returns True if the entity was modified.
         """
-        factual_id = entity['factual_id']
-        if controller.shouldEnrich('factual', self.sourceName, entity):
-            factual_id = self.__factual.factual_from_entity(entity)
-            entity['factual_id'] = factual_id
-            timestamps['factual'] = controller.now
-        else:
-            # Only populate fields when factual id is refreshed
-            return False
+        try:
+            factual_id = entity['factual_id']
+            if controller.shouldEnrich('factual', self.sourceName, entity):
+                factual_id = self.__factual.factual_from_entity(entity)
+                entity['factual_id'] = factual_id
+                timestamps['factual'] = controller.now
+            else:
+                return False
 
-        if factual_id is None:
-            return True
-        if controller.shouldEnrich('singleplatform', self.sourceName, entity):
-            singleplatform_id = self.__factual.singleplatform(factual_id)
-            entity['singleplatform_id'] = singleplatform_id
-            timestamps['singleplatform'] = controller.now
-        
-        # all further enrichments require place/restaurant data so return if not present
-        data = self.__factual.data(factual_id,entity=entity)
+            if factual_id is None:
+                return True
+            if controller.shouldEnrich('singleplatform', self.sourceName, entity):
+                singleplatform_id = self.__factual.singleplatform(factual_id)
+                entity['singleplatform_id'] = singleplatform_id
+                timestamps['singleplatform'] = controller.now
+            
+            # all further enrichments require place/restaurant data so return if not present
+            data = self.__factual.data(factual_id,entity=entity)
 
-        if data is None:
-            return True
-        
-        # set all simple mappings
-        for k,v in self.__simple_fields.items():
-            if v in data:
-                entity[k] = data[v]
+            if data is None:
+                return True
+            
+            # set all simple mappings
+            for k,v in self.__simple_fields.items():
+                if v in data:
+                    entity[k] = data[v]
 
-        # set address group
-        self.writeFields(entity, data, self.__address_fields)
+            # set address group
+            self.writeFields(entity, data, self.__address_fields)
 
-        if 'price' in data:
+            if 'price' in data:
+                try:
+                    price = int(float(data['price']))
+                    entity['price_range'] = price
+                except:
+                    logs.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)
+
+            if 'hours' in data:
+                raw_hours_s = data['hours']
+                try:
+                    raw_hours = json.loads(raw_hours_s)
+                    hours = {}
+                    broken = False
+                    for k,v in raw_hours.items():
+                        k = int(k)-1
+                        if k < len(self.__hours_map):
+                            day = self.__hours_map[k]
+                            times = []
+                            for slot in v:
+                                time_d = {}
+                                time_d['open'] = slot[0]
+                                time_d['close'] = slot[1]
+                                if len(slot) > 2:
+                                    time_d['desc'] = slot[2]
+                                times.append(time_d)
+                            hours[day] = times
+                        else:
+                            broken = True
+                            break
+                    if not broken and len(hours) > 0:
+                        entity['hours'] = hours
+                except ValueError:
+                    logs.warning('bad json for hours')
+
             try:
-                price = int(float(data['price']))
-                entity['price_range'] = price
+                crosswalk_results = self.__factual.crosswalk_id(factual_id, namespace='opentable')
+                print(crosswalk_results)
+                for result in crosswalk_results:
+                    if result['namespace'] == 'opentable':
+                        if 'namespace_id' in result and result['namespace_id'] != '':
+                            entity['opentable_id'] = result['namespace_id']
+                        else:
+                            url = result['url']
+                            match = re.match(r'^http://www.opentable.com/([^./]+)$',url)
+                            if match is not None:
+                                entity['opentable_nickname'] = match.group(1)
             except:
-                logs.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)
-
-        if 'hours' in data:
-            raw_hours_s = data['hours']
-            try:
-                raw_hours = json.loads(raw_hours_s)
-                hours = {}
-                broken = False
-                for k,v in raw_hours.items():
-                    k = int(k)-1
-                    if k < len(self.__hours_map):
-                        day = self.__hours_map[k]
-                        times = []
-                        for slot in v:
-                            time_d = {}
-                            time_d['open'] = slot[0]
-                            time_d['close'] = slot[1]
-                            if len(slot) > 2:
-                                time_d['desc'] = slot[2]
-                            times.append(time_d)
-                        hours[day] = times
-                    else:
-                        broken = True
-                        break
-                if not broken and len(hours) > 0:
-                    entity['hours'] = hours
-            except ValueError:
-                logs.warning('bad json for hours')
+                pass
+        except HTTPError as e:
+            logs.warning("Factual threw an %s error for %s (%s)" % (e.code, entity['title'], entity['entity_id']))
+            #timestamps['factual'] = controller.now
+            # Let container deal with it
+            raise
 
         return True
 

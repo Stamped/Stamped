@@ -83,6 +83,9 @@ class FullResolveContainer(BasicSourceContainer):
             AmazonLinkGroup(),
             AmazonUnderlyingGroup(),
             ImagesGroup(),
+
+            OpenTableGroup(),
+            OpenTableNicknameGroup(),
         ]
         for group in groups:
             self.addGroup(group)

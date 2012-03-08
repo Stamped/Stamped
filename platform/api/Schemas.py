@@ -923,6 +923,14 @@ class EntitySourcesSchema(Schema):
         self.amazon_source      = SchemaElement(basestring)
         self.amazon_timestamp   = SchemaElement(datetime)
         
+        self.opentable_id       = SchemaElement(basestring)
+        self.opentable_source   = SchemaElement(basestring)
+        self.opentable_timestamp = SchemaElement(datetime)
+        
+        self.opentable_nickname       = SchemaElement(basestring)
+        self.opentable_nickname_source   = SchemaElement(basestring)
+        self.opentable_nickname_timestamp= SchemaElement(datetime)
+
         # TODO: remove these three lines -- temporary workaround!
         # (and the TMDBSchema and RdioSchema above)
         self.tmdb               = TMDBSchema()
