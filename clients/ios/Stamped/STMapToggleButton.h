@@ -10,6 +10,9 @@
 
 @interface STMapToggleButton : UIControl
 
+- (void)showListButton:(id)sender;
+- (void)showMapButton:(id)sender;
+
 @property (nonatomic, retain) UIButton* mapButton;
 @property (nonatomic, retain) UIButton* listButton;
 

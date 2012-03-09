@@ -267,6 +267,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  NSLog(@"View did appear");
   [super viewDidAppear:animated];
   if (mapViewShown_)
     [self.mapViewController viewDidAppear:animated];
@@ -321,6 +322,9 @@
   } else {
     showTooltipWhenAuthenticated_ = YES;
   }
+
+  NSLog(@"Push notification function test...");
+  [self pushNotificationReceived:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -352,7 +356,7 @@
 - (void)updateNavBar {
   UITabBarItem* item = self.tabBar.selectedItem;
   if (item == stampsTabBarItem_ || item == mustDoTabBarItem_) {
-    if ([self.navigationItem.rightBarButtonItem isMemberOfClass:[STMapToggleButton class]])
+    if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]])
       return;
 
     STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
@@ -380,6 +384,9 @@
 }
 
 - (void)showMapView {
+  if (mapViewShown_)
+    return;
+
   [mapViewController_ reset];
   if ([selectedViewController_ isMemberOfClass:[InboxViewController class]])
     mapViewController_.source = STMapViewControllerSourceInbox;
@@ -414,6 +421,9 @@
 }
 
 - (void)showListView {
+  if (!mapViewShown_)
+    return;
+
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
@@ -555,12 +565,18 @@
 }
 
 - (void)pushNotificationReceived:(NSNotification*)notification {
+  NSLog(@"list view bullshit");
+  if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]] && mapViewShown_) {
+    [self showListView];
+    [(STMapToggleButton*)self.navigationItem.rightBarButtonItem.customView showListButton:nil];
+  }
+
   if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
     self.tabBar.selectedItem = activityTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
   }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
-  [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];
+  [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];  
 }
 
 #pragma mark - AccountManagerDelegate Methods.
