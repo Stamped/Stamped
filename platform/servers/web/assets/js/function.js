@@ -224,7 +224,7 @@ stamped.init = function(){
         };
         
         updateParams = function(){
-            updatedParams = [];
+            updatedParams = {};
             
             $('.slider').each(function(){
                 sliderID = $(this).attr('id');
@@ -234,10 +234,20 @@ stamped.init = function(){
                     sliderBool = false;
                 }
                 
-                updatedParams.push(sliderID + ' : ' + sliderBool);
+                updatedParams[sliderID] = sliderBool;
             });
-            stutterBar('success', 'Notification settings updated successfully.');
-            // Bons stub: submit updatedParams to server
+            updatedParams['token'] = _TOKEN;
+            $.ajax({
+              type: 'POST',
+              url: '/settings/alerts/update.json',
+              data: updatedParams,
+              success: function() {
+                stutterBar('success', 'Notification settings updated successfully.');
+              },
+              error: function() {
+                stutterBar('error', 'Something went wrong. Try again?');
+              }
+            });
         }
         
         $('.toggle-all').live('click', function(){

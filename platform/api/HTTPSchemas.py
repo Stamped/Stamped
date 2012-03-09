@@ -12,6 +12,7 @@ from errors     import *
 from schema     import *
 from Schemas    import *
 from libs.LibUtils import parseDateString
+from libs.CountryData import countries
 
 # ####### #
 # PRIVATE #
@@ -85,6 +86,9 @@ def _encodeLinkShareDeepURL(raw_url):
     return deep_url
 
 def _encodeiTunesShortURL(raw_url):
+    if raw_url is None:
+        return None
+        
     parsed_url  = urlparse.urlparse(raw_url)
     query       = "partnerId=30&siteID=%s" % LINKSHARE_TOKEN
     new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
@@ -124,6 +128,31 @@ def _formatReleaseDate(date):
         return date.strftime("%h %d, %Y")
     except:
         return None
+
+def _formatAddress(address, street=None, street_ext=None, locality=None, region=None, postcode=None, country=None):
+    if street is not None and locality is not None and country is not None:
+
+        if street_ext is not None:
+            street = '%s %s' % (street, street_ext)
+
+        if country == 'US':
+            if region is not None and postcode is not None:
+                return '%s\n%s, %s %s' % (street, locality, region, postcode)
+            elif region is not None:
+                return '%s\n%s, %s' % (street, locality, postcode)
+            elif postcode is not None:
+                return '%s\n%s, %s' % (street, locality, region)
+
+        else:
+            if country in countries:
+                return '%s\n%s, %s' % (street, locality, countries[country])
+            else:
+                return '%s\n%s, %s' % (street, locality, country)
+
+    elif address is not None:
+        return address
+
+    return None
 
 
 # ######### #
@@ -520,6 +549,21 @@ class HTTPEntity(Schema):
                 item.optional = kwargs['optional']
 
             self.metadata.append(item)
+    
+    def _addImage(self, url):
+        if url is not None:
+            domain = urlparse.urlparse(url).netloc
+
+            if 'amzstatic.com' in domain:
+                # try to return the maximum-resolution apple photo possible if we have 
+                # a lower-resolution version stored in our db
+                url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+            
+            elif 'amazon.com' in domain:
+                # strip the 'look inside' image modifier
+                url = amazon_image_re.sub(r'\1.jpg', url)
+            
+            self.image = url
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -541,6 +585,19 @@ class HTTPEntity(Schema):
             
             # Restaurant / Bar
             if schema.category == 'food':
+
+                try:
+                    self.caption = _formatAddress(
+                                    address     = schema.address,
+                                    street      = schema.address_street,
+                                    street_ext  = schema.address_street_ext,
+                                    locality    = schema.address_locality,
+                                    region      = schema.address_region,
+                                    postcode    = schema.address_postcode,
+                                    country     = schema.address_country,
+                                )
+                except:
+                    pass
 
                 # Metadata
 
@@ -607,10 +664,6 @@ class HTTPEntity(Schema):
 
                 self._addAction('menu', 'View menu', sources)
 
-
-            # Generic Place
-            elif coordinates is not None:
-                pass
 
             # Book
             elif schema.category == 'book':
@@ -696,7 +749,8 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.link         = 'http://itunes.apple.com/us/movie/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
+                    itunes.link_type    = 'url'
                     # Only add icon if no movie tickets to be found
                     if len(self.actions) == 0:
                         itunes.icon     = 'http://static.stamped.com/assets/itunes.png'
@@ -824,12 +878,32 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.link         = 'http://itunes.apple.com/us/artist/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
                 self._addAction('download', 'Download %s' % schema.subcategory, sources)
             
+                # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
+                #     songs = schema.songs
+                    
+                #     # for an artist, only return up to 10 songs
+                #     if schema.subcategory == "artist":
+                #         songs = songs[0: min(10, len(songs))]
+                    
+                #     songs = list(song.song_name for song in songs)
+                #     self.songs = songs
+                
+                # if schema.subcategory == "album" and schema.tracks is not None:
+                #     self.songs = schema.tracks
+                
+                # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
+                #     try:
+                #         albums = list(album.album_name for album in schema.albums)
+                #         self.albums = albums
+                #     except:
+                #         utils.printException()
+                #         pass
 
             elif schema.subcategory == 'app':
 
@@ -852,7 +926,7 @@ class HTTPEntity(Schema):
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
-                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.itunes_id
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
                 ### TEMP - apple.aid should be deprecated
@@ -862,7 +936,7 @@ class HTTPEntity(Schema):
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.apple.aid
                     itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
-                    itunes.link         = 'http://itunes.apple.com/us/app/id%s' % schema.sources.apple.aid
+                    itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
@@ -878,95 +952,65 @@ class HTTPEntity(Schema):
                         self.gallery.data.append(item)
 
 
-
-            # if self.category in ['music', 'film']:
-            #     try:
-            #         if schema.release_date is not None:
-            #             date_time = schema.release_date.strftime("%h %d, %Y")
-            #         else:
-            #             date_time = parseDateString(schema.original_release_date)
-            #     except Exception:
-            #         pass
-
-            # if date_time is not None:
-            #     self.release_date   = date_time.strftime("%h %d, %Y")
-
-            # # Food
-            # self.cuisine        = schema.cuisine
-            # self.price_scale    = schema.priceScale
-
-            # # Book
-            # self.author         = schema.author
-            # self.isbn           = schema.isbn
-            # self.publisher      = schema.publisher
-            # self.format         = schema.book_format
-            # self.language       = schema.language
-            # self.edition        = schema.edition
-
-            # # Film
-            # self.cast           = schema.cast
-            # self.director       = schema.director
-            # self.network        = schema.network_name
-            # self.in_theaters    = schema.in_theaters
-            
-            # # Music
-            # self.artist_name    = schema.artist_display_name
-            # self.album_name     = schema.album_name
-            # self.label          = schema.label_studio
-            
-            # if 'preview_url' in schema:
-            #     self.preview_url = schema.preview_url
-            
-            # if schema.sources.apple.view_url != None:
-            #     itunes_url  = schema.sources.apple.view_url
-            #     base_url    = "http://click.linksynergy.com/fs-bin/stat"
-            #     params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
-            #                    % (LINKSHARE_TOKEN)
-            #     deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
-            #                         _encodeLinkShareDeepURL(itunes_url))
-            #     short_url   = _encodeiTunesShortURL(itunes_url)
+            # Generic Place
+            elif self.coordinates is not None or self.address is not None:
                 
-            #     self.itunes_url       = deep_url
-            #     self.itunes_short_url = short_url
-            
-            # if schema.amazon_link != None:
-            #     self.amazon_url = _encodeAmazonURL(schema.amazon_link)
-            
-            is_apple = 'apple' in schema
+                try:
+                    self.caption = _formatAddress(
+                                    address     = schema.address,
+                                    street      = schema.address_street,
+                                    street_ext  = schema.address_street_ext,
+                                    locality    = schema.address_locality,
+                                    region      = schema.address_region,
+                                    postcode    = schema.address_postcode,
+                                    country     = schema.address_country,
+                                )
+                except:
+                    pass
+
+                # Metadata
+
+                self._addMetadata('Description', schema.desc)
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+
+                # Actions: Call
+
+                sources = []
+
+                if schema.contact.phone is not None:
+                    phone               = HTTPEntitySource()
+                    phone.source        = 'phone'
+                    phone.link          = schema.contact.phone
+                    phone.link_type     = 'phone'
+                    sources.append(phone)
+
+                self._addAction('phone', schema.contact.phone, sources)
+
+            # Generic item
+            else:
+
+                # Metadata
+
+                self._addMetadata('Description', schema.desc)
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+
             
             # Image
-            if schema.image is not None:
-                self.image = self._handle_image(schema.image, is_apple)
-            elif schema.large is not None:
-                self.image = self._handle_image(schema.large, is_apple)
-            elif schema.small is not None:
-                self.image = self._handle_image(schema.small, is_apple)
-            elif schema.tiny is not None:
-                self.image = self._handle_image(schema.tiny, is_apple)
-            elif schema.artwork_url is not None:
-                self.image = self._handle_image(schema.artwork_url, is_apple)
-            
-            # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
-            #     songs = schema.songs
-                
-            #     # for an artist, only return up to 10 songs
-            #     if schema.subcategory == "artist":
-            #         songs = songs[0: min(10, len(songs))]
-                
-            #     songs = list(song.song_name for song in songs)
-            #     self.songs = songs
-            
-            # if schema.subcategory == "album" and schema.tracks is not None:
-            #     self.songs = schema.tracks
-            
-            # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
-            #     try:
-            #         albums = list(album.album_name for album in schema.albums)
-            #         self.albums = albums
-            #     except:
-            #         utils.printException()
-            #         pass
 
+            if self.coordinates is not None or self.address is not None:
+                # Don't add an image if coordinates exist
+                pass
+            elif schema.image is not None:
+                self._addImage(schema.image)
+            elif schema.large is not None:
+                self._addImage(schema.large)
+            elif schema.small is not None:
+                self._addImage(schema.small)
+            elif schema.tiny is not None:
+                self._addImage(schema.tiny)
+            elif schema.artwork_url is not None:
+                self._addImage(schema.artwork_url)
+            
         elif schema.__class__.__name__ == 'EntityMini':
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
@@ -975,18 +1019,6 @@ class HTTPEntity(Schema):
         else:
             raise NotImplementedError
         return self
-    
-    def _handle_image(self, url, is_apple):
-        if is_apple:
-            # try to return the maximum-resolution apple photo possible if we have 
-            # a lower-resolution version stored in our db
-            return url.replace('100x100', '200x200').replace('170x170', '200x200')
-        
-        if 'amazon.com' in url:
-            # strip the 'look inside' image modifier
-            return amazon_image_re.sub(r'\1.jpg', url)
-        
-        return url
 
 # HTTPEntity Components
 
