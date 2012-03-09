@@ -94,9 +94,9 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)commonInit {
-  STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
-  [factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
-  [factory release];
+  //STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
+  //[factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
+  //[factory release];
   [self loadEntityDataFromServer];
   sectionsDict_ = [[NSMutableDictionary alloc] init];
 }
