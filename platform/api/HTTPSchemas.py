@@ -548,7 +548,7 @@ class HTTPEntity(Schema):
         base_url = 'http://static.stamped.com/assets/icons'
 
         if client is None or not isinstance(client, Client):
-            return '%s/%s.png' % (base_url, filename)
+            return '%s/default/%s.png' % (base_url, filename)
 
         if client.client_class == 'iphone':
             if client.client_resolution == 2:
@@ -559,7 +559,7 @@ class HTTPEntity(Schema):
         if client.client_class == 'web':
             return '%s/web/%s.png' % (base_url, filename)
 
-        return '%s/%s.png' % (base_url, filename)
+        return '%s/default/%s.png' % (base_url, filename)
 
 
     def importSchema(self, schema, client=None):
@@ -778,7 +778,7 @@ class HTTPEntity(Schema):
                     self._addMetadata('Genre', schema.genre)
                     self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
                     self._addMetadata('Album Details', schema.desc, key='desc', optional=True)
-                    
+
                 elif schema.subcategory == 'song':
                     self._addMetadata('Genre', schema.genre)
                     self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
