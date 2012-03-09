@@ -95,36 +95,63 @@ countries = libs.CountryData.countries
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
 year_re = re.compile(r'([0-9]{4})')
 
+def formatReleaseDate(date):
+    try:
+        return date.strftime("%h %d, %Y")
+    except:
+        return None
+
+def formatAddress(entity, extendStreet=False, breakLines=False):
+
+    street      = entity.address_street
+    street_ext  = entity.address_street_ext
+    locality    = entity.address_locality
+    region      = entity.address_region
+    postcode    = entity.address_postcode
+    country     = entity.address_country
+
+    delimiter = '\n' if breakLines else ', '
+
+    if street is not None and locality is not None and country is not None:
+
+        # Expand street 
+        if extendStreet == True and street_ext is not None:
+            street = '%s %s' % (street, street_ext)
+
+        # Use state if in US
+        if country == 'US':
+            if region is not None and postcode is not None:
+                return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
+            elif region is not None:
+                return '%s%s%s, %s' % (street, delimiter, locality, postcode)
+            elif postcode is not None:
+                return '%s%s%s, %s' % (street, delimiter, locality, region)
+
+        # Use country if outside US
+        else:
+            if country in countries:
+                return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
+            else:
+                return '%s%s%s, %s' % (street, delimiter, locality, country)
+
+    if schema.address is not None:
+        return schema.address
+        
+    if entity.neighborhood is not None:
+        return entity.neighborhood
+
+    return None
+
 def getGenericSubtitle(entity):
     return str(entity.subcategory).replace('_', ' ').title()
 
 def getLocationSubtitle(entity, detailed=False):
     # Return detailed address data if requested
     if detailed:
-        if entity.address_country is not None and entity.address_locality is not None and entity.address_street is not None:
-
-            # Expand street if necessary
-            street = entity.address_street
-            if entity.address_street_ext is not None:
-                street = "%s %s" % (street, entity.address_street_ext)
-
-            # Use state if in US
-            if entity.address_country == 'US':
-                if entity.address_region is not None:
-                    return "%s, %s, %s" % (street, entity.address_locality, entity.address_region)
-
-            # Use country if outside US
-            else:
-                country = entity.address_country
-                if entity.address_country in countries:
-                    country = countries[entity.address_country]
-                return "%s, %s, %s" % (street, entity.address_locality, country)
-
-        if entity.address is not None:
-            return entity.address
         
-        if entity.neighborhood is not None:
-            return entity.neighborhood
+        address = formatAddress(entity)
+        if address is not None:
+            return address
         
         return getGenericSubtitle(entity)
     

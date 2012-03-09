@@ -43,7 +43,11 @@ class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
             "desc": desc,
         }
         result = self.handlePOST(path, data)
-        self.assertEqual(result['desc'], desc)
+        newDesc = None
+        for item in result['metadata']:
+            if 'key' in item and item['key'] == 'desc':
+                newDesc = item['value']
+        self.assertEqual(newDesc, desc)
 
 class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
     def test_utf8_update(self):
@@ -55,7 +59,11 @@ class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
             "desc": desc
         }
         result = self.handlePOST(path, data)
-        self.assertEqual(result['desc'], desc.decode('utf-8'))
+        newDesc = None
+        for item in result['metadata']:
+            if 'key' in item and item['key'] == 'desc':
+                newDesc = item['value']
+        self.assertEqual(newDesc, desc.decode('utf-8'))
 
 class StampedAPIEntitiesSearch(StampedAPIEntityTest):
     def test_search(self):

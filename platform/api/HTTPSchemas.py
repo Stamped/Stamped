@@ -88,7 +88,7 @@ def _encodeLinkShareDeepURL(raw_url):
 def _encodeiTunesShortURL(raw_url):
     if raw_url is None:
         return None
-        
+
     parsed_url  = urlparse.urlparse(raw_url)
     query       = "partnerId=30&siteID=%s" % LINKSHARE_TOKEN
     new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
@@ -122,37 +122,6 @@ def _encodeAmazonURL(raw_url):
 
 def _buildAmazonURL(amazonId):
     return "http://www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
-
-def _formatReleaseDate(date):
-    try:
-        return date.strftime("%h %d, %Y")
-    except:
-        return None
-
-def _formatAddress(address, street=None, street_ext=None, locality=None, region=None, postcode=None, country=None):
-    if street is not None and locality is not None and country is not None:
-
-        if street_ext is not None:
-            street = '%s %s' % (street, street_ext)
-
-        if country == 'US':
-            if region is not None and postcode is not None:
-                return '%s\n%s, %s %s' % (street, locality, region, postcode)
-            elif region is not None:
-                return '%s\n%s, %s' % (street, locality, postcode)
-            elif postcode is not None:
-                return '%s\n%s, %s' % (street, locality, region)
-
-        else:
-            if country in countries:
-                return '%s\n%s, %s' % (street, locality, countries[country])
-            else:
-                return '%s\n%s, %s' % (street, locality, country)
-
-    elif address is not None:
-        return address
-
-    return None
 
 
 # ######### #
@@ -491,7 +460,6 @@ class HTTPEntity(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.caption            = SchemaElement(basestring)
-        self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
         
@@ -568,8 +536,8 @@ class HTTPEntity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
 
-            from Entity import setFields
-            setFields(schema)
+            import Entity
+            Entity.setFields(schema)
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
@@ -586,18 +554,9 @@ class HTTPEntity(Schema):
             # Restaurant / Bar
             if schema.category == 'food':
 
-                try:
-                    self.caption = _formatAddress(
-                                    address     = schema.address,
-                                    street      = schema.address_street,
-                                    street_ext  = schema.address_street_ext,
-                                    locality    = schema.address_locality,
-                                    region      = schema.address_region,
-                                    postcode    = schema.address_postcode,
-                                    country     = schema.address_country,
-                                )
-                except:
-                    pass
+                address = Entity.formatAddress(schema, extendStreet=True, breakLines=True)
+                if address is not None:
+                    self.caption = address 
 
                 # Metadata
 
@@ -605,7 +564,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
-                self._addMetadata('Description', schema.desc, extended=True)
+                self._addMetadata('Description', schema.desc, key='desc', extended=True)
 
                 # Actions: Reservation
 
@@ -673,9 +632,9 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/book.png')
                 self._addMetadata('Publish Date', schema.publish_date)
-                self._addMetadata('Description', schema.desc, extended=True)
+                self._addMetadata('Description', schema.desc, key='desc', extended=True)
                 self._addMetadata('Publisher', schema.publisher)
 
                 # Actions: Buy
@@ -715,8 +674,8 @@ class HTTPEntity(Schema):
 
                 category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
                 self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
-                self._addMetadata('Overview', schema.desc, extended=True)
-                self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
+                self._addMetadata('Overview', schema.desc, key='desc', extended=True)
+                self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
                 self._addMetadata('Cast', schema.cast, extended=True, optional=True)
                 self._addMetadata('Director', schema.director, optional=True)
                 self._addMetadata('Genres', schema.genre, optional=True)
@@ -798,16 +757,16 @@ class HTTPEntity(Schema):
 
                 self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/music.png')
                 if schema.subcategory == 'artist':
-                    self._addMetadata('Biography', schema.desc)
+                    self._addMetadata('Biography', schema.desc, key='desc')
                     self._addMetadata('Genre', schema.genre, optional=True)
                 elif schema.subcategory == 'album':
                     self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
-                    self._addMetadata('Album Details', schema.desc, optional=True)
+                    self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
+                    self._addMetadata('Album Details', schema.desc, key='desc', optional=True)
                 elif schema.subcategory == 'song':
                     self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', _formatReleaseDate(schema.release_date))
-                    self._addMetadata('Song Details', schema.desc, optional=True)
+                    self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
+                    self._addMetadata('Song Details', schema.desc, key='desc', optional=True)
 
                 # Actions: Listen
 
@@ -914,7 +873,7 @@ class HTTPEntity(Schema):
 
                 self._addMetadata('Category',       'App', icon='http://static.stamped.com/assets/app.png')
                 self._addMetadata('Genre',          schema.genre)
-                self._addMetadata('Description',    schema.desc, extended=True)
+                self._addMetadata('Description',    schema.desc, key='desc', extended=True)
 
                 # Actions: Download
 
@@ -954,23 +913,14 @@ class HTTPEntity(Schema):
 
             # Generic Place
             elif self.coordinates is not None or self.address is not None:
-                
-                try:
-                    self.caption = _formatAddress(
-                                    address     = schema.address,
-                                    street      = schema.address_street,
-                                    street_ext  = schema.address_street_ext,
-                                    locality    = schema.address_locality,
-                                    region      = schema.address_region,
-                                    postcode    = schema.address_postcode,
-                                    country     = schema.address_country,
-                                )
-                except:
-                    pass
+
+                address = Entity.formatAddress(schema, extendStreet=True, breakLines=True)
+                if address is not None:
+                    self.caption = address 
 
                 # Metadata
 
-                self._addMetadata('Description', schema.desc)
+                self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 
                 # Actions: Call
@@ -991,7 +941,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Description', schema.desc)
+                self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 
             
