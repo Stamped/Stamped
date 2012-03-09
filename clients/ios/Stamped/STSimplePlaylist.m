@@ -15,6 +15,12 @@
 @synthesize overflow = overflow_;
 @synthesize data = data_;
 
+- (void)dealloc {
+  self.name = nil;
+  self.data = nil;
+  [super dealloc];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimplePlaylist class]];
   

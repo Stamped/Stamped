@@ -20,9 +20,6 @@
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A7891506779C003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
 		6380A78C15069299003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
-		6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
-		6380A7921506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
-		6380A7931506B6E8003087EF /* STDetailScroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7901506B6E8003087EF /* STDetailScroller.m */; };
 		6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
@@ -34,9 +31,6 @@
 		6386EE9A15081EBE0019F1DC /* STSimpleAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9915081EBE0019F1DC /* STSimpleAction.m */; };
 		6386EE9B15081EBE0019F1DC /* STSimpleAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9915081EBE0019F1DC /* STSimpleAction.m */; };
 		6386EE9C15081EBE0019F1DC /* STSimpleAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9915081EBE0019F1DC /* STSimpleAction.m */; };
-		6386EE9F150820590019F1DC /* STSimpleMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9E150820580019F1DC /* STSimpleMetadata.m */; };
-		6386EEA0150820590019F1DC /* STSimpleMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9E150820580019F1DC /* STSimpleMetadata.m */; };
-		6386EEA1150820590019F1DC /* STSimpleMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9E150820580019F1DC /* STSimpleMetadata.m */; };
 		6386EEA41508210A0019F1DC /* STSimpleMetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */; };
 		6386EEA51508210A0019F1DC /* STSimpleMetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */; };
 		6386EEA61508210A0019F1DC /* STSimpleMetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */; };
@@ -49,9 +43,15 @@
 		6386EEB915090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
 		6386EEBA15090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
 		6386EEBB15090FB90019F1DC /* STGalleryView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEB815090FB90019F1DC /* STGalleryView.m */; };
-		6386EEBE15091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
-		6386EEBF15091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
-		6386EEC015091EC70019F1DC /* STMetadataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEBD15091EC60019F1DC /* STMetadataView.m */; };
+		6386EED41509713F0019F1DC /* STSimpleGallery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EED31509713E0019F1DC /* STSimpleGallery.m */; };
+		6386EED51509713F0019F1DC /* STSimpleGallery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EED31509713E0019F1DC /* STSimpleGallery.m */; };
+		6386EED61509713F0019F1DC /* STSimpleGallery.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EED31509713E0019F1DC /* STSimpleGallery.m */; };
+		6386EEDD150A52B60019F1DC /* STEntityDetailFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */; };
+		6386EEDE150A52B60019F1DC /* STEntityDetailFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */; };
+		6386EEDF150A52B60019F1DC /* STEntityDetailFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */; };
+		6386EEE2150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
+		6386EEE3150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
+		6386EEE4150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1718,8 +1718,6 @@
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
 		6380A77815067776003087EF /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = "Vendor/gtm-oauth/Source/../../../RestKit/RestKit.xcodeproj"; sourceTree = "<group>"; };
-		6380A78F1506B6E8003087EF /* STDetailScroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailScroller.h; sourceTree = "<group>"; };
-		6380A7901506B6E8003087EF /* STDetailScroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDetailScroller.m; sourceTree = "<group>"; };
 		6380A7A31506D3F8003087EF /* STGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryItem.h; sourceTree = "<group>"; };
 		6380A7A61506D6C2003087EF /* STEntityDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetail.h; sourceTree = "<group>"; };
 		6380A7A81506D907003087EF /* STMetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataItem.h; sourceTree = "<group>"; };
@@ -1735,19 +1733,23 @@
 		6386EE9415081D040019F1DC /* STSimpleSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleSource.m; sourceTree = "<group>"; };
 		6386EE9815081EBD0019F1DC /* STSimpleAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleAction.h; sourceTree = "<group>"; };
 		6386EE9915081EBE0019F1DC /* STSimpleAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleAction.m; sourceTree = "<group>"; };
-		6386EE9D150820580019F1DC /* STSimpleMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMetadata.h; sourceTree = "<group>"; };
-		6386EE9E150820580019F1DC /* STSimpleMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMetadata.m; sourceTree = "<group>"; };
 		6386EEA2150821090019F1DC /* STSimpleMetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMetadataItem.h; sourceTree = "<group>"; };
 		6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMetadataItem.m; sourceTree = "<group>"; };
-		6386EEA7150822090019F1DC /* STMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadata.h; sourceTree = "<group>"; };
 		6386EEA8150822900019F1DC /* STSimplePlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimplePlaylistItem.h; sourceTree = "<group>"; };
 		6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePlaylistItem.m; sourceTree = "<group>"; };
 		6386EEAD150824810019F1DC /* STSimplePlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimplePlaylist.h; sourceTree = "<group>"; };
 		6386EEAE150824810019F1DC /* STSimplePlaylist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePlaylist.m; sourceTree = "<group>"; };
 		6386EEB715090FB80019F1DC /* STGalleryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryView.h; sourceTree = "<group>"; };
 		6386EEB815090FB90019F1DC /* STGalleryView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGalleryView.m; sourceTree = "<group>"; };
-		6386EEBC15091EC50019F1DC /* STMetadataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataView.h; sourceTree = "<group>"; };
-		6386EEBD15091EC60019F1DC /* STMetadataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMetadataView.m; sourceTree = "<group>"; };
+		6386EED1150970F40019F1DC /* STGallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGallery.h; sourceTree = "<group>"; };
+		6386EED21509713D0019F1DC /* STSimpleGallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleGallery.h; sourceTree = "<group>"; };
+		6386EED31509713E0019F1DC /* STSimpleGallery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleGallery.m; sourceTree = "<group>"; };
+		6386EEDB150A52B30019F1DC /* STEntityDetailFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailFactory.h; sourceTree = "<group>"; };
+		6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailFactory.m; sourceTree = "<group>"; };
+		6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryViewFactory.h; sourceTree = "<group>"; };
+		6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGalleryViewFactory.m; sourceTree = "<group>"; };
+		6386EEE5150A58520019F1DC /* STLinkDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLinkDelegate.h; sourceTree = "<group>"; };
+		6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFactoryDelegate.h; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2803,8 +2805,6 @@
 		6380A78E1506B67D003087EF /* New Entity Detail */ = {
 			isa = PBXGroup;
 			children = (
-				6380A78F1506B6E8003087EF /* STDetailScroller.h */,
-				6380A7901506B6E8003087EF /* STDetailScroller.m */,
 				6386EE9315081D040019F1DC /* STSimpleSource.h */,
 				6386EE9415081D040019F1DC /* STSimpleSource.m */,
 				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
@@ -2813,8 +2813,6 @@
 				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
 				6386EE9815081EBD0019F1DC /* STSimpleAction.h */,
 				6386EE9915081EBE0019F1DC /* STSimpleAction.m */,
-				6386EE9D150820580019F1DC /* STSimpleMetadata.h */,
-				6386EE9E150820580019F1DC /* STSimpleMetadata.m */,
 				6386EEA2150821090019F1DC /* STSimpleMetadataItem.h */,
 				6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */,
 				6386EEA8150822900019F1DC /* STSimplePlaylistItem.h */,
@@ -2823,8 +2821,12 @@
 				6386EEAE150824810019F1DC /* STSimplePlaylist.m */,
 				6386EEB715090FB80019F1DC /* STGalleryView.h */,
 				6386EEB815090FB90019F1DC /* STGalleryView.m */,
-				6386EEBC15091EC50019F1DC /* STMetadataView.h */,
-				6386EEBD15091EC60019F1DC /* STMetadataView.m */,
+				6386EED21509713D0019F1DC /* STSimpleGallery.h */,
+				6386EED31509713E0019F1DC /* STSimpleGallery.m */,
+				6386EEDB150A52B30019F1DC /* STEntityDetailFactory.h */,
+				6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */,
+				6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */,
+				6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2832,7 +2834,6 @@
 		6380A7A41506D41A003087EF /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
-				6386EEA7150822090019F1DC /* STMetadata.h */,
 				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6380A7A61506D6C2003087EF /* STEntityDetail.h */,
 				6380A7B11507D0CC003087EF /* STSource.h */,
@@ -2840,6 +2841,9 @@
 				6380A7A91506DAC5003087EF /* STPlaylist.h */,
 				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
 				6386EE92150819270019F1DC /* STAction.h */,
+				6386EED1150970F40019F1DC /* STGallery.h */,
+				6386EEE5150A58520019F1DC /* STLinkDelegate.h */,
+				6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -5965,16 +5969,16 @@
 				7E33045D14F5795A00114494 /* STClosableOverlayView.m in Sources */,
 				7E31D84F14F6D1A500E42429 /* ActivityGenericTableViewCell.m in Sources */,
 				6380A76315066EAE003087EF /* STPageControl.m in Sources */,
-				6380A7921506B6E8003087EF /* STDetailScroller.m in Sources */,
 				6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 				6386EE9615081D050019F1DC /* STSimpleSource.m in Sources */,
 				6386EE9B15081EBE0019F1DC /* STSimpleAction.m in Sources */,
-				6386EEA0150820590019F1DC /* STSimpleMetadata.m in Sources */,
 				6386EEA51508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAB150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEB0150824820019F1DC /* STSimplePlaylist.m in Sources */,
 				6386EEBA15090FB90019F1DC /* STGalleryView.m in Sources */,
-				6386EEBF15091EC70019F1DC /* STMetadataView.m in Sources */,
+				6386EED51509713F0019F1DC /* STSimpleGallery.m in Sources */,
+				6386EEDE150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
+				6386EEE3150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6124,17 +6128,17 @@
 				7E33045C14F5795A00114494 /* STClosableOverlayView.m in Sources */,
 				7E31D84E14F6D1A500E42429 /* ActivityGenericTableViewCell.m in Sources */,
 				6380A76215066EAE003087EF /* STPageControl.m in Sources */,
-				6380A7911506B6E8003087EF /* STDetailScroller.m in Sources */,
 				6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 				6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */,
 				6386EE9515081D050019F1DC /* STSimpleSource.m in Sources */,
 				6386EE9A15081EBE0019F1DC /* STSimpleAction.m in Sources */,
-				6386EE9F150820590019F1DC /* STSimpleMetadata.m in Sources */,
 				6386EEA41508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAA150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEAF150824820019F1DC /* STSimplePlaylist.m in Sources */,
 				6386EEB915090FB90019F1DC /* STGalleryView.m in Sources */,
-				6386EEBE15091EC70019F1DC /* STMetadataView.m in Sources */,
+				6386EED41509713F0019F1DC /* STSimpleGallery.m in Sources */,
+				6386EEDD150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
+				6386EEE2150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6144,16 +6148,16 @@
 			files = (
 				7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */,
 				6380A76415066EAE003087EF /* STPageControl.m in Sources */,
-				6380A7931506B6E8003087EF /* STDetailScroller.m in Sources */,
 				6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
 				6386EE9715081D050019F1DC /* STSimpleSource.m in Sources */,
 				6386EE9C15081EBE0019F1DC /* STSimpleAction.m in Sources */,
-				6386EEA1150820590019F1DC /* STSimpleMetadata.m in Sources */,
 				6386EEA61508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
 				6386EEAC150822910019F1DC /* STSimplePlaylistItem.m in Sources */,
 				6386EEB1150824820019F1DC /* STSimplePlaylist.m in Sources */,
 				6386EEBB15090FB90019F1DC /* STGalleryView.m in Sources */,
-				6386EEC015091EC70019F1DC /* STMetadataView.m in Sources */,
+				6386EED61509713F0019F1DC /* STSimpleGallery.m in Sources */,
+				6386EEDF150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
+				6386EEE4150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

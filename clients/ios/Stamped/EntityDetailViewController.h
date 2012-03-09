@@ -14,6 +14,7 @@
 #import "STViewController.h"
 #import "Util.h"
 #import "STEntityDetail.h"
+#import "STFactoryDelegate.h"
 
 @class Entity;
 @class DetailedEntity;
@@ -23,7 +24,8 @@
 
 @interface EntityDetailViewController : STViewController <RKObjectLoaderDelegate, 
                                                           CollapsibleViewControllerDelegate,
-                                                          STImageViewDelegate> {
+                                                          STImageViewDelegate,
+                                                          STFactoryDelegate> {
  @protected
   DetailedEntity* detailedEntity_;
   Entity* entityObject_;
@@ -41,6 +43,7 @@
 - (id)initWithSearchResult:(SearchResult*)searchResult;
 - (void)addSectionWithName:(NSString*)name;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
+- (void)addNewSection:(UIView*)section;
 - (void)addSectionStampedBy;
 - (void)addTodoToolbar;
 - (void)hideMainToolbar;
@@ -48,6 +51,7 @@
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
+- (void)didLoadEntityDetail:(BOOL)loaded;
 
 @property (nonatomic, retain) Stamp* referringStamp;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;

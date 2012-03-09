@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@protocol STSource;
+#import "STSource.h"
 
 @protocol STAction <NSObject>
 

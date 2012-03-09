@@ -28,6 +28,8 @@
 #import "Alerts.h"
 #import "STToolbar.h"
 #import "STSimpleEntityDetail.h"
+#import "STEntityDetailFactory.h"
+#import "STGalleryViewFactory.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -92,7 +94,9 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)commonInit {
-  entityDetail_ = [[STSimpleEntityDetail alloc] initWithEntityId:entityObject_.entityID];
+  STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
+  [factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
+  [factory release];
   [self loadEntityDataFromServer];
   sectionsDict_ = [[NSMutableDictionary alloc] init];
 }
@@ -541,6 +545,13 @@ static const CGFloat kTodoBarHeight = 44.0;
     [section moveArrowViewIfBehindImageView:self.imageView];
 }
 
+- (void)addNewSection:(UIView*)section {
+  section.frame = CGRectMake(100, 150, 100, 100);
+  [scrollView_ addSubview:section];
+  [scrollView_ setNeedsLayout];
+  [scrollView_ setNeedsDisplay];
+}
+
 - (void)addSectionWithName:(NSString*)name {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
                                               initWithNibName:@"CollapsibleViewController" bundle:nil];
@@ -753,5 +764,32 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {}
+
+- (void)didLoad:(id)object withLabel:(id)label {
+  if ([label isEqualToString:@"entityDetail"]) {
+    if (object) {
+      id<STEntityDetail> detail = object;
+      entityDetail_ = [detail retain];
+      [self didLoadEntityDetail:YES];
+        if (self.entityDetail.gallery) {
+          STGalleryViewFactory* factory = [[STGalleryViewFactory alloc] init];
+          [factory createWithGallery:self.entityDetail.gallery andLinkDelegate:nil delegate:self withLabel:@"galleryView"];
+        }
+    }
+    else {
+      [self didLoadEntityDetail:NO];
+    }
+  }
+  else if ([label isEqualToString:@"galleryView"]) {
+    if (object) {
+      UIView* galleryView = object;
+      [self addNewSection:galleryView];
+    }
+  }
+}
+
+- (void)didLoadEntityDetail:(BOOL)loaded {
+  
+}
 
 @end

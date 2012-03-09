@@ -18,6 +18,16 @@
 @synthesize height = height_;
 @synthesize width = width_;
 
+- (void)dealloc {
+  self.image = nil;
+  self.caption = nil;
+  self.link = nil;
+  self.linkType = nil;
+  self.height = nil;
+  self.width = nil;
+  [super dealloc];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGalleryItem class]];
   

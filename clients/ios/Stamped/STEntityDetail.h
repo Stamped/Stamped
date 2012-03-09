@@ -7,13 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@protocol STAction;
-@protocol STGallery;
-@protocol STMetadata;
-@protocol STPlaylist;
-@protocol STFriends;
-@protocol STRelated;
+#import "STAction.h"
+#import "STGallery.h"
+#import "STMetadataItem.h"
+#import "STPlaylist.h"
 
 @protocol STEntityDetail <NSObject>
 
@@ -35,8 +32,8 @@
 @property (nonatomic, readonly, retain) NSString* coordinates;
 
 @property (nonatomic, readonly, retain) NSArray<STAction>* actions;
-@property (nonatomic, readonly, retain) id<STMetadata> metadata;
-@property (nonatomic, readonly, retain) NSArray<STGalleryItem>* gallery;
+@property (nonatomic, readonly, retain) NSArray<STMetadataItem>* metadata;
+@property (nonatomic, readonly, retain) id<STGallery> gallery;
 @property (nonatomic, readonly, retain) id<STPlaylist> playlist;
 
 @end

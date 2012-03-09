@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "STGallery.h"
+#import "STLinkDelegate.h"
 
 @interface STGalleryView : UIScrollView
 
-- (id)initWithGallery:(id<STGallery>)gallery andFrame:(CGRect)frame;
+- (id)initWithGallery:(id<STGallery>)gallery andLinkDelegate:(id<STLinkDelegate>)linkDelegate;
 
 @end

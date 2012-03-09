@@ -16,6 +16,7 @@
 #import "STPlaceAnnotation.h"
 #import "Util.h"
 #import "MusicDetailViewController.h"
+#import "STGalleryView.h"
 
 @interface OtherDetailViewController ()
 - (void)confirmCall;
@@ -234,7 +235,6 @@
   
   
   //section = [self makeSectionWithName:@"Gallery"];
-  NSLog(@"hererererere");
   /*
   if (detailedEntity_.gallery) {
     NSArray* data = [detailedEntity_ objectForKey:@"data"];
@@ -317,6 +317,7 @@
   [shadowView release];
 
   self.imageView.layer.shadowOpacity = 0;
+  
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {

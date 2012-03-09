@@ -16,6 +16,16 @@
 @synthesize link = link_;
 @synthesize icon = icon_;
 
+
+- (void)dealloc {
+  self.name = nil;
+  self.source = nil;
+  self.sourceID = nil;
+  self.link = nil;
+  self.icon = nil;
+  [super dealloc];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleSource class]];
   

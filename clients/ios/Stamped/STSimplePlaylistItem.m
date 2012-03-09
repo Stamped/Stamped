@@ -18,6 +18,15 @@
 @synthesize link = link_;
 @synthesize sources = sources_;
 
+- (void)dealloc {
+  self.name = nil;
+  self.icon = nil;
+  self.link = nil;
+  self.sources = nil;
+  
+  [super dealloc];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimplePlaylistItem class]];
   

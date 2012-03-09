@@ -11,7 +11,7 @@
 #import <RestKit/RestKit.h>
 
 
-@interface STSimpleEntityDetail : NSObject <STEntityDetail, RKObjectLoaderDelegate>
+@interface STSimpleEntityDetail : NSObject <STEntityDetail>
 
 @property (nonatomic, readwrite, retain) NSString* entityID;
 @property (nonatomic, readwrite, retain) NSString* title;
@@ -31,14 +31,10 @@
 @property (nonatomic, readwrite, retain) NSString* coordinates;
 
 @property (nonatomic, readwrite, retain) NSArray<STAction>* actions;
-@property (nonatomic, readwrite, retain) id<STMetadata> metadata;
+@property (nonatomic, readwrite, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readwrite, retain) id<STGallery> gallery;
 @property (nonatomic, readwrite, retain) id<STPlaylist> playlist;
 
-- (id)initWithEntityId:(NSString*)entityID;
 + (RKObjectMapping*)mapping;
-
-@property (nonatomic, readonly) BOOL loading;
-@property (nonatomic, readonly) BOOL failed;
 
 @end

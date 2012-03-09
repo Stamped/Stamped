@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@protocol STPlaylistItem;
+#import "STPlaylistItem.h"
 
 @protocol STPlaylist <NSObject>
 
