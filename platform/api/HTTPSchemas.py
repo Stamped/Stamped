@@ -533,6 +533,9 @@ class HTTPEntity(Schema):
             
             self.image = url
 
+    def _getIconURL(self, filename, client=None):
+        pass
+
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
 
@@ -560,7 +563,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/food.png')
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
@@ -632,7 +635,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/book.png')
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/book.png')
                 self._addMetadata('Publish Date', schema.publish_date)
                 self._addMetadata('Description', schema.desc, key='desc', extended=True)
                 self._addMetadata('Publisher', schema.publisher)
@@ -672,8 +675,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                category = 'TV' if schema.subcategory == 'tv' else schema.subcategory.title()
-                self._addMetadata('Category', category, icon='http://static.stamped.com/assets/film.png')
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/film.png')
                 self._addMetadata('Overview', schema.desc, key='desc', extended=True)
                 self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
                 self._addMetadata('Cast', schema.cast, extended=True, optional=True)
@@ -755,7 +757,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', schema.subcategory.title(), icon='http://static.stamped.com/assets/music.png')
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/music.png')
                 if schema.subcategory == 'artist':
                     self._addMetadata('Biography', schema.desc, key='desc')
                     self._addMetadata('Genre', schema.genre, optional=True)
@@ -919,7 +921,8 @@ class HTTPEntity(Schema):
                     self.caption = address 
 
                 # Metadata
-
+                
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/place.png')
                 self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 
@@ -941,6 +944,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
+                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/other.png')
                 self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 

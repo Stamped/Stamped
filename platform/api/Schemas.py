@@ -16,18 +16,17 @@ from schema import *
 class RefreshToken(Schema):
     def setSchema(self):
         self.token_id           = SchemaElement(basestring)
-        self.client_id          = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
+        self.client             = Client()
         self.access_tokens      = SchemaList(SchemaElement(basestring))
         self.timestamp          = TimestampSchema()
 
 class AccessToken(Schema):
     def setSchema(self):
         self.token_id           = SchemaElement(basestring)
-        self.client_id          = SchemaElement(basestring)
         self.refresh_token      = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
-        self.api_version        = SchemaElement(int)
+        self.client             = Client()
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 
@@ -43,6 +42,15 @@ class SettingsEmailAlertToken(Schema):
         self.user_id            = SchemaElement(basestring)
         self.token_id           = SchemaElement(basestring)
         self.timestamp          = TimestampSchema()
+
+class Client(Schema):
+    def setSchema(self):
+        self.client_id          = SchemaElement(basestring)
+        self.client_class       = SchemaElement(basestring) # iphone, web
+        self.api_version        = SchemaElement(int)
+        self.is_mobile          = SchemaElement(bool)
+        self.resolution         = SchemaElement(int) # 1, 2
+        
 
 # ####### #
 # Account #

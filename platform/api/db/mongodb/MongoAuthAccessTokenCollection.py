@@ -28,9 +28,18 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         return document
 
     def _convertFromMongo(self, document):
-        if document != None and '_id' in document:
-            document['token_id'] = document['_id']
-            del(document['_id'])
+        if document is not None:
+            if '_id' in document:
+                document['token_id'] = document['_id']
+                del(document['_id'])
+            if 'client' not in document:
+                document['client'] = {}
+            if 'client_id' in document:
+                document['client']['client_id'] = document['client_id']
+                del(document['client_id'])
+            if 'api_version' in document:
+                document['client']['api_version'] = document['api_version']
+                del(document['api_version'])
         return AccessToken(document)
 
     ### PUBLIC

@@ -142,6 +142,11 @@ def formatAddress(entity, extendStreet=False, breakLines=False):
 
     return None
 
+def formatSubcategory(subcategory):
+    if subcategory == 'tv':
+        return 'TV'
+    return subcategory.title()
+
 def getGenericSubtitle(entity):
     return str(entity.subcategory).replace('_', ' ').title()
 
