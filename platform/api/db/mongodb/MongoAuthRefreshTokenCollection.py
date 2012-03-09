@@ -32,11 +32,6 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
             if '_id' in document:
                 document['token_id'] = document['_id']
                 del(document['_id'])
-            if 'client_id' in document:
-                if 'client' not in document:
-                    document['client'] = {}
-                document['client']['client_id'] = document['client_id']
-                del(document['client_id'])
         return RefreshToken(document)
 
     ### PUBLIC

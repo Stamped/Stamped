@@ -39,7 +39,6 @@ class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
         data = {
             "oauth_token": self.token['access_token'],
             "entity_id": self.entity['entity_id'],
-            # "category": '',
             "desc": desc,
         }
         result = self.handlePOST(path, data)

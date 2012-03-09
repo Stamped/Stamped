@@ -536,7 +536,7 @@ class HTTPEntity(Schema):
     def _getIconURL(self, filename, client=None):
         pass
 
-    def importSchema(self, schema):
+    def importSchema(self, schema, client=None):
         if schema.__class__.__name__ == 'Entity':
 
             import Entity

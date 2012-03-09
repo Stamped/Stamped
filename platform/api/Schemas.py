@@ -17,7 +17,7 @@ class RefreshToken(Schema):
     def setSchema(self):
         self.token_id           = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
-        self.client             = Client()
+        self.client_id          = SchemaElement(basestring)
         self.access_tokens      = SchemaList(SchemaElement(basestring))
         self.timestamp          = TimestampSchema()
 
@@ -26,7 +26,7 @@ class AccessToken(Schema):
         self.token_id           = SchemaElement(basestring)
         self.refresh_token      = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
-        self.client             = Client()
+        self.client_id          = SchemaElement(basestring)
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 
@@ -50,7 +50,7 @@ class Client(Schema):
         self.api_version        = SchemaElement(int)
         self.is_mobile          = SchemaElement(bool)
         self.resolution         = SchemaElement(int) # 1, 2
-        
+
 
 # ####### #
 # Account #
