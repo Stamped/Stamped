@@ -42,7 +42,7 @@
 - (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
-@property (nonatomic, readonly) UIImageView* mapButtonTooltipImageView;
+@property (nonatomic, retain) UIImageView* mapButtonTooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
 @property (nonatomic, retain) STMapViewController* mapViewController;
 @property (nonatomic, assign) BOOL mapViewShown;
@@ -86,7 +86,7 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
-  mapButtonTooltipImageView_ = nil;
+  self.mapButtonTooltipImageView = nil;
   [super dealloc];
 }
 
@@ -253,7 +253,7 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
-  mapButtonTooltipImageView_ = nil;
+  self.mapButtonTooltipImageView = nil;
   mapViewShown_ = NO;
 }
 
@@ -396,9 +396,7 @@
                         delay:0
                       options:UIViewAnimationOptionAllowUserInteraction
                    animations:^{ mapButtonTooltipImageView_.alpha = 0; }
-                   completion:^(BOOL finished) {
-                     mapButtonTooltipImageView_ = nil;
-                   }];
+                   completion:nil];
   
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
@@ -456,7 +454,7 @@
   }
   
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hideMapButtonTooltip"] && !mapButtonTooltipImageView_) {
-    mapButtonTooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_inbox_tooltip"]];
+    self.mapButtonTooltipImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_inbox_tooltip"]];
     mapButtonTooltipImageView_.center = CGPointMake(CGRectGetMidX(self.view.bounds), 10 + CGRectGetHeight(mapButtonTooltipImageView_.bounds));
     mapButtonTooltipImageView_.userInteractionEnabled = YES;
     UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -511,7 +509,6 @@
                      animations:^{ mapButtonTooltipImageView_.alpha = 0; }
                      completion:^(BOOL finished) {
                        [mapButtonTooltipImageView_ removeFromSuperview];
-                       mapButtonTooltipImageView_ = nil;
                      }];
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -604,7 +601,6 @@
   if (item != stampsTabBarItem_) {
     mapButtonTooltipImageView_.alpha = 0;
     [mapButtonTooltipImageView_ removeFromSuperview];
-    mapButtonTooltipImageView_ = nil;
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
