@@ -147,6 +147,18 @@ def formatSubcategory(subcategory):
         return 'TV'
     return subcategory.title()
 
+def formatFilmLength(seconds):
+    try:
+        seconds = int(seconds)
+        m = (seconds % 3600) / 60
+        h = (seconds - (seconds % 3600)) / 3600
+        if h > 0:
+            return '%s hr %s min' % (h, m)
+        else:
+            return '%s min' % m
+    except Exception:
+        return None
+
 def getGenericSubtitle(entity):
     return str(entity.subcategory).replace('_', ' ').title()
 
