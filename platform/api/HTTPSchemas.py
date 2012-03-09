@@ -534,7 +534,22 @@ class HTTPEntity(Schema):
             self.image = url
 
     def _getIconURL(self, filename, client=None):
-        pass
+        base_url = 'http://static.stamped.com/assets/icons'
+
+        if client is None or not isinstance(client, Client):
+            return '%s/%s.png' % (base_url, filename)
+
+        if client.client_class == 'iphone':
+            if client.client_resolution == 2:
+                return '%s/iphone/2x/%s.png' % (base_url, filename)
+            else:
+                return '%s/iphone/1x/%s.png' % (base_url, filename)
+
+        if client.client_class == 'web':
+            return '%s/web/%s.png' % (base_url, filename)
+
+        return '%s/%s.png' % (base_url, filename)
+
 
     def importSchema(self, schema, client=None):
         if schema.__class__.__name__ == 'Entity':
@@ -544,6 +559,7 @@ class HTTPEntity(Schema):
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
+            subcategory         = Entity.formatSubcategory(schema.subcategory)
             
             self.importData(data, overflow=True)
             
@@ -563,7 +579,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/food.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
@@ -581,7 +597,7 @@ class HTTPEntity(Schema):
                     opentable.link      = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                             schema.sources.openTable.reserveURL
                     opentable.link_type = 'url'
-                    opentable.icon      = 'http://static.stamped.com/assets/opentable.png'
+                    opentable.icon      = self._getIconURL('src_opentable', client=client)
                     sources.append(opentable)
 
                 elif schema.sources.openTable.rid is not None:
@@ -596,10 +612,11 @@ class HTTPEntity(Schema):
                     opentable.source_id = schema.sources.itunes_id
                     opentable.link      = mobileUrl # TODO: Allow API to specify?
                     opentable.link_type = 'url'
-                    opentable.icon      = 'http://static.stamped.com/assets/opentable.png'
+                    opentable.icon      = self._getIconURL('src_opentable', client=client)
                     sources.append(opentable)
 
-                self._addAction('reserve', 'Reserve a table', sources)
+                actionIcon = self._getIconURL('act_reserve_primary', client=client)
+                self._addAction('reserve', 'Reserve a table', sources, icon=actionIcon)
 
                 # Actions: Call
 
@@ -612,7 +629,8 @@ class HTTPEntity(Schema):
                     phone.link_type     = 'phone'
                     sources.append(phone)
 
-                self._addAction('phone', schema.contact.phone, sources)
+                actionIcon = self._getIconURL('act_call', client=client)
+                self._addAction('phone', schema.contact.phone, sources, icon=actionIcon)
 
                 # Actions: View Menu
 
@@ -624,7 +642,8 @@ class HTTPEntity(Schema):
                     menu.source_id      = schema.entity_id
                     sources.append(menu)
 
-                self._addAction('menu', 'View menu', sources)
+                actionIcon = self._getIconURL('act_menu', client=client)
+                self._addAction('menu', 'View menu', sources, icon=actionIcon)
 
 
             # Book
@@ -635,7 +654,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/book.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_book', client=client))
                 self._addMetadata('Publish Date', schema.publish_date)
                 self._addMetadata('Description', schema.desc, key='desc', extended=True)
                 self._addMetadata('Publisher', schema.publisher)
@@ -649,12 +668,13 @@ class HTTPEntity(Schema):
                     amazon.name         = 'Amazon'
                     amazon.source       = 'amazon'
                     amazon.source_id    = schema.sources.amazon_underlying
-                    amazon.icon         = 'http://static.stamped.com/assets/amazon.png'
+                    amazon.icon         = self._getIconURL('src_amazon', client=client)
                     amazon.link         = _buildAmazonURL(schema.sources.amazon_underlying)
                     amazon.link_type    = 'url'
                     sources.append(amazon)
 
-                self._addAction('buy', 'Buy now', sources)
+                actionIcon = self._getIconURL('act_buy_primary', client=client)
+                self._addAction('buy', 'Buy now', sources, icon=actionIcon)
 
             
             elif schema.category == 'film':
@@ -675,7 +695,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/film.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_film', client=client))
                 self._addMetadata('Overview', schema.desc, key='desc', extended=True)
                 self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
                 self._addMetadata('Cast', schema.cast, extended=True, optional=True)
@@ -683,23 +703,6 @@ class HTTPEntity(Schema):
                 self._addMetadata('Genres', schema.genre, optional=True)
                 if schema.subcategory == 'movie':
                     self._addMetadata('Rating', schema.mpaa_rating, key='rating', optional=True)
-
-                # Actions: Find Tickets
-
-                if schema.subcategory == 'movie':
-                    sources = []
-
-                    if schema.sources.fandango.fid is not None:
-                        fandango            = HTTPEntitySource()
-                        fandango.name       = 'Fandango'
-                        fandango.source     = 'fandango'
-                        fandango.source_id  = schema.sources.fandango.fid
-                        fandango.icon       = 'http://static.stamped.com/assets/fandango.png'
-                        fandango.link       = schema.sources.fandango.f_url 
-                        fandango.link_type  = 'url'
-                        sources.append(fandango)
-
-                    self._addAction('tickets', 'Find tickets', sources)
 
                 # Actions: Watch Now
 
@@ -712,12 +715,32 @@ class HTTPEntity(Schema):
                     itunes.source_id    = schema.sources.itunes_id
                     itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
-                    # Only add icon if no movie tickets to be found
-                    if len(self.actions) == 0:
-                        itunes.icon     = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.icon         = self._getIconURL('src_itunes', client=client)
                     sources.append(itunes)
 
-                self._addAction('watch', 'Watch now', sources)
+                actionIcon = self._getIconURL('act_play_primary', client=client)
+                self._addAction('watch', 'Watch now', sources, icon=actionIcon)
+
+                # Actions: Find Tickets
+
+                sources = []
+
+                if schema.sources.fandango.fid is not None:
+                    fandango            = HTTPEntitySource()
+                    fandango.name       = 'Fandango'
+                    fandango.source     = 'fandango'
+                    fandango.source_id  = schema.sources.fandango.fid
+                    fandango.link       = schema.sources.fandango.f_url 
+                    fandango.link_type  = 'url'
+                    # Only add icon if no "watch now"
+                    if len(self.actions) == 0:
+                        fandango.icon   = self._getIconURL('src_fandango', client=client)
+                    sources.append(fandango)
+
+                actionIcon = self._getIconURL('act_ticket_primary', client=client)
+                if len(self.actions) == 0:
+                    actionIcon = self._getIconURL('act_ticket', client=client)
+                self._addAction('tickets', 'Find tickets', sources, icon=actionIcon)
 
                 # Actions: Add to Queue
 
@@ -736,12 +759,12 @@ class HTTPEntity(Schema):
                     amazon.name         = 'Amazon'
                     amazon.source       = 'amazon'
                     amazon.source_id    = schema.sources.amazon_underlying
-                    amazon.icon         = 'http://static.stamped.com/assets/amazon.png'
                     amazon.link         = _buildAmazonURL(schema.sources.amazon_underlying)
                     amazon.link_type    = 'url'
                     sources.append(amazon)
 
-                self._addAction('buy', 'Buy', sources)
+                actionIcon = self._getIconURL('act_buy', client=client)
+                self._addAction('buy', 'Buy', sources, icon=actionIcon)
 
             
             elif schema.category == 'music':
@@ -757,7 +780,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/music.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_music', client=client))
                 if schema.subcategory == 'artist':
                     self._addMetadata('Biography', schema.desc, key='desc')
                     self._addMetadata('Genre', schema.genre, optional=True)
@@ -779,7 +802,7 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.icon         = self._getIconURL('src_itunes', client=client)
                     sources.append(itunes)
 
                 if schema.sources.rdio_id is not None:
@@ -787,7 +810,7 @@ class HTTPEntity(Schema):
                     rdio.name           = 'Rdio'
                     rdio.source         = 'rdio'
                     rdio.source_id      = schema.sources.rdio_id
-                    rdio.icon           = 'http://static.stamped.com/assets/rdio.png'
+                    rdio.icon           = self._getIconURL('src_rdio', client=client)
                     sources.append(rdio)
 
                 if schema.sources.spotify_id is not None:
@@ -795,15 +818,19 @@ class HTTPEntity(Schema):
                     spotify.name        = 'Spotify'
                     spotify.source      = 'spotify'
                     spotify.source_id   = schema.sources.spotify_id
-                    spotify.icon        = 'http://static.stamped.com/assets/spotify.png'
+                    spotify.icon        = self._getIconURL('src_spotify', client=client)
                     sources.append(spotify)
 
+                actionTitle = 'Listen'
                 if schema.subcategory == 'artist':
-                    self._addAction('listen', 'Listen to top songs', sources)
+                    actionTitle = 'Listen to top songs'
                 elif schema.subcategory == 'album':
-                    self._addAction('listen', 'Listen to album', sources)
+                    actionTitle = 'Listen to album'
                 elif schema.subcategory == 'song':
-                    self._addAction('listen', 'Listen to song', sources)
+                    actionTitle = 'Listen to song'
+                        
+                actionIcon = self._getIconURL('act_play_primary', client=client)
+                self._addAction('listen', actionTitle, sources, icon=actionIcon)
 
                 # Actions: Add to Playlist
 
@@ -823,12 +850,12 @@ class HTTPEntity(Schema):
                     spotify.source_id   = schema.sources.spotify_id
                     sources.append(spotify)
 
+                actionTitle = 'Add to playlist'
                 if schema.subcategory == 'artist':
-                    self._addAction('playlist', 'Add artist to playlist', sources)
-                elif schema.subcategory == 'album':
-                    self._addAction('playlist', 'Add to playlist', sources)
-                elif schema.subcategory == 'song':
-                    self._addAction('playlist', 'Add to playlist', sources)
+                    actionTitle = 'Add artist to playlist'
+                
+                actionIcon = self._getIconURL('act_playlist_music', client=client)
+                self._addAction('playlist', actionTitle, sources, icon=actionIcon)
 
                 # Actions: Download
 
@@ -843,7 +870,9 @@ class HTTPEntity(Schema):
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
-                self._addAction('download', 'Download %s' % schema.subcategory, sources)
+                actionTitle = 'Download %s' % schema.subcategory
+                actionIcon  = self._getIconURL('act_download', client=client)
+                self._addAction('download', actionTitle, sources, icon=actionIcon)
             
                 # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
                 #     songs = schema.songs
@@ -873,9 +902,9 @@ class HTTPEntity(Schema):
 
                 # Metadata
 
-                self._addMetadata('Category',       'App', icon='http://static.stamped.com/assets/app.png')
-                self._addMetadata('Genre',          schema.genre)
-                self._addMetadata('Description',    schema.desc, key='desc', extended=True)
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_app', client=client))
+                self._addMetadata('Genre', schema.genre)
+                self._addMetadata('Description', schema.desc, key='desc', extended=True)
 
                 # Actions: Download
 
@@ -886,7 +915,7 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.itunes_id
-                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.icon         = self._getIconURL('src_itunes', client=client)
                     itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
@@ -896,12 +925,13 @@ class HTTPEntity(Schema):
                     itunes.name         = 'iTunes'
                     itunes.source       = 'itunes'
                     itunes.source_id    = schema.sources.apple.aid
-                    itunes.icon         = 'http://static.stamped.com/assets/itunes.png'
+                    itunes.icon         = self._getIconURL('src_itunes', client=client)
                     itunes.link         = _encodeiTunesShortURL(schema.itunes_url)
                     itunes.link_type    = 'url'
                     sources.append(itunes)
 
-                self._addAction('download', 'Download', sources)
+                actionIcon = self._getIconURL('act_download_primary', client=client)
+                self._addAction('download', 'Download', sources, icon=actionIcon)
 
                 # Gallery
 
@@ -922,7 +952,7 @@ class HTTPEntity(Schema):
 
                 # Metadata
                 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/place.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_place', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 
@@ -937,14 +967,15 @@ class HTTPEntity(Schema):
                     phone.link_type     = 'phone'
                     sources.append(phone)
 
-                self._addAction('phone', schema.contact.phone, sources)
+                actionIcon = self._getIconURL('act_call', client=client)
+                self._addAction('phone', schema.contact.phone, sources, icon=actionIcon)
 
             # Generic item
             else:
 
                 # Metadata
 
-                self._addMetadata('Category', Entity.formatSubcategory(schema.subcategory), icon='http://static.stamped.com/assets/other.png')
+                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_other', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
                 self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
 
