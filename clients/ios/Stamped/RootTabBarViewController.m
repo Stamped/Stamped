@@ -267,7 +267,6 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  NSLog(@"View did appear");
   [super viewDidAppear:animated];
   if (mapViewShown_)
     [self.mapViewController viewDidAppear:animated];
@@ -322,9 +321,6 @@
   } else {
     showTooltipWhenAuthenticated_ = YES;
   }
-
-  NSLog(@"Push notification function test...");
-  [self pushNotificationReceived:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -565,13 +561,11 @@
 }
 
 - (void)pushNotificationReceived:(NSNotification*)notification {
-  NSLog(@"list view bullshit");
-  if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]] && mapViewShown_) {
-    [self showListView];
-    [(STMapToggleButton*)self.navigationItem.rightBarButtonItem.customView showListButton:nil];
-  }
-
   if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+    if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]] && mapViewShown_) {
+      [self showListView];
+      [(STMapToggleButton*)self.navigationItem.rightBarButtonItem.customView showMapButton:nil];
+    }
     self.tabBar.selectedItem = activityTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
   }
