@@ -134,8 +134,8 @@ def formatAddress(entity, extendStreet=False, breakLines=False):
             else:
                 return '%s%s%s, %s' % (street, delimiter, locality, country)
 
-    if schema.address is not None:
-        return schema.address
+    if entity.address is not None:
+        return entity.address
         
     if entity.neighborhood is not None:
         return entity.neighborhood
