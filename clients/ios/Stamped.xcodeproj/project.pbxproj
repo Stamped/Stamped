@@ -6452,7 +6452,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6473,8 +6473,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "412A1F71-167A-44B9-8511-B70381F4683F";
+				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -6524,8 +6524,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6545,8 +6545,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

@@ -28,9 +28,10 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
         return document
 
     def _convertFromMongo(self, document):
-        if document != None and '_id' in document:
-            document['token_id'] = document['_id']
-            del(document['_id'])
+        if document is not None:
+            if '_id' in document:
+                document['token_id'] = document['_id']
+                del(document['_id'])
         return RefreshToken(document)
 
     ### PUBLIC

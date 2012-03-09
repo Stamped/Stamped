@@ -42,7 +42,7 @@
 - (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
-@property (nonatomic, readonly) UIImageView* mapButtonTooltipImageView;
+@property (nonatomic, retain) UIImageView* mapButtonTooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
 @property (nonatomic, retain) STMapViewController* mapViewController;
 @property (nonatomic, assign) BOOL mapViewShown;
@@ -86,7 +86,7 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
-  mapButtonTooltipImageView_ = nil;
+  self.mapButtonTooltipImageView = nil;
   [super dealloc];
 }
 
@@ -253,7 +253,7 @@
   self.userStampBackgroundImageView = nil;
   self.mapViewController = nil;
   tooltipImageView_ = nil;
-  mapButtonTooltipImageView_ = nil;
+  self.mapButtonTooltipImageView = nil;
   mapViewShown_ = NO;
 }
 
@@ -352,7 +352,7 @@
 - (void)updateNavBar {
   UITabBarItem* item = self.tabBar.selectedItem;
   if (item == stampsTabBarItem_ || item == mustDoTabBarItem_) {
-    if ([self.navigationItem.rightBarButtonItem isMemberOfClass:[STMapToggleButton class]])
+    if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]])
       return;
 
     STMapToggleButton* toggleButton = [[[STMapToggleButton alloc] init] autorelease];
@@ -380,6 +380,9 @@
 }
 
 - (void)showMapView {
+  if (mapViewShown_)
+    return;
+
   [mapViewController_ reset];
   if ([selectedViewController_ isMemberOfClass:[InboxViewController class]])
     mapViewController_.source = STMapViewControllerSourceInbox;
@@ -396,9 +399,7 @@
                         delay:0
                       options:UIViewAnimationOptionAllowUserInteraction
                    animations:^{ mapButtonTooltipImageView_.alpha = 0; }
-                   completion:^(BOOL finished) {
-                     mapButtonTooltipImageView_ = nil;
-                   }];
+                   completion:nil];
   
   [UIView transitionFromView:selectedViewController_.view
                       toView:mapViewController_.view
@@ -416,6 +417,9 @@
 }
 
 - (void)showListView {
+  if (!mapViewShown_)
+    return;
+
   // Since showing the map removes the inbox from the view hierarchy it needs to be re-added.
   // Otherwise the view ends up on top of the Tab Bar.
   [self.view insertSubview:selectedViewController_.view atIndex:0];
@@ -456,7 +460,7 @@
   }
   
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hideMapButtonTooltip"] && !mapButtonTooltipImageView_) {
-    mapButtonTooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_inbox_tooltip"]];
+    self.mapButtonTooltipImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"map_inbox_tooltip"]];
     mapButtonTooltipImageView_.center = CGPointMake(CGRectGetMidX(self.view.bounds), 10 + CGRectGetHeight(mapButtonTooltipImageView_.bounds));
     mapButtonTooltipImageView_.userInteractionEnabled = YES;
     UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -511,7 +515,6 @@
                      animations:^{ mapButtonTooltipImageView_.alpha = 0; }
                      completion:^(BOOL finished) {
                        [mapButtonTooltipImageView_ removeFromSuperview];
-                       mapButtonTooltipImageView_ = nil;
                      }];
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -559,11 +562,15 @@
 
 - (void)pushNotificationReceived:(NSNotification*)notification {
   if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+    if ([self.navigationItem.rightBarButtonItem.customView isMemberOfClass:[STMapToggleButton class]] && mapViewShown_) {
+      [self showListView];
+      [(STMapToggleButton*)self.navigationItem.rightBarButtonItem.customView showMapButton:nil];
+    }
     self.tabBar.selectedItem = activityTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
   }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
-  [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];
+  [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];  
 }
 
 #pragma mark - AccountManagerDelegate Methods.
@@ -604,7 +611,6 @@
   if (item != stampsTabBarItem_) {
     mapButtonTooltipImageView_.alpha = 0;
     [mapButtonTooltipImageView_ removeFromSuperview];
-    mapButtonTooltipImageView_ = nil;
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hideMapButtonTooltip"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }

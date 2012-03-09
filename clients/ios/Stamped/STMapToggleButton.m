@@ -10,11 +10,6 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-@interface STMapToggleButton ()
-- (void)showListButton:(id)sender;
-- (void)showMapButton:(id)sender;
-@end
-
 @implementation STMapToggleButton
 
 @synthesize mapButton = mapButton_;

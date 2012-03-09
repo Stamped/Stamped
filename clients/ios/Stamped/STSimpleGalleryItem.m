@@ -23,8 +23,6 @@
   self.caption = nil;
   self.link = nil;
   self.linkType = nil;
-  self.height = nil;
-  self.width = nil;
   [super dealloc];
 }
 
@@ -32,7 +30,7 @@
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGalleryItem class]];
   
   [mapping mapKeyPathsToAttributes:
-   @"link_type",@"linkType",
+   @"link_type", @"linkType",
    nil];
   
   [mapping mapAttributes:

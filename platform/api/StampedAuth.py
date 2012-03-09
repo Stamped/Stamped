@@ -34,13 +34,6 @@ class StampedAuth(AStampedAuth):
     @property
     def isValid(self):
         return self._validated
-
-    def _getAPIVersion(self, clientId):
-        clientIds = {
-            'stampedtest':  0,
-            'ios8':         1,
-        }
-        return clientIds[clientId]
     
     # ####### #
     # Clients #
@@ -48,6 +41,28 @@ class StampedAuth(AStampedAuth):
     
     def addClient(self, params):
         raise NotImplementedError
+
+    def getClientDetails(self, clientId):
+        client = Client()
+        client.client_id = clientId 
+
+        if clientId == 'ios8':
+            client.client_class = 'iphone'
+            client.api_version  = 1
+            client.is_mobile    = True
+            client.resolution   = 1
+
+        elif clientId == 'ios8@2x':
+            client.client_class = 'iphone'
+            client.api_version  = 1
+            client.is_mobile    = True
+            client.resolution   = 2
+
+        else:
+            client.api_version  = 0
+
+        return client
+
     
     def verifyClientCredentials(self, clientId, clientSecret):
         ### TODO: remove hardcoded id / secret in plaintext!'
@@ -55,7 +70,7 @@ class StampedAuth(AStampedAuth):
             if clientId == 'stampedtest' and clientSecret == 'august1ftw':
                 logs.info("Client approved")
                 return True
-            if clientId == 'ios8' and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
+            if (clientId == 'ios8' or clientId == 'ios8@2x') and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
                 logs.info("Client approved: ios8")
                 return True
             raise
@@ -315,7 +330,6 @@ class StampedAuth(AStampedAuth):
                 accessToken.client_id = clientId
                 accessToken.refresh_token = refreshToken
                 accessToken.user_id = authUserId
-                accessToken.api_version = self._getAPIVersion(clientId)
                 accessToken.expires = rightNow + timedelta(seconds=expire)
                 accessToken.timestamp.created = rightNow
                 
@@ -343,7 +357,7 @@ class StampedAuth(AStampedAuth):
 
             if token['expires'] > datetime.utcnow():
                 logs.info("Authenticated user id: %s" % token.user_id)
-                return token.user_id, token.api_version
+                return token.user_id, token.client_id
             
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(token.token_id)
