@@ -806,16 +806,18 @@ def round_float(f, n):
 def get_modified_time(filename):
     return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 
-def getFacebook(accessToken, path, params={}):
+def getFacebook(accessToken, path, params=None):
+    if params is None:
+        params = {}
     num_retries = 0
     max_retries = 5
+    params['access_token'] = accessToken
 
     while True:
         try:
             baseurl = 'https://graph.facebook.com'
-            params['access_token'] = accessToken
-            params  = urllib.urlencode(params)
-            url     = "%s%s?%s" % (baseurl, path, params)
+            encoded_params  = urllib.urlencode(params)
+            url     = "%s%s?%s" % (baseurl, path, encoded_params)
             result  = json.load(urllib2.urlopen(url))
             
             if 'error' in result:
