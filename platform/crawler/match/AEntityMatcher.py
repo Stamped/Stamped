@@ -67,7 +67,7 @@ class AEntityMatcher(object):
         if not force:
             result = self.dedupeOne(entity, override=override)
             
-            if result is not None:
+            if result is not None and result.subcategory == entity.subcategory: # and result.title == entity.title:
                 return result
         
         if 'place' in entity and entity.lat is None:
