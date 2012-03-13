@@ -31,7 +31,7 @@ except:
 class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def __init__(self, collection='entities'):
-        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity)
+        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity, overflow=True)
         AEntityDB.__init__(self)
     
     @lazyProperty
