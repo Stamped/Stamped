@@ -9,6 +9,13 @@ import copy
 from datetime import datetime
 from schema import *
 
+import report from logs
+try:
+    raise Exception
+except Exception:
+    report()
+
+
 # #### #
 # Auth #
 # #### #
