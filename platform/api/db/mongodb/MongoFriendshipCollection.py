@@ -101,7 +101,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             logs.warning('Invalid distance for friends of friends: %s' % distance)
             raise Exception
 
-        friends = {}
+        friends = {0: set(userId)}
 
         def visitUser(userId, distance):
             friendIds = self.friends_collection.getFriends(userId)
@@ -116,16 +116,16 @@ class MongoFriendshipCollection(AFriendshipDB):
                     visitUser(friendId, distance + 1)
 
         visitUser(userId, 1)
-        
+
         result = friends[distance]
-        
+
         if not inclusive:
             prevDistance = distance - 1
-            while prevDistance > 0:
+            while prevDistance >= 0:
                 result = result.difference(friends[prevDistance])
                 prevDistance = prevDistance - 1
-                
-        return result
+
+        return list(result)
     
     def getFollowers(self, userId):
         # TODO: Remove limit, add cursor instead
@@ -266,7 +266,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         # seed potential friends with users who have stamped at least one of the same entities
         for entity_id in user_entity_ids:
-            stamps = self.stamp_collection.getStampsFromEntity(entity_id, limit=200)
+            stamps = self.stamp_collection.getStampsSliceForEntity(entity_id, GenericCollectionSlice(limit=200))
             
             for stamp in stamps:
                 user_id = stamp.user.user_id

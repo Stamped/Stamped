@@ -1264,6 +1264,33 @@ class StampedAPI(AStampedAPI):
         
         return results
     
+    @API_CALL
+    def getEntityStampedBy(self, entityId, authUserId=None, genericCollectionSlice=None, showCount=False):
+        if genericCollectionSlice is None:
+            genericCollectionSlice = GenericCollectionSlice()
+
+        # Use relationships
+        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+            distance = genericCollectionSlice.distance
+            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds) 
+                if count == 0:
+                    return [], 0
+            stamps = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
+
+        # Use popular
+        else:
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId)
+                if count <= 0:
+                    return [], 0
+            stamps = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
+            
+        if showCount:
+            return stamps, count
+        return stamps
+    
     """
      #####                                    
     #     # #####   ##   #    # #####   ####  

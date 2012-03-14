@@ -31,6 +31,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
+        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
@@ -189,7 +190,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def getStampFromUserEntity(self, userId, entityId):
         try:
-            ### TODO: Index
             document = self._collection.find_one({
                 'user.user_id': userId, 
                 'entity.entity_id': entityId,
@@ -198,9 +198,22 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         except:
             return None
     
-    def getStampsFromEntity(self, entityId, limit=None):
+    def getStampsSliceForEntity(self, entityId, genericCollectionSlice, userIds=None):
+        query = {'entity.entity_id': entityId}
+
+        if userIds is not None:
+            if len(userIds) == 0:
+                return []
+            
+            if len(userIds) == 1:
+                query['user.user_id'] = userIds[0]
+            else:
+                query['user.user_id'] = { '$in' : userIds }
+
+        return self._getSlice(query, genericCollectionSlice)
+
+    def getStampsForEntity(self, entityId, limit=None):
         try:
-            ### TODO: Index
             docs = self._collection.find({
                 'entity.entity_id': entityId,
             })
@@ -210,6 +223,20 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return (self._convertFromMongo(doc) for doc in docs)
         except:
             return []
+    
+    def countStampsForEntity(self, entityId, userIds=None):
+        query = {'entity.entity_id': entityId}
+
+        if userIds is not None:
+            if len(userIds) == 0:
+                return []
+            
+            if len(userIds) == 1:
+                query['user.user_id'] = userIds[0]
+            else:
+                query['user.user_id'] = { '$in' : userIds }
+
+        return self._collection.find(query).count()
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:
