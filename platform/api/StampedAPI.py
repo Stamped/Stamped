@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, sys
+    import os, logs, re, time, urlparse
     
     import Blacklist
     import libs.ec2_utils
@@ -36,7 +36,7 @@ try:
     from ACollectionDB      import ACollectionDB
     from AFriendshipDB      import AFriendshipDB
     from AActivityDB        import AActivityDB
-    from api.Schemas            import *
+    from api.Schemas        import *
     
     # third-party search API wrappers
     from resolve            import FullResolveContainer
@@ -2473,17 +2473,9 @@ class StampedAPI(AStampedAPI):
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
 
         count = None
-        logs.info("ID: %s" % id(FriendsSlice))
-        logs.info("SCHEMA ID: %s" % id(Schema))
-        logs.info("Modules: %s" % sys.modules)
-        logs.info("IS FRIEND: %s" % isinstance(genericCollectionSlice, FriendsSlice))
-        logs.info("IS GENERIC: %s" % isinstance(genericCollectionSlice, GenericCollectionSlice))
-        logs.info("IS SCHEMA: %s" % isinstance(genericCollectionSlice, Schema))
-        logs.info('%s' % genericCollectionSlice)
 
         # Use relationships
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
-            logs.info("WORKING")
             distance = genericCollectionSlice.distance
             userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
             if showCount == True:

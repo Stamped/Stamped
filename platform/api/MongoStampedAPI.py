@@ -10,7 +10,7 @@ import json, logs, time
 import libs.ec2_utils
 
 from Entity                 import *
-from Schemas                import *
+from api.Schemas            import *
 from utils                  import lazyProperty
 from pprint                 import pformat
 from StampedAPI             import StampedAPI

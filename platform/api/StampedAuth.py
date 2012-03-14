@@ -10,7 +10,7 @@ import time, hashlib, random, base64, struct, logs, auth, os
 
 from datetime               import datetime, timedelta
 from errors                 import *
-from Schemas                import *
+from api.Schemas            import *
 
 from AStampedAuth           import AStampedAuth
 from AAccountDB             import AAccountDB
