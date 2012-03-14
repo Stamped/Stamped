@@ -2328,7 +2328,19 @@ class StampedAPI(AStampedAPI):
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
 
-        return self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        
+        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
+            if len(stamps) >= genericCollectionSlice.limit:
+                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
+
+            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
+            
+            if len(deleted) > 0:
+                stamps = stamps + deleted
+                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+        
+        return stamps
 
     def _enrichStampCollection(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
         commentPreviews = {}
@@ -2358,18 +2370,6 @@ class StampedAPI(AStampedAPI):
         
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        
-        num_stamps = len(stamps)
-        
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
-            if num_stamps >= genericCollectionSlice.limit:
-                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
-
-            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
-            
-            if len(deleted) > 0:
-                stamps = stamps + deleted
-                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
     
