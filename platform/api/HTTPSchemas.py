@@ -643,7 +643,7 @@ class HTTPEntity(Schema):
             elif schema.category == 'book':
 
                 if schema.author is not None:
-                    self.caption = 'By %s' % schema.author
+                    self.caption = 'by %s' % schema.author
 
                 # Metadata
 
@@ -756,10 +756,10 @@ class HTTPEntity(Schema):
                     self.caption = 'Artist'
 
                 elif schema.subcategory == 'album' and schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 elif schema.subcategory == 'song' and schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 # Metadata
 
@@ -882,7 +882,7 @@ class HTTPEntity(Schema):
             elif schema.subcategory == 'app':
 
                 if schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 # Metadata
 
@@ -965,7 +965,7 @@ class HTTPEntity(Schema):
 
             if self.coordinates is not None or self.address is not None:
                 # Don't add an image if coordinates exist
-                pass
+                del(self.image)
             elif schema.image is not None:
                 self._addImage(schema.image)
             elif schema.large is not None:
