@@ -153,7 +153,7 @@ def stampedBy(request):
     result      = HTTPStampedBy()
 
     if schema.group is None or schema.group == 'friends':
-        requestSlice = schema.exportSparse(FriendsSlice())
+        requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 1
         stamps, count = stampedAPI.getStampsForEntity(schema.entity_id, authUserId, requestSlice, showCount)
         for stamp in stamps:
@@ -162,7 +162,7 @@ def stampedBy(request):
             result.friends.count = count
 
     if schema.group is None or schema.group == 'fof':
-        requestSlice = schema.exportSparse(FriendsSlice())
+        requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
         stamps, count = stampedAPI.getStampsForEntity(schema.entity_id, authUserId, requestSlice, showCount)
         for stamp in stamps:
@@ -171,7 +171,7 @@ def stampedBy(request):
             result.fof.count = count
 
     if schema.group is None or schema.group == 'all':
-        requestSlice = schema.exportSparse(GenericCollectionSlice())
+        requestSlice = schema.exportSchema(GenericCollectionSlice())
         stamps, count = stampedAPI.getStampsForEntity(schema.entity_id, authUserId, requestSlice, showCount)
         for stamp in stamps:
             result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
