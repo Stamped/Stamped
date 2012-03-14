@@ -95,6 +95,37 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     def getFriends(self, userId):
         return self.friends_collection.getFriends(userId)
+
+    def getFriendsOfFriends(self, userId, distance=2, inclusive=True):
+        if distance <= 0:
+            logs.warning('Invalid distance for friends of friends: %s' % distance)
+            raise Exception
+
+        friends = {}
+
+        def visitUser(userId, distance):
+            friendIds = self.friends_collection.getFriends(userId)
+            
+            if distance not in friends:
+                friends[distance] = set()
+            
+            for friendId in friendIds:
+                friends[distance].add(friendId)
+                
+                if distance < maxDistance:
+                    visitUser(friendId, distance + 1)
+
+        visitUser(userId, 1)
+        
+        result = friends[distance]
+        
+        if not inclusive:
+            prevDistance = distance - 1
+            while prevDistance > 0:
+                result = result.difference(friends[prevDistance])
+                prevDistance = prevDistance - 1
+                
+        return result
     
     def getFollowers(self, userId):
         # TODO: Remove limit, add cursor instead
