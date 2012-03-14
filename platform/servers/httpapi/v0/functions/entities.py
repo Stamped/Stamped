@@ -163,6 +163,8 @@ def stampedBy(request):
 
     if schema.group is None or schema.group == 'fof':
         requestSlice = schema.exportSchema(FriendsSlice())
+        logs.info('FRIENDSSLICE: %s' % isinstance(requestSlice, FriendsSlice))
+        logs.info('GENERIC: %s' % isinstance(requestSlice, GenericCollectionSlice))
         requestSlice.distance = 2
         stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
         for stamp in stamps:
