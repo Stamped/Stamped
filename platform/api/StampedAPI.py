@@ -2478,11 +2478,15 @@ class StampedAPI(AStampedAPI):
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
             distance = genericCollectionSlice.distance
             userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
+            logs.info('USER IDS: %s' % userIds)
+            logs.info('LENGTH: %s' % len(userIds))
+            logs.info('DISTANCE: %s' % distance)
             if showCount == True:
                 count = self._stampDB.countStampsForEntity(entityId, userIds=userIds) 
                 if count == 0:
                     return [], 0
             stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
+            logs.info(stampData)
 
         # Use popular
         else:
