@@ -164,6 +164,8 @@ def stampedBy(request):
     if schema.group is None or schema.group == 'fof':
         requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
+        import sys
+        logs.info(sys.modules)
         logs.info("ID: %s" % id(FriendsSlice))
         logs.info("SCHEMA ID: %s" % id(Schema))
         logs.info('FRIENDSSLICE: %s' % isinstance(requestSlice, FriendsSlice))

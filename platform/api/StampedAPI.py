@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse
+    import os, logs, re, time, urlparse, sys
     
     import Blacklist
     import libs.ec2_utils
@@ -2475,6 +2475,7 @@ class StampedAPI(AStampedAPI):
         count = None
         logs.info("ID: %s" % id(FriendsSlice))
         logs.info("SCHEMA ID: %s" % id(Schema))
+        logs.info(sys.modules)
         logs.info("IS FRIEND: %s" % isinstance(genericCollectionSlice, FriendsSlice))
         logs.info("IS GENERIC: %s" % isinstance(genericCollectionSlice, GenericCollectionSlice))
         logs.info("IS SCHEMA: %s" % isinstance(genericCollectionSlice, Schema))
