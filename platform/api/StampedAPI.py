@@ -1941,36 +1941,6 @@ class StampedAPI(AStampedAPI):
         
         return stamp
     
-    @API_CALL
-    def getStampsForEntity(self, entityId, authUserId=None, genericCollectionSlice=None, showCount=False):
-        if genericCollectionSlice is None:
-            genericCollectionSlice = GenericCollectionSlice()
-
-        if genericCollectionSlice.limit is None:
-            genericCollectionSlice.limit = 20
-
-        count = None
-
-        # Use relationships
-        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
-            distance = genericCollectionSlice.distance
-            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds) 
-                if count == 0:
-                    return [], 0
-            stamps = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
-
-        # Use popular
-        else:
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId)
-                if count <= 0:
-                    return [], 0
-            stamps = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
-            
-        return stamps, count
-    
     
     """
      #####                                                  
@@ -2357,6 +2327,10 @@ class StampedAPI(AStampedAPI):
             genericCollectionSlice.limit = stampCap
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
+
+        return self._enrichStampCollection(stampData, genericCollectionSlice, enrich)
+
+    def _enrichStampCollection(self, stampData, genericCollectionSlice, enrich=True):
         commentPreviews = {}
         
         if genericCollectionSlice.comments:
@@ -2494,6 +2468,33 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericCollectionSlice):
         return self._getStampCollection(authUserId, None, genericCollectionSlice)
+    
+    @API_CALL
+    def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
+
+        count = None
+
+        # Use relationships
+        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+            distance = genericCollectionSlice.distance
+            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds) 
+                if count == 0:
+                    return [], 0
+            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
+
+        # Use popular
+        else:
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId)
+                if count <= 0:
+                    return [], 0
+            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
+            
+        stamps = self._enrichStampCollection(stampData, genericCollectionSlice)
+        
+        return stamps, count
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):
