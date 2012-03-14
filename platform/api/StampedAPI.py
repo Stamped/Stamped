@@ -2328,9 +2328,9 @@ class StampedAPI(AStampedAPI):
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
 
-        return self._enrichStampCollection(stampData, genericCollectionSlice, enrich)
+        return self._enrichStampCollection(stampData, genericCollectionSlice, enrich, commentCap)
 
-    def _enrichStampCollection(self, stampData, genericCollectionSlice, enrich=True):
+    def _enrichStampCollection(self, stampData, genericCollectionSlice, enrich=True, commentCap=4):
         commentPreviews = {}
         
         if genericCollectionSlice.comments:
@@ -2493,7 +2493,7 @@ class StampedAPI(AStampedAPI):
             stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
             
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice)
-        
+
         return stamps, count
     
     @API_CALL
