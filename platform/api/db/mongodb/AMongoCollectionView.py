@@ -10,6 +10,7 @@ import Globals, utils
 import bson, logs, pprint, pymongo
 import libs.worldcities, unicodedata
 
+from errors             import *
 from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
 
