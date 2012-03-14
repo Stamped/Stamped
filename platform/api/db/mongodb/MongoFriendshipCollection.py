@@ -102,6 +102,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             raise Exception
 
         friends = {0: set(userId)}
+        maxDistance = distance
 
         def visitUser(userId, distance):
             friendIds = self.friends_collection.getFriends(userId)
