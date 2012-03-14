@@ -26,6 +26,9 @@ class AMongoCollectionView(AMongoCollection):
         viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         orig_coords = True
+
+        if genericCollectionSlice.limit is None:
+            genericCollectionSlice.limit = 0
         
         if relaxed:
             center = {
