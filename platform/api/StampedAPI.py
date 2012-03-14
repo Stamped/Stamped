@@ -2473,7 +2473,11 @@ class StampedAPI(AStampedAPI):
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
 
         count = None
-        logs.info("IS INSTANCE: %s" % isinstance(genericCollectionSlice, FriendsSlice))
+        
+        logs.info("IS FRIEND: %s" % isinstance(genericCollectionSlice, FriendsSlice))
+        logs.info("IS GENERIC: %s" % isinstance(genericCollectionSlice, GenericCollectionSlice))
+        logs.info('%s' % genericCollectionSlice)
+
         # Use relationships
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
             logs.info("WORKING")
