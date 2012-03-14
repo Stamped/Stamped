@@ -9,7 +9,7 @@ import copy
 from datetime import datetime
 from schema import *
 
-import report from logs
+from logs import report
 try:
     raise Exception
 except Exception:
