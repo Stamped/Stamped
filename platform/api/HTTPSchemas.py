@@ -1484,6 +1484,33 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
         
         return schema
 
+class HTTPStampedBySlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+        
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.group              = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ in ['FriendsSlice', 'GenericCollectionSlice']:
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPStampedBy(Schema):
+    def setSchema(self):
+        self.friends            = HTTPStampedByGroup()
+        self.fof                = HTTPStampedByGroup()
+        self.all                = HTTPStampedByGroup()
+
+class HTTPStampedByGroup(Schema):
+    def setSchema(self):
+        self.count              = SchemaElement(int)
+        self.stamps             = SchemaList(HTTPStamp())
+
 class HTTPStampImage(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring, required=True)
