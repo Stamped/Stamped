@@ -148,7 +148,7 @@ def stampedBy(request):
     authUserId, authClientId = checkOAuth(request)
     
     schema      = parseRequest(HTTPStampedBySlice(), request)
-    showCount   = False if schema.group is None else True
+    showCount   = True if schema.group is None else False
 
     result      = HTTPStampedBy()
 
