@@ -165,6 +165,7 @@ def stampedBy(request):
         requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
         logs.info("ID: %s" % id(FriendsSlice))
+        logs.info("SCHEMA ID: %s" % id(Schema))
         logs.info('FRIENDSSLICE: %s' % isinstance(requestSlice, FriendsSlice))
         logs.info('GENERIC: %s' % isinstance(requestSlice, GenericCollectionSlice))
         stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)

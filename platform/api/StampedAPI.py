@@ -2474,6 +2474,7 @@ class StampedAPI(AStampedAPI):
 
         count = None
         logs.info("ID: %s" % id(FriendsSlice))
+        logs.info("SCHEMA ID: %s" % id(Schema))
         logs.info("IS FRIEND: %s" % isinstance(genericCollectionSlice, FriendsSlice))
         logs.info("IS GENERIC: %s" % isinstance(genericCollectionSlice, GenericCollectionSlice))
         logs.info("IS SCHEMA: %s" % isinstance(genericCollectionSlice, Schema))
