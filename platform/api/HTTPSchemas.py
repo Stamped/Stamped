@@ -551,7 +551,7 @@ class HTTPEntity(Schema):
             return '%s/default/%s.png' % (base_url, filename)
 
         if client.client_class == 'iphone':
-            if client.client_resolution == 2:
+            if client.resolution == 2:
                 return '%s/iphone/2x/%s.png' % (base_url, filename)
             else:
                 return '%s/iphone/1x/%s.png' % (base_url, filename)
