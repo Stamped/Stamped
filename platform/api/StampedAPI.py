@@ -1269,6 +1269,9 @@ class StampedAPI(AStampedAPI):
         if genericCollectionSlice is None:
             genericCollectionSlice = GenericCollectionSlice()
 
+        if genericCollectionSlice.limit is None:
+            genericCollectionSlice.limit = 20
+
         # Use relationships
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
             distance = genericCollectionSlice.distance
