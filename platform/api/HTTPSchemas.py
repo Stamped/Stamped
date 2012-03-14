@@ -593,7 +593,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
                 self._addMetadata('Description', schema.desc, key='desc', extended=True)
 
                 # Actions: Reservation
@@ -606,7 +606,6 @@ class HTTPEntity(Schema):
                     source.source       = 'opentable'
                     source.source_id    = schema.sources.opentable_id
                     source.link         = _buildOpenTableURL(schema.opentable_id, schema.opentable_nickname, client)
-                    source.link_type    = 'url'
                     source.icon         = self._getIconURL('src_opentable', client=client)
                     sources.append(source)
 
@@ -620,8 +619,7 @@ class HTTPEntity(Schema):
                 if schema.contact.phone is not None:
                     source              = HTTPEntitySource()
                     source.source       = 'phone'
-                    source.link         = schema.contact.phone
-                    source.link_type    = 'phone'
+                    source.source_id    = schema.contact.phone
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_call', client=client)
@@ -665,7 +663,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.amazon_underlying
                     source.icon         = self._getIconURL('src_amazon', client=client)
                     source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_buy_primary', client=client)
@@ -703,7 +700,6 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     sources.append(source)
 
@@ -720,7 +716,6 @@ class HTTPEntity(Schema):
                     source.source       = 'fandango'
                     source.source_id    = schema.sources.fandango.fid
                     source.link         = schema.sources.fandango.f_url 
-                    source.link_type    = 'url'
                     # Only add icon if no "watch now"
                     if len(self.actions) == 0:
                         source.icon   = self._getIconURL('src_fandango', client=client)
@@ -749,7 +744,6 @@ class HTTPEntity(Schema):
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
                     source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_buy', client=client)
@@ -858,7 +852,6 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionTitle = 'Download %s' % schema.subcategory
@@ -908,7 +901,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.itunes_id
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
                 ### TEMP - apple.aid should be deprecated
                 elif schema.sources.apple.aid is not None:
@@ -918,7 +910,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.apple.aid
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_download_primary', client=client)
@@ -945,7 +936,7 @@ class HTTPEntity(Schema):
                 
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_place', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
 
                 # Actions: Call
 
@@ -954,8 +945,7 @@ class HTTPEntity(Schema):
                 if schema.contact.phone is not None:
                     source              = HTTPEntitySource()
                     source.source       = 'phone'
-                    source.link         = schema.contact.phone
-                    source.link_type    = 'phone'
+                    source.source_id    = schema.contact.phone
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_call', client=client)
@@ -968,7 +958,7 @@ class HTTPEntity(Schema):
 
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_other', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
 
             
             # Image
@@ -1005,7 +995,6 @@ class HTTPEntitySource(Schema):
         self.source_id          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
@@ -1052,7 +1041,6 @@ class HTTPEntityPlaylistItem(Schema):
         self.num                = SchemaElement(int)
         self.length             = SchemaElement(int)
         self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
 
 class HTTPEntityStampedBy(Schema):
