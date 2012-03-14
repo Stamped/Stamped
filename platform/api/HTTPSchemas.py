@@ -1494,7 +1494,7 @@ class HTTPStampedBySlice(HTTPGenericCollectionSlice):
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ['FriendsSlice', 'GenericCollectionSlice']:
             data = self._convertData(self.exportSparse())
-            schema.importData(data)
+            schema.importData(data, overflow=True)
         else:
             raise NotImplementedError
         
