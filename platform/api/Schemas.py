@@ -9,12 +9,6 @@ import copy
 from datetime import datetime
 from schema import *
 
-from logs import report
-try:
-    raise Exception
-except Exception:
-    report()
-
 
 # #### #
 # Auth #

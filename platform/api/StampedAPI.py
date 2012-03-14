@@ -36,7 +36,7 @@ try:
     from ACollectionDB      import ACollectionDB
     from AFriendshipDB      import AFriendshipDB
     from AActivityDB        import AActivityDB
-    from Schemas            import *
+    from api.Schemas            import *
     
     # third-party search API wrappers
     from resolve            import FullResolveContainer

@@ -10,7 +10,7 @@ import copy, urllib, urlparse, re, logs, string, time, utils
 from datetime   import datetime, date, timedelta
 from errors     import *
 from schema     import *
-from Schemas    import *
+from api.Schemas    import *
 from libs.LibUtils import parseDateString
 from libs.CountryData import countries
 
