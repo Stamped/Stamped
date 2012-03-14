@@ -36,7 +36,7 @@ try:
     from ACollectionDB      import ACollectionDB
     from AFriendshipDB      import AFriendshipDB
     from AActivityDB        import AActivityDB
-    from Schemas            import *
+    from api.Schemas        import *
     
     # third-party search API wrappers
     from resolve            import FullResolveContainer
@@ -2327,6 +2327,22 @@ class StampedAPI(AStampedAPI):
             genericCollectionSlice.limit = stampCap
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
+
+        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        
+        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
+            if len(stamps) >= genericCollectionSlice.limit:
+                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
+
+            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
+            
+            if len(deleted) > 0:
+                stamps = stamps + deleted
+                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+        
+        return stamps
+
+    def _enrichStampCollection(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
         commentPreviews = {}
         
         if genericCollectionSlice.comments:
@@ -2354,18 +2370,6 @@ class StampedAPI(AStampedAPI):
         
         if enrich:
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        
-        num_stamps = len(stamps)
-        
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
-            if num_stamps >= genericCollectionSlice.limit:
-                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
-
-            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
-            
-            if len(deleted) > 0:
-                stamps = stamps + deleted
-                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
     
@@ -2464,6 +2468,33 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericCollectionSlice):
         return self._getStampCollection(authUserId, None, genericCollectionSlice)
+    
+    @API_CALL
+    def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
+
+        count = None
+
+        # Use relationships
+        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+            distance = genericCollectionSlice.distance
+            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds) 
+                if count == 0:
+                    return [], 0
+            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
+
+        # Use popular
+        else:
+            if showCount == True:
+                count = self._stampDB.countStampsForEntity(entityId)
+                if count <= 0:
+                    return [], 0
+            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
+            
+        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId=authUserId)
+
+        return stamps, count
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):

@@ -10,7 +10,7 @@ import time, hashlib, random, base64, struct, logs, auth, os
 
 from datetime               import datetime, timedelta
 from errors                 import *
-from Schemas                import *
+from api.Schemas            import *
 
 from AStampedAuth           import AStampedAuth
 from AAccountDB             import AAccountDB
@@ -46,13 +46,13 @@ class StampedAuth(AStampedAuth):
         client = Client()
         client.client_id = clientId 
 
-        if clientId == 'ios8':
+        if clientId == 'iphone8':
             client.client_class = 'iphone'
             client.api_version  = 1
             client.is_mobile    = True
             client.resolution   = 1
 
-        elif clientId == 'ios8@2x':
+        elif clientId == 'iphone8@2x':
             client.client_class = 'iphone'
             client.api_version  = 1
             client.is_mobile    = True
@@ -70,8 +70,8 @@ class StampedAuth(AStampedAuth):
             if clientId == 'stampedtest' and clientSecret == 'august1ftw':
                 logs.info("Client approved")
                 return True
-            if (clientId == 'ios8' or clientId == 'ios8@2x') and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
-                logs.info("Client approved: ios8")
+            if (clientId == 'iphone8' or clientId == 'iphone8@2x') and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
+                logs.info("Client approved: iphone8")
                 return True
             raise
         except:

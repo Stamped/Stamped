@@ -7,12 +7,12 @@ __license__   = "TODO"
 
 import copy, urllib, urlparse, re, logs, string, time, utils
 
-from datetime   import datetime, date, timedelta
-from errors     import *
-from schema     import *
-from Schemas    import *
-from libs.LibUtils import parseDateString
-from libs.CountryData import countries
+from datetime           import datetime, date, timedelta
+from errors             import *
+from schema             import *
+from api.Schemas        import *
+from libs.LibUtils      import parseDateString
+from libs.CountryData   import countries
 
 # ####### #
 # PRIVATE #
@@ -551,7 +551,7 @@ class HTTPEntity(Schema):
             return '%s/default/%s.png' % (base_url, filename)
 
         if client.client_class == 'iphone':
-            if client.client_resolution == 2:
+            if client.resolution == 2:
                 return '%s/iphone/2x/%s.png' % (base_url, filename)
             else:
                 return '%s/iphone/1x/%s.png' % (base_url, filename)
@@ -593,7 +593,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
                 self._addMetadata('Description', schema.desc, key='desc', extended=True)
 
                 # Actions: Reservation
@@ -606,7 +606,6 @@ class HTTPEntity(Schema):
                     source.source       = 'opentable'
                     source.source_id    = schema.sources.opentable_id
                     source.link         = _buildOpenTableURL(schema.opentable_id, schema.opentable_nickname, client)
-                    source.link_type    = 'url'
                     source.icon         = self._getIconURL('src_opentable', client=client)
                     sources.append(source)
 
@@ -620,8 +619,7 @@ class HTTPEntity(Schema):
                 if schema.contact.phone is not None:
                     source              = HTTPEntitySource()
                     source.source       = 'phone'
-                    source.link         = schema.contact.phone
-                    source.link_type    = 'phone'
+                    source.source_id    = schema.contact.phone
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_call', client=client)
@@ -645,7 +643,7 @@ class HTTPEntity(Schema):
             elif schema.category == 'book':
 
                 if schema.author is not None:
-                    self.caption = 'By %s' % schema.author
+                    self.caption = 'by %s' % schema.author
 
                 # Metadata
 
@@ -665,7 +663,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.amazon_underlying
                     source.icon         = self._getIconURL('src_amazon', client=client)
                     source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_buy_primary', client=client)
@@ -703,7 +700,6 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     sources.append(source)
 
@@ -720,7 +716,6 @@ class HTTPEntity(Schema):
                     source.source       = 'fandango'
                     source.source_id    = schema.sources.fandango.fid
                     source.link         = schema.sources.fandango.f_url 
-                    source.link_type    = 'url'
                     # Only add icon if no "watch now"
                     if len(self.actions) == 0:
                         source.icon   = self._getIconURL('src_fandango', client=client)
@@ -749,7 +744,6 @@ class HTTPEntity(Schema):
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
                     source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_buy', client=client)
@@ -762,10 +756,10 @@ class HTTPEntity(Schema):
                     self.caption = 'Artist'
 
                 elif schema.subcategory == 'album' and schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 elif schema.subcategory == 'song' and schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 # Metadata
 
@@ -858,7 +852,6 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionTitle = 'Download %s' % schema.subcategory
@@ -889,7 +882,7 @@ class HTTPEntity(Schema):
             elif schema.subcategory == 'app':
 
                 if schema.artist_display_name is not None:
-                    self.caption = 'By %s' % schema.artist_display_name
+                    self.caption = 'by %s' % schema.artist_display_name
 
                 # Metadata
 
@@ -908,7 +901,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.itunes_id
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
                 ### TEMP - apple.aid should be deprecated
                 elif schema.sources.apple.aid is not None:
@@ -918,7 +910,6 @@ class HTTPEntity(Schema):
                     source.source_id    = schema.sources.apple.aid
                     source.icon         = self._getIconURL('src_itunes', client=client)
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.link_type    = 'url'
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_download_primary', client=client)
@@ -945,7 +936,7 @@ class HTTPEntity(Schema):
                 
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_place', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
 
                 # Actions: Call
 
@@ -954,8 +945,7 @@ class HTTPEntity(Schema):
                 if schema.contact.phone is not None:
                     source              = HTTPEntitySource()
                     source.source       = 'phone'
-                    source.link         = schema.contact.phone
-                    source.link_type    = 'phone'
+                    source.source_id    = schema.contact.phone
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_call', client=client)
@@ -968,14 +958,14 @@ class HTTPEntity(Schema):
 
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_other', client=client))
                 self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site, link_type='url')
+                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
 
             
             # Image
 
             if self.coordinates is not None or self.address is not None:
                 # Don't add an image if coordinates exist
-                pass
+                del(self.image)
             elif schema.image is not None:
                 self._addImage(schema.image)
             elif schema.large is not None:
@@ -1005,7 +995,6 @@ class HTTPEntitySource(Schema):
         self.source_id          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
@@ -1052,7 +1041,6 @@ class HTTPEntityPlaylistItem(Schema):
         self.num                = SchemaElement(int)
         self.length             = SchemaElement(int)
         self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
 
 class HTTPEntityStampedBy(Schema):
@@ -1495,6 +1483,33 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
             raise NotImplementedError
         
         return schema
+
+class HTTPStampedBySlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+        
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.group              = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ in ['FriendsSlice', 'GenericCollectionSlice']:
+            data = self._convertData(self.exportSparse())
+            schema.importData(data, overflow=True)
+        else:
+            raise NotImplementedError
+        
+        return schema
+
+class HTTPStampedBy(Schema):
+    def setSchema(self):
+        self.friends            = HTTPStampedByGroup()
+        self.fof                = HTTPStampedByGroup()
+        self.all                = HTTPStampedByGroup()
+
+class HTTPStampedByGroup(Schema):
+    def setSchema(self):
+        self.count              = SchemaElement(int)
+        self.stamps             = SchemaList(HTTPStamp())
 
 class HTTPStampImage(Schema):
     def setSchema(self):

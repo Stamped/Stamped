@@ -130,6 +130,7 @@ def nearby(request):
     
     return transformOutput(autosuggest)
 
+
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def menu(request):
@@ -139,5 +140,44 @@ def menu(request):
     menu        = stampedAPI.getMenu(schema.entity_id)
     httpMenu    = HTTPMenu().importSchema(menu)
     return transformOutput(httpMenu.exportSparse())
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def stampedBy(request):
+    authUserId, authClientId = checkOAuth(request)
+    
+    schema      = parseRequest(HTTPStampedBySlice(), request)
+    showCount   = True if schema.group is None else False
+
+    result      = HTTPStampedBy()
+
+    if schema.group is None or schema.group == 'friends':
+        requestSlice = schema.exportSchema(FriendsSlice())
+        requestSlice.distance = 1
+        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+        for stamp in stamps:
+            result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if count is not None:
+            result.friends.count = count
+
+    if schema.group is None or schema.group == 'fof':
+        requestSlice = schema.exportSchema(FriendsSlice())
+        requestSlice.distance = 2
+        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+        for stamp in stamps:
+            result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if count is not None:
+            result.fof.count = count
+
+    if schema.group is None or schema.group == 'all':
+        requestSlice = schema.exportSchema(GenericCollectionSlice())
+        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+        for stamp in stamps:
+            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if count is not None:
+            result.all.count = count
+
+    return transformOutput(result.exportSparse())
 
 

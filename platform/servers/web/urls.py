@@ -36,9 +36,8 @@ urlpatterns = patterns('',
     url(R'^terms-of-service$',              'teaser.views.terms'),
     url(R'^blog$',                          'teaser.views.blog'),
     
-    url(R'^maps/sxsw$',                     'maps.views.sxsw'),
-    url(R'^maps/test$',                     'maps.views.test'),
-
+    #url(R'^maps/sxsw$',                     'maps.views.sxsw'),
+    #url(R'^maps/test$',                     'maps.views.test'),
     #url(R'^(?P<screen_name>[\w-]{1,20})/map$', 'maps.views.user'),
     
     # Static content

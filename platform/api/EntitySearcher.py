@@ -10,7 +10,7 @@ import Globals, utils
 from utils           import abstract, lazyProperty
 from AEntitySearcher import AEntitySearcher
 from GooglePlaces    import GooglePlaces
-from Schemas         import Entity
+from api.Schemas     import Entity
 
 class EntitySearcher(AEntitySearcher):
     pass
