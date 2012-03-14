@@ -2477,6 +2477,7 @@ class StampedAPI(AStampedAPI):
         logs.info("IS FRIEND: %s" % isinstance(genericCollectionSlice, FriendsSlice))
         logs.info("IS GENERIC: %s" % isinstance(genericCollectionSlice, GenericCollectionSlice))
         logs.info('%s' % genericCollectionSlice)
+        logs.info('%s' % genericCollectionSlice.__name__)
 
         # Use relationships
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
