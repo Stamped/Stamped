@@ -2473,9 +2473,10 @@ class StampedAPI(AStampedAPI):
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
 
         count = None
-
+        logs.info("IS INSTANCE: %s" % isinstance(genericCollectionSlice, FriendsSlice))
         # Use relationships
         if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+            logs.info("WORKING")
             distance = genericCollectionSlice.distance
             userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
             if showCount == True:
