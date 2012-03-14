@@ -13,5 +13,6 @@
 @interface STEntityDetailFactory : NSObject
 
 - (void)createWithEntityId:(NSString*)entityID delegate:(id<STFactoryDelegate>)delegate label:(id)label;
+- (void)createWithSearchId:(NSString*)searchID delegate:(id<STFactoryDelegate>)delegate label:(id)label;
 
 @end

@@ -16,6 +16,8 @@
 #import "BookDetailViewController.h"
 #import "OtherDetailViewController.h"
 #import "FilmDetailViewController.h"
+#import "EntityDetailViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -61,16 +63,16 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
             secondaryBlue:(CGFloat)sBlue {
   if (!img)
     return nil;
-
+  
   CGFloat width = img.size.width;
   CGFloat height = img.size.height;
   
   UIGraphicsBeginImageContextWithOptions(img.size, NO, 0.0);
   CGContextRef context = UIGraphicsGetCurrentContext();
-
+  
   CGContextTranslateCTM(context, 0, height);
   CGContextScaleCTM(context, 1.0, -1.0);
-
+  
   CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
   CGFloat colors[] = {pRed, pGreen, pBlue, 1.0, sRed, sGreen, sBlue, 1.0};
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -128,7 +130,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     g2 = g1;
     b2 = b1;
   }
-
+  
   return [Util gradientImage:image
               withPrimaryRed:r1
                 primaryGreen:g1
@@ -144,7 +146,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     CGFloat numYears = floorf(timeSince / 31556926);
     if (shortened)
       return [NSString stringWithFormat:@"%.0fy", numYears];
-
+    
     if (numYears < 2) {
       return @"a year ago";
     } else {
@@ -161,7 +163,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     CGFloat numWeeks = floorf(timeSince / 604800);
     if (shortened)
       return [NSString stringWithFormat:@"%.0fw", numWeeks];
-
+    
     if (numWeeks < 2) {
       return @"a week ago";
     } else {
@@ -181,7 +183,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     CGFloat numHours = floorf(timeSince / 3600);
     if (shortened)
       return [NSString stringWithFormat:@"%.0fh", numHours];
-
+    
     if (numHours < 2) {
       return [NSString stringWithFormat:@"%.0f hr ago", numHours];
     } else {
@@ -189,15 +191,15 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     }
   } else if (timeSince > 60) {
     CGFloat numMin = floorf(timeSince / 60);
-
+    
     if (shortened)
       return [NSString stringWithFormat:@"%.0fm", numMin];
-
+    
     return [NSString stringWithFormat:@"%.0f min ago", numMin];
   } else {
     if (shortened)
       return [NSString stringWithFormat:@"%.0fs", timeSince];
-
+    
     return @"just now";
   }
   return nil;
@@ -213,60 +215,68 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 + (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject {
   UIViewController* detailViewController = nil;
-  switch (entityObject.entityCategory) {
-    case EntityCategoryFood:
-      detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
-    case EntityCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
-    case EntityCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
-    case EntityCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
-    case EntityCategoryOther:
-      detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
-    default:
-//      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
-      break;
+  if (newEDetail) {
+    detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:entityObject];
   }
-
+  else {
+    switch (entityObject.entityCategory) {
+      case EntityCategoryFood:
+        detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+      case EntityCategoryMusic:
+        detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+      case EntityCategoryBook:
+        detailViewController = [[BookDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+      case EntityCategoryFilm:
+        detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+      case EntityCategoryOther:
+        detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+      default:
+        //      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
+        break;
+    }
+  }
   return [detailViewController autorelease];
 }
 
 + (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult {
   UIViewController* detailViewController = nil;
-  switch (searchResult.searchCategory) {
-    case SearchCategoryFood:
-      detailViewController = [[PlaceDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
-    case SearchCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
-    case SearchCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
-    case SearchCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
-    case SearchCategoryOther:
-      detailViewController = [[OtherDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
-    default:
-//      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
-      break;
+  if (newEDetail) {
+    detailViewController = [[EntityDetailViewController alloc] initWithSearchResult:searchResult];
   }
-
+  else {
+    switch (searchResult.searchCategory) {
+      case SearchCategoryFood:
+        detailViewController = [[PlaceDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+      case SearchCategoryMusic:
+        detailViewController = [[MusicDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+      case SearchCategoryBook:
+        detailViewController = [[BookDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+      case SearchCategoryFilm:
+        detailViewController = [[FilmDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+      case SearchCategoryOther:
+        detailViewController = [[OtherDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+      default:
+        //      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
+        break;
+    }
+  }
   return [detailViewController autorelease];
 }
 
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum {
   if (!originalNum)
     return nil;
-
+  
   NSString* num = originalNum;
   num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
   num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
@@ -315,6 +325,33 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     }
   }
   return title;
+}
+
++ (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame {
+  NSData* data = [[NSData alloc] initWithContentsOfURL:url];
+  UIImage* image = [UIImage imageWithData:data];
+  if (CGRectIsNull(frame)) {
+    frame = CGRectMake(0, 0, image.size.width, image.size.height);
+  }
+  UIImageView* imageView = [[UIImageView alloc] initWithFrame:frame];
+  imageView.image = image;
+  [data release];
+  [imageView autorelease];
+  return imageView;
+}
+
++ (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
+  CGSize actualSize = [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
+  
+  UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, actualSize.width, actualSize.height)];
+  label.numberOfLines = 0;
+  label.lineBreakMode = mode;
+  label.text = text;
+  label.font = font;
+  label.textColor = color;
+  label.backgroundColor = [UIColor clearColor];
+  [label autorelease];
+  return label;
 }
 
 @end

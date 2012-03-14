@@ -406,7 +406,6 @@ typedef enum {
   twitterButton_.selected = YES;
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
-
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     self.signInTwitterView.hidden = YES;
     [[SocialManager sharedManager] refreshStampedFriendsFromTwitter];

@@ -244,7 +244,6 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
                                             delegate:self
                                     finishedSelector:@selector(viewController:finishedWithAuth:error:)];
     [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
-    
     [navigationController pushViewController:authVC animated:YES];
     [authVC release];
   }

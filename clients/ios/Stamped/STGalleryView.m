@@ -12,7 +12,7 @@
 
 @interface STGalleryView ()
 
-- (void)commonInit:(id<STGallery>)gallery withLinkDelegate:(id<STLinkDelegate>)linkDelegate;
+- (void)commonInit:(id<STGallery>)gallery withDelegate:(id<STViewDelegate>)delegate;
 
 @end
 
@@ -29,26 +29,26 @@
 
 @implementation STGalleryView
 
-- (id)initWithGallery:(id<STGallery>)gallery andLinkDelegate:(id<STLinkDelegate>)linkDelegate {
+- (id)initWithGallery:(id<STGallery>)gallery andDelegate:(id<STViewDelegate>)delegate {
   self = [super initWithFrame:CGRectZero];
   if (self) {
-    [self commonInit:gallery withLinkDelegate:linkDelegate];
+    [self commonInit:gallery withDelegate:delegate];
   }
   return self;
 }
 
-- (void)commonInit:(id<STGallery>)gallery withLinkDelegate:(id<STLinkDelegate>)linkDelegate {
+- (void)commonInit:(id<STGallery>)gallery withDelegate:(id<STViewDelegate>)delegate {
   self.pagingEnabled = YES;
   self.scrollEnabled = YES;
-  self.clipsToBounds = YES;
-  self.frame = CGRectMake(0, 0, 100, 100);
+  self.clipsToBounds = NO;
+  self.frame = CGRectMake(30, 0, 260, 360);
   NSInteger offset = 0;
   for (id<STGalleryItem> item in gallery.data) {
-    STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, 100, 100) andGalleryItem:item];
+    STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, 260, 360) andGalleryItem:item];
     [self addSubview:view];
-    offset += 100;
+    offset += 260;
   }
-	[self setContentSize:CGSizeMake(offset, 100)];
+	[self setContentSize:CGSizeMake(offset, 360)];
   //self.backgroundColor = [UIColor blackColor];
 }
 
@@ -65,7 +65,7 @@
   self = [super initWithFrame:frame];
   NSLog(@"Here Item");
   if (self) {
-    STImageView* view = [[STImageView alloc] initWithFrame:CGRectMake(10, 10, 80, 80)];
+    STImageView* view = [[STImageView alloc] initWithFrame:CGRectMake(5, 5, 250, 350)];
     view.imageURL = item.image;
     view.hidden = YES;
     view.backgroundColor = [UIColor clearColor];

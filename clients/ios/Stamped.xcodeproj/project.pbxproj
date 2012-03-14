@@ -52,6 +52,30 @@
 		6386EEE2150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
 		6386EEE3150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
 		6386EEE4150A58200019F1DC /* STGalleryViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */; };
+		6386EF03150FBF030019F1DC /* NewEntityDetail.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF02150FBF020019F1DC /* NewEntityDetail.xib */; };
+		6386EF04150FBF030019F1DC /* NewEntityDetail.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF02150FBF020019F1DC /* NewEntityDetail.xib */; };
+		6386EF05150FBF030019F1DC /* NewEntityDetail.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF02150FBF020019F1DC /* NewEntityDetail.xib */; };
+		6386EF0F150FD5A80019F1DC /* STActionsViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */; };
+		6386EF10150FD5A80019F1DC /* STActionsViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */; };
+		6386EF11150FD5A80019F1DC /* STActionsViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */; };
+		6386EF14150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */; };
+		6386EF15150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */; };
+		6386EF16150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */; };
+		6386EF19151129820019F1DC /* STMetadataViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF18151129800019F1DC /* STMetadataViewFactory.m */; };
+		6386EF1A151129820019F1DC /* STMetadataViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF18151129800019F1DC /* STMetadataViewFactory.m */; };
+		6386EF1B151129820019F1DC /* STMetadataViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF18151129800019F1DC /* STMetadataViewFactory.m */; };
+		6386EF1F151137730019F1DC /* STViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF1E151137710019F1DC /* STViewContainer.m */; };
+		6386EF20151137730019F1DC /* STViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF1E151137710019F1DC /* STViewContainer.m */; };
+		6386EF21151137730019F1DC /* STViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF1E151137710019F1DC /* STViewContainer.m */; };
+		6386EF2415114B950019F1DC /* eDetailBox_line.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2215114B950019F1DC /* eDetailBox_line.png */; };
+		6386EF2515114B950019F1DC /* eDetailBox_line.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2215114B950019F1DC /* eDetailBox_line.png */; };
+		6386EF2615114B950019F1DC /* eDetailBox_line.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2215114B950019F1DC /* eDetailBox_line.png */; };
+		6386EF2715114B950019F1DC /* eDetailBox_line@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */; };
+		6386EF2815114B950019F1DC /* eDetailBox_line@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */; };
+		6386EF2915114B950019F1DC /* eDetailBox_line@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */; };
+		6386EF2C1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
+		6386EF2D1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
+		6386EF2E1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1748,8 +1772,22 @@
 		6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailFactory.m; sourceTree = "<group>"; };
 		6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryViewFactory.h; sourceTree = "<group>"; };
 		6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGalleryViewFactory.m; sourceTree = "<group>"; };
-		6386EEE5150A58520019F1DC /* STLinkDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLinkDelegate.h; sourceTree = "<group>"; };
 		6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFactoryDelegate.h; sourceTree = "<group>"; };
+		6386EF02150FBF020019F1DC /* NewEntityDetail.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = NewEntityDetail.xib; path = Interfaces/NewEntityDetail.xib; sourceTree = SOURCE_ROOT; };
+		6386EF0C150FD3410019F1DC /* STViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegate.h; sourceTree = "<group>"; };
+		6386EF0D150FD5A60019F1DC /* STActionsViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionsViewFactory.h; sourceTree = "<group>"; };
+		6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionsViewFactory.m; sourceTree = "<group>"; };
+		6386EF12150FF9B20019F1DC /* STHeaderViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHeaderViewFactory.h; sourceTree = "<group>"; };
+		6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHeaderViewFactory.m; sourceTree = "<group>"; };
+		6386EF171511297E0019F1DC /* STMetadataViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataViewFactory.h; sourceTree = "<group>"; };
+		6386EF18151129800019F1DC /* STMetadataViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMetadataViewFactory.m; sourceTree = "<group>"; };
+		6386EF1C1511371F0019F1DC /* STResizeDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STResizeDelegate.h; sourceTree = "<group>"; };
+		6386EF1D1511376F0019F1DC /* STViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewContainer.h; sourceTree = "<group>"; };
+		6386EF1E151137710019F1DC /* STViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewContainer.m; sourceTree = "<group>"; };
+		6386EF2215114B950019F1DC /* eDetailBox_line.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eDetailBox_line.png; sourceTree = "<group>"; };
+		6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetailBox_line@2x.png"; sourceTree = "<group>"; };
+		6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Stamped.h"; sourceTree = "<group>"; };
+		6386EF2B151150420019F1DC /* UIFont+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Stamped.m"; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2827,6 +2865,14 @@
 				6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */,
 				6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */,
 				6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */,
+				6386EF0D150FD5A60019F1DC /* STActionsViewFactory.h */,
+				6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */,
+				6386EF12150FF9B20019F1DC /* STHeaderViewFactory.h */,
+				6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */,
+				6386EF171511297E0019F1DC /* STMetadataViewFactory.h */,
+				6386EF18151129800019F1DC /* STMetadataViewFactory.m */,
+				6386EF1D1511376F0019F1DC /* STViewContainer.h */,
+				6386EF1E151137710019F1DC /* STViewContainer.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2842,8 +2888,9 @@
 				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
 				6386EE92150819270019F1DC /* STAction.h */,
 				6386EED1150970F40019F1DC /* STGallery.h */,
-				6386EEE5150A58520019F1DC /* STLinkDelegate.h */,
 				6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */,
+				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
+				6386EF1C1511371F0019F1DC /* STResizeDelegate.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3259,6 +3306,7 @@
 				7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */,
 				7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */,
 				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
+				6386EF02150FBF020019F1DC /* NewEntityDetail.xib */,
 				CB4388F8141ABEF90086D1AE /* MusicDetailViewController.h */,
 				CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */,
 				7ED60829141E85E7001C499D /* MusicDetailViewController.xib */,
@@ -3448,6 +3496,8 @@
 		7E7612B413C95BBD0023CCC4 /* Entity Details */ = {
 			isa = PBXGroup;
 			children = (
+				6386EF2215114B950019F1DC /* eDetailBox_line.png */,
+				6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */,
 				CBCED273146A811D00D188CE /* eDetail_notConnected.png */,
 				CBCED274146A811D00D188CE /* eDetail_notConnected@2x.png */,
 				CBC85D1C14679D3D008FAE7B /* book_gradient.png */,
@@ -4240,6 +4290,8 @@
 				7E3909351401975C00910F98 /* Notifications.m */,
 				7E407E931450A55100D7847F /* SharedRequestDelegate.h */,
 				7E407E941450A55100D7847F /* SharedRequestDelegate.m */,
+				6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */,
+				6386EF2B151150420019F1DC /* UIFont+Stamped.m */,
 				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E260F8914BB77BB00D9F7F0 /* UIButton+Stamped.h */,
@@ -5166,6 +5218,9 @@
 				7ECAB0A914F4616100E854D4 /* map_inbox_tooltip@2x.png in Resources */,
 				7ECAB0AB14F4616100E854D4 /* map_loading_overlay.png in Resources */,
 				7ECAB0AD14F4616100E854D4 /* map_loading_overlay@2x.png in Resources */,
+				6386EF04150FBF030019F1DC /* NewEntityDetail.xib in Resources */,
+				6386EF2515114B950019F1DC /* eDetailBox_line.png in Resources */,
+				6386EF2815114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5791,6 +5846,9 @@
 				7ECAB0A814F4616100E854D4 /* map_inbox_tooltip@2x.png in Resources */,
 				7ECAB0AA14F4616100E854D4 /* map_loading_overlay.png in Resources */,
 				7ECAB0AC14F4616100E854D4 /* map_loading_overlay@2x.png in Resources */,
+				6386EF03150FBF030019F1DC /* NewEntityDetail.xib in Resources */,
+				6386EF2415114B950019F1DC /* eDetailBox_line.png in Resources */,
+				6386EF2715114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5800,6 +5858,9 @@
 			files = (
 				7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */,
 				7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */,
+				6386EF05150FBF030019F1DC /* NewEntityDetail.xib in Resources */,
+				6386EF2615114B950019F1DC /* eDetailBox_line.png in Resources */,
+				6386EF2915114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5979,6 +6040,11 @@
 				6386EED51509713F0019F1DC /* STSimpleGallery.m in Sources */,
 				6386EEDE150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
 				6386EEE3150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
+				6386EF10150FD5A80019F1DC /* STActionsViewFactory.m in Sources */,
+				6386EF15150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */,
+				6386EF1A151129820019F1DC /* STMetadataViewFactory.m in Sources */,
+				6386EF20151137730019F1DC /* STViewContainer.m in Sources */,
+				6386EF2D1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6139,6 +6205,11 @@
 				6386EED41509713F0019F1DC /* STSimpleGallery.m in Sources */,
 				6386EEDD150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
 				6386EEE2150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
+				6386EF0F150FD5A80019F1DC /* STActionsViewFactory.m in Sources */,
+				6386EF14150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */,
+				6386EF19151129820019F1DC /* STMetadataViewFactory.m in Sources */,
+				6386EF1F151137730019F1DC /* STViewContainer.m in Sources */,
+				6386EF2C1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6158,6 +6229,11 @@
 				6386EED61509713F0019F1DC /* STSimpleGallery.m in Sources */,
 				6386EEDF150A52B60019F1DC /* STEntityDetailFactory.m in Sources */,
 				6386EEE4150A58200019F1DC /* STGalleryViewFactory.m in Sources */,
+				6386EF11150FD5A80019F1DC /* STActionsViewFactory.m in Sources */,
+				6386EF16150FF9B40019F1DC /* STHeaderViewFactory.m in Sources */,
+				6386EF1B151129820019F1DC /* STMetadataViewFactory.m in Sources */,
+				6386EF21151137730019F1DC /* STViewContainer.m in Sources */,
+				6386EF2E1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

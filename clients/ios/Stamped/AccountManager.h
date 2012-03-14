@@ -15,7 +15,7 @@
 
 extern NSString* const kCurrentUserHasUpdatedNotification;
 extern NSString* const kUserHasLoggedOutNotification;
-static NSString* const kClientID = @"ios8";
+static NSString* const kClientID = @"iphone8@2x";
 static NSString* const kClientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 //static NSString* const kClientID = @"stampedtest";
 //static NSString* const kClientSecret = @"august1ftw";

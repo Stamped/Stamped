@@ -69,7 +69,7 @@
 }
 
 + (NSString*)authNibName {
-  return @"WebViewController";
+  return @"GTMOAuthViewTouch";
 }
 
 - (void)webViewDidStartLoad:(UIWebView*)webView {

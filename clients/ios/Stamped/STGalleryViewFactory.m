@@ -12,12 +12,14 @@
 @implementation STGalleryViewFactory
 
 - (void)createWithGallery:(id<STGallery>)gallery
-          andLinkDelegate:(id<STLinkDelegate>)linkDelegate
-                 delegate:(id<STFactoryDelegate>)delegate
+                 delegate:(id<STViewDelegate>)delegate
                 withLabel:(id)label {
-  UIView* view = [[STGalleryView alloc] initWithGallery:gallery andLinkDelegate:linkDelegate];
+  UIView* view = nil;
+  if (gallery) {
+    view = [[STGalleryView alloc] initWithGallery:gallery andDelegate:delegate];
+    [view autorelease];
+  }
   [delegate didLoad:view withLabel:label];
-  [view autorelease];
 }
 
 @end

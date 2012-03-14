@@ -21,6 +21,7 @@
 @property (nonatomic, readonly, retain) NSString* category;
 @property (nonatomic, readonly, retain) NSString* subcategory;
 @property (nonatomic, readonly, retain) NSString* image;
+@property (nonatomic, readonly, retain) NSString* caption;
 
 @property (nonatomic, readonly, retain) NSString* address;
 @property (nonatomic, readonly, retain) NSString* addressStreet;

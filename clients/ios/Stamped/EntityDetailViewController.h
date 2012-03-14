@@ -14,7 +14,7 @@
 #import "STViewController.h"
 #import "Util.h"
 #import "STEntityDetail.h"
-#import "STFactoryDelegate.h"
+#import "STViewDelegate.h"
 
 @class Entity;
 @class DetailedEntity;
@@ -22,10 +22,12 @@
 @class Stamp;
 @class STToolbar;
 
+extern BOOL const newEDetail;
+
 @interface EntityDetailViewController : STViewController <RKObjectLoaderDelegate, 
                                                           CollapsibleViewControllerDelegate,
                                                           STImageViewDelegate,
-                                                          STFactoryDelegate> {
+                                                          STViewDelegate> {
  @protected
   DetailedEntity* detailedEntity_;
   Entity* entityObject_;
@@ -55,6 +57,7 @@
 
 @property (nonatomic, retain) Stamp* referringStamp;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;
+@property (nonatomic, readonly) NSMutableArray* detailComponents;
 
 @property (nonatomic, retain) IBOutlet STToolbar* toolbarView;
 @property (nonatomic, retain) IBOutlet UIButton* todoButton;

@@ -25,6 +25,7 @@
 @synthesize category = category_;
 @synthesize subcategory = subcategory_;
 @synthesize image = image_;
+@synthesize caption = caption_;
 
 @synthesize address = address_;
 @synthesize addressStreet = addressStreet_;
@@ -48,6 +49,7 @@
   self.category = nil;
   self.subcategory = nil;
   self.image = nil;
+  self.caption = nil;
   
   self.address = nil;
   self.addressStreet = nil;
@@ -88,6 +90,7 @@
    @"address",
    @"neighborhood",
    @"coordinates",
+   @"caption",
    nil];
   [mapping mapRelationship:@"actions" withMapping:[STSimpleAction mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];

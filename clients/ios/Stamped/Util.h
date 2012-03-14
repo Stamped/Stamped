@@ -54,4 +54,7 @@ extern NSString* const kKeychainTwitterToken;
 + (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
 + (NSString*)truncateTitleForBackButton:(NSString*)title;
 
++ (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
++ (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
+
 @end

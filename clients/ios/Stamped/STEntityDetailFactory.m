@@ -49,11 +49,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 
 #pragma mark - Public Methods.
 
-- (void)createWithEntityId:(NSString*)entityID delegate:(id<STFactoryDelegate>)delegate label:(id)label {
-  if (entityID == nil) {
-    [delegate didLoad:nil withLabel:label];
-    return;
-  }
+- (void)createWithParams:(NSDictionary*)params delegate:(id<STFactoryDelegate>)delegate label:(id)label {
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
     [delegate didLoad:nil withLabel:label];
@@ -70,10 +66,28 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   
   objectLoader.objectMapping = [STSimpleEntityDetail mapping];
   
-  NSString* key = @"entity_id";
-  objectLoader.params = [NSDictionary dictionaryWithObject:entityID forKey:key];
+  objectLoader.params = params;
   
   [objectLoader send];
+}
+
+- (void)createWithEntityId:(NSString*)entityID delegate:(id<STFactoryDelegate>)delegate label:(id)label {
+  if (entityID == nil) {
+    [delegate didLoad:nil withLabel:label];
+    return;
+  }
+  NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey: @"entity_id"];
+  [self createWithParams:params delegate:delegate label:label];
+}
+
+
+- (void)createWithSearchId:(NSString*)searchID delegate:(id<STFactoryDelegate>)delegate label:(id)label {
+  if (searchID == nil) {
+    [delegate didLoad:nil withLabel:label];
+    return;
+  }
+  NSDictionary* params = [NSDictionary dictionaryWithObject:searchID forKey: @"search_id"];
+  [self createWithParams:params delegate:delegate label:label];
 }
 
 @end

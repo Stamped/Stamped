@@ -29,11 +29,17 @@
 #import "STToolbar.h"
 #import "STSimpleEntityDetail.h"
 #import "STEntityDetailFactory.h"
+#import "STHeaderViewFactory.h"
+#import "STMetadataViewFactory.h"
 #import "STGalleryViewFactory.h"
+#import "STActionsViewFactory.h"
+#import <QuartzCore/QuartzCore.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
+
+BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -74,9 +80,15 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize toolbarView = toolbarView_;
 @synthesize referringStamp = referringStamp_;
 @synthesize entityDetail = entityDetail_;
+@synthesize detailComponents = detailComponents_;
 
 - (id)initWithEntityObject:(Entity*)entity {
-  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  if (newEDetail) {
+    self = [self initWithNibName:@"NewEntityDetail" bundle:nil];
+  }
+  else {
+    self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  }
   if (self) {
     entityObject_ = [entity retain];
     [self commonInit];
@@ -85,7 +97,12 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (id)initWithSearchResult:(SearchResult*)searchResult {
-  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  if (newEDetail) {
+    self = [self initWithNibName:@"NewEntityDetail" bundle:nil];
+  }
+  else {
+    self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  }
   if (self) {
     searchResult_ = [searchResult retain];
     [self commonInit];
@@ -94,80 +111,104 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)commonInit {
-  //STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
-  //[factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
-  //[factory release];
-  [self loadEntityDataFromServer];
-  sectionsDict_ = [[NSMutableDictionary alloc] init];
+  if (newEDetail) {
+    detailComponents_ = [[NSMutableArray alloc] init];
+    CGSize content = self.scrollView.contentSize;
+    content.height = 0;
+    self.scrollView.contentSize = content;
+    STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
+    if (entityObject_) {
+      [factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
+    }
+    else if (searchResult_) {
+      [factory createWithSearchId:searchResult_.searchID delegate:self label:@"entityDetail"];
+    }
+    [factory release];
+  }
+  else {
+    [self loadEntityDataFromServer];
+    sectionsDict_ = [[NSMutableDictionary alloc] init];
+  }
 }
 
 - (void)dealloc {
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  if (newEDetail) {
+    [entityDetail_ release];
+    [detailComponents_ release];
+  }
+  else {
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
     
-  self.titleLabel = nil;
-  self.descriptionLabel = nil;
-  self.mainActionLabel = nil;
-  self.mainActionButton = nil;
-  self.shelfImageView = nil;
-  self.scrollView = nil;
-  self.categoryImageView = nil;
-  self.mainActionsView = nil;
-  self.mainContentView = nil;
-  self.loadingView = nil;
-  self.addFavoriteButton = nil;
-  self.spinner = nil;
-  self.imageView.delegate = nil;
-  self.imageView = nil;
-  self.todoLabel = nil;
-  self.todoButton = nil;
-  self.toolbarView = nil;
-  self.referringStamp = nil;
-  
-  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
-    vc.delegate = nil;
-
-  [Entity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
+    self.titleLabel = nil;
+    self.descriptionLabel = nil;
+    self.mainActionLabel = nil;
+    self.mainActionButton = nil;
+    self.shelfImageView = nil;
+    self.scrollView = nil;
+    self.categoryImageView = nil;
+    self.mainActionsView = nil;
+    self.mainContentView = nil;
+    self.loadingView = nil;
+    self.addFavoriteButton = nil;
+    self.spinner = nil;
+    self.imageView.delegate = nil;
+    self.imageView = nil;
+    self.todoLabel = nil;
+    self.todoButton = nil;
+    self.toolbarView = nil;
+    self.referringStamp = nil;
+    
+    for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
+      vc.delegate = nil;
+    
+    [Entity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
+    [sectionsDict_ release];
+    [detailedEntity_ release];
+  }
   [entityObject_ release];
-  [detailedEntity_ release];
   [searchResult_ release];
-  [sectionsDict_ release];
   [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-
+  
   // Release any cached data, images, etc that aren't in use.
 }
 
 - (void)loadEntityDataFromServer {
-  RKClient* client = [RKClient sharedClient];
-  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
-    return;
-  } 
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
-                                                                    delegate:self];
-  objectLoader.objectMapping = entityMapping;
-  NSString* key = @"entity_id";
-  id objectForKey = nil;
-  if (entityObject_) {
-    objectForKey = entityObject_.entityID;
-  } else if (searchResult_) {
-    if (searchResult_.entityID) {
-      objectForKey = searchResult_.entityID;
-    } else if (searchResult_.searchID) {
-      key = @"search_id";
-      objectForKey = searchResult_.searchID;
-    }
+  if (newEDetail) {
+    
   }
-  NSAssert(objectForKey, @"Must provide a valid search or entity ID to fetch data");
-  objectLoader.params = [NSDictionary dictionaryWithObject:objectForKey forKey:key];
-  [objectLoader send];
-  [self view];
-  [self.loadingView startAnimating];
+  else {
+    RKClient* client = [RKClient sharedClient];
+    if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
+      return;
+    } 
+    RKObjectManager* objectManager = [RKObjectManager sharedManager];
+    RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
+    RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
+                                                                      delegate:self];
+    objectLoader.objectMapping = entityMapping;
+    NSString* key = @"entity_id";
+    id objectForKey = nil;
+    if (entityObject_) {
+      objectForKey = entityObject_.entityID;
+    } else if (searchResult_) {
+      if (searchResult_.entityID) {
+        objectForKey = searchResult_.entityID;
+      } else if (searchResult_.searchID) {
+        key = @"search_id";
+        objectForKey = searchResult_.searchID;
+      }
+    }
+    NSAssert(objectForKey, @"Must provide a valid search or entity ID to fetch data");
+    objectLoader.params = [NSDictionary dictionaryWithObject:objectForKey forKey:key];
+    [objectLoader send];
+    [self view];
+    [self.loadingView startAnimating];
+  }
 }
 
 - (void)showContents {
@@ -179,270 +220,310 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)viewDidLayoutSubviews {
-  CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(270, MAXFLOAT)];
-  CGFloat todoBarPadding = entityObject_.favorite.stamp != nil ? kTodoBarHeight : 0;
-  titleLabel_.frame = CGRectMake(15, 10 + todoBarPadding,
-                                 titleSize.width,
-                                 titleSize.height);
-
-  [categoryImageView_ sizeToFit];
-  categoryImageView_.frame = CGRectMake(305 - CGRectGetWidth(categoryImageView_.frame),
-                                        16 + todoBarPadding,
-                                        CGRectGetWidth(categoryImageView_.frame),
-                                        CGRectGetHeight(categoryImageView_.frame));
-
-  CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(190, MAXFLOAT)];
-  descriptionLabel_.frame = CGRectMake(15, CGRectGetMaxY(titleLabel_.frame) - 1,
-                                       size.width, size.height);
-  
-  CGRect frame = imageView_.frame;
-  frame.origin.y = CGRectGetMinY(descriptionLabel_.frame) + 3;
-  imageView_.frame = frame;
-  
-  frame = self.mainActionsView.frame;
-  CGFloat originalY = frame.origin.y;
-  frame.origin.y = CGRectGetMaxY(descriptionLabel_.frame) + 8;
-  self.mainActionsView.frame = frame;
-  CGFloat delta = frame.origin.y - originalY;
-
-  self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
-  if ([self isKindOfClass:[PlaceDetailViewController class]] || [self isKindOfClass:[OtherDetailViewController class]]) {
-    // Casting to either class doesn't matter since they will both respond to the message without throwing
-    // an exception.
-    PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
-    vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+  if (newEDetail) {
+    
   }
-
-  if ([self isKindOfClass:[OtherDetailViewController class]]) {
-    OtherDetailViewController* vc = (OtherDetailViewController*)self;
-    vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
+  else {
+    CGSize titleSize = [titleLabel_ sizeThatFits:CGSizeMake(270, MAXFLOAT)];
+    CGFloat todoBarPadding = entityObject_.favorite.stamp != nil ? kTodoBarHeight : 0;
+    titleLabel_.frame = CGRectMake(15, 10 + todoBarPadding,
+                                   titleSize.width,
+                                   titleSize.height);
+    
+    [categoryImageView_ sizeToFit];
+    categoryImageView_.frame = CGRectMake(305 - CGRectGetWidth(categoryImageView_.frame),
+                                          16 + todoBarPadding,
+                                          CGRectGetWidth(categoryImageView_.frame),
+                                          CGRectGetHeight(categoryImageView_.frame));
+    
+    CGSize size = [descriptionLabel_ sizeThatFits:CGSizeMake(190, MAXFLOAT)];
+    descriptionLabel_.frame = CGRectMake(15, CGRectGetMaxY(titleLabel_.frame) - 1,
+                                         size.width, size.height);
+    
+    CGRect frame = imageView_.frame;
+    frame.origin.y = CGRectGetMinY(descriptionLabel_.frame) + 3;
+    imageView_.frame = frame;
+    
+    frame = self.mainActionsView.frame;
+    CGFloat originalY = frame.origin.y;
+    frame.origin.y = CGRectGetMaxY(descriptionLabel_.frame) + 8;
+    self.mainActionsView.frame = frame;
+    CGFloat delta = frame.origin.y - originalY;
+    
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
+    if ([self isKindOfClass:[PlaceDetailViewController class]] || [self isKindOfClass:[OtherDetailViewController class]]) {
+      // Casting to either class doesn't matter since they will both respond to the message without throwing
+      // an exception.
+      PlaceDetailViewController* vc = (PlaceDetailViewController*)self;
+      vc.mapContainerView.frame = CGRectOffset(vc.mapContainerView.frame, 0.0, delta);
+    }
+    
+    if ([self isKindOfClass:[OtherDetailViewController class]]) {
+      OtherDetailViewController* vc = (OtherDetailViewController*)self;
+      vc.appActionsView.frame = CGRectOffset(vc.appActionsView.frame, 0.0, delta);
+    }
+    CGFloat maxY = 0;
+    for (UIView* subview in scrollView_.subviews)
+      maxY = MAX(CGRectGetMaxY(subview.frame), maxY);
+    scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, maxY);
   }
-  CGFloat maxY = 0;
-  for (UIView* subview in scrollView_.subviews)
-    maxY = MAX(CGRectGetMaxY(subview.frame), maxY);
-
-  scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, maxY);
 }
 
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {  
   [super viewDidLoad];
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Details"
-                                                                 style:UIBarButtonItemStyleBordered
-                                                                target:nil
-                                                                action:nil];
-  [[self navigationItem] setBackBarButtonItem:backButton];
-  [backButton release];
-  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
-  backgroundGradient.colors = [NSArray arrayWithObjects:
-                               (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
-                               (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
-  backgroundGradient.frame = self.view.bounds;
-  [self.view.layer insertSublayer:backgroundGradient atIndex:0];
-  [backgroundGradient release];
-
-  titleLabel_.numberOfLines = 0;
-  titleLabel_.adjustsFontSizeToFitWidth = NO;
-  titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
-  titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  if (entityObject_) {
-    titleLabel_.text = entityObject_.title;
-  } else if (searchResult_) {
-    titleLabel_.text = searchResult_.title;
+  if (newEDetail) {
+    CGSize content = self.scrollView.frame.size;
+    content.height = 0;
+    self.scrollView.contentSize = content;
   }
-
-  descriptionLabel_.numberOfLines = 0;
-  descriptionLabel_.adjustsFontSizeToFitWidth = NO;
-  descriptionLabel_.text = nil;
-  descriptionLabel_.textColor = [UIColor stampedGrayColor];
-  mainActionButton_.layer.masksToBounds = YES;
-  mainActionButton_.layer.cornerRadius = 2.0;
-  mainActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
-
-  if (entityObject_.favorite.stamp)
-    [self addTodoBar];
-  
-  RKClient* client = [RKClient sharedClient];
-  if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
-    UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_notConnected"]];
-    CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
-    CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);
-    iv.frame = CGRectMake(floorf(xOffset / 2), floorf(0.95 * yOffset / 2), iv.bounds.size.width, iv.bounds.size.height);
-    [self.scrollView addSubview:iv];
-    [iv release];
-  }
-  
-  if (entityObject_.favorite) {
-    todoLabel_.text = @"To-Do'd";
-    todoButton_.selected = YES;
+  else {
+    UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Details"
+                                                                   style:UIBarButtonItemStyleBordered
+                                                                  target:nil
+                                                                  action:nil];
+    [[self navigationItem] setBackBarButtonItem:backButton];
+    [backButton release];
+    CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
+    backgroundGradient.colors = [NSArray arrayWithObjects:
+                                 (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
+                                 (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
+    backgroundGradient.frame = self.view.bounds;
+    [self.view.layer insertSublayer:backgroundGradient atIndex:0];
+    [backgroundGradient release];
+    
+    titleLabel_.numberOfLines = 0;
+    titleLabel_.adjustsFontSizeToFitWidth = NO;
+    titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
+    titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
+    if (entityObject_) {
+      titleLabel_.text = entityObject_.title;
+    } else if (searchResult_) {
+      titleLabel_.text = searchResult_.title;
+    }
+    
+    descriptionLabel_.numberOfLines = 0;
+    descriptionLabel_.adjustsFontSizeToFitWidth = NO;
+    descriptionLabel_.text = nil;
+    descriptionLabel_.textColor = [UIColor stampedGrayColor];
+    mainActionButton_.layer.masksToBounds = YES;
+    mainActionButton_.layer.cornerRadius = 2.0;
+    mainActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
+    
+    if (entityObject_.favorite.stamp)
+      [self addTodoBar];
+    
+    RKClient* client = [RKClient sharedClient];
+    if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
+      UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_notConnected"]];
+      CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
+      CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);
+      iv.frame = CGRectMake(floorf(xOffset / 2), floorf(0.95 * yOffset / 2), iv.bounds.size.width, iv.bounds.size.height);
+      [self.scrollView addSubview:iv];
+      [iv release];
+    }
+    
+    if (entityObject_.favorite) {
+      todoLabel_.text = @"To-Do'd";
+      todoButton_.selected = YES;
+    }
   }
 }
 
 - (void)addTodoBar {
-  for (UIView* view in self.scrollView.subviews) {
-    if (view == shelfImageView_)
-      continue;
-
-    view.frame = CGRectOffset(view.frame, 0, kTodoBarHeight);
+  if (newEDetail) {
+    
   }
-
-  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, kTodoBarHeight)];
-  bar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:.1];
-  CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
-  gradient.frame = bar.bounds;
-  gradient.startPoint = CGPointZero;
-  gradient.endPoint = CGPointMake(0, 1);
-  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:0.043 green:0.38 blue:0.85 alpha:1.0].CGColor,
-                     (id)[UIColor colorWithRed:0.29 green:0.56 blue:0.95 alpha:1.0].CGColor, nil];
-  [bar.layer addSublayer:gradient];
-  bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
-  bar.layer.shadowColor = [UIColor blackColor].CGColor;
-  bar.layer.shadowOpacity = 0.25;
-  bar.layer.shadowOffset = CGSizeMake(0, 1);
-  bar.layer.shadowRadius = 3;
-  [gradient release];
-  
-  UIImageView* icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_icon"]];
-  icon.frame = CGRectOffset(icon.frame, 14, 14);
-  [bar addSubview:icon];
-  [icon release];
-  
-  UIImageView* arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_arrow"]];
-  arrow.frame = CGRectOffset(arrow.frame, 297, 18);
-  [bar addSubview:arrow];
-  [arrow release];
-  
-  CATextLayer* text = [[CATextLayer alloc] init];
-  text.frame = CGRectMake(CGRectGetMaxX(icon.frame) + 2,
-                                       CGRectGetMinY(icon.frame) + 5, 200, 14);
-  text.truncationMode = kCATruncationEnd;
-  text.contentsScale = [[UIScreen mainScreen] scale];
-  text.fontSize = 12.0;
-  text.foregroundColor = [UIColor whiteColor].CGColor;
-  text.string = [self todoAttributedString:entityObject_.favorite.stamp.user];
-  [bar.layer addSublayer:text];
-  [text release];
-  
-  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                               action:@selector(todoBarTapped:)];
-  [bar addGestureRecognizer:recognizer];
-  [recognizer release];
-  [self.scrollView insertSubview:bar atIndex:0];
-  self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width,
-                                           self.scrollView.contentSize.height + bar.bounds.size.height);
-  [bar release];
+  else {
+    for (UIView* view in self.scrollView.subviews) {
+      if (view == shelfImageView_)
+        continue;
+      
+      view.frame = CGRectOffset(view.frame, 0, kTodoBarHeight);
+    }
+    
+    UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, kTodoBarHeight)];
+    bar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:.1];
+    CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
+    gradient.frame = bar.bounds;
+    gradient.startPoint = CGPointZero;
+    gradient.endPoint = CGPointMake(0, 1);
+    gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:0.043 green:0.38 blue:0.85 alpha:1.0].CGColor,
+                       (id)[UIColor colorWithRed:0.29 green:0.56 blue:0.95 alpha:1.0].CGColor, nil];
+    [bar.layer addSublayer:gradient];
+    bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
+    bar.layer.shadowColor = [UIColor blackColor].CGColor;
+    bar.layer.shadowOpacity = 0.25;
+    bar.layer.shadowOffset = CGSizeMake(0, 1);
+    bar.layer.shadowRadius = 3;
+    [gradient release];
+    
+    UIImageView* icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_icon"]];
+    icon.frame = CGRectOffset(icon.frame, 14, 14);
+    [bar addSubview:icon];
+    [icon release];
+    
+    UIImageView* arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_arrow"]];
+    arrow.frame = CGRectOffset(arrow.frame, 297, 18);
+    [bar addSubview:arrow];
+    [arrow release];
+    
+    CATextLayer* text = [[CATextLayer alloc] init];
+    text.frame = CGRectMake(CGRectGetMaxX(icon.frame) + 2,
+                            CGRectGetMinY(icon.frame) + 5, 200, 14);
+    text.truncationMode = kCATruncationEnd;
+    text.contentsScale = [[UIScreen mainScreen] scale];
+    text.fontSize = 12.0;
+    text.foregroundColor = [UIColor whiteColor].CGColor;
+    text.string = [self todoAttributedString:entityObject_.favorite.stamp.user];
+    [bar.layer addSublayer:text];
+    [text release];
+    
+    UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(todoBarTapped:)];
+    [bar addGestureRecognizer:recognizer];
+    [recognizer release];
+    [self.scrollView insertSubview:bar atIndex:0];
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width,
+                                             self.scrollView.contentSize.height + bar.bounds.size.height);
+    [bar release];
+  }
 }
 
 - (void)addTodoToolbar {
-  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 56, 320, 56)];
-  bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
-  bar.layer.shadowOpacity = 0.2;
-  bar.layer.shadowOffset = CGSizeMake(0, -1);
-  CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
-  toolbarGradient.frame = bar.bounds;
-  toolbarGradient.colors = [NSArray arrayWithObjects:
-                            (id)[UIColor whiteColor].CGColor,
-                            (id)[UIColor colorWithWhite:0.85 alpha:1.0].CGColor, nil];
-  [bar.layer addSublayer:toolbarGradient];
-  [toolbarGradient release];
-  
-  UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
-  UIImage* buttonBG = [UIImage imageNamed:@"big_blue_button_bg"];
-  [button setBackgroundImage:buttonBG forState:UIControlStateNormal];
-  [button setTitle:@"Add To-Do" forState:UIControlStateNormal];
-  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14.0];
-  button.titleLabel.shadowColor = [UIColor colorWithWhite:0.3 alpha:1.0];
-  button.titleLabel.shadowOffset = CGSizeMake(0.0, -1.0);
-  button.frame = CGRectMake((bar.frame.size.width - buttonBG.size.width) / 2, 8.0, buttonBG.size.width, buttonBG.size.height);
-  [button addTarget:self action:@selector(addSelfAsFavorite) forControlEvents:UIControlEventTouchUpInside];
-  self.addFavoriteButton = button;
-  [bar addSubview:self.addFavoriteButton];
-  
-  UIActivityIndicatorView* activity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-  activity.center = button.center;
-  activity.hidesWhenStopped = YES;
-  [activity stopAnimating];
-  self.spinner = activity;
-  [bar addSubview:self.spinner];
-
-  [self.view addSubview:bar];
-  CGRect frame = self.scrollView.frame;
-  frame.size.height -= 56;
-  self.scrollView.frame = frame;
-  
-  [bar release];
+  if (newEDetail) {
+    
+  }
+  else {
+    UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 56, 320, 56)];
+    bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
+    bar.layer.shadowOpacity = 0.2;
+    bar.layer.shadowOffset = CGSizeMake(0, -1);
+    CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
+    toolbarGradient.frame = bar.bounds;
+    toolbarGradient.colors = [NSArray arrayWithObjects:
+                              (id)[UIColor whiteColor].CGColor,
+                              (id)[UIColor colorWithWhite:0.85 alpha:1.0].CGColor, nil];
+    [bar.layer addSublayer:toolbarGradient];
+    [toolbarGradient release];
+    
+    UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+    UIImage* buttonBG = [UIImage imageNamed:@"big_blue_button_bg"];
+    [button setBackgroundImage:buttonBG forState:UIControlStateNormal];
+    [button setTitle:@"Add To-Do" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14.0];
+    button.titleLabel.shadowColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    button.titleLabel.shadowOffset = CGSizeMake(0.0, -1.0);
+    button.frame = CGRectMake((bar.frame.size.width - buttonBG.size.width) / 2, 8.0, buttonBG.size.width, buttonBG.size.height);
+    [button addTarget:self action:@selector(addSelfAsFavorite) forControlEvents:UIControlEventTouchUpInside];
+    self.addFavoriteButton = button;
+    [bar addSubview:self.addFavoriteButton];
+    
+    UIActivityIndicatorView* activity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    activity.center = button.center;
+    activity.hidesWhenStopped = YES;
+    [activity stopAnimating];
+    self.spinner = activity;
+    [bar addSubview:self.spinner];
+    
+    [self.view addSubview:bar];
+    CGRect frame = self.scrollView.frame;
+    frame.size.height -= 56;
+    self.scrollView.frame = frame;
+    
+    [bar release];
+  }
 }
 
 - (void)hideMainToolbar {
-  toolbarView_.hidden = YES;
-  CGRect frame = self.scrollView.frame;
-  frame.size.height += CGRectGetHeight(toolbarView_.frame);
-  self.scrollView.frame = frame;
+  if (newEDetail) {
+  }
+  else {
+    toolbarView_.hidden = YES;
+    CGRect frame = self.scrollView.frame;
+    frame.size.height += CGRectGetHeight(toolbarView_.frame);
+    self.scrollView.frame = frame;
+  }
 }
 
 - (NSAttributedString*)todoAttributedString:(User*)user {
-  if (!user)
+  if (newEDetail) {
     return nil;
-  
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* screenName = user.screenName;
-  if ([user.screenName isEqualToString:[AccountManager sharedManager].currentUser.screenName])
-    screenName = @"you";
-
-  NSString* full = [NSString stringWithFormat:@"To-do added via %@", screenName];
-  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
-  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                         (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor whiteColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
-                  range:NSMakeRange(0, full.length)];
-  [string addAttribute:(NSString*)kCTFontAttributeName
-                 value:(id)font 
-                 range:[full rangeOfString:screenName options:NSBackwardsSearch]];
-  CFRelease(font);
-  CFRelease(style);
-  return [string autorelease];
+  }
+  else {
+    if (!user)
+      return nil;
+    
+    CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+    CFIndex numSettings = 1;
+    CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+    CTParagraphStyleSetting settings[1] = {
+      {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+    };
+    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+    NSString* screenName = user.screenName;
+    if ([user.screenName isEqualToString:[AccountManager sharedManager].currentUser.screenName])
+      screenName = @"you";
+    
+    NSString* full = [NSString stringWithFormat:@"To-do added via %@", screenName];
+    NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+    [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                           (id)style, (id)kCTParagraphStyleAttributeName,
+                           (id)[UIColor whiteColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                    range:NSMakeRange(0, full.length)];
+    [string addAttribute:(NSString*)kCTFontAttributeName
+                   value:(id)font 
+                   range:[full rangeOfString:screenName options:NSBackwardsSearch]];
+    CFRelease(font);
+    CFRelease(style);
+    return [string autorelease];
+  }
 }
 
 - (void)todoBarTapped:(UITapGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
-  StampDetailViewController* vc = [[StampDetailViewController alloc] initWithStamp:entityObject_.favorite.stamp];
-  [self.navigationController pushViewController:vc animated:YES];
-  [vc release];
+  if (newEDetail) {
+    
+  }
+  else {
+    if (recognizer.state != UIGestureRecognizerStateEnded)
+      return;
+    
+    StampDetailViewController* vc = [[StampDetailViewController alloc] initWithStamp:entityObject_.favorite.stamp];
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
+  }
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.titleLabel = nil;
-  self.descriptionLabel = nil;
-  self.mainActionLabel = nil;
-  self.mainActionButton = nil;
-  self.shelfImageView = nil;
-  self.scrollView = nil;
-  self.categoryImageView = nil;
-  self.mainActionsView = nil;
-  self.loadingView = nil;
-  self.mainContentView = nil;
-  self.addFavoriteButton = nil;
-  self.spinner = nil;
-  self.imageView.delegate = nil;
-  self.imageView = nil;
-  self.todoLabel = nil;
-  self.todoButton = nil;
-  self.toolbarView = nil;
-
-  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
-    vc.delegate = nil;
+  if (newEDetail) {
+    
+  }
+  else {
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+    self.titleLabel = nil;
+    self.descriptionLabel = nil;
+    self.mainActionLabel = nil;
+    self.mainActionButton = nil;
+    self.shelfImageView = nil;
+    self.scrollView = nil;
+    self.categoryImageView = nil;
+    self.mainActionsView = nil;
+    self.loadingView = nil;
+    self.mainContentView = nil;
+    self.addFavoriteButton = nil;
+    self.spinner = nil;
+    self.imageView.delegate = nil;
+    self.imageView = nil;
+    self.todoLabel = nil;
+    self.todoButton = nil;
+    self.toolbarView = nil;
+    
+    for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
+      vc.delegate = nil;
+  }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -452,7 +533,12 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  if (newEDetail) {
+    
+  }
+  else {
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  }
   viewIsVisible_ = NO;
 }
 
@@ -510,7 +596,7 @@ static const CGFloat kTodoBarHeight = 44.0;
     else
       [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   }
-
+  
   [self.loadingView stopAnimating];
 }
 
@@ -546,10 +632,17 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)addNewSection:(UIView*)section {
-  section.frame = CGRectMake(100, 150, 100, 100);
-  [scrollView_ addSubview:section];
-  [scrollView_ setNeedsLayout];
-  [scrollView_ setNeedsDisplay];
+  CGSize content = self.scrollView.contentSize;
+  NSLog(@"%fx%f",content.width,content.height);
+  CGRect sectionFrame = section.frame;
+  sectionFrame.origin.y = content.height;
+  section.frame = sectionFrame;
+  content.height = content.height + sectionFrame.size.height;
+  self.scrollView.contentSize = content;
+  
+  [self.scrollView addSubview:section];
+  [self.scrollView setNeedsLayout];
+  [self.detailComponents addObject:section];
 }
 
 - (void)addSectionWithName:(NSString*)name {
@@ -562,7 +655,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   
   collapsibleVC.sectionLabel.text = name;
   collapsibleVC.delegate = self;
-
+  
   [sectionsDict_ setObject:collapsibleVC forKey:name];
   [mainContentView_ addSubview:collapsibleVC.view];
   if (self.imageView && self.imageView.hidden == NO)
@@ -572,7 +665,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
                                               initWithNibName:@"CollapsiblePreviewController" bundle:nil];
-
+  
   collapsibleVC.collapsedHeight = previewHeight;
   collapsibleVC.view.frame = CGRectMake(0, [self contentHeight], 
                                         mainContentView_.frame.size.width, 
@@ -623,19 +716,19 @@ static const CGFloat kTodoBarHeight = 44.0;
   
   CGFloat newHeight = [self contentHeight];
   newHeight += delta;
-
+  
   CGRect contentFrame = self.mainContentView.frame;
   contentFrame.size.height = newHeight;
   self.mainContentView.frame = contentFrame;
   
   newHeight += CGRectGetMinY(self.mainContentView.frame);
-
+  
   BOOL shouldScrollDown = NO;
   if (scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
       scrollView_.contentOffset.y >= scrollView_.contentSize.height - scrollView_.frame.size.height) {
     shouldScrollDown = YES;
   }
-
+  
   scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
   if (shouldScrollDown)
     self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);
@@ -649,7 +742,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (CGFloat)contentHeight {
   if (sectionsDict_.count == 0)
     return 0.0f;
-
+  
   CGFloat contentHeight = 0.0f;
   for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator) {
     contentHeight += cvc.view.frame.size.height;
@@ -730,7 +823,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   } else {
     todoLabel_.text = @"To-Do";
   }
-
+  
   NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
@@ -740,7 +833,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:entityObject_.entityID forKey:@"entity_id"];
   if (referringStamp_)
     [params setObject:referringStamp_.stampID forKey:@"stamp_id"];
-
+  
   objectLoader.params = params;
   if (shouldDelete) {
     entityObject_.favorite = nil;
@@ -753,10 +846,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   User* creditedUser = entityObject_.favorite.stamp.user;
   if ([creditedUser.userID isEqualToString:[AccountManager sharedManager].currentUser.userID])
     creditedUser = nil;
-
+  
   if (!creditedUser)
     creditedUser = referringStamp_.user;
-
+  
   CreateStampViewController* vc = [[CreateStampViewController alloc] initWithEntityObject:entityObject_
                                                                                creditedTo:creditedUser];
   [self.navigationController pushViewController:vc animated:YES];
@@ -766,19 +859,46 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (IBAction)mainActionButtonPressed:(id)sender {}
 
 - (void)didLoad:(id)object withLabel:(id)label {
+  NSLog(@"loadeded: %@",label);
   if ([label isEqualToString:@"entityDetail"]) {
     if (object) {
       id<STEntityDetail> detail = object;
       entityDetail_ = [detail retain];
       [self didLoadEntityDetail:YES];
-        if (self.entityDetail.gallery) {
-          STGalleryViewFactory* factory = [[STGalleryViewFactory alloc] init];
-          [factory createWithGallery:self.entityDetail.gallery andLinkDelegate:nil delegate:self withLabel:@"galleryView"];
-        }
+      STHeaderViewFactory* factory = [[STHeaderViewFactory alloc] init];
+      [factory createWithEntityDetail:self.entityDetail delegate:self withLabel:@"headerView"];
+      [factory release];
     }
     else {
       [self didLoadEntityDetail:NO];
     }
+  }
+  else if ([label isEqualToString:@"headerView"]) {
+    if (object) {
+      UIView* headerView = object;
+      [self addNewSection:headerView];
+    }
+    STActionsViewFactory* factory = [[STActionsViewFactory alloc] init];
+    [factory createWithActions:self.entityDetail.actions delegate:self withLabel:@"actionsView"];
+    [factory release];
+  }
+  else if ([label isEqualToString:@"actionsView"]) {
+    if (object) {
+      UIView* actionsView = object;
+      [self addNewSection:actionsView];
+    }
+    STMetadataViewFactory* factory = [[STMetadataViewFactory alloc] init];
+    [factory createWithEntityDetail:self.entityDetail delegate:self withLabel:@"metadataView"];
+    [factory release];
+  }
+  else if ([label isEqualToString:@"metadataView"]) {
+    if (object) {
+      UIView* metadataView = object;
+      [self addNewSection:metadataView];
+    }
+    STGalleryViewFactory* factory = [[STGalleryViewFactory alloc] init];
+    [factory createWithGallery:self.entityDetail.gallery delegate:self withLabel:@"galleryView"];
+    [factory release];
   }
   else if ([label isEqualToString:@"galleryView"]) {
     if (object) {
@@ -789,6 +909,27 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)didLoadEntityDetail:(BOOL)loaded {
+  
+}
+
+- (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
+  for (UIView* view2 in self.detailComponents) {
+    if (view2 == view || CGRectGetMinY(view2.frame) > CGRectGetMinY(view.frame)) {
+      [UIView animateWithDuration:seconds animations:^{
+        if (view2 == view) {
+          CGRect frame = view2.frame;
+          frame.size.height += delta;
+          view2.frame = frame;
+        }
+        else {
+          view2.frame = CGRectOffset(view2.frame, 0, delta);
+        }
+      }];
+    }
+  }
+}
+
+- (void)view:(UIView*)view didChooseAction:(id<STAction>)action {
   
 }
 
