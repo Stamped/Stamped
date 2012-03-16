@@ -145,7 +145,7 @@ def formatAddress(entity, extendStreet=False, breakLines=False):
 def formatSubcategory(subcategory):
     if subcategory == 'tv':
         return 'TV'
-    return subcategory.title()
+    return subcategory.replace('_', ' ').title()
 
 def formatFilmLength(seconds):
     try:
