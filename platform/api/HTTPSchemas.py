@@ -602,7 +602,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.opentable_id is not None or schema.sources.opentable_nickname is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'OpenTable'
+                    source.name         = 'Reserve on OpenTable'
                     source.source       = 'opentable'
                     source.source_id    = schema.sources.opentable_id
                     source.link         = _buildOpenTableURL(schema.opentable_id, schema.opentable_nickname, client)
@@ -631,6 +631,7 @@ class HTTPEntity(Schema):
 
                 if schema.menu is not None:
                     source              = HTTPEntitySource()
+                    source.name         = 'View menu'
                     source.source       = 'menu'
                     source.source_id    = schema.entity_id
                     sources.append(source)
@@ -658,7 +659,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.amazon_underlying is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Amazon'
+                    source.name         = 'Buy from Amazon'
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
                     source.icon         = self._getIconURL('src_amazon', client=client)
@@ -696,7 +697,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.itunes_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'iTunes'
+                    source.name         = 'Watch on iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
@@ -712,7 +713,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.fandango.fid is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Fandango'
+                    source.name         = 'Buy from Fandango'
                     source.source       = 'fandango'
                     source.source_id    = schema.sources.fandango.fid
                     source.link         = schema.sources.fandango.f_url 
@@ -740,7 +741,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.amazon_underlying is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Amazon'
+                    source.name         = 'Buy from Amazon'
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
                     source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
@@ -784,7 +785,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.itunes_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'iTunes'
+                    source.name         = 'Listen on iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.icon         = self._getIconURL('src_itunes', client=client)
@@ -792,7 +793,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.rdio_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Rdio'
+                    source.name         = 'Listen on Rdio'
                     source.source       = 'rdio'
                     source.source_id    = schema.sources.rdio_id
                     source.icon         = self._getIconURL('src_rdio', client=client)
@@ -800,7 +801,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.spotify_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Spotify'
+                    source.name         = 'Listn on Spotify'
                     source.source       = 'spotify'
                     source.source_id    = schema.sources.spotify_id
                     source.icon         = self._getIconURL('src_spotify', client=client)
@@ -823,14 +824,14 @@ class HTTPEntity(Schema):
 
                 if schema.sources.rdio_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Rdio'
+                    source.name         = 'Add to playlist on Rdio'
                     source.source       = 'rdio'
                     source.source_id    = schema.sources.rdio_id
                     sources.append(source)
 
                 if schema.sources.spotify_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'Spotify'
+                    source.name         = 'Add to playlist on Spotify'
                     source.source       = 'spotify'
                     source.source_id    = schema.sources.spotify_id
                     sources.append(source)
@@ -848,7 +849,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.itunes_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'iTunes'
+                    source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.link         = _encodeiTunesShortURL(schema.itunes_url)
@@ -896,7 +897,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.itunes_id is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'iTunes'
+                    source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.icon         = self._getIconURL('src_itunes', client=client)
@@ -905,7 +906,7 @@ class HTTPEntity(Schema):
                 ### TEMP - apple.aid should be deprecated
                 elif schema.sources.apple.aid is not None:
                     source              = HTTPEntitySource()
-                    source.name         = 'iTunes'
+                    source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.apple.aid
                     source.icon         = self._getIconURL('src_itunes', client=client)
@@ -995,6 +996,7 @@ class HTTPEntitySource(Schema):
         self.source_id          = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
+        self.endpoint           = SchemaElement(basestring)
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
@@ -1236,6 +1238,12 @@ class HTTPEntityNearby(Schema):
         else:
             raise NotImplementedError
         return schema
+
+class HTTPEntityActionEndpoint(Schema):
+    def setSchema(self):
+        self.status             = SchemaElement(basestring)
+        self.message            = SchemaElement(basestring)
+        self.redirect           = SchemaElement(basestring)
 
 
 # ###### #
