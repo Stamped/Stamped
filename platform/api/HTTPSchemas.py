@@ -923,7 +923,7 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.apple.aid
                     source.icon         = self._getIconURL('src_itunes', client=client)
-                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
+                    source.link         = _encodeiTunesShortURL(schema.view_url)
                     sources.append(source)
 
                 actionIcon = self._getIconURL('act_download_primary', client=client)
