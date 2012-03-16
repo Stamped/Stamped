@@ -12,7 +12,7 @@
 
 @interface STSimpleGallery : NSObject
 
-@property (nonatomic, readwrite, assign) NSInteger name;
+@property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, retain) NSArray<STGalleryItem>* data;
 
 + (RKObjectMapping*)mapping;

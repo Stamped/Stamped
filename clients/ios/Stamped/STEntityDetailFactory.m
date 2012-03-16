@@ -24,6 +24,12 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 @synthesize delegate = delegate_;
 @synthesize label = label_;
 
+- (void)dealloc {
+  self.delegate = nil;
+  self.label = nil;
+  [super dealloc];
+}
+
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {

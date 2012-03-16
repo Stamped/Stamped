@@ -10,10 +10,9 @@
 #import "STGallery.h"
 #import "STViewDelegate.h"
 
+
 @interface STGalleryViewFactory : NSObject
 
-- (void)createWithGallery:(id<STGallery>)gallery
-                 delegate:(id<STViewDelegate>)delegate
-                withLabel:(id)label;
+- (NSOperation*)createWithGallery:(id<STGallery>)gallery forBlock:(void (^)(STViewCreator))callback;
 
 @end

@@ -26,4 +26,11 @@
   return mapping;
 }
 
+- (void)dealloc {
+  self.name = nil;
+  self.data = nil;
+  NSLog(@"simple gallery dealloc");
+  [super dealloc];
+}
+
 @end

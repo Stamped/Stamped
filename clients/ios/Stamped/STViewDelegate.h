@@ -11,9 +11,14 @@
 #import "STResizeDelegate.h"
 #import "STAction.h"
 
+
 @protocol STViewDelegate <STFactoryDelegate, STResizeDelegate>
 
 - (void)view:(UIView*)view didChooseAction:(id<STAction>)action;
 
+@property (nonatomic, readonly) NSOperationQueue* asyncQueue;
+
 @end
 
+typedef UIView* (^STViewCreator)(id<STViewDelegate>);
+typedef void (^STViewCreatorCallback)(STViewCreator);

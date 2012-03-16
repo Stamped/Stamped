@@ -81,6 +81,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 @synthesize referringStamp = referringStamp_;
 @synthesize entityDetail = entityDetail_;
 @synthesize detailComponents = detailComponents_;
+@synthesize operationQueue = operationQueue_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   if (newEDetail) {
@@ -112,6 +113,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)commonInit {
   if (newEDetail) {
+    operationQueue_ = [[NSOperationQueue alloc] init];
     detailComponents_ = [[NSMutableArray alloc] init];
     CGSize content = self.scrollView.contentSize;
     content.height = 0;
@@ -132,9 +134,31 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)dealloc {
+  NSLog(@"releasing eDetail");
   if (newEDetail) {
+    [self.operationQueue cancelAllOperations];
+    [operationQueue_ release];
     [entityDetail_ release];
     [detailComponents_ release];
+    self.titleLabel = nil;
+    self.descriptionLabel = nil;
+    self.mainActionLabel = nil;
+    self.mainActionButton = nil;
+    self.shelfImageView = nil;
+    self.scrollView = nil;
+    self.categoryImageView = nil;
+    self.mainActionsView = nil;
+    self.mainContentView = nil;
+    self.loadingView = nil;
+    self.addFavoriteButton = nil;
+    self.spinner = nil;
+    self.imageView.delegate = nil;
+    self.imageView = nil;
+    self.todoLabel = nil;
+    self.todoButton = nil;
+    self.toolbarView = nil;
+    self.referringStamp = nil;
+    
   }
   else {
     [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -897,14 +921,27 @@ static const CGFloat kTodoBarHeight = 44.0;
       [self addNewSection:metadataView];
     }
     STGalleryViewFactory* factory = [[STGalleryViewFactory alloc] init];
-    [factory createWithGallery:self.entityDetail.gallery delegate:self withLabel:@"galleryView"];
+    __block EntityDetailViewController* selfRef = self;
+    NSOperation* operation = [factory createWithGallery:self.entityDetail.gallery forBlock:^(STViewCreator init) {
+      @autoreleasepool {
+        if (init) {
+          UIView* view = init(selfRef);
+          if (view) {
+            UIView* galleryView = view;
+            [selfRef addNewSection:galleryView];
+            NSLog(@"added %fx%f",galleryView.frame.size.width,galleryView.frame.size.height);
+          }
+          else {
+            NSLog(@"Gallery Load failed!");
+          }
+        }
+        else {
+          NSLog(@"Gallery Load failed2!");
+        }
+      }
+    }];
     [factory release];
-  }
-  else if ([label isEqualToString:@"galleryView"]) {
-    if (object) {
-      UIView* galleryView = object;
-      [self addNewSection:galleryView];
-    }
+    [self.operationQueue addOperation:operation];
   }
 }
 
@@ -927,10 +964,19 @@ static const CGFloat kTodoBarHeight = 44.0;
       }];
     }
   }
+  [UIView animateWithDuration:seconds animations:^{
+    CGSize contentSize = self.scrollView.contentSize;
+    contentSize.height += delta;
+    self.scrollView.contentSize = contentSize;
+  }];
 }
 
 - (void)view:(UIView*)view didChooseAction:(id<STAction>)action {
   
+}
+
+- (NSOperationQueue*)asyncQueue {
+  return operationQueue_;
 }
 
 @end

@@ -11,33 +11,38 @@
 @interface STViewContainer ()
 
 @property (nonatomic, retain) NSMutableArray* children;
+@property (nonatomic, assign) id<STViewDelegate> delegate;
 
 @end
 
 @implementation STViewContainer
 
+@dynamic asyncQueue;
 @synthesize delegate = delegate_;
 @synthesize children = children_;
 
-- (id)initWithFrame:(CGRect)frame
+- (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame
 {
-    self = [super initWithFrame:frame];
-    if (self) {
-      children_ = [[NSMutableArray alloc] init];
-      self.backgroundColor = [UIColor clearColor];
-    }
-    return self;
+  self = [super initWithFrame:frame];
+  if (self) {
+    self.children = [NSMutableArray array];
+    self.delegate = delegate;
+    self.backgroundColor = [UIColor clearColor];
+  }
+  return self;
 }
 
 - (void)dealloc {
-  [children_ release];
+  NSLog(@"dealloc STViewContainer");
+  self.children = nil;
   self.delegate = nil;
   [super dealloc];
 }
 
 - (void)appendChild:(UIView*)child {
   CGRect frame = child.frame;
-  frame.origin.y = CGRectGetMaxY(self.frame);
+  frame.origin.y = self.frame.size.height;
+  NSLog(@"Child frame: %f,%f,%f,%f,%@",frame.origin.x,frame.origin.y,frame.size.width,frame.size.height,self);
   child.frame = frame;
   frame = self.frame;
   frame.size.height += child.frame.size.height;
@@ -47,15 +52,11 @@
 }
 
 - (void)didLoad:(id)object withLabel:(id)label {
-  if (self.delegate) {
-    [self.delegate didLoad:object withLabel:label];
-  }
+  [self.delegate didLoad:object withLabel:label];
 }
 
 - (void)view:(UIView*)view didChooseAction:(id<STAction>)action {
-  if (self.delegate) {
-    [self.delegate view:view didChooseAction:action];
-  }
+  [self.delegate view:view didChooseAction:action];
 }
 
 - (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
@@ -76,5 +77,8 @@
   [self.delegate view:self willChangeHeightBy:delta over:seconds];
 }
 
+- (NSOperationQueue*)asyncQueue {
+  return self.delegate.asyncQueue;
+}
 
 @end

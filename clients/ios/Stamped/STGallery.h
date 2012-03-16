@@ -11,7 +11,7 @@
 
 @protocol STGallery <NSObject>
 
-@property (nonatomic, readonly, assign) NSInteger name;
+@property (nonatomic, readonly, retain) NSString* name;
 @property (nonatomic, readonly, retain) NSArray<STGalleryItem>* data;
 
 @end

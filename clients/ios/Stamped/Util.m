@@ -354,4 +354,28 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
   return label;
 }
 
++ (CGRect)centeredAndBounded:(CGSize)size inFrame:(CGRect)frame {
+  CGFloat delta_w = frame.size.width - size.width;
+  CGFloat delta_h = frame.size.height - size.height;
+  if (delta_w < 0 || delta_h < 0) {
+    CGFloat scale = frame.size.width / size.width;
+    CGFloat scale_h = frame.size.height / size.height;
+    if (scale_h < scale) {
+      scale = scale_h;
+    }
+    size.width *= scale;
+    size.height *= scale;
+    delta_w = frame.size.width - size.width;
+    delta_h = frame.size.height - size.height;
+  }
+  return CGRectMake(frame.origin.x + delta_w / 2, frame.origin.y + delta_h / 2, size.width, size.height);
+}
+
++ (UIView*)tapViewWithFrame:(CGRect)frame delegate:(id)delegate andSelector:(SEL)selector {
+  UIButton* button = [[[UIButton alloc] initWithFrame:frame] autorelease];
+  [button addTarget:delegate action:selector forControlEvents:UIControlEventTouchUpInside];
+  button.backgroundColor = [UIColor clearColor];
+  return button;
+}
+
 @end

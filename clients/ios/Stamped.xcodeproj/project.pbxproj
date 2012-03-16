@@ -1788,6 +1788,7 @@
 		6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetailBox_line@2x.png"; sourceTree = "<group>"; };
 		6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Stamped.h"; sourceTree = "<group>"; };
 		6386EF2B151150420019F1DC /* UIFont+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Stamped.m"; sourceTree = "<group>"; };
+		6386EF2F151278610019F1DC /* STAsyncConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAsyncConfig.h; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2891,6 +2892,7 @@
 				6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */,
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
 				6386EF1C1511371F0019F1DC /* STResizeDelegate.h */,
+				6386EF2F151278610019F1DC /* STAsyncConfig.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";

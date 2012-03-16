@@ -36,8 +36,8 @@
     }
     
     CGFloat padding = 10;
-    CGFloat paddingBetween = 5;
-    UIFont* titleFont = [UIFont stampedBoldFontWithSize:20];
+    CGFloat paddingBetween = 0;
+    UIFont* titleFont = [UIFont stampedTitleFontWithSize:30];
     UIFont* captionFont = [UIFont stampedFontWithSize:12];
     
     UIView* titleView = [Util viewWithText:entity.title

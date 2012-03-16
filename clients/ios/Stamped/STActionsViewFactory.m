@@ -17,8 +17,8 @@
 - (id)initWithAction:(id<STAction>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate;
 - (void)selected:(id)button;
 
-@property (nonatomic, readonly) id<STViewDelegate> delegate;
-@property (nonatomic, readonly) id<STAction> action;
+@property (nonatomic, assign) id<STViewDelegate> delegate;
+@property (nonatomic, retain) id<STAction> action;
 
 @end
 
@@ -37,8 +37,8 @@
   self = [super initWithFrame:frame];
   if (self) {
     NSLog(@"loading action: %@",action.name);
-    delegate_ = [delegate retain];
-    action_ = [action retain];
+    self.delegate = delegate;
+    self.action = action;
     self.backgroundColor = [UIColor clearColor];
     CGRect buttonFrame = frame;
     buttonFrame.origin.x = 0;
@@ -105,6 +105,13 @@
   return self;
 }
 
+- (void)dealloc {
+  NSLog(@"dealloc ActionItemView");
+  self.action = nil;
+  self.delegate = nil;
+  [super dealloc];
+}
+
 - (void)selected:(id)button {
   NSLog(@"selected %@ %@",self.action.name, self.action.icon);
   CGFloat delta = 25;
@@ -127,9 +134,7 @@
                 withLabel:(id)label {
   STViewContainer* view = nil;
   if (actions) {
-    view = [[STViewContainer alloc] initWithFrame:CGRectMake(0, 0, 320, 10)];
-    view.delegate = delegate;
-    //view.backgroundColor = [UIColor redColor];
+    view = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)];
     CGFloat cell_height = 44;
     CGFloat cell_padding_h = 5;
     CGFloat cell_width = 290;

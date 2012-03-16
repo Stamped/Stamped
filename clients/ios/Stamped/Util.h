@@ -56,5 +56,8 @@ extern NSString* const kKeychainTwitterToken;
 
 + (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
 + (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
++ (UIView*)tapViewWithFrame:(CGRect)frame delegate:(id)delegate andSelector:(SEL)selector;
+
++ (CGRect)centeredAndBounded:(CGSize)size inFrame:(CGRect)frame;
 
 @end
