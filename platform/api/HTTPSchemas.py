@@ -498,6 +498,9 @@ class HTTPEntity(Schema):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
+            for i in xrange(len(sources)):
+                if sources[i].link is None:
+                    del(sources[i].link)
             action.sources  = sources
             action.name     = name
 
