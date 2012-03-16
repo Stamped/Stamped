@@ -817,7 +817,7 @@ class HTTPEntity(Schema):
 
                 if schema.sources.spotify_id is not None:
                     source              = HTTPActionSource()
-                    source.name         = 'Listn on Spotify'
+                    source.name         = 'Listen on Spotify'
                     source.source       = 'spotify'
                     source.source_id    = schema.sources.spotify_id
                     source.icon         = self._getIconURL('src_spotify', client=client)
@@ -874,27 +874,63 @@ class HTTPEntity(Schema):
                 actionTitle = 'Download %s' % schema.subcategory
                 actionIcon  = self._getIconURL('act_download', client=client)
                 self._addAction('download', actionTitle, sources, icon=actionIcon)
+
+                # Playlist
             
-                # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
-                #     songs = schema.songs
-                    
-                #     # for an artist, only return up to 10 songs
-                #     if schema.subcategory == "artist":
-                #         songs = songs[0: min(10, len(songs))]
-                    
-                #     songs = list(song.song_name for song in songs)
-                #     self.songs = songs
-                
-                # if schema.subcategory == "album" and schema.tracks is not None:
-                #     self.songs = schema.tracks
-                
-                # if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
-                #     try:
-                #         albums = list(album.album_name for album in schema.albums)
-                #         self.albums = albums
-                #     except:
-                #         utils.printException()
-                #         pass
+                if schema.subcategory in ["album", "artist"] and schema.songs is not None:
+                    playlist = HTTPEntityPlaylist()
+
+                    if schema.subcategory == 'album':
+                        playlist.name = 'Tracks'
+                    else:
+                        playlist.name = 'Top songs'
+
+                    for i in range(len(schema.songs))[:50]:
+                        try:
+                            song = schema.songs[i]
+                            item = HTTPEntityPlaylistItem()
+                            item.length = song.length
+                            item.num = i + 1
+                            item.icon = None ### TODO
+
+                            sources = []
+
+                            if song.sources.itunes_id is not None:
+                                source              = HTTPActionSource()
+                                source.name         = 'Listen on iTunes'
+                                source.source       = 'itunes'
+                                source.source_id    = schema.sources.itunes_id
+                                source.icon         = self._getIconURL('src_itunes', client=client)
+                                sources.append(source)
+
+                            if song.sources.rdio_id is not None:
+                                source              = HTTPActionSource()
+                                source.name         = 'Listen on Rdio'
+                                source.source       = 'rdio'
+                                source.source_id    = schema.sources.rdio_id
+                                source.icon         = self._getIconURL('src_rdio', client=client)
+                                sources.append(source)
+
+                            if song.sources.spotify_id is not None:
+                                source              = HTTPActionSource()
+                                source.name         = 'Listen on Spotify'
+                                source.source       = 'spotify'
+                                source.source_id    = schema.sources.spotify_id
+                                source.icon         = self._getIconURL('src_spotify', client=client)
+                                sources.append(source)
+
+                            if len(sources) > 0:
+                                action = HTTPAction()
+                                action.type = 'listen'
+                                action.name = 'Listen to song'
+                                action.sources = sources
+
+                                item.action = action
+
+                            playlist.data.append(item)
+
+                        except Exception:
+                            pass
 
             elif schema.subcategory == 'app':
 
@@ -1053,7 +1089,6 @@ class HTTPEntityPlaylist(Schema):
     def setSchema(self):
         self.data               = SchemaList(HTTPEntityPlaylistItem(), required=True)
         self.name               = SchemaElement(basestring)
-        self.overflow           = SchemaElement(int)
 
 class HTTPEntityPlaylistItem(Schema):
     def setSchema(self):
