@@ -11,14 +11,16 @@
 #import "STImageView.h"
 #import "Util.h"
 #import "STViewContainer.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 @interface ActionItemView : UIView
 
-- (id)initWithAction:(id<STAction>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate;
+- (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate;
 - (void)selected:(id)button;
 
 @property (nonatomic, assign) id<STViewDelegate> delegate;
-@property (nonatomic, retain) id<STAction> action;
+@property (nonatomic, retain) id<STActionItem> action;
 
 @end
 
@@ -33,7 +35,7 @@
  Check Font
  
  */
-- (id)initWithAction:(id<STAction>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate {
+- (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate {
   self = [super initWithFrame:frame];
   if (self) {
     NSLog(@"loading action: %@",action.name);
@@ -87,11 +89,11 @@
     CGRect imageFrame = CGRectMake(12, 12, 20, 20);
     UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:action.icon] andFrame:imageFrame];
     [self addSubview:imageView];
-    if (action.sources) {
-      NSInteger index = [action.sources count] - 1;
+    if (action.action.sources) {
+      NSInteger index = [action.action.sources count] - 1;
       CGFloat offset = frame.size.width - 32;
       while (index >= 0) {
-        id<STSource> source = [action.sources objectAtIndex:index];
+        id<STSource> source = [action.action.sources objectAtIndex:index];
         if (source.icon) {
           CGRect iconFrame = CGRectMake(offset, 14, 16, 16);
           UIView* iconView = [Util imageViewWithURL:[NSURL URLWithString:source.icon] andFrame:iconFrame];
@@ -113,12 +115,7 @@
 }
 
 - (void)selected:(id)button {
-  NSLog(@"selected %@ %@",self.action.name, self.action.icon);
-  CGFloat delta = 25;
-  if (self.frame.size.height > 20) {
-    delta = -25;
-  }
-  [self.delegate view:self willChangeHeightBy:delta over:.25];
+  [self.delegate didChooseAction:self.action.action];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -129,7 +126,7 @@
 
 @implementation STActionsViewFactory
 
-- (void)createWithActions:(NSArray<STAction>*)actions
+- (void)createWithActions:(NSArray<STActionItem>*)actions
                  delegate:(id<STViewDelegate>)delegate
                 withLabel:(id)label {
   STViewContainer* view = nil;
@@ -139,7 +136,7 @@
     CGFloat cell_padding_h = 5;
     CGFloat cell_width = 290;
     CGFloat cell_padding_w = (320 - cell_width) / 2.0;
-    for (id<STAction> action in actions) {
+    for (id<STActionItem> action in actions) {
       CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
       UIView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
       [view appendChild:actionView];

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STAction.h"
+#import "STActionItem.h"
 #import "STGallery.h"
 #import "STMetadataItem.h"
 #import "STPlaylist.h"
@@ -32,7 +32,7 @@
 @property (nonatomic, readonly, retain) NSString* neighborhood;
 @property (nonatomic, readonly, retain) NSString* coordinates;
 
-@property (nonatomic, readonly, retain) NSArray<STAction>* actions;
+@property (nonatomic, readonly, retain) NSArray<STActionItem>* actions;
 @property (nonatomic, readonly, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readonly, retain) id<STGallery> gallery;
 @property (nonatomic, readonly, retain) id<STPlaylist> playlist;

@@ -7,7 +7,7 @@
 //
 
 #import "STSimpleEntityDetail.h"
-#import "STSimpleAction.h"
+#import "STSimpleActionItem.h"
 #import "STSimpleMetadataItem.h"
 #import "STSimpleGallery.h"
 #import "STSimplePlaylist.h"
@@ -92,7 +92,7 @@
    @"coordinates",
    @"caption",
    nil];
-  [mapping mapRelationship:@"actions" withMapping:[STSimpleAction mapping]];
+  [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
   [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];
   [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];

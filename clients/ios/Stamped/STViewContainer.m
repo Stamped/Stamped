@@ -55,8 +55,8 @@
   [self.delegate didLoad:object withLabel:label];
 }
 
-- (void)view:(UIView*)view didChooseAction:(id<STAction>)action {
-  [self.delegate view:view didChooseAction:action];
+- (void)didChooseAction:(id<STAction>)action {
+  [self.delegate didChooseAction:action];
 }
 
 - (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
@@ -79,6 +79,10 @@
 
 - (NSOperationQueue*)asyncQueue {
   return self.delegate.asyncQueue;
+}
+
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
+  [self.delegate didChooseSource:source forAction:action];
 }
 
 @end

@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STAction.h"
+#import "STActionItem.h"
 #import "STViewDelegate.h"
 
 @interface STActionsViewFactory : NSObject
 
-- (void)createWithActions:(NSArray<STAction>*)actions
+- (void)createWithActions:(NSArray<STActionItem>*)actions
                  delegate:(id<STViewDelegate>)delegate
                 withLabel:(id)label;
 

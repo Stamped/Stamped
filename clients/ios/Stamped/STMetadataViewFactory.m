@@ -21,6 +21,7 @@ static const CGFloat _kReadMoreHeight = 74;
 - (id)initWithDatum:(id<STMetadataItem>)datum andDelegate:(id<STViewDelegate>)delegate;
 
 - (void)clicked:(id)button;
+- (void)actionClicked:(id<STAction>)action;
 
 @property (nonatomic, assign) CGFloat uncollapsedValueHeight;
 @property (nonatomic, retain) UIView* valueViewContainer;
@@ -28,6 +29,8 @@ static const CGFloat _kReadMoreHeight = 74;
 @property (nonatomic, retain) UIView* readMore;
 @property (nonatomic, retain) UIView* readLess;
 @property (nonatomic, assign) BOOL collapsed;
+@property (nonatomic, retain) UIView* button;
+@property (nonatomic, assign) id<STViewDelegate> delegateRef;
 
 @end
 
@@ -39,14 +42,26 @@ static const CGFloat _kReadMoreHeight = 74;
 @synthesize readMore = readMore_;
 @synthesize readLess = readLess_;
 @synthesize collapsed = collapsed_;
+@synthesize button = button_;
+@synthesize delegateRef = delegateRef_;
 
 - (id)initWithDatum:(id<STMetadataItem>)datum andDelegate:(id<STViewDelegate>)delegate {
   self = [super initWithDelegate:delegate andFrame:CGRectZero];
   if (self) {
+    if (datum.action) {
+      self.button = [Util tapViewWithFrame:CGRectZero target:self selector:@selector(actionClicked:) andMessage:datum.action];
+      self.delegateRef = delegate;
+      //self.button.backgroundColor = [UIColor redColor];
+      [self addSubview:self.button];
+    }
     CGFloat maxWidth = 262;
+    UIColor* valueColor = [UIColor stampedGrayColor];
+    if (self.button) {
+      valueColor = [UIColor colorWithRed:.3 green:.3 blue:.5 alpha:1];
+    }
     UIView* valueView = [Util viewWithText:datum.value
                                       font:[UIFont stampedFontWithSize:12]
-                                     color:[UIColor stampedGrayColor]
+                                     color:valueColor
                                       mode:UILineBreakModeWordWrap 
                                 andMaxSize:CGSizeMake(maxWidth, CGFLOAT_MAX)];
     
@@ -83,6 +98,7 @@ static const CGFloat _kReadMoreHeight = 74;
       self.valueViewContainer.clipsToBounds = YES;
       self.valueViewContainer.backgroundColor = [UIColor clearColor];
       [self.valueViewContainer addSubview:valueView];
+      
       self.frame = frame;
       [self appendChild:self.valueViewContainer];
       self.readMore = [Util viewWithText:@"read more" 
@@ -99,7 +115,7 @@ static const CGFloat _kReadMoreHeight = 74;
       self.readLess.frame = CGRectOffset(self.readLess.frame, 14, 14);
       self.readLess.hidden = YES;
       UIView* buttonContainer = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, self.readLess.frame.size.height+28)] autorelease];
-      UIView* button = [Util tapViewWithFrame:buttonContainer.frame delegate:self andSelector:@selector(clicked:)];
+      UIView* button = [Util tapViewWithFrame:buttonContainer.frame target:self selector:@selector(clicked:) andMessage:nil];
       [buttonContainer addSubview:button];
       [buttonContainer addSubview:self.readMore];
       [buttonContainer addSubview:self.readLess];
@@ -119,6 +135,15 @@ static const CGFloat _kReadMoreHeight = 74;
                             (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.8].CGColor,
                             (id)[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:.6].CGColor,
                             nil];
+    if (self.button && NO) {
+      self.gradient.colors = [NSMutableArray arrayWithObjects:
+                              (id)[UIColor colorWithRed:.9 green:.90 blue:1.0 alpha:.6].CGColor,
+                              (id)[UIColor colorWithRed:.80 green:.80 blue:.95 alpha:.6].CGColor,
+                              nil];
+    }
+    if (self.button) {
+      self.button.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
+    }
   }
   return self;
 }
@@ -150,11 +175,20 @@ static const CGFloat _kReadMoreHeight = 74;
 
 - (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
   [UIView animateWithDuration:seconds animations:^{
-      CGRect frame = self.gradient.frame;
+    CGRect frame = self.gradient.frame;
+    frame.size.height += delta;
+    self.gradient.frame = frame;
+    if (self.button) {
+      CGRect frame = self.button.frame;
       frame.size.height += delta;
-      self.gradient.frame = frame;
+      self.button.frame = frame;
+    }
   }];
   [super view:view willChangeHeightBy:delta over:seconds];
+}
+
+- (void)actionClicked:(id<STAction>)action {
+  [self.delegateRef didChooseAction:action];
 }
 
 @end
@@ -170,14 +204,17 @@ static const CGFloat _kReadMoreHeight = 74;
     STViewContainer* view = [[STViewContainer alloc] initWithDelegate:main andFrame:CGRectMake(15, 0, 290, 0)];
     
     UIImage* image = [UIImage imageNamed:@"eDetailBox_line"];
-    for (id<STMetadataItem> datum in entity.metadata) {
+    for (NSInteger i = 0; i < [entity.metadata count]; i++) {
+      id<STMetadataItem> datum = [entity.metadata objectAtIndex:i];
       UIView* item = [[MetadatumView alloc] initWithDatum:datum andDelegate:view];
       [view appendChild:item];
-      UIImageView* bar = [[UIImageView alloc] initWithImage:image];
-      bar.backgroundColor = [UIColor clearColor];
-      [view appendChild:bar];
+      if (i + 1 != [entity.metadata count] ) {
+        UIImageView* bar = [[UIImageView alloc] initWithImage:image];
+        bar.backgroundColor = [UIColor clearColor];
+        [view appendChild:bar];
+        [bar release];
+      }
       [item release];
-      [bar release];
     }
     
     view.layer.cornerRadius = 2.0;

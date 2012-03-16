@@ -13,13 +13,11 @@
 
 @synthesize action = action_;
 @synthesize name = name_;
-@synthesize icon = icon_;
 @synthesize sources = sources_;
 
 - (void)dealloc {
   self.action = nil;
   self.name = nil;
-  self.icon = nil;
   self.sources = nil;
   
   [super dealloc];
@@ -31,7 +29,6 @@
   [mapping mapAttributes:
    @"action",
    @"name",
-   @"icon",
    nil];
   
   [mapping mapRelationship:@"sources" withMapping:[STSimpleSource mapping]];

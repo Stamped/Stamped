@@ -28,9 +28,32 @@ NSString* const kOAuthCallbackURL = @"http://www.example.com/oauth_callback";
 NSString* const kTwitterScope = @"http://www.example.com/oauth_scope";
 NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
+
 @interface Util ()
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened;
 @end
+
+@interface STUtilButton : UIButton
+
+@property (nonatomic, assign) id target;
+@property (nonatomic, assign) SEL selector; 
+@property (nonatomic, retain) id state;
+
+- (void)callback:(id)view;
+
+@end
+
+@interface STPopUpView : UIView
+
+@property (nonatomic, retain) UIView* button;
+@property (nonatomic, retain) UIView* view;
+
+- (id)initWithFrame:(CGRect)frame view:(UIView*)view dismissible:(BOOL)dismissible andColor:(UIColor*)color;
+- (void)buttonCallback:(id)state;
+
+@end
+
+static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
 
@@ -371,11 +394,86 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
   return CGRectMake(frame.origin.x + delta_w / 2, frame.origin.y + delta_h / 2, size.width, size.height);
 }
 
-+ (UIView*)tapViewWithFrame:(CGRect)frame delegate:(id)delegate andSelector:(SEL)selector {
-  UIButton* button = [[[UIButton alloc] initWithFrame:frame] autorelease];
-  [button addTarget:delegate action:selector forControlEvents:UIControlEventTouchUpInside];
++ (CGSize)size:(CGSize)size withScale:(CGFloat)scale {
+  size.width /= scale;
+  size.height /= scale;
+  return size;
+}
+
++ (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message {
+  STUtilButton* button = [[[STUtilButton alloc] initWithFrame:frame] autorelease];
+  button.selector = selector;
+  button.target = target;
+  button.state = message;
+  [button addTarget:button action:@selector(callback:) forControlEvents:UIControlEventTouchUpInside];
   button.backgroundColor = [UIColor clearColor];
   return button;
+}
+
++ (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color {
+  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  STPopUpView* cur = _currentPopUp;
+  if (cur) {
+    [cur removeFromSuperview];
+    [cur release];
+  }
+  if (view) {
+    STPopUpView* popup = [[[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color] autorelease];
+    [window addSubview:popup];
+    _currentPopUp = [popup retain];
+  }
+  else {
+    _currentPopUp = nil;
+  }
+}
+
++ (CGFloat)imageScale {
+  return 2.0;
+}
+
+@end
+
+@implementation STPopUpView
+
+@synthesize button = button_;
+@synthesize view = view_;
+
+- (id)initWithFrame:(CGRect)frame view:(UIView*)view dismissible:(BOOL)dismissible andColor:(UIColor*)color {
+  self = [super initWithFrame:frame];
+  if (self) {
+    self.backgroundColor = color;
+    UIView* button = [Util tapViewWithFrame:frame target:self selector:@selector(buttonCallback:) andMessage:nil];
+    [self addSubview:button];
+    [self addSubview:view];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  self.button = nil;
+  self.view = nil;
+  [super dealloc];
+}
+
+-(void)buttonCallback:(id)state {
+  [Util setFullScreenPopUp:nil dismissible:NO withBackground:nil];
+}
+
+@end
+
+@implementation STUtilButton
+
+@synthesize target = target_;
+@synthesize selector = selector_;
+@synthesize state = state_;
+
+- (void)dealloc {
+  self.state = nil;
+  [super dealloc];
+}
+
+- (void)callback:(id)view {
+  [self.target performSelector:self.selector withObject:self.state];
 }
 
 @end

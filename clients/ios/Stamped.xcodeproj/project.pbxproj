@@ -76,6 +76,12 @@
 		6386EF2C1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
 		6386EF2D1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
 		6386EF2E1511504C0019F1DC /* UIFont+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF2B151150420019F1DC /* UIFont+Stamped.m */; };
+		6386EF321513C33C0019F1DC /* STActionMenuFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF311513C3390019F1DC /* STActionMenuFactory.m */; };
+		6386EF331513C33C0019F1DC /* STActionMenuFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF311513C3390019F1DC /* STActionMenuFactory.m */; };
+		6386EF341513C33C0019F1DC /* STActionMenuFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF311513C3390019F1DC /* STActionMenuFactory.m */; };
+		6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
+		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
+		6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1789,6 +1795,11 @@
 		6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Stamped.h"; sourceTree = "<group>"; };
 		6386EF2B151150420019F1DC /* UIFont+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Stamped.m"; sourceTree = "<group>"; };
 		6386EF2F151278610019F1DC /* STAsyncConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAsyncConfig.h; sourceTree = "<group>"; };
+		6386EF301513C3360019F1DC /* STActionMenuFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionMenuFactory.h; sourceTree = "<group>"; };
+		6386EF311513C3390019F1DC /* STActionMenuFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionMenuFactory.m; sourceTree = "<group>"; };
+		6386EF351513E2740019F1DC /* STActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionItem.h; sourceTree = "<group>"; };
+		6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActionItem.h; sourceTree = "<group>"; };
+		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2874,6 +2885,10 @@
 				6386EF18151129800019F1DC /* STMetadataViewFactory.m */,
 				6386EF1D1511376F0019F1DC /* STViewContainer.h */,
 				6386EF1E151137710019F1DC /* STViewContainer.m */,
+				6386EF301513C3360019F1DC /* STActionMenuFactory.h */,
+				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
+				6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */,
+				6386EF371513E2D20019F1DC /* STSimpleActionItem.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2893,6 +2908,7 @@
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
 				6386EF1C1511371F0019F1DC /* STResizeDelegate.h */,
 				6386EF2F151278610019F1DC /* STAsyncConfig.h */,
+				6386EF351513E2740019F1DC /* STActionItem.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6047,6 +6063,8 @@
 				6386EF1A151129820019F1DC /* STMetadataViewFactory.m in Sources */,
 				6386EF20151137730019F1DC /* STViewContainer.m in Sources */,
 				6386EF2D1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
+				6386EF331513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
+				6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6212,6 +6230,8 @@
 				6386EF19151129820019F1DC /* STMetadataViewFactory.m in Sources */,
 				6386EF1F151137730019F1DC /* STViewContainer.m in Sources */,
 				6386EF2C1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
+				6386EF321513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
+				6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6236,6 +6256,8 @@
 				6386EF1B151129820019F1DC /* STMetadataViewFactory.m in Sources */,
 				6386EF21151137730019F1DC /* STViewContainer.m in Sources */,
 				6386EF2E1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
+				6386EF341513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
+				6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6474,8 +6496,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6494,8 +6516,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "D578280E-EB1A-4501-AB8D-F486F490E724";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D578280E-EB1A-4501-AB8D-F486F490E724";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6602,8 +6624,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6623,8 +6645,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8D4BDC16-91EE-4F39-A815-CE05369F3360";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6644,8 +6666,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6664,8 +6686,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

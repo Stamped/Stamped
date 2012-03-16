@@ -14,7 +14,6 @@
 
 @property (nonatomic, readwrite, retain) NSString* action;
 @property (nonatomic, readwrite, retain) NSString* name;
-@property (nonatomic, readwrite, retain) NSString* icon;
 @property (nonatomic, readwrite, retain) NSArray<STSource>* sources;
 
 + (RKObjectMapping*)mapping;

@@ -16,6 +16,7 @@
 @property (nonatomic, readwrite, retain) NSString* value;
 @property (nonatomic, readwrite, retain) NSString* icon;
 @property (nonatomic, readwrite, retain) NSString* link;
+@property (nonatomic, readwrite, retain) id<STAction> action;
 
 + (RKObjectMapping*)mapping;
 

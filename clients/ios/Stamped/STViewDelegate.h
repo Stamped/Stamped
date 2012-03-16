@@ -14,7 +14,8 @@
 
 @protocol STViewDelegate <STFactoryDelegate, STResizeDelegate>
 
-- (void)view:(UIView*)view didChooseAction:(id<STAction>)action;
+- (void)didChooseAction:(id<STAction>)action;
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 
 @property (nonatomic, readonly) NSOperationQueue* asyncQueue;
 

@@ -13,7 +13,6 @@
 
 @property (nonatomic, readonly, retain) NSString* action;
 @property (nonatomic, readonly, retain) NSString* name;
-@property (nonatomic, readonly, retain) NSString* icon;
 @property (nonatomic, readonly, retain) NSArray<STSource>* sources;
 
 @end

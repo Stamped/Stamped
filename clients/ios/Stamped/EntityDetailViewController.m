@@ -33,6 +33,7 @@
 #import "STMetadataViewFactory.h"
 #import "STGalleryViewFactory.h"
 #import "STActionsViewFactory.h"
+#import "STActionMenuFactory.h"
 #import <QuartzCore/QuartzCore.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
@@ -58,6 +59,8 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)setupSectionViews;
 - (void)addSelfAsFavorite;
 - (void)dismissSelf;
+
+- (void)handleSource:(id<STSource>)source withAction:(NSString*)action;
 @end
 
 @implementation EntityDetailViewController
@@ -657,7 +660,6 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)addNewSection:(UIView*)section {
   CGSize content = self.scrollView.contentSize;
-  NSLog(@"%fx%f",content.width,content.height);
   CGRect sectionFrame = section.frame;
   sectionFrame.origin.y = content.height;
   section.frame = sectionFrame;
@@ -883,7 +885,6 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (IBAction)mainActionButtonPressed:(id)sender {}
 
 - (void)didLoad:(id)object withLabel:(id)label {
-  NSLog(@"loadeded: %@",label);
   if ([label isEqualToString:@"entityDetail"]) {
     if (object) {
       id<STEntityDetail> detail = object;
@@ -929,14 +930,7 @@ static const CGFloat kTodoBarHeight = 44.0;
           if (view) {
             UIView* galleryView = view;
             [selfRef addNewSection:galleryView];
-            NSLog(@"added %fx%f",galleryView.frame.size.width,galleryView.frame.size.height);
           }
-          else {
-            NSLog(@"Gallery Load failed!");
-          }
-        }
-        else {
-          NSLog(@"Gallery Load failed2!");
         }
       }
     }];
@@ -971,12 +965,37 @@ static const CGFloat kTodoBarHeight = 44.0;
   }];
 }
 
-- (void)view:(UIView*)view didChooseAction:(id<STAction>)action {
-  
+- (void)didChooseAction:(id<STAction>)action {
+  if (action.sources && [action.sources count] > 1) {
+    STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
+    NSOperation* operation = [factory createWithAction:action forBlock:^(STViewCreator init) {
+      if (init) {
+        UIView* view = init(self);
+        view.frame = [Util centeredAndBounded:view.frame.size inFrame:[[UIApplication sharedApplication] keyWindow].frame];
+        [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.3]];
+      }
+    }];
+    [self.operationQueue addOperation:operation];
+  }
+  if (action.sources && [action.sources count] == 1) {
+    [self handleSource:[action.sources objectAtIndex:0] withAction:action.action];
+  }
 }
 
 - (NSOperationQueue*)asyncQueue {
   return operationQueue_;
+}
+
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
+  [Util setFullScreenPopUp:nil dismissible:NO withBackground:nil];
+  [self handleSource:source withAction:action];
+}
+
+- (void)handleSource:(id<STSource>)source withAction:(NSString*)action {
+  NSLog(@"Source: %@",source.link);
+  if (source.link) {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:source.link]];
+  }
 }
 
 @end
