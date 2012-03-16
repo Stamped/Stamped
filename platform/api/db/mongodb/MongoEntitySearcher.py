@@ -588,7 +588,15 @@ class MongoEntitySearcher(EntitySearcher):
             
             for result in value:
                 #utils.log(result[0].entity_id)
-                _add_result(result)
+
+                setFields(result[0])
+                
+                # apply category filter to results
+                if category_filter is not None:
+                    if result[0].category == category_filter:
+                        _add_result(result)
+                else:
+                    _add_result(result)
         
         # aggregate all third-party results
         for key, value in wrapper.iteritems():
@@ -1008,7 +1016,7 @@ class MongoEntitySearcher(EntitySearcher):
     
     def _get_entity_query(self, query):
         #return {"title": {"$regex": query, "$options": "i"}}
-        return {"titlel": {"$regex": query }}
+        return {"titlel": {"$regex": query }, "sources.userGenerated": {'$exists': False}}
     
     @lru_cache(maxsize=64)
     def _find_entity(self, input_query, query, lat, lng, prefix):
