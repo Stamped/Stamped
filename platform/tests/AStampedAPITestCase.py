@@ -15,7 +15,7 @@ from StampedTestUtils import *
 DEFAULT_CLIENT_ID       = "stampedtest"
 CLIENT_SECRETS  = {
     'stampedtest': 'august1ftw',
-    'ios8': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+    'iphone8': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
 }
 
 TWITTER_KEY     = "322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U"

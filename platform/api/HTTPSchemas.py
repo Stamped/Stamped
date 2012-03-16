@@ -494,12 +494,16 @@ class HTTPEntity(Schema):
         self.related            = HTTPEntityRelated()
 
 
-    def _addAction(self, action, name, sources, **kwargs):
+    def _addAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
-            item = HTTPEntityAction()
-            item.action = action
-            item.name = name
-            item.sources = sources
+            action          = HTTPAction()
+            action.type     = actionType
+            action.sources  = sources
+            action.name     = name
+
+            item            = HTTPEntityAction()
+            item.action     = action
+            item.name       = name
 
             if 'icon' in kwargs:
                 item.icon = kwargs['icon']
@@ -518,14 +522,24 @@ class HTTPEntity(Schema):
             if 'icon' in kwargs:
                 item.icon = kwargs['icon']
 
-            if 'link' in kwargs:
-                item.link = kwargs['link']
-
             if 'extended' in kwargs:
                 item.extended = kwargs['extended']
 
             if 'optional' in kwargs:
                 item.optional = kwargs['optional']
+
+            if 'link' in kwargs:
+                actionSource = HTTPActionSource()
+                actionSource.link = kwargs['link']
+                actionSource.name = 'View link'
+                actionSource.source = 'link'
+
+                action = HTTPAction()
+                action.type = 'link'
+                action.name = 'View link'
+                action.sources.append(actionSource)
+
+                item.action = action
 
             self.metadata.append(item)
     
@@ -589,7 +603,6 @@ class HTTPEntity(Schema):
                     self.caption = address 
 
                 # Metadata
-
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
                 self._addMetadata('Cuisine', schema.cuisine)
                 self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
@@ -601,7 +614,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.opentable_id is not None or schema.sources.opentable_nickname is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Reserve on OpenTable'
                     source.source       = 'opentable'
                     source.source_id    = schema.sources.opentable_id
@@ -617,7 +630,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.contact.phone is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.source       = 'phone'
                     source.source_id    = schema.contact.phone
                     sources.append(source)
@@ -630,7 +643,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.menu is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'View menu'
                     source.source       = 'menu'
                     source.source_id    = schema.entity_id
@@ -658,7 +671,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.amazon_underlying is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Buy from Amazon'
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
@@ -696,7 +709,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Watch on iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
@@ -712,7 +725,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.fandango.fid is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Buy from Fandango'
                     source.source       = 'fandango'
                     source.source_id    = schema.sources.fandango.fid
@@ -740,7 +753,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.amazon_underlying is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Buy from Amazon'
                     source.source       = 'amazon'
                     source.source_id    = schema.sources.amazon_underlying
@@ -784,7 +797,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Listen on iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
@@ -792,7 +805,7 @@ class HTTPEntity(Schema):
                     sources.append(source)
 
                 if schema.sources.rdio_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Listen on Rdio'
                     source.source       = 'rdio'
                     source.source_id    = schema.sources.rdio_id
@@ -800,7 +813,7 @@ class HTTPEntity(Schema):
                     sources.append(source)
 
                 if schema.sources.spotify_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Listn on Spotify'
                     source.source       = 'spotify'
                     source.source_id    = schema.sources.spotify_id
@@ -823,14 +836,14 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.rdio_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Add to playlist on Rdio'
                     source.source       = 'rdio'
                     source.source_id    = schema.sources.rdio_id
                     sources.append(source)
 
                 if schema.sources.spotify_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Add to playlist on Spotify'
                     source.source       = 'spotify'
                     source.source_id    = schema.sources.spotify_id
@@ -848,7 +861,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
@@ -896,7 +909,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.sources.itunes_id is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
@@ -905,7 +918,7 @@ class HTTPEntity(Schema):
                     sources.append(source)
                 ### TEMP - apple.aid should be deprecated
                 elif schema.sources.apple.aid is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.name         = 'Download from iTunes'
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.apple.aid
@@ -944,7 +957,7 @@ class HTTPEntity(Schema):
                 sources = []
 
                 if schema.contact.phone is not None:
-                    source              = HTTPEntitySource()
+                    source              = HTTPActionSource()
                     source.source       = 'phone'
                     source.source_id    = schema.contact.phone
                     sources.append(source)
@@ -989,29 +1002,33 @@ class HTTPEntity(Schema):
 
 # HTTPEntity Components
 
-class HTTPEntitySource(Schema):
+class HTTPAction(Schema):
+    def setSchema(self):
+        self.type               = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
+        self.sources            = SchemaList(HTTPActionSource(), required=True)
+
+class HTTPActionSource(Schema):
     def setSchema(self):
         self.name               = SchemaElement(basestring, required=True)
         self.source             = SchemaElement(basestring, required=True)
         self.source_id          = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
-        self.link               = SchemaElement(basestring)
         self.endpoint           = SchemaElement(basestring)
+        self.link               = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
-        self.action             = SchemaElement(basestring, required=True)
+        self.action             = HTTPAction(required=True)
         self.name               = SchemaElement(basestring, required=True)
-        self.sources            = SchemaList(HTTPEntitySource(), required=True)
         self.icon               = SchemaElement(basestring)
 
 class HTTPEntityMetadataItem(Schema):
     def setSchema(self):
         self.name               = SchemaElement(basestring, required=True)
         self.value              = SchemaElement(basestring, required=True)
-        self.key                = SchemaElement(basestring) 
-        self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
+        self.key                = SchemaElement(basestring)
+        self.action             = HTTPAction()
         self.icon               = SchemaElement(basestring)
         self.extended           = SchemaElement(bool)
         self.optional           = SchemaElement(bool)
@@ -1024,8 +1041,7 @@ class HTTPEntityGallery(Schema):
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
         self.image              = SchemaElement(basestring, required=True)
-        self.link               = SchemaElement(basestring)
-        self.link_type          = SchemaElement(basestring)
+        self.action             = HTTPAction()
         self.caption            = SchemaElement(basestring)
         self.height             = SchemaElement(int)
         self.width              = SchemaElement(int)
@@ -1039,10 +1055,9 @@ class HTTPEntityPlaylist(Schema):
 class HTTPEntityPlaylistItem(Schema):
     def setSchema(self):
         self.name               = SchemaElement(basestring, required=True)
-        self.sources            = SchemaList(HTTPEntitySource(), required=True)
+        self.action             = HTTPAction()
         self.num                = SchemaElement(int)
         self.length             = SchemaElement(int)
-        self.link               = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
 
 class HTTPEntityStampedBy(Schema):
