@@ -961,7 +961,7 @@ class MongoEntitySearcher(EntitySearcher):
         else:
             value = -math.log10(1 - value)
         
-        return value
+        return max(value, 0)
     
     def _is_possible_location_query(self, category_filter, subcategory_filter, local, prefix):
         if prefix:
