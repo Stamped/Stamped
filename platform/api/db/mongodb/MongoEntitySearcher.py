@@ -828,7 +828,7 @@ class MongoEntitySearcher(EntitySearcher):
                 pprint(data)
                 print
                 """
-                
+
                 return aggregate_value
             except:
                 utils.printException()
@@ -1052,7 +1052,7 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 if coords is not None and e.lat is not None and e.lng is not None:
                     distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
-                    distance = -distance * earthRadius
+                    distance = abs(distance * earthRadius)
                 
                 #assert e.entity_id is not None
                 output.append((e, distance))
