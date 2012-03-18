@@ -11,6 +11,7 @@ from match.EntityMatcher    import EntityMatcher
 from AEntitySink            import AEntitySink
 from Schemas                import Entity
 from pprint                 import pprint
+from MongoStampedAPI        import MongoStampedAPI
 
 from match.EntityMatcher import EntityMatcher
 
