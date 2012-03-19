@@ -20,6 +20,7 @@ try:
     from gevent.pool                import Pool
     import logs
     from Resolver                   import *
+    from pprint                     import pformat
 except:
     report()
     raise

@@ -86,6 +86,10 @@ class GenericSource(BasicSource):
     def idField(self):
         return "%s_id" % self.sourceName
 
+    @property
+    def urlField(self):
+        return "%s_url" % self.sourceName
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
@@ -96,6 +100,8 @@ class GenericSource(BasicSource):
                     best = results[0]
                     if best[0]['resolved']:
                         entity[self.idField] = best[1].key
+                        if self.urlField is not None and best[1].url is not None:
+                            entity[self.urlField] = best[1].url
             except ValueError:
                 pass
         return True

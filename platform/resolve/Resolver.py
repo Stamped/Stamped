@@ -259,6 +259,10 @@ class ResolverObject(object):
     def description(self):
         return ''
 
+    @property 
+    def url(self):
+        return None
+
 #
 # Artist
 #

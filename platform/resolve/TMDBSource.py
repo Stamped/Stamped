@@ -95,6 +95,13 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
         return self.info['title']
 
     @lazyProperty
+    def imdb(self):
+        try:
+            return self.info['imdb_id']
+        except KeyError:
+            return None
+
+    @lazyProperty
     def cast(self):
         return [
             {
@@ -156,6 +163,7 @@ class TMDBSource(GenericSource):
             'desc',
             'short_description',
             'genre',
+            'imdb',
         )
         self.__max_cast = 6
 
@@ -234,7 +242,7 @@ class TMDBSource(GenericSource):
                         
                 except Exception:
                     pass
-                info = self.__tmdb.movie_info(tmdb_id)
+                info = movie.info
                 if 'tagline' in info:
                     tagline = info['tagline']
                     if tagline is not None and tagline != '':
@@ -243,6 +251,9 @@ class TMDBSource(GenericSource):
                     overview = info['overview']
                     if overview is not None and overview != '':
                         entity['desc'] = overview
+
+                if movie.imdb is not None:
+                    entity['imdb_id'] = movie.imdb;
                 if len(movie.genres) > 0:
                     entity['genre'] = movie.genres[0]
 

@@ -805,6 +805,7 @@ class HTTPEntity(Schema):
                     source.source       = 'itunes'
                     source.source_id    = schema.sources.itunes_id
                     source.icon         = self._getIconURL('src_itunes', client=client)
+                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
                     sources.append(source)
 
                 if schema.sources.rdio_id is not None:

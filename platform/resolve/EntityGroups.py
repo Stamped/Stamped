@@ -99,6 +99,7 @@ class OpenTableGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'opentable')
         self.addField(['opentable_id'])
+        self.addField(['opentable_url'])
 
 class OpenTableNicknameGroup(APlaceGroup):
 
@@ -111,6 +112,7 @@ class SinglePlatformGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'singleplatform')
         self.addField(['singleplatform_id'])
+        self.addField(['singleplatform_url'])
 
 class GooglePlacesGroup(APlaceGroup):
 
@@ -123,12 +125,14 @@ class TMDBGroup(AMovieGroup):
     def __init__(self):
         AMovieGroup.__init__(self, 'tmdb')
         self.addField(['tmdb_id'])
+        self.addField(['tmdb_url'])
 
 class RdioGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
         ASubcategoryGroup.__init__(self, 'rdio')
         self.addField(['rdio_id'])
+        self.addField(['rdio_url'])
         self.addEligible('song')
         self.addEligible('artist')
         self.addEligible('album')
@@ -138,6 +142,7 @@ class SpotifyGroup(ASubcategoryGroup):
     def __init__(self, *args, **kwargs):
         ASubcategoryGroup.__init__(self, 'spotify')
         self.addField(['spotify_id'])
+        self.addField(['spotify_url'])
         self.addEligible('song')
         self.addEligible('artist')
         self.addEligible('album')
@@ -282,6 +287,14 @@ class AlbumNameGroup(ASubcategoryGroup):
         self.addEligible('song')
 
 
+class IMDBGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'imdb')
+        self.addField(['imdb_id'])
+        self.addEligible('tv')
+        self.addEligible('movie')
+
 class AAmazonGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
@@ -295,6 +308,7 @@ class AmazonGroup(AAmazonGroup):
     def __init__(self):
         AAmazonGroup.__init__(self, 'amazon')
         self.addField(['amazon_id'])
+        self.addField(['amazon_url'])
 
 
 class AmazonLinkGroup(AAmazonGroup):

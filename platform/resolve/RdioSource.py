@@ -71,6 +71,10 @@ class _RdioObject(object):
     def key(self):
         return self.data['key']
 
+    @lazyProperty
+    def url(self):
+        return self.data['url']
+
     @property 
     def source(self):
         return "rdio"

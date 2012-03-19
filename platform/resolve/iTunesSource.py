@@ -80,7 +80,7 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     @lazyProperty
     def url(self):
         try:
-            return self.data['artistViewUrl']
+            return self.data['artistLinkUrl']
         except Exception:
             return None
 
@@ -430,8 +430,6 @@ class iTunesSource(GenericSource):
                 obj = track
                 if len(track.genres) > 0:
                     entity['genre'] = track.genres[0]
-            if obj is not None and obj.url is not None:
-                entity['itunes_url'] = obj.url
         return True
 
     def matchSource(self, query):

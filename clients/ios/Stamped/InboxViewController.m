@@ -387,7 +387,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadStampsFromNetwork];

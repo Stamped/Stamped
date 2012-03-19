@@ -791,6 +791,8 @@ class VideoSchema(Schema):
         self.v_hd_rental_price  = SchemaElement(basestring)
         
         self.imdb_id            = SchemaElement(basestring)
+        self.imdb_source        = SchemaElement(basestring)
+        self.imdb_timestamp     = SchemaElement(datetime)
 
 class CastEntrySchema(Schema):
     def setSchema(self):
@@ -917,6 +919,7 @@ class EntitySourcesSchema(Schema):
         self.tmdb               = TMDBSchema()
 
         self.spotify_id         = SchemaElement(basestring)
+        self.spotify_url        = SchemaElement(basestring)
         self.spotify_timestamp  = SchemaElement(datetime)
         self.spotify_source     = SchemaElement(basestring)
 
@@ -926,14 +929,17 @@ class EntitySourcesSchema(Schema):
         self.itunes_source      = SchemaElement(basestring)
 
         self.rdio_id            = SchemaElement(basestring)
+        self.rdio_url           = SchemaElement(basestring)
         self.rdio_timestamp     = SchemaElement(datetime)
         self.rdio_source        = SchemaElement(basestring)
         
         self.amazon_id          = SchemaElement(basestring)
+        self.amazon_url         = SchemaElement(basestring)
         self.amazon_source      = SchemaElement(basestring)
         self.amazon_timestamp   = SchemaElement(datetime)
         
         self.opentable_id       = SchemaElement(basestring)
+        self.opentable_url      = SchemaElement(basestring)
         self.opentable_source   = SchemaElement(basestring)
         self.opentable_timestamp = SchemaElement(datetime)
 
@@ -992,6 +998,7 @@ class GooglePlacesSchema(Schema):
 class TMDBSchema(Schema):
     def setSchema(self):
         self.tmdb_id            = SchemaElement(basestring)
+        self.tmdb_url           = SchemaElement(basestring)
         self.tmdb_source        = SchemaElement(basestring)
         self.tmdb_timestamp     = SchemaElement(datetime)
 
@@ -1019,6 +1026,7 @@ class FactualSchema(Schema):
 class SinglePlatformSchema(Schema):
     def setSchema(self):
         self.singleplatform_id  = SchemaElement(basestring)
+        self.singleplatform_url = SchemaElement(basestring)
         self.singleplatform_timestamp  = SchemaElement(datetime)
         self.singleplatform_source = SchemaElement(basestring)
 

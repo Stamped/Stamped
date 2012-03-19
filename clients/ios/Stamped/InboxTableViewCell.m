@@ -104,6 +104,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize subtitleLabel = subtitleLabel_;
 @synthesize typeImageView = typeImageView_;
 
+
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
@@ -352,6 +353,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)setTitle:(NSString*)title {
+
   if (title_ != title) {
     [title_ release];
     title_ = [title copy];
