@@ -519,6 +519,8 @@ class StampedAPI(AStampedAPI):
                 if login.lower() not in Blacklist.screen_names:
                     valid = True
                     user = self._accountDB.getAccountByScreenName(login)
+                else:
+                    logs.info('Blacklisted login: %s' % login)
             else:
                 raise
             return user

@@ -32,7 +32,6 @@ screen_names = set([
     '402',
     '401',
     '400',
-    'test',
     'root',
     'admin',
     'guest',

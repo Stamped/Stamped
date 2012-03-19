@@ -66,7 +66,6 @@ class _TMDBObject(object):
         return pformat( self.info )
 
 
-#TODO finish
 class TMDBMovie(_TMDBObject, ResolverMovie):
     """
     TMDB movie wrapper

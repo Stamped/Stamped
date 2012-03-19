@@ -331,7 +331,7 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'title' : query.name,
+                    'titlel' : query.name.lower(),
                 }
                 yield {
                     'mangled_title' : trackSimplify( query.name ),
@@ -350,7 +350,7 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'title' : query.name,
+                    'titlel' : query.name.lower(),
                 }
                 yield {
                     'mangled_title' : albumSimplify( query.name ),
@@ -372,7 +372,7 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'title' : query.name,
+                    'titlel' : query.name.lower(),
                 }
                 yield {
                     'mangled_title' : artistSimplify( query.name ),
@@ -397,7 +397,7 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'title' : query.name,
+                    'titlel' : query.name.lower(),
                 }
                 yield {
                     'mangled_title' : movieSimplify( query.name ),
@@ -410,7 +410,7 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'title' : query.name,
+                    'titlel' : query.name.lower(),
                 }
                 yield {
                     'mangled_title' : bookSimplify( query.name ),
