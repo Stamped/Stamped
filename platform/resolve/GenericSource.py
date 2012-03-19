@@ -50,8 +50,8 @@ class GenericSource(BasicSource):
     def emptySource(self, start, count):
         return []
 
-    def resolve(self, query):
-        return self.resolver.resolve(query, self.matchSource(query))
+    def resolve(self, query, **options):
+        return self.resolver.resolve(query, self.matchSource(query), **options)
 
     def generatorSource(self, generator, constructor=None, unique=False):
         if constructor is None:
