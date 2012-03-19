@@ -134,9 +134,7 @@ def customize_stamp(request):
 @require_http_methods(["POST"])
 def check(request):
     client_id   = checkClient(request)
-    logs.info('SO FAR SO GOOD')
     schema      = parseRequest(HTTPAccountCheck(), request)
-    logs.info('REALL GOOD')
 
     try:
         user    = stampedAPI.checkAccount(schema.login)
@@ -155,7 +153,6 @@ def check(request):
         response.status_code = 404
         return response
     except Exception:
-        logs.report()
         response = HttpResponse("invalid_request")
         response.status_code = 400
         return response
