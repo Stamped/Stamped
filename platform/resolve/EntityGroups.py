@@ -127,6 +127,13 @@ class TMDBGroup(AMovieGroup):
         self.addField(['tmdb_id'])
         self.addField(['tmdb_url'])
 
+class FandangoGroup(AMovieGroup):
+
+    def __init__(self):
+        AMovieGroup.__init__(self, 'fandango')
+        self.addField(['fandango_id'])
+        self.addField(['fandango_url'])
+
 class RdioGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):

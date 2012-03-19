@@ -476,21 +476,21 @@ class ResolverMovie(ResolverObject):
     rating - a string indicating the MPAA rating of the movie or '' for unknown
     genres - a list of genre strings
     """
-    @abstractproperty
+    @property
     def cast(self):
-        pass
+        return []
 
-    @abstractproperty
+    @property
     def director(self):
-        pass
+        return {'name':''}
 
-    @abstractproperty
+    @property
     def date(self):
-        pass
+        return None
 
-    @abstractproperty
+    @property
     def length(self):
-        pass
+        return -1
 
     @property
     def rating(self):
