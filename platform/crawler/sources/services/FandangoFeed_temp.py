@@ -1,4 +1,8 @@
+
+import Globals
 import feedparser, re, datetime
+
+from resolve.FullResolveContainer import FullResolveContainer
 
 feeds = [
     'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839&a=12170', 
@@ -6,7 +10,9 @@ feeds = [
     'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=5348839&a=12168', 
 ]
 
-for url in feeds:
+enricher = FullResolveContainer()
+
+for url in feeds[:1]:
     data = feedparser.parse(url)
     print '\n\n%s\n%s' % ('='*40, data['feed']['title'])
     
@@ -17,7 +23,7 @@ for url in feeds:
     genre_re    = re.compile('Genres:(.*)$')
     length_re   = re.compile('([0-9]+) *hr. *([0-9]+) min.')
     
-    for entry in data.entries:
+    for entry in data.entries[:3]:
         if entry.title == 'More Movies':
             continue
         
@@ -51,5 +57,49 @@ for url in feeds:
         print '  TITLE:     %s' % title
         print '  ID:        %s_%s' % (id_num, id_title)
         print '  RELEASED:  %s' % release_date
+        
+        entity = Entity()
+        entity.subcategory = 'movie'
+        entity.title = title
+        entity.release_date = release_date
+        
+        modified = enricher.enrichEntity(entity,{})
+        print modified
+        print entity.value
 
 
+
+
+"""
+fandango_id = 12345
+title = '21 Jump Street'
+release_date = parseDateString('2012-03-12')
+
+
+movie = FandangoMovie(fandango_id, title,release_date)
+resolver = Resolver()
+resolvedMovie = None
+
+sources = [TMDBSource(), iTunesSource(), AmazonSource(), StampedSource()]
+for source in sources:
+    gen = source.matchSource(movie)
+    results = resolver.resolve(movie, gen)
+
+    if len(results) > 0:
+        similarities, best = results[0]
+        if similarities['resolved']:
+            resolvedMovie = best
+            break
+
+if resolvedMovie is not None:
+    source = resolvedMovie.source
+    if source == 'stamped':
+        stampedSource = StampedSource()
+        results = resolver.resolve(resolvedMovie, stampedSource(resolvedMovie))
+        try:
+            result = results[0]
+            if result[0]['resolved']:
+                entity_id = result[1].key
+        except Exception:
+            pass
+            """

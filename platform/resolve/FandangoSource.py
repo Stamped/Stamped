@@ -72,6 +72,13 @@ class FandangoMovie(_FandangoObject, ResolverMovie):
         return self.__date
 
 
+class FandangoSource(GenericSource):
+    def __init__(self):
+        GenericSource.__init__(self, 'fandango',
+            'release_date',
+        )
+
+
 def testFandango(fandango_id, title, release_date):
     import resolve.StampedSource
     stamped_source = resolve.StampedSource.StampedSource()

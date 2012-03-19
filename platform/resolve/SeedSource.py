@@ -46,6 +46,7 @@ class SeedSource(BasicSource):
             'author',
             'publisher',
             'isbn',
+            'release_date',
         ]
         for group in self.__simple_groups:
             self.addGroup(group)

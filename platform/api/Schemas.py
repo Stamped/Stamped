@@ -923,38 +923,43 @@ class TMDBSchema(Schema):
 class EntitySourcesSchema(Schema):
     def setSchema(self):
         #new resolve fields
-        self.singleplatform     = SinglePlatformSchema()
-        self.factual            = FactualSchema()
-        self.tmdb               = TMDBSchema()
+        self.singleplatform         = SinglePlatformSchema()
+        self.factual                = FactualSchema()
+        self.tmdb                   = TMDBSchema()
 
-        self.spotify_id         = SchemaElement(basestring)
-        self.spotify_url        = SchemaElement(basestring)
-        self.spotify_timestamp  = SchemaElement(datetime)
-        self.spotify_source     = SchemaElement(basestring)
+        self.spotify_id             = SchemaElement(basestring)
+        self.spotify_url            = SchemaElement(basestring)
+        self.spotify_timestamp      = SchemaElement(datetime)
+        self.spotify_source         = SchemaElement(basestring)
 
-        self.itunes_id          = SchemaElement(basestring)
-        self.itunes_url         = SchemaElement(basestring)
-        self.itunes_timestamp   = SchemaElement(datetime)
-        self.itunes_source      = SchemaElement(basestring)
+        self.itunes_id              = SchemaElement(basestring)
+        self.itunes_url             = SchemaElement(basestring)
+        self.itunes_timestamp       = SchemaElement(datetime)
+        self.itunes_source          = SchemaElement(basestring)
 
-        self.rdio_id            = SchemaElement(basestring)
-        self.rdio_url           = SchemaElement(basestring)
-        self.rdio_timestamp     = SchemaElement(datetime)
-        self.rdio_source        = SchemaElement(basestring)
+        self.rdio_id                = SchemaElement(basestring)
+        self.rdio_url               = SchemaElement(basestring)
+        self.rdio_timestamp         = SchemaElement(datetime)
+        self.rdio_source            = SchemaElement(basestring)
         
-        self.amazon_id          = SchemaElement(basestring)
-        self.amazon_url         = SchemaElement(basestring)
-        self.amazon_source      = SchemaElement(basestring)
-        self.amazon_timestamp   = SchemaElement(datetime)
+        self.amazon_id              = SchemaElement(basestring)
+        self.amazon_url             = SchemaElement(basestring)
+        self.amazon_source          = SchemaElement(basestring)
+        self.amazon_timestamp       = SchemaElement(datetime)
         
-        self.opentable_id       = SchemaElement(basestring)
-        self.opentable_url      = SchemaElement(basestring)
-        self.opentable_source   = SchemaElement(basestring)
-        self.opentable_timestamp = SchemaElement(datetime)
+        self.opentable_id           = SchemaElement(basestring)
+        self.opentable_url          = SchemaElement(basestring)
+        self.opentable_source       = SchemaElement(basestring)
+        self.opentable_timestamp    = SchemaElement(datetime)
 
-        self.opentable_nickname       = SchemaElement(basestring)
-        self.opentable_nickname_source   = SchemaElement(basestring)
+        self.opentable_nickname         = SchemaElement(basestring)
+        self.opentable_nickname_source  = SchemaElement(basestring)
         self.opentable_nickname_timestamp= SchemaElement(datetime)
+        
+        self.fandango_id            = SchemaElement(basestring)
+        self.fandango_url           = SchemaElement(basestring)
+        self.fandango_source        = SchemaElement(basestring)
+        self.fandango_timestamp     = SchemaElement(datetime)
 
         # TODO: remove these three lines -- temporary workaround!
         # (and the TMDBSchema and RdioSchema above)
