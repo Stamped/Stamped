@@ -120,6 +120,9 @@ def _encodeAmazonURL(raw_url):
         logs.warning('Unable to encode Amazon URL: %s' % raw_url)
         return raw_url
 
+def _encodeFandangoURL(raw_url):
+    return "http://www.qksrv.net/click-5348839-10576761?url=%s" % urllib.quote_plus(raw_url)
+
 def _buildAmazonURL(amazonId):
     return "http://www.amazon.com/dp/%s?tag=%s" % (amazonId, AMAZON_TOKEN)
 

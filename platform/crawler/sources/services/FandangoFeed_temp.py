@@ -1,8 +1,10 @@
 
 import Globals
-import feedparser, re, datetime
+import feedparser, re
 
+from datetime import *
 from resolve.FullResolveContainer import FullResolveContainer
+from Schemas import *
 
 feeds = [
     'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839&a=12170', 
@@ -52,7 +54,7 @@ for url in feeds[:1]:
         if len(release_date_match) == 2:
             month, day, year = map(lambda x: int(x), release_date_match[-1].split('/'))
             if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:
-                release_date = datetime.datetime(year, month, day)
+                release_date = datetime(year, month, day)
         
         print '  TITLE:     %s' % title
         print '  ID:        %s_%s' % (id_num, id_title)
@@ -62,12 +64,14 @@ for url in feeds[:1]:
         entity.subcategory = 'movie'
         entity.title = title
         entity.release_date = release_date
+        entity.fandango_id  = id_num
+        entity.fandango_url = 'http://www.fandango.com/%s_%s/movieoverview' % (id_title, id_num)
+        entity.fandango_source = 'fandango'
+        entity.fandango_timestamp = datetime.utcnow()
         
         modified = enricher.enrichEntity(entity,{})
         print modified
         print entity.value
-
-
 
 
 """
