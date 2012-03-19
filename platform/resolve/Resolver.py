@@ -677,6 +677,8 @@ class Resolver(object):
         """
         length specific similarity metric.
         """
+        if q <= 0 or m <= 0:
+            return 0
         diff = abs(q - m)
         return (1 - (float(diff)/max(q, m)))**2
 
