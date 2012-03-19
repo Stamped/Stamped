@@ -552,6 +552,13 @@ class Entity(Schema):
             # default to 'other' category
             return "other"
 
+class GenericSourceSchema(Schema):
+    def setSchema(self):
+        self.source             = SchemaElement(basestring)
+        self.source_id          = SchemaElement(basestring)
+        self.link               = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
 class StatsSchema(Schema):
     def setSchema(self):
         self.simplified_title   = SchemaElement(basestring)
@@ -828,6 +835,8 @@ class ArtistSongsSchema(Schema):
         self.source             = SchemaElement(basestring)
         self.id                 = SchemaElement(basestring)
         self.timestamp          = SchemaElement(datetime)
+        self.entity_id          = SchemaElement(basestring)
+        self.sources            = SchemaList(GenericSourceSchema())
 
 class SongSchema(Schema):
     def setSchema(self):

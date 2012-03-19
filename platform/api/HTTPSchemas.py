@@ -814,6 +814,7 @@ class HTTPEntity(Schema):
                     source.source       = 'rdio'
                     source.source_id    = schema.sources.rdio_id
                     source.icon         = self._getIconURL('src_rdio', client=client)
+                    source.link         = schema.rdio_url
                     sources.append(source)
 
                 if schema.sources.spotify_id is not None:

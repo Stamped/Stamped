@@ -21,6 +21,7 @@ try:
     from pprint                     import pformat
     from Resolver                   import *
     from libs.LibUtils              import parseDateString
+    from StampedSource              import StampedSource
 except:
     report()
     raise
@@ -355,6 +356,14 @@ class iTunesSource(GenericSource):
     def __itunes(self):
         return globaliTunes()
 
+    @lazyProperty
+    def __stamped(self):
+        return StampedSource()
+
+    @lazyProperty
+    def __resolver(self):
+        return Resolver()
+
     def __repopulateAlbums(self, entity, artist, controller):
         new_albums = [
             {
@@ -369,16 +378,21 @@ class iTunesSource(GenericSource):
         entity['albums'] = new_albums
 
     def __repopulateSongs(self, entity, artist, controller):
-        new_songs = [
-            {
+        new_songs = []
+        for track in artist.tracks:
+            info = {
                 'song_name'    : track['name'],
                 'source'        : self.sourceName,
                 'id'            : track['key'],
                 'timestamp'     : controller.now,
                 'song_mangled' : trackSimplify(track['name']),
             }
-                for track in artist.tracks
-        ]
+            query = iTunesTrack(track['key'])
+            source = self.__stamped.matchSource(query)
+            results = self.__resolver.resolve(query, source)
+            if len(results) > 0 and results[0][0]['resolved']:
+                info['entity_id'] = results[0][1].key
+            new_songs.append(info)
         entity['songs'] = new_songs
 
     def wrapperFromId(self, itunes_id):

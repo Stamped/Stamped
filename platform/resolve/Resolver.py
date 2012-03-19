@@ -11,9 +11,11 @@ __license__   = "TODO"
 __all__ = [
     'Resolver',
     'ResolverObject',
+    'SimpleResolverObject',
     'ResolverArtist',
     'ResolverAlbum',
     'ResolverTrack',
+    'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
     'demo',
@@ -263,6 +265,50 @@ class ResolverObject(object):
     def url(self):
         return None
 
+class SimpleResolverObject(ResolverObject):
+
+    def __init__(self, **data):
+        self.__data = data
+
+    @property
+    def data(self):
+        return self.__data
+
+    @lazyProperty
+    def name(self):
+        try:
+            return str(self.data['name'])
+        except KeyError:
+            return ''
+
+    @lazyProperty
+    def key(self):
+        try:
+            return str(self.data['key'])
+        except KeyError:
+            return ''
+
+    @lazyProperty
+    def source(self):
+        try:
+            return str(self.data['source'])
+        except KeyError:
+            return ''
+
+    @property
+    def description(self):
+        try:
+            return str(self.data['description'])
+        except KeyError:
+            return ''
+
+    @property 
+    def url(self):
+        try:
+            return str(self.data['url'])
+        except KeyError:
+            return None
+
 #
 # Artist
 #
@@ -363,6 +409,51 @@ class ResolverTrack(ResolverObject):
     @property
     def date(self):
         return None
+
+    @property 
+    def type(self):
+        return 'track'
+
+class SimpleResolverTrack(SimpleResolverObject):
+    """
+    """
+    def __init__(self, **data):
+        SimpleResolverObject.__init__(self, **data)
+
+    @lazyProperty
+    def artist(self):
+        try:
+            return self.data['artist']
+        except KeyError:
+            return {'name':''}
+
+    @lazyProperty
+    def album(self):
+        try:
+            return self.data['album']
+        except KeyError:
+            return {'name':''}
+
+    @lazyProperty
+    def length(self):
+        try:
+            return float(self.data['length'])
+        except Exception:
+            return -1
+
+    @lazyProperty
+    def genres(self):
+        try:
+            return self.data['genres']
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def date(self):
+        try:
+            return self.data['date']
+        except KeyError:
+            return None
 
     @property 
     def type(self):
@@ -686,7 +777,7 @@ class Resolver(object):
             'cast': lambda q, m, s, o: self.__castWeight(q, m),
             'director': lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length,q_empty=.2) * 3,
-            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) ,
+            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=2) ,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -891,11 +982,19 @@ class Resolver(object):
             weight = exact_boost * weight
         return weight
 
-    def __dateWeight(self, q, m):
-        if q == None:
-            return 2
-        else:
-            return 5
+    def __dateWeight(self, q, m, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
+        if q is None:
+            if m is None:
+                return both_empty
+            else:
+                return q_empty
+        elif m is None:
+            return m_empty
+        #TODO
+        weight = 4
+        if q == m:
+            weight = exact_boost * weight
+        return weight
 
     def __setWeight(self, q, m):
         size = len( q | m )

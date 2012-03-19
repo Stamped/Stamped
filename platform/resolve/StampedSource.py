@@ -102,16 +102,24 @@ class EntityTrack(_EntityObject, ResolverTrack):
 
     @lazyProperty
     def artist(self):
-        return {'name':self.entity['artist_display_name']}
+        if self.entity['artist_display_name'] is not None:
+            return {'name':self.entity['artist_display_name']}
+        else:
+            return {'name':''}
 
     @lazyProperty
     def album(self):
-        return {'name':self.entity['album_name']}
+        if self.entity['album_name'] is not None:
+            return {'name':self.entity['album_name']}
+        else:
+            return {'name':''}
 
     @lazyProperty
     def length(self):
-        return float(self.entity['track_length'])
-
+        try:
+            return float(self.entity['track_length'])
+        except Exception:
+            return -1
 
 
 class EntityMovie(_EntityObject, ResolverMovie):
