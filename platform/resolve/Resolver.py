@@ -680,25 +680,25 @@ class Resolver(object):
 
     def albumSimplify(self, album):
         """
-        Reduces an album name to a simplied form for fuzzy comparison.
+        Reduces an album name to a simplified form for fuzzy comparison.
         """
         return albumSimplify(album)
 
     def trackSimplify(self, track):
         """
-        Reduces a track name to a simplied form for fuzzy comparison.
+        Reduces a track name to a simplified form for fuzzy comparison.
         """
         return trackSimplify(track)
 
     def artistSimplify(self, artist):
         """
-        Reduces an artist name to a simplied form for fuzzy comparison.
+        Reduces an artist name to a simplified form for fuzzy comparison.
         """
         return artistSimplify(artist)
 
     def actorSimplify(self, actor):
         """
-        Reduces an actor name to a simplied form for fuzzy comparison.
+        Reduces an actor name to a simplified form for fuzzy comparison.
         """
         return nameSimplify(actor)
 
