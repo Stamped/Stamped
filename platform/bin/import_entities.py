@@ -23,8 +23,6 @@ def importFandango():
         'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=5348839&a=12168', 
     ]
 
-    enricher = FullResolveContainer()
-
     for url in feeds:
         data = feedparser.parse(url)
         print '\n\n%s\n%s' % ('='*40, data['feed']['title'])
