@@ -210,6 +210,17 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
     def length(self):
         return float(self.data['trackTimeMillis']) / 1000
 
+    @lazyProperty
+    def keywords(self):
+        return [
+            v for v in [
+                self.name,
+                self.artist['name'],
+                self.album['name'],
+            ]
+                if v != ''
+        ]
+
 class iTunesMovie(_iTunesObject, ResolverMovie):
     """
     iTunes movie wrapper
@@ -550,6 +561,7 @@ class iTunesSource(GenericSource):
         for value in raw_results:
             if 'kind' in value and value['kind'] == 'song':
                 results.append(iTunesTrack(data=value))
+        print(results[0].keywords)
         def source(start, count):
             if start + count <= len(results):
                 result = results[start:start+count]
