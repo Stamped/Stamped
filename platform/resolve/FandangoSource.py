@@ -80,15 +80,6 @@ class FandangoSource(GenericSource):
 
 
 def testFandango(fandango_id, title, release_date):
-    import resolve.StampedSource
-    stamped_source = resolve.StampedSource.StampedSource()
-
-    movie = FandangoMovie(fandango_id, title, release_date)
-
-    source = stamped_source.matchSource(movie)
-
-    resolver = Resolver()
-
     import TMDBSource
     tmdb = TMDBSource.TMDBSource()
 
