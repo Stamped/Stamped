@@ -387,7 +387,7 @@ class ResolverSearchAll(ResolverObject):
         pass
 
     @property
-    def subcategory(self):
+    def subtype(self):
         return None
 
     @property 

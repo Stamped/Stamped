@@ -74,7 +74,7 @@ class EntitySearch(object):
         results = []
         for source in self.searchSources:
             source_results = source.resolve(query, count=count)
-            results.extend(source_results)
+            results.extend([ x[1] for x in source_results])
         def gen(start, count):
             return results[start:count]
         final_results = self.__resolver.resolve(query, gen, count=count)
@@ -84,4 +84,5 @@ if __name__ == '__main__':
     import sys
     import pprint
     results = EntitySearch().search(sys.argv[1])
+    print("Final Search Results")
     pprint.pprint(results)

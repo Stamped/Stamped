@@ -547,7 +547,6 @@ class iTunesSource(GenericSource):
     def searchAllSource(self, query):
         raw_results = self.__itunes.method('search',term=query.query_string)['results']
         results = []
-        print(pformat(raw_results))
         for value in raw_results:
             if 'kind' in value and value['kind'] == 'song':
                 results.append(iTunesTrack(data=value))
@@ -558,8 +557,6 @@ class iTunesSource(GenericSource):
                 result = results[start:]
             else:
                 result = []
-
-            print(result)
             return result
         return source
 
