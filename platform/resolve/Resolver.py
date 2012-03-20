@@ -11,6 +11,7 @@ __license__   = "TODO"
 __all__ = [
     'Resolver',
     'ResolverObject',
+    'ResolverProxy',
     'SimpleResolverObject',
     'ResolverSearchAll',
     'ResolverArtist',
@@ -258,6 +259,14 @@ class ResolverObject(object):
     def type(self):
         pass
 
+    @property
+    def keywords(self):
+        return []
+    
+    @property 
+    def related_terms(self):
+        return []
+
     @property 
     def description(self):
         return ''
@@ -265,6 +274,54 @@ class ResolverObject(object):
     @property 
     def url(self):
         return None
+
+    @property 
+    def priority(self):
+        return 0
+
+class ResolverProxy(object):
+
+    def __init__(self, target):
+        self.__target = target
+
+    @property
+    def target(self):
+        return self.__target
+
+    @lazyProperty
+    def name(self):
+        return self.target.name
+
+    @lazyProperty
+    def url(self):
+        return self.target.url
+
+    @lazyProperty
+    def key(self):
+        return self.target.key
+
+    @property 
+    def source(self):
+        return self.target.source
+
+    def __repr__(self):
+        return "ResolverProxy:%s" % str(self.target)
+
+    @property
+    def keywords(self):
+        return self.target.keywords
+    
+    @property
+    def name(self):
+        return self.target.name
+
+    @property 
+    def priority(self):
+        return self.target.type
+
+    @property 
+    def related_terms(self):
+        return self.target.related_terms
 
 class SimpleResolverObject(ResolverObject):
 
@@ -330,24 +387,8 @@ class ResolverSearchAll(ResolverObject):
         pass
 
     @property
-    def keywords(self):
-        return self.query_string.split()
-    
-    @property 
-    def title(self):
-        return None
-
-    @property
     def subcategory(self):
         return None
-
-    @property 
-    def priority(self):
-        return 0
-
-    @property 
-    def related_terms(self):
-        return []
 
     @property 
     def type(self):
@@ -1015,6 +1056,8 @@ class Resolver(object):
                 options['check'] = self.checkMovie
             elif query.type =='book':
                 options['check'] = self.checkBook
+            elif query.type == 'search_all':
+                options['check'] = self.checkSearchAll
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))

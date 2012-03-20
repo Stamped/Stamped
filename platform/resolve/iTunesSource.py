@@ -339,6 +339,24 @@ class iTunesBook(_iTunesObject, ResolverBook):
     def sku(self):
         return None
 
+class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def coordinates(self):
+        return None
+
+    @property
+    def query_string(self):
+        return None
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 
 class iTunesSource(GenericSource):
     """
@@ -457,6 +475,8 @@ class iTunesSource(GenericSource):
             return self.movieSource(query)
         elif query.type == 'book':
             return self.bookSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         else:
             return self.emptySource
 
@@ -522,6 +542,23 @@ class iTunesSource(GenericSource):
             else:
                 result = []
             return [ iTunesBook( entry['trackId'] ) for entry in result ]
+        return source
+
+    def searchAllSource(self, query):
+        raw_results = self.__itunes.method('search',term=query.query_string)['results']
+        results = []
+        print(pformat(raw_results))
+        for value in raw_results:
+            if 'kind' in value and value['kind'] == 'song':
+                results.append(iTunesTrack(data=value))
+        def source(start, count):
+            if start + count <= len(results):
+                result = results[start:start+count]
+            elif start < len(results):
+                result = results[start:]
+            else:
+                result = []
+            return result
         return source
 
 if __name__ == '__main__':

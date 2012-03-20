@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'EntitySearch' ]
+__all__ = [ 'EntitySearch', 'QuerySearchAll' ]
 
 import Globals
 from logs import report
@@ -23,26 +23,54 @@ try:
     from Schemas                    import Entity
     from datetime                   import datetime
     from bson                       import ObjectId
+    from iTunesSource               import iTunesSource
 except:
     report()
     raise
 
+class QuerySearchAll(ResolverSearchAll):
+
+    def __init__(self, query_string, coordinates=None):
+        ResolverSearchAll.__init__(self)
+        self.__query_string = query_string
+        self.__coordinates = coordinates
+
+    @property 
+    def query_string(self):
+        return self.__query_string
+
+    @property 
+    def coordinates(self):
+        return self.__coordinates
+
+    @property
+    def keywords(self):
+        return self.query_string.split()
+
+    @property 
+    def key(self):
+        return ''
+
+    @property
+    def name(self):
+        return ''
+
+    @property
+    def source(self):
+        return 'search'
 
 class EntitySearch(object):
 
-    def createSearchQuery(self, query_string, category=None, coordinates=None):
-        return None
-
     @lazyProperty
     def searchSources(self):
-        return []
+        return [iTunesSource()]
 
     @lazyProperty
     def __resolver(self):
         return Resolver()
 
-    def search(self, query_string, count=10, **kwargs):
-        query = createSearchQuery(query_string, **kwargs)
+    def search(self, query_string, count=10, coordinates=None):
+        query = QuerySearchAll(query_string, coordinates)
         results = []
         for source in self.searchSources:
             source_results = source.resolve(query, count=count)
@@ -55,5 +83,5 @@ class EntitySearch(object):
 if __name__ == '__main__':
     import sys
     import pprint
-    resutls = EntitySearch().search(sys.argv[1])
+    results = EntitySearch().search(sys.argv[1])
     pprint.pprint(results)
