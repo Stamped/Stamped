@@ -25,6 +25,7 @@ try:
     from SpotifySource          import SpotifySource
     from iTunesSource           import iTunesSource
     from AmazonSource           import AmazonSource
+    from StampedSource          import StampedSource
     from pprint                 import pformat
 except:
     report()
@@ -86,6 +87,7 @@ class FullResolveContainer(BasicSourceContainer):
 
             OpenTableGroup(),
             OpenTableNicknameGroup(),
+            StampedGroup(),
         ]
         for group in groups:
             self.addGroup(group)
@@ -101,6 +103,7 @@ class FullResolveContainer(BasicSourceContainer):
             RdioSource(),
             SpotifySource(),
             iTunesSource(),
+            StampedSource(),
         ]
         for source in sources:
             self.addSource(source)

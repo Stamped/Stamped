@@ -181,6 +181,10 @@ class SpotifySource(GenericSource):
     def __spotify(self):
         return globalSpotify()
 
+    @property
+    def urlField(self):
+        return None
+
     def matchSource(self, query):
         if query.type == 'artist':
             return self.artistSource(query)

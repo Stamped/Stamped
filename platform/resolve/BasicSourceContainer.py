@@ -170,6 +170,10 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__sources.append(source)
         self.__failedValues[source] = 0
 
+    def clearSources(self):
+        self.__sources = []
+        self.__failedValues = {}
+
     def getGroup(self, name):
         if name in self.__groups:
             return self.__groups[name]
@@ -179,6 +183,10 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
     def addGroup(self, group):
         self.__groups[group.groupName] = group
         
+    @property
+    def groups(self):
+        return set(self.__groups.values())
+
     def setGlobalMaxAge(self, age):
         self.__global_max_age = age
 

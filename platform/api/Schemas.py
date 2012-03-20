@@ -530,10 +530,7 @@ class Entity(Schema):
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
         self.stats              = StatsSchema()
-        self.successor          = SchemaElement(basestring)
-        self.successor_source   = SchemaElement(basestring)
-        self.successor_timestamp= SchemaElement(datetime)
-    
+
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             from Entity import setFields
@@ -927,6 +924,11 @@ class EntitySourcesSchema(Schema):
         self.factual                = FactualSchema()
         self.tmdb                   = TMDBSchema()
 
+        self.stamped_id             = SchemaElement(basestring)
+        self.stamped_url            = SchemaElement(basestring)
+        self.stamped_timestamp      = SchemaElement(datetime)
+        self.stamped_source         = SchemaElement(basestring)
+
         self.spotify_id             = SchemaElement(basestring)
         self.spotify_url            = SchemaElement(basestring)
         self.spotify_timestamp      = SchemaElement(datetime)
@@ -961,13 +963,6 @@ class EntitySourcesSchema(Schema):
         self.fandango_source        = SchemaElement(basestring)
         self.fandango_timestamp     = SchemaElement(datetime)
 
-        # TODO: remove these three lines -- temporary workaround!
-        # (and the TMDBSchema and RdioSchema above)
-        self.tmdb               = TMDBSchema()
-        self.factual            = FactualSchema()
-        # TODO: remove these three lines -- temporary workaround!
-        # (and the TMDBSchema and RdioSchema above)
-        
         
         self.googlePlaces       = GooglePlacesSchema()
         self.googleLocal        = GoogleLocalSchema()
@@ -1033,6 +1028,7 @@ class FactualSchema(Schema):
         self.faid               = SchemaElement(basestring)
         self.table              = SchemaElement(basestring)
         self.factual_id         = SchemaElement(basestring)
+        self.factual_url        = SchemaElement(basestring)
         self.factual_timestamp  = SchemaElement(datetime)
         self.factual_source     = SchemaElement(basestring)
         self.factual_crosswalk  = SchemaElement(datetime)

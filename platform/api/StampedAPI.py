@@ -18,7 +18,6 @@ try:
     import libs.Memcache
     import tasks.APITasks
     
-    from pprint             import pprint, pformat
     from datetime           import datetime
     from auth               import convertPasswordForStorage
     from utils              import lazyProperty
@@ -46,7 +45,10 @@ try:
     from libs.TheTVDB       import TheTVDB
     from libs.Factual       import Factual
     from libs.ec2_utils     import is_prod_stack
-    from pprint             import pformat
+
+    #resolve classes
+    from resolve.EntitySource import EntitySource
+    from pprint             import pprint, pformat
 except:
     report()
     raise
@@ -2956,20 +2958,49 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         
         return entity.entity_id
-    
+
+    def mergeEntity(self, entity):
+        copy = Entity()
+        copy.importData(entity.value)
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
+
+    def mergeEntityAsync(self, entity):
+        try:
+            decorations = {}
+            modified = self.__full_resolve.enrichEntity(entity, decorations)
+            if 'stamped_id' in entity and entity['stamped_id'] is not None:
+                successor_id = entity['stamped_id']
+                successor = self._entityDB.getEntity(successor_id)
+                merger = FullResolveContainer.FullResolveContainer()
+                merger.addSource(EntitySource(entity, merger.groups))
+                successor_decorations = {}
+                modified_successor = merger.enrichEntity(successor, successor_decorations)
+                self.__handleDecorations(successor, successor_decorations)
+                if modified_successor:
+                    self._entityDB.update(successor)
+            else:
+                self.__handleDecorations(entity, decorations)
+                self._entityDB.update(entity)
+        except:
+            report()
+            raise
+
     @lazyProperty
     def __full_resolve(self):
         return FullResolveContainer.FullResolveContainer()
     
-    def _enrichEntity(self, entity):
-        decorations = {}
-        modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
+    def __handleDecorations(self, entity, decorations):
         for k,v in decorations.items():
             if k == 'menu' and isinstance(v,MenuSchema):
                 try:
                     self.__menuDB.update(v)
                 except Exception:
                     report()
+
+    def _enrichEntity(self, entity):
+        decorations = {}
+        modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
+        self.__handleDecorations(entity, decorations)
         return modified
     
     def _enrichEntityAsync(self,entity_id):

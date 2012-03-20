@@ -380,6 +380,15 @@ class SubcategoryGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
+class StampedGroup(BasicFieldGroup):
+
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'stamped')
+        self.addField(['stamped_id'])
+
+    def eligible(self, entity):
+        return True
+
 class ImagesGroup(BasicFieldGroup):
 
     def __init__(self):

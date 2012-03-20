@@ -22,6 +22,7 @@ try:
     from libs.LibUtils              import parseDateString
     from Schemas                    import Entity
     from datetime                   import datetime
+    from bson                       import ObjectId
 except:
     report()
     raise
@@ -44,11 +45,17 @@ class _EntityObject(object):
 
     @lazyProperty
     def name(self):
-        return self.entity['title']
+        try:
+            return self.entity['title']
+        except Exception:
+            return ''
 
     @lazyProperty
     def key(self):
-        return self.entity['entity_id']
+        try:
+            return self.entity['entity_id']
+        except Exception:
+            return ''
 
     @property 
     def source(self):
@@ -68,11 +75,17 @@ class EntityArtist(_EntityObject, ResolverArtist):
 
     @lazyProperty
     def albums(self):
-        return [ {'name':album['album_name']} for album in self.entity['albums'] ]
+        try:
+            return [ {'name':album['album_name']} for album in self.entity['albums'] ]
+        except Exception:
+            return []
 
     @lazyProperty
     def tracks(self):
-        return [ {'name':song['song_name']} for song in self.entity['songs'] ]
+        try:
+            return [ {'name':song['song_name']} for song in self.entity['songs'] ]
+        except Exception:
+            return []
 
 
 class EntityAlbum(_EntityObject, ResolverAlbum):
@@ -85,11 +98,17 @@ class EntityAlbum(_EntityObject, ResolverAlbum):
 
     @lazyProperty
     def artist(self):
-        return { 'name' : self.entity['artist_display_name'] }
+        try:
+            return { 'name' : self.entity['artist_display_name'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty
     def tracks(self):
-        return [ {'name':entry.value} for entry in self.entity['tracks'] ]
+        try:
+            return [ {'name':entry.value} for entry in self.entity['tracks'] ]
+        except Exception:
+            return []
 
 
 class EntityTrack(_EntityObject, ResolverTrack):
@@ -352,7 +371,7 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), subcategory='song')
+        return self.__querySource(query_gen(), query, subcategory='song')
 
     def albumSource(self, query):
         def query_gen():
@@ -374,7 +393,7 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), subcategory='album')
+        return self.__querySource(query_gen(), query, subcategory='album')
 
     def artistSource(self, query):
         def query_gen():
@@ -399,7 +418,7 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), subcategory='artist')
+        return self.__querySource(query_gen(), query, subcategory='artist')
 
     def movieSource(self, query):
         def query_gen():
@@ -412,7 +431,7 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), subcategory='movie')
+        return self.__querySource(query_gen(), query, subcategory='movie')
 
     def bookSource(self, query):
         def query_gen():
@@ -428,18 +447,39 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), subcategory='book')
+        return self.__querySource(query_gen(), query, subcategory='book')
+
+
+    def enrichEntity(self, entity, controller, decorations, timestamps):
+        if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
+            try:
+                query = self.wrapperFromEntity(entity)
+                timestamps[self.idField] = controller.now
+                results = self.resolver.resolve(query, self.matchSource(query))
+                if len(results) != 0:
+                    best = results[0]
+                    if best[0]['resolved']:
+                        entity[self.idField] = best[1].key
+                        if self.urlField is not None and best[1].url is not None:
+                            entity[self.urlField] = best[1].url
+            except ValueError:
+                pass
+        return True
 
     def __id_query(self, mongo_query):
-        return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ))
+        import pymongo
+        return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ).sort('_id',pymongo.ASCENDING))
 
-    def __querySource(self, query_gen, **kwargs):
+    def __querySource(self, query_gen, query_obj, **kwargs):
         def gen():
             try:
                 id_set = set()
                 for query in query_gen:
                     for k,v in kwargs.items():
                         query[k] = v
+                    query['sources.stamped_id'] = {'$exists':False}
+                    if query_obj.source == 'stamped' and query_obj.key != '':
+                        query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                     matches = self.__id_query(query )
                     for match in matches:
                         entity_id = match['_id']
@@ -458,6 +498,9 @@ class StampedSource(GenericSource):
             )
         return self.generatorSource(generator, constructor)
 
+    @property
+    def urlField(self):
+        return None
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')

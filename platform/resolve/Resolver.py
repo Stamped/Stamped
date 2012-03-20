@@ -1128,6 +1128,7 @@ def demo(generic_source, default_title):
 
     resolver = Resolver(verbose=True)
     entity_source = StampedSource.StampedSource()
+    index = 0
 
     print(sys.argv)
     if len(sys.argv) > 1:
@@ -1136,6 +1137,8 @@ def demo(generic_source, default_title):
         subcategory = sys.argv[2]
     if len(sys.argv) > 3:
         count = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        index = int(sys.argv[3])
 
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
@@ -1152,10 +1155,10 @@ def demo(generic_source, default_title):
         }
     pprint(query)
     cursor = db._collection.find(query)
-    if cursor.count() == 0:
+    if cursor.count() <= index:
         print("Could not find a matching entity for %s" % title)
         return
-    result = cursor[0]
+    result = cursor[index]
     entity = db._convertFromMongo(result)
     query = entity_source.wrapperFromEntity(entity)
     results = resolver.resolve(query, generic_source.matchSource(query), count=count)
