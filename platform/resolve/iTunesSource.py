@@ -558,6 +558,8 @@ class iTunesSource(GenericSource):
                 result = results[start:]
             else:
                 result = []
+
+            print(result)
             return result
         return source
 

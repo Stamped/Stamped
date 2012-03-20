@@ -900,14 +900,14 @@ class Resolver(object):
 
         ]
         weights = {
-            ('query_string', lambda q, m, s, o: 1),
-            ('title',lambda q, m, s, o: 1),
-            ('location', lambda q, m, s, o: 1),
-            ('subcategory', lambda q, m, s, o: 1),
-            ('priority', lambda q, m, s, o: 1),
-            ('source_priority', lambda q, m, s, o: self.__sourceWeight(m.source)),
-            ('keywords', lambda q, m, s, o: 1),
-            ('related_terms', lambda q, m, s, o: 1),
+            'query_string': lambda q, m, s, o: 1,
+            'title': lambda q, m, s, o: 1,
+            'location': lambda q, m, s, o: 1,
+            'subcategory': lambda q, m, s, o: 1,
+            'priority': lambda q, m, s, o: 1,
+            'source_priority': lambda q, m, s, o: self.__sourceWeight(m.source),
+            'keywords': lambda q, m, s, o: 1,
+            'related_terms': lambda q, m, s, o: 1,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1063,6 +1063,37 @@ class Resolver(object):
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
 
         return options
+
+        """"
+            ('query_string', self.__queryStringTest),
+            ('title',self.__titleTest),
+            ('location', self.__locationTest),
+            ('subcategory', self.__subcategoryTest),
+            ('priority', lambda q, m, s, o: m.priority),
+            ('source_priority', lambda q, m, s, o: 1),
+            ('keywords', self.__keywordsTest),
+            ('related_terms', self.__relatedTermsTest),
+            """
+    def __sourceWeight(self, source):
+        return 1
+
+    def __queryStringTest(self, query, match, tests, options):
+        return 0 
+
+    def __titleTest(self, query, match, tests, options):
+        return 0 
+        
+    def __locationTest(self, query, match, tests, options):
+        return 0 
+        
+    def __subcategoryTest(self, query, match, tests, options):
+        return 0 
+        
+    def __keywordsTest(self, query, match, tests, options):
+        return 0 
+        
+    def __relatedTermsTest(self, query, match, tests, options):
+        return 0 
 
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
