@@ -49,6 +49,7 @@ class FullResolveContainer(BasicSourceContainer):
             SpotifyGroup(),
             iTunesGroup(),
             AmazonGroup(),
+            FandangoGroup(),
 
             AddressGroup(),
             CoordinatesGroup(),
@@ -108,6 +109,7 @@ class FullResolveContainer(BasicSourceContainer):
         for source in sources:
             self.addSource(source)
         self.setGlobalPriority('seed',seedPriority)
+        self.setGlobalPriority('entity',-1)
         self.setGlobalPriority('itunes',1)
 
 def demo(default_title='Katy Perry'):
@@ -116,12 +118,15 @@ def demo(default_title='Katy Perry'):
 
     title = default_title
     subcategory = None
+    index = 0
 
     print(sys.argv)
     if len(sys.argv) > 1:
         title = sys.argv[1]
     if len(sys.argv) > 2:
         subcategory = sys.argv[2]
+    if len(sys.argv) > 3:
+        index = int(sys.argv[3])
 
     _verbose = True
     from MongoStampedAPI import MongoStampedAPI
@@ -135,7 +140,7 @@ def demo(default_title='Katy Perry'):
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)
         return
-    result = cursor[0]
+    result = cursor[index]
     entity = db._convertFromMongo(result)
     print( "Before:\n%s" % pformat( entity.value ) )
 

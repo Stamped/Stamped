@@ -2978,7 +2978,9 @@ class StampedAPI(AStampedAPI):
                 self.__handleDecorations(successor, successor_decorations)
                 if modified_successor:
                     self._entityDB.update(successor)
+                logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
             else:
+                logs.info("Inserted new entity on merge %s" % entity.entity_id)
                 self.__handleDecorations(entity, decorations)
                 self._entityDB.update(entity)
         except:

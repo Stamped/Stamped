@@ -880,6 +880,7 @@ class MediaSchema(Schema):
         self.release_date               = SchemaElement(datetime)
         self.release_date_source        = SchemaElement(basestring)
         self.release_date_timestamp     = SchemaElement(datetime)
+
         self.track_length               = SchemaElement(basestring)
         self.track_length_source        = SchemaElement(basestring)
         self.track_length_timestamp     = SchemaElement(datetime)

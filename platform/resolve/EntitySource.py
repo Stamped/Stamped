@@ -34,7 +34,8 @@ class EntitySource(BasicSource):
         self.__groups = set(groups)
         self.__entity = entity
         for group in groups:
-            self.addGroup(group)
+            if group.groupName != 'stamped':
+                self.addGroup(group.groupName)
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         modified = False

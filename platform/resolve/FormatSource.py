@@ -124,7 +124,7 @@ class FormatSource(BasicSource):
             elif 'fid' in entity:
                 desc = entity['desc'].replace('\n',' ')
 
-                release_date_match = desc.summary[-23:].split('Release Date:')
+                release_date_match = desc[-23:].split('Release Date:')
                 if len(release_date_match) == 2:
                     month, day, year = map(lambda x: int(x), release_date_match[-1].split('/'))
                     if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:

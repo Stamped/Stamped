@@ -468,6 +468,7 @@ class StampedSource(GenericSource):
 
     def __id_query(self, mongo_query):
         import pymongo
+        #print(pformat(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ).sort('_id',pymongo.ASCENDING))
 
     def __querySource(self, query_gen, query_obj, **kwargs):
@@ -477,10 +478,18 @@ class StampedSource(GenericSource):
                 for query in query_gen:
                     for k,v in kwargs.items():
                         query[k] = v
-                    query['sources.stamped_id'] = {'$exists':False}
+
+                    and_list = query.setdefault('$and',[])
+                    and_list.append( {
+                        '$or' : [
+                            {'sources.stamped_id' : { '$exists':False }},
+                            {'sources.stamped_id' : None},
+                        ]
+                    } )
                     if query_obj.source == 'stamped' and query_obj.key != '':
                         query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                     matches = self.__id_query(query )
+                    #print(matches)
                     for match in matches:
                         entity_id = match['_id']
                         if entity_id not in id_set:

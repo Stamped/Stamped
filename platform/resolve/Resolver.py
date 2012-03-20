@@ -12,6 +12,7 @@ __all__ = [
     'Resolver',
     'ResolverObject',
     'SimpleResolverObject',
+    'ResolverSearchAll',
     'ResolverArtist',
     'ResolverAlbum',
     'ResolverTrack',
@@ -308,6 +309,49 @@ class SimpleResolverObject(ResolverObject):
             return str(self.data['url'])
         except KeyError:
             return None
+
+
+class ResolverSearchAll(ResolverObject):
+    """
+    Interface for Artist objects.
+
+    Attributes:
+
+    albums - a list of artist dicts which must at least contain a 'name' string.
+    tracks - a list of track dicts which must at least contain a 'name' string.
+    """
+
+    @property
+    def coordinates(self):
+        return None
+
+    @abstractproperty
+    def query_string(self):
+        pass
+
+    @property
+    def keywords(self):
+        return self.query_string.split()
+    
+    @property 
+    def title(self):
+        return None
+
+    @property
+    def subcategory(self):
+        return None
+
+    @property 
+    def priority(self):
+        return 0
+
+    @property 
+    def related_terms(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'search_all'
 
 #
 # Artist
@@ -775,11 +819,11 @@ class Resolver(object):
             ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
         ]
         weights = {
-            'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
+            'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
             'cast': lambda q, m, s, o: self.__castWeight(q, m),
             'director': lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length,q_empty=.2) * 3,
-            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=2) ,
+            'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -799,6 +843,30 @@ class Resolver(object):
                 exact_boost=2, m_empty=4 ),
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * .5,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) * .2,
+        }
+        self.genericCheck(tests, weights, results, query, match, options)
+
+    def checkSearchAll(self, results, query, match, options):
+        tests = [
+            ('query_string', self.__queryStringTest),
+            ('title',self.__titleTest),
+            ('location', self.__locationTest),
+            ('subcategory', self.__subcategoryTest),
+            ('priority', lambda q, m, s, o: m.priority),
+            ('source_priority', lambda q, m, s, o: 1),
+            ('keywords', self.__keywordsTest),
+            ('related_terms', self.__relatedTermsTest),
+
+        ]
+        weights = {
+            ('query_string', lambda q, m, s, o: 1),
+            ('title',lambda q, m, s, o: 1),
+            ('location', lambda q, m, s, o: 1),
+            ('subcategory', lambda q, m, s, o: 1),
+            ('priority', lambda q, m, s, o: 1),
+            ('source_priority', lambda q, m, s, o: self.__sourceWeight(m.source)),
+            ('keywords', lambda q, m, s, o: 1),
+            ('related_terms', lambda q, m, s, o: 1),
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
