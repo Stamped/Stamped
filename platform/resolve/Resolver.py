@@ -259,9 +259,14 @@ class ResolverObject(object):
     def type(self):
         pass
 
-    @property
+    @lazyProperty
     def keywords(self):
-        return []
+        words = set()
+        for term in self.related_terms:
+            for w in term.split():
+                if w != '':
+                    words.add(w)
+        return words
     
     @property 
     def related_terms(self):

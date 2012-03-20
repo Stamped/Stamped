@@ -211,7 +211,7 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
         return float(self.data['trackTimeMillis']) / 1000
 
     @lazyProperty
-    def keywords(self):
+    def related_terms(self):
         return [
             v for v in [
                 self.name,
