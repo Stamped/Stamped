@@ -322,7 +322,7 @@ class ResolverProxy(object):
 
     @property 
     def priority(self):
-        return self.target.type
+        return self.target.priority
 
     @property 
     def related_terms(self):
@@ -895,7 +895,7 @@ class Resolver(object):
     def checkSearchAll(self, results, query, match, options):
         tests = [
             ('query_string', self.__queryStringTest),
-            ('title',self.__titleTest),
+            ('name',self.__nameTest),
             ('location', self.__locationTest),
             ('subcategory', self.__subcategoryTest),
             ('priority', lambda q, m, s, o: m.priority),
@@ -905,14 +905,14 @@ class Resolver(object):
 
         ]
         weights = {
-            'query_string': lambda q, m, s, o: 1,
-            'title': lambda q, m, s, o: 1,
-            'location': lambda q, m, s, o: 1,
-            'subcategory': lambda q, m, s, o: 1,
-            'priority': lambda q, m, s, o: 1,
+            'query_string': lambda q, m, s, o: 0,
+            'name': lambda q, m, s, o: 5,
+            'location': lambda q, m, s, o: 0,
+            'subcategory': lambda q, m, s, o: 0,
+            'priority': lambda q, m, s, o: 0,
             'source_priority': lambda q, m, s, o: self.__sourceWeight(m.source),
-            'keywords': lambda q, m, s, o: 1,
-            'related_terms': lambda q, m, s, o: 1,
+            'keywords': self.__keywordsWeight,
+            'related_terms': self.__relatedTermsWeight,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1069,36 +1069,63 @@ class Resolver(object):
 
         return options
 
-        """"
-            ('query_string', self.__queryStringTest),
-            ('title',self.__titleTest),
-            ('location', self.__locationTest),
-            ('subcategory', self.__subcategoryTest),
-            ('priority', lambda q, m, s, o: m.priority),
-            ('source_priority', lambda q, m, s, o: 1),
-            ('keywords', self.__keywordsTest),
-            ('related_terms', self.__relatedTermsTest),
-            """
     def __sourceWeight(self, source):
         return 1
 
     def __queryStringTest(self, query, match, tests, options):
-        return 0 
+        return 0
 
-    def __titleTest(self, query, match, tests, options):
-        return 0 
+    def __nameTest(self, query, match, tests, options):
+        if query.name == '':
+            if query.query_string == match.name:
+                return 1
+            elif query.query_string.find(match.name) != -1:
+                return .75
+        return 0
         
     def __locationTest(self, query, match, tests, options):
-        return 0 
+        return 0
         
     def __subcategoryTest(self, query, match, tests, options):
         return 0 
         
     def __keywordsTest(self, query, match, tests, options):
-        return 0 
-        
+        if len(query.keywords) > 0:
+            return self.setSimilarity(set(query.keywords), set(match.keywords))
+        else:
+            return self.setSimilarity(set(query.query_string.split()), set(match.keywords))
+    
+    def __keywordsWeight(self, query, match, tests, options):
+        if len(query.keywords) > 0:
+            return self.__setWeight(set(query.keywords), set(match.keywords))
+        else:
+            if len(match.keywords) == 0 or query.query_string == '':
+                return 0
+            string = query.query_string
+            for term in match.keywords:
+                if string.find(term) != -1:
+                    string.replace(term,' ')
+            string = simplify(string)
+            return len(string) / len(query.query_string)
+
     def __relatedTermsTest(self, query, match, tests, options):
-        return 0 
+        if len(query.related_terms) > 0:
+            return self.setSimilarity(set(query.related_terms), set(match.related_terms))
+        else:
+            if len(match.related_terms) == 0 or query.query_string == '':
+                return 0
+            string = query.query_string
+            for term in match.related_terms:
+                if string.find(term) != -1:
+                    string = string.replace(term,' ')
+            string = simplify(string)
+            return 1 - (len(string) / len(query.query_string))
+
+    def __relatedTermsWeight(self, query, match, tests, options):
+        if len(query.related_terms) > 0:
+            return self.__setWeight(set(query.related_terms), set(match.related_terms))
+        else:
+            return len(query.query_string.split())
 
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
@@ -1191,7 +1218,11 @@ class Resolver(object):
             mins = {}
         success = True
         for name,test in tests:
-            similarity = test(query, match, similarities, options)
+            try:
+                similarity = float(test(query, match, similarities, options))
+            except ValueError:
+                print("test %s failed with ValueError" % name)
+                raise
             similarities[name] = similarity
             if name in mins and similarity < mins[name]:
                 success = False

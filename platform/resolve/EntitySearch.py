@@ -83,6 +83,12 @@ class EntitySearch(object):
 if __name__ == '__main__':
     import sys
     import pprint
-    results = EntitySearch().search(sys.argv[1])
+    count = 10
+    query = "Katy Perry Firework"
+    if len(sys.argv) > 1:
+        query = sys.argv[1]
+    if len(sys.argv) > 2:
+        count = int(sys.argv[2])
+    results = EntitySearch().search(query, count=count)
     print("Final Search Results")
     pprint.pprint(results)

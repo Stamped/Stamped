@@ -117,6 +117,17 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
                 for track in results if track.pop('wrapperType',None) == 'track'
         ]
 
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.name,
+            ]
+        l.extend(self.tracks)
+        l.extend(self.albums)
+        return [
+            v for v in l if v != ''
+        ]
+
 class iTunesAlbum(_iTunesObject, ResolverAlbum):
     """
     iTunes album wrapper
@@ -159,6 +170,17 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
                 'name':track['trackName'],
             }
                 for track in results if track.pop('wrapperType',None) == 'track' 
+        ]
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.name,
+                self.artist['name'],
+            ]
+        l.extend(self.tracks)
+        return [
+            v for v in l if v != ''
         ]
 
 
@@ -502,7 +524,6 @@ class iTunesSource(GenericSource):
                 result = []
             return [ iTunesTrack( entry['trackId'] ) for entry in result ]
         return source
-
     
     def albumSource(self, query):
         albums = self.__itunes.method('search',term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
@@ -516,7 +537,6 @@ class iTunesSource(GenericSource):
             return [ iTunesAlbum( entry['collectionId'] ) for entry in result ]
         return source
 
-
     def artistSource(self, query):
         artists = self.__itunes.method('search',term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
         def source(start, count):
@@ -529,7 +549,6 @@ class iTunesSource(GenericSource):
             return [ iTunesArtist( entry['artistId'] ) for entry in result ]
         return source
 
-
     def movieSource(self, query):
         movies = self.__itunes.method('search',term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
         def source(start, count):
@@ -541,7 +560,6 @@ class iTunesSource(GenericSource):
                 result = []
             return [ iTunesMovie( entry['trackId'] ) for entry in result ]
         return source
-
 
     def bookSource(self, query):
         movies = self.__itunes.method('search',term=query.name, entity='ebook', limit=100)['results']
@@ -559,9 +577,15 @@ class iTunesSource(GenericSource):
         raw_results = self.__itunes.method('search',term=query.query_string)['results']
         results = []
         for value in raw_results:
-            if 'kind' in value and value['kind'] == 'song':
-                results.append(iTunesTrack(data=value))
-        print(results[0].keywords)
+            try:
+                if value['wrapperType'] == 'track' and value['kind'] == 'song':
+                    results.append(iTunesTrack(data=value))
+                if value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
+                    results.append(iTunesAlbum(data=value))
+                if value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
+                    results.append(iTunesArtist(data=value))
+            except Exception:
+                logs.info('Malformed iTunes output:\n%s' % pformat(value))
         def source(start, count):
             if start + count <= len(results):
                 result = results[start:start+count]
@@ -569,7 +593,7 @@ class iTunesSource(GenericSource):
                 result = results[start:]
             else:
                 result = []
-            return result
+            return [ iTunesSearchAll(target) for target in result ]
         return source
 
 if __name__ == '__main__':
