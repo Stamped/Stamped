@@ -17,6 +17,8 @@ __all__ = [
     'ResolverArtist',
     'ResolverAlbum',
     'ResolverTrack',
+    'ResolverPlace',
+    'ResolverRestaurant',
     'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
@@ -53,6 +55,7 @@ try:
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
+    import utils
 except:
     report()
     raise
@@ -406,6 +409,14 @@ class ResolverObject(object):
     def priority(self):
         return 0
 
+    @property
+    def coordinates(self):
+        return None
+
+    @property
+    def address(self):
+        return {}
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -449,6 +460,14 @@ class ResolverProxy(object):
     @property 
     def related_terms(self):
         return self.target.related_terms
+
+    @property
+    def coordinates(self):
+        return self.target.coordinates
+
+    @property
+    def address(self):
+        return self.target.address
 
 class SimpleResolverObject(ResolverObject):
 
@@ -496,14 +515,6 @@ class SimpleResolverObject(ResolverObject):
 
 
 class ResolverSearchAll(ResolverObject):
-    """
-    Interface for Artist objects.
-
-    Attributes:
-
-    albums - a list of artist dicts which must at least contain a 'name' string.
-    tracks - a list of track dicts which must at least contain a 'name' string.
-    """
 
     @property
     def coordinates(self):
@@ -826,6 +837,68 @@ class ResolverBook(ResolverObject):
             v for v in l if v != ''
         ]
 
+class ResolverPlace(ResolverObject):
+    """
+    Interface for place objects
+
+    Attributes:
+
+    TODO
+    """
+
+    @property
+    def phone(self):
+        return None
+
+    @property
+    def email(self):
+        return None
+
+    @property 
+    def type(self):
+        return 'place'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+            ]
+        for k,v in self.address.items():
+            l.append(v)
+        return [
+            v for v in l if v != ''
+        ]
+
+class ResolverRestaurant(ResolverPlace):
+    """
+    Interface for restaurant objects
+
+    Attributes:
+
+    TODO
+    """
+    @property 
+    def cuisines(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'restaurant'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+            ]
+        for k,v in self.address.items():
+            l.append(v)
+        l.extend(self.cuisines)
+        return [
+            v for v in l if v != ''
+        ]
+
 ##
 # Main Resolver class
 ##
@@ -1015,6 +1088,12 @@ class Resolver(object):
         """
         return self.nameComparison(q['name'], m['name'])
 
+    def placeComparison(self, q, m):
+        """
+        Place specific comparison metric.
+        """
+        return self.nameComparison(q['name'], m['name'])
+
     def checkArtist(self, results, query, match, options):
         tests = [
             ('name', lambda q, m, s, o: self.artistComparison(q.name, m.name)),
@@ -1093,6 +1172,17 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
+    def checkPlace(self, results, query, match, options):
+        tests = [
+            ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
+            ('location',    self.__locationTest),
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
+            'location':     lambda q, m ,s, o: 1,
+        }
+        self.genericCheck(tests, weights, results, query, match, options)
+
     def checkSearchAll(self, results, query, match, options):
         tests = [
             ('query_string',        self.__queryStringTest),
@@ -1103,12 +1193,11 @@ class Resolver(object):
             ('source_priority',     lambda q, m, s, o: 1),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
-
         ]
         weights = {
             'query_string':         lambda q, m, s, o: 0,
             'name':                 lambda q, m, s, o: 5,
-            'location':             lambda q, m, s, o: 0,
+            'location':             lambda q, m, s, o: 1,
             'subcategory':          lambda q, m, s, o: 0,
             'priority':             lambda q, m, s, o: 1,
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
@@ -1256,6 +1345,8 @@ class Resolver(object):
                 groups.extend([10, 20, 50]) 
             elif query.type == 'book':
                 groups.extend([20, 50, 100])
+            elif query.type == 'search_all':
+                groups.extend([])
             else:
                 #generic
                 groups.extend([10, 20, 50]) 
@@ -1271,6 +1362,8 @@ class Resolver(object):
                 options['check'] = self.checkMovie
             elif query.type =='book':
                 options['check'] = self.checkBook
+            elif query.type =='place':
+                options['check'] = self.checkPlace
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:
@@ -1289,8 +1382,19 @@ class Resolver(object):
         return stringComparison(query.query_string, match.name)
         
     def __locationTest(self, query, match, tests, options):
-        return 0
+
+        if query.coordinates is None or match.coordinates is None:
+            return 0
+
+        distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
+        distance = abs(distance * 3959)
         
+        if distance < 0 or distance > 50:
+            return 0
+    
+        # Simple parabolic curve to weight closer distances
+        return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
+            
     def __subcategoryTest(self, query, match, tests, options):
         return 0 
         
@@ -1415,9 +1519,9 @@ class Resolver(object):
         success = True
         for name,test in tests:
             try:
-                #before = time()
+                before = time()
                 comparison = float(test(query, match, similarities, options))
-                #print(time()-before)
+                #print("%.8f - test time for %s" %(time()-before, name))
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise

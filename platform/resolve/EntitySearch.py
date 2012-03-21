@@ -27,6 +27,7 @@ try:
     from iTunesSource               import iTunesSource
     from RdioSource                 import RdioSource
     from StampedSource              import StampedSource
+    from FactualSource              import FactualSource
     from time                       import time
 except:
     report()
@@ -77,6 +78,7 @@ class EntitySearch(object):
             'itunes':iTunesSource().matchSource(query),
             'rdio':RdioSource().matchSource(query),
             'stamped':StampedSource().matchSource(query),
+            'factual':FactualSource().matchSource(query),
         }
         results_list = []
         pool = Pool(len(sources))
@@ -133,11 +135,14 @@ if __name__ == '__main__':
     import pprint
     count = 10
     query = "Katy Perry Firework"
+    coordinates = None
     if len(sys.argv) > 1:
         query = sys.argv[1]
     if len(sys.argv) > 2:
         count = int(sys.argv[2])
-    results = EntitySearch().search(query, count=count)
+    if len(sys.argv) > 3:
+        coordinates = tuple([ float(v) for v in sys.argv[3].split(',') ])
+    results = EntitySearch().search(query, count=count, coordinates=coordinates)
     print("Final Search Results")
     print(formatResults(results))
 
