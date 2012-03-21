@@ -96,6 +96,7 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
             {
                 'name'  : album['collectionName'],
                 'key'   : str(album['collectionId']),
+                'data'  : album,
             }
                 for album in results if album.pop('collectionType',None) == 'Album' ]
 
@@ -113,6 +114,7 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
             {
                 'name':track['trackName'],
                 'key':track['trackId'],
+                'data':track,
             }
                 for track in results if track.pop('wrapperType',None) == 'track'
         ]
@@ -398,11 +400,11 @@ class iTunesSource(GenericSource):
                 'timestamp'     : controller.now,
                 'song_mangled' : trackSimplify(track['name']),
             }
-            query = iTunesTrack(track['key'])
-            source = self.__stamped.matchSource(query)
-            results = self.__resolver.resolve(query, source)
-            if len(results) > 0 and results[0][0]['resolved']:
-                info['entity_id'] = results[0][1].key
+            #query = iTunesTrack(data=track['data'])
+            #source = self.__stamped.matchSource(query)
+            #results = self.__resolver.resolve(query, source)
+            #if len(results) > 0 and results[0][0]['resolved']:
+            #    info['entity_id'] = results[0][1].key
             new_songs.append(info)
         entity['songs'] = new_songs
 
@@ -482,7 +484,7 @@ class iTunesSource(GenericSource):
                 result = tracks[start:]
             else:
                 result = []
-            return [ iTunesTrack( entry['trackId'] ) for entry in result ]
+            return [ iTunesTrack( data=entry ) for entry in result ]
         return source
     
     def albumSource(self, query):
@@ -494,7 +496,7 @@ class iTunesSource(GenericSource):
                 result = albums[start:]
             else:
                 result = []
-            return [ iTunesAlbum( entry['collectionId'] ) for entry in result ]
+            return [ iTunesAlbum( data=entry ) for entry in result ]
         return source
 
     def artistSource(self, query):
@@ -506,7 +508,7 @@ class iTunesSource(GenericSource):
                 result = artists[start:]
             else:
                 result = []
-            return [ iTunesArtist( entry['artistId'] ) for entry in result ]
+            return [ iTunesArtist( data=entry ) for entry in result ]
         return source
 
     def movieSource(self, query):
@@ -518,7 +520,7 @@ class iTunesSource(GenericSource):
                 result = movies[start:]
             else:
                 result = []
-            return [ iTunesMovie( entry['trackId'] ) for entry in result ]
+            return [ iTunesMovie( data=entry ) for entry in result ]
         return source
 
     def bookSource(self, query):
@@ -530,7 +532,7 @@ class iTunesSource(GenericSource):
                 result = movies[start:]
             else:
                 result = []
-            return [ iTunesBook( entry['trackId'] ) for entry in result ]
+            return [ iTunesBook( data=entry ) for entry in result ]
         return source
 
     def __createWrapper(self, value):
