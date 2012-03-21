@@ -818,15 +818,10 @@ class Resolver(object):
 
     def setComparison(self, a, b, options):
         score = setComparison(a, b, options['symmetric'])
-        print '%60s %s' % (b, score)
         if options['negative'] and not options['symmetric']:
-            print 'CHECK NEGATIVE'
             for word, weight in _negative_weights.iteritems():
                 if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
-                    print 'REMOVE %s' % word
                     score = score * (1.0 - abs(weight))
-        print score
-        print 
         return score
 
     def albumSimplify(self, album):
@@ -1247,9 +1242,7 @@ class Resolver(object):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
         
-        score = self.setComparison(set(query.query_string.split()), set(match.keywords), options)
-        score = score + self.negative
-        return score
+        return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
     
     def __keywordsWeight(self, query, match, tests, options):
         if len(query.keywords) > 0:

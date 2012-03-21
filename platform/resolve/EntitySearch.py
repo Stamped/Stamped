@@ -115,4 +115,25 @@ if __name__ == '__main__':
         count = int(sys.argv[2])
     results = EntitySearch().search(query, count=count)
     print("Final Search Results")
-    pprint.pprint(results)
+    n = len(results)
+    # for result in results:
+    for i in range(len(results)):
+        result = results[n - 1]
+        print '\n%3s %s' % (n, '=' * 37)
+        scores = result[0]
+        weights = scores['weights']
+        total_weight = 0.0
+        for k, v in weights.iteritems():
+            total_weight = total_weight + float(v)
+        print '%16s   Val     Wght     Total' % ' '
+        for k, v in weights.iteritems():
+            s = float(scores[k])
+            w = float(weights[k])
+            t = 0
+            if total_weight > 0:
+                t = s * w / total_weight
+            print '%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t)
+        print ' ' * 36, '%.2f' % scores['total']
+        pprint.pprint(result[1])
+        n = n - 1
+
