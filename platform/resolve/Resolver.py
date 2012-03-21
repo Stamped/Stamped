@@ -1104,7 +1104,7 @@ class Resolver(object):
             'name':                 lambda q, m, s, o: 5,
             'location':             lambda q, m, s, o: 0,
             'subcategory':          lambda q, m, s, o: 0,
-            'priority':             lambda q, m, s, o: 0,
+            'priority':             lambda q, m, s, o: 1,
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
@@ -1280,12 +1280,7 @@ class Resolver(object):
         return 0
 
     def __nameTest(self, query, match, tests, options):
-        if query.name == '':
-            if query.query_string == match.name:
-                return 1
-            elif query.query_string.find(match.name) != -1:
-                return .75
-        return 0
+        return stringComparison(query.query_string, match.name)
         
     def __locationTest(self, query, match, tests, options):
         return 0
@@ -1318,10 +1313,9 @@ class Resolver(object):
         return self.termComparison(query.query_string, match.related_terms, options)
 
     def __relatedTermsWeight(self, query, match, tests, options):
-        if len(query.related_terms) > 0:
-            return self.__setWeight(set(query.related_terms), set(match.related_terms))
-        else:
-            return len(query.query_string.split())
+        if len(match.related_terms) == 0:
+            return 1
+        return 5
 
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
