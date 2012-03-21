@@ -40,6 +40,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
+#warning Set to NO to revert to old.
 BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
@@ -708,6 +709,9 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)addSectionStampedBy {
   // Make sure that the current user follows someone who stamped this entity.
   NSSet* following = [[AccountManager sharedManager].currentUser following];
+  if (!following)
+    following = [NSSet set];
+
   NSPredicate* p = [NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)

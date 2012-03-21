@@ -214,7 +214,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)showListView {
-  NSLog(@"List view: %@", listView_);
   [self.view insertSubview:listView_ atIndex:0];
   [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view

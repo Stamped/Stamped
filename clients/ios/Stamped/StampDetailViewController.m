@@ -411,6 +411,9 @@ typedef enum {
   NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   NSString* excludedUserID = stamp_.user.userID;
   NSSet* following = [[AccountManager sharedManager].currentUser following];
+  if (!following)
+    following = [NSSet set];
+
   NSPredicate* p = [NSPredicate predicateWithFormat:@"deleted == NO AND user IN %@ AND user.userID != %@", following, excludedUserID];
   return [stampsArray filteredArrayUsingPredicate:p];
 }

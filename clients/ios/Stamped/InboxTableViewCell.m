@@ -586,6 +586,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
     NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     NSSet* following = [[AccountManager sharedManager].currentUser following];
+    if (!following)
+      following = [NSSet set];
     stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
     customView_.stamps = stampsArray;
     

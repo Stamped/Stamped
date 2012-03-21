@@ -291,6 +291,9 @@ static const NSUInteger kSpaceHeight = 10;
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   NSSet* following = [[AccountManager sharedManager].currentUser following];
+  if (!following)
+    following = [NSSet set];
+
   stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
 
   [stamps_ release];

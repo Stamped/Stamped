@@ -54,14 +54,44 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize fetchedResultsController = fetchedResultsController_;
 @synthesize selectedIndexPath = selectedIndexPath_;
 
+- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    [[AccountManager sharedManager] addObserver:self
+                                     forKeyPath:@"currentUser.following"
+                                        options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld)
+                                        context:NULL];
+  }
+  return self;
+}
+
 - (void)dealloc {
+  [[AccountManager sharedManager] removeObserver:self forKeyPath:@"currentUser.following"];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.searchQuery = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   self.selectedIndexPath = nil;
+
   [super dealloc];
+}
+
+#pragma mark - KVO
+
+- (void)observeValueForKeyPath:(NSString*)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary*)change
+                       context:(void*)context {
+  id old = [change objectForKey:NSKeyValueChangeOldKey];
+  id new = [change objectForKey:NSKeyValueChangeNewKey];
+  if (old == new)
+    return;
+
+  if ([keyPath isEqualToString:@"currentUser.following"]) {
+    if (new != [NSNull null])
+      [self filterStamps];
+  }
 }
 
 #pragma mark - View lifecycle
@@ -197,6 +227,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     NSSet* following = [[AccountManager sharedManager].currentUser following];
+    if (!following)
+      following = [NSSet set];
+
     [request setPredicate:
         [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
     [request setFetchBatchSize:20];
@@ -266,8 +299,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - Filter/Search stuff.
 
 - (void)filterStamps {
+  if (!fetchedResultsController_)
+    return;
+
   NSMutableArray* predicates = [NSMutableArray array];
   NSSet* following = [[AccountManager sharedManager].currentUser following];
+  if (!following)
+    following = [NSSet set];
   [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
 
   if (searchQuery_.length) {
@@ -423,6 +461,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     NSSet* following = [[AccountManager sharedManager].currentUser following];
+    if (!following)
+      following = [NSSet set];
+
     sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
     stamp = [sortedStamps lastObject];
   } else {
