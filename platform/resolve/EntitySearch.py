@@ -27,6 +27,7 @@ try:
     from iTunesSource               import iTunesSource
     from RdioSource                 import RdioSource
     from StampedSource              import StampedSource
+    from FactualSource              import FactualSource
     from time                       import time
 except:
     report()
@@ -77,6 +78,7 @@ class EntitySearch(object):
             'itunes':iTunesSource().matchSource(query),
             'rdio':RdioSource().matchSource(query),
             'stamped':StampedSource().matchSource(query),
+            'factual':FactualSource().matchSource(query),
         }
         results_list = []
         pool = Pool(len(sources))

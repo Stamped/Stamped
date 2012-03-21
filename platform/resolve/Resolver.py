@@ -17,6 +17,8 @@ __all__ = [
     'ResolverArtist',
     'ResolverAlbum',
     'ResolverTrack',
+    'ResolverPlace',
+    'ResolverRestaurant',
     'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
@@ -400,6 +402,14 @@ class ResolverObject(object):
     def priority(self):
         return 0
 
+    @property
+    def coordinates(self):
+        return None
+
+    @property
+    def address(self):
+        return {}
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -443,6 +453,14 @@ class ResolverProxy(object):
     @property 
     def related_terms(self):
         return self.target.related_terms
+
+    @property
+    def coordinates(self):
+        return self.target.coordinates
+
+    @property
+    def address(self):
+        return self.target.address
 
 class SimpleResolverObject(ResolverObject):
 
@@ -820,6 +838,51 @@ class ResolverBook(ResolverObject):
             v for v in l if v != ''
         ]
 
+class ResolverPlace(ResolverObject):
+    """
+    Interface for place objects
+
+    Attributes:
+
+    TODO
+    """
+    @property
+    def coordinates(self):
+        return None
+
+    @property
+    def address(self):
+        return {}
+
+    @property
+    def phone_number(self):
+        return None
+
+    @property
+    def email(self):
+        return None
+
+    @property 
+    def type(self):
+        return 'place'
+
+class ResolverRestaurant(ResolverPlace):
+    """
+    Interface for restaurant objects
+
+    Attributes:
+
+    TODO
+    """
+    @property 
+    def cuisines(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'restaurant'
+
+
 ##
 # Main Resolver class
 ##
@@ -1009,6 +1072,12 @@ class Resolver(object):
         """
         return self.nameComparison(q['name'], m['name'])
 
+    def placeComparison(self, q, m):
+        """
+        Place specific comparison metric.
+        """
+        return self.nameComparison(q['name'], m['name'])
+
     def checkArtist(self, results, query, match, options):
         tests = [
             ('name', lambda q, m, s, o: self.artistComparison(q.name, m.name)),
@@ -1087,6 +1156,17 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
+    def checkPlace(self, results, query, match, options):
+        tests = [
+            ('name',        lambda q, m, s, o: self.placeComparison(q.name, m.name)),
+            ('location',    self.__locationTest),
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
+            'location':     0,
+        }
+        self.genericCheck(tests, weights, results, query, match, options)
+
     def checkSearchAll(self, results, query, match, options):
         tests = [
             ('query_string',        self.__queryStringTest),
@@ -1097,7 +1177,6 @@ class Resolver(object):
             ('source_priority',     lambda q, m, s, o: 1),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
-
         ]
         weights = {
             'query_string':         lambda q, m, s, o: 0,
@@ -1265,6 +1344,8 @@ class Resolver(object):
                 options['check'] = self.checkMovie
             elif query.type =='book':
                 options['check'] = self.checkBook
+            elif query.type =='place':
+                options['check'] = self.checkPlace
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:
@@ -1409,9 +1490,9 @@ class Resolver(object):
         success = True
         for name,test in tests:
             try:
-                #before = time()
+                before = time()
                 comparison = float(test(query, match, similarities, options))
-                #print(time()-before)
+                #print("%.8f - test time for %s" %(time()-before, name))
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise

@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'FactualSource' ]
+__all__ = [ 'FactualSource', 'FactualPlace' ]
 
 import Globals
 from logs import report
@@ -16,12 +16,14 @@ from logs import report
 try:
     from BasicSource    import BasicSource
     from libs.Factual       import globalFactual
+    from Resolver           import *
     from utils              import lazyProperty
     from functools          import partial
     import json
     import logs
     import re
     from urllib2             import HTTPError
+    from GenericSource      import generatorSource
 except:
     report()
     raise
@@ -37,6 +39,73 @@ def _path(path,data):
 
 def _ppath(*args):
     return partial(_path,args)
+
+
+class FactualPlace(ResolverPlace):
+
+    def __init__(self, factual_id=None, data=None):
+        if factual_id is None and data is None:
+            raise ValueError("must have id or data")
+        ResolverPlace.__init__(self)
+        self.__factual_id = factual_id
+        self.__data = data
+
+    @lazyProperty
+    def factual(self):
+        return globalFactual()
+
+    @lazyProperty
+    def key(self):
+        if self.__factual_id is None:
+            return self.data['factual_id']
+        else:
+            return self.__factual_id
+
+    @lazyProperty
+    def data(self):
+        if self.__data is None:
+            return self.factual.data(self.key)
+        else:
+            return self.__data
+
+    @lazyProperty
+    def name(self):
+        return self.data['name']
+
+    @lazyProperty
+    def coordinates(self):
+        return (self.data['latitude'], self.data['longitude'])
+    
+    @lazyProperty
+    def address(self):
+        return {
+            k2: self.data[k1]
+                for k1, k2 in {
+                    'address':'street',
+                    'country':'country',
+                    'locality':'locality',
+                    'postcode':'postcode',
+                    'region':'region',
+                    'country':'country',
+                }.items()
+                    if k1 in self.data
+        }
+
+    @property 
+    def source(self):
+        return 'factual'
+
+
+class FactualSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 
 class FactualSource(BasicSource):
     """
@@ -75,6 +144,23 @@ class FactualSource(BasicSource):
     @lazyProperty
     def __factual(self):
         return globalFactual()
+
+    def matchSource(self, query):
+        if query.type == 'search_all':
+            return self.searchAllSource(query)
+        else:
+            raise Exception()
+
+    def searchAllSource(self, query):
+        def gen():
+            try:
+                results = self.__factual.search(query.query_string)
+                for result in results:
+                    yield FactualPlace(data=result)
+            except GeneratorExit:
+                pass
+        return generatorSource(gen(), constructor=FactualSearchAll)
+
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
@@ -168,3 +254,5 @@ class FactualSource(BasicSource):
 
         return True
 
+if __name__ == '__main__':
+    print("here")
