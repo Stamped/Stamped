@@ -32,6 +32,7 @@ __all__ = [
     'nameSimplify',
     'stringComparison',
     'setComparison',
+    'formatResults',
 ]
 
 import Globals
@@ -307,6 +308,31 @@ def setComparison(a, b, symmetric=False, strict=False):
 
     else:
         return asymmetricComparison(a, b)
+
+def formatResults(results):
+    n = len(results)
+    l = []
+    # for result in results:
+    for i in range(len(results)):
+        result = results[n - 1]
+        l.append('\n%3s %s' % (n, '=' * 37))
+        scores = result[0]
+        weights = scores['weights']
+        total_weight = 0.0
+        for k, v in weights.iteritems():
+            total_weight = total_weight + float(v)
+        l.append('%16s   Val     Wght     Total' % ' ')
+        for k, v in weights.iteritems():
+            s = float(scores[k])
+            w = float(weights[k])
+            t = 0
+            if total_weight > 0:
+                t = s * w / total_weight
+            l.append('%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t))
+        l.append(' ' * 36 + '%.2f' % scores['total'])
+        l.append(str(result[1]))
+        n = n - 1
+    return '\n'.join(l)
 
 
 class ResolverObject(object):

@@ -25,6 +25,7 @@ try:
     from bson                       import ObjectId
     from iTunesSource               import iTunesSource
     from RdioSource                 import RdioSource
+    from time                       import time
 except:
     report()
     raise
@@ -67,42 +68,53 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
+        before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
         sources = {
             'itunes':iTunesSource().matchSource(query),
             'rdio':RdioSource().matchSource(query),
         }
-        def gen():
-            try:
-                all_results = {}
-                for name,source in sources.items():
-                    source_results = self.__resolver.resolve(query, source, count=count)
-                    all_results[name] = source_results
-                while True:
-                    best = None
-                    best_name = None
-                    for name,results in list(all_results.items()):
-                        if len(results) == 0:
-                            del all_results[name]
-                        else:
-                            cur_best = results[0]
-                            if best is None or cur_best[0]['total'] > best[0]['total']:
-                                best = cur_best
-                                best_name = name
-                            else:
-                                print("skipped %s with value %s" % (name, cur_best[0]['total']))
-                    if best is not None:
-                        del all_results[best_name][0]
-                        print("Chose %s with value %s" % (best_name, best[0]['total']))
-                        yield best[1]
+        all_results = {}
+        total = 0
+        for name,source in sources.items():
+            source_results = self.__resolver.resolve(query, source, count=count)
+            all_results[name] = source_results
+            total += len(source_results)
+        print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (total, time() - before, ' '.join(all_results.keys())))
+        before2 = time()
+        chosen = []
+        while True:
+            best = None
+            best_name = None
+            for name,results in list(all_results.items()):
+                if len(results) == 0:
+                    del all_results[name]
+                else:
+                    cur_best = results[0]
+                    if best is None or cur_best[0]['total'] > best[0]['total']:
+                        best = cur_best
+                        best_name = name
                     else:
-                        break
-            except GeneratorExit:
-                pass
-        
-        final_results = self.__resolver.resolve(query, generatorSource(gen()), count=count)
-        return final_results
+                        print("skipped %s with value %s" % (name, cur_best[0]['total']))
+            if best is not None:
+                del all_results[best_name][0]
+                print("Chose %s with value %s" % (best_name, best[0]['total']))
+                cur = best[1]
+                def dedup():
+                    for entry in chosen:
+                        target = entry[1].target
+                        if target.type == cur.target.type:
+                            yield target
+                dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
+                if len(dups) == 0 or not dups[0][0]['resolved']:
+                    chosen.append(best)
+                else:
+                    print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+            else:
+                break
+        print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
+        return chosen
   
 if __name__ == '__main__':
     import sys
@@ -115,25 +127,5 @@ if __name__ == '__main__':
         count = int(sys.argv[2])
     results = EntitySearch().search(query, count=count)
     print("Final Search Results")
-    n = len(results)
-    # for result in results:
-    for i in range(len(results)):
-        result = results[n - 1]
-        print '\n%3s %s' % (n, '=' * 37)
-        scores = result[0]
-        weights = scores['weights']
-        total_weight = 0.0
-        for k, v in weights.iteritems():
-            total_weight = total_weight + float(v)
-        print '%16s   Val     Wght     Total' % ' '
-        for k, v in weights.iteritems():
-            s = float(scores[k])
-            w = float(weights[k])
-            t = 0
-            if total_weight > 0:
-                t = s * w / total_weight
-            print '%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t)
-        print ' ' * 36, '%.2f' % scores['total']
-        pprint.pprint(result[1])
-        n = n - 1
+    print(formatResults(results))
 
