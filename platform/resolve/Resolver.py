@@ -1279,12 +1279,7 @@ class Resolver(object):
         return 0
 
     def __nameTest(self, query, match, tests, options):
-        if query.name == '':
-            if query.query_string == match.name:
-                return 1
-            elif query.query_string.find(match.name) != -1:
-                return .75
-        return 0
+        return stringComparison(query.query_string, match.name)
         
     def __locationTest(self, query, match, tests, options):
         return 0
