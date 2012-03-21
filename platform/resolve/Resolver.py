@@ -38,10 +38,10 @@ import Globals
 from logs import report
 
 try:
+    import re, string
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
     import logs
-    import re
     from pprint                     import pprint, pformat
     import sys
     from Entity                     import getSimplifiedTitle
@@ -80,7 +80,7 @@ _general_regex_removals = [
 # track-specific removal patterns
 _track_removals = [
     (r'^(the ).*$'      , [1]),
-    (r'.*(-.* (remix|mix|version|edit|dub)$)'  , [1]),
+    (r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm)$)'  , [1]),
 ]
 
 # album-specific removal patterns
@@ -104,6 +104,21 @@ _movie_removals = [
     (r'^(the ).*$'      , [1]),
     (r'^.*( band)'      , [1]),
 ]
+
+# blacklist words and score
+_negative_weights = {
+    'remix'         : 0.1,
+    're-mix'        : 0.1,
+    'mix'           : 0.1,
+    'cover'         : 0.2,
+    'tribute'       : 0.2,
+    'version'       : 0.1,
+    'audiobook'     : 0.2,
+    'instrumental'  : 0.1,
+    'karaoke'       : 0.2,
+}
+
+punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
 
 def regexRemoval(string, patterns):
     """
@@ -335,6 +350,7 @@ class ResolverObject(object):
     def keywords(self):
         words = set()
         for term in self.related_terms:
+            term = punctuation_re.sub(' ', term)
             for w in term.split():
                 if w != '':
                     words.add(w)
@@ -801,7 +817,12 @@ class Resolver(object):
         return self.__verbose
 
     def setComparison(self, a, b, options):
-        return setComparison(a, b) 
+        score = setComparison(a, b, options['symmetric'])
+        if options['negative'] and not options['symmetric']:
+            for word, weight in _negative_weights.iteritems():
+                if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
+                    score = score * (1.0 - abs(weight))
+        return score
 
     def albumSimplify(self, album):
         """
@@ -1104,6 +1125,8 @@ class Resolver(object):
 
         count -  a positive integer indicating the desired minimum result size (results may be smaller if the source is limited)
         max - a positive integer that sets the maximum number of results to return
+        symmetric - a boolean which denotes if the comparison should by symmetric (i.e. a to b == b to a)
+        negative - a boolean which denotes if negative weights should be used
         resolvedComparison -  a float which indicates a simple cutoff total comparison to consider something resolved
         pool - a positive integer indicating the size of the gevent pool to be used (use 1 for sequential)
         mins - an attribute-comparison dict which can be used to prune matches (useful for reducing execution time)
@@ -1114,6 +1137,8 @@ class Resolver(object):
             options['strict'] = False
         if 'symmetric' not in options:
             options['symmetric'] = False
+        if 'negative' not in options:
+            options['negative'] = True
         if 'max' not in options:
             options['max'] = 1000000
         if 'resolvedComparison' not in options:
@@ -1216,8 +1241,8 @@ class Resolver(object):
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
-        else:
-            return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
+        
+        return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
     
     def __keywordsWeight(self, query, match, tests, options):
         if len(query.keywords) > 0:
