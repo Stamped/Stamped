@@ -254,7 +254,8 @@ class Factual(object):
         self.__max_resolve_age = timedelta(30)
 
     def search(self, query, limit=_limit):
-        return self.__factual('global',prefix='t',limit=limit,q=urllib.quote(query))
+        return self.__factual('global',prefix='t',limit=limit,q=urllib.quote(query),
+            filters=urllib.quote(json.dumps({"category":{"$bw":"Food & Beverage"}})))
 
 
     def resolve(self, data,limit=_limit):

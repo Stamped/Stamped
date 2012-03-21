@@ -24,6 +24,7 @@ try:
     import re
     from urllib2             import HTTPError
     from GenericSource      import generatorSource
+    from pprint             import pformat
 except:
     report()
     raise
@@ -74,7 +75,10 @@ class FactualPlace(ResolverPlace):
 
     @lazyProperty
     def coordinates(self):
-        return (self.data['latitude'], self.data['longitude'])
+        try:
+            return (self.data['latitude'], self.data['longitude'])
+        except Exception:
+            return None
     
     @lazyProperty
     def address(self):
@@ -94,6 +98,9 @@ class FactualPlace(ResolverPlace):
     @property 
     def source(self):
         return 'factual'
+
+    def __repr__(self):
+        return pformat(self.data)
 
 
 class FactualSearchAll(ResolverProxy, ResolverSearchAll):

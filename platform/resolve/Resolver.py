@@ -55,6 +55,7 @@ try:
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
+    import utils
 except:
     report()
     raise
@@ -844,16 +845,9 @@ class ResolverPlace(ResolverObject):
 
     TODO
     """
-    @property
-    def coordinates(self):
-        return None
 
     @property
-    def address(self):
-        return {}
-
-    @property
-    def phone_number(self):
+    def phone(self):
         return None
 
     @property
@@ -863,6 +857,18 @@ class ResolverPlace(ResolverObject):
     @property 
     def type(self):
         return 'place'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+            ]
+        for k,v in self.address.items():
+            l.append(v)
+        return [
+            v for v in l if v != ''
+        ]
 
 class ResolverRestaurant(ResolverPlace):
     """
@@ -880,6 +886,18 @@ class ResolverRestaurant(ResolverPlace):
     def type(self):
         return 'restaurant'
 
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+            ]
+        for k,v in self.address.items():
+            l.append(v)
+        l.extend(self.cuisines)
+        return [
+            v for v in l if v != ''
+        ]
 
 ##
 # Main Resolver class
@@ -1156,12 +1174,12 @@ class Resolver(object):
 
     def checkPlace(self, results, query, match, options):
         tests = [
-            ('name',        lambda q, m, s, o: self.placeComparison(q.name, m.name)),
+            ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
             ('location',    self.__locationTest),
         ]
         weights = {
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
-            'location':     0,
+            'location':     lambda q, m ,s, o: 1,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1327,6 +1345,8 @@ class Resolver(object):
                 groups.extend([10, 20, 50]) 
             elif query.type == 'book':
                 groups.extend([20, 50, 100])
+            elif query.type == 'search_all':
+                groups.extend([])
             else:
                 #generic
                 groups.extend([10, 20, 50]) 
@@ -1362,13 +1382,12 @@ class Resolver(object):
         return stringComparison(query.query_string, match.name)
         
     def __locationTest(self, query, match, tests, options):
-        return 0
 
         if query.coordinates is None or match.coordinates is None:
             return 0
 
         distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
-        distance = abs(distance * earthRadius)
+        distance = abs(distance * 3959)
         
         if distance < 0 or distance > 50:
             return 0
