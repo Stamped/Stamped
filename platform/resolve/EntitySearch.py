@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource              import GenericSource
+    from GenericSource              import generatorSource
     from utils                      import lazyProperty
     import logs
     from Resolver                   import *
@@ -24,6 +24,7 @@ try:
     from datetime                   import datetime
     from bson                       import ObjectId
     from iTunesSource               import iTunesSource
+    from RdioSource                 import RdioSource
 except:
     report()
     raise
@@ -62,22 +63,45 @@ class QuerySearchAll(ResolverSearchAll):
 class EntitySearch(object):
 
     @lazyProperty
-    def searchSources(self):
-        return [iTunesSource()]
-
-    @lazyProperty
     def __resolver(self):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
         query = QuerySearchAll(query_string, coordinates)
         results = []
-        for source in self.searchSources:
-            source_results = source.resolve(query, count=count)
-            results.extend([ x[1] for x in source_results])
-        def gen(start, count):
-            return results[start:count]
-        final_results = self.__resolver.resolve(query, gen, count=count)
+        sources = {
+            'itunes':iTunesSource().matchSource(query),
+            'rdio':RdioSource().matchSource(query),
+        }
+        def gen():
+            try:
+                all_results = {}
+                for name,source in sources.items():
+                    source_results = self.__resolver.resolve(query, source, count=count)
+                    all_results[name] = source_results
+                while True:
+                    best = None
+                    best_name = None
+                    for name,results in list(all_results.items()):
+                        if len(results) == 0:
+                            del all_results[name]
+                        else:
+                            cur_best = results[0]
+                            if best is None or cur_best[0]['total'] > best[0]['total']:
+                                best = cur_best
+                                best_name = name
+                            else:
+                                print("skipped %s with value %s" % (name, cur_best[0]['total']))
+                    if best is not None:
+                        del all_results[best_name][0]
+                        print("Chose %s with value %s" % (best_name, best[0]['total']))
+                        yield best[1]
+                    else:
+                        break
+            except GeneratorExit:
+                pass
+        
+        final_results = self.__resolver.resolve(query, generatorSource(gen()), count=count)
         return final_results
   
 if __name__ == '__main__':

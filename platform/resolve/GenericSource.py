@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'GenericSource' ]
+__all__ = [ 'GenericSource', 'generatorSource' ]
 
 import Globals
 from logs import report
@@ -24,6 +24,39 @@ try:
 except:
     report()
     raise
+
+
+def generatorSource(generator, constructor=None, unique=False):
+    if constructor is None:
+        constructor = lambda x: x
+    results = []
+    if unique:
+        value_set = set()
+    def source(start, count):
+        total = start + count
+        while total - len(results) > 0:
+            try:
+                value = generator.next()
+                if unique:
+                    if value not in value_set:
+                        results.append(value)
+                        value_set.add(value)
+                else:
+                    results.append(value)
+            except StopIteration:
+                break
+
+        if start + count <= len(results):
+            result = results[start:start+count]
+        elif start < len(results):
+            result = results[start:]
+        else:
+            result = []
+        return [
+            constructor(entry)
+                for entry in result
+        ]
+    return source
 
 class GenericSource(BasicSource):
     """
@@ -54,36 +87,7 @@ class GenericSource(BasicSource):
         return self.resolver.resolve(query, self.matchSource(query), **options)
 
     def generatorSource(self, generator, constructor=None, unique=False):
-        if constructor is None:
-            constructor = lambda x: x
-        results = []
-        if unique:
-            value_set = set()
-        def source(start, count):
-            total = start + count
-            while total - len(results) > 0:
-                try:
-                    value = generator.next()
-                    if unique:
-                        if value not in value_set:
-                            results.append(value)
-                            value_set.add(value)
-                    else:
-                        results.append(value)
-                except StopIteration:
-                    break
-
-            if start + count <= len(results):
-                result = results[start:start+count]
-            elif start < len(results):
-                result = results[start:]
-            else:
-                result = []
-            return [
-                constructor(entry)
-                    for entry in result
-            ]
-        return source
+        return generatorSource(generator, constructor=constructor, unique=unique)
 
     @property
     def idField(self):

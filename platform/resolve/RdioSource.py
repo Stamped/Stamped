@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'RdioSource', 'RdioArtist', 'RdioAlbum', 'RdioTrack' ]
+__all__ = [ 'RdioSource', 'RdioArtist', 'RdioAlbum', 'RdioTrack', 'RdioSearchAll' ]
 
 import Globals
 from logs import report
@@ -141,6 +141,26 @@ class RdioTrack(_RdioObject, ResolverTrack):
         return float(self.data['duration'])
 
 
+class RdioSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, data):
+        target = None
+        t = data['type']
+        if t == 't':
+            target = RdioTrack(data=data)
+        elif t == 'a':
+            target = RdioAlbum(data=data)
+        elif t == 'r':
+            target = RdioArtist(data=data)
+        else:
+            raise ValueError("bad type for Rdio data: %s" % data)
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 class RdioSource(GenericSource):
     """
     """
@@ -168,6 +188,8 @@ class RdioSource(GenericSource):
             return self.albumSource(query)
         elif query.type == 'track':
             return self.trackSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         else:
             return self.emptySource
 
@@ -221,6 +243,32 @@ class RdioSource(GenericSource):
             else:
                 return []
         return source
+
+    def searchAllSource(self, query):
+        def gen():
+            try:
+                batches = [100]
+                offset = 0
+                for batch in batches:
+                    response = self.__rdio.method('search',
+                        query=query.query_string,
+                        types='Artist,Album,Track',
+                        extras='albumCount,label,isCompilation',
+                        start=offset,
+                        count=batch,
+                    )
+                    if response['status'] == 'ok':
+                        entries = response['result']['results']
+                        for entry in entries:
+                            print("yielding: %s" % entry['name'])
+                            yield entry
+                    else:
+                        break
+                    offset += batch
+            except GeneratorExit:
+                pass
+        return self.generatorSource(gen(), constructor=RdioSearchAll)
+
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')

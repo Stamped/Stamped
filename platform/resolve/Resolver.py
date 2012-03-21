@@ -387,9 +387,9 @@ class ResolverSearchAll(ResolverObject):
     def coordinates(self):
         return None
 
-    @abstractproperty
+    @property
     def query_string(self):
-        pass
+        return ''
 
     @property
     def subtype(self):

@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'iTunesSource', 'iTunesArtist', 'iTunesAlbum', 'iTunesTrack', 'iTunesMovie' ]
+__all__ = [ 'iTunesSource', 'iTunesArtist', 'iTunesAlbum', 'iTunesTrack', 'iTunesMovie', 'iTunesBook', 'iTunesSearchAll' ]
 
 import Globals
 from logs import report
@@ -122,8 +122,8 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
         l = [
                 self.name,
             ]
-        l.extend(self.tracks)
-        l.extend(self.albums)
+        l.extend([ track['name'] for track in self.tracks])
+        l.extend([ album['name'] for album in self.albums])
         return [
             v for v in l if v != ''
         ]
@@ -178,7 +178,7 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
                 self.name,
                 self.artist['name'],
             ]
-        l.extend(self.tracks)
+        l.extend([ track['name'] for track in self.tracks])
         return [
             v for v in l if v != ''
         ]
@@ -315,6 +315,7 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
         except KeyError:
             return ''
 
+
 class iTunesBook(_iTunesObject, ResolverBook):
 
     def __init__(self, itunes_id=None, data=None, itunes=None):
@@ -377,14 +378,6 @@ class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
     def __init__(self, target):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
-
-    @property
-    def coordinates(self):
-        return None
-
-    @property
-    def query_string(self):
-        return None
 
     @property
     def subtype(self):
@@ -574,7 +567,12 @@ class iTunesSource(GenericSource):
         return source
 
     def searchAllSource(self, query):
-        raw_results = self.__itunes.method('search',term=query.query_string)['results']
+        raw_results = self.__itunes.method(
+            'search',term=query.query_string,entity="song,musicArtist,album"
+        )['results']
+        raw_results2 = self.__itunes.method(
+            'search',term=query.query_string,entity="movie"
+        )['results']
         results = []
         for value in raw_results:
             try:
