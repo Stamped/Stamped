@@ -1036,25 +1036,25 @@ class Resolver(object):
 
     def checkSearchAll(self, results, query, match, options):
         tests = [
-            ('query_string', self.__queryStringTest),
-            ('name',self.__nameTest),
-            ('location', self.__locationTest),
-            ('subcategory', self.__subcategoryTest),
-            ('priority', lambda q, m, s, o: m.priority),
-            ('source_priority', lambda q, m, s, o: 1),
-            ('keywords', self.__keywordsTest),
-            ('related_terms', self.__relatedTermsTest),
+            ('query_string',        self.__queryStringTest),
+            ('name',                self.__nameTest),
+            ('location',            self.__locationTest),
+            ('subcategory',         self.__subcategoryTest),
+            ('priority',            lambda q, m, s, o: m.priority),
+            ('source_priority',     lambda q, m, s, o: 1),
+            ('keywords',            self.__keywordsTest),
+            ('related_terms',       self.__relatedTermsTest),
 
         ]
         weights = {
-            'query_string': lambda q, m, s, o: 0,
-            'name': lambda q, m, s, o: 5,
-            'location': lambda q, m, s, o: 0,
-            'subcategory': lambda q, m, s, o: 0,
-            'priority': lambda q, m, s, o: 0,
-            'source_priority': lambda q, m, s, o: self.__sourceWeight(m.source),
-            'keywords': self.__keywordsWeight,
-            'related_terms': self.__relatedTermsWeight,
+            'query_string':         lambda q, m, s, o: 0,
+            'name':                 lambda q, m, s, o: 5,
+            'location':             lambda q, m, s, o: 0,
+            'subcategory':          lambda q, m, s, o: 0,
+            'priority':             lambda q, m, s, o: 0,
+            'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
+            'keywords':             self.__keywordsWeight,
+            'related_terms':        self.__relatedTermsWeight,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1248,7 +1248,9 @@ class Resolver(object):
     
     def __keywordsWeight(self, query, match, tests, options):
         if len(query.keywords) > 0:
-            return self.__setWeight(set(query.keywords), set(match.keywords))
+            if len(match.keywords) == 0:
+                return 1
+            return 5
         else:
             if len(match.keywords) == 0 or query.query_string == '':
                 return 0
@@ -1260,9 +1262,13 @@ class Resolver(object):
             return len(string) / len(query.query_string)
 
     def __relatedTermsTest(self, query, match, tests, options):
+        print (query.query_string, match.related_terms)
+
         if len(query.related_terms) > 0:
             return self.setComparison(set(query.related_terms), set(match.related_terms), options)
         else:
+            return self.setComparison(set(query.query_string), set(match.related_terms), options)
+
             if len(match.related_terms) == 0 or query.query_string == '':
                 return 0
             string = query.query_string
