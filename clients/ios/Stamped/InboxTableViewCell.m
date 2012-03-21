@@ -13,6 +13,7 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
@@ -584,7 +585,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
 
     NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
+    NSSet* following = [[AccountManager sharedManager].currentUser following];
+    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
     customView_.stamps = stampsArray;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];

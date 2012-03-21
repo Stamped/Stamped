@@ -707,7 +707,8 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)addSectionStampedBy {
   // Make sure that the current user follows someone who stamped this entity.
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"];
+  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)
     return;

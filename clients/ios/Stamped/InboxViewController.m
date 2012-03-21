@@ -168,7 +168,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   for (Stamp* s in stamps) {
     Entity* e = s.entityObject;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO && deleted == NO"]];
+    NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"deleted == NO"]];
     if (filteredStamps.count == 0)
       continue;
 
@@ -196,8 +196,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    NSSet* following = [[AccountManager sharedManager].currentUser following];
     [request setPredicate:
-        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"]];
+        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
     [request setFetchBatchSize:20];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -266,7 +267,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)filterStamps {
   NSMutableArray* predicates = [NSMutableArray array];
-  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"]];
+  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
 
   if (searchQuery_.length) {
     NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
@@ -367,7 +369,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
     [request setFetchLimit:1];
     Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
 
@@ -421,7 +422,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
+    NSSet* following = [[AccountManager sharedManager].currentUser following];
+    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
     stamp = [sortedStamps lastObject];
   } else {
     stamp = [entity.stamps anyObject];

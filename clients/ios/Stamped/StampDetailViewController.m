@@ -410,7 +410,8 @@ typedef enum {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   NSString* excludedUserID = stamp_.user.userID;
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO AND user.userID != %@", excludedUserID];
+  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"deleted == NO AND user IN %@ AND user.userID != %@", following, excludedUserID];
   return [stampsArray filteredArrayUsingPredicate:p];
 }
 
