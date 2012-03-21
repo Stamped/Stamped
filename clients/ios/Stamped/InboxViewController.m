@@ -226,12 +226,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    NSSet* following = [[AccountManager sharedManager].currentUser following];
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    NSSet* following = currentUser.following;
     if (!following)
       following = [NSSet set];
 
     [request setPredicate:
-        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
+        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, ($s.user IN %@ OR $s.user.userID == %@) AND $s.deleted == NO).@count != 0)", following, currentUser.userID]];
     [request setFetchBatchSize:20];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -303,10 +304,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     return;
 
   NSMutableArray* predicates = [NSMutableArray array];
-  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
   if (!following)
     following = [NSSet set];
-  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.user IN %@ AND $s.deleted == NO).@count != 0)", following]];
+
+  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, ($s.user IN %@ OR $s.user.userID == %@) AND $s.deleted == NO).@count != 0)", following, currentUser.userID]];
 
   if (searchQuery_.length) {
     NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
@@ -460,11 +463,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    NSSet* following = [[AccountManager sharedManager].currentUser following];
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    NSSet* following = currentUser.following;
     if (!following)
       following = [NSSet set];
 
-    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
+    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
     stamp = [sortedStamps lastObject];
   } else {
     stamp = [entity.stamps anyObject];

@@ -137,8 +137,8 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)dealloc {
-  NSLog(@"releasing eDetail");
   if (newEDetail) {
+    NSLog(@"releasing eDetail");
     [self.operationQueue cancelAllOperations];
     [operationQueue_ release];
     [entityDetail_ release];
@@ -188,7 +188,6 @@ static const CGFloat kTodoBarHeight = 44.0;
     for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
       vc.delegate = nil;
     
-    [Entity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
     [sectionsDict_ release];
     [detailedEntity_ release];
   }
@@ -707,11 +706,12 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)addSectionStampedBy {
   // Make sure that the current user follows someone who stamped this entity.
-  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
   if (!following)
     following = [NSSet set];
 
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following];
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)
     return;

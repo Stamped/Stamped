@@ -585,10 +585,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
 
     NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    NSSet* following = [[AccountManager sharedManager].currentUser following];
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    NSSet* following = currentUser.following;
     if (!following)
       following = [NSSet set];
-    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
+
+    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
     customView_.stamps = stampsArray;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];

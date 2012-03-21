@@ -1367,9 +1367,11 @@ typedef enum {
 #pragma mark - FindFriendsToolbarDelegate methods.
 
 - (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button {
-  [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
-                        atScrollPosition:UITableViewScrollPositionTop
-                                animated:YES];
+  if (tableView_.numberOfSections > 1) {
+    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
+                          atScrollPosition:UITableViewScrollPositionTop
+                                  animated:YES];
+  }
 }
 
 - (void)toolbar:(FindFriendsToolbar*)toolbar previewButtonPressed:(UIButton*)button {

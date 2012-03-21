@@ -290,11 +290,12 @@ static const NSUInteger kSpaceHeight = 10;
 - (void)addImagesForStamps:(NSSet*)newStamps {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  NSSet* following = [[AccountManager sharedManager].currentUser following];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
   if (!following)
     following = [NSSet set];
 
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"user IN %@ AND deleted == NO", following]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
 
   [stamps_ release];
   stamps_ = [stampsArray retain];
