@@ -990,6 +990,10 @@ class Resolver(object):
         """
         if 'count' not in options:
             options['count'] = 1
+        if 'strict' not in options:
+            options['strict'] = False
+        if 'symmetric' not in options:
+            options['symmetric'] = False
         if 'max' not in options:
             options['max'] = 1000000
         if 'resolvedSimilarity' not in options:

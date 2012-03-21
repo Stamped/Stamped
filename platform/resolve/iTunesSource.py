@@ -578,12 +578,20 @@ class iTunesSource(GenericSource):
         results = []
         for value in raw_results:
             try:
-                if value['wrapperType'] == 'track' and value['kind'] == 'song':
-                    results.append(iTunesTrack(data=value))
-                if value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
-                    results.append(iTunesAlbum(data=value))
-                if value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
-                    results.append(iTunesArtist(data=value))
+                if 'wrapperType' in value:
+                    if value['wrapperType'] == 'track' and value['kind'] == 'song':
+                        results.append(iTunesTrack(data=value))
+                    elif value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
+                        results.append(iTunesAlbum(data=value))
+                    elif value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
+                        results.append(iTunesArtist(data=value))
+                    elif value['wrapperType'] == 'track' and value['kind'] == 'song':
+                        results.append(iTunesMovie(data=value))
+                    elif value['wrapperType'] == 'track' and value['kind'] == 'song':
+                        results.append(iTunesMovie(data=value))
+                else:
+                    if value['kind'] == 'ebook':
+                        results.append(iTunesBook(data=value))
             except Exception:
                 logs.info('Malformed iTunes output:\n%s' % pformat(value))
         def source(start, count):
