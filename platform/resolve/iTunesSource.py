@@ -117,17 +117,6 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
                 for track in results if track.pop('wrapperType',None) == 'track'
         ]
 
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.name,
-            ]
-        l.extend([ track['name'] for track in self.tracks])
-        l.extend([ album['name'] for album in self.albums])
-        return [
-            v for v in l if v != ''
-        ]
-
 class iTunesAlbum(_iTunesObject, ResolverAlbum):
     """
     iTunes album wrapper
@@ -170,17 +159,6 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
                 'name':track['trackName'],
             }
                 for track in results if track.pop('wrapperType',None) == 'track' 
-        ]
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.name,
-                self.artist['name'],
-            ]
-        l.extend([ track['name'] for track in self.tracks])
-        return [
-            v for v in l if v != ''
         ]
 
 
@@ -232,16 +210,6 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
     def length(self):
         return float(self.data['trackTimeMillis']) / 1000
 
-    @lazyProperty
-    def related_terms(self):
-        return [
-            v for v in [
-                self.name,
-                self.artist['name'],
-                self.album['name'],
-            ]
-                if v != ''
-        ]
 
 class iTunesMovie(_iTunesObject, ResolverMovie):
     """
@@ -314,7 +282,6 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
             return self.data['longDescription']
         except KeyError:
             return ''
-
 
 class iTunesBook(_iTunesObject, ResolverBook):
 

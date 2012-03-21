@@ -245,30 +245,34 @@ class RdioSource(GenericSource):
         return source
 
     def searchAllSource(self, query):
+        return self.generatorSource(self.__queryGen(
+                query=query.query_string,
+                types='Artist,Album,Track',
+                extras='albumCount,label,isCompilation',
+            ),
+            constructor=RdioSearchAll)
+
+    def __queryGen(self, batches=(100,), **params):
         def gen():
             try:
                 batches = [100]
                 offset = 0
                 for batch in batches:
                     response = self.__rdio.method('search',
-                        query=query.query_string,
-                        types='Artist,Album,Track',
-                        extras='albumCount,label,isCompilation',
                         start=offset,
                         count=batch,
+                        **params
                     )
                     if response['status'] == 'ok':
                         entries = response['result']['results']
                         for entry in entries:
-                            print("yielding: %s" % entry['name'])
                             yield entry
                     else:
                         break
                     offset += batch
             except GeneratorExit:
                 pass
-        return self.generatorSource(gen(), constructor=RdioSearchAll)
-
+        return gen()
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')

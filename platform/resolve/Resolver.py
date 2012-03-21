@@ -429,6 +429,16 @@ class ResolverArtist(ResolverObject):
     def type(self):
         return 'artist'
 
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.name,
+            ]
+        l.extend([ track['name'] for track in self.tracks])
+        l.extend([ album['name'] for album in self.albums])
+        return [
+            v for v in l if v != ''
+        ]
 
 #
 #       #       #       ######  #       # #     #
@@ -464,6 +474,17 @@ class ResolverAlbum(ResolverObject):
     @property 
     def type(self):
         return 'album'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.name,
+                self.artist['name'],
+            ]
+        l.extend([ track['name'] for track in self.tracks])
+        return [
+            v for v in l if v != ''
+        ]
 
 
 #
@@ -503,6 +524,18 @@ class ResolverTrack(ResolverObject):
     @property 
     def type(self):
         return 'track'
+        
+    @lazyProperty
+    def related_terms(self):
+        return [
+            v for v in [
+                self.name,
+                self.artist['name'],
+                self.album['name'],
+            ]
+                if v != ''
+        ]
+
 
 class SimpleResolverTrack(SimpleResolverObject):
     """
@@ -548,7 +581,6 @@ class SimpleResolverTrack(SimpleResolverObject):
     @property 
     def type(self):
         return 'track'
-
 #
 # Movie
 #
@@ -594,6 +626,20 @@ class ResolverMovie(ResolverObject):
     def type(self):
         return 'movie'
 
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.name,
+                self.director['name']
+            ]
+        l.extend(self.genres)
+        for actor in self.cast:
+            l.append(actor['name'])
+            if 'character' in actor:
+                l.append(actor['character'])
+        return [
+            v for v in l if v != ''
+        ]
 
 #
 # Books
