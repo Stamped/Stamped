@@ -533,41 +533,52 @@ class iTunesSource(GenericSource):
             return [ iTunesBook( entry['trackId'] ) for entry in result ]
         return source
 
-    def searchAllSource(self, query):
-        raw_results = self.__itunes.method(
-            'search',term=query.query_string,entity="song,musicArtist,album"
-        )['results']
-        raw_results2 = self.__itunes.method(
-            'search',term=query.query_string,entity="movie"
-        )['results']
-        results = []
-        for value in raw_results:
-            try:
-                if 'wrapperType' in value:
-                    if value['wrapperType'] == 'track' and value['kind'] == 'song':
-                        results.append(iTunesTrack(data=value))
-                    elif value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
-                        results.append(iTunesAlbum(data=value))
-                    elif value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
-                        results.append(iTunesArtist(data=value))
-                    elif value['wrapperType'] == 'track' and value['kind'] == 'song':
-                        results.append(iTunesMovie(data=value))
-                    elif value['wrapperType'] == 'track' and value['kind'] == 'song':
-                        results.append(iTunesMovie(data=value))
-                else:
-                    if value['kind'] == 'ebook':
-                        results.append(iTunesBook(data=value))
-            except Exception:
-                logs.info('Malformed iTunes output:\n%s' % pformat(value))
-        def source(start, count):
-            if start + count <= len(results):
-                result = results[start:start+count]
-            elif start < len(results):
-                result = results[start:]
+    def __createWrapper(self, value):
+        try:
+            if 'wrapperType' in value:
+                if value['wrapperType'] == 'track' and value['kind'] == 'song':
+                    return iTunesTrack(data=value)
+                elif value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
+                    return iTunesAlbum(data=value)
+                elif value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
+                    return iTunesArtist(data=value)
+                elif value['wrapperType'] == 'track' and value['kind'] == 'feature-movie':
+                    return iTunesMovie(data=value)
             else:
-                result = []
-            return [ iTunesSearchAll(target) for target in result ]
-        return source
+                if value['kind'] == 'ebook':
+                    return iTunesBook(data=value)
+        except Exception:
+            raise ValueError('Malformed iTunes output')
+
+    def searchAllSource(self, query):
+        def gen():
+            try:
+                raw_results = []
+                raw_results.append(self.__itunes.method(
+                    'search',term=query.query_string,entity="song,musicArtist,album"
+                )['results'])
+                raw_results.append(self.__itunes.method(
+                    'search',term=query.query_string,entity="movie"
+                )['results'])
+                raw_results.append(self.__itunes.method(
+                    'search',term=query.query_string,entity="ebook"
+                )['results'])
+                found = True
+                while found:
+                    found = False
+                    for results in raw_results:
+                        if len(results) > 0:
+                            value = results[0]
+                            del results[0]
+                            try:
+                                yield self.__createWrapper(value)
+                                found = True
+                            except ValueError:
+                                logs.info('Malformed iTunes output:\n%s' % pformat(value))
+            except GeneratorExit:
+                pass
+        return self.generatorSource( gen(), constructor=iTunesSearchAll )
+
 
 if __name__ == '__main__':
     demo(iTunesSource(), 'Katy Perry')

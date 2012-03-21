@@ -194,55 +194,28 @@ class RdioSource(GenericSource):
             return self.emptySource
 
     def trackSource(self, query):
-        name = query.name
-        def source(start, count):
-            response = self.__rdio.method('search',
-                query=name,
+        return self.generatorSource(self.__queryGen(
+                query=query.name,
                 types='Track',
                 extras='',
-                start=start,
-                count=count,
-            )
-            if response['status'] == 'ok':
-                entries = response['result']['results']
-                return [ RdioTrack( data=entry, rdio=self.__rdio ) for entry in entries ]
-            else:
-                return []
-        return source
+            ),
+            constructor=RdioTrack)
     
     def albumSource(self, query):
-        name = query.name
-        def source(start, count):
-            response = self.__rdio.method('search',
-                query=name,
+        return self.generatorSource(self.__queryGen(
+                query=query.name,
                 types='Album',
-                extras='label, isCompilation',
-                start=start,
-                count=count,
-            )
-            if response['status'] == 'ok':
-                entries = response['result']['results']
-                return [ RdioAlbum( data=entry, rdio=self.__rdio ) for entry in entries ]
-            else:
-                return []
-        return source
+                extras='label,isCompilation',
+            ),
+            constructor=RdioAlbum)
 
     def artistSource(self, query):
-        name = query.name
-        def source(start, count):
-            response = self.__rdio.method('search',
-                query=name,
+        return self.generatorSource(self.__queryGen(
+                query=query.name,
                 types='Artist',
                 extras='albumCount',
-                start=start,
-                count=count,
-            )
-            if response['status'] == 'ok':
-                entries = response['result']['results']
-                return [ RdioArtist( data=entry, rdio=self.__rdio ) for entry in entries ]
-            else:
-                return []
-        return source
+            ),
+            constructor=RdioArtist)
 
     def searchAllSource(self, query):
         return self.generatorSource(self.__queryGen(

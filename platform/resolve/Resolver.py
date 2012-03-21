@@ -504,6 +504,7 @@ class ResolverArtist(ResolverObject):
     @lazyProperty
     def related_terms(self):
         l = [
+                self.type,
                 self.name,
             ]
         l.extend([ track['name'] for track in self.tracks])
@@ -550,6 +551,7 @@ class ResolverAlbum(ResolverObject):
     @lazyProperty
     def related_terms(self):
         l = [
+                self.type,
                 self.name,
                 self.artist['name'],
             ]
@@ -601,6 +603,8 @@ class ResolverTrack(ResolverObject):
     def related_terms(self):
         return [
             v for v in [
+                self.type,
+                'song',
                 self.name,
                 self.artist['name'],
                 self.album['name'],
@@ -701,6 +705,7 @@ class ResolverMovie(ResolverObject):
     @lazyProperty
     def related_terms(self):
         l = [
+                self.type,
                 self.name,
                 self.director['name']
             ]
@@ -758,6 +763,18 @@ class ResolverBook(ResolverObject):
     @property 
     def type(self):
         return 'book'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.author['name'],
+                self.publisher['name'],
+            ]
+        return [
+            v for v in l if v != ''
+        ]
 
 ##
 # Main Resolver class
@@ -934,7 +951,7 @@ class Resolver(object):
         tests = [
             ('name', lambda q, m, s, o: self.albumComparison(q.name, m.name)),
             ('artist', lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
-            ('tracks', lambda q, m, s, o: self.tracksComparison(q, m)),
+            ('tracks', lambda q, m, s, o: self.tracksComparison(q, m, o)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
