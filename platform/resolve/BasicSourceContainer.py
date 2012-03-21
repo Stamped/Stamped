@@ -68,6 +68,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         copy.importData(entity.value)
                         timestamps = {}
                         localDecorations = {}
+                        logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
                         try:
                             enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
                             if enriched:

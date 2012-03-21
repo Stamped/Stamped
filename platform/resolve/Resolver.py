@@ -32,6 +32,7 @@ __all__ = [
     'nameSimplify',
     'stringComparison',
     'setComparison',
+    'formatResults',
 ]
 
 import Globals
@@ -51,6 +52,7 @@ try:
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
+    from time                       import time
 except:
     report()
     raise
@@ -116,6 +118,12 @@ _negative_weights = {
     'audiobook'     : 0.2,
     'instrumental'  : 0.1,
     'karaoke'       : 0.2,
+    'vhs'           : 0.2,
+    'dvd'           : 0.2,
+    'blu-ray'       : 0.2,
+    'bluray'        : 0.2,
+    'season'        : 0.1,
+    'edition'       : 0.05,
 }
 
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
@@ -306,6 +314,32 @@ def setComparison(a, b, symmetric=False, strict=False):
 
     else:
         return asymmetricComparison(a, b)
+
+def formatResults(results):
+    n = len(results)
+    l = []
+    # for result in results:
+    for i in range(len(results)):
+        result = results[n - 1]
+        l.append('\n%3s %s' % (n, '=' * 37))
+        scores = result[0]
+        weights = scores['weights']
+        total_weight = 0.0
+        for k, v in weights.iteritems():
+            total_weight = total_weight + float(v)
+        l.append('%16s   Val     Wght     Total' % ' ')
+        for k, v in weights.iteritems():
+            s = float(scores[k])
+            w = float(weights[k])
+            t = 0
+            if total_weight > 0:
+                t = s * w / total_weight
+            l.append('%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t))
+        l.append(' ' * 36 + '%.2f' % scores['total'])
+        l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
+        l.append(str(result[1]))
+        n = n - 1
+    return '\n'.join(l)
 
 
 class ResolverObject(object):
@@ -818,16 +852,37 @@ class Resolver(object):
 
     def setComparison(self, a, b, options):
         score = setComparison(a, b, options['symmetric'])
-        print '%60s %s' % (b, score)
         if options['negative'] and not options['symmetric']:
-            print 'CHECK NEGATIVE'
             for word, weight in _negative_weights.iteritems():
                 if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
-                    print 'REMOVE %s' % word
                     score = score * (1.0 - abs(weight))
-        print score
-        print 
         return score
+
+    def termComparison(self, query, terms, options):
+        def checkTerms(query, valid):
+            maxLenTerms = 0
+            for term in valid:
+                lenTerms = 0
+                a = query.split(term)
+                if len(a) > 1:
+                    lenTerms = len(term)
+                    for section in a:
+                        if section == ' ':
+                            lenTerms = lenTerms + 1
+                        elif len(section) > 0:
+                            lenTerms = lenTerms + checkTerms(section, valid)
+                if lenTerms > maxLenTerms:
+                    maxLenTerms = lenTerms
+            return maxLenTerms
+
+        def score(query, terms):
+            valid = []
+            for term in terms:
+                if term.lower() in query.lower():
+                    valid.append(term.lower())
+            return checkTerms(query.lower(), valid) * 1.0 / len(query)
+
+        return score(query, terms)
 
     def albumSimplify(self, album):
         """
@@ -1040,25 +1095,25 @@ class Resolver(object):
 
     def checkSearchAll(self, results, query, match, options):
         tests = [
-            ('query_string', self.__queryStringTest),
-            ('name',self.__nameTest),
-            ('location', self.__locationTest),
-            ('subcategory', self.__subcategoryTest),
-            ('priority', lambda q, m, s, o: m.priority),
-            ('source_priority', lambda q, m, s, o: 1),
-            ('keywords', self.__keywordsTest),
-            ('related_terms', self.__relatedTermsTest),
+            ('query_string',        self.__queryStringTest),
+            ('name',                self.__nameTest),
+            ('location',            self.__locationTest),
+            ('subcategory',         self.__subcategoryTest),
+            ('priority',            lambda q, m, s, o: m.priority),
+            ('source_priority',     lambda q, m, s, o: 1),
+            ('keywords',            self.__keywordsTest),
+            ('related_terms',       self.__relatedTermsTest),
 
         ]
         weights = {
-            'query_string': lambda q, m, s, o: 0,
-            'name': lambda q, m, s, o: 5,
-            'location': lambda q, m, s, o: 0,
-            'subcategory': lambda q, m, s, o: 0,
-            'priority': lambda q, m, s, o: 0,
-            'source_priority': lambda q, m, s, o: self.__sourceWeight(m.source),
-            'keywords': self.__keywordsWeight,
-            'related_terms': self.__relatedTermsWeight,
+            'query_string':         lambda q, m, s, o: 0,
+            'name':                 lambda q, m, s, o: 5,
+            'location':             lambda q, m, s, o: 0,
+            'subcategory':          lambda q, m, s, o: 0,
+            'priority':             lambda q, m, s, o: 1,
+            'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
+            'keywords':             self.__keywordsWeight,
+            'related_terms':        self.__relatedTermsWeight,
         }
         self.genericCheck(tests, weights, results, query, match, options)
 
@@ -1070,6 +1125,7 @@ class Resolver(object):
         if success:
             self.__addTotal(similarities, weights, query, match, options)
             if 'total' not in mins or similarities['total'] >= mins['total']:
+                #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
                 results.append((similarities,match))
 
     def resolve(self, query, source, **options):
@@ -1230,12 +1286,7 @@ class Resolver(object):
         return 0
 
     def __nameTest(self, query, match, tests, options):
-        if query.name == '':
-            if query.query_string == match.name:
-                return 1
-            elif query.query_string.find(match.name) != -1:
-                return .75
-        return 0
+        return stringComparison(query.query_string, match.name)
         
     def __locationTest(self, query, match, tests, options):
         return 0
@@ -1247,13 +1298,13 @@ class Resolver(object):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
         
-        score = self.setComparison(set(query.query_string.split()), set(match.keywords), options)
-        score = score + self.negative
-        return score
+        return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
     
     def __keywordsWeight(self, query, match, tests, options):
         if len(query.keywords) > 0:
-            return self.__setWeight(set(query.keywords), set(match.keywords))
+            if len(match.keywords) == 0:
+                return 1
+            return 5
         else:
             if len(match.keywords) == 0 or query.query_string == '':
                 return 0
@@ -1265,23 +1316,12 @@ class Resolver(object):
             return len(string) / len(query.query_string)
 
     def __relatedTermsTest(self, query, match, tests, options):
-        if len(query.related_terms) > 0:
-            return self.setComparison(set(query.related_terms), set(match.related_terms), options)
-        else:
-            if len(match.related_terms) == 0 or query.query_string == '':
-                return 0
-            string = query.query_string
-            for term in match.related_terms:
-                if string.find(term) != -1:
-                    string = string.replace(term,' ')
-            string = simplify(string)
-            return 1 - (len(string) / len(query.query_string))
+        return self.termComparison(query.query_string, match.related_terms, options)
 
     def __relatedTermsWeight(self, query, match, tests, options):
-        if len(query.related_terms) > 0:
-            return self.__setWeight(set(query.related_terms), set(match.related_terms))
-        else:
-            return len(query.query_string.split())
+        if len(match.related_terms) == 0:
+            return 1
+        return 5
 
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
@@ -1375,7 +1415,9 @@ class Resolver(object):
         success = True
         for name,test in tests:
             try:
+                #before = time()
                 comparison = float(test(query, match, similarities, options))
+                #print(time()-before)
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise

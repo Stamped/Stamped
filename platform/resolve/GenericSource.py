@@ -26,7 +26,7 @@ except:
     raise
 
 
-def generatorSource(generator, constructor=None, unique=False):
+def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     if constructor is None:
         constructor = lambda x: x
     results = []
@@ -36,13 +36,23 @@ def generatorSource(generator, constructor=None, unique=False):
         total = start + count
         while total - len(results) > 0:
             try:
-                value = generator.next()
-                if unique:
-                    if value not in value_set:
-                        results.append(value)
-                        value_set.add(value)
+                value = None
+                if tolerant:
+                    try:
+                        value = constructor(generator.next())
+                    except StopIteration:
+                        raise
+                    except Exception:
+                        pass
                 else:
-                    results.append(value)
+                    value = constructor(generator.next())
+                if value is not None:
+                    if unique:
+                        if value not in value_set:
+                            results.append(value)
+                            value_set.add(value)
+                    else:
+                        results.append(value)
             except StopIteration:
                 break
 
@@ -52,10 +62,7 @@ def generatorSource(generator, constructor=None, unique=False):
             result = results[start:]
         else:
             result = []
-        return [
-            constructor(entry)
-                for entry in result
-        ]
+        return result
     return source
 
 class GenericSource(BasicSource):
@@ -86,8 +93,8 @@ class GenericSource(BasicSource):
     def resolve(self, query, **options):
         return self.resolver.resolve(query, self.matchSource(query), **options)
 
-    def generatorSource(self, generator, constructor=None, unique=False):
-        return generatorSource(generator, constructor=constructor, unique=unique)
+    def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
+        return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
     @property
     def idField(self):
@@ -101,7 +108,7 @@ class GenericSource(BasicSource):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
                 query = self.stamped.wrapperFromEntity(entity)
-                timestamps[self.idField] = controller.now
+                timestamps[self.sourceName] = controller.now
                 results = self.resolver.resolve(query, self.matchSource(query))
                 if len(results) != 0:
                     best = results[0]
