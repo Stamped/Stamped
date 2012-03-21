@@ -330,6 +330,7 @@ def formatResults(results):
                 t = s * w / total_weight
             l.append('%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t))
         l.append(' ' * 36 + '%.2f' % scores['total'])
+        l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
         l.append(str(result[1]))
         n = n - 1
     return '\n'.join(l)

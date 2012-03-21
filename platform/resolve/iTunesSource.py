@@ -602,7 +602,13 @@ class iTunesSource(GenericSource):
             try:
                 raw_results = []
                 raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="song,musicArtist,album"
+                    'search',term=query.query_string,entity="musicArtist"
+                )['results'])
+                raw_results.append(self.__itunes.method(
+                    'search',term=query.query_string,entity="song"
+                )['results'])
+                raw_results.append(self.__itunes.method(
+                    'search',term=query.query_string,entity="album"
                 )['results'])
                 raw_results.append(self.__itunes.method(
                     'search',term=query.query_string,entity="movie"

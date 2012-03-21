@@ -25,6 +25,7 @@ try:
     from bson                       import ObjectId
     from iTunesSource               import iTunesSource
     from RdioSource                 import RdioSource
+    from StampedSource              import StampedSource
     from time                       import time
 except:
     report()
@@ -74,6 +75,7 @@ class EntitySearch(object):
         sources = {
             'itunes':iTunesSource().matchSource(query),
             'rdio':RdioSource().matchSource(query),
+            'stamped':StampedSource().matchSource(query),
         }
         all_results = {}
         total = 0

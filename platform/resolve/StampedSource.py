@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedSource' ]
+__all__ = [ 'StampedSource', 'StampedSearchAll' ]
 
 import Globals
 from logs import report
@@ -254,6 +254,17 @@ class EntityBook(_EntityObject, ResolverBook):
         return None
 
 
+class StampedSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
+
 class StampedSource(GenericSource):
     """
     """
@@ -351,6 +362,8 @@ class StampedSource(GenericSource):
             return self.movieSource(query)
         elif query.type == 'book':
             return self.bookSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         else:
             return self.emptySource
 
@@ -449,6 +462,36 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query, subcategory='book')
 
+    def searchAllSource(self, query):
+        def query_gen():
+            try:
+                yield {
+                    'titlel' : query.query_string.lower(),
+                }
+                blacklist = set([
+                    'and',
+                    'or',
+                    'in',
+                    'the',
+                    'a',
+                    'an',
+                    'of',
+                    'on',
+                ])
+                yield {
+                    '$or' : [
+                        {
+                            'titlel' : {
+                                '$regex' : r"^(.* )?%s( .*)?$" % word
+                            }
+                        }
+                            for word in simplify(query.query_string).split()
+                                if word not in blacklist
+                    ]
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), query, constructor_wrapper=StampedSearchAll)
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
@@ -479,7 +522,7 @@ class StampedSource(GenericSource):
         #print(pformat(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ).sort('_id',pymongo.ASCENDING))
 
-    def __querySource(self, query_gen, query_obj, **kwargs):
+    def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
         def gen():
             try:
                 id_set = set()
@@ -513,7 +556,10 @@ class StampedSource(GenericSource):
                     self.__entityDB._getStringFromObjectId(entity_id)
                 )
             )
-        return self.generatorSource(generator, constructor)
+        if constructor_wrapper is not None:
+            return self.generatorSource(generator, lambda x: constructor_wrapper(constructor(x)), unique=True, tolerant=True)
+        else:
+            return self.generatorSource(generator, constructor=constructor, unique=True, tolerant=True)
 
     @property
     def urlField(self):
