@@ -118,6 +118,12 @@ _negative_weights = {
     'audiobook'     : 0.2,
     'instrumental'  : 0.1,
     'karaoke'       : 0.2,
+    'vhs'           : 0.2,
+    'dvd'           : 0.2,
+    'blu-ray'       : 0.2,
+    'bluray'        : 0.2,
+    'season'        : 0.1,
+    'edition'       : 0.05,
 }
 
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
