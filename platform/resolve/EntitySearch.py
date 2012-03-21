@@ -16,6 +16,7 @@ from logs import report
 try:
     from GenericSource              import generatorSource
     from utils                      import lazyProperty
+    from gevent.pool                import Pool
     import logs
     from Resolver                   import *
     from pprint                     import pformat
@@ -77,12 +78,21 @@ class EntitySearch(object):
             'rdio':RdioSource().matchSource(query),
             'stamped':StampedSource().matchSource(query),
         }
-        all_results = {}
-        total = 0
-        for name,source in sources.items():
+        results_list = []
+        pool = Pool(len(sources))
+        def helper(name, source, output):
             source_results = self.__resolver.resolve(query, source, count=count)
+            output.append((name,source_results))
+        for name,source in sources.items():
+            pool.spawn(helper, name, source, results_list)
+        pool.join()
+
+        all_results ={}
+        total = 0
+        for name,source_results in results_list:
             all_results[name] = source_results
             total += len(source_results)
+
         print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (total, time() - before, ' '.join(all_results.keys())))
         before2 = time()
         chosen = []
