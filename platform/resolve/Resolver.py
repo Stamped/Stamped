@@ -30,6 +30,8 @@ __all__ = [
     'movieSimplify',
     'bookSimplify',
     'nameSimplify',
+    'stringComparison',
+    'setComparison',
 ]
 
 import Globals
@@ -48,6 +50,7 @@ try:
     from abc                        import ABCMeta, abstractmethod, abstractproperty
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
+    from difflib                    import SequenceMatcher
 except:
     report()
     raise
@@ -219,6 +222,75 @@ def nameSimplify(string):
     """
     string = simplify(string)
     return format(string)
+
+def stringComparison(a, b, strict=False):
+    """
+    Generic fuzzy string comparison.
+
+    Returns a comparison decimal [0,1]
+    """
+    if not strict:
+        a = simplify(a)
+        b = simplify(b)
+
+    return SequenceMatcher(None, a, b).ratio()
+
+def setComparison(a, b, symmetric=False, strict=False):
+    """
+    Generic comparison of two sets.
+
+    This method does not make any assumptions about set
+    members except equality.
+
+    assymetric - denotes if a and b are interchangable
+    strict - avoid fuzzy matching, etc.
+    """
+
+    def cleanSet(s):
+        clean = set()
+        for i in s:
+            clean.add(simplify(i).lower())
+        return clean
+
+    def symmetricComparion(a, b):
+        return (asymmetricComparison(a, b) + asymmetricComparison(b, a)) / 2.0
+
+    def asymmetricComparison(a, b):
+        score = 0
+        total = 0
+
+        for x in a:
+            total = total + len(x)
+            if x in b:
+                score = score + len(x)
+            else:
+                x_score = 0
+                for y in b:
+                    xy_score = stringComparison(x, y, strict=True)
+                    if xy_score > x_score:
+                        x_score = xy_score
+                score = score + x_score 
+
+        if total <= 0:
+            return 0
+        return 1.0 * score / total
+
+
+    if not strict:
+        a = cleanSet(a)
+        b = cleanSet(b)
+
+    if len(b) == 0 or len(a) == 0:
+        return 0
+
+    if a == b:
+        return 1.0
+
+    if symmetric:
+        return symmetricComparion(a, b)
+
+    else:
+        return asymmetricComparison(a, b)
 
 
 class ResolverObject(object):
@@ -711,23 +783,8 @@ class Resolver(object):
     def verbose(self):
         return self.__verbose
 
-    def setSimilarity(self, a, b):
-        """
-        Generic similarity of two sets.
-
-        This method does not make any assumptions about set
-        members except equality.
-        """
-        if a == b:
-            return 1.0
-        elif len(b) == 0 or len(a) == 0:
-            return 0
-        else:
-            inter = a & b
-            value = math.log(2+len(inter))/math.log(2+len(a))
-            if inter == a:
-                value = float(1 + value) / 2
-            return value 
+    def setComparison(self, a, b, options):
+        return setComparison(a, b) 
 
     def albumSimplify(self, album):
         """
@@ -753,11 +810,11 @@ class Resolver(object):
         """
         return nameSimplify(actor)
 
-    def nameSimilarity(self, a, b):
+    def nameComparison(self, a, b):
         """
         Generic fuzzy name comparison.
 
-        Returns a similarity decimal [0,1]
+        Returns a comparison decimal [0,1]
         """
         if a is None or b is None:
             return 0
@@ -785,42 +842,42 @@ class Resolver(object):
                     return len(b)*.40 / max(len(a),1)
         return 0.0
 
-    def artistSimilarity(self, q, m):
+    def artistComparison(self, q, m):
         """
-        Artist specific similarity metric.
+        Artist specific comparison metric.
         """
-        return self.nameSimilarity(q, m)
+        return self.nameComparison(q, m)
 
-    def albumSimilarity(self, q, m):
+    def albumComparison(self, q, m):
         """
-        Album specific similarity metric.
+        Album specific comparison metric.
         """
-        return self.nameSimilarity(q, m)
+        return self.nameComparison(q, m)
 
-    def trackSimilarity(self, q, m):
+    def trackComparison(self, q, m):
         """
-        Track specific similarity metric.
+        Track specific comparison metric.
         """
-        return self.nameSimilarity(q, m)
+        return self.nameComparison(q, m)
 
-    def movieSimilarity(self, q, m):
+    def movieComparison(self, q, m):
         """
-        Movie specific similarity metric.
+        Movie specific comparison metric.
         """
-        return self.nameSimilarity(q, m)
+        return self.nameComparison(q, m)
 
-    def lengthSimilarity(self, q, m):
+    def lengthComparison(self, q, m):
         """
-        length specific similarity metric.
+        length specific comparison metric.
         """
         if q <= 0 or m <= 0:
             return 0
         diff = abs(q - m)
         return (1 - (float(diff)/max(q, m)))**2
 
-    def dateSimilarity(self, q, m):
+    def dateComparison(self, q, m):
         """
-        Date specific similarity metric.
+        Date specific comparison metric.
         """
         if q is None or m is None:
             return 0
@@ -842,29 +899,29 @@ class Resolver(object):
             v *= .8
         return v
 
-    def directorSimilarity(self, q, m):
+    def directorComparison(self, q, m):
         """
-        Director specific similarity metric.
+        Director specific comparison metric.
         """
-        return self.nameSimilarity(q['name'], m['name'])
+        return self.nameComparison(q['name'], m['name'])
 
-    def authorSimilarity(self, q, m):
+    def authorComparison(self, q, m):
         """
-        Author specific similarity metric.
+        Author specific comparison metric.
         """
-        return self.nameSimilarity(q['name'], m['name'])
+        return self.nameComparison(q['name'], m['name'])
 
-    def publisherSimilarity(self, q, m):
+    def publisherComparison(self, q, m):
         """
-        Publisher specific similarity metric.
+        Publisher specific comparison metric.
         """
-        return self.nameSimilarity(q['name'], m['name'])
+        return self.nameComparison(q['name'], m['name'])
 
     def checkArtist(self, results, query, match, options):
         tests = [
-            ('name', lambda q, m, s, o: self.artistSimilarity(q.name, m.name)),
-            ('albums', lambda q, m, s, o: self.albumsSimilarity(q, m)),
-            ('tracks', lambda q, m, s, o: self.tracksSimilarity(q, m)),
+            ('name', lambda q, m, s, o: self.artistComparison(q.name, m.name)),
+            ('albums', lambda q, m, s, o: self.albumsComparison(q, m, o)),
+            ('tracks', lambda q, m, s, o: self.tracksComparison(q, m, o)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
@@ -875,9 +932,9 @@ class Resolver(object):
 
     def checkAlbum(self, results, query, match, options):
         tests = [
-            ('name', lambda q, m, s, o: self.albumSimilarity(q.name, m.name)),
-            ('artist', lambda q, m, s, o: self.artistSimilarity(q.artist['name'], m.artist['name'])),
-            ('tracks', lambda q, m, s, o: self.tracksSimilarity(q, m)),
+            ('name', lambda q, m, s, o: self.albumComparison(q.name, m.name)),
+            ('artist', lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
+            ('tracks', lambda q, m, s, o: self.tracksComparison(q, m)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
@@ -888,10 +945,10 @@ class Resolver(object):
 
     def checkTrack(self, results, query, match, options):
         tests = [
-            ('name', lambda q, m, s, o: self.trackSimilarity(q.name, m.name)),
-            ('artist', lambda q, m, s, o: self.artistSimilarity(q.artist['name'], m.artist['name'])),
-            ('album', lambda q, m, s, o: self.albumSimilarity(q.album['name'], m.album['name'])),
-            ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
+            ('name', lambda q, m, s, o: self.trackComparison(q.name, m.name)),
+            ('artist', lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
+            ('album', lambda q, m, s, o: self.albumComparison(q.album['name'], m.album['name'])),
+            ('length', lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name),
@@ -904,11 +961,11 @@ class Resolver(object):
 
     def checkMovie(self, results, query, match, options):
         tests = [
-            ('name', lambda q, m, s, o: self.movieSimilarity(q.name, m.name)),
-            ('cast', lambda q, m, s, o: self.castSimilarity(q, m)),
-            ('director', lambda q, m, s, o: self.directorSimilarity(q.director, m.director)),
-            ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
-            ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
+            ('name', lambda q, m, s, o: self.movieComparison(q.name, m.name)),
+            ('cast', lambda q, m, s, o: self.castComparison(q, m, o)),
+            ('director', lambda q, m, s, o: self.directorComparison(q.director, m.director)),
+            ('length', lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
+            ('date', lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
@@ -921,11 +978,11 @@ class Resolver(object):
 
     def checkBook(self, results, query, match, options):
         tests = [
-            ('name', lambda q, m, s, o: self.movieSimilarity(q.name, m.name)),
-            ('author', lambda q, m, s, o: self.authorSimilarity(q.author, m.author)),
-            ('publisher', lambda q, m, s, o: self.publisherSimilarity(q.publisher, m.publisher)),
-            ('length', lambda q, m, s, o: self.lengthSimilarity(q.length, m.length)),
-            ('date', lambda q, m, s, o: self.dateSimilarity(q.date, m.date)),
+            ('name', lambda q, m, s, o: self.movieComparison(q.name, m.name)),
+            ('author', lambda q, m, s, o: self.authorComparison(q.author, m.author)),
+            ('publisher', lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher)),
+            ('length', lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
+            ('date', lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
             'name': lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
@@ -994,32 +1051,32 @@ class Resolver(object):
     def castSet(self, entity):
         return set( [ self.actorSimplify(actor['name']) for actor in entity.cast ] )
 
-    def albumsSimilarity(self, query, match):
+    def albumsComparison(self, query, match, options):
         query_album_set = self.albumsSet(query)
         match_album_set = self.albumsSet(match)
 
         if self.verbose:
             self.__differenceLog('Album', query_album_set, match_album_set, query, match)
 
-        return self.setSimilarity(query_album_set, match_album_set)
+        return self.setComparison(query_album_set, match_album_set, options)
 
-    def tracksSimilarity(self, query, match):
+    def tracksComparison(self, query, match, options):
         query_track_set = self.tracksSet(query)
         match_track_set = self.tracksSet(match)
 
         if self.verbose:
             self.__differenceLog('Track', query_track_set, match_track_set, query, match)
 
-        return self.setSimilarity(query_track_set, match_track_set)
+        return self.setComparison(query_track_set, match_track_set, options)
 
-    def castSimilarity(self, query, match):
+    def castComparison(self, query, match, options):
         query_cast_set = self.castSet(query)
         match_cast_set = self.castSet(match)
 
         if self.verbose:
             self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
 
-        return self.setSimilarity(query_cast_set, match_cast_set)
+        return self.setComparison(query_cast_set, match_cast_set, options)
 
 
     def parseGeneralOptions(self, query, options):
@@ -1030,9 +1087,9 @@ class Resolver(object):
 
         count -  a positive integer indicating the desired minimum result size (results may be smaller if the source is limited)
         max - a positive integer that sets the maximum number of results to return
-        resolvedSimilarity -  a float which indicates a simple cutoff total similarity to consider something resolved
+        resolvedComparison -  a float which indicates a simple cutoff total comparison to consider something resolved
         pool - a positive integer indicating the size of the gevent pool to be used (use 1 for sequential)
-        mins - an attribute-similarity dict which can be used to prune matches (useful for reducing execution time)
+        mins - an attribute-comparison dict which can be used to prune matches (useful for reducing execution time)
         """
         if 'count' not in options:
             options['count'] = 1
@@ -1042,8 +1099,8 @@ class Resolver(object):
             options['symmetric'] = False
         if 'max' not in options:
             options['max'] = 1000000
-        if 'resolvedSimilarity' not in options:
-            options['resolvedSimilarity'] = .7
+        if 'resolvedComparison' not in options:
+            options['resolvedComparison'] = .7
         if 'pool' not in options:
             options['pool'] = 10
         if 'mins' not in options:
@@ -1141,9 +1198,9 @@ class Resolver(object):
         
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:
-            return self.setSimilarity(set(query.keywords), set(match.keywords))
+            return self.setComparison(set(query.keywords), set(match.keywords), options)
         else:
-            return self.setSimilarity(set(query.query_string.split()), set(match.keywords))
+            return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
     
     def __keywordsWeight(self, query, match, tests, options):
         if len(query.keywords) > 0:
@@ -1160,7 +1217,7 @@ class Resolver(object):
 
     def __relatedTermsTest(self, query, match, tests, options):
         if len(query.related_terms) > 0:
-            return self.setSimilarity(set(query.related_terms), set(match.related_terms))
+            return self.setComparison(set(query.related_terms), set(match.related_terms), options)
         else:
             if len(match.related_terms) == 0 or query.query_string == '':
                 return 0
@@ -1269,12 +1326,12 @@ class Resolver(object):
         success = True
         for name,test in tests:
             try:
-                similarity = float(test(query, match, similarities, options))
+                comparison = float(test(query, match, similarities, options))
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise
-            similarities[name] = similarity
-            if name in mins and similarity < mins[name]:
+            similarities[name] = comparison
+            if name in mins and comparison < mins[name]:
                 success = False
                 break
         return (success, similarities)
@@ -1285,7 +1342,7 @@ class Resolver(object):
         elif len(results) < options['count']:
             return False
         else:
-            cutoff = options['resolvedSimilarity']
+            cutoff = options['resolvedComparison']
             if results[0][0]['total'] >= cutoff:
                 return True
         return False
@@ -1293,7 +1350,7 @@ class Resolver(object):
     def __finish(self, query, results, options):
         for result in results:
             result[0]['resolved'] = False
-        if len(results) > 0 and results[0][0]['total'] > options['resolvedSimilarity']:
+        if len(results) > 0 and results[0][0]['total'] > options['resolvedComparison']:
             results[0][0]['resolved'] = True
         return results
 
@@ -1409,7 +1466,7 @@ def demo(generic_source, default_title):
                 else:
                     print("Inverted to different entity! (dup or false positive)")
             else:
-                print("Inversion failed! (low asymetric similarity?)")
+                print("Inversion failed! (low asymetric comparison?)")
 
     else:
         print("No results")
