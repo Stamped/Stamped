@@ -120,6 +120,12 @@ _negative_weights = {
     'audiobook'     : 0.2,
     'instrumental'  : 0.1,
     'karaoke'       : 0.2,
+    'vhs'           : 0.2,
+    'dvd'           : 0.2,
+    'blu-ray'       : 0.2,
+    'bluray'        : 0.2,
+    'season'        : 0.1,
+    'edition'       : 0.05,
 }
 
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
@@ -508,14 +514,6 @@ class SimpleResolverObject(ResolverObject):
 
 
 class ResolverSearchAll(ResolverObject):
-    """
-    Interface for Artist objects.
-
-    Attributes:
-
-    albums - a list of artist dicts which must at least contain a 'name' string.
-    tracks - a list of track dicts which must at least contain a 'name' string.
-    """
 
     @property
     def coordinates(self):
@@ -1181,7 +1179,7 @@ class Resolver(object):
         weights = {
             'query_string':         lambda q, m, s, o: 0,
             'name':                 lambda q, m, s, o: 5,
-            'location':             lambda q, m, s, o: 0,
+            'location':             lambda q, m, s, o: 1,
             'subcategory':          lambda q, m, s, o: 0,
             'priority':             lambda q, m, s, o: 1,
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
@@ -1365,7 +1363,19 @@ class Resolver(object):
         
     def __locationTest(self, query, match, tests, options):
         return 0
+
+        if query.coordinates is None or match.coordinates is None:
+            return 0
+
+        distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
+        distance = abs(distance * earthRadius)
         
+        if distance < 0 or distance > 50:
+            return 0
+    
+        # Simple parabolic curve to weight closer distances
+        return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
+            
     def __subcategoryTest(self, query, match, tests, options):
         return 0 
         
