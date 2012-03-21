@@ -34,14 +34,13 @@
 #import "STGalleryViewFactory.h"
 #import "STActionsViewFactory.h"
 #import "STActionMenuFactory.h"
-#import <QuartzCore/QuartzCore.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
-#warning Set to NO to revert to old.
-BOOL const newEDetail = YES;
+#warning Set to NO to revert to old version.
+BOOL const newEDetail = NO;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
