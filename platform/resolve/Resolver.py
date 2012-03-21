@@ -851,6 +851,32 @@ class Resolver(object):
                     score = score * (1.0 - abs(weight))
         return score
 
+    def termComparison(self, query, terms, options):
+        def checkTerms(query, valid):
+            maxLenTerms = 0
+            for term in valid:
+                lenTerms = 0
+                a = query.split(term)
+                if len(a) > 1:
+                    lenTerms = len(term)
+                    for section in a:
+                        if section == ' ':
+                            lenTerms = lenTerms + 1
+                        elif len(section) > 0:
+                            lenTerms = lenTerms + checkTerms(section, valid)
+                if lenTerms > maxLenTerms:
+                    maxLenTerms = lenTerms
+            return maxLenTerms
+
+        def score(query, terms):
+            valid = []
+            for term in terms:
+                if term.lower() in query.lower():
+                    valid.append(term.lower())
+            return checkTerms(query.lower(), valid) * 1.0 / len(query)
+
+        return score(query, terms)
+
     def albumSimplify(self, album):
         """
         Reduces an album name to a simplified form for fuzzy comparison.
@@ -1288,21 +1314,7 @@ class Resolver(object):
             return len(string) / len(query.query_string)
 
     def __relatedTermsTest(self, query, match, tests, options):
-        print (query.query_string, match.related_terms)
-
-        if len(query.related_terms) > 0:
-            return self.setComparison(set(query.related_terms), set(match.related_terms), options)
-        else:
-            return self.setComparison(set(query.query_string), set(match.related_terms), options)
-
-            if len(match.related_terms) == 0 or query.query_string == '':
-                return 0
-            string = query.query_string
-            for term in match.related_terms:
-                if string.find(term) != -1:
-                    string = string.replace(term,' ')
-            string = simplify(string)
-            return 1 - (len(string) / len(query.query_string))
+        return self.termComparison(query.query_string, match.related_terms, options)
 
     def __relatedTermsWeight(self, query, match, tests, options):
         if len(query.related_terms) > 0:
