@@ -454,8 +454,16 @@ class StampedSource(GenericSource):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
                 query = self.wrapperFromEntity(entity)
-                timestamps[self.idField] = controller.now
-                results = self.resolver.resolve(query, self.matchSource(query))
+                timestamps[self.sourceName] = controller.now
+                mins = None
+                if query.type == 'artist':
+                    mins = {
+                        'name':.1,
+                        'albums':.1,
+                        'tracks':-1,
+                        'total':-1,
+                    }
+                results = self.resolver.resolve(query, self.matchSource(query), mins=mins)
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:

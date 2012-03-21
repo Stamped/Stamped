@@ -43,16 +43,47 @@ class _iTunesObject(object):
         if itunes is None:
             itunes = globaliTunes()
         self.__itunes = itunes
-        if data == None:
-            self.__data = itunes.method('lookup',id=itunes_id)['results'][0]
-        else:
-            self.__data = data
-            if itunes_id is not None and itunes_id != self.__data['artistId']:
-                raise ValueError('data does not match id')
+        self.__data = data
+        self.__itunes_id = itunes_id
 
-    @property
+    @lazyProperty
     def data(self):
-        return self.__data
+        if self.__data == None:
+            if self.type == 'album' or self.type == 'artist':
+                entity_field = 'song'
+                if self.type == 'artist':
+                    entity_field = 'album,song'
+                results = self.itunes.method('lookup',id=self.__itunes_id,entity=entity_field)['results']
+                m = {
+                    'tracks':[],
+                    'albums':[],
+                    'artists':[]
+                }
+                for result in results:
+                    k = None
+                    if 'wrapperType' in result:
+                        t = result['wrapperType']
+                        if t == 'track' and result['kind'] == 'song':
+                            k = 'tracks'
+                        elif t == 'collection' and result['collectionType'] == 'Album':
+                            k = 'albums'
+                        elif t == 'artist' and result['artistType'] == 'Artist':
+                            k = 'artists'
+                    if k is not None:
+                        m[k].append(result)
+                if self.type == 'artist':
+                    data = m['artists'][0]
+                    data['albums'] = m['albums']
+                    data['tracks'] = m['tracks']
+                    return data
+                else:
+                    data = m['albums'][0]
+                    data['tracks'] = m['tracks']
+                    return data
+            else:
+                return self.itunes.method('lookup',id=self.__itunes_id)['results'][0]
+        else:
+            return self.__data
 
     @property 
     def itunes(self):
@@ -91,7 +122,11 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
 
     @lazyProperty
     def albums(self):
-        results = self.itunes.method('lookup',id=self.key,entity='album')['results']
+        results = []
+        if 'albums' in self.data:
+            results = self.data['albums']
+        else:
+            results = self.itunes.method('lookup',id=self.key,entity='album')['results']
         return [
             {
                 'name'  : album['collectionName'],
@@ -109,7 +144,11 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
 
     @lazyProperty
     def tracks(self):
-        results = self.itunes.method('lookup',id=self.key,entity='song')['results']
+        results = []
+        if 'tracks' in self.data:
+            results = self.data['tracks']
+        else:
+            results = self.itunes.method('lookup',id=self.key,entity='song')['results']
         return [
             {
                 'name':track['trackName'],
@@ -155,7 +194,11 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
 
     @lazyProperty
     def tracks(self):
-        results = self.itunes.method('lookup', id=self.key, entity='song')['results']
+        results = []
+        if 'tracks' in self.data:
+            results = self.data['tracks']
+        else:
+            results = self.itunes.method('lookup', id=self.key, entity='song')['results']
         return [
             {
                 'name':track['trackName'],
@@ -445,8 +488,10 @@ class iTunesSource(GenericSource):
                 obj = artist
                 aid = entity['aid']
                 if aid == itunes_id:
-                    self.__repopulateAlbums(entity, artist, controller) 
-                    self.__repopulateSongs(entity, artist, controller)
+                    if controller.shouldEnrich('albums', self.sourceName, entity):
+                        self.__repopulateAlbums(entity, artist, controller) 
+                    if controller.shouldEnrich('songs', self.sourceName, entity):
+                        self.__repopulateSongs(entity, artist, controller)
             elif entity['subcategory'] == 'album':
                 album = iTunesAlbum(itunes_id)
                 obj = album

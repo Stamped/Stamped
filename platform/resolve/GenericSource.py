@@ -101,7 +101,7 @@ class GenericSource(BasicSource):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
                 query = self.stamped.wrapperFromEntity(entity)
-                timestamps[self.idField] = controller.now
+                timestamps[self.sourceName] = controller.now
                 results = self.resolver.resolve(query, self.matchSource(query))
                 if len(results) != 0:
                     best = results[0]

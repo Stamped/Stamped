@@ -51,6 +51,7 @@ try:
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
+    from time                       import time
 except:
     report()
     raise
@@ -1065,6 +1066,7 @@ class Resolver(object):
         if success:
             self.__addTotal(similarities, weights, query, match, options)
             if 'total' not in mins or similarities['total'] >= mins['total']:
+                #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
                 results.append((similarities,match))
 
     def resolve(self, query, source, **options):
@@ -1368,7 +1370,9 @@ class Resolver(object):
         success = True
         for name,test in tests:
             try:
+                #before = time()
                 comparison = float(test(query, match, similarities, options))
+                #print(time()-before)
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise
