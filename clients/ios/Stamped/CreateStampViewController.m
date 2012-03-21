@@ -1036,7 +1036,6 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     if (fbButton_.selected)
       [[SocialManager sharedManager] requestFacebookPostWithStamp:stamp];
 
-    stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
 

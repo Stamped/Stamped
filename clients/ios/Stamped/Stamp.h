@@ -24,7 +24,6 @@
 @property (nonatomic, retain) NSNumber * numComments;
 @property (nonatomic, retain) NSNumber * numLikes;
 @property (nonatomic, retain) NSString * stampID;
-@property (nonatomic, retain) NSNumber * temporary;
 @property (nonatomic, retain) NSString * URL;
 @property (nonatomic, retain) NSString * via;
 @property (nonatomic, retain) NSSet *comments;

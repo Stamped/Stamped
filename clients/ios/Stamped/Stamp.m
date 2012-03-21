@@ -27,7 +27,6 @@
 @dynamic numComments;
 @dynamic numLikes;
 @dynamic stampID;
-@dynamic temporary;
 @dynamic URL;
 @dynamic comments;
 @dynamic credits;

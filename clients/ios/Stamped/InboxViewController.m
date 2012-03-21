@@ -338,8 +338,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   for (Stamp* stamp in objects) {
     if ([stamp.deleted boolValue]) {
       [toDelete addObject:stamp];
-    } else {
-      stamp.temporary = [NSNumber numberWithBool:NO];
     }
   }
   

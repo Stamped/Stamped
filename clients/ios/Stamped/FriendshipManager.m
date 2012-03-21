@@ -83,17 +83,13 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)unfollowUser:(User*)user {
   User* currentUser = [AccountManager sharedManager].currentUser;
   [currentUser removeFollowingObject:user];
+  [User.managedObjectContext save:NULL];
+
   RKObjectLoader* loader = [userToRequestDictionary_ objectForKey:user.userID];
   [loader cancel];
   [userToRequestDictionary_ removeObjectForKey:user.userID];
   [userToOldestStampDateDictionary_ removeObjectForKey:user.userID];
-  NSFetchRequest* request = [Stamp fetchRequest];
-  request.predicate = [NSPredicate predicateWithFormat:@"user.userID == %@", user.userID];
-  NSArray* results = [Stamp objectsWithFetchRequest:request];
-  for (Stamp* s in results)
-    s.temporary = [NSNumber numberWithBool:YES];
 
-  [Stamp.managedObjectContext save:NULL];
 }
 
 - (void)loadStampsForUserID:(NSString*)userID {
@@ -128,11 +124,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
   [userToRequestDictionary_ removeObjectForKey:userID];
   NSDate* oldestInBatch = [objects.lastObject created];
-  
-  for (Stamp* s in objects)
-    s.temporary = [NSNumber numberWithBool:NO];
-  
-  [Stamp.managedObjectContext save:NULL];
+
   if (objects.count < 10 || !oldestInBatch) {
     [userToOldestStampDateDictionary_ removeObjectForKey:userID];
   } else {

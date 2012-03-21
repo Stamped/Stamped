@@ -36,7 +36,6 @@
 
 @property (nonatomic, retain) User* user;
 @property (nonatomic, copy) NSString* screenName;
-@property (nonatomic, assign) BOOL stampsAreTemporary;
 
 - (IBAction)followButtonPressed:(id)sender;
 - (IBAction)unfollowButtonPressed:(id)sender;

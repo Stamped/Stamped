@@ -1223,12 +1223,6 @@ typedef enum {
     self.suggestedFriends = objects;
     [self.tableView reloadData];
   }
-  if ([objectLoader.resourcePath rangeOfString:@"/collections/user.json"].location != NSNotFound) {
-    for (Stamp* s in objects)
-      s.temporary = [NSNumber numberWithBool:NO];
-  
-    [Stamp.managedObjectContext save:NULL];
-  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
