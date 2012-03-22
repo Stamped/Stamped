@@ -39,6 +39,8 @@ def searchDemo(request):
         kwargs.setdefault('mimetype', 'text/html')
         
         output = ''
+        query = ''
+        coord_string = ''
         if request.method == 'GET' and 'query' in request.GET:
             query = request.GET['query']
             coordinates = None
@@ -55,12 +57,12 @@ def searchDemo(request):
             output = formatResults(results, reverse=False)
         output_json = """
 <html>
-<head><title>Here</title>
+<head><title>Search Demo</title>
 </head>
 <body>
 <form>
-Coordinates (optional): <input type="text" name="coordinates" /><br/>
-Query String: <input type="text" name="query" />
+Coordinates (optional): <input type="text" name="coordinates" value="%s"/> (i.e. "43,-74.25")<br/>
+Query String: <input type="text" name="query" value="%s"/>
 <input type="submit" value="Submit" />
 </form>
 <pre>
@@ -68,7 +70,7 @@ Query String: <input type="text" name="query" />
 </pre>
 </body>
 </html>
-        """ % output
+        """ % ( coord_string, query, output )
         if message is not None:
             output_json += message
         response = HttpResponse(output_json, **kwargs)
