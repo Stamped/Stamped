@@ -271,7 +271,6 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-            'amazon',
 
             'artist_display_name',
             'genre',
