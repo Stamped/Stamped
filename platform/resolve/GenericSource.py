@@ -218,14 +218,28 @@ class GenericSource(BasicSource):
                     'lat': wrapper.coordinates[0],
                     'lng': wrapper.coordinates[1],
                 }
-            for k,v in wrapper.address.items():
-                entity['address_%s' % k] = v
+
+            if len(wrapper.address) > 0:
+                address_set = set([
+                    'street',
+                    'street_ext',
+                    'locality',
+                    'region',
+                    'postcode',
+                    'country',
+                ])
+                for k in address_set:
+                    v = None
+                    if k in wrapper.address:
+                        v = wrapper.address[k]
+                    entity['address_%s' % k] = v
             if wrapper.phone is not None:
                 entity['phone'] = wrapper.phone
             if wrapper.url is not None:
                 entity['site'] = wrapper.url
             if wrapper.email is not None:
                 entity['email'] = wrapper.email
+
         if wrapper.type in set(['track','album','artist','movie','book']):
             if len(wrapper.genres) > 0:
                 entity['genre'] = wrapper.genres[0]

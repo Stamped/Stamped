@@ -109,19 +109,56 @@ class GooglePlacesPlace(ResolverPlace):
     
     @lazyProperty
     def address(self):
-        return {}
+        if 'address_components' not in self.data:
+            return {}
+        data = {
+        }
+        number = None
+        route = None
+        for comp in self.data['address_components']:
+            if 'types' in comp and 'long_name' in comp:
+                name = comp['long_name']
+                types = comp['types']
+                if 'administrative_area_level_1' in types:
+                    #TODO consider country checking
+                    if name in states:
+                        name = states[name]
+                    data['region'] = name
+                elif 'country' in types:
+                    data['country'] = name
+                elif 'postal_code' in types:
+                    data['postcode'] = name
+                elif 'locality' in types:
+                    data['locality'] = name
+                elif 'street_number' in types:
+                    number = name
+                elif 'route' in types:
+                    route = name
+        for comp in self.data['address_components']:
+            if 'types' in comp and 'long_name' in comp:
+                name = comp['long_name']
+                types = comp['types']
+                if 'sublocality' in types and 'locality' not in data:
+                    data['locality'] = name
+        if route is not None and number is not None:
+            data['street'] = "%s %s" % (number, route)
+        return data
+
+    @lazyProperty
+    def neighborhoods(self):
+        return []
 
     @lazyProperty
     def phone(self):
-        if 'tel' in self.data:
-            return self.data['tel']
+        if 'formatted_phone_number' in self.data:
+            return self.data['formatted_phone_number']
         else:
             return None
 
     @lazyProperty
     def url(self):
-        if 'website' in self.data:
-            return self.data['website']
+        if 'url' in self.data:
+            return self.data['url']
         else:
             return None
 
@@ -166,7 +203,41 @@ class GooglePlacesSource(GenericSource):
         return GooglePlaces()
     
     def matchSource(self, query):
+        if query.type == 'place':
+            return self.placeSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         return self.emptySource
+
+    def placeSource(self, query):
+        def gen():
+            try:
+                gdata = self.__places.getSearchResultsByLatLng(query.coordinates, {'name':query.name})
+                if gdata is not None:
+                    for gdatum in gdata:
+                        if 'reference' in gdatum:
+                            ref = gdatum['reference']
+                            details = self.__places.getPlaceDetails(ref)
+                            details['reference'] = ref
+                            yield GooglePlacesPlace(details)
+            except GeneratorExit:
+                pass
+        return self.generatorSource(gen())
+
+    def searchAllSource(self, query, timeout=None, types=None):
+        def gen():
+            try:
+                gdata = self.__places.getAutocompleteResults(query.coordinates, query.query_string)
+                if gdata is not None:
+                    for gdatum in gdata:
+                        if 'reference' in gdatum:
+                            ref = gdatum['reference']
+                            details = self.__places.getPlaceDetails(ref)
+                            details['reference'] = ref
+                            yield GooglePlacesSearchAll(GooglePlacesPlace(details))
+            except GeneratorExit:
+                pass
+        return self.generatorSource(gen())
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if not controller.shouldEnrich('googleplaces', self.sourceName, entity):
@@ -275,4 +346,6 @@ class GooglePlacesSource(GenericSource):
             data2[tuple(k.split('.'))] = _constant(v)
         return data2
     
+if __name__ == '__main__':
+    demo(GooglePlacesSource(), 'Barley Swine')
 

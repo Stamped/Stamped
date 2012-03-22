@@ -30,6 +30,7 @@ try:
     from FactualSource              import FactualSource
     from TMDBSource                 import TMDBSource
     from SpotifySource              import SpotifySource
+    from GooglePlacesSource         import GooglePlacesSource
     from time                       import time
 except:
     report()
@@ -86,6 +87,7 @@ class EntitySearch(object):
             'factual': lambda: FactualSource().matchSource(query),
             'tmdb': lambda: TMDBSource().matchSource(query),
             'spotify': lambda: SpotifySource().searchAllSource(query,timeout=timeout),
+            'googleplaces' : lambda: GooglePlacesSource().searchAllSource(query),
         }
         results_list = []
         pool = Pool(len(sources))
