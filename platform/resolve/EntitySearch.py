@@ -35,7 +35,7 @@ except:
     report()
     raise
 
-_verbose = False
+_verbose = True
 
 class QuerySearchAll(ResolverSearchAll):
 
@@ -75,7 +75,7 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
-        timeout = 20
+        timeout = 5
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
@@ -91,7 +91,9 @@ class EntitySearch(object):
         pool = Pool(len(sources))
         def helper(name, source_f, output):
             source = source_f()
-            def callback(result):
+            def callback(result, order):
+                if _verbose:
+                    print("%3d from %s" % (order, name))
                 results_list.append((name,result))
             self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
         for name,source_f in sources.items():

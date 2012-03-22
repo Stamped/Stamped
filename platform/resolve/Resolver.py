@@ -1104,7 +1104,7 @@ class Resolver(object):
         """
         return self.nameComparison(q['name'], m['name'])
 
-    def checkArtist(self, results, query, match, options):
+    def checkArtist(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.artistComparison(q.name, m.name)),
             ('albums', lambda q, m, s, o: self.albumsComparison(q, m, o)),
@@ -1115,9 +1115,9 @@ class Resolver(object):
             'albums': lambda q, m, s, o: self.__albumsWeight(q, m),
             'tracks': lambda q, m, s, o: self.__tracksWeight(q, m),
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def checkAlbum(self, results, query, match, options):
+    def checkAlbum(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.albumComparison(q.name, m.name)),
             ('artist', lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
@@ -1128,9 +1128,9 @@ class Resolver(object):
             'artist': lambda q, m, s, o: self.__nameWeight(q.artist, m.artist),
             'tracks': lambda q, m, s, o: self.__tracksWeight(q, m),
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def checkTrack(self, results, query, match, options):
+    def checkTrack(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.trackComparison(q.name, m.name)),
             ('artist', lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
@@ -1143,10 +1143,10 @@ class Resolver(object):
             'album': lambda q, m, s, o: self.__nameWeight(q.album, m.album)*.3,
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length),
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
 
-    def checkMovie(self, results, query, match, options):
+    def checkMovie(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.movieComparison(q.name, m.name)),
             ('cast', lambda q, m, s, o: self.castComparison(q, m, o)),
@@ -1161,9 +1161,9 @@ class Resolver(object):
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length,q_empty=.2) * 3,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def checkBook(self, results, query, match, options):
+    def checkBook(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.movieComparison(q.name, m.name)),
             ('author', lambda q, m, s, o: self.authorComparison(q.author, m.author)),
@@ -1180,9 +1180,9 @@ class Resolver(object):
             'length': lambda q, m, s, o: self.__lengthWeight(q.length, m.length) * .5,
             'date': lambda q, m, s, o: self.__dateWeight(q.date, m.date) * .2,
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def checkPlace(self, results, query, match, options):
+    def checkPlace(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
             ('location',    self.__locationTest),
@@ -1191,9 +1191,9 @@ class Resolver(object):
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
             'location':     lambda q, m ,s, o: 1,
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def checkSearchAll(self, results, query, match, options):
+    def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
             return
@@ -1217,9 +1217,9 @@ class Resolver(object):
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
         }
-        self.genericCheck(tests, weights, results, query, match, options)
+        self.genericCheck(tests, weights, results, query, match, options, order)
 
-    def genericCheck(self, tests, weights, results, query, match, options):
+    def genericCheck(self, tests, weights, results, query, match, options, order):
         mins = options['mins']
         if self.verbose:
             print("Comparing %s and %s" % (match.name,query.name))
@@ -1230,7 +1230,7 @@ class Resolver(object):
                 #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
                 result = (similarities, match)
                 results.append(result)
-                options['callback'](result)
+                options['callback'](result, order)
 
 
     def resolve(self, query, source, **options):
@@ -1298,7 +1298,7 @@ class Resolver(object):
         mins - an attribute-comparison dict which can be used to prune matches (useful for reducing execution time)
         """
         if 'callback' not in options:
-            options['callback'] = lambda x: None
+            options['callback'] = lambda x,y: None
         if 'count' not in options:
             options['count'] = 1
         if 'strict' not in options:
@@ -1548,8 +1548,9 @@ class Resolver(object):
         results = []
         entries = source(start, count)
         pool = Pool(options['pool'])
-        for entry in entries:
-            pool.spawn(check, results, query, entry, options)
+        for i in range(len(entries)):
+            entry = entries[i]
+            pool.spawn(check, results, query, entry, options, start+i)
         pool.join()
 
         return results
