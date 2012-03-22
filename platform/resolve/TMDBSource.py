@@ -153,6 +153,16 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
             logs.info('no genres for %s (%s:%s)' % (self.name, self.source, self.key))
             return []
 
+class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 class TMDBSource(GenericSource):
     """
     """
@@ -174,6 +184,8 @@ class TMDBSource(GenericSource):
     def matchSource(self, query):
         if query.type == 'movie':
             return self.movieSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         else:
             return self.emptySource
 
@@ -193,6 +205,23 @@ class TMDBSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
+
+    def searchAllSource(self, query):
+        def gen():
+            try:
+                results = self.__tmdb.movie_search(query.query_string)
+                for movie in results['results']:
+                    yield movie
+                pages = results['total_pages']
+
+                if pages > 1:
+                    for p in range(1,pages):
+                        results = self.__tmdb.movie_search(query.query_string, page=p+1)
+                        for movie in results['results']:
+                            yield movie
+            except GeneratorExit:
+                pass
+        return self.generatorSource(gen(), constructor=lambda x: TMDBSearchAll(TMDBMovie( x['id'])) )
 
     def __release_date(self, movie):
         result = None

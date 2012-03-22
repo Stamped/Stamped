@@ -28,6 +28,7 @@ try:
     from RdioSource                 import RdioSource
     from StampedSource              import StampedSource
     from FactualSource              import FactualSource
+    from TMDBSource                 import TMDBSource
     from time                       import time
 except:
     report()
@@ -82,6 +83,7 @@ class EntitySearch(object):
             'rdio':RdioSource().matchSource(query),
             'stamped':StampedSource().matchSource(query),
             'factual':FactualSource().matchSource(query),
+            'tmdb':TMDBSource().matchSource(query),
         }
         results_list = []
         pool = Pool(len(sources))

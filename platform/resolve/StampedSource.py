@@ -477,6 +477,7 @@ class StampedSource(GenericSource):
                     'an',
                     'of',
                     'on',
+                    'movie',
                 ])
                 yield {
                     '$or' : [
@@ -520,6 +521,7 @@ class StampedSource(GenericSource):
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
+        logs.info(mongo_query)
         return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ).sort('_id',pymongo.ASCENDING))
 
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
