@@ -48,6 +48,7 @@ subcategories = {
     'artist'            : 'music', 
     'song'              : 'music', 
     'album'             : 'music', 
+    'track'             : 'music', 
     
     # --------------------------
     #           other
