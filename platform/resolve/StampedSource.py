@@ -622,7 +622,7 @@ class StampedSource(GenericSource):
         import pymongo
         #print(pformat(mongo_query))
         logs.info(mongo_query)
-        return list(self.__entityDB._collection.find(mongo_query, {'_id':1} ).sort('_id',pymongo.ASCENDING))
+        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING))
 
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
         def gen():
@@ -642,7 +642,7 @@ class StampedSource(GenericSource):
                     if query_obj.source == 'stamped' and query_obj.key != '':
                         query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                     matches = self.__id_query(query )
-                    #logs.info('Found %d matches for query: %20s' % (len(matches), str(matches)))
+                    logs.info('Found %d matches for query: %20s' % (len(matches), str(matches)))
                     #print(matches)
                     for match in matches:
                         entity_id = match['_id']

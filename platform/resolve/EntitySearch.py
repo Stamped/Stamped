@@ -75,7 +75,7 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
-        timeout = 10
+        timeout = 6
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
