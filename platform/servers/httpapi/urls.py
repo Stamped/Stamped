@@ -135,7 +135,9 @@ urlpatterns = patterns('',
     
     ### PING
     (r'v0/temp/ping.json',              'v0.functions.ping.ping'),
+    (r'v0/temp/searchDemo.json',        'v0.functions.ping.searchDemo'),
     (r'v0/ping.json',                   'v0.functions.ping.ping'),
+    (r'v0/searchDemo.json',             'v0.functions.ping.searchDemo'),
     
     ### TEMP
     (r'v0/temp/friends.json',           'v0.functions.temp.friends'),

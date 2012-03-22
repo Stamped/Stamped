@@ -33,6 +33,8 @@ except:
     report()
     raise
 
+_verbose = False
+
 class QuerySearchAll(ResolverSearchAll):
 
     def __init__(self, query_string, coordinates=None):
@@ -71,11 +73,12 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
+        timeout = 5
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
         sources = {
-            'itunes':iTunesSource().matchSource(query),
+            'itunes':iTunesSource().searchAllSource(query,timeout=timeout),
             'rdio':RdioSource().matchSource(query),
             'stamped':StampedSource().matchSource(query),
             'factual':FactualSource().matchSource(query),
@@ -87,18 +90,21 @@ class EntitySearch(object):
             output.append((name,source_results))
         for name,source in sources.items():
             pool.spawn(helper, name, source, results_list)
-        pool.join()
+        pool.join(timeout=timeout)
 
         all_results ={}
         total = 0
-        for name,source_results in results_list:
+        for name,source_results in list(results_list):
             all_results[name] = source_results
             total += len(source_results)
 
-        print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (total, time() - before, ' '.join(all_results.keys())))
+        if _verbose:
+            print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (
+                total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.items()])
+            ))
         before2 = time()
         chosen = []
-        while True:
+        while len(chosen) < count:
             best = None
             best_name = None
             for name,results in list(all_results.items()):
@@ -110,10 +116,12 @@ class EntitySearch(object):
                         best = cur_best
                         best_name = name
                     else:
-                        print("skipped %s with value %s" % (name, cur_best[0]['total']))
+                        if _verbose:
+                            print("skipped %s with value %s" % (name, cur_best[0]['total']))
             if best is not None:
                 del all_results[best_name][0]
-                print("Chose %s with value %s" % (best_name, best[0]['total']))
+                if _verbose:
+                    print("Chose %s with value %s" % (best_name, best[0]['total']))
                 cur = best[1]
                 def dedup():
                     for entry in chosen:
@@ -124,13 +132,16 @@ class EntitySearch(object):
                 if len(dups) == 0 or not dups[0][0]['resolved']:
                     chosen.append(best)
                 else:
-                    print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+                    if _verbose:
+                        print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
             else:
                 break
-        print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
+        if _verbose:
+            print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
         return chosen
   
 if __name__ == '__main__':
+    _verbose = True
     import sys
     import pprint
     count = 10

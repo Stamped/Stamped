@@ -318,13 +318,17 @@ def setComparison(a, b, symmetric=False, strict=False):
     else:
         return asymmetricComparison(a, b)
 
-def formatResults(results):
+def formatResults(results, reverse=True):
     n = len(results)
     l = []
     # for result in results:
     for i in range(len(results)):
-        result = results[n - 1]
-        l.append('\n%3s %s' % (n, '=' * 37))
+        if reverse:
+            result = results[n - 1]
+            l.append('\n%3s %s' % (n, '=' * 37))
+        else:
+            result = results[i]
+            l.append('\n%3s %s' % (i+1, '=' * 37))
         scores = result[0]
         weights = scores['weights']
         total_weight = 0.0

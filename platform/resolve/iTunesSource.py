@@ -17,6 +17,7 @@ try:
     from libs.iTunes                import globaliTunes
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
+    from gevent.pool                import Pool
     import logs
     from pprint                     import pformat
     from Resolver                   import *
@@ -597,29 +598,27 @@ class iTunesSource(GenericSource):
         except Exception:
             raise ValueError('Malformed iTunes output')
 
-    def searchAllSource(self, query):
+    def searchAllSource(self, query, timeout=None):
         def gen():
             try:
+                queries = [
+                    'musicArtist','song','album','movie','ebook'
+                ]
                 raw_results = []
-                raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="musicArtist"
-                )['results'])
-                raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="song"
-                )['results'])
-                raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="album"
-                )['results'])
-                raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="movie"
-                )['results'])
-                raw_results.append(self.__itunes.method(
-                    'search',term=query.query_string,entity="ebook"
-                )['results'])
+                def helper(q):
+                    raw_results.append(self.__itunes.method(
+                        'search',term=query.query_string,entity=q
+                    )['results'])
+
+                pool = Pool(len(queries))
+                for q in queries:
+                    pool.spawn(helper, q)
+                pool.join(timeout=timeout)
+                final_results = list(raw_results)
                 found = True
                 while found:
                     found = False
-                    for results in raw_results:
+                    for results in final_results:
                         if len(results) > 0:
                             value = results[0]
                             del results[0]
