@@ -82,8 +82,8 @@ class FactualPlace(ResolverPlace):
     
     @lazyProperty
     def address(self):
-        return {
-            k2: self.data[k1]
+        pairs = [
+            (k2, self.data[k1])
                 for k1, k2 in {
                     'address':'street',
                     'country':'country',
@@ -93,7 +93,11 @@ class FactualPlace(ResolverPlace):
                     'country':'country',
                 }.items()
                     if k1 in self.data
-        }
+        ]
+        address = {}
+        for k,v in pairs:
+            address[k] = v
+        return address
 
     @property 
     def source(self):
