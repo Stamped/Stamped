@@ -76,33 +76,57 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    def search(self, query_string, count=10, coordinates=None):
+    @property 
+    def sources(self):
+        return {
+            'itunes':   iTunesSource,
+            'rdio':     RdioSource,
+            'stamped':  StampedSource,
+            'factual':  FactualSource,
+            'tmdb':     TMDBSource,
+            'spotify':  SpotifySource,
+        }
+
+    def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
         types = set()
-        sources = {
-            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
-            'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
-            'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
-            'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
-            'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
-            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
-            'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
-        }
+        # sources = {
+        #     'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
+        #     'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
+        #     'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
+        #     'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
+        #     'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
+        #     'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
+        #     'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
+        #     'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
+        # }
         results_list = []
-        pool = Pool(len(sources))
+        pool = Pool(len(self.sources))
+
+        print '%s' % query_string
+
         def helper(name, source_f, output):
+            print 'HELPER: %s / %s' % (name, source_f)
             source = source_f()
+            print 'SOURCE: %s' % source(0, 1)
             def callback(result, order):
                 if _verbose:
                     print("%3d from %s" % (order, name))
                 results_list.append((name,result))
             self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
-        for name,source_f in sources.items():
+
+        for name, source in self.sources.items():
+            print source
+            source_f = lambda: source().searchAllSource(query, timeout=timeout, types=types)
+            print source_f
             pool.spawn(helper, name, source_f, results_list)
+
+        # for name, source_f in sources.items():
+        #     pool.spawn(helper, name, source_f, results_list)
+
         pool.join(timeout=timeout)
 
         all_results ={}
@@ -171,6 +195,13 @@ if __name__ == '__main__':
     if len(sys.argv) > 3:
         coordinates = tuple([ float(v) for v in sys.argv[3].split(',') ])
     results = EntitySearch().search(query, count=count, coordinates=coordinates)
+
     print("Final Search Results")
     print(formatResults(results))
+
+    for result in results:
+        entity = Entity()
+        StampedSource().enrichEntityWithWrapper(result[1].target, entity)
+        print entity.value
+
 
