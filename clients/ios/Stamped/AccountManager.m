@@ -159,6 +159,7 @@ static AccountManager* sharedAccountManager_ = nil;
     if (timeUntilTokenRefresh <= 0) {
       [self sendTokenRefreshRequest];
       [self sendUserInfoRequest];
+      [self.delegate accountManagerDidAuthenticate];
       return;
     }
     oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:timeUntilTokenRefresh
