@@ -125,6 +125,7 @@ static NSString* const kNumInstructionsDisplayed = @"kNumInstructionsDisplayed";
 
 - (void)reset {
   self.searchQuery = nil;
+  searchButton_.selected = NO;
   self.filterType = StampFilterTypeNone;
   self.searchField.text = nil;
   [self.scrollView setContentOffset:CGPointZero animated:YES];

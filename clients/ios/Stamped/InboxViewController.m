@@ -484,6 +484,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)userPulledToReload {
   [super userPulledToReload];
+  // TODO(andybons): Put this somewhere nicer.
+  [self.stampFilterBar reset];
+  self.searchQuery = nil;
+  selectedFilterType_ = StampFilterTypeNone;
+  [self filterStamps];
+  [self.tableView reloadData];
+
   [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
   [[NSUserDefaults standardUserDefaults] synchronize];
   [self loadStampsFromNetwork];
