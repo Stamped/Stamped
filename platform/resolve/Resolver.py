@@ -1222,7 +1222,10 @@ class Resolver(object):
             self.__addTotal(similarities, weights, query, match, options)
             if 'total' not in mins or similarities['total'] >= mins['total']:
                 #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
-                results.append((similarities,match))
+                result = (similarities, match)
+                results.append(result)
+                options['callback'](result)
+
 
     def resolve(self, query, source, **options):
         options = self.parseGeneralOptions(query, options)
@@ -1288,6 +1291,8 @@ class Resolver(object):
         pool - a positive integer indicating the size of the gevent pool to be used (use 1 for sequential)
         mins - an attribute-comparison dict which can be used to prune matches (useful for reducing execution time)
         """
+        if 'callback' not in options:
+            options['callback'] = lambda x: None
         if 'count' not in options:
             options['count'] = 1
         if 'strict' not in options:
