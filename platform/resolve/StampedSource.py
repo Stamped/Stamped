@@ -468,6 +468,21 @@ class StampedSource(GenericSource):
                 yield {
                     'titlel' : query.query_string.lower(),
                 }
+
+                words = query.query_string.lower().split()
+                if len(words) == 1:
+                    return
+                yield {
+                    '$or' : [
+                        {
+                            'titlel' : {
+                                '$regex' : r"^(.* )?%s %s( .*)?$" % (words[i], words[i+1])
+                            }
+                        }
+                            for i in xrange(len(words) - 1)
+                    ]
+                }
+
                 blacklist = set([
                     'and',
                     'or',
