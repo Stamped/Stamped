@@ -194,7 +194,7 @@ class FactualSource(GenericSource):
         elif query.type == 'search_all':
             return self.searchAllSource(query)
         else:
-            raise Exception()
+            return self.emptySource
 
     def placeSource(self, query):
         def gen():
@@ -207,7 +207,7 @@ class FactualSource(GenericSource):
         return generatorSource(gen())
 
 
-    def searchAllSource(self, query):
+    def searchAllSource(self, query, timeout=None, types=None):
         def gen():
             try:
                 results = self.__factual.search(query.query_string)

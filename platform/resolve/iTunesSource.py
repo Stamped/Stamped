@@ -554,7 +554,7 @@ class iTunesSource(GenericSource):
         except Exception:
             raise ValueError('Malformed iTunes output')
 
-    def searchAllSource(self, query, timeout=None):
+    def searchAllSource(self, query, timeout=None, types=None):
         def gen():
             try:
                 queries = [

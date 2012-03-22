@@ -239,7 +239,7 @@ class SpotifySource(GenericSource):
         artists = self.__spotify.search('artist',q=q)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
-    def searchAllSource(self, query, timeout=None):
+    def searchAllSource(self, query, timeout=None, types=None):
         q = query.query_string
         return multipleSource(
             [

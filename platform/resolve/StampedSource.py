@@ -517,7 +517,7 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query)
 
-    def searchAllSource(self, query):
+    def searchAllSource(self, query, timeout=None, types=None):
         def query_gen():
             try:
                 # Exact match

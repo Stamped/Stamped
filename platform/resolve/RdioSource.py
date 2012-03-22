@@ -217,7 +217,7 @@ class RdioSource(GenericSource):
             ),
             constructor=RdioArtist)
 
-    def searchAllSource(self, query):
+    def searchAllSource(self, query, timeout=None, types=None):
         return self.generatorSource(self.__queryGen(
                 query=query.query_string,
                 types='Artist,Album,Track',
