@@ -255,7 +255,12 @@ class Factual(object):
 
     def search(self, query, limit=_limit):
         return self.__factual('global',prefix='t',limit=limit,q=urllib.quote(query),
-            filters=urllib.quote(json.dumps({"category":{"$bw":"Food & Beverage"}})))
+            filters=urllib.quote(json.dumps({
+                '$or':[
+                        {"category":{"$bw":"Food & Beverage"}},
+                        {"category":{"$bw":"Arts, Entertainment & Nightlife"}},
+                    ]
+                })))
 
 
     def resolve(self, data,limit=_limit):
