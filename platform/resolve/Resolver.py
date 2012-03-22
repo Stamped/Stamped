@@ -36,6 +36,7 @@ __all__ = [
     'setComparison',
     'sortedResults',
     'formatResults',
+    'typeToSubcategory',
 ]
 
 import Globals
@@ -354,6 +355,18 @@ def formatResults(results, reverse=True):
         n = n - 1
     return '\n'.join(l)
 
+def typeToSubcategory(t):
+    m = {
+        'track':'song',
+        'album':'album',
+        'artist':'artist',
+        'book':'book',
+        'movie':'movie',
+    }
+    if t in m:
+        return m[t]
+    else:
+        return None
 
 class ResolverObject(object):
     """
@@ -615,6 +628,10 @@ class ResolverAlbum(ResolverObject):
     def genres(self):
         return []
 
+    @property
+    def date(self):
+        return None
+
     @property 
     def type(self):
         return 'album'
@@ -830,6 +847,10 @@ class ResolverBook(ResolverObject):
     @property
     def sku(self):
         return None
+
+    @property 
+    def genres(self):
+        return []
 
     @property 
     def type(self):
@@ -1646,6 +1667,7 @@ def demo(generic_source, default_title):
     _verbose = True
     import sys
     import StampedSource
+    import Schemas
 
     title = default_title
     subcategory = None
@@ -1707,6 +1729,9 @@ def demo(generic_source, default_title):
                     print("Inverted to different entity! (dup or false positive)")
             else:
                 print("Inversion failed! (low asymetric comparison?)")
+            blank = Schemas.Entity()
+            generic_source.enrichEntityWithWrapper(new_query, blank)
+            pprint(blank.value)
 
     else:
         print("No results")

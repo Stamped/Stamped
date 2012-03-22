@@ -421,36 +421,8 @@ class iTunesSource(GenericSource):
     def __resolver(self):
         return Resolver()
 
-    def __repopulateAlbums(self, entity, artist, controller):
-        new_albums = [
-            {
-                'album_name'    : album['name'],
-                'source'        : self.sourceName,
-                'id'            : album['key'],
-                'timestamp'     : controller.now,
-                'album_mangled' : albumSimplify(album['name']),
-            }
-                for album in artist.albums
-        ]
-        entity['albums'] = new_albums
-
-    def __repopulateSongs(self, entity, artist, controller):
-        new_songs = []
-        for track in artist.tracks:
-            info = {
-                'song_name'    : track['name'],
-                'source'        : self.sourceName,
-                'id'            : track['key'],
-                'timestamp'     : controller.now,
-                'song_mangled' : trackSimplify(track['name']),
-            }
-            #query = iTunesTrack(data=track['data'])
-            #source = self.__stamped.matchSource(query)
-            #results = self.__resolver.resolve(query, source)
-            #if len(results) > 0 and results[0][0]['resolved']:
-            #    info['entity_id'] = results[0][1].key
-            new_songs.append(info)
-        entity['songs'] = new_songs
+    def wrapperFromKey(self, key, type=None):
+        return self.wrapperFromId(key)
 
     def wrapperFromId(self, itunes_id):
         try:
@@ -476,33 +448,17 @@ class iTunesSource(GenericSource):
         if itunes_id != None:
             obj = None
             if entity['subcategory'] == 'movie':
-                movie = iTunesMovie(itunes_id)
-                obj = movie
-                if movie.rating is not None:
-                    entity['mpaa_rating'] = movie.rating
-                if len(movie.genres) > 0:
-                    entity['genre'] = movie.genres[0]
-                #if movie.description != '':
-                #    entity['desc'] = movie.description
+                obj = iTunesMovie(itunes_id)
             elif entity['subcategory'] == 'artist':
-                artist = iTunesArtist(itunes_id)
-                obj = artist
-                aid = entity['aid']
-                if aid == itunes_id:
-                    if controller.shouldEnrich('albums', self.sourceName, entity):
-                        self.__repopulateAlbums(entity, artist, controller) 
-                    if controller.shouldEnrich('songs', self.sourceName, entity):
-                        self.__repopulateSongs(entity, artist, controller)
+                obj = iTunesArtist(itunes_id)
             elif entity['subcategory'] == 'album':
-                album = iTunesAlbum(itunes_id)
-                obj = album
-                if len(album.genres) > 0:
-                    entity['genre'] = album.genres[0]
+                obj = iTunesAlbum(itunes_id)
             elif entity['subcategory'] == 'song':
-                track = iTunesTrack(itunes_id)
-                obj = track
-                if len(track.genres) > 0:
-                    entity['genre'] = track.genres[0]
+                obj = iTunesTrack(itunes_id)
+            elif entity['subcategory'] == 'book':
+                obj = iTunesBook(itunes_id)
+            if obj is not None:
+                self.enrichEntityWithWrapper(obj, entity, controller, decorations, timestamps)
         return True
 
     def matchSource(self, query):

@@ -5,13 +5,15 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'ASourceController' ]
+__all__ = [ 'ASourceController', "AlwaysSourceController" ]
 
 import Globals
 from logs import log, report
 
 try:
     from abc        import ABCMeta, abstractmethod, abstractproperty
+    from datetime   import datetime
+    from utils      import lazyProperty
 except:
     report()
     raise
@@ -41,3 +43,15 @@ class ASourceController(object):
         """
         pass
 
+
+class AlwaysSourceController(ASourceController):
+
+    def __init__(self):
+        ASourceController.__init__(self)
+
+    def shouldEnrich(self, group, source, entity,timestamp=None):
+        return True
+
+    @lazyProperty
+    def now(self):
+        return datetime.utcnow()

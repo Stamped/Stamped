@@ -20,8 +20,9 @@ try:
     import logs
     from pprint                     import pprint, pformat
     import sys
-    from Resolver                   import Resolver
+    from Resolver                   import *
     from abc                        import ABCMeta, abstractmethod
+    from ASourceController          import AlwaysSourceController
 except:
     report()
     raise
@@ -132,6 +133,101 @@ class GenericSource(BasicSource):
 
     def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
+
+    def __repopulateAlbums(self, entity, artist, controller):
+        new_albums = [
+            {
+                'album_name'    : album['name'],
+                'source'        : self.sourceName,
+                'id'            : album['key'],
+                'timestamp'     : controller.now,
+                'album_mangled' : albumSimplify(album['name']),
+            }
+                for album in artist.albums
+        ]
+        entity['albums'] = new_albums
+
+    def __repopulateSongs(self, entity, artist, controller):
+        new_songs = []
+        for track in artist.tracks:
+            info = {
+                'song_name'    : track['name'],
+                'source'        : self.sourceName,
+                'id'            : track['key'],
+                'timestamp'     : controller.now,
+                'song_mangled' : trackSimplify(track['name']),
+            }
+            new_songs.append(info)
+        entity['songs'] = new_songs
+
+    def wrapperFromKey(self, key, type=None):
+        return None
+
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        if controller is None:
+            controller = AlwaysSourceController()
+        if decorations is None:
+            decorations = {}
+        if timestamps is None:
+            timestamps = {}
+        subcategory = typeToSubcategory(wrapper.type)
+        if subcategory is not None:
+            entity['subcategory'] = subcategory
+        entity['title'] = wrapper.name
+        entity['itunes_id'] = wrapper.key
+        if wrapper.description != '':
+            entity['desc'] = wrapper.description
+
+        if wrapper.type == 'movie':
+            if wrapper.rating is not None:
+                entity['mpaa_rating'] = wrapper.rating
+        if wrapper.type == 'artist':
+            if controller.shouldEnrich('albums', self.sourceName, entity):
+                self.__repopulateAlbums(entity, wrapper, controller) 
+            if controller.shouldEnrich('songs', self.sourceName, entity):
+                self.__repopulateSongs(entity, wrapper, controller)
+        if wrapper.type == 'album':
+            if len(wrapper.tracks) > 0:
+                entity['tracks'] = [
+                    track['name'] for track in wrapper.tracks
+                ]
+        if wrapper.type == 'track':
+            if wrapper.album['name'] != '':
+                entity['album_name'] = wrapper.album['name']
+        if wrapper.type == 'book':
+            if wrapper.author['name'] != '':
+                entity['author'] = wrapper.author['name']
+            if wrapper.eisbn is not None:
+                entity['isbn'] = wrapper.eisbn
+            if wrapper.isbn is not None:
+                entity['isbn'] = wrapper.isbn
+            if wrapper.sku is not None:
+                entity['sku_number'] = wrapper.sku
+            if wrapper.publisher['name'] != '':
+                entity['publisher'] = wrapper.publisher['name']
+            if wrapper.length > 0:
+                entity['num_pages'] = int(wrapper.length)
+
+        if wrapper.type in set(['track','album','artist','movie','book']):
+            if len(wrapper.genres) > 0:
+                entity['genre'] = wrapper.genres[0]
+        if wrapper.type in set(['track','album']):
+            if wrapper.artist['name'] != '':
+                entity['artist_display_name'] = wrapper.artist['name']
+        if wrapper.type in set(['track', 'album', 'movie', 'book']):
+            if wrapper.date is not None:
+                entity['release_date'] = wrapper.date
+        if wrapper.type in set(['track', 'movie']):
+            if wrapper.length > 0:
+                entity['track_length'] = str(int(wrapper.length))
+        if wrapper.type in set(['movie', 'tv']):
+            if len(wrapper.cast) > 0:
+                entity['cast'] = [
+                    actor['name'] for actor in wrapper.cast
+                ]
+            if wrapper.director['name'] != '':
+                entity['director'] = wrapper.director['name']
+        return True
 
     @property
     def idField(self):
