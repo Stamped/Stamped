@@ -28,8 +28,12 @@
 #import "EditEntityViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
-static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
+#if defined (DEV_BUILD)
+#warning using stamped dev.
+static NSString* const kDataBaseURL = @"https://dev.stamped.com/v0";
+#else
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
+#endif
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface StampedAppDelegate ()
@@ -228,7 +232,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)performRestKitMappings {
-//#warning Switched to dev
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];

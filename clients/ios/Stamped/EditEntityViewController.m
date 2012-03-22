@@ -633,8 +633,10 @@ const CGFloat kKeyboardHeight = 217.0;
     detailedEntity_.address = cityStateZip;
   }
   
-  if (detailedEntity_.address)
+  if (detailedEntity_.address) {
+    NSLog(@"Got address: %@", detailedEntity_.address);
     detailedEntity_.address = [detailedEntity_.address stringByAppendingFormat:@", %@", detailedEntity_.countryCode];
+  }
   
   switch (selectedCategory_) {
     case STEditCategoryRowFilm:
