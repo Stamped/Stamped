@@ -146,7 +146,21 @@ class GooglePlacesPlace(ResolverPlace):
 
     @lazyProperty
     def neighborhoods(self):
-        return []
+        locality = None
+        sublocality = None
+        if 'address_components' in self.data:
+            for comp in self.data['address_components']:
+                if 'types' in comp and 'long_name' in comp:
+                    name = comp['long_name']
+                    types = comp['types']
+                    if 'locality' in types:
+                        locality = name
+                    elif 'sublocality' in types:
+                        sublocality = name
+        if locality is not None and sublocality is not None:
+            return [sublocality]
+        else:
+            return []
 
     @lazyProperty
     def phone(self):
