@@ -99,6 +99,39 @@ class FactualPlace(ResolverPlace):
             address[k] = v
         return address
 
+    @lazyProperty
+    def phone(self):
+        if 'tel' in self.data:
+            return self.data['tel']
+        else:
+            return None
+
+    @lazyProperty
+    def url(self):
+        if 'website' in self.data:
+            return self.data['website']
+        else:
+            return None
+
+    @lazyProperty
+    def subcategory(self):
+        m = {
+            'Arts, Entertainment & Nightlife > Bars': 'bar',
+            'Arts, Entertainment & Nightlife > Night Clubs': 'night_club',
+            'Food & Beverage > Bakeries': 'bakery',
+            'Food & Beverage > Beer, Wine & Spirits': 'bar',
+            'Food & Beverage > Breweries': 'bar',
+            'Food & Beverage > Cafes, Coffee Houses & Tea Houses': 'cafe',
+        }
+        try:
+            if self.data['category'] in m:
+                return m[self.data['category']]
+            elif self.data['category'].startswith('Food & Beverage'):
+                return 'restaurant'
+        except Exception:
+            pass
+        return None
+
     @property 
     def source(self):
         return 'factual'
@@ -161,12 +194,12 @@ class FactualSource(GenericSource):
         elif query.type == 'search_all':
             return self.searchAllSource(query)
         else:
-            raise Exception()
+            return self.emptySource
 
     def placeSource(self, query):
         def gen():
             try:
-                results = self.__factual.search(query.query_string)
+                results = self.__factual.search(query.name)
                 for result in results:
                     yield FactualPlace(data=result)
             except GeneratorExit:
@@ -174,7 +207,7 @@ class FactualSource(GenericSource):
         return generatorSource(gen())
 
 
-    def searchAllSource(self, query):
+    def searchAllSource(self, query, timeout=None, types=None):
         def gen():
             try:
                 results = self.__factual.search(query.query_string)
@@ -191,6 +224,7 @@ class FactualSource(GenericSource):
 
         Returns True if the entity was modified.
         """
+        #Override and ignores GenericSource.enrichEntity
         try:
             factual_id = entity['factual_id']
             if controller.shouldEnrich('factual', self.sourceName, entity):
@@ -278,4 +312,4 @@ class FactualSource(GenericSource):
         return True
 
 if __name__ == '__main__':
-    print("here")
+    demo(FactualSource(),'Barley Swine')

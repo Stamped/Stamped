@@ -439,6 +439,10 @@ class ResolverObject(object):
     def address(self):
         return {}
 
+    @property 
+    def neighborhoods(self):
+        return []
+
 class ResolverProxy(object):
 
     def __init__(self, target):

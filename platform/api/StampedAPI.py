@@ -1219,12 +1219,38 @@ class StampedAPI(AStampedAPI):
         return entity
     
     @API_CALL
+    def searchEntitiesNew(self, query, coords=None, authUserId=None, category=None, subcategory=None):
+
+        types = None
+        if subcategory is not None:
+            if subcategory == 'song':
+                subcategory = 'track'
+            types = set(subcategory)
+        elif category is not None:
+            import Entity
+            types = set()
+            for s, c in subcategories.iteritems():
+                if category == c:
+                    if s == 'song':
+                        s = 'track'
+                    types.add(s)
+
+        coordinates = None
+        if coords is not None:
+            coordinates = (coords.lat, coords.lng)
+
+        from EntitySearch import EntitySearch
+        results = EntitySearch().search(query, count=10, coordinates=coordinates, types=types)
+        #enrichEntity
+        logs.info(results)
+    
+    @API_CALL
     def searchEntities(self, 
                        query, 
                        coords=None, 
                        authUserId=None, 
-                       category_filter=None, 
-                       subcategory_filter=None, 
+                       category=None, 
+                       subcategory=None, 
                        prefix=False, 
                        local=False, 
                        full=True, 
@@ -1248,8 +1274,8 @@ class StampedAPI(AStampedAPI):
     def searchNearby(self, 
                      coords=None, 
                      authUserId=None, 
-                     category_filter=None, 
-                     subcategory_filter=None, 
+                     category=None, 
+                     subcategory=None, 
                      prefix=False, 
                      full=True, 
                      page=0, 

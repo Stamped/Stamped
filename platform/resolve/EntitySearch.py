@@ -30,12 +30,13 @@ try:
     from FactualSource              import FactualSource
     from TMDBSource                 import TMDBSource
     from SpotifySource              import SpotifySource
+    from GooglePlacesSource         import GooglePlacesSource
     from time                       import time
 except:
     report()
     raise
 
-_verbose = True
+_verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
 
@@ -75,17 +76,19 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
-        timeout = 10
+        timeout = 6
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
+        types = set()
         sources = {
-            'itunes': lambda: iTunesSource().searchAllSource(query,timeout=timeout),
-            'rdio': lambda: RdioSource().matchSource(query),
-            'stamped': lambda: StampedSource().matchSource(query),
-            'factual': lambda: FactualSource().matchSource(query),
-            'tmdb': lambda: TMDBSource().matchSource(query),
-            'spotify': lambda: SpotifySource().searchAllSource(query,timeout=timeout),
+            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
+            'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
+            'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
+            'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
+            'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
+            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
+            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
         }
         results_list = []
         pool = Pool(len(sources))
