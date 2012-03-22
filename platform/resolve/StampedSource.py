@@ -465,6 +465,7 @@ class StampedSource(GenericSource):
     def searchAllSource(self, query):
         def query_gen():
             try:
+                # Exact match
                 yield {
                     'titlel' : query.query_string.lower(),
                 }
@@ -472,6 +473,20 @@ class StampedSource(GenericSource):
                 words = query.query_string.lower().split()
                 if len(words) == 1:
                     return
+
+                # Pair prefix
+                yield {
+                    '$or' : [
+                        {
+                            'titlel' : {
+                                '$regex' : r"^%s %s( .*)?$" % (words[i], words[i+1])
+                            }
+                        }
+                            for i in xrange(len(words) - 1)
+                    ]
+                }
+
+                # Pair regex
                 yield {
                     '$or' : [
                         {
@@ -494,6 +509,8 @@ class StampedSource(GenericSource):
                     'on',
                     'movie',
                 ])
+
+                # Word regex
                 yield {
                     '$or' : [
                         {
