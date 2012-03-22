@@ -9,9 +9,8 @@ __license__   = "TODO"
 import time, json
 from django.http import HttpResponse
 
-from httpapi.v0.helpers import *
-
 try:
+    from httpapi.v0.helpers import *
     from resolve.EntitySearch   import EntitySearch
     from resolve.Resolver       import *
 except Exception:
