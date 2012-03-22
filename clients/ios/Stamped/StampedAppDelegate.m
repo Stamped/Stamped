@@ -109,7 +109,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  [self.navigationController popToRootViewControllerAnimated:YES];
+  [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer {
