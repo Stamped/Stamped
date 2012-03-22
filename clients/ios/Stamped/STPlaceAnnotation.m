@@ -10,6 +10,7 @@
 
 #import "Entity.h"
 #import "Stamp.h"
+#import "User.h"
 
 const CGFloat kStandardLatLongSpan = 600.0f / 111000.0f;
 
@@ -49,7 +50,7 @@ const CGFloat kStandardLatLongSpan = 600.0f / 111000.0f;
     if (stamp_.via.length > 0)
       return stamp_.via;
 
-    return stamp_.entityObject.subtitle;
+    return [NSString stringWithFormat:@"@%@", stamp_.user.screenName];
   }
   return entityObject_.subtitle;
 }
