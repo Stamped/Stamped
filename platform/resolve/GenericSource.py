@@ -170,9 +170,14 @@ class GenericSource(BasicSource):
             decorations = {}
         if timestamps is None:
             timestamps = {}
-        subcategory = typeToSubcategory(wrapper.type)
-        if subcategory is not None:
-            entity['subcategory'] = subcategory
+        if wrapper.type == 'place':
+            subcategory = wrapper.subcategory
+            if subcategory is not None:
+                entity['subcategory'] = subcategory
+        else:
+            subcategory = typeToSubcategory(wrapper.type)
+            if subcategory is not None:
+                entity['subcategory'] = subcategory
         entity['title'] = wrapper.name
         entity['itunes_id'] = wrapper.key
         if wrapper.description != '':
@@ -207,6 +212,14 @@ class GenericSource(BasicSource):
                 entity['publisher'] = wrapper.publisher['name']
             if wrapper.length > 0:
                 entity['num_pages'] = int(wrapper.length)
+        if wrapper.type == 'place':
+            if wrapper.coordinates is not None:
+                entity['coordinates'] = {
+                    'lat': wrapper.coordinates[0],
+                    'lng': wrapper.coordinates[1],
+                }
+            for k,v in wrapper.address:
+                entity['address_%s' % k] = v
 
         if wrapper.type in set(['track','album','artist','movie','book']):
             if len(wrapper.genres) > 0:

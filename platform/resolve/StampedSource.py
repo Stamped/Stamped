@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedSource', 'StampedSearchAll' ]
+__all__ = [ 'StampedSource', 'EntitySearchAll' ]
 
 import Globals
 from logs import report
@@ -253,8 +253,33 @@ class EntityBook(_EntityObject, ResolverBook):
     def eisbn(self):
         return None
 
+class EntityPlace(_EntityObject, ResolverPlace):
 
-class StampedSearchAll(ResolverProxy, ResolverSearchAll):
+    def __init__(self, entity):
+        _EntityObject.__init__(self, entity)
+        ResolverPlace.__init__(self)
+
+    @lazyProperty
+    def coordinates(self):
+        try:
+            return (self.entity['lat'], self.entity['lng'])
+        except Exception:
+            return None
+
+    @lazyProperty
+    def address(self):
+        m = set(['street','street_ext','locality','region','postcode','country'])
+        address = {}
+        for k in m:
+            actual = 'address_%s' % k
+            if actual in self.entity:
+                value = self.entity[actual]
+                if value is not None and value != '':
+                    address[k] = value
+        return address
+
+
+class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, target):
         ResolverProxy.__init__(self, target)
@@ -330,6 +355,9 @@ class StampedSource(GenericSource):
         """
         return EntityBook(entity)
 
+    def placeFromEntity(self, entity):
+        return EntityPlace(entity)
+
     def wrapperFromEntity(self, entity):
         """
         Generic ResolverObject factory method for entities.
@@ -348,6 +376,8 @@ class StampedSource(GenericSource):
             return self.movieFromEntity(entity)
         elif sub == 'book':
             return self.bookFromEntity(entity)
+        elif sub in set(['restaurant','bar','bakery','cafe','market','food','nightclub']):
+            return self.placeFromEntity(entity)
         else:
             raise ValueError('Unrecognized subcategory %s for %s' % (sub, entity['title']))
 
@@ -362,6 +392,8 @@ class StampedSource(GenericSource):
             return self.movieSource(query)
         elif query.type == 'book':
             return self.bookSource(query)
+        elif query.type == 'place':
+            return self.placeSource(query)
         elif query.type == 'search_all':
             return self.searchAllSource(query)
         else:
@@ -462,6 +494,29 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query, subcategory='book')
 
+    def placeSource(self, query):
+        def query_gen():
+            try:
+                or_clause = [
+                    {'subcategory' : 'bar'},
+                    {'subcategory' : 'restaurant'},
+                ]
+                yield {
+                    'titlel' : query.name.lower(),
+                    '$or' : or_clause,
+                }
+                yield {
+                    'mangled_title' : bookSimplify( query.name ),
+                    '$or' : or_clause,
+                }
+                yield {
+                    'details.book.author' : query.author['name'],
+                    '$or' : or_clause,
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), query)
+
     def searchAllSource(self, query):
         def query_gen():
             try:
@@ -537,7 +592,7 @@ class StampedSource(GenericSource):
                 """
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, constructor_wrapper=StampedSearchAll)
+        return self.__querySource(query_gen(), query, constructor_wrapper=EntitySearchAll)
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
@@ -587,6 +642,7 @@ class StampedSource(GenericSource):
                     if query_obj.source == 'stamped' and query_obj.key != '':
                         query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                     matches = self.__id_query(query )
+                    #logs.info('Found %d matches for query: %20s' % (len(matches), str(matches)))
                     #print(matches)
                     for match in matches:
                         entity_id = match['_id']
