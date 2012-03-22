@@ -35,7 +35,7 @@ except:
     report()
     raise
 
-_verbose = True
+_verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
 
