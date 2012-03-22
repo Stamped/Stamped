@@ -9,12 +9,13 @@ __license__   = "TODO"
 import time, json
 from django.http import HttpResponse
 
+message = None
 try:
     from httpapi.v0.helpers import *
     from resolve.EntitySearch   import EntitySearch
     from resolve.Resolver       import *
-except Exception:
-    pass
+except Exception as e:
+    message = str(e)
 
 def ping(request):
     try:
@@ -68,6 +69,8 @@ Query String: <input type="text" name="query" />
 </body>
 </html>
         """ % output
+        if message is not None:
+            output_json += message
         response = HttpResponse(output_json, **kwargs)
         
         return response
