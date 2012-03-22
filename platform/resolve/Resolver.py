@@ -341,8 +341,8 @@ def formatResults(results, reverse=True):
             t = 0
             if total_weight > 0:
                 t = s * w / total_weight
-            l.append('%16s  %.2f  *  %.2f  =>  %.2f' % (k, s, w, t))
-        l.append(' ' * 36 + '%.2f' % scores['total'])
+            l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
+        l.append(' ' * 37 + '%.2f' % scores['total'])
         l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
         l.append(str(result[1]))
         n = n - 1
@@ -1194,14 +1194,14 @@ class Resolver(object):
             ('location',            self.__locationTest),
             ('subcategory',         self.__subcategoryTest),
             ('priority',            lambda q, m, s, o: m.priority),
-            ('source_priority',     lambda q, m, s, o: 1),
+            ('source_priority',     self.__sourceTest),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
         ]
         weights = {
             'query_string':         lambda q, m, s, o: 0,
-            'name':                 lambda q, m, s, o: 5,
-            'location':             lambda q, m, s, o: 1,
+            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=2),
+            'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
             'subcategory':          lambda q, m, s, o: 0,
             'priority':             lambda q, m, s, o: 1,
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
@@ -1376,6 +1376,22 @@ class Resolver(object):
 
         return options
 
+    def __sourceTest(self, query, match, tests, options):
+        weights = {
+            'stamped'   : 1.0,
+            'itunes'    : 0.8,
+            'rdio'      : 0.6,
+            'spotify'   : 0.6,
+            'factual'   : 0.6,
+            'tmdb'      : 0.8,
+            'amazon'    : 0.6,
+            'netflix'   : 0.8,
+            'google'    : 0.7,
+        }
+        if match.source in weights:
+            return weights[match.source]
+        return 0
+
     def __sourceWeight(self, source):
         return 1
 
@@ -1398,6 +1414,11 @@ class Resolver(object):
     
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
+
+    def __locationWeight(self, query, match, tests, options, boost=1):
+        if 'location' in tests and tests['location'] > 0.85:
+            return boost 
+        return 1
             
     def __subcategoryTest(self, query, match, tests, options):
         return 0 
@@ -1429,6 +1450,11 @@ class Resolver(object):
     def __relatedTermsWeight(self, query, match, tests, options):
         if len(match.related_terms) == 0:
             return 1
+        return 5
+
+    def __nameWeightBoost(self, query, match, tests, options, boost=1):
+        if 'name' in tests and tests['name'] > 0.95:
+            return boost * 5
         return 5
 
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):

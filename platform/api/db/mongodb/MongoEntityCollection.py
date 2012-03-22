@@ -47,6 +47,13 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         
         return entity
     
+    def _convertToMongo(self, entity):
+        if entity is not None and entity.titlel is None:
+            entity.titlel = getSimplifiedTitle(entity.title)
+        document = AMongoCollection._convertToMongo(self, entity)
+        
+        return document
+    
     def addEntity(self, entity):
         if entity.titlel is None:
             entity.titlel = getSimplifiedTitle(entity.title)
