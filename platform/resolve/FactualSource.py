@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    from BasicSource    import BasicSource
+    from GenericSource      import GenericSource
     from libs.Factual       import globalFactual
     from Resolver           import *
     from utils              import lazyProperty
@@ -118,13 +118,12 @@ class FactualSearchAll(ResolverProxy, ResolverSearchAll):
         return self.target.type
 
 
-class FactualSource(BasicSource):
+class FactualSource(GenericSource):
     """
     Data-Source wrapper for Factual services.
     """
     def __init__(self):
-        BasicSource.__init__(self, 'factual',
-            'factual',
+        GenericSource.__init__(self, 'factual',
             'singleplatform',
 
             'address',
@@ -157,10 +156,23 @@ class FactualSource(BasicSource):
         return globalFactual()
 
     def matchSource(self, query):
-        if query.type == 'search_all':
+        if query.type == 'place':
+            return self.placeSource(query)
+        elif query.type == 'search_all':
             return self.searchAllSource(query)
         else:
             raise Exception()
+
+    def placeSource(self, query):
+        def gen():
+            try:
+                results = self.__factual.search(query.query_string)
+                for result in results:
+                    yield FactualPlace(data=result)
+            except GeneratorExit:
+                pass
+        return generatorSource(gen())
+
 
     def searchAllSource(self, query):
         def gen():

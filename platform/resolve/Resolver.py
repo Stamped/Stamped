@@ -18,7 +18,6 @@ __all__ = [
     'ResolverAlbum',
     'ResolverTrack',
     'ResolverPlace',
-    'ResolverRestaurant',
     'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
@@ -886,36 +885,24 @@ class ResolverPlace(ResolverObject):
         return None
 
     @property 
-    def type(self):
-        return 'place'
+    def has_food(self):
+        return False
 
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-            ]
-        for k,v in self.address.items():
-            l.append(v)
-        return [
-            v for v in l if v != ''
-        ]
+    @property 
+    def has_drinks(self):
+        return False
 
-class ResolverRestaurant(ResolverPlace):
-    """
-    Interface for restaurant objects
-
-    Attributes:
-
-    TODO
-    """
     @property 
     def cuisines(self):
         return []
 
     @property 
     def type(self):
-        return 'restaurant'
+        return 'place'
+
+    @property 
+    def subcategory(self):
+        return None
 
     @lazyProperty
     def related_terms(self):
@@ -925,7 +912,6 @@ class ResolverRestaurant(ResolverPlace):
             ]
         for k,v in self.address.items():
             l.append(v)
-        l.extend(self.cuisines)
         return [
             v for v in l if v != ''
         ]
