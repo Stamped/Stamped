@@ -255,6 +255,16 @@ class AmazonBook(_AmazonObject, ResolverBook):
             pass
         return self
 
+class AmazonSearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 class AmazonSource(GenericSource):
     """
     Amazon entities
@@ -286,6 +296,8 @@ class AmazonSource(GenericSource):
             return self.trackSource(query)
         elif query.type == 'book':
             return self.bookSource(query)
+        elif query.type == 'search_all':
+            return self.searchAllSource(query)
         return self.emptySource
 
     def __searchGen(self, wrapper, *queries):
