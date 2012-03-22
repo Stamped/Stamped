@@ -1188,6 +1188,9 @@ class Resolver(object):
         self.genericCheck(tests, weights, results, query, match, options)
 
     def checkSearchAll(self, results, query, match, options):
+        if match.target is None:
+            logs.info("Aborted match for %s due to None target" % type(match))
+            return
         tests = [
             ('query_string',        self.__queryStringTest),
             ('name',                self.__nameTest),

@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'GenericSource', 'generatorSource' ]
+__all__ = [ 'GenericSource', 'generatorSource', 'listSource', 'multipleSource' ]
 
 import Globals
 from logs import report
@@ -16,6 +16,7 @@ from logs import report
 try:
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
+    from gevent.pool                import Pool
     import logs
     from pprint                     import pprint, pformat
     import sys
@@ -64,6 +65,42 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
             result = []
         return result
     return source
+
+def listSource(items, **kwargs):
+    def gen():
+        try:
+            for item in items:
+                yield item
+        except Exception:
+            pass
+    return generatorSource(gen(), **kwargs)
+
+def multipleSource(source_functions, initial_timeout=None, final_timeout=None, **kwargs):
+    def gen():
+        try:
+            pool = Pool(len(source_functions))
+            sources = []
+            def helper(source_function):
+                source = source_function()
+                if source is not None:
+                    sources.append(source)
+            for source_function in source_functions:
+                pool.spawn(helper, source_function)
+            pool.join(timeout=initial_timeout)
+
+            offset = 0
+            found = True
+            while found:
+                found = False
+                for source in sources:
+                    cur = source(offset,1)
+                    for item in cur:
+                        found = True
+                        yield item
+                offset += 1
+        except GeneratorExit:
+            pass
+    return generatorSource(gen(),  **kwargs)
 
 class GenericSource(BasicSource):
     """

@@ -29,6 +29,7 @@ try:
     from StampedSource              import StampedSource
     from FactualSource              import FactualSource
     from TMDBSource                 import TMDBSource
+    from SpotifySource              import SpotifySource
     from time                       import time
 except:
     report()
@@ -74,24 +75,26 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
-        timeout = 5
+        timeout = 4
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
         sources = {
-            'itunes':iTunesSource().searchAllSource(query,timeout=timeout),
-            'rdio':RdioSource().matchSource(query),
-            'stamped':StampedSource().matchSource(query),
-            'factual':FactualSource().matchSource(query),
-            'tmdb':TMDBSource().matchSource(query),
+            'itunes': lambda: iTunesSource().searchAllSource(query,timeout=timeout),
+            'rdio': lambda: RdioSource().matchSource(query),
+            'stamped': lambda: StampedSource().matchSource(query),
+            'factual': lambda: FactualSource().matchSource(query),
+            'tmdb': lambda: TMDBSource().matchSource(query),
+            'spotify': lambda: SpotifySource().searchAllSource(query,timeout=timeout),
         }
         results_list = []
         pool = Pool(len(sources))
-        def helper(name, source, output):
+        def helper(name, source_f, output):
+            source = source_f()
             source_results = self.__resolver.resolve(query, source, count=count)
             output.append((name,source_results))
-        for name,source in sources.items():
-            pool.spawn(helper, name, source, results_list)
+        for name,source_f in sources.items():
+            pool.spawn(helper, name, source_f, results_list)
         pool.join(timeout=timeout)
 
         all_results ={}

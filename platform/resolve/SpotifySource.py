@@ -15,7 +15,7 @@ from logs import report
 
 try:
     from libs.Spotify               import globalSpotify
-    from GenericSource              import GenericSource
+    from GenericSource              import GenericSource, multipleSource, listSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     import logs
@@ -171,6 +171,16 @@ class SpotifyTrack(_SpotifyObject, ResolverTrack):
         return float(self.data['length'])
 
 
+class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
+
+    def __init__(self, target):
+        ResolverProxy.__init__(self, target)
+        ResolverSearchAll.__init__(self)
+
+    @property
+    def subtype(self):
+        return self.target.type
+
 class SpotifySource(GenericSource):
     """
     """
@@ -192,47 +202,53 @@ class SpotifySource(GenericSource):
             return self.albumSource(query)
         elif query.type == 'track':
             return self.trackSource(query)
+        elif query.type == 'search_all':
+            return self.trackSource(query)
         else:
             return self.emptySource
 
-    def trackSource(self, query):
-        tracks = self.__spotify.search('track',q=query.name)['tracks']
-        def source(start, count):
-            if start + count <= len(tracks):
-                result = tracks[start:start+count]
-            elif start < len(tracks):
-                result = tracks[start:]
-            else:
-                result = []
-            return [ SpotifyTrack( entry['href'] ) for entry in result ]
-        return source
-
+    def trackSource(self, query=None, query_string=None):
+        if query is not None:
+            q = query.name
+        elif query_string is not None:
+            q = query_string
+        else:
+            raise ValueError("query and query_string cannot both be None")
+        tracks = self.__spotify.search('track',q=q)['tracks']
+        return listSource(tracks, constructor=lambda x: SpotifyTrack( x['href'] ))
     
-    def albumSource(self, query):
-        albums = self.__spotify.search('album',q=query.name)['albums']
+    def albumSource(self, query=None, query_string=None):
+        if query is not None:
+            q = query.name
+        elif query_string is not None:
+            q = query_string
+        else:
+            raise ValueError("query and query_string cannot both be None")
+        albums = self.__spotify.search('album',q=q)['albums']
         albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
-        def source(start, count):
-            if start + count <= len(albums):
-                result = albums[start:start+count]
-            elif start < len(albums):
-                result = albums[start:]
-            else:
-                result = []
-            return [ SpotifyAlbum( entry['href'] ) for entry in result ]
-        return source
+        return listSource(albums, constructor=lambda x: SpotifyAlbum( x['href'] ))
 
 
-    def artistSource(self, query):
-        artists = self.__spotify.search('artist',q=query.name)['artists']
-        def source(start, count):
-            if start + count <= len(artists):
-                result = artists[start:start+count]
-            elif start < len(artists):
-                result = artists[start:]
-            else:
-                result = []
-            return [ SpotifyArtist( entry['href'] ) for entry in result ]
-        return source
+    def artistSource(self, query=None, query_string=None):
+        if query is not None:
+            q = query.name
+        elif query_string is not None:
+            q = query_string
+        else:
+            raise ValueError("query and query_string cannot both be None")
+        artists = self.__spotify.search('artist',q=q)['artists']
+        return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
+
+    def searchAllSource(self, query, timeout=None):
+        q = query.query_string
+        return multipleSource(
+            [
+                lambda : self.artistSource(query_string=q),
+                lambda : self.albumSource(query_string=q),
+                lambda : self.trackSource(query_string=q),
+            ],
+            constructor=SpotifySearchAll
+        )
 
 if __name__ == '__main__':
     demo(SpotifySource(), 'Katy Perry')

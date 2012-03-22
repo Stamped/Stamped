@@ -623,8 +623,10 @@ class iTunesSource(GenericSource):
                             value = results[0]
                             del results[0]
                             try:
-                                yield self.__createWrapper(value)
-                                found = True
+                                wrapper = self.__createWrapper(value)
+                                if wrapper is not None:
+                                    found = True
+                                    yield wrapper
                             except ValueError:
                                 logs.info('Malformed iTunes output:\n%s' % pformat(value))
             except GeneratorExit:
