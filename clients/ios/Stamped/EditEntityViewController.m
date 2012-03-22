@@ -620,23 +620,22 @@ const CGFloat kKeyboardHeight = 217.0;
   detailedEntity_.city = cityTextField_.text;
   detailedEntity_.state = stateTextField_.text;
   detailedEntity_.zipcode = zipTextField_.text;
-  
+
+  detailedEntity_.address = nil;
   NSString* street = [[NSArray arrayWithObjects:detailedEntity_.street, detailedEntity_.substreet, nil] componentsJoinedByString:@" "];
   NSString* cityStateZip = [[NSArray arrayWithObjects:detailedEntity_.city, detailedEntity_.state, detailedEntity_.zipcode, nil] componentsJoinedByString:@" "];
   street = [street stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
   cityStateZip = [cityStateZip stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
   if (street.length > 0 && cityStateZip.length > 0) {
     detailedEntity_.address = [[NSArray arrayWithObjects:street, cityStateZip, nil] componentsJoinedByString:@", "];
-  } else if (street) {
+  } else if (street.length > 0) {
     detailedEntity_.address = street;
-  } else if (cityStateZip) {
+  } else if (cityStateZip.length > 0) {
     detailedEntity_.address = cityStateZip;
   }
   
-  if (detailedEntity_.address) {
-    NSLog(@"Got address: %@", detailedEntity_.address);
+  if (detailedEntity_.address.length > 0)
     detailedEntity_.address = [detailedEntity_.address stringByAppendingFormat:@", %@", detailedEntity_.countryCode];
-  }
   
   switch (selectedCategory_) {
     case STEditCategoryRowFilm:
