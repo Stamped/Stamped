@@ -76,16 +76,13 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    @property 
-    def sources(self):
-        return {
-            'itunes':   iTunesSource,
-            'rdio':     RdioSource,
-            'stamped':  StampedSource,
-            'factual':  FactualSource,
-            'tmdb':     TMDBSource,
-            'spotify':  SpotifySource,
-        }
+    def __helper(self, query, count, name, source_f, results_list):
+        source = source_f()
+        def callback(result, order):
+            if _verbose:
+                print("%3d from %s" % (order, name))
+            results_list.append((name,result))
+        self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
 
     def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
@@ -93,39 +90,21 @@ class EntitySearch(object):
         query = QuerySearchAll(query_string, coordinates)
         results = []
         types = set()
-        # sources = {
-        #     'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
-        #     'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
-        #     'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
-        #     'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
-        #     'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
-        #     'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-        #     'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
-        #     'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
-        # }
+        sources = {
+            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
+            'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
+            'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
+            'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
+            'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
+            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
+            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
+            'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
+        }
         results_list = []
-        pool = Pool(len(self.sources))
+        pool = Pool(len(sources))
 
-        print '%s' % query_string
-
-        def helper(name, source_f, output):
-            print 'HELPER: %s / %s' % (name, source_f)
-            source = source_f()
-            print 'SOURCE: %s' % source(0, 1)
-            def callback(result, order):
-                if _verbose:
-                    print("%3d from %s" % (order, name))
-                results_list.append((name,result))
-            self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
-
-        for name, source in self.sources.items():
-            print source
-            source_f = lambda: source().searchAllSource(query, timeout=timeout, types=types)
-            print source_f
-            pool.spawn(helper, name, source_f, results_list)
-
-        # for name, source_f in sources.items():
-        #     pool.spawn(helper, name, source_f, results_list)
+        for name, source_f in sources.items():
+            pool.spawn(self.__helper, query, count, name, source_f, results_list)
 
         pool.join(timeout=timeout)
 
@@ -180,9 +159,8 @@ class EntitySearch(object):
         if _verbose:
             print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
         return chosen
-  
-if __name__ == '__main__':
-    _verbose = True
+
+def demo():
     import sys
     import pprint
     count = 10
@@ -204,4 +182,7 @@ if __name__ == '__main__':
         StampedSource().enrichEntityWithWrapper(result[1].target, entity)
         print entity.value
 
+if __name__ == '__main__':
+    _verbose = True
+    demo()
 

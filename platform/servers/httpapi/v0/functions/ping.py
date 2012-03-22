@@ -41,6 +41,7 @@ def searchDemo(request):
         output = ''
         query = ''
         coord_string = ''
+        subcategories = 
         if request.method == 'GET' and 'query' in request.GET:
             query = request.GET['query']
             coordinates = None
@@ -55,12 +56,15 @@ def searchDemo(request):
             results = EntitySearch().search(query, coordinates=coordinates)
 
             output = formatResults(results, reverse=False)
+
         output_json = """
 <html>
 <head><title>Search Demo</title>
 </head>
 <body>
 <form>
+<input type="checkbox" name="vehicle" value="Bike" /> I have a bike<br />
+<input type="checkbox" name="vehicle" value="Car" /> I have a car <br />
 Coordinates (optional): <input type="text" name="coordinates" value="%s"/> (i.e. "43,-74.25")<br/>
 Query String: <input type="text" name="query" value="%s"/>
 <input type="submit" value="Submit" />

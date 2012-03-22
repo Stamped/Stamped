@@ -295,7 +295,6 @@ class StampedSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'stamped')
-        print 'INIT STAMPED SOURCE'
 
     @lazyProperty
     def __entityDB(self):
@@ -519,7 +518,6 @@ class StampedSource(GenericSource):
         return self.__querySource(query_gen(), query)
 
     def searchAllSource(self, query, timeout=None, types=None):
-        print 'PLEASE WORK'
         def query_gen():
             try:
                 # Exact match
