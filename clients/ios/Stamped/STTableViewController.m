@@ -228,7 +228,7 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
-#pragma mark - UIScrollView delegate methods
+#pragma mark - UIScrollViewDelegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [super scrollViewDidScroll:scrollView];

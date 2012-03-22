@@ -457,13 +457,10 @@ typedef enum PeopleSearchCorpus {
   User* user = nil;
   if (searchResults_) {
     user = [searchResults_ objectAtIndex:indexPath.row];
-    profileViewController.stampsAreTemporary = [currentUser.following containsObject:user];
   } else if (indexPath.section == 0) {
     user = currentUser;
-    profileViewController.stampsAreTemporary = NO;
   } else {
     user = [self.friendsArray objectAtIndex:indexPath.row - 1];
-    profileViewController.stampsAreTemporary = [currentUser.following containsObject:user];
   }
   profileViewController.user = user;
   

@@ -2228,6 +2228,7 @@
 		7E806FFE14312ED2003AF77D /* ActivityTodoTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityTodoTableViewCell.m; sourceTree = "<group>"; };
 		7E8070001431327A003AF77D /* ActivityFollowTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityFollowTableViewCell.h; sourceTree = "<group>"; };
 		7E8070011431327A003AF77D /* ActivityFollowTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityFollowTableViewCell.m; sourceTree = "<group>"; };
+		7E8143E7151A428800A7BBE8 /* StampedModel 20.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 20.xcdatamodel"; sourceTree = "<group>"; };
 		7E86282E14259A3B00E6FA3D /* toolbar_likeButton_highlighted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_likeButton_highlighted.png; sourceTree = "<group>"; };
 		7E86282F14259A3B00E6FA3D /* toolbar_likeButton_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_likeButton_highlighted@2x.png"; sourceTree = "<group>"; };
 		7E86283014259A3B00E6FA3D /* toolbar_likeButton_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_likeButton_selected.png; sourceTree = "<group>"; };
@@ -6333,8 +6334,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6355,8 +6356,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6377,8 +6378,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6398,8 +6399,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6421,8 +6422,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6442,8 +6443,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6496,8 +6497,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6516,8 +6517,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "D578280E-EB1A-4501-AB8D-F486F490E724";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D578280E-EB1A-4501-AB8D-F486F490E724";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6624,8 +6625,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6645,8 +6646,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "21C25832-D591-43DA-8785-D20D911A77E3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "21C25832-D591-43DA-8785-D20D911A77E3";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6666,8 +6667,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6686,8 +6687,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6789,6 +6790,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E8143E7151A428800A7BBE8 /* StampedModel 20.xcdatamodel */,
 				7E31D85014F6D26000E42429 /* StampedModel 19.xcdatamodel */,
 				7E45866A14D74E460031BB45 /* StampedModel 18.xcdatamodel */,
 				7EC4325A1496CE3D00BDBC6B /* StampedModel 17.xcdatamodel */,
@@ -6809,7 +6811,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E31D85014F6D26000E42429 /* StampedModel 19.xcdatamodel */;
+			currentVersion = 7E8143E7151A428800A7BBE8 /* StampedModel 20.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

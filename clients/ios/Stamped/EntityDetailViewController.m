@@ -34,13 +34,13 @@
 #import "STGalleryViewFactory.h"
 #import "STActionsViewFactory.h"
 #import "STActionMenuFactory.h"
-#import <QuartzCore/QuartzCore.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
-BOOL const newEDetail = YES;
+#warning Set to NO to revert to old version.
+BOOL const newEDetail = NO;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -137,8 +137,8 @@ static const CGFloat kTodoBarHeight = 44.0;
 }
 
 - (void)dealloc {
-  NSLog(@"releasing eDetail");
   if (newEDetail) {
+    NSLog(@"releasing eDetail");
     [self.operationQueue cancelAllOperations];
     [operationQueue_ release];
     [entityDetail_ release];
@@ -188,7 +188,6 @@ static const CGFloat kTodoBarHeight = 44.0;
     for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
       vc.delegate = nil;
     
-    [Entity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
     [sectionsDict_ release];
     [detailedEntity_ release];
   }
@@ -707,7 +706,12 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 - (void)addSectionStampedBy {
   // Make sure that the current user follows someone who stamped this entity.
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
+  if (!following)
+    following = [NSSet set];
+
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)
     return;

@@ -44,7 +44,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize listView = listView_;
 @synthesize mapViewController = mapViewController_;
 @synthesize mapViewShown = mapViewShown_;
-@synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize user = user_;
 @synthesize oldestInBatch = oldestInBatch_;
 @synthesize selectedFilterType = selectedFilterType_;
@@ -139,17 +138,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
-  stampsAreTemporary_ = stampsAreTemporary;
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-
-  for (Stamp* stamp in [sectionInfo objects]) {
-    stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
-  }
-
-  [Stamp.managedObjectContext save:NULL];
-}
-
 - (void)filterStamps {
   NSMutableArray* predicates = [NSMutableArray array];
   [predicates addObject:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
@@ -226,7 +214,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)showListView {
-  NSLog(@"List view: %@", listView_);
   [self.view insertSubview:listView_ atIndex:0];
   [mapViewController_ viewWillDisappear:YES];
   [UIView transitionFromView:mapViewController_.view
@@ -286,7 +273,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
     self.oldestInBatch = [objects.lastObject created];
 
-    self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
     if (objects.count < 10 || !self.oldestInBatch) {
       self.oldestInBatch = nil;
     } else {

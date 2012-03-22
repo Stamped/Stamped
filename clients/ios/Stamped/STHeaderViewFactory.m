@@ -75,6 +75,7 @@
     imageView.layer.shadowOpacity = .2;
     imageView.layer.shadowRadius = 2.0;
     imageView.layer.shadowOffset = CGSizeMake(0, 2);
+    imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
     
     CGRect frame = CGRectMake(0, 0, 320, 0);
     frame.size.height = height + 2 * padding;

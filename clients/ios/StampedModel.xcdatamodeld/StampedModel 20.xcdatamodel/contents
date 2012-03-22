@@ -105,7 +105,6 @@
         <attribute name="numComments" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numLikes" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
-        <attribute name="temporary" attributeType="Boolean" defaultValueString="YES"/>
         <attribute name="URL" optional="YES" attributeType="String"/>
         <attribute name="via" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
@@ -144,7 +143,7 @@
         <element name="Entity" positionX="558" positionY="81" width="128" height="750"/>
         <element name="Event" positionX="88" positionY="135" width="128" height="240"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>
-        <element name="Stamp" positionX="252" positionY="333" width="128" height="345"/>
-        <element name="User" positionX="-101" positionY="102" width="128" height="375"/>
+        <element name="Stamp" positionX="252" positionY="333" width="128" height="330"/>
+        <element name="User" positionX="-101" positionY="102" width="128" height="360"/>
     </elements>
 </model>

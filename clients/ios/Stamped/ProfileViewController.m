@@ -71,7 +71,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize followButton = followButton_;
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
-@synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize stampCounterLayer = stampCounterLayer_;
 @synthesize stampLayer = stampLayer_;
 @synthesize fetchedResultsController = fetchedResultsController_;
@@ -340,7 +339,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if (numStamps > 0 && indexPath.row == numStamps) {
     StampListViewController* vc = [[StampListViewController alloc] init];
     vc.user = user_;
-    vc.stampsAreTemporary = stampsAreTemporary_;
     UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"All Stamps"
                                                                    style:UIBarButtonItemStyleBordered
                                                                   target:nil
@@ -369,7 +367,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
-    self.stampsAreTemporary = NO;
     [followIndicator_ stopAnimating];
     unfollowButton_.hidden = NO;
     followButton_.hidden = YES;
@@ -380,7 +377,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
-    self.stampsAreTemporary = YES;
     [followIndicator_ stopAnimating];
     unfollowButton_.hidden = YES;
     followButton_.hidden = NO;
@@ -388,10 +384,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     followerCountLabel_.text = [user_.numFollowers stringValue];
 
     [[FriendshipManager sharedManager] unfollowUser:user_];
-  }
-  
-  if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
   }
 }
 
@@ -477,11 +469,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
       [currentUser removeFollowingObject:user_];
-      self.stampsAreTemporary = YES;
     } else {
       unfollowButton_.hidden = NO;
       [currentUser addFollowingObject:user_];
-      self.stampsAreTemporary = NO;
     }
   }
 }
@@ -684,10 +674,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   } else {
     if ([currentUser.following containsObject:user_]) {
       unfollowButton_.hidden = NO;
-      self.stampsAreTemporary = NO;
     } else {
       followButton_.hidden = NO;
-      self.stampsAreTemporary = YES;
     }
   }
 

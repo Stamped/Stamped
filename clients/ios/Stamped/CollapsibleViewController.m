@@ -8,6 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "AccountManager.h"
 #import "CollapsibleViewController.h"
 #import "PairedLabel.h"
 #import "WrappingTextView.h"
@@ -289,8 +290,13 @@ static const NSUInteger kSpaceHeight = 10;
 - (void)addImagesForStamps:(NSSet*)newStamps {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
-  
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
+  if (!following)
+    following = [NSSet set];
+
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
+
   [stamps_ release];
   stamps_ = [stampsArray retain];
   

@@ -1223,12 +1223,6 @@ typedef enum {
     self.suggestedFriends = objects;
     [self.tableView reloadData];
   }
-  if ([objectLoader.resourcePath rangeOfString:@"/collections/user.json"].location != NSNotFound) {
-    for (Stamp* s in objects)
-      s.temporary = [NSNumber numberWithBool:NO];
-  
-    [Stamp.managedObjectContext save:NULL];
-  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -1373,9 +1367,11 @@ typedef enum {
 #pragma mark - FindFriendsToolbarDelegate methods.
 
 - (void)toolbar:(FindFriendsToolbar*)toolbar centerButtonPressed:(UIButton*)button {
-  [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
-                        atScrollPosition:UITableViewScrollPositionTop
-                                animated:YES];
+  if (tableView_.numberOfSections > 1) {
+    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1]
+                          atScrollPosition:UITableViewScrollPositionTop
+                                  animated:YES];
+  }
 }
 
 - (void)toolbar:(FindFriendsToolbar*)toolbar previewButtonPressed:(UIButton*)button {
