@@ -74,18 +74,18 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    def search(self, query_string, count=10, coordinates=None):
+    def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
         sources = {
-            'itunes': lambda: iTunesSource().searchAllSource(query,timeout=timeout),
-            'rdio': lambda: RdioSource().matchSource(query),
-            'stamped': lambda: StampedSource().matchSource(query),
-            'factual': lambda: FactualSource().matchSource(query),
-            'tmdb': lambda: TMDBSource().matchSource(query),
-            'spotify': lambda: SpotifySource().searchAllSource(query,timeout=timeout),
+            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
+            'rdio':     lambda: RdioSource().matchSource(query, types=types),
+            'stamped':  lambda: StampedSource().matchSource(query, types=types),
+            'factual':  lambda: FactualSource().matchSource(query, types=types),
+            'tmdb':     lambda: TMDBSource().matchSource(query, types=types),
+            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
         }
         results_list = []
         pool = Pool(len(sources))

@@ -96,8 +96,8 @@ def search(request):
     result      = stampedAPI.searchEntities(query=search.q, 
                                             coords=search.coordinates, 
                                             authUserId=authUserId, 
-                                            category_filter=search.category, 
-                                            subcategory_filter=search.subcategory, 
+                                            category=search.category, 
+                                            subcategory=search.subcategory, 
                                             local=search.local, 
                                             page=search.page)
     
@@ -119,8 +119,8 @@ def nearby(request):
     
     result      = stampedAPI.searchNearby(coords=search.coordinates, 
                                           authUserId=authUserId, 
-                                          category_filter=search.category, 
-                                          subcategory_filter=search.subcategory, 
+                                          category=search.category, 
+                                          subcategory=search.subcategory, 
                                           page=search.page)
     
     autosuggest = []
