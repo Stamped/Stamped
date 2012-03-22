@@ -28,6 +28,7 @@
 #import "UserImageView.h"
 #import "Alerts.h"
 #import "SocialManager.h"
+#import "STLoadingMoreTableViewCell.h"
 
 static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
 static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
@@ -80,6 +81,7 @@ typedef enum {
 @property (nonatomic, assign) BOOL searchFieldHidden;
 @property (nonatomic, assign) BOOL showToolbar;
 @property (nonatomic, readonly) FindFriendsToolbar* toolbar;
+@property (nonatomic, readonly) BOOL loading;
 
 @end
 
@@ -112,6 +114,7 @@ typedef enum {
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize signInTwitterConnectButton = signinTwitterConnectButton_;
 @synthesize signInFacebookConnectButton = signInFacebookConnectButton_;
+@synthesize loading = loading_;
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -814,6 +817,13 @@ typedef enum {
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (self.loading) {
+    if (section == 0)
+      return 1;
+    else if (section == 0)
+      return 0;
+  }
+  
   if (self.findSource == FindFriendsSourceContacts) {
     if (section == 0)
       return self.contactFriends.count;
@@ -903,7 +913,17 @@ typedef enum {
   }
 }
 
+- (BOOL)loading {
+  return ((findSource_ == FindFriendsSourceFacebook && !facebookFriends_) ||
+          (findSource_ == FindFriendsSourceTwitter && !twitterFriends_) ||
+          (findSource_ == FindFriendsSourceContacts && !contactFriends_) ||
+          (findSource_ == FindFriendsSourceStamped && !stampedFriends_));
+}
+
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (self.loading)
+    return [STLoadingMoreTableViewCell cell];
+  
   NSString* CellIdentifier = findSource_ == FindFriendsSourceSuggested ? @"SuggestedCell" : @"FriendshipCell";
   if (indexPath.section == 1)
     CellIdentifier = @"InviteCell";
@@ -1017,7 +1037,7 @@ typedef enum {
   } else if (findSource_ == FindFriendsSourceContacts && !contactFriends_) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
       view.rightLabel.text = nil;
-  } else if (findSource_ == FindFriendsSourceStamped) {
+  } else if (findSource_ == FindFriendsSourceStamped && !stampedFriends_) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
       view.rightLabel.text = nil;
   } else if (findSource_ == FindFriendsSourceSuggested) {
@@ -1028,6 +1048,9 @@ typedef enum {
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (self.loading)
+    return;
+
   UITableViewCell* cell = [tableView_ cellForRowAtIndexPath:indexPath];
   if ([cell isMemberOfClass:[PeopleTableViewCell class]] ||
       [cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
