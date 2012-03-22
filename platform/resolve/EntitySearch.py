@@ -75,7 +75,7 @@ class EntitySearch(object):
         return Resolver()
 
     def search(self, query_string, count=10, coordinates=None):
-        timeout = 4
+        timeout = 20
         before = time()
         query = QuerySearchAll(query_string, coordinates)
         results = []
@@ -91,17 +91,22 @@ class EntitySearch(object):
         pool = Pool(len(sources))
         def helper(name, source_f, output):
             source = source_f()
-            source_results = self.__resolver.resolve(query, source, count=count)
-            output.append((name,source_results))
+            def callback(result):
+                results_list.append((name,result))
+            self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
         for name,source_f in sources.items():
             pool.spawn(helper, name, source_f, results_list)
         pool.join(timeout=timeout)
 
         all_results ={}
         total = 0
-        for name,source_results in list(results_list):
-            all_results[name] = source_results
-            total += len(source_results)
+        for name,result in list(results_list):
+            source_results = all_results.setdefault(name,[])
+            source_results.append(result)
+            total += 1
+
+        for name,source_results in all_results.items():
+            all_results[name] = sortedResults(source_results)
 
         if _verbose:
             print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (

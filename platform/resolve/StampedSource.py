@@ -486,6 +486,18 @@ class StampedSource(GenericSource):
                     ]
                 }
 
+                # Pair prefix
+                yield {
+                    '$or' : [
+                        {
+                            'titlel' : {
+                                '$regex' : r"^%s( .*)?$" % (words[i])
+                            }
+                        }
+                            for i in xrange(len(words))
+                    ]
+                }
+
                 # Pair regex
                 yield {
                     '$or' : [
@@ -497,7 +509,7 @@ class StampedSource(GenericSource):
                             for i in xrange(len(words) - 1)
                     ]
                 }
-
+                """
                 blacklist = set([
                     'and',
                     'or',
@@ -522,6 +534,7 @@ class StampedSource(GenericSource):
                                 if word not in blacklist
                     ]
                 }
+                """
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), query, constructor_wrapper=StampedSearchAll)

@@ -34,6 +34,7 @@ __all__ = [
     'nameSimplify',
     'stringComparison',
     'setComparison',
+    'sortedResults',
     'formatResults',
 ]
 
@@ -317,6 +318,11 @@ def setComparison(a, b, symmetric=False, strict=False):
 
     else:
         return asymmetricComparison(a, b)
+
+def sortedResults(results):
+    def pairSort(pair):
+        return -pair[0]['total']
+    return sorted(results , key=pairSort)
 
 def formatResults(results, reverse=True):
     n = len(results)
