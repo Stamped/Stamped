@@ -179,8 +179,22 @@ def demo():
 
     for result in results:
         entity = Entity()
-        StampedSource().enrichEntityWithWrapper(result[1].target, entity)
-        print entity.value
+        sources = {
+            'itunes':   iTunesSource(),
+            'rdio':     RdioSource(),
+            'stamped':  StampedSource(),
+            'factual':  FactualSource(),
+            'tmdb':     TMDBSource(),
+            'spotify':  SpotifySource(),
+            'googleplaces':  GooglePlacesSource(),
+            'amazon':  AmazonSource(),
+        }
+        s = result[1].target.source
+        if s in sources:
+            sources[s].enrichEntityWithWrapper(result[1].target, entity)
+        else:
+            StampedSource().enrichEntityWithWrapper(result[1].target, entity)
+        print(pformat(entity.value))
 
 if __name__ == '__main__':
     _verbose = True

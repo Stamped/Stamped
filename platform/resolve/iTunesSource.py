@@ -557,7 +557,6 @@ class iTunesSource(GenericSource):
     def searchAllSource(self, query, timeout=None, types=None):
         def gen():
             try:
-                print("haslkdfafsdkllkfasdfalkdsakl")
                 queries = [
                     'musicArtist','song','album','movie','ebook'
                 ]
