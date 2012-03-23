@@ -246,7 +246,7 @@ def setFields(entity, detailed=False):
     elif entity.category == 'other':
         if entity.subcategory == 'app' and entity.artist_display_name is not None:
             entity.subtitle = 'App (%s)' % entity.artist_display_name
-        elif entity.address is not None:
+        elif entity.address is not None or entity.address_country is not None:
             entity.subtitle = getLocationSubtitle(entity, detailed)
         elif entity.subtitle is None:
             setSubtitle(entity)
