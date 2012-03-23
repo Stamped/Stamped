@@ -65,6 +65,12 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 }
 
 - (void)userPulledToReload {
+  // TODO(andybons): Put this somewhere nicer.
+  [self.stampFilterBar reset];
+  self.searchQuery = nil;
+  selectedFilterType_ = StampFilterTypeNone;
+  [self filterFavorites];
+  [self.tableView reloadData];
   [self loadFavoritesFromNetwork];
 }
 
