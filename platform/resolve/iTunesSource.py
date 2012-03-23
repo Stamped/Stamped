@@ -442,6 +442,11 @@ class iTunesSource(GenericSource):
             pass
         return None
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.itunes_id = wrapper.key
+        return True
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
         itunes_id = entity['itunes_id']

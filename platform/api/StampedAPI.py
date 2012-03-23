@@ -1220,35 +1220,24 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def searchEntitiesNew(self, query, coords=None, authUserId=None, category=None, subcategory=None):
 
-        types = None
-        if subcategory is not None:
-            if subcategory == 'song':
-                subcategory = 'track'
-            types = set(subcategory)
-        elif category is not None:
-            from Entity import subcategories
-            types = set()
-            for s, c in subcategories.iteritems():
-                if category == c:
-                    if s == 'song':
-                        s = 'track'
-                    types.add(s)
-
-        coordinates = None
-        if coords is not None:
-            coordinates = (coords.lat, coords.lng)
 
         from EntitySearch import EntitySearch
-        from StampedSource import StampedSource
-        results = EntitySearch().search(query, count=10, coordinates=coordinates, types=types)
 
-        entities = []
-        for result in results:
-            entity = Entity()
-            StampedSource().enrichEntityWithWrapper(result[1], entity)
-            entities.append(entity)
+        entities = EntitySearch().searchEntities(query, count=10, coords=coords, category=category, subcategory=subcategory)
+        
+        results = []
+        for entity in entities:
+            distance = None
+            try:
+                if coords is not None and entity.coordinates is not None:
+                    a = (coords['lat'], coords['lng'])
+                    b = (entity.coordinates.lat, entity.coordinates.lng)
+                    distance = abs(utils.get_spherical_distance(a, b) * 3959)
+            except:
+                pass
+            results.append((entity, distance))
 
-        return entities
+        return results
     
     @API_CALL
     def searchEntities(self, 
@@ -1264,8 +1253,8 @@ class StampedAPI(AStampedAPI):
                        limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
-                                                        category_filter=category_filter, 
-                                                        subcategory_filter=subcategory_filter, 
+                                                        category_filter=category, 
+                                                        subcategory_filter=subcategory, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=local, 
@@ -1288,8 +1277,8 @@ class StampedAPI(AStampedAPI):
                      limit=10):
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 
-                                                        category_filter=category_filter, 
-                                                        subcategory_filter=subcategory_filter, 
+                                                        category_filter=category, 
+                                                        subcategory_filter=subcategory, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=True, 

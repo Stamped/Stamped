@@ -135,29 +135,37 @@ class GenericSource(BasicSource):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
     def __repopulateAlbums(self, entity, artist, controller):
-        new_albums = [
-            {
-                'album_name'    : album['name'],
-                'source'        : self.sourceName,
-                'id'            : album['key'],
-                'timestamp'     : controller.now,
-                'album_mangled' : albumSimplify(album['name']),
-            }
-                for album in artist.albums
-        ]
+        new_albums = []
+        for album in artist.albums:
+            try:
+                info = {
+                    'album_name'    : album['name'],
+                    'source'        : self.sourceName,
+                    'timestamp'     : controller.now,
+                    'album_mangled' : albumSimplify(album['name']),
+                }
+                if 'key' in album:
+                    info['id'] = album['key']
+                new_albums.append(info)
+            except:
+                logs.info('Album import failure: %s for artist %s' % (track, artist))
         entity['albums'] = new_albums
 
     def __repopulateSongs(self, entity, artist, controller):
         new_songs = []
         for track in artist.tracks:
-            info = {
-                'song_name'    : track['name'],
-                'source'        : self.sourceName,
-                'id'            : track['key'],
-                'timestamp'     : controller.now,
-                'song_mangled' : trackSimplify(track['name']),
-            }
-            new_songs.append(info)
+            try:
+                info = {
+                    'song_name'     : track['name'],
+                    'source'        : self.sourceName,
+                    'timestamp'     : controller.now,
+                    'song_mangled'  : trackSimplify(track['name']),
+                }
+                if 'key' in track:
+                    info['id'] = track['key']
+                new_songs.append(info)
+            except Exception:
+                logs.info('Track import failure: %s for artist %s' % (track, artist))
         entity['songs'] = new_songs
 
     def wrapperFromKey(self, key, type=None):
@@ -170,6 +178,12 @@ class GenericSource(BasicSource):
             decorations = {}
         if timestamps is None:
             timestamps = {}
+
+        if wrapper.source == 'stamped':
+            entity['entity_id'] = wrapper.key 
+        else:
+            entity['entity_id'] = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
+
         if wrapper.type == 'place':
             subcategory = wrapper.subcategory
             if subcategory is not None:
@@ -179,7 +193,6 @@ class GenericSource(BasicSource):
             if subcategory is not None:
                 entity['subcategory'] = subcategory
         entity['title'] = wrapper.name
-        entity['itunes_id'] = wrapper.key
         if wrapper.description != '':
             entity['desc'] = wrapper.description
 
@@ -191,14 +204,17 @@ class GenericSource(BasicSource):
                 self.__repopulateAlbums(entity, wrapper, controller) 
             if controller.shouldEnrich('songs', self.sourceName, entity):
                 self.__repopulateSongs(entity, wrapper, controller)
+
         if wrapper.type == 'album':
             if len(wrapper.tracks) > 0:
                 entity['tracks'] = [
                     track['name'] for track in wrapper.tracks
                 ]
+
         if wrapper.type == 'track':
             if wrapper.album['name'] != '':
                 entity['album_name'] = wrapper.album['name']
+
         if wrapper.type == 'book':
             if wrapper.author['name'] != '':
                 entity['author'] = wrapper.author['name']
@@ -212,6 +228,7 @@ class GenericSource(BasicSource):
                 entity['publisher'] = wrapper.publisher['name']
             if wrapper.length > 0:
                 entity['num_pages'] = int(wrapper.length)
+
         if wrapper.type == 'place':
             if wrapper.coordinates is not None:
                 entity['coordinates'] = {
@@ -233,6 +250,9 @@ class GenericSource(BasicSource):
                     if k in wrapper.address:
                         v = wrapper.address[k]
                     entity['address_%s' % k] = v
+
+            if wrapper.address_string is not None:
+                entity['address'] = wrapper.address_string
             if wrapper.phone is not None:
                 entity['phone'] = wrapper.phone
             if wrapper.url is not None:

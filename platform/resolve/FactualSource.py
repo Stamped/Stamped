@@ -22,9 +22,10 @@ try:
     import json
     import logs
     import re
-    from urllib2             import HTTPError
+    from urllib2            import HTTPError
     from GenericSource      import generatorSource
     from pprint             import pformat
+    from gevent.pool        import Pool
 except:
     report()
     raise
@@ -115,22 +116,29 @@ class FactualPlace(ResolverPlace):
 
     @lazyProperty
     def subcategory(self):
-        m = {
-            'Arts, Entertainment & Nightlife > Bars': 'bar',
-            'Arts, Entertainment & Nightlife > Night Clubs': 'night_club',
-            'Food & Beverage > Bakeries': 'bakery',
-            'Food & Beverage > Beer, Wine & Spirits': 'bar',
-            'Food & Beverage > Breweries': 'bar',
-            'Food & Beverage > Cafes, Coffee Houses & Tea Houses': 'cafe',
+        arts = {
+            'Bars': 'bar',
+            'Night Clubs': 'night_club',
+        }
+        food = {
+            'Bakeries': 'bakery',
+            'Beer, Wine & Spirits': 'bar',
+            'Breweries': 'bar',
+            'Cafes, Coffee Houses & Tea Houses': 'cafe',
         }
         try:
-            if self.data['category'] in m:
-                return m[self.data['category']]
-            elif self.data['category'].startswith('Food & Beverage'):
+            c = self.data['category'].split(' > ')
+            if c[0] == 'Food & Beverage':
+                if c[1] in food:
+                    return food[c[1]]
                 return 'restaurant'
+
+            elif c[0] == 'Arts, Entertainment & Nightlife':
+                if c[1] in arts:
+                    return arts[c[1]]
         except Exception:
             pass
-        return None
+        return 'other'
 
     @property 
     def source(self):
@@ -188,6 +196,11 @@ class FactualSource(GenericSource):
     def __factual(self):
         return globalFactual()
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.factual_id = wrapper.key
+        return True
+
     def matchSource(self, query):
         if query.type == 'place':
             return self.placeSource(query)
@@ -210,8 +223,25 @@ class FactualSource(GenericSource):
     def searchAllSource(self, query, timeout=None, types=None):
         def gen():
             try:
-                results = self.__factual.search(query.query_string)
-                for result in results:
+                raw_results = []
+
+                def getFactualSearch(q, useLocation=False):
+                    if useLocation and q.coordinates is not None:
+                        results = self.__factual.search(q.query_string, coordinates=q.coordinates)
+                    else:
+                        results = self.__factual.search(q.query_string)
+                    for result in results:
+                        raw_results.append(result)
+
+                if query.coordinates is not None:
+                    pool = Pool(2)
+                    pool.spawn(getFactualSearch, query, False)
+                    pool.spawn(getFactualSearch, query, True)
+                    pool.join(timeout=timeout)
+                else:
+                    raw_results = getFactualSearch(query)
+
+                for result in raw_results:
                     yield FactualPlace(data=result)
             except GeneratorExit:
                 pass

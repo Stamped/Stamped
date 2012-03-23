@@ -33,6 +33,7 @@ try:
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
     from time                       import time
+    from Entity                     import subcategories
 except:
     report()
     raise
@@ -97,9 +98,10 @@ class EntitySearch(object):
             'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
             'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
             'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
+            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query, timeout=timeout, types=types),
             'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
         }
+
         results_list = []
         pool = Pool(len(sources))
 
@@ -160,6 +162,50 @@ class EntitySearch(object):
             print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
         return chosen
 
+    def searchEntities(self, query_string, count=10, coords=None, category=None, subcategory=None):
+
+        types = None
+        if subcategory is not None:
+            if subcategory == 'song':
+                subcategory = 'track'
+            types = set(subcategory)
+        elif category is not None:
+            types = set()
+            for s, c in subcategories.iteritems():
+                if category == c:
+                    if s == 'song':
+                        s = 'track'
+                    types.add(s)
+
+        coordinates = None
+        if coords is not None:
+            coordinates = (coords.lat, coords.lng)
+
+        sources = {
+            'itunes':   iTunesSource(),
+            'rdio':     RdioSource(),
+            'stamped':  StampedSource(),
+            'factual':  FactualSource(),
+            'tmdb':     TMDBSource(),
+            'spotify':  SpotifySource(),
+            'googleplaces':  GooglePlacesSource(),
+            'amazon':  AmazonSource(),
+        }
+
+        search = EntitySearch().search(query_string, count=count, coordinates=coordinates, types=types)
+
+        results = []
+
+        for item in search:
+            entity = Entity()
+            source = item[1].target.source
+            if source not in sources:
+                source = sources['stamped']
+            sources[source].enrichEntityWithWrapper(item[1].target, entity)
+            results.append(entity)
+
+        return results
+
 def demo():
     import sys
     import pprint
@@ -177,24 +223,24 @@ def demo():
     print("Final Search Results")
     print(formatResults(results))
 
-    for result in results:
-        entity = Entity()
-        sources = {
-            'itunes':   iTunesSource(),
-            'rdio':     RdioSource(),
-            'stamped':  StampedSource(),
-            'factual':  FactualSource(),
-            'tmdb':     TMDBSource(),
-            'spotify':  SpotifySource(),
-            'googleplaces':  GooglePlacesSource(),
-            'amazon':  AmazonSource(),
-        }
-        s = result[1].target.source
-        if s in sources:
-            sources[s].enrichEntityWithWrapper(result[1].target, entity)
-        else:
-            StampedSource().enrichEntityWithWrapper(result[1].target, entity)
-        print(pformat(entity.value))
+    # for result in results:
+    #     entity = Entity()
+    #     sources = {
+    #         'itunes':   iTunesSource(),
+    #         'rdio':     RdioSource(),
+    #         'stamped':  StampedSource(),
+    #         'factual':  FactualSource(),
+    #         'tmdb':     TMDBSource(),
+    #         'spotify':  SpotifySource(),
+    #         'googleplaces':  GooglePlacesSource(),
+    #         'amazon':  AmazonSource(),
+    #     }
+    #     s = result[1].target.source
+    #     if s in sources:
+    #         sources[s].enrichEntityWithWrapper(result[1].target, entity)
+    #     else:
+    #         StampedSource().enrichEntityWithWrapper(result[1].target, entity)
+    #     print(pformat(entity.value))
 
 if __name__ == '__main__':
     _verbose = True
