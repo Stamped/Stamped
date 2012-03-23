@@ -2875,6 +2875,18 @@ class StampedAPI(AStampedAPI):
         if doc is not None:
             entity = self._tempEntityDB._convertFromMongo(doc)
         
+        if search_id.startswith('T_ITUNES_'):
+            itunes_id = search_id[9:]
+            from iTunesSource import iTunesSource
+            iTunes = iTunesSource()
+            entity = Entity()
+            iTunes.enrichEntityWithWrapper(iTunes.wrapperFromId(itunes_id), entity)
+            if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
+                return entity.entity_id
+            del entity.entity_id
+            entity = self._mergeEntity(entity)
+            return entity.entity_id
+        
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
             results = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
@@ -2980,12 +2992,7 @@ class StampedAPI(AStampedAPI):
         
         return entity.entity_id
 
-    def mergeEntity(self, entity):
-        copy = Entity()
-        copy.importData(entity.value)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
-
-    def mergeEntityAsync(self, entity):
+    def _mergeEntity(self, entity):
         try:
             decorations = {}
             modified = self.__full_resolve.enrichEntity(entity, decorations)
@@ -3000,13 +3007,22 @@ class StampedAPI(AStampedAPI):
                 if modified_successor:
                     self._entityDB.update(successor)
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
+                return successor
             else:
                 logs.info("Inserted new entity on merge %s" % entity.entity_id)
                 self.__handleDecorations(entity, decorations)
-                self._entityDB.update(entity)
-        except:
+                return self._entityDB.addEntity(entity)
+        except Exception:
             report()
             raise
+
+    def mergeEntity(self, entity):
+        copy = Entity()
+        copy.importData(entity.value)
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
+
+    def mergeEntityAsync(self, entity):
+        self._mergeEntity(entity)
 
     @lazyProperty
     def __full_resolve(self):
