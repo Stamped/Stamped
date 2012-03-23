@@ -896,9 +896,8 @@ class StampedAPI(AStampedAPI):
                 'parislemon':       4, 
                 'michaelkors':      5, 
                 'petertravers':     6,
-                'benbrooks':        7,
-                'rebeccaminkoff':   8, 
-                'austinchronicle':  9,
+                'rebeccaminkoff':   7, 
+                'austinchronicle':  8,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
