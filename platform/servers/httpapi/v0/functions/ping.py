@@ -55,6 +55,7 @@ def searchDemo(request):
             results = EntitySearch().search(query, coordinates=coordinates)
 
             output = formatResults(results, reverse=False)
+
         output_json = """
 <html>
 <head><title>Search Demo</title>

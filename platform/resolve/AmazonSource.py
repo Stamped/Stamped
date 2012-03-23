@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource    import GenericSource
+    from GenericSource    import GenericSource, multipleSource
     import logs
     import re
     from Resolver           import *
@@ -271,7 +271,6 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-            'amazon',
 
             'artist_display_name',
             'genre',
@@ -322,38 +321,52 @@ class AmazonSource(GenericSource):
                 pass
         return self.generatorSource(gen(), constructor=lambda x: wrapper( x ), unique=True)
 
-    def albumSource(self, query):
-        keywords = ' '.join([
-            query.name
-        ])
+    def albumSource(self, query=None, query_string=None):
+        if query_string is None:
+            query_string = ' '.join([
+                query.name
+            ])
         return self.__searchGen(AmazonAlbum, {
             'test':lambda item:  xp(item, 'ItemAttributes', 'ProductTypeName')['v'] == "DOWNLOADABLE_MUSIC_ALBUM",
-            'Keywords':keywords
+            'Keywords':query_string
         })
 
-    def trackSource(self, query):
-        keywords = ' '.join([
-            query.name
-        ])
+    def trackSource(self, query=None, query_string=None):
+        if query_string is None:
+            query_string = ' '.join([
+                query.name
+            ])
         return self.__searchGen(AmazonTrack, {
             'test':lambda item:  xp(item, 'ItemAttributes', 'ProductTypeName')['v'] == "DOWNLOADABLE_MUSIC_TRACK",
-            'Keywords':keywords
+            'Keywords':query_string
         })
 
-    def bookSource(self, query):
-        keywords = ' '.join([
-            query.name
-        ])
+    def bookSource(self, query=None, query_string=None):
+        if query_string is None:
+            query_string = ' '.join([
+                query.name
+            ])
         return self.__searchGen(AmazonBook,
             {
-                'Keywords':keywords,
+                'Keywords':query_string,
                 'SearchIndex':'Books',
                 'test': lambda item: xp(item, 'ItemAttributes', 'Binding')['v'] == 'Kindle Edition',
             },
             {
-                'Keywords':keywords,
+                'Keywords':query_string,
                 'SearchIndex':'Books',
             }
+        )
+
+    def searchAllSource(self, query, timeout=None, types=None):
+        q = query.query_string
+        return multipleSource(
+            [
+                lambda : self.albumSource(query_string=q),
+                lambda : self.trackSource(query_string=q),
+                lambda : self.bookSource(query_string=q),
+            ],
+            constructor=AmazonSearchAll
         )
 
     @lazyProperty

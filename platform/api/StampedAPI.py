@@ -896,9 +896,8 @@ class StampedAPI(AStampedAPI):
                 'parislemon':       4, 
                 'michaelkors':      5, 
                 'petertravers':     6,
-                'benbrooks':        7,
-                'rebeccaminkoff':   8, 
-                'austinchronicle':  9,
+                'rebeccaminkoff':   7, 
+                'austinchronicle':  8,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
@@ -1227,7 +1226,7 @@ class StampedAPI(AStampedAPI):
                 subcategory = 'track'
             types = set(subcategory)
         elif category is not None:
-            import Entity
+            from Entity import subcategories
             types = set()
             for s, c in subcategories.iteritems():
                 if category == c:
@@ -1240,9 +1239,16 @@ class StampedAPI(AStampedAPI):
             coordinates = (coords.lat, coords.lng)
 
         from EntitySearch import EntitySearch
+        from StampedSource import StampedSource
         results = EntitySearch().search(query, count=10, coordinates=coordinates, types=types)
-        #enrichEntity
-        logs.info(results)
+
+        entities = []
+        for result in results:
+            entity = Entity()
+            StampedSource().enrichEntityWithWrapper(result[1], entity)
+            entities.append(entity)
+
+        return entities
     
     @API_CALL
     def searchEntities(self, 

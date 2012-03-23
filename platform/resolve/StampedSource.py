@@ -541,15 +541,20 @@ class StampedSource(GenericSource):
                     ]
                 }
 
-                # Pair prefix
+                blacklist = set([
+                    'the',
+                    'a',
+                    'an',
+                ])
+
                 yield {
                     '$or' : [
                         {
                             'titlel' : {
-                                '$regex' : r"^%s( .*)?$" % (words[i])
+                                '$regex' : r"^%s( .*)?$" % (word)
                             }
                         }
-                            for i in xrange(len(words))
+                            for word in words if word not in blacklist
                     ]
                 }
 
@@ -622,7 +627,7 @@ class StampedSource(GenericSource):
         import pymongo
         #print(pformat(mongo_query))
         logs.info(mongo_query)
-        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING))
+        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING), limit=1000)
 
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
         def gen():

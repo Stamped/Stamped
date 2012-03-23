@@ -31,6 +31,7 @@ try:
     from TMDBSource                 import TMDBSource
     from SpotifySource              import SpotifySource
     from GooglePlacesSource         import GooglePlacesSource
+    from AmazonSource               import AmazonSource
     from time                       import time
 except:
     report()
@@ -75,7 +76,15 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    def search(self, query_string, count=10, coordinates=None):
+    def __helper(self, query, count, name, source_f, results_list):
+        source = source_f()
+        def callback(result, order):
+            if _verbose:
+                print("%3d from %s" % (order, name))
+            results_list.append((name,result))
+        self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
+
+    def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
         before = time()
         query = QuerySearchAll(query_string, coordinates)
@@ -89,18 +98,14 @@ class EntitySearch(object):
             'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
             'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
             'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query,timeout=timeout, types=types),
+            'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
         }
         results_list = []
         pool = Pool(len(sources))
-        def helper(name, source_f, output):
-            source = source_f()
-            def callback(result, order):
-                if _verbose:
-                    print("%3d from %s" % (order, name))
-                results_list.append((name,result))
-            self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
-        for name,source_f in sources.items():
-            pool.spawn(helper, name, source_f, results_list)
+
+        for name, source_f in sources.items():
+            pool.spawn(self.__helper, query, count, name, source_f, results_list)
+
         pool.join(timeout=timeout)
 
         all_results ={}
@@ -154,9 +159,8 @@ class EntitySearch(object):
         if _verbose:
             print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
         return chosen
-  
-if __name__ == '__main__':
-    _verbose = True
+
+def demo():
     import sys
     import pprint
     count = 10
@@ -169,6 +173,30 @@ if __name__ == '__main__':
     if len(sys.argv) > 3:
         coordinates = tuple([ float(v) for v in sys.argv[3].split(',') ])
     results = EntitySearch().search(query, count=count, coordinates=coordinates)
+
     print("Final Search Results")
     print(formatResults(results))
+
+    for result in results:
+        entity = Entity()
+        sources = {
+            'itunes':   iTunesSource(),
+            'rdio':     RdioSource(),
+            'stamped':  StampedSource(),
+            'factual':  FactualSource(),
+            'tmdb':     TMDBSource(),
+            'spotify':  SpotifySource(),
+            'googleplaces':  GooglePlacesSource(),
+            'amazon':  AmazonSource(),
+        }
+        s = result[1].target.source
+        if s in sources:
+            sources[s].enrichEntityWithWrapper(result[1].target, entity)
+        else:
+            StampedSource().enrichEntityWithWrapper(result[1].target, entity)
+        print(pformat(entity.value))
+
+if __name__ == '__main__':
+    _verbose = True
+    demo()
 
