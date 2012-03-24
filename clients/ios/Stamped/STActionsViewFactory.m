@@ -7,6 +7,8 @@
 //
 
 #import "STActionsViewFactory.h"
+#import "STViewDelegate.h"
+#import "STEntityDetail.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STImageView.h"
 #import "Util.h"
@@ -126,20 +128,20 @@
 
 @implementation STActionsViewFactory
 
-- (void)createWithActions:(NSArray<STActionItem>*)actions
-                 delegate:(id<STViewDelegate>)delegate
-                withLabel:(id)label {
+- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)detail
+                        withState:(id)asyncState
+                      andDelegate:(id<STViewDelegate>)delegate {
   STViewContainer* view = nil;
-  if (actions) {
+  if (detail.actions) {
     view = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)];
     CGFloat cell_height = 44;
     CGFloat cell_padding_h = 5;
     CGFloat cell_width = 290;
     CGFloat cell_padding_w = (320 - cell_width) / 2.0;
-    for (id<STActionItem> action in actions) {
+    for (id<STActionItem> action in detail.actions) {
       CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
       UIView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
-      [view appendChild:actionView];
+      [view appendChildView:actionView];
       [actionView release];
       CGRect viewFrame = view.frame;
       viewFrame.size.height += cell_padding_h;
@@ -147,7 +149,7 @@
     }
     [view autorelease];
   }
-  [delegate didLoad:view withLabel:label];
+  return view;
 }
 
 @end

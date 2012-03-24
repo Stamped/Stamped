@@ -9,11 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "STActionItem.h"
 #import "STViewDelegate.h"
+#import "STAEntityDetailComponentFactory.h"
 
-@interface STActionsViewFactory : NSObject
-
-- (void)createWithActions:(NSArray<STActionItem>*)actions
-                 delegate:(id<STViewDelegate>)delegate
-                withLabel:(id)label;
+@interface STActionsViewFactory : STAEntityDetailComponentFactory
 
 @end

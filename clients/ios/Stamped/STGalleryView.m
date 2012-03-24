@@ -36,12 +36,13 @@ static const CGFloat _padding_h = 10;
 
 @synthesize pageControl = pageControl_;
 
-- (id)initWithGallery:(id<STGallery>)gallery images:(NSArray*)images andDelegate:(id<STViewDelegate>)delegate {
+- (id)initWithGallery:(id<STGallery>)gallery images:(NSDictionary*)images andDelegate:(id<STViewDelegate>)delegate {
+
   self = [super initWithFrame:CGRectZero];
   if (self) {
     
     CGFloat maxHeight = 0;
-    for (UIImage* image in images) {
+    for (UIImage* image in [images allValues]) {
       CGFloat height = image.size.height + 2 * _padding_h;
       if (height > maxHeight) {
         maxHeight = height;
@@ -63,7 +64,7 @@ static const CGFloat _padding_h = 10;
     NSInteger offset = 0;
     for (NSInteger i = 0; i < [images count]; i++) {
       id<STGalleryItem> item = [gallery.data objectAtIndex:i];
-      UIImage* image = [images objectAtIndex:i];
+      UIImage* image = [images objectForKey:item.image];
       STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, width, maxHeight) image:image andGalleryItem:item];
       [scrollView addSubview:view];
       [view release];
@@ -150,7 +151,6 @@ static const CGFloat _padding_h = 10;
 
 - (id)initWithFrame:(CGRect)frame image:(UIImage*)image andGalleryItem:(id<STGalleryItem>)item {
   self = [super initWithFrame:frame];
-  NSLog(@"GalleryItemView %@",item.image);
   if (self) {
     CGRect bounds = CGRectMake(_padding_w, _padding_h, frame.size.width - 2 * _padding_w, frame.size.height - 2 * _padding_h);
     CGRect imageFrame = [Util centeredAndBounded:image.size inFrame:bounds];

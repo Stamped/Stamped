@@ -25,7 +25,7 @@
 
 @implementation STActionMenuFactory
 
-- (NSOperation*)createWithAction:(id<STAction>)action forBlock:(void (^)(STViewCreator))callback {
+- (NSOperation*)createViewWithAction:(id<STAction>)action forBlock:(void (^)(STViewCreator))callback {
   __block NSBlockOperation* operation = [[[NSBlockOperation alloc] init] autorelease];
   [operation addExecutionBlock:^{
     @try {
@@ -118,11 +118,11 @@
                     
                     [cell addSubview:text];
                     [cell addSubview:icon];
-                    [view appendChild:cell];
+                    [view appendChildView:cell];
                     if (i + 1 != [array count] ) {
                       UIImageView* bar = [[UIImageView alloc] initWithImage:image];
                       bar.backgroundColor = [UIColor clearColor];
-                      [view appendChild:bar];
+                      [view appendChildView:bar];
                       [bar release];
                     }
                   }

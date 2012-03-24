@@ -100,7 +100,7 @@ static const CGFloat _kReadMoreHeight = 74;
       [self.valueViewContainer addSubview:valueView];
       
       self.frame = frame;
-      [self appendChild:self.valueViewContainer];
+      [self appendChildView:self.valueViewContainer];
       self.readMore = [Util viewWithText:@"read more" 
                                     font:[UIFont stampedFontWithSize:12] 
                                    color:[UIColor stampedDarkGrayColor] 
@@ -119,7 +119,7 @@ static const CGFloat _kReadMoreHeight = 74;
       [buttonContainer addSubview:button];
       [buttonContainer addSubview:self.readMore];
       [buttonContainer addSubview:self.readLess];
-      [self appendChild:buttonContainer];
+      [self appendChildView:buttonContainer];
       self.collapsed = YES;
     }
     else {
@@ -169,11 +169,11 @@ static const CGFloat _kReadMoreHeight = 74;
     self.readLess.hidden = YES;
     self.readMore.hidden = NO;
   }
-  [self view:self.valueViewContainer willChangeHeightBy:delta over:duration];
+  [self childView:self.valueViewContainer shouldChangeHeightBy:delta overDuration:duration];
   self.collapsed = !self.collapsed;
 }
 
-- (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
+- (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds {
   [UIView animateWithDuration:seconds animations:^{
     CGRect frame = self.gradient.frame;
     frame.size.height += delta;
@@ -184,7 +184,7 @@ static const CGFloat _kReadMoreHeight = 74;
       self.button.frame = frame;
     }
   }];
-  [super view:view willChangeHeightBy:delta over:seconds];
+  [super childView:view shouldChangeHeightBy:delta overDuration:seconds];
 }
 
 - (void)actionClicked:(id<STAction>)action {
@@ -195,9 +195,9 @@ static const CGFloat _kReadMoreHeight = 74;
 
 @implementation STMetadataViewFactory
 
-- (void)createWithEntityDetail:(id<STEntityDetail>)entity
-                      delegate:(id<STViewDelegate>)delegate
-                     withLabel:(id)label {
+- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)entity
+                        withState:(id)asyncState
+                      andDelegate:(id<STViewDelegate>)delegate {
   STViewContainer* main = nil;
   if (entity && entity.metadata && [entity.metadata count] > 0) {
     main = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)];
@@ -207,11 +207,11 @@ static const CGFloat _kReadMoreHeight = 74;
     for (NSInteger i = 0; i < [entity.metadata count]; i++) {
       id<STMetadataItem> datum = [entity.metadata objectAtIndex:i];
       UIView* item = [[MetadatumView alloc] initWithDatum:datum andDelegate:view];
-      [view appendChild:item];
+      [view appendChildView:item];
       if (i + 1 != [entity.metadata count] ) {
         UIImageView* bar = [[UIImageView alloc] initWithImage:image];
         bar.backgroundColor = [UIColor clearColor];
-        [view appendChild:bar];
+        [view appendChildView:bar];
         [bar release];
       }
       [item release];
@@ -225,7 +225,7 @@ static const CGFloat _kReadMoreHeight = 74;
     view.layer.shadowRadius = 1.0;
     view.layer.shadowOffset = CGSizeMake(0, 1);
     
-    [main appendChild:view];
+    [main appendChildView:view];
     [view release];
     
     CGRect frame = main.frame;
@@ -233,7 +233,7 @@ static const CGFloat _kReadMoreHeight = 74;
     main.frame = frame;
     [main autorelease];
   }
-  [delegate didLoad:main withLabel:label];
+  return main;
 }
 
 @end

@@ -431,6 +431,16 @@ static STPopUpView* volatile _currentPopUp = nil;
   return 2.0;
 }
 
++ (void)logOperationException:(NSException*)exception withMessage:(NSString*)message {
+  if (message) {
+    NSLog(@"%@: %@", message, exception);
+  }
+  else {
+    NSLog(@"exception occurred! %@", exception);
+  }
+  NSLog(@"%@",[NSThread callStackSymbols]);
+}
+
 @end
 
 @implementation STPopUpView
