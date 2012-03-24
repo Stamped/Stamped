@@ -253,15 +253,23 @@ class Factual(object):
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
 
-    def search(self, query, limit=_limit):
-        return self.__factual('global',prefix='t',limit=limit,q=urllib.quote(query),
-            filters=urllib.quote(json.dumps({
-                '$or':[
-                        {"category":{"$bw":"Food & Beverage"}},
-                        {"category":{"$bw":"Arts, Entertainment & Nightlife"}},
-                    ]
-                })))
-
+    def search(self, query, limit=_limit, coordinates=None):
+        params = {}
+        params['prefix']    = 't'
+        params['limit']     = limit
+        params['q']         = urllib.quote(query)
+        params['filters']   = urllib.quote(json.dumps({
+            '$or':[
+                    {"category":{"$bw":"Food & Beverage"}},
+                    {"category":{"$bw":"Arts, Entertainment & Nightlife"}},
+                ]
+            }))
+        if coordinates is not None:
+            params['geo'] = urllib.quote(json.dumps({
+                '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':5000}
+            }))
+            
+        return self.__factual('global', **params)
 
     def resolve(self, data,limit=_limit):
         """

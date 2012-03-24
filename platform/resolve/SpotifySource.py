@@ -195,6 +195,11 @@ class SpotifySource(GenericSource):
     def urlField(self):
         return None
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.spotify_id = wrapper.key
+        return True
+
     def matchSource(self, query):
         if query.type == 'artist':
             return self.artistSource(query)

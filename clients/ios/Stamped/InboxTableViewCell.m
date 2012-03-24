@@ -216,7 +216,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
         (id)titleFont_, (id)kCTFontAttributeName,
         (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
         (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
-        (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil];
+        (id)[NSNumber numberWithFloat:1.2], (id)kCTKernAttributeName, nil];
     
     CTFontRef ellipsisFont = CTFontCreateWithName((CFStringRef)kEllipsisFontString, kEllipsisFontSize, NULL);
     NSMutableDictionary* ellipsisAttributes = [[[NSMutableDictionary alloc] initWithObjectsAndKeys: 
@@ -374,7 +374,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
       CGFloat width = fmin(kTitleMaxWidth, offset);
       CFRelease(line);
       CFRelease(truncatedLine);
-      
+
       CGRect oldFrame = stampImageFrame_;
       stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
                                     kStampSize / 2.0,

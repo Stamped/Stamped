@@ -78,6 +78,11 @@ class FandangoSource(GenericSource):
             'release_date',
         )
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.fandango_id = wrapper.key
+        return True
+
 
 def testFandango(fandango_id, title, release_date):
     import TMDBSource

@@ -18,10 +18,12 @@ try:
     from GooglePlaces           import GooglePlaces
     from Resolver               import *
     from utils                  import lazyProperty
+    from gevent.pool            import Pool
     from datetime               import datetime
     from functools              import partial
     from LibUtils               import states
     from pprint                 import pformat
+    import logs
 except:
     report()
     raise
@@ -108,6 +110,11 @@ class GooglePlacesPlace(ResolverPlace):
             return None
     
     @lazyProperty
+    def address_string(self):
+        if 'address_string' in self.data:
+            return self.data['address_string']
+    
+    @lazyProperty
     def address(self):
         if 'address_components' not in self.data:
             return {}
@@ -178,6 +185,8 @@ class GooglePlacesPlace(ResolverPlace):
 
     @lazyProperty
     def subcategory(self):
+        if 'subcategory' in self.data:
+            return self.data['subcategory']
         return None
 
     @property 
@@ -226,7 +235,11 @@ class GooglePlacesSource(GenericSource):
     def placeSource(self, query):
         def gen():
             try:
-                gdata = self.__places.getSearchResultsByLatLng(query.coordinates, {'name':query.name})
+                params = {
+                    'radius': 20000,
+                    'name': query.name
+                }
+                gdata = self.__places.getSearchResultsByLatLng(query.coordinates, params)
                 if gdata is not None:
                     for gdatum in gdata:
                         if 'reference' in gdatum:
@@ -239,16 +252,46 @@ class GooglePlacesSource(GenericSource):
         return self.generatorSource(gen())
 
     def searchAllSource(self, query, timeout=None, types=None):
+        print 'asdf'
         def gen():
             try:
-                gdata = self.__places.getAutocompleteResults(query.coordinates, query.query_string)
-                if gdata is not None:
-                    for gdatum in gdata:
-                        if 'reference' in gdatum:
-                            ref = gdatum['reference']
-                            details = self.__places.getPlaceDetails(ref)
-                            details['reference'] = ref
-                            yield GooglePlacesSearchAll(GooglePlacesPlace(details))
+                raw_results = []
+
+                def getGooglePlacesSearch(q):
+                    # Hacky conversion
+                    params = {'name': q.query_string, 'radius': 20000}
+                    results = self.__places.getEntityResultsByLatLng(q.coordinates, params)
+                    for result in results:
+                        data = {}
+                        data['reference'] = result.reference
+                        data['name'] = result.title
+                        data['latitude'] = result.lat
+                        data['longitude'] = result.lng
+                        data['address_string'] = result.neighborhood
+                        data['subcategory'] = result.subcategory
+                        raw_results.append(data)
+
+                def getGoogleNationalSearch(q):
+                    # Hacky conversion
+                    results = self.__places.getEntityAutocompleteResults(q.query_string, q.coordinates)
+                    for result in results:
+                        data = {}
+                        data['reference'] = result.reference
+                        data['name'] = result.title
+                        data['address_string'] = result.address
+                        raw_results.append(data)
+
+                if query.coordinates is not None:
+                    pool = Pool(2)
+                    pool.spawn(getGooglePlacesSearch, query)
+                    pool.spawn(getGoogleNationalSearch, query)
+                    pool.join(timeout=timeout)
+                else:
+                    getGoogleNationalSearch(query)
+
+                for result in raw_results:
+                    yield GooglePlacesSearchAll(GooglePlacesPlace(result))
+
             except GeneratorExit:
                 pass
         return self.generatorSource(gen())

@@ -81,6 +81,7 @@ _general_regex_removals = [
     (r'.*(\.\.\.).*'    , [1]),     # ellipsis ... anywhere
     (r".*(').*"         , [1]),
     (r'.*(").*'         , [1]),
+    (r'^(the ).*$'      , [1]),
 ]
 
 # track-specific removal patterns
@@ -439,9 +440,17 @@ class ResolverObject(object):
     def address(self):
         return {}
 
+    @property
+    def address_string(self):
+        return None
+
     @property 
     def neighborhoods(self):
         return []
+
+    @property 
+    def subcategory(self):
+        return None
 
 class ResolverProxy(object):
 
@@ -904,10 +913,6 @@ class ResolverPlace(ResolverObject):
     def type(self):
         return 'place'
 
-    @property 
-    def subcategory(self):
-        return None
-
     @lazyProperty
     def related_terms(self):
         l = [
@@ -1156,7 +1161,6 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
-
     def checkMovie(self, results, query, match, options, order):
         tests = [
             ('name', lambda q, m, s, o: self.movieComparison(q.name, m.name)),
@@ -1200,7 +1204,7 @@ class Resolver(object):
         ]
         weights = {
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
-            'location':     lambda q, m ,s, o: 1,
+            'location':     lambda q, m, s, o: 10,
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
@@ -1220,9 +1224,9 @@ class Resolver(object):
         ]
         weights = {
             'query_string':         lambda q, m, s, o: 0,
-            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=2),
+            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=2.5),
             'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
-            'subcategory':          lambda q, m, s, o: 0,
+            'subcategory':          lambda q, m, s, o: 1,
             'priority':             lambda q, m, s, o: 1,
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
@@ -1441,12 +1445,20 @@ class Resolver(object):
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
 
     def __locationWeight(self, query, match, tests, options, boost=1):
-        if 'location' in tests and tests['location'] > 0.85:
-            return boost 
-        return 1
+        weight = 2
+        if 'location' in tests:
+            if tests['location'] > 0.96:
+                return boost * 4 * weight
+            if tests['location'] > 0.90:
+                return boost * 2 * weight
+            if tests['location'] > 0.85:
+                return boost * weight
+        return weight
             
     def __subcategoryTest(self, query, match, tests, options):
-        return 0 
+        if match.subcategory == 'other' or match.subcategory is None:
+            return 0
+        return 1 
         
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:

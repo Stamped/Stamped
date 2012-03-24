@@ -189,6 +189,11 @@ class TMDBSource(GenericSource):
         else:
             return self.emptySource
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.tmdb_id = wrapper.key
+        return True
+
     def movieSource(self, query):
         def gen():
             try:

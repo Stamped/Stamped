@@ -419,6 +419,11 @@ class AmazonSource(GenericSource):
         except Exception:
             logs.warning("no image set for %s" % book.underlying.key)
 
+    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
+        entity.amazon_id = wrapper.key
+        return True
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         asin = entity['asin']
         if asin is not None and asin != '':

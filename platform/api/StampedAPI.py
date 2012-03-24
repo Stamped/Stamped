@@ -896,9 +896,8 @@ class StampedAPI(AStampedAPI):
                 'parislemon':       4, 
                 'michaelkors':      5, 
                 'petertravers':     6,
-                'benbrooks':        7,
-                'rebeccaminkoff':   8, 
-                'austinchronicle':  9,
+                'rebeccaminkoff':   7, 
+                'austinchronicle':  8,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
@@ -1221,35 +1220,24 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def searchEntitiesNew(self, query, coords=None, authUserId=None, category=None, subcategory=None):
 
-        types = None
-        if subcategory is not None:
-            if subcategory == 'song':
-                subcategory = 'track'
-            types = set(subcategory)
-        elif category is not None:
-            from Entity import subcategories
-            types = set()
-            for s, c in subcategories.iteritems():
-                if category == c:
-                    if s == 'song':
-                        s = 'track'
-                    types.add(s)
-
-        coordinates = None
-        if coords is not None:
-            coordinates = (coords.lat, coords.lng)
 
         from EntitySearch import EntitySearch
-        from StampedSource import StampedSource
-        results = EntitySearch().search(query, count=10, coordinates=coordinates, types=types)
 
-        entities = []
-        for result in results:
-            entity = Entity()
-            StampedSource().enrichEntityWithWrapper(result[1], entity)
-            entities.append(entity)
+        entities = EntitySearch().searchEntities(query, count=10, coords=coords, category=category, subcategory=subcategory)
+        
+        results = []
+        for entity in entities:
+            distance = None
+            try:
+                if coords is not None and entity.coordinates is not None:
+                    a = (coords['lat'], coords['lng'])
+                    b = (entity.coordinates.lat, entity.coordinates.lng)
+                    distance = abs(utils.get_spherical_distance(a, b) * 3959)
+            except:
+                pass
+            results.append((entity, distance))
 
-        return entities
+        return results
     
     @API_CALL
     def searchEntities(self, 
@@ -1265,8 +1253,8 @@ class StampedAPI(AStampedAPI):
                        limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
-                                                        category_filter=category_filter, 
-                                                        subcategory_filter=subcategory_filter, 
+                                                        category_filter=category, 
+                                                        subcategory_filter=subcategory, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=local, 
@@ -1289,8 +1277,8 @@ class StampedAPI(AStampedAPI):
                      limit=10):
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 
-                                                        category_filter=category_filter, 
-                                                        subcategory_filter=subcategory_filter, 
+                                                        category_filter=category, 
+                                                        subcategory_filter=subcategory, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=True, 
@@ -2887,6 +2875,18 @@ class StampedAPI(AStampedAPI):
         if doc is not None:
             entity = self._tempEntityDB._convertFromMongo(doc)
         
+        if search_id.startswith('T_ITUNES_'):
+            itunes_id = search_id[9:]
+            from iTunesSource import iTunesSource
+            iTunes = iTunesSource()
+            entity = Entity()
+            iTunes.enrichEntityWithWrapper(iTunes.wrapperFromId(itunes_id), entity)
+            if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
+                return entity.entity_id
+            del entity.entity_id
+            entity = self._mergeEntity(entity)
+            return entity.entity_id
+        
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
             results = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
@@ -2992,12 +2992,7 @@ class StampedAPI(AStampedAPI):
         
         return entity.entity_id
 
-    def mergeEntity(self, entity):
-        copy = Entity()
-        copy.importData(entity.value)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
-
-    def mergeEntityAsync(self, entity):
+    def _mergeEntity(self, entity):
         try:
             decorations = {}
             modified = self.__full_resolve.enrichEntity(entity, decorations)
@@ -3012,13 +3007,22 @@ class StampedAPI(AStampedAPI):
                 if modified_successor:
                     self._entityDB.update(successor)
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
+                return successor
             else:
                 logs.info("Inserted new entity on merge %s" % entity.entity_id)
                 self.__handleDecorations(entity, decorations)
-                self._entityDB.update(entity)
-        except:
+                return self._entityDB.addEntity(entity)
+        except Exception:
             report()
             raise
+
+    def mergeEntity(self, entity):
+        copy = Entity()
+        copy.importData(entity.value)
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
+
+    def mergeEntityAsync(self, entity):
+        self._mergeEntity(entity)
 
     @lazyProperty
     def __full_resolve(self):

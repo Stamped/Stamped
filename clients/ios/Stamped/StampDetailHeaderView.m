@@ -69,7 +69,6 @@
 }
 
 - (void)commonInit {
-  inverted_ = NO;
   self.backgroundColor = [UIColor clearColor];
   CGColorRef color1 = [UIColor colorWithRed:0.02 green:0.55 blue:0.96 alpha:1.0].CGColor;
   CGColorRef color2 = [UIColor colorWithRed:0.0  green:0.37 blue:0.91 alpha:1.0].CGColor;
@@ -197,7 +196,8 @@
       NSMutableDictionary* titleAttributes = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                               (id)titleFont, (id)kCTFontAttributeName,
                                               (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
-                                              (id)titleStyle, (id)kCTParagraphStyleAttributeName, nil];
+                                              (id)titleStyle, (id)kCTParagraphStyleAttributeName,
+                                              (id)[NSNumber numberWithFloat:0.3], (id)kCTKernAttributeName,nil];
 
       [titleAttributes setObject:(id)[UIColor stampedDarkGrayColor].CGColor forKey:(id)kCTForegroundColorAttributeName];
       titleAttrString_ = [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
