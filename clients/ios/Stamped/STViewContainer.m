@@ -74,15 +74,17 @@
   }
   else {
     [UIView animateWithDuration:seconds animations:^{
-        CGRect frame = self.frame;
-        frame.size.height += delta;
-        self.frame = frame;
+      CGRect frame = self.frame;
+      frame.size.height += delta;
+      self.frame = frame;
     }];
   }
 }
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
-  [self.delegate didChooseSource:source forAction:action];
+  if (self.delegate) {
+    [self.delegate didChooseSource:source forAction:action];
+  }
 }
 
 @end

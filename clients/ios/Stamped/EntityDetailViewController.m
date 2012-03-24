@@ -40,7 +40,7 @@ static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 #warning Set to NO to revert to old version.
-BOOL const newEDetail = YES;
+BOOL const newEDetail = NO;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
