@@ -7,17 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STFactoryDelegate.h"
-#import "STResizeDelegate.h"
 #import "STAction.h"
 
 
-@protocol STViewDelegate <STFactoryDelegate, STResizeDelegate>
-
+@protocol STViewDelegate
+@required
 - (void)didChooseAction:(id<STAction>)action;
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
-
-@property (nonatomic, readonly) NSOperationQueue* asyncQueue;
+- (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds;
 
 @end
 

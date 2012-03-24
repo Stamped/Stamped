@@ -40,7 +40,7 @@ static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 #warning Set to NO to revert to old version.
-BOOL const newEDetail = NO;
+BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -121,14 +121,22 @@ static const CGFloat kTodoBarHeight = 44.0;
     CGSize content = self.scrollView.contentSize;
     content.height = 0;
     self.scrollView.contentSize = content;
-    STEntityDetailFactory* factory = [[STEntityDetailFactory alloc] init];
+    NSOperation* operation = nil;
     if (entityObject_) {
-      [factory createWithEntityId:entityObject_.entityID delegate:self label:@"entityDetail"];
+      operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:entityObject_.entityID andCallbackBlock:^(id<STEntityDetail> detail) {
+        @autoreleasepool {
+          [self didLoadEntityDetail:detail];
+        }
+      }];
     }
     else if (searchResult_) {
-      [factory createWithSearchId:searchResult_.searchID delegate:self label:@"entityDetail"];
+      operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithSearchId:searchResult_.searchID andCallbackBlock:^(id<STEntityDetail> detail) {
+        @autoreleasepool {
+          [self didLoadEntityDetail:detail];
+        }
+      }];
     }
-    [factory release];
+    [self.operationQueue addOperation:operation];
   }
   else {
     [self loadEntityDataFromServer];
@@ -657,7 +665,7 @@ static const CGFloat kTodoBarHeight = 44.0;
     [section moveArrowViewIfBehindImageView:self.imageView];
 }
 
-- (void)addNewSection:(UIView*)section {
+- (void)appendChildView:(UIView*)section {
   CGSize content = self.scrollView.contentSize;
   CGRect sectionFrame = section.frame;
   sectionFrame.origin.y = content.height;
@@ -710,7 +718,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   NSSet* following = currentUser.following;
   if (!following)
     following = [NSSet set];
-
+  
   NSPredicate* p = [NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)
@@ -889,65 +897,76 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (IBAction)mainActionButtonPressed:(id)sender {}
 
 - (void)didLoad:(id)object withLabel:(id)label {
-  if ([label isEqualToString:@"entityDetail"]) {
-    if (object) {
-      id<STEntityDetail> detail = object;
-      entityDetail_ = [detail retain];
-      [self didLoadEntityDetail:YES];
-      STHeaderViewFactory* factory = [[STHeaderViewFactory alloc] init];
-      [factory createWithEntityDetail:self.entityDetail delegate:self withLabel:@"headerView"];
-      [factory release];
-    }
-    else {
-      [self didLoadEntityDetail:NO];
+
+}
+
+- (void)didLoadGalleryViewCreator:(STViewCreator)viewCreator {
+  if (viewCreator) {
+    UIView* view = viewCreator(self);
+    if (view) {
+      [self appendChildView:view];
     }
   }
-  else if ([label isEqualToString:@"headerView"]) {
-    if (object) {
-      UIView* headerView = object;
-      [self addNewSection:headerView];
+}
+
+
+- (void)didLoadMetadataViewCreator:(STViewCreator)viewCreator {
+  if (viewCreator) {
+    UIView* metadataView = viewCreator(self);
+    if (metadataView) {
+      [self appendChildView:metadataView];
     }
-    STActionsViewFactory* factory = [[STActionsViewFactory alloc] init];
-    [factory createWithActions:self.entityDetail.actions delegate:self withLabel:@"actionsView"];
-    [factory release];
   }
-  else if ([label isEqualToString:@"actionsView"]) {
-    if (object) {
-      UIView* actionsView = object;
-      [self addNewSection:actionsView];
+  STGalleryViewFactory* factory = [[[STGalleryViewFactory alloc] init] autorelease];
+  NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator viewCreator) {
+    [self didLoadGalleryViewCreator:viewCreator];
+  }];
+  [self.operationQueue addOperation:operation];
+}
+
+- (void)didLoadActionsViewCreator:(STViewCreator)viewCreator {
+  if (viewCreator) {
+    UIView* view = viewCreator(self);
+    if (view) {
+      [self appendChildView:view];
     }
-    STMetadataViewFactory* factory = [[STMetadataViewFactory alloc] init];
-    [factory createWithEntityDetail:self.entityDetail delegate:self withLabel:@"metadataView"];
-    [factory release];
   }
-  else if ([label isEqualToString:@"metadataView"]) {
-    if (object) {
-      UIView* metadataView = object;
-      [self addNewSection:metadataView];
+  STMetadataViewFactory* factory = [[STMetadataViewFactory alloc] init];
+  NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator creator) {
+    [self didLoadMetadataViewCreator:creator];
+  }];
+  [self.operationQueue addOperation:operation];
+  [factory release];
+}
+
+- (void)didLoadHeaderViewCreator:(STViewCreator)viewCreator {
+  if (viewCreator) {
+    UIView* headerView = viewCreator(self);
+    if (headerView) {
+      [self appendChildView:headerView];
     }
-    STGalleryViewFactory* factory = [[STGalleryViewFactory alloc] init];
-    __block EntityDetailViewController* selfRef = self;
-    NSOperation* operation = [factory createWithGallery:self.entityDetail.gallery forBlock:^(STViewCreator init) {
-      @autoreleasepool {
-        if (init) {
-          UIView* view = init(selfRef);
-          if (view) {
-            UIView* galleryView = view;
-            [selfRef addNewSection:galleryView];
-          }
-        }
-      }
+  }
+  STActionsViewFactory* factory = [[STActionsViewFactory alloc] init];
+  NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator creator) {
+    [self didLoadActionsViewCreator:creator];
+  }];
+  [self.operationQueue addOperation:operation];
+  [factory release];
+}
+
+- (void)didLoadEntityDetail:(id<STEntityDetail>)anEntityDetail {
+  entityDetail_ = [anEntityDetail retain];
+  if (self.entityDetail) {
+    STHeaderViewFactory* factory = [[STHeaderViewFactory alloc] init];
+    NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator viewCreator) {
+      [self didLoadHeaderViewCreator:viewCreator];
     }];
-    [factory release];
     [self.operationQueue addOperation:operation];
+    [factory release];
   }
 }
 
-- (void)didLoadEntityDetail:(BOOL)loaded {
-  
-}
-
-- (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
+- (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds {
   for (UIView* view2 in self.detailComponents) {
     if (view2 == view || CGRectGetMinY(view2.frame) > CGRectGetMinY(view.frame)) {
       [UIView animateWithDuration:seconds animations:^{
@@ -972,7 +991,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)didChooseAction:(id<STAction>)action {
   if (action.sources && [action.sources count] > 1) {
     STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
-    NSOperation* operation = [factory createWithAction:action forBlock:^(STViewCreator init) {
+    NSOperation* operation = [factory createViewWithAction:action forBlock:^(STViewCreator init) {
       if (init) {
         UIView* view = init(self);
         view.frame = [Util centeredAndBounded:view.frame.size inFrame:[[UIApplication sharedApplication] keyWindow].frame];

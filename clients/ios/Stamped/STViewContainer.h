@@ -12,6 +12,8 @@
 @interface STViewContainer : UIView <STViewDelegate>
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
-- (void)appendChild:(UIView*)child;
+- (void)appendChildView:(UIView*)child;
+
+@property (nonatomic, assign) id<STViewDelegate> delegate;
 
 @end

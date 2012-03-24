@@ -45,7 +45,7 @@ extern BOOL const newEDetail;
 - (id)initWithSearchResult:(SearchResult*)searchResult;
 - (void)addSectionWithName:(NSString*)name;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
-- (void)addNewSection:(UIView*)section;
+- (void)appendChildView:(UIView*)section;
 - (void)addSectionStampedBy;
 - (void)addTodoToolbar;
 - (void)hideMainToolbar;
@@ -53,7 +53,7 @@ extern BOOL const newEDetail;
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
-- (void)didLoadEntityDetail:(BOOL)loaded;
+- (void)didLoadEntityDetail:(id<STEntityDetail>)anEntityDetail;
 
 @property (nonatomic, retain) Stamp* referringStamp;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;

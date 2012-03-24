@@ -82,6 +82,12 @@
 		6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
+		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
+		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
+		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
+		63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
+		63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
+		63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		7E007BF514EEB67000FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
 		7E007BF714EEB68400FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E007BF814EEB69400FB557E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF414EEB67000FB557E /* Default@2x.png */; };
@@ -1776,7 +1782,6 @@
 		6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailFactory.m; sourceTree = "<group>"; };
 		6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryViewFactory.h; sourceTree = "<group>"; };
 		6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGalleryViewFactory.m; sourceTree = "<group>"; };
-		6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFactoryDelegate.h; sourceTree = "<group>"; };
 		6386EF02150FBF020019F1DC /* NewEntityDetail.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = NewEntityDetail.xib; path = Interfaces/NewEntityDetail.xib; sourceTree = SOURCE_ROOT; };
 		6386EF0C150FD3410019F1DC /* STViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegate.h; sourceTree = "<group>"; };
 		6386EF0D150FD5A60019F1DC /* STActionsViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionsViewFactory.h; sourceTree = "<group>"; };
@@ -1785,19 +1790,22 @@
 		6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHeaderViewFactory.m; sourceTree = "<group>"; };
 		6386EF171511297E0019F1DC /* STMetadataViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataViewFactory.h; sourceTree = "<group>"; };
 		6386EF18151129800019F1DC /* STMetadataViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMetadataViewFactory.m; sourceTree = "<group>"; };
-		6386EF1C1511371F0019F1DC /* STResizeDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STResizeDelegate.h; sourceTree = "<group>"; };
 		6386EF1D1511376F0019F1DC /* STViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewContainer.h; sourceTree = "<group>"; };
 		6386EF1E151137710019F1DC /* STViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewContainer.m; sourceTree = "<group>"; };
 		6386EF2215114B950019F1DC /* eDetailBox_line.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eDetailBox_line.png; sourceTree = "<group>"; };
 		6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetailBox_line@2x.png"; sourceTree = "<group>"; };
 		6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Stamped.h"; sourceTree = "<group>"; };
 		6386EF2B151150420019F1DC /* UIFont+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Stamped.m"; sourceTree = "<group>"; };
-		6386EF2F151278610019F1DC /* STAsyncConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAsyncConfig.h; sourceTree = "<group>"; };
 		6386EF301513C3360019F1DC /* STActionMenuFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionMenuFactory.h; sourceTree = "<group>"; };
 		6386EF311513C3390019F1DC /* STActionMenuFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionMenuFactory.m; sourceTree = "<group>"; };
 		6386EF351513E2740019F1DC /* STActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionItem.h; sourceTree = "<group>"; };
 		6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActionItem.h; sourceTree = "<group>"; };
 		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
+		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
+		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
+		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
+		63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAEntityDetailComponentFactory.h; sourceTree = "<group>"; };
+		63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAEntityDetailComponentFactory.m; sourceTree = "<group>"; };
 		7E007BF414EEB67000FB557E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		7E007BF614EEB68400FB557E /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
@@ -2854,40 +2862,44 @@
 		6380A78E1506B67D003087EF /* New Entity Detail */ = {
 			isa = PBXGroup;
 			children = (
-				6386EE9315081D040019F1DC /* STSimpleSource.h */,
-				6386EE9415081D040019F1DC /* STSimpleSource.m */,
-				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
-				6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */,
+				6386EEDB150A52B30019F1DC /* STEntityDetailFactory.h */,
+				6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */,
 				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
 				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
 				6386EE9815081EBD0019F1DC /* STSimpleAction.h */,
 				6386EE9915081EBE0019F1DC /* STSimpleAction.m */,
-				6386EEA2150821090019F1DC /* STSimpleMetadataItem.h */,
-				6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */,
-				6386EEA8150822900019F1DC /* STSimplePlaylistItem.h */,
-				6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */,
-				6386EEAD150824810019F1DC /* STSimplePlaylist.h */,
-				6386EEAE150824810019F1DC /* STSimplePlaylist.m */,
-				6386EEB715090FB80019F1DC /* STGalleryView.h */,
-				6386EEB815090FB90019F1DC /* STGalleryView.m */,
-				6386EED21509713D0019F1DC /* STSimpleGallery.h */,
-				6386EED31509713E0019F1DC /* STSimpleGallery.m */,
-				6386EEDB150A52B30019F1DC /* STEntityDetailFactory.h */,
-				6386EEDC150A52B40019F1DC /* STEntityDetailFactory.m */,
-				6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */,
-				6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */,
-				6386EF0D150FD5A60019F1DC /* STActionsViewFactory.h */,
-				6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */,
-				6386EF12150FF9B20019F1DC /* STHeaderViewFactory.h */,
-				6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */,
-				6386EF171511297E0019F1DC /* STMetadataViewFactory.h */,
-				6386EF18151129800019F1DC /* STMetadataViewFactory.m */,
-				6386EF1D1511376F0019F1DC /* STViewContainer.h */,
-				6386EF1E151137710019F1DC /* STViewContainer.m */,
-				6386EF301513C3360019F1DC /* STActionMenuFactory.h */,
-				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
 				6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */,
 				6386EF371513E2D20019F1DC /* STSimpleActionItem.m */,
+				6386EE9315081D040019F1DC /* STSimpleSource.h */,
+				6386EE9415081D040019F1DC /* STSimpleSource.m */,
+				6386EEA2150821090019F1DC /* STSimpleMetadataItem.h */,
+				6386EEA31508210A0019F1DC /* STSimpleMetadataItem.m */,
+				6386EEAD150824810019F1DC /* STSimplePlaylist.h */,
+				6386EEAE150824810019F1DC /* STSimplePlaylist.m */,
+				6386EEA8150822900019F1DC /* STSimplePlaylistItem.h */,
+				6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */,
+				6386EED21509713D0019F1DC /* STSimpleGallery.h */,
+				6386EED31509713E0019F1DC /* STSimpleGallery.m */,
+				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
+				6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */,
+				6386EF1D1511376F0019F1DC /* STViewContainer.h */,
+				6386EF1E151137710019F1DC /* STViewContainer.m */,
+				63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */,
+				63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */,
+				6386EF12150FF9B20019F1DC /* STHeaderViewFactory.h */,
+				6386EF13150FF9B30019F1DC /* STHeaderViewFactory.m */,
+				6386EF0D150FD5A60019F1DC /* STActionsViewFactory.h */,
+				6386EF0E150FD5A60019F1DC /* STActionsViewFactory.m */,
+				6386EF171511297E0019F1DC /* STMetadataViewFactory.h */,
+				6386EF18151129800019F1DC /* STMetadataViewFactory.m */,
+				6386EEE0150A581D0019F1DC /* STGalleryViewFactory.h */,
+				6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */,
+				6386EEB715090FB80019F1DC /* STGalleryView.h */,
+				6386EEB815090FB90019F1DC /* STGalleryView.m */,
+				6386EF301513C3360019F1DC /* STActionMenuFactory.h */,
+				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
+				63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */,
+				63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2895,21 +2907,28 @@
 		6380A7A41506D41A003087EF /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
-				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6380A7A61506D6C2003087EF /* STEntityDetail.h */,
+				6386EE92150819270019F1DC /* STAction.h */,
+				6386EF351513E2740019F1DC /* STActionItem.h */,
 				6380A7B11507D0CC003087EF /* STSource.h */,
 				6380A7A81506D907003087EF /* STMetadataItem.h */,
 				6380A7A91506DAC5003087EF /* STPlaylist.h */,
 				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
-				6386EE92150819270019F1DC /* STAction.h */,
 				6386EED1150970F40019F1DC /* STGallery.h */,
-				6386EEE7150A5A6C0019F1DC /* STFactoryDelegate.h */,
+				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
-				6386EF1C1511371F0019F1DC /* STResizeDelegate.h */,
-				6386EF2F151278610019F1DC /* STAsyncConfig.h */,
-				6386EF351513E2740019F1DC /* STActionItem.h */,
+				63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */,
 			);
 			name = Protocol;
+			sourceTree = "<group>";
+		};
+		63F27E6F151CF23700DA7001 /* New Entity Detail */ = {
+			isa = PBXGroup;
+			children = (
+				6386EF2215114B950019F1DC /* eDetailBox_line.png */,
+				6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */,
+			);
+			name = "New Entity Detail";
 			sourceTree = "<group>";
 		};
 		7E07EBD114C73EFA00A2B5F0 /* ASIHTTPRequest */ = {
@@ -3513,8 +3532,6 @@
 		7E7612B413C95BBD0023CCC4 /* Entity Details */ = {
 			isa = PBXGroup;
 			children = (
-				6386EF2215114B950019F1DC /* eDetailBox_line.png */,
-				6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */,
 				CBCED273146A811D00D188CE /* eDetail_notConnected.png */,
 				CBCED274146A811D00D188CE /* eDetail_notConnected@2x.png */,
 				CBC85D1C14679D3D008FAE7B /* book_gradient.png */,
@@ -3889,6 +3906,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				63F27E6F151CF23700DA7001 /* New Entity Detail */,
 				7E007BF614EEB68400FB557E /* Default.png */,
 				7E007BF414EEB67000FB557E /* Default@2x.png */,
 				7EF25E3E148EE0C3004E4F11 /* column-grid@2x.png */,
@@ -6062,6 +6080,8 @@
 				6386EF2D1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 				6386EF331513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
 				6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
+				63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
+				63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6229,6 +6249,8 @@
 				6386EF2C1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 				6386EF321513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
 				6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
+				63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
+				63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6255,6 +6277,8 @@
 				6386EF2E1511504C0019F1DC /* UIFont+Stamped.m in Sources */,
 				6386EF341513C33C0019F1DC /* STActionMenuFactory.m in Sources */,
 				6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
+				63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
+				63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

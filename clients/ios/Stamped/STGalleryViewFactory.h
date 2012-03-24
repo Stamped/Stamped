@@ -8,11 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "STGallery.h"
-#import "STViewDelegate.h"
+#import "STAEntityDetailComponentFactory.h"
 
 
-@interface STGalleryViewFactory : NSObject
-
-- (NSOperation*)createWithGallery:(id<STGallery>)gallery forBlock:(void (^)(STViewCreator))callback;
+@interface STGalleryViewFactory : STAEntityDetailComponentFactory
 
 @end

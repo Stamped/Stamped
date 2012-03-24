@@ -66,4 +66,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (CGFloat)imageScale;
 
++ (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
+
 @end

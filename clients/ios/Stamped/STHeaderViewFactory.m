@@ -19,9 +19,9 @@
 
 @implementation STHeaderViewFactory
 
-- (void)createWithEntityDetail:(id<STEntityDetail>)entity
-                      delegate:(id<STViewDelegate>)delegate
-                     withLabel:(id)label {
+- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)entity
+                        withState:(id)asyncState
+                      andDelegate:(id<STViewDelegate>)delegate {
   UIView* view = nil;
   if (entity) {
     CGFloat padding_h = 15;
@@ -87,7 +87,7 @@
     
     [view autorelease];
   }
-  [delegate didLoad:view withLabel:label];
+  return view;
 }
 
 @end

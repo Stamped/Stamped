@@ -9,10 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "STEntityDetail.h"
 #import "STViewDelegate.h"
+#import "STAEntityDetailComponentFactory.h"
 
-@interface STMetadataViewFactory : NSObject
+@interface STMetadataViewFactory : STAEntityDetailComponentFactory
 
-- (void)createWithEntityDetail:(id<STEntityDetail>)entity
-                      delegate:(id<STViewDelegate>)delegate
-                     withLabel:(id)label;
 @end

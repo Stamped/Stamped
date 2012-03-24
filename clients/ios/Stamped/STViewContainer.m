@@ -11,13 +11,11 @@
 @interface STViewContainer ()
 
 @property (nonatomic, retain) NSMutableArray* children;
-@property (nonatomic, assign) id<STViewDelegate> delegate;
 
 @end
 
 @implementation STViewContainer
 
-@dynamic asyncQueue;
 @synthesize delegate = delegate_;
 @synthesize children = children_;
 
@@ -33,16 +31,15 @@
 }
 
 - (void)dealloc {
-  NSLog(@"dealloc STViewContainer");
   self.children = nil;
   self.delegate = nil;
   [super dealloc];
 }
 
-- (void)appendChild:(UIView*)child {
+- (void)appendChildView:(UIView*)child {
   CGRect frame = child.frame;
   frame.origin.y = self.frame.size.height;
-  NSLog(@"Child frame: %f,%f,%f,%f,%@",frame.origin.x,frame.origin.y,frame.size.width,frame.size.height,self);
+  //NSLog(@"Child frame: %f,%f,%f,%f,%@",frame.origin.x,frame.origin.y,frame.size.width,frame.size.height,self);
   child.frame = frame;
   frame = self.frame;
   frame.size.height += child.frame.size.height;
@@ -51,15 +48,13 @@
   [self addSubview:child];
 }
 
-- (void)didLoad:(id)object withLabel:(id)label {
-  [self.delegate didLoad:object withLabel:label];
-}
-
 - (void)didChooseAction:(id<STAction>)action {
-  [self.delegate didChooseAction:action];
+  if (self.delegate) {
+    [self.delegate didChooseAction:action];
+  }
 }
 
-- (void)view:(UIView*)view willChangeHeightBy:(CGFloat)delta over:(CGFloat)seconds {
+- (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds {
   for (UIView* view2 in self.children) {
     if (view2 == view || CGRectGetMinY(view2.frame) > CGRectGetMinY(view.frame)) {
       [UIView animateWithDuration:seconds animations:^{
@@ -74,11 +69,16 @@
       }];
     }
   }
-  [self.delegate view:self willChangeHeightBy:delta over:seconds];
-}
-
-- (NSOperationQueue*)asyncQueue {
-  return self.delegate.asyncQueue;
+  if (self.delegate) {
+    [self.delegate childView:self shouldChangeHeightBy:delta overDuration:seconds];
+  }
+  else {
+    [UIView animateWithDuration:seconds animations:^{
+        CGRect frame = self.frame;
+        frame.size.height += delta;
+        self.frame = frame;
+    }];
+  }
 }
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {

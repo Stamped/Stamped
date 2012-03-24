@@ -8,11 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "STEntityDetail.h"
-#import "STFactoryDelegate.h"
 
 @interface STEntityDetailFactory : NSObject
 
-- (void)createWithEntityId:(NSString*)entityID delegate:(id<STFactoryDelegate>)delegate label:(id)label;
-- (void)createWithSearchId:(NSString*)searchID delegate:(id<STFactoryDelegate>)delegate label:(id)label;
+- (NSOperation*)entityDetailCreatorWithEntityId:(NSString*)anEntityID andCallbackBlock:(void (^)(id<STEntityDetail>))aBlock;
+- (NSOperation*)entityDetailCreatorWithSearchId:(NSString*)aSearchID andCallbackBlock:(void (^)(id<STEntityDetail>))aBlock;
+
++ (STEntityDetailFactory*)sharedFactory;
 
 @end

@@ -9,90 +9,29 @@
 #import "STGalleryViewFactory.h"
 #import "STGalleryView.h"
 
-@interface STGalleryOperation : NSOperation
+@implementation STGalleryViewFactory
 
-@property (nonatomic, retain) id<STGallery> gallery;
-@property (nonatomic, copy) STViewCreatorCallback callback;
-
-@end
-
-@implementation STGalleryOperation
-
-@synthesize gallery = gallery_;
-@synthesize callback = callback_;
-
-- (void)dealloc {
-  self.gallery = nil;
-  self.callback = nil;
-  [super dealloc];
-}
-
-- (void)main {
-  @try {
-    @autoreleasepool {
-      BOOL failed = NO;
-      NSMutableArray* array = [NSMutableArray array];
-      if (self.gallery) {
-        for (id<STGalleryItem> item in self.gallery.data) {
-          @autoreleasepool {
-            if ([self isCancelled]) {
-              failed = YES;
-              break;
-            }
-            NSData* data = [NSData dataWithContentsOfURL:[NSURL URLWithString:item.image]];
-            UIImage* image = [UIImage imageWithData:data];
-            [array addObject:image];
-          }
+- (id)generateAsynchronousState:(id<STEntityDetail>)anEntityDetail withOperation:(NSOperation*)operation {
+  NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+  if (anEntityDetail.gallery) {
+    for (id<STGalleryItem> item in anEntityDetail.gallery.data) {
+      @autoreleasepool {
+        if ([operation isCancelled]) {
+          return nil;
         }
-      }
-      else {
-        failed = YES;
-      }
-      if ([self isCancelled]) {
-        NSLog(@"GalleryView Load Operation cancelled");
-        failed = YES;
-      }
-      if (failed) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          @autoreleasepool {
-            self.callback(nil);
-          }
-        });
-      }
-      else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          @autoreleasepool {
-            if ([self isCancelled]) {
-              self.callback(nil);
-            }
-            else {
-              STViewCreator init = ^(id<STViewDelegate> delegate) {
-                STGalleryView* view = [[[STGalleryView alloc] initWithGallery:self.gallery images:array andDelegate:delegate] autorelease];
-                return view;
-              };
-              self.callback(init);
-            }
-          }
-        });
+        NSData* data = [NSData dataWithContentsOfURL:[NSURL URLWithString:item.image]];
+        UIImage* image = [UIImage imageWithData:data];
+        [dict setObject:image forKey:item.image];
       }
     }
   }
-  @catch (NSException *exception) {
-    NSLog(@"exception occurred! %@",exception);
-  }
-  @finally {
-  }
+  return dict;
 }
 
-@end
-
-@implementation STGalleryViewFactory
-
-- (NSOperation*)createWithGallery:(id<STGallery>)gallery forBlock:(void (^)(STViewCreator))callback {
-  STGalleryOperation* operation = [[STGalleryOperation alloc] init];
-  operation.gallery = gallery;
-  operation.callback = callback;
-  return [operation autorelease];
+- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)anEntityDetail
+                        withState:(id)asyncState
+                      andDelegate:(id<STViewDelegate>)delegate {
+  return [[[STGalleryView alloc] initWithGallery:anEntityDetail.gallery images:asyncState andDelegate:delegate] autorelease];
 }
 
 @end

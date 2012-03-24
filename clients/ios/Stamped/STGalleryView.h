@@ -12,6 +12,6 @@
 
 @interface STGalleryView : UIView <UIScrollViewDelegate>
 
-- (id)initWithGallery:(id<STGallery>)gallery images:(NSArray*)images andDelegate:(id<STViewDelegate>)delegate;
+- (id)initWithGallery:(id<STGallery>)gallery images:(NSDictionary*)images andDelegate:(id<STViewDelegate>)delegate;
 
 @end
