@@ -8,10 +8,12 @@
 
 #import <CoreLocation/CoreLocation.h>
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "Event.h"
 #import "Favorite.h"
 #import "Stamp.h"
+#import "User.h"
 
 @implementation Entity
 
@@ -71,6 +73,23 @@
 
 - (id)valueForUndefinedKey:(NSString*)key {
   return nil;
+}
+
+- (void)updateLatestStamp {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSSet* following = currentUser.following;
+  if (!following)
+    following = [NSSet set];
+  
+        
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+  NSArray* filteredStamps = [[self.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
+  if (filteredStamps.count == 0)
+    return;
+
+  filteredStamps = [filteredStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  Stamp* latestStamp = [filteredStamps objectAtIndex:0];
+  self.mostRecentStampDate = latestStamp.created;
 }
 
 @end

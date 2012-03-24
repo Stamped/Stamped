@@ -157,6 +157,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
   gridView_.alpha = 0;
+  [Entity.managedObjectContext save:NULL];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {}

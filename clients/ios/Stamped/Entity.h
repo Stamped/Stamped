@@ -42,6 +42,8 @@ typedef enum {
 @property (nonatomic, readonly) UIImage* highlightedInboxTodoCategoryImage;
 @property (nonatomic, readonly) UIImage* stampDetailCategoryImage;
 @property (nonatomic, readonly) UIImage* entitySearchCategoryImage;
+
+- (void)updateLatestStamp;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

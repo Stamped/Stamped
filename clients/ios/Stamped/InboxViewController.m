@@ -191,23 +191,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)managedObjectContextChanged:(NSNotification*)notification {
   NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
   objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
-  NSSet* stamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    return ([obj isMemberOfClass:[Stamp class]]);
-  }];
-
-  for (Stamp* s in stamps) {
-    Entity* e = s.entityObject;
-    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"deleted == NO"]];
-    if (filteredStamps.count == 0)
-      continue;
-
-    filteredStamps = [filteredStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    Stamp* latestStamp = [filteredStamps objectAtIndex:0];
-    e.mostRecentStampDate = latestStamp.created;
-  }
-
-  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
+  if (objects.count == 0)
+    return;
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  NSString* currentUserID = currentUser.userID;
   NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
     if ([obj isMemberOfClass:[Stamp class]] ||
         ([obj isMemberOfClass:[User class]] && [[(User*)obj userID] isEqualToString:currentUserID])) {
@@ -217,8 +204,19 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     return NO;
   }];
 
-  if (allStampsOrCurrentUser.count > 0)
+  if (allStampsOrCurrentUser.count > 0) {
     needToRefetch_ = YES;
+    for (id obj in allStampsOrCurrentUser) {
+      if ([obj isMemberOfClass:[Stamp class]]) {
+        [[obj entityObject] updateLatestStamp];
+      } else {
+        User* user = obj;
+        NSArray* entities = [user valueForKeyPath:@"following.stamps.@distinctUnionOfSets.entityObject"];
+        for (Entity* e in entities)
+          [e updateLatestStamp];
+      }
+    }
+  }
 }
 
 - (void)loadStampsFromDataStore {

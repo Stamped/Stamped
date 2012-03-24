@@ -1017,14 +1017,22 @@ typedef enum {
     }
   } else if (actionSheet.tag == StampDetailActionTypeDeleteStamp && buttonIndex == 0) {
     if (stamp_.entityObject.stamps.count > 1) {
+      User* currentUser = [AccountManager sharedManager].currentUser;
+      NSSet* following = currentUser.following;
+      if (!following)
+        following = [NSSet set];
+
+      Entity* e = stamp_.entityObject;
       NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+      NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
       NSMutableArray* sortedStamps =
-          [NSMutableArray arrayWithArray:[[stamp_.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
+          [NSMutableArray arrayWithArray:[filteredStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
       [sortedStamps removeObject:stamp_];
+      stamp_.deleted = [NSNumber numberWithBool:YES];
       Stamp* latestStamp = [sortedStamps objectAtIndex:0];
       stamp_.entityObject.mostRecentStampDate = latestStamp.created;
     }
-    
+
     Favorite* fave = [Favorite objectWithPredicate:
         [NSPredicate predicateWithFormat:@"entityObject.entityID == %@", stamp_.entityObject.entityID]];
     fave.complete = [NSNumber numberWithBool:NO];
