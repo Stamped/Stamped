@@ -80,8 +80,7 @@
   NSSet* following = currentUser.following;
   if (!following)
     following = [NSSet set];
-  
-        
+
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
   NSArray* filteredStamps = [[self.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
   if (filteredStamps.count == 0)

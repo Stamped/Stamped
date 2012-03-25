@@ -380,6 +380,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     if ([stamp.deleted boolValue]) {
       [toDelete addObject:stamp];
     }
+    [stamp.entityObject updateLatestStamp];
   }
   
   Stamp* oldestStampInBatch = objects.lastObject;
@@ -390,17 +391,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   }
 
   for (Stamp* stamp in toDelete) {
-    if (stamp.entityObject.stamps.count > 1) {
-      NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-      NSMutableArray* sortedStamps =
-          [NSMutableArray arrayWithArray:[[stamp.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
-      [sortedStamps removeObject:stamp];
-      Stamp* latestStamp = [sortedStamps objectAtIndex:0];
-      stamp.entityObject.mostRecentStampDate = latestStamp.created;
-    }
-
     [Stamp.managedObjectContext deleteObject:stamp];
   }
+
   [Stamp.managedObjectContext save:NULL];
 
   if (objects.count < 10) {
