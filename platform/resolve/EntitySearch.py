@@ -264,8 +264,8 @@ class EntitySearch(object):
             entity = Entity()
             source = item[1].target.source
             
-            if source not in self._source_map:
-                source = self._source_map['stamped']
+            if source not in self._sources_map:
+                source = self._sources_map['stamped']
             
             sources[source].enrichEntityWithWrapper(item[1].target, entity)
             results.append(entity)

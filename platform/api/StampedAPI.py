@@ -1223,7 +1223,7 @@ class StampedAPI(AStampedAPI):
 
         from EntitySearch import EntitySearch
 
-        entities = EntitySearch().searchEntities(query, count=10, coords=coords, category=category, subcategory=subcategory)
+        entities = EntitySearch().searchEntities(query, limit=10, coords=coords, category=category, subcategory=subcategory)
         
         results = []
         for entity in entities:
