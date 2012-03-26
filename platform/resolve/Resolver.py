@@ -83,6 +83,11 @@ _general_regex_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
 ]
 
+#generally applicable replacements
+_general_replacements = [
+    ('&', ' and '),                             # canonicalize synonyms
+]
+
 # track-specific removal patterns
 _track_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
@@ -190,6 +195,10 @@ def simplify(string):
     string = getSimplifiedTitle(string)
     string = format(string)
     string = regexRemoval(string, _general_regex_removals)
+    
+    for find, replacement in _general_replacements:
+        string = string.replace(find, replacement)
+    
     return format(string)
 
 def trackSimplify(string):
@@ -363,7 +372,7 @@ def formatResults(results, reverse=True, verbose=True):
                 'key'    : result[1].key, 
                 'score'  : scores['total'], 
             }
-            l.append("%3d) %s" % (n - i, pformat(data)))
+            l.append("\n%3d) %s" % (n - i, pformat(data)))
     
     return '\n'.join(l)
 
@@ -1762,9 +1771,13 @@ class Resolver(object):
         return (success, similarities)
 
     def __shouldFinish(self, query, results, options):
-        if len(results) >= options['max']:
+        num_results = len(results)
+        
+        if num_results == 0:
+            return False # TODO: is this right?
+        elif num_results >= options['max']:
             return True
-        elif len(results) < options['count']:
+        elif num_results < options['count']:
             return False
         else:
             cutoff = options['resolvedComparison']

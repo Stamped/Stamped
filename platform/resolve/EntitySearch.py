@@ -166,7 +166,7 @@ class EntitySearch(object):
                 # ignore any external sources if full search is disabled
                 continue
             
-            pool.spawn(self.__search_helper, query, limit, offset, source, results, timeout=timeout, types=types)
+            pool.spawn(self.__search_helper, query, limit, offset, source, results, timeout=timeout)
         
         pool.join(timeout=timeout)
         

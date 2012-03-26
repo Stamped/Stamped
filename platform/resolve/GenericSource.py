@@ -22,7 +22,7 @@ try:
     import sys
     from Resolver                   import *
     from abc                        import ABCMeta, abstractmethod
-    from ASourceController          import ASourceController, AlwaysSourceController
+    from ASourceController          import *
 except:
     report()
     raise

@@ -719,49 +719,51 @@ class iTunesSource(GenericSource):
         except Exception:
             raise ValueError('Malformed iTunes output')
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['book', 'track', 'album', 'artist', 'movie', 'tv', 'app'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
 
         def gen():
             try:
-                if types is None:
+                if query.types is None:
                     queries = [
                         'musicArtist', 'song', 'album', 'movie', 'ebook', 'tvShow', 'software'
                     ]
                 else:
                     queries = []
-                    if 'book' in types:
+                    if 'book' in query.types:
                         queries.append('ebook')
-                    if 'track' in types:
+                    if 'track' in query.types:
                         queries.append('song')
-                    if 'album' in types:
+                    if 'album' in query.types:
                         queries.append('album')
-                    if 'artist' in types:
+                    if 'artist' in query.types:
                         queries.append('musicArtist')
-                    if 'movie' in types:
+                    if 'movie' in query.types:
                         queries.append('movie')
-                    if 'tv' in types:
+                    if 'tv' in query.types:
                         queries.append('tvShow')
-                    if 'app' in types:
+                    if 'app' in query.types:
                         queries.append('software')
-
+                
                 if len(queries) == 0:
                     return 
-
+                
                 raw_results = []
                 def helper(q):
                     raw_results.append(self.__itunes.method(
                         'search',term=query.query_string,entity=q
                     )['results'])
-
+                
                 pool = Pool(len(queries))
                 for q in queries:
                     pool.spawn(helper, q)
                 pool.join(timeout=timeout)
+                
                 final_results = list(raw_results)
                 found = True
+                
                 while found:
                     found = False
                     for results in final_results:
@@ -778,7 +780,6 @@ class iTunesSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.generatorSource( gen(), constructor=iTunesSearchAll )
-
 
 if __name__ == '__main__':
     demo(iTunesSource(), 'Katy Perry')
