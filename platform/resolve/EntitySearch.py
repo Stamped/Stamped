@@ -159,7 +159,7 @@ class EntitySearch(object):
                 # ignore any external sources if full search is disabled
                 continue
             
-            pool.spawn(self.__search_helper, query, limit, offset, source, results, timeout=timeout)
+            pool.spawn(self.__search_helper, query, limit, offset, source, results, timeout=timeout, types=types)
         
         pool.join(timeout=timeout)
         
@@ -266,7 +266,7 @@ class EntitySearch(object):
             
             if source not in self._sources_map:
                 source = 'stamped'
-                
+
             self._sources_map[source].enrichEntityWithWrapper(item[1].target, entity)
             results.append(entity)
         
