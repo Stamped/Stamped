@@ -101,7 +101,7 @@ td { vertical-align: top; }
     position: absolute;
   }
   #ribbon {
-    background-image: url('../img/ribbon_bg.png');
+    background-image: url('/static/img/ribbon_bg.png');
     background-repeat: repeat-x;
     height: 7px;
     top: 64px;
@@ -151,3 +151,13 @@ td { vertical-align: top; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+.stamp_pin {
+    overflow: hidden;
+}
+
+.left  { float: left;  width: 7px; height: 100%; background: no-repeat url('../img/popout_left.png'); }
+.right { float: right; width: 7px; height: 100%; background: no-repeat url('../img/popout_right.png');}
+.mid   { max-width: 384px; background: 100% 100% no-repeat url('../img/popout_middle.png'); }
+.clear { clear: both; line-height: 1px; }
+.title { font-weight: bold; }
+

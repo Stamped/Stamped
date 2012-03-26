@@ -271,7 +271,6 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-
             'artist_display_name',
             'genre',
             'track_length',
@@ -440,3 +439,4 @@ class AmazonSource(GenericSource):
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")
+

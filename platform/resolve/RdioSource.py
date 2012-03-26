@@ -254,3 +254,4 @@ class RdioSource(GenericSource):
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')
+

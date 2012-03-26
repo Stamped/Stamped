@@ -74,3 +74,4 @@ class AExternalSource(object):
         """
         for k,v in fields.items():
             self.writeField(entity, v(data), k)
+

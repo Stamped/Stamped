@@ -252,7 +252,6 @@ class GooglePlacesSource(GenericSource):
         return self.generatorSource(gen())
 
     def searchAllSource(self, query, timeout=None, types=None):
-        print 'asdf'
         def gen():
             try:
                 raw_results = []
