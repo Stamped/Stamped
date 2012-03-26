@@ -1244,8 +1244,6 @@ class Resolver(object):
                 options['callback'](result, order)
 
     def resolve(self, query, source, **options):
-        if source is None:
-            return None
         options = self.parseGeneralOptions(query, options)
         results = []
         index = 0

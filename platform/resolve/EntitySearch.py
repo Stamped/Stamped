@@ -42,10 +42,11 @@ _verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
 
-    def __init__(self, query_string, coordinates=None):
+    def __init__(self, query_string, coordinates=None, types=None):
         ResolverSearchAll.__init__(self)
         self.__query_string = query_string
         self.__coordinates = coordinates
+        self.__types = types
 
     @property 
     def query_string(self):
@@ -66,6 +67,10 @@ class QuerySearchAll(ResolverSearchAll):
     @property
     def name(self):
         return ''
+
+    @property
+    def types(self):
+        return self.__types
 
     @property
     def source(self):
@@ -91,7 +96,7 @@ class EntitySearch(object):
     def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
         before  = time()
-        query   = QuerySearchAll(query_string, coordinates)
+        query   = QuerySearchAll(query_string, coordinates, types)
         results = []
         
         sources = [
@@ -117,8 +122,9 @@ class EntitySearch(object):
         total = 0
         for name,result in list(results_list):
             source_results = all_results.setdefault(name,[])
-            source_results.append(result)
-            total += 1
+            if types is None or result[1].subtype in types:
+                source_results.append(result)
+                total += 1
 
         for name,source_results in all_results.items():
             all_results[name] = sortedResults(source_results)

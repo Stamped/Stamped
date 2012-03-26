@@ -562,7 +562,7 @@ class iTunesSource(GenericSource):
     def searchAllSource(self, query, timeout=None, types=None):
         validTypes = set(['book', 'track', 'album', 'artist', 'movie', 'tv', 'app'])
         if types is not None and len(validTypes.intersection(types)) == 0:
-            return None
+            return self.emptySource
 
         def gen():
             try:
