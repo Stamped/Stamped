@@ -90,8 +90,6 @@ class EntitySearch(object):
         before  = time()
         query   = QuerySearchAll(query_string, coordinates)
         results = []
-        types   = set()
-        
         sources = {
             'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
             'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
@@ -99,8 +97,8 @@ class EntitySearch(object):
             'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
             'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
             'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query, timeout=timeout, types=types),
             'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
+            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query, timeout=timeout, types=types),
         }
 
         results_list = []
@@ -193,8 +191,9 @@ class EntitySearch(object):
             'googleplaces': GooglePlacesSource(),
             'amazon':       AmazonSource(),
         }
+        
+        search = self.search(query_string, count=count, coordinates=coordinates, types=types)
 
-        search  = EntitySearch().search(query_string, count=count, coordinates=coordinates, types=types)
         results = []
 
         for item in search:
