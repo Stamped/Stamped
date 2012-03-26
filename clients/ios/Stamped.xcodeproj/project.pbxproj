@@ -82,6 +82,12 @@
 		6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
+		63877B541520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
+		63877B551520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
+		63877B561520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
+		63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
+		63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
+		63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
@@ -1801,6 +1807,10 @@
 		6386EF351513E2740019F1DC /* STActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionItem.h; sourceTree = "<group>"; };
 		6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActionItem.h; sourceTree = "<group>"; };
 		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
+		63877B521520BAE100DE5A3A /* STEntityDetailView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailView.h; sourceTree = "<group>"; };
+		63877B531520BAE100DE5A3A /* STEntityDetailView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailView.m; sourceTree = "<group>"; };
+		63877B571520C35700DE5A3A /* STSynchronousWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSynchronousWrapper.h; sourceTree = "<group>"; };
+		63877B581520C35700DE5A3A /* STSynchronousWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSynchronousWrapper.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
@@ -2900,6 +2910,10 @@
 				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
 				63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */,
 				63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */,
+				63877B521520BAE100DE5A3A /* STEntityDetailView.h */,
+				63877B531520BAE100DE5A3A /* STEntityDetailView.m */,
+				63877B571520C35700DE5A3A /* STSynchronousWrapper.h */,
+				63877B581520C35700DE5A3A /* STSynchronousWrapper.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -6082,6 +6096,8 @@
 				6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
+				63877B551520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
+				63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6251,6 +6267,8 @@
 				6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
+				63877B541520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
+				63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6279,6 +6297,8 @@
 				6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
+				63877B561520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
+				63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

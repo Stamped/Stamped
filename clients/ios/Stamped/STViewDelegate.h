@@ -10,7 +10,7 @@
 #import "STAction.h"
 
 
-@protocol STViewDelegate
+@protocol STViewDelegate <NSObject>
 @required
 - (void)didChooseAction:(id<STAction>)action;
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
