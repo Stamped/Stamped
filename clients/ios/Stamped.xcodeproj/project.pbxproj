@@ -98,6 +98,8 @@
 		7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596411520E6B7009D691E /* STStampDetailViewController.m */; };
 		7E0596451520E6B7009D691E /* STStampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0596421520E6B7009D691E /* STStampDetailViewController.xib */; };
 		7E0596461520E6B7009D691E /* STStampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0596421520E6B7009D691E /* STStampDetailViewController.xib */; };
+		7E05964A1520EB6B009D691E /* STStampDetailToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596491520EB6B009D691E /* STStampDetailToolbar.m */; };
+		7E05964B1520EB6B009D691E /* STStampDetailToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596491520EB6B009D691E /* STStampDetailToolbar.m */; };
 		7E07EBE614C73F1600A2B5F0 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */; };
 		7E07EBE714C73F1600A2B5F0 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */; };
 		7E07EBE814C73F1600A2B5F0 /* ASIDataCompressor.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD614C73F1600A2B5F0 /* ASIDataCompressor.m */; };
@@ -1818,6 +1820,8 @@
 		7E0596401520E6B7009D691E /* STStampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailViewController.h; sourceTree = "<group>"; };
 		7E0596411520E6B7009D691E /* STStampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailViewController.m; sourceTree = "<group>"; };
 		7E0596421520E6B7009D691E /* STStampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = STStampDetailViewController.xib; sourceTree = "<group>"; };
+		7E0596481520EB6B009D691E /* STStampDetailToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailToolbar.h; sourceTree = "<group>"; };
+		7E0596491520EB6B009D691E /* STStampDetailToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailToolbar.m; sourceTree = "<group>"; };
 		7E07EBD214C73F1600A2B5F0 /* ASIAuthenticationDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIAuthenticationDialog.h; path = ASIHTTPRequest/Classes/ASIAuthenticationDialog.h; sourceTree = "<group>"; };
 		7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIAuthenticationDialog.m; path = ASIHTTPRequest/Classes/ASIAuthenticationDialog.m; sourceTree = "<group>"; };
 		7E07EBD414C73F1600A2B5F0 /* ASICacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASICacheDelegate.h; path = ASIHTTPRequest/Classes/ASICacheDelegate.h; sourceTree = "<group>"; };
@@ -2944,6 +2948,8 @@
 				7E0596401520E6B7009D691E /* STStampDetailViewController.h */,
 				7E0596411520E6B7009D691E /* STStampDetailViewController.m */,
 				7E0596421520E6B7009D691E /* STStampDetailViewController.xib */,
+				7E0596481520EB6B009D691E /* STStampDetailToolbar.h */,
+				7E0596491520EB6B009D691E /* STStampDetailToolbar.m */,
 			);
 			name = "New Stamp Detail";
 			sourceTree = "<group>";
@@ -6103,6 +6109,7 @@
 				63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 				7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */,
+				7E05964B1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6273,6 +6280,7 @@
 				63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 				7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */,
+				7E05964A1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
