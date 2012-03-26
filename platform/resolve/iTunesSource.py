@@ -15,7 +15,7 @@ from logs import report
 
 try:
     from libs.iTunes                import globaliTunes
-    from GenericSource              import GenericSource
+    from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     import logs
@@ -635,88 +635,32 @@ class iTunesSource(GenericSource):
             return self.emptySource
 
     def trackSource(self, query):
-        tracks = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
-        def source(start, count):
-            if start + count <= len(tracks):
-                result = tracks[start:start+count]
-            elif start < len(tracks):
-                result = tracks[start:]
-            else:
-                result = []
-            return [ iTunesTrack( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
+        return listSource(items)
     
     def albumSource(self, query):
-        albums = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
-        def source(start, count):
-            if start + count <= len(albums):
-                result = albums[start:start+count]
-            elif start < len(albums):
-                result = albums[start:]
-            else:
-                result = []
-            return [ iTunesAlbum( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
+        return listSource(items)
 
     def artistSource(self, query):
-        artists = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(artists):
-                result = artists[start:start+count]
-            elif start < len(artists):
-                result = artists[start:]
-            else:
-                result = []
-            return [ iTunesArtist( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
+        return listSource(items)
 
     def movieSource(self, query):
-        movies = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(movies):
-                result = movies[start:start+count]
-            elif start < len(movies):
-                result = movies[start:]
-            else:
-                result = []
-            return [ iTunesMovie( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
+        return listSource(items)
 
     def bookSource(self, query):
-        movies = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(movies):
-                result = movies[start:start+count]
-            elif start < len(movies):
-                result = movies[start:]
-            else:
-                result = []
-            return [ iTunesBook( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
+        return listSource(items)
 
     def tvSource(self, query):
-        shows = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(shows):
-                result = shows[start:start+count]
-            elif start < len(shows):
-                result = shows[start:]
-            else:
-                result = []
-            return [ iTunesTVShow( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
+        return listSource(items)
 
     def appSource(self, query):
-        apps = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(apps):
-                result = apps[start:start+count]
-            elif start < len(apps):
-                result = apps[start:]
-            else:
-                result = []
-            return [ iTunesTVShow( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
+        return listSource(items)
 
     def __createWrapper(self, value):
         try:
