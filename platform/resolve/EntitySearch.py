@@ -48,7 +48,10 @@ class QuerySearchAll(ResolverSearchAll):
     def __init__(self, query_string, coords=None, types=None, local=False):
         ResolverSearchAll.__init__(self)
         
-        if not local:
+        if local:
+            if types is None: types = set()
+            types.add('place')
+        else:
             if types and 'place' not in types:
                 # if we're filtering by category / subcategory and the filtered results 
                 # couldn't possibly contain a location, then ensure that coords are 
@@ -59,16 +62,13 @@ class QuerySearchAll(ResolverSearchAll):
                 result = libs.worldcities.try_get_region(query_string)
                 
                 if result is not None:
-                    query_string, coords, region_name = result
+                    new_query_string, coords, region_name = result
                     if types is None: types = set()
                     types.add('place')
                     
                     logs.info("[search] using region %s at %s (parsed from '%s')" % 
                               (region_name, coords, query_string))
-        
-        if local:
-            if types is None: types = set()
-            types.add('place')
+                    query_string = new_query_string
         
         self.__query_string = query_string
         self.__coordinates  = coords

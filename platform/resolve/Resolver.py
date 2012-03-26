@@ -1571,9 +1571,9 @@ class Resolver(object):
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
-
+        
         return options
-
+    
     def __sourceTest(self, query, match, tests, options):
         weights = {
             'stamped'   : 1.0,
@@ -1589,30 +1589,29 @@ class Resolver(object):
         if match.source in weights:
             return weights[match.source]
         return 0
-
+    
     def __sourceWeight(self, source):
         return 1
-
+    
     def __queryStringTest(self, query, match, tests, options):
         return 0
-
+    
     def __nameTest(self, query, match, tests, options):
         return stringComparison(query.query_string, match.name)
-        
+    
     def __locationTest(self, query, match, tests, options):
-
         if query.coordinates is None or match.coordinates is None:
             return 0
-
+        
         distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
         distance = abs(distance * 3959)
         
         if distance < 0 or distance > 50:
             return 0
-    
+        
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
-
+    
     def __locationWeight(self, query, match, tests, options, boost=1):
         weight = 2
         if 'location' in tests:
@@ -1623,14 +1622,14 @@ class Resolver(object):
             if tests['location'] > 0.85:
                 return boost * weight
         return weight
-            
+    
     def __subcategoryTest(self, query, match, tests, options):
         if match.subtype == 'other' or match.subtype is None:
             return 0
         if match.subtype == 'tv':
             return 0.5
         return 1 
-        
+    
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
