@@ -94,6 +94,13 @@ class _iTunesObject(object):
     def source(self):
         return "itunes"
 
+    @lazyProperty
+    def image(self):
+        try:
+            return self.data['artworkUrl100']
+        except:
+            return ''
+
     def __repr__(self):
         return pformat( self.data )
 
@@ -503,6 +510,20 @@ class iTunesApp(_iTunesObject, ResolverApp):
         try:
             return self.data['description']
         except KeyError:
+            return ''
+
+    @lazyProperty
+    def screenshots(self):
+        try:
+            return self.data['screenshotUrls']
+        except:
+            return []
+
+    @lazyProperty 
+    def image(self):
+        try:
+            return self.data['artworkUrl512']
+        except:
             return ''
 
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):

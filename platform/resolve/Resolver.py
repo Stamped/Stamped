@@ -1380,6 +1380,7 @@ class Resolver(object):
             ('location',            self.__locationTest),
             ('subcategory',         self.__subcategoryTest),
             ('priority',            lambda q, m, s, o: m.priority),
+            ('recency',             self.__recencyTest),
             ('source_priority',     self.__sourceTest),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
@@ -1390,6 +1391,7 @@ class Resolver(object):
             'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
             'subcategory':          lambda q, m, s, o: 1,
             'priority':             lambda q, m, s, o: 1,
+            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
@@ -1708,6 +1710,22 @@ class Resolver(object):
         if q == m:
             weight = exact_boost * weight
         return weight
+
+    def __recencyTest(self, query, match, tests, options):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 1
+        except:
+            pass
+        return 0
+
+    def __recencyWeight(self, query, match, tests, options, boost=1):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 5
+        except:
+            pass
+        return 0
 
     def __setWeight(self, q, m):
         size = len( q | m )

@@ -195,10 +195,13 @@ class GenericSource(BasicSource):
         entity['title'] = wrapper.name
         if wrapper.description != '':
             entity['desc'] = wrapper.description
+        if wrapper.image != '':
+            entity['image'] = wrapper.image
 
         if wrapper.type == 'movie':
             if wrapper.rating is not None:
                 entity['mpaa_rating'] = wrapper.rating
+
         if wrapper.type == 'artist':
             if controller.shouldEnrich('albums', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
@@ -260,13 +263,20 @@ class GenericSource(BasicSource):
             if wrapper.email is not None:
                 entity['email'] = wrapper.email
 
+        if wrapper.type == 'app':
+            if wrapper.publisher['name'] != '':
+                entity['artist_display_name'] = wrapper.publisher['name']
+            if len(wrapper.screenshots) > 0:
+                for screenshot in wrapper.screenshots:
+                    entity['screenshots'].append(screenshot)
+
         if wrapper.type in set(['track','album','artist','movie','book']):
             if len(wrapper.genres) > 0:
                 entity['genre'] = wrapper.genres[0]
         if wrapper.type in set(['track','album']):
             if wrapper.artist['name'] != '':
                 entity['artist_display_name'] = wrapper.artist['name']
-        if wrapper.type in set(['track', 'album', 'movie', 'book']):
+        if wrapper.type in set(['track', 'album', 'movie', 'book', 'tv', 'app']):
             if wrapper.date is not None:
                 entity['release_date'] = wrapper.date
         if wrapper.type in set(['track', 'movie']):
@@ -280,9 +290,6 @@ class GenericSource(BasicSource):
                 entity['cast'] = ', '.join(cast)
             if wrapper.director['name'] != '':
                 entity['director'] = wrapper.director['name']
-        if wrapper.type in set(['app']):
-            if wrapper.publisher['name'] != '':
-                entity['artist_display_name'] = wrapper.publisher['name']
         return True
 
     @property
