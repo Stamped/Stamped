@@ -326,31 +326,45 @@ def sortedResults(results):
 def formatResults(results, reverse=True, verbose=True):
     n = len(results)
     l = []
-    # for result in results:
-    for i in range(len(results)):
-        if reverse:
-            result = results[n - 1]
-            l.append('\n%3s %s' % (n, '=' * 37))
-        else:
+    
+    if reverse:
+        results = list(reversed(results))
+    
+    if verbose:
+        for i in range(len(results)):
             result = results[i]
-            l.append('\n%3s %s' % (i+1, '=' * 37))
-        scores = result[0]
-        weights = scores['weights']
-        total_weight = 0.0
-        for k, v in weights.iteritems():
-            total_weight = total_weight + float(v)
-        l.append('%16s   Val     Wght     Total' % ' ')
-        for k, v in weights.iteritems():
-            s = float(scores[k])
-            w = float(weights[k])
-            t = 0
-            if total_weight > 0:
-                t = s * w / total_weight
-            l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
-        l.append(' ' * 37 + '%.2f' % scores['total'])
-        l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
-        l.append(str(result[1]))
-        n = n - 1
+            l.append('\n%3s %s' % (n - i, '=' * 37))
+            
+            scores  = result[0]
+            weights = scores['weights']
+            total_weight = 0.0
+            for k, v in weights.iteritems():
+                total_weight = total_weight + float(v)
+            l.append('%16s   Val     Wght     Total' % ' ')
+            
+            for k, v in weights.iteritems():
+                s = float(scores[k])
+                w = float(weights[k])
+                t = 0
+                if total_weight > 0:
+                    t = s * w / total_weight
+                l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
+            
+            l.append(' ' * 37 + '%.2f' % scores['total'])
+            l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
+            l.append(str(result[1]))
+    else:
+        for i in range(len(results)):
+            result = results[i]
+            scores = result[0]
+            data   = {
+                'name'   : result[1].name, 
+                'source' : result[1].source, 
+                'key'    : result[1].key, 
+                'score'  : scores['total'], 
+            }
+            l.append("%3d) %s" % (n - i, pformat(data)))
+    
     return '\n'.join(l)
 
 def typeToSubcategory(t):

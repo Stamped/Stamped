@@ -60,19 +60,26 @@ class QuerySearchAll(ResolverSearchAll):
                 
                 if result is not None:
                     query_string, coords, region_name = result
+                    if types is None: types = set()
+                    types.add('place')
+                    
                     logs.info("[search] using region %s at %s (parsed from '%s')" % 
                               (region_name, coords, query_string))
+        
+        if local:
+            if types is None: types = set()
+            types.add('place')
         
         self.__query_string = query_string
         self.__coordinates  = coords
         self.__types        = types
         self.__local        = local
     
-    @property 
+    @property
     def query_string(self):
         return self.__query_string
     
-    @property 
+    @property
     def coordinates(self):
         return self.__coordinates
     
@@ -88,7 +95,7 @@ class QuerySearchAll(ResolverSearchAll):
     def local(self):
         return self.__local
     
-    @property 
+    @property
     def key(self):
         return ''
     
@@ -167,7 +174,7 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            if types is None or result[1].subtype in types:
+            if query.types is None or result[1].subtype in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
@@ -342,7 +349,7 @@ def demo():
                               limit     = options.limit)
     
     print("Final Search Results")
-    print(formatResults(results))
+    print(formatResults(results, verbose=options.verbose))
 
 if __name__ == '__main__':
     _verbose = True
