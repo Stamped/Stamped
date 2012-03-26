@@ -7,10 +7,13 @@
 //
 
 #import "STViewContainer.h"
+#import "STViewDelegateDependent.h"
 
 @interface STViewContainer ()
 
+@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 @property (nonatomic, retain) NSMutableArray* children;
+@property (nonatomic, retain) NSMutableSet* dependents;
 
 @end
 
@@ -18,21 +21,31 @@
 
 @synthesize delegate = delegate_;
 @synthesize children = children_;
+@synthesize dependents = dependents_;
+
+static int _count = 0;
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame
 {
   self = [super initWithFrame:frame];
   if (self) {
+    NSLog(@"Creating STViewContainer %d %p %@",_count, self, self);
+    _count++;
     self.children = [NSMutableArray array];
+    dependents_ = [[NSMutableSet alloc] init];
     self.delegate = delegate;
     self.backgroundColor = [UIColor clearColor];
+    [delegate registerDependent:self];
   }
   return self;
 }
 
 - (void)dealloc {
+  _count--;
+  NSLog(@"Deleting STViewContainer %d %p",_count, self);
   self.children = nil;
   self.delegate = nil;
+  [dependents_ release];
   [super dealloc];
 }
 
@@ -84,6 +97,17 @@
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
   if (self.delegate) {
     [self.delegate didChooseSource:source forAction:action];
+  }
+}
+
+- (void)registerDependent:(id<STViewDelegateDependent>)dependent {
+  [self.dependents addObject:dependent];
+}
+
+- (void)detatchFromDelegate {
+  self.delegate = nil;
+  for (id<STViewDelegateDependent> dependent in self.dependents) {
+    [dependent detatchFromDelegate];
   }
 }
 

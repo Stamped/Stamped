@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "STViewDelegate.h"
 
-@interface STViewContainer : UIView <STViewDelegate>
+@interface STViewContainer : UIView <STViewDelegate, STViewDelegateDependent>
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
 - (void)appendChildView:(UIView*)child;
 
-@property (nonatomic, assign) id<STViewDelegate> delegate;
+@property (nonatomic, readonly, assign) id<STViewDelegate> delegate;
 
 @end

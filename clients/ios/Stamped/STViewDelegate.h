@@ -8,13 +8,15 @@
 
 #import <Foundation/Foundation.h>
 #import "STAction.h"
-
+#import "STViewDelegateDependent.h"
 
 @protocol STViewDelegate <NSObject>
 @required
+
 - (void)didChooseAction:(id<STAction>)action;
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 - (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds;
+- (void)registerDependent:(id<STViewDelegateDependent>)dependent;
 
 @end
 

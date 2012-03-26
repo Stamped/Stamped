@@ -16,7 +16,7 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 
-@interface ActionItemView : UIView
+@interface ActionItemView : UIView <STViewDelegateDependent>
 
 - (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate;
 - (void)selected:(id)button;
@@ -42,6 +42,7 @@
   if (self) {
     NSLog(@"loading action: %@",action.name);
     self.delegate = delegate;
+    [self.delegate registerDependent:self];
     self.action = action;
     self.backgroundColor = [UIColor clearColor];
     CGRect buttonFrame = frame;
@@ -117,11 +118,17 @@
 }
 
 - (void)selected:(id)button {
-  [self.delegate didChooseAction:self.action.action];
+  if (self.delegate) {
+    [self.delegate didChooseAction:self.action.action];
+  }
 }
 
 - (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
+}
+
+- (void)detatchFromDelegate {
+  self.delegate = nil;
 }
 
 @end
@@ -133,7 +140,7 @@
                       andDelegate:(id<STViewDelegate>)delegate {
   STViewContainer* view = nil;
   if (detail.actions) {
-    view = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)];
+    view = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
     CGFloat cell_height = 44;
     CGFloat cell_padding_h = 5;
     CGFloat cell_width = 290;
@@ -147,7 +154,6 @@
       viewFrame.size.height += cell_padding_h;
       view.frame = viewFrame;
     }
-    [view autorelease];
   }
   return view;
 }
