@@ -18,6 +18,7 @@
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
+#import "STStampDetailViewController.h"
 #import "Stamp.h"
 #import "STNavigationBar.h"
 #import "STPlaceAnnotation.h"
@@ -465,10 +466,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     stamp = [entity.stamps anyObject];
   }
   
-  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
+  STStampDetailViewController* vc = [[STStampDetailViewController alloc] initWithStamp:stamp];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
+  [delegate.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 #pragma mark - STTableViewController methods.

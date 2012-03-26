@@ -47,10 +47,10 @@ class QuerySearchAll(ResolverSearchAll):
     def __init__(self, query_string, coordinates=None, types=None, local=False):
         ResolverSearchAll.__init__(self)
         self.__query_string = query_string
-        self.__coordinates  = coordinates
-        self.__types        = types
-        self.__local        = local
-    
+        self.__coordinates = coordinates
+        self.__types = types
+        self.__local = local
+
     @property 
     def query_string(self):
         return self.__query_string
@@ -80,6 +80,10 @@ class QuerySearchAll(ResolverSearchAll):
         return ''
     
     @property
+    def types(self):
+        return self.__types
+
+    @property
     def source(self):
         return 'search'
 
@@ -98,7 +102,7 @@ class EntitySearch(object):
         ]
         
         self._sources_map = { }
-        for source in sources:
+        for source in self._sources:
             self._sources_map[source.sourceName] = source
     
     @lazyProperty
@@ -149,9 +153,10 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            source_results = all_results.setdefault(name,[])
-            source_results.append(result)
-            total += 1
+            if types is None or result[1].subtype in types:
+                source_results = all_results.setdefault(name,[])
+                source_results.append(result)
+                total += 1
         
         for name, source_results in all_results.items():
             all_results[name] = sortedResults(source_results)
