@@ -321,7 +321,7 @@ def sortedResults(results):
         return -pair[0]['total']
     return sorted(results , key=pairSort)
 
-def formatResults(results, reverse=True):
+def formatResults(results, reverse=True, verbose=True):
     n = len(results)
     l = []
     # for result in results:
@@ -1313,6 +1313,10 @@ class Resolver(object):
             options['callback'] = lambda x,y: None
         if 'count' not in options:
             options['count'] = 1
+        if 'limit' not in options:
+            options['limit'] = 10
+        if 'offset' not in options or options['offset'] is None:
+            options['offset'] = 0
         if 'strict' not in options:
             options['strict'] = False
         if 'symmetric' not in options:
@@ -1615,21 +1619,22 @@ class Resolver(object):
         return results
 
     def __addTotal(self, similarities, weights, query, match, options):
-        total = 0
+        total  = 0
         weight = 0
         actual_weights = {}
+        
         for k,f in weights.items():
             v = f(query, match, similarities, options)
             weight += v
-            total += v * similarities[k]
+            total  += v * similarities[k]
             actual_weights[k] = v
-
+        
         similarities['total'] = total / weight
         similarities['weights'] = actual_weights
-
+    
     def __logSimilarities(self, similarities, query, match):
         print( 'Similarities for %s:\n%s' %(match.name, pformat(similarities) ) )
-
+    
     def __differenceLog(self, label, query_set, match_set, query, match):
         diff = sorted(query_set ^ match_set)
         print('%s %s difference for %s and %s (%s %s vs %s %s)' % (
