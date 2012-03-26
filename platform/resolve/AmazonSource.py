@@ -308,16 +308,20 @@ class AmazonSource(GenericSource):
                     if 'ResponseGroup' not in params:
                         params['ResponseGroup'] = "ItemAttributes"
                     results = globalAmazon().item_search(**params)
-                    items = xp(results, 'ItemSearchResponse', 'Items')['c']['Item']
-                    for item in items:
-                        try:
-                            if test == None or test(item):
-                                yield xp(item, 'ASIN')['v']
-                        except Exception:
-                            pass
-
+                    items = xp(results, 'ItemSearchResponse', 'Items')['c']
+                    
+                    if 'Item' in items:
+                        items = items['Item']
+                        
+                        for item in items:
+                            try:
+                                if test == None or test(item):
+                                    yield xp(item, 'ASIN')['v']
+                            except Exception:
+                                pass
             except GeneratorExit:
                 pass
+        
         return self.generatorSource(gen(), constructor=lambda x: wrapper( x ), unique=True)
 
     def albumSource(self, query=None, query_string=None):
@@ -357,9 +361,9 @@ class AmazonSource(GenericSource):
             }
         )
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['book', 'track', 'album'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
             
         q = query.query_string

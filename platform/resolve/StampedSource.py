@@ -14,10 +14,11 @@ import Globals
 from logs import report
 
 try:
+    import logs
+    
+    from Resolver                   import *
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
-    import logs
-    from Resolver                   import *
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
     from Schemas                    import Entity
@@ -76,14 +77,14 @@ class EntityArtist(_EntityObject, ResolverArtist):
     @lazyProperty
     def albums(self):
         try:
-            return [ {'name':album['album_name']} for album in self.entity['albums'] ]
+            return [ {'name' : album['album_name'] } for album in self.entity['albums'] ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ {'name':song['song_name']} for song in self.entity['songs'] ]
+            return [ {'name' : song['song_name'] } for song in self.entity['songs'] ]
         except Exception:
             return []
 
@@ -517,7 +518,7 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query)
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         def query_gen():
             try:
                 # Exact match
@@ -636,7 +637,7 @@ class StampedSource(GenericSource):
                 for query in query_gen:
                     for k,v in kwargs.items():
                         query[k] = v
-
+                    
                     and_list = query.setdefault('$and',[])
                     and_list.append( {
                         '$or' : [
@@ -657,13 +658,14 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         generator = gen()
-
+        
         def constructor(entity_id):
             return self.wrapperFromEntity(
                 self.__entityDB.getEntity(
                     self.__entityDB._getStringFromObjectId(entity_id)
                 )
             )
+        
         if constructor_wrapper is not None:
             return self.generatorSource(generator, lambda x: constructor_wrapper(constructor(x)), unique=True, tolerant=True)
         else:
@@ -675,3 +677,4 @@ class StampedSource(GenericSource):
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')
+

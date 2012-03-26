@@ -219,9 +219,9 @@ class TMDBSource(GenericSource):
                 pass
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['movie'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
             
         def gen():
@@ -310,3 +310,4 @@ class TMDBSource(GenericSource):
 
 if __name__ == '__main__':
     demo(TMDBSource(), 'Avatar')
+

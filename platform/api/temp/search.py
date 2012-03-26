@@ -17,11 +17,12 @@ stampedAPI = MongoStampedAPI()
 q = 'auction house'
 # q = 'little owl'
 q = '21 jump street'
+# q = 'stamped'
 coords = CoordinatesSchema({'lat': 37.781697, 'lng':-122.392146})   # SF
 coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # coords = None
 
-results = stampedAPI.searchEntitiesNew(q, coords=coords, category='film')
+results = stampedAPI.searchEntitiesNew(q, coords=coords)
 
 for i in range(len(results)):
     # pprint(results[i][0].value)
@@ -39,4 +40,4 @@ for i in range(len(results)):
     # pprint(entity)
     print 
 
-# pprint(results[1][0].value)
+pprint(results[0][0].value)

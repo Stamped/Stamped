@@ -21,6 +21,8 @@ __all__ = [
     'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
+    'ResolverTVShow',
+    'ResolverApp',
     'demo',
     'regexRemoval',
     'simplify',
@@ -79,6 +81,11 @@ _general_regex_removals = [
     (re.compile(r".*(').*")         , [1]),
     (re.compile(r'.*(").*')         , [1]),
     (re.compile(r'^(the ).*$')      , [1]),
+]
+
+#generally applicable replacements
+_general_replacements = [
+    ('&', ' and '),                             # canonicalize synonyms
 ]
 
 # track-specific removal patterns
@@ -188,6 +195,10 @@ def simplify(string):
     string = getSimplifiedTitle(string)
     string = format(string)
     string = regexRemoval(string, _general_regex_removals)
+    
+    for find, replacement in _general_replacements:
+        string = string.replace(find, replacement)
+    
     return format(string)
 
 def trackSimplify(string):
@@ -321,34 +332,48 @@ def sortedResults(results):
         return -pair[0]['total']
     return sorted(results , key=pairSort)
 
-def formatResults(results, reverse=True):
+def formatResults(results, reverse=True, verbose=True):
     n = len(results)
     l = []
-    # for result in results:
-    for i in range(len(results)):
-        if reverse:
-            result = results[n - 1]
-            l.append('\n%3s %s' % (n, '=' * 37))
-        else:
+    
+    if reverse:
+        results = list(reversed(results))
+    
+    if verbose:
+        for i in range(len(results)):
             result = results[i]
-            l.append('\n%3s %s' % (i+1, '=' * 37))
-        scores = result[0]
-        weights = scores['weights']
-        total_weight = 0.0
-        for k, v in weights.iteritems():
-            total_weight = total_weight + float(v)
-        l.append('%16s   Val     Wght     Total' % ' ')
-        for k, v in weights.iteritems():
-            s = float(scores[k])
-            w = float(weights[k])
-            t = 0
-            if total_weight > 0:
-                t = s * w / total_weight
-            l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
-        l.append(' ' * 37 + '%.2f' % scores['total'])
-        l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
-        l.append(str(result[1]))
-        n = n - 1
+            l.append('\n%3s %s' % (n - i, '=' * 37))
+            
+            scores  = result[0]
+            weights = scores['weights']
+            total_weight = 0.0
+            for k, v in weights.iteritems():
+                total_weight = total_weight + float(v)
+            l.append('%16s   Val     Wght     Total' % ' ')
+            
+            for k, v in weights.iteritems():
+                s = float(scores[k])
+                w = float(weights[k])
+                t = 0
+                if total_weight > 0:
+                    t = s * w / total_weight
+                l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
+            
+            l.append(' ' * 37 + '%.2f' % scores['total'])
+            l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
+            l.append(str(result[1]))
+    else:
+        for i in range(len(results)):
+            result = results[i]
+            scores = result[0]
+            data   = {
+                'name'   : result[1].name, 
+                'source' : result[1].source, 
+                'key'    : result[1].key, 
+                'score'  : scores['total'], 
+            }
+            l.append("\n%3d) %s" % (n - i, pformat(data)))
+    
     return '\n'.join(l)
 
 def typeToSubcategory(t):
@@ -358,6 +383,8 @@ def typeToSubcategory(t):
         'artist':'artist',
         'book':'book',
         'movie':'movie',
+        'tv':'tv',
+        'app':'app'
     }
     if t in m:
         return m[t]
@@ -448,6 +475,10 @@ class ResolverObject(object):
     def subcategory(self):
         return None
 
+    @property 
+    def image(self):
+        return None
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -499,6 +530,10 @@ class ResolverProxy(object):
     @property
     def address(self):
         return self.target.address
+
+    @property
+    def image(self):
+        return self.target.image
 
 class SimpleResolverObject(ResolverObject):
 
@@ -606,14 +641,8 @@ class ResolverArtist(ResolverObject):
         ]
 
 #
-#       #       #       ######  #       # #     #
-#      # #      #       #     # #       # ##   ##
-#     #   #     #       #     # #       # # # # #
-#    #     #    #       ######  #       # #  #  #
-#   #########   #       #     # #       # #     #
-#  #         #  #       #     # #       # #     #
-# #           # ####### ######   #######  #     #
-#
+# Album
+# 
 
 class ResolverAlbum(ResolverObject):
     """
@@ -813,6 +842,66 @@ class ResolverMovie(ResolverObject):
         return [
             v for v in l if v != ''
         ]
+#
+# TV Show
+#
+
+class ResolverTVShow(ResolverObject):
+    """
+    Interface for tv show objects
+
+    Attributes:
+
+    cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
+    director - a director dict containing at least a 'name' string
+    date - a datetime indicating the release date or None for unknown
+    rating - a string indicating the MPAA rating of the show or '' for unknown
+    genres - a list of genre strings
+    seasons - the number of seasons of the show
+    """
+    @property
+    def cast(self):
+        return []
+
+    @property
+    def director(self):
+        return {'name':''}
+
+    @property
+    def date(self):
+        return None
+
+    @property
+    def rating(self):
+        return None
+
+    @property 
+    def genres(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'tv'
+
+    @property
+    def seasons(self):
+        return -1
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.director['name']
+            ]
+        l.extend(self.genres)
+        for actor in self.cast:
+            l.append(actor['name'])
+            if 'character' in actor:
+                l.append(actor['character'])
+        return [
+            v for v in l if v != ''
+        ]
 
 #
 # Books
@@ -876,6 +965,10 @@ class ResolverBook(ResolverObject):
             v for v in l if v != ''
         ]
 
+#
+# Places
+# 
+
 class ResolverPlace(ResolverObject):
     """
     Interface for place objects
@@ -920,6 +1013,50 @@ class ResolverPlace(ResolverObject):
         return [
             v for v in l if v != ''
         ]
+
+#
+# Apps
+#
+
+class ResolverApp(ResolverObject):
+    """
+    Interface for track objects
+
+    Attributes:
+
+    genres - a list containing any applicable genres
+    publisher - an publisher dict containing at least a 'name' string
+    """
+    @abstractproperty
+    def publisher(self):
+        pass
+
+    @property
+    def date(self):
+        return None
+
+    @property 
+    def genres(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'app'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.publisher['name'],
+            ]
+        return [
+            v for v in l if v != ''
+        ]
+
+    @lazyProperty 
+    def screenshots(self):
+        return []
 
 ##
 # Main Resolver class
@@ -1204,6 +1341,35 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
+    def checkTVShow(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.movieComparison(q.name, m.name)),
+            ('cast',        lambda q, m, s, o: self.castComparison(q, m, o)),
+            ('director',    lambda q, m, s, o: self.directorComparison(q.director, m.director)),
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
+            'cast':         lambda q, m, s, o: self.__castWeight(q, m),
+            'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+
+    def checkApp(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+            ('publisher',   lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher))
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
+                                                exact_boost=2, m_empty=4 ),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+
     def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
@@ -1214,6 +1380,7 @@ class Resolver(object):
             ('location',            self.__locationTest),
             ('subcategory',         self.__subcategoryTest),
             ('priority',            lambda q, m, s, o: m.priority),
+            ('recency',             self.__recencyTest),
             ('source_priority',     self.__sourceTest),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
@@ -1224,6 +1391,7 @@ class Resolver(object):
             'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
             'subcategory':          lambda q, m, s, o: 1,
             'priority':             lambda q, m, s, o: 1,
+            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
@@ -1311,6 +1479,10 @@ class Resolver(object):
             options['callback'] = lambda x,y: None
         if 'count' not in options:
             options['count'] = 1
+        if 'limit' not in options:
+            options['limit'] = 10
+        if 'offset' not in options or options['offset'] is None:
+            options['offset'] = 0
         if 'strict' not in options:
             options['strict'] = False
         if 'symmetric' not in options:
@@ -1392,14 +1564,18 @@ class Resolver(object):
                 options['check'] = self.checkBook
             elif query.type =='place':
                 options['check'] = self.checkPlace
+            elif query.type =='tv':
+                options['check'] = self.checkTVShow
+            elif query.type =='app':
+                options['check'] = self.checkApp
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
-
+        
         return options
-
+    
     def __sourceTest(self, query, match, tests, options):
         weights = {
             'stamped'   : 1.0,
@@ -1415,30 +1591,29 @@ class Resolver(object):
         if match.source in weights:
             return weights[match.source]
         return 0
-
+    
     def __sourceWeight(self, source):
         return 1
-
+    
     def __queryStringTest(self, query, match, tests, options):
         return 0
-
+    
     def __nameTest(self, query, match, tests, options):
         return stringComparison(query.query_string, match.name)
-        
+    
     def __locationTest(self, query, match, tests, options):
-
         if query.coordinates is None or match.coordinates is None:
             return 0
-
+        
         distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
         distance = abs(distance * 3959)
         
         if distance < 0 or distance > 50:
             return 0
-    
+        
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
-
+    
     def __locationWeight(self, query, match, tests, options, boost=1):
         weight = 2
         if 'location' in tests:
@@ -1449,12 +1624,14 @@ class Resolver(object):
             if tests['location'] > 0.85:
                 return boost * weight
         return weight
-            
+    
     def __subcategoryTest(self, query, match, tests, options):
-        if match.subcategory == 'other' or match.subcategory is None:
+        if match.subtype == 'other' or match.subtype is None:
             return 0
+        if match.subtype == 'tv':
+            return 0.5
         return 1 
-        
+    
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
@@ -1534,6 +1711,22 @@ class Resolver(object):
             weight = exact_boost * weight
         return weight
 
+    def __recencyTest(self, query, match, tests, options):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 1
+        except:
+            pass
+        return 0
+
+    def __recencyWeight(self, query, match, tests, options, boost=1):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 5
+        except:
+            pass
+        return 0
+
     def __setWeight(self, q, m):
         size = len( q | m )
         if size == 0:
@@ -1595,9 +1788,13 @@ class Resolver(object):
         return (success, similarities)
 
     def __shouldFinish(self, query, results, options):
-        if len(results) >= options['max']:
+        num_results = len(results)
+        
+        if num_results == 0:
+            return False # TODO: is this right?
+        elif num_results >= options['max']:
             return True
-        elif len(results) < options['count']:
+        elif num_results < options['count']:
             return False
         else:
             cutoff = options['resolvedComparison']
@@ -1613,21 +1810,22 @@ class Resolver(object):
         return results
 
     def __addTotal(self, similarities, weights, query, match, options):
-        total = 0
+        total  = 0
         weight = 0
         actual_weights = {}
+        
         for k,f in weights.items():
             v = f(query, match, similarities, options)
             weight += v
-            total += v * similarities[k]
+            total  += v * similarities[k]
             actual_weights[k] = v
-
+        
         similarities['total'] = total / weight
         similarities['weights'] = actual_weights
-
+    
     def __logSimilarities(self, similarities, query, match):
         print( 'Similarities for %s:\n%s' %(match.name, pformat(similarities) ) )
-
+    
     def __differenceLog(self, label, query_set, match_set, query, match):
         diff = sorted(query_set ^ match_set)
         print('%s %s difference for %s and %s (%s %s vs %s %s)' % (
