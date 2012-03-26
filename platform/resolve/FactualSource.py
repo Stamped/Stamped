@@ -219,6 +219,14 @@ class FactualSource(GenericSource):
                 pass
         return generatorSource(gen())
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            data = self.__factual.data(key)
+            return FactualPlace(factual_id=key, data=data)
+        except KeyError:
+            pass
+        return None
+
 
     def searchAllSource(self, query, timeout=None, types=None):
         def gen():

@@ -174,7 +174,7 @@ _address_fields = {
     'address_country':_ppath('country'),
 }
 
-def _filters(entity,fields):
+def _filters(entity, fields):
     """
     Helper function to create a filters from a dict of filter names and entity functions
 
@@ -190,7 +190,7 @@ def _filters(entity,fields):
             m[k] = v
     return m
 
-def _enrich(entity,data,fields=_enrich_fields):
+def _enrich(entity, data, fields=_enrich_fields):
     result = False
     for k,f in fields.items():
         v = f(data)
@@ -199,7 +199,7 @@ def _enrich(entity,data,fields=_enrich_fields):
             result = True
     return result
 
-def _populate(entity,data,fields):
+def _populate(entity, data, fields):
     for k,f in fields.items():
         entity[k] = f(data)
 
@@ -244,7 +244,7 @@ class Factual(object):
     """
     Factual API Wrapper
     """
-    def __init__(self,key=_API_V3_Key,secret=_API_V3_Secret,log=None):
+    def __init__(self, key=_API_V3_Key, secret=_API_V3_Secret, log=None):
         self.__v3_key = key
         self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
@@ -271,7 +271,7 @@ class Factual(object):
             
         return self.__factual('global', **params)
 
-    def resolve(self, data,limit=_limit):
+    def resolve(self, data, limit=_limit):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
         
@@ -288,21 +288,21 @@ class Factual(object):
             r = r[:limit]
         return r
         
-    def places(self, data,limit=_limit):
+    def places(self, data, limit=_limit):
         """
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        return self.__factual('global',prefix='t',limit=limit,filters=string)
+        return self.__factual('global', prefix='t', limit=limit, filters=string)
     
-    def place(self,factual_id):
+    def place(self, factual_id):
         result = self.places({'factual_id':factual_id},1)
         if result:
             return result[0]
         else:
             return None
 
-    def crosswalk_id(self,factual_id,namespace=None,limit=_limit,namespaces=None):
+    def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
         
@@ -326,7 +326,7 @@ class Factual(object):
             del args['limit']
         return self.__factual('crosswalk',**args)
     
-    def crosswalk_external(self,space,space_id,namespace=None,limit=_limit):
+    def crosswalk_external(self, space, space_id, namespace=None, limit=_limit):
         """
         Use Crosswalk service to find urls and ids that match the given external entity.
         
@@ -343,19 +343,19 @@ class Factual(object):
             args['only'] = namespace
         return self.__factual('crosswalk',**args)
         
-    def crossref_id(self,factual_id,limit=_limit):
+    def crossref_id(self, factual_id, limit=_limit):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
         return self.__factual('crossref',factual_id=factual_id,limit=limit)
         
-    def crossref_url(self,url,limit=_limit):
+    def crossref_url(self, url, limit=_limit):
         """
         User Crossref service to find the entities related/mentioned at the given url.
         """
         return self.__factual('crossref',url=urllib.quote(url),limit=limit)
     
-    def restaurant(self,factual_id):
+    def restaurant(self, factual_id):
         """
         Get Factual restaurant data for a given factual_id.
         """
@@ -366,7 +366,7 @@ class Factual(object):
         else:
             return None
             
-    def entity(self,factual_id):
+    def entity(self, factual_id):
         """
         STUB Create a Stamped entity from a factual_id.
         """
@@ -438,7 +438,7 @@ class Factual(object):
             result = True
         return result
 
-    def factual_from_entity(self,entity):
+    def factual_from_entity(self, entity):
         """
         Get the factual_id (if any) associated with the given entity.
 
@@ -458,7 +458,7 @@ class Factual(object):
                     first = False
         return None
 
-    def factual_from_singleplatform(self,singleplatform_id):
+    def factual_from_singleplatform(self, singleplatform_id):
         """
         Get the factual_id (if any) associated with the given singleplatform ID.
 
@@ -470,7 +470,7 @@ class Factual(object):
         else:
             return None
     
-    def singleplatform(self,factual_id):
+    def singleplatform(self, factual_id):
         """
         Get singleplatform id from factual_id
 
@@ -485,7 +485,7 @@ class Factual(object):
         else:
             return None
     
-    def data(self,factual_id,entity=None):
+    def data(self, factual_id, entity=None):
         """
         Generate Factual data for given factual_id.
 
@@ -496,7 +496,7 @@ class Factual(object):
             data = self.place(factual_id)
         return data
 
-    def menu(self,factual_id):
+    def menu(self, factual_id):
         """
         Get menu for a factual_id
 
@@ -509,7 +509,7 @@ class Factual(object):
         else:
             return None
 
-    def __factual(self,service,prefix='places',**args):
+    def __factual(self, service, prefix='places', **args):
         """
         Helper method for making OAuth Factual API calls.
 
@@ -540,7 +540,7 @@ class Factual(object):
         except:
             return None
     
-    def __distance(self,a,b):
+    def __distance(self, a, b):
         if 'latitude' in a and 'latitude' in b and 'longitude' in a and 'longitude' in b:
             latA = a['latitude']
             latB = b['latitude']
@@ -553,7 +553,7 @@ class Factual(object):
             #Don't disqualify if ommitted
             return 0
 
-    def __phone_test(self,result,entity,filters,verbose=False):
+    def __phone_test(self, result, entity, filters, verbose=False):
         if 'tel' in filters and 'tel' in result:
             good = filters['tel'] == result['tel'] or result['similarity'] > .98
             if not good and verbose:
@@ -562,7 +562,7 @@ class Factual(object):
         else:
             return True 
     
-    def __category_test(self,result,entity,filters,verbose=False):
+    def __category_test(self, result, entity, filters, verbose=False):
         if 'category' not in filters or 'category' not in result:
             # Don't reject things for no category
             return True
@@ -572,7 +572,7 @@ class Factual(object):
         else:
             return True
 
-    def __custom_test(self,result,entity,filters,verbose=False):
+    def __custom_test(self, result, entity, filters, verbose=False):
         if not self.__category_test(result,entity,filters,verbose):
             return False
         if self.__distance(result,filters) > 1:
@@ -586,7 +586,7 @@ class Factual(object):
         return True
 
     
-    def __acceptable(self,result,entity,filters,verbose=False):
+    def __acceptable(self, result, entity, filters, verbose=False):
         """
         Determines whether a Resolve result is a positive match.
         
@@ -623,7 +623,7 @@ def _eligible(entity):
                     return False
     return True
 
-def resolveEntities(size=None,log=None):
+def resolveEntities(size=None, log=None):
     """
     Resolve a random batch of entities, and output accuracy stats
     """

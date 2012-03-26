@@ -171,6 +171,20 @@ class RdioSource(GenericSource):
     def __rdio(self):
         return globalRdio()
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            if key.startswith('t'):
+                return RdioTrack(rdio_id=key)
+            if key.startswith('a'):
+                return RdioAlbum(rdio_id=key)
+            if key.startswith('r'):
+                return RdioArtist(rdio_id=key)
+            raise KeyError
+        except KeyError:
+            logs.warning('UNABLE TO FIND RDIO ITEM FOR ID: %s' % key)
+            raise
+        return None
+
     def wrapperFromData(self, data):
         if data['type'] == 'r':
             return RdioArtist(data=data)
