@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+#import <MessageUI/MFMailComposeViewController.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
@@ -14,7 +15,8 @@
 @class Stamp;
 @class STStampDetailToolbar;
 
-@interface STStampDetailViewController : STViewController
+@interface STStampDetailViewController : STViewController<UIActionSheetDelegate,
+                                                          MFMailComposeViewControllerDelegate>
 
 - (id)initWithStamp:(Stamp*)stamp;
 
