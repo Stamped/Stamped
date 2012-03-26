@@ -100,50 +100,47 @@ months = {
     'December' : 12,
 }
 
+datestring_re0 = re.compile(r'^(\d\d\d\d) (\d\d) (\d\d)$')
+datestring_re1 = re.compile(r'^(\w+) (\d+), (\d\d\d\d)$')
+datestring_re2 = re.compile(r'^(\d\d\d\d)-(\d\d)-(\d\d)$')
+datestring_re3 = re.compile(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$')
+
 def parseDateString(date):
     if date is not None:
-        match = re.match(r'^(\d\d\d\d) (\d\d) (\d\d)$',date)
+        match = datestring_re0.match(date)
         
         if match is not None:
             try:
                 return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-            except ValueError:
-                pass
-            except TypeError:
+            except (ValueError, TypeError):
                 pass
         
-        match = re.match(r'^(\w+) (\d+), (\d\d\d\d)$',date)
+        match = datestring_re1.match(date)
         
         if match is not None:
             try:
                 month = match.group(1)
                 if month in months:
                     return datetime(int(match.group(3)),months[month],int(match.group(2)))
-            except ValueError:
-                pass
-            except TypeError:
+            except (ValueError, TypeError):
                 pass
         
         #sample 2012-02-10
-        match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date)
+        match = datestring_re2.match(date)
         
         if match is not None:
             try:
                 return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-            except ValueError:
-                pass
-            except TypeError:
+            except (ValueError, TypeError):
                 pass
         
         #sample 2009-05-29T07:00:00Z
-        match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$',date)
+        match = datestring_re3.match(date)
         
         if match is not None:
             try:
                 return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-            except ValueError:
-                pass
-            except TypeError:
+            except (ValueError, TypeError):
                 pass
     
     return None
@@ -181,3 +178,4 @@ def xp(e, *args):
         else:
             cur = cur['c'][arg][0]
     return cur
+

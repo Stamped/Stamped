@@ -249,8 +249,9 @@ class FactualSource(GenericSource):
                 else:
                     raw_results = getFactualSearch(query)
 
-                for result in raw_results:
-                    yield FactualPlace(data=result)
+                if raw_results is not None:
+                    for result in raw_results:
+                        yield FactualPlace(data=result)
             except GeneratorExit:
                 pass
         return generatorSource(gen(), constructor=FactualSearchAll)
