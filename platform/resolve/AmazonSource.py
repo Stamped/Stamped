@@ -418,6 +418,18 @@ class AmazonSource(GenericSource):
         except Exception:
             logs.warning("no image set for %s" % book.underlying.key)
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            item = _AmazonObject(amazon_id=key)
+            print xp(item.attributes, 'ProductGroup')['v']
+            if xp(item.attributes, 'ProductGroup')['v'].lower() == 'book':
+                # TODO: Avoid additional API call?
+                return AmazonBook(key)
+            raise Exception
+        except KeyError:
+            pass
+        return None
+
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
         entity.amazon_id = wrapper.key
@@ -429,7 +441,7 @@ class AmazonSource(GenericSource):
             entity['amazon_id'] = asin
         else:
             GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        if entity['amazon_id'] != None:
+        if entity['amazon_id'] is not None:
             asin = entity['amazon_id']
             if entity['subcategory'] == 'song':
                 self.__enrichSong(entity, asin)
