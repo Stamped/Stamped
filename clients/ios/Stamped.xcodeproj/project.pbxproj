@@ -94,6 +94,10 @@
 		7E007BF914EEB69A00FB557E /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E007BF614EEB68400FB557E /* Default.png */; };
 		7E05100414B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
 		7E05100514B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
+		7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596411520E6B7009D691E /* STStampDetailViewController.m */; };
+		7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596411520E6B7009D691E /* STStampDetailViewController.m */; };
+		7E0596451520E6B7009D691E /* STStampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0596421520E6B7009D691E /* STStampDetailViewController.xib */; };
+		7E0596461520E6B7009D691E /* STStampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0596421520E6B7009D691E /* STStampDetailViewController.xib */; };
 		7E07EBE614C73F1600A2B5F0 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */; };
 		7E07EBE714C73F1600A2B5F0 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */; };
 		7E07EBE814C73F1600A2B5F0 /* ASIDataCompressor.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E07EBD614C73F1600A2B5F0 /* ASIDataCompressor.m */; };
@@ -1811,6 +1815,9 @@
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
 		7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoadingMoreTableViewCell.h; sourceTree = "<group>"; };
 		7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLoadingMoreTableViewCell.m; sourceTree = "<group>"; };
+		7E0596401520E6B7009D691E /* STStampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailViewController.h; sourceTree = "<group>"; };
+		7E0596411520E6B7009D691E /* STStampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailViewController.m; sourceTree = "<group>"; };
+		7E0596421520E6B7009D691E /* STStampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = STStampDetailViewController.xib; sourceTree = "<group>"; };
 		7E07EBD214C73F1600A2B5F0 /* ASIAuthenticationDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIAuthenticationDialog.h; path = ASIHTTPRequest/Classes/ASIAuthenticationDialog.h; sourceTree = "<group>"; };
 		7E07EBD314C73F1600A2B5F0 /* ASIAuthenticationDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIAuthenticationDialog.m; path = ASIHTTPRequest/Classes/ASIAuthenticationDialog.m; sourceTree = "<group>"; };
 		7E07EBD414C73F1600A2B5F0 /* ASICacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASICacheDelegate.h; path = ASIHTTPRequest/Classes/ASICacheDelegate.h; sourceTree = "<group>"; };
@@ -2931,6 +2938,16 @@
 			name = "New Entity Detail";
 			sourceTree = "<group>";
 		};
+		7E0596471520E6BE009D691E /* New Stamp Detail */ = {
+			isa = PBXGroup;
+			children = (
+				7E0596401520E6B7009D691E /* STStampDetailViewController.h */,
+				7E0596411520E6B7009D691E /* STStampDetailViewController.m */,
+				7E0596421520E6B7009D691E /* STStampDetailViewController.xib */,
+			);
+			name = "New Stamp Detail";
+			sourceTree = "<group>";
+		};
 		7E07EBD114C73EFA00A2B5F0 /* ASIHTTPRequest */ = {
 			isa = PBXGroup;
 			children = (
@@ -3443,6 +3460,7 @@
 				7E407E8B144FB05D00D7847F /* STAddCommentTextField.m */,
 				CB9C0907147B19D50007D9A6 /* StampDetailHeaderView.h */,
 				CB9C0908147B19D50007D9A6 /* StampDetailHeaderView.m */,
+				7E0596471520E6BE009D691E /* New Stamp Detail */,
 			);
 			name = "Stamp Detail";
 			sourceTree = "<group>";
@@ -5254,6 +5272,7 @@
 				6386EF04150FBF030019F1DC /* NewEntityDetail.xib in Resources */,
 				6386EF2515114B950019F1DC /* eDetailBox_line.png in Resources */,
 				6386EF2815114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
+				7E0596461520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5882,6 +5901,7 @@
 				6386EF2715114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 				7E5EEEC6151BD689004FFBB9 /* icon.png in Resources */,
 				7E5EEEC8151BD68E004FFBB9 /* icon@2x.png in Resources */,
+				7E0596451520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6082,6 +6102,7 @@
 				6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
+				7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6251,6 +6272,7 @@
 				6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
+				7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6354,8 +6376,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6383,8 +6405,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "5698C5B4-134F-4266-B153-091A899B790C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5698C5B4-134F-4266-B153-091A899B790C";
+				PROVISIONING_PROFILE = "7B61E280-7A74-4141-9DCD-72786E12B906";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7B61E280-7A74-4141-9DCD-72786E12B906";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
