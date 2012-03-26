@@ -220,6 +220,10 @@ class TMDBSource(GenericSource):
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['movie'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         def gen():
             try:
                 results = self.__tmdb.movie_search(query.query_string)

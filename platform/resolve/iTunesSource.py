@@ -560,10 +560,14 @@ class iTunesSource(GenericSource):
             raise ValueError('Malformed iTunes output')
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['book', 'track', 'album', 'artist', 'movie', 'tv', 'app'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+
         def gen():
             try:
                 queries = [
-                    'musicArtist','song','album','movie','ebook'
+                    'musicArtist', 'song', 'album', 'movie', 'ebook'
                 ]
                 raw_results = []
                 def helper(q):
