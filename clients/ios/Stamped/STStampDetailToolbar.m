@@ -24,6 +24,8 @@
 
 @implementation STStampDetailToolbar
 
+@synthesize style = _style;
+
 // All button and subview ownership is managed by the view hierarchy.
 @synthesize likeButton = _likeButton;
 @synthesize todoButton = _todoButton;
@@ -59,24 +61,38 @@
 
   CGRect buttonFrame = CGRectMake(0, 0, 80, CGRectGetHeight(self.bounds));
   // These two arrays MUST be kept in order.
-  NSArray* buttons = [NSArray arrayWithObjects:_likeButton, _todoButton, _stampButton, _shareButton, nil];
-  NSArray* labels = [NSArray arrayWithObjects:_likeLabel, _todoLabel, _stampLabel, _shareLabel, nil];
+  NSArray* buttons = nil;
+  NSArray* labels = nil;
+  if (_style == STStampDetailToolbarStyleDefault) {
+    buttons = [NSArray arrayWithObjects:_likeButton, _todoButton, _stampButton, _shareButton, nil];
+    labels = [NSArray arrayWithObjects:_likeLabel, _todoLabel, _stampLabel, _shareLabel, nil];
+  } else if (_style == STStampDetailToolbarStyleMine) {
+    buttons = [NSArray arrayWithObjects:_todoButton, _shareButton, nil];
+    labels = [NSArray arrayWithObjects:_todoLabel, _shareLabel, nil];
+  }
   NSInteger spacing = CGRectGetWidth(self.bounds) / buttons.count;
-  NSInteger xOffset = 0;
+  NSInteger xOffset = spacing / 2;
   for (UIButton* b in buttons) {
-    buttonFrame.origin.x = xOffset;
     b.frame = buttonFrame;
+    b.center = CGPointMake(xOffset, b.center.y);
     NSUInteger i = [buttons indexOfObject:b];
     UILabel* l = [labels objectAtIndex:i];
     [l sizeToFit];
     CGRect labelFrame = l.frame;
-    labelFrame.origin.x = CGRectGetMidX(buttonFrame) - CGRectGetMidX(l.bounds);
-    labelFrame.origin.y = CGRectGetMaxY(buttonFrame) - CGRectGetHeight(labelFrame) - 2;
+    labelFrame.origin.x = CGRectGetMidX(b.frame) - CGRectGetMidX(l.bounds);
+    labelFrame.origin.y = CGRectGetMaxY(b.frame) - CGRectGetHeight(labelFrame) - 2;
     l.frame = labelFrame;
-    xOffset = spacing * (i + 1);
+    xOffset += spacing;
   }
 }
 
+- (void)setStyle:(STStampDetailToolbarStyle)style {
+  if (style == _style)
+    return;
+
+  _style = style;
+  [self setNeedsLayout];
+}
 
 #pragma mark - Private methods.
 

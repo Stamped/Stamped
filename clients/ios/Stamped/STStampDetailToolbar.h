@@ -8,7 +8,14 @@
 
 #import "STToolbar.h"
 
+typedef enum {
+  STStampDetailToolbarStyleDefault = 0,
+  STStampDetailToolbarStyleMine,
+} STStampDetailToolbarStyle;
+
 @interface STStampDetailToolbar : STToolbar
+
+@property (nonatomic, assign) STStampDetailToolbarStyle style;
 
 @property (nonatomic, readonly) UIButton* likeButton;
 @property (nonatomic, readonly) UIButton* todoButton;
