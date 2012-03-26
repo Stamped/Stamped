@@ -13,4 +13,6 @@
 
 @interface STEntityDetailViewFactory : NSObject <STEntityDetailComponentFactory>
 
+- (id)initWithStyle:(NSString*)style;
+
 @end
