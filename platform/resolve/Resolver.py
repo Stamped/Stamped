@@ -22,6 +22,7 @@ __all__ = [
     'ResolverMovie',
     'ResolverBook',
     'ResolverTVShow',
+    'ResolverApp',
     'demo',
     'regexRemoval',
     'simplify',
@@ -450,6 +451,10 @@ class ResolverObject(object):
     def subcategory(self):
         return None
 
+    @property 
+    def image(self):
+        return None
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -501,6 +506,10 @@ class ResolverProxy(object):
     @property
     def address(self):
         return self.target.address
+
+    @property
+    def image(self):
+        return self.target.image
 
 class SimpleResolverObject(ResolverObject):
 
@@ -932,6 +941,10 @@ class ResolverBook(ResolverObject):
             v for v in l if v != ''
         ]
 
+#
+# Places
+# 
+
 class ResolverPlace(ResolverObject):
     """
     Interface for place objects
@@ -976,6 +989,50 @@ class ResolverPlace(ResolverObject):
         return [
             v for v in l if v != ''
         ]
+
+#
+# Apps
+#
+
+class ResolverApp(ResolverObject):
+    """
+    Interface for track objects
+
+    Attributes:
+
+    genres - a list containing any applicable genres
+    publisher - an publisher dict containing at least a 'name' string
+    """
+    @abstractproperty
+    def publisher(self):
+        pass
+
+    @property
+    def date(self):
+        return None
+
+    @property 
+    def genres(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'app'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.publisher['name'],
+            ]
+        return [
+            v for v in l if v != ''
+        ]
+
+    @lazyProperty 
+    def screenshots(self):
+        return []
 
 ##
 # Main Resolver class
@@ -1275,6 +1332,20 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
+    def checkApp(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+            ('publisher',   lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher))
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
+                                                exact_boost=2, m_empty=4 ),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+
     def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
@@ -1465,6 +1536,8 @@ class Resolver(object):
                 options['check'] = self.checkPlace
             elif query.type =='tv':
                 options['check'] = self.checkTVShow
+            elif query.type =='app':
+                options['check'] = self.checkApp
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:

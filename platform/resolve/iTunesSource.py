@@ -452,6 +452,59 @@ class iTunesBook(_iTunesObject, ResolverBook):
     def sku(self):
         return None
 
+class iTunesApp(_iTunesObject, ResolverApp):
+
+    def __init__(self, itunes_id=None, data=None, itunes=None):
+        _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
+        ResolverApp.__init__(self)
+
+    @lazyProperty
+    def name(self):
+        return self.data['trackName']
+
+    @lazyProperty
+    def url(self):
+        try:
+            return self.data['sellerUrl']
+        except Exception:
+            return None
+
+    @lazyProperty
+    def key(self):
+        return self.data['trackId']
+
+    @lazyProperty
+    def publisher(self):
+        try:
+            return {
+                'name':self.data['sellerName']
+            }
+        except Exception:
+            return { 'name':'' }
+
+    @property
+    def date(self):
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except Exception:
+            return None
+
+    @lazyProperty 
+    def genres(self):
+        try:
+            if 'genres' in self.data:
+                return self.data['genres']
+            return [ self.data['primaryGenreName'] ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def description(self):
+        try:
+            return self.data['description']
+        except KeyError:
+            return ''
+
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, target):
@@ -501,7 +554,11 @@ class iTunesSource(GenericSource):
             elif data['wrapperType'] == 'collection' and data['collectionType'] == 'Album':
                 return iTunesAlbum(data=data)
             elif data['wrapperType'] == 'artist':
+                if data['artistType'] == 'TV Show':
+                    return iTunesTVShow(data=data)
                 return iTunesArtist(data=data)
+            elif value['wrapperType'] == 'software':
+                return iTunesApp(data=data)
             else:
                 pass
         except KeyError:
@@ -530,6 +587,8 @@ class iTunesSource(GenericSource):
                 obj = iTunesBook(itunes_id)
             elif entity['subcategory'] == 'tv':
                 obj = iTunesTVShow(itunes_id)
+            elif entity['subcategory'] == 'app':
+                obj = iTunesApp(itunes_id)
             if obj is not None:
                 self.enrichEntityWithWrapper(obj, entity, controller, decorations, timestamps)
         return True
@@ -547,6 +606,8 @@ class iTunesSource(GenericSource):
             return self.bookSource(query)
         elif query.type == 'tv':
             return self.tvSource(query)
+        elif query.type == 'app':
+            return self.appSource(query)
         elif query.type == 'search_all':
             return self.searchAllSource(query)
         else:
@@ -624,6 +685,18 @@ class iTunesSource(GenericSource):
             return [ iTunesTVShow( data=entry ) for entry in result ]
         return source
 
+    def appSource(self, query):
+        apps = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
+        def source(start, count):
+            if start + count <= len(apps):
+                result = apps[start:start+count]
+            elif start < len(apps):
+                result = apps[start:]
+            else:
+                result = []
+            return [ iTunesTVShow( data=entry ) for entry in result ]
+        return source
+
     def __createWrapper(self, value):
         try:
             if 'wrapperType' in value:
@@ -637,6 +710,8 @@ class iTunesSource(GenericSource):
                     return iTunesMovie(data=value)
                 elif value['wrapperType'] == 'artist' and value['artistType'] == 'TV Show':
                     return iTunesTVShow(data=value)
+                elif value['wrapperType'] == 'software':
+                    return iTunesApp(data=value)
             else:
                 if value['kind'] == 'ebook':
                     return iTunesBook(data=value)
@@ -653,7 +728,7 @@ class iTunesSource(GenericSource):
             try:
                 if types is None:
                     queries = [
-                        'musicArtist', 'song', 'album', 'movie', 'ebook'
+                        'musicArtist', 'song', 'album', 'movie', 'ebook', 'tvShow', 'software'
                     ]
                 else:
                     queries = []
