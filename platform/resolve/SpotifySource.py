@@ -195,6 +195,21 @@ class SpotifySource(GenericSource):
     def urlField(self):
         return None
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            item = self.__spotify.lookup(key)
+            if item['info']['type'] == 'artist':
+                return SpotifyArtist(key)
+            if item['info']['type'] == 'album':
+                return SpotifyAlbum(key)
+            if item['info']['type'] == 'track':
+                return SpotifyTrack(key)
+            raise KeyError
+        except KeyError:
+            logs.warning('UNABLE TO FIND SPOTIFY ITEM FOR ID: %s' % key)
+            raise
+        return None
+
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
         entity.spotify_id = wrapper.key
@@ -208,7 +223,7 @@ class SpotifySource(GenericSource):
         elif query.type == 'track':
             return self.trackSource(query)
         elif query.type == 'search_all':
-            return self.trackSource(query)
+            return self.searchAllSource(query)
         else:
             return self.emptySource
 
@@ -245,6 +260,10 @@ class SpotifySource(GenericSource):
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['track', 'album', 'artist'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         q = query.query_string
         return multipleSource(
             [

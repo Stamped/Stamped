@@ -18,37 +18,37 @@ try:
     import libs.Memcache
     import tasks.APITasks
     
-    from datetime           import datetime
-    from auth               import convertPasswordForStorage
-    from utils              import lazyProperty
-    from functools          import wraps
-    from errors             import *
+    from datetime               import datetime
+    from auth                   import convertPasswordForStorage
+    from utils                  import lazyProperty
+    from functools              import wraps
+    from errors                 import *
+    from libs.ec2_utils         import is_prod_stack
+    from pprint                 import pprint, pformat
     
-    from AStampedAPI        import AStampedAPI
-    from AAccountDB         import AAccountDB
-    from AEntityDB          import AEntityDB
-    from APlacesEntityDB    import APlacesEntityDB
-    from AUserDB            import AUserDB
-    from AStampDB           import AStampDB
-    from ACommentDB         import ACommentDB
-    from AFavoriteDB        import AFavoriteDB
-    from ACollectionDB      import ACollectionDB
-    from AFriendshipDB      import AFriendshipDB
-    from AActivityDB        import AActivityDB
-    from api.Schemas        import *
-    
-    # third-party search API wrappers
-    from resolve            import FullResolveContainer
-    from GooglePlaces       import GooglePlaces
-    from libs.apple         import AppleAPI
-    from libs.AmazonAPI     import AmazonAPI
-    from libs.TheTVDB       import TheTVDB
-    from libs.Factual       import Factual
-    from libs.ec2_utils     import is_prod_stack
+    from AStampedAPI            import AStampedAPI
+    from AAccountDB             import AAccountDB
+    from AEntityDB              import AEntityDB
+    from APlacesEntityDB        import APlacesEntityDB
+    from AUserDB                import AUserDB
+    from AStampDB               import AStampDB
+    from ACommentDB             import ACommentDB
+    from AFavoriteDB            import AFavoriteDB
+    from ACollectionDB          import ACollectionDB
+    from AFriendshipDB          import AFriendshipDB
+    from AActivityDB            import AActivityDB
+    from api.Schemas            import *
 
     #resolve classes
-    from resolve.EntitySource import EntitySource
-    from pprint             import pprint, pformat
+    from resolve.EntitySource   import EntitySource
+    from resolve                import FullResolveContainer
+    from AmazonSource           import AmazonSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
+    from iTunesSource           import iTunesSource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
+    from TMDBSource             import TMDBSource
 except:
     report()
     raise
@@ -1510,7 +1510,8 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            ### TODO: Change this to StampedDuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
+            ### TODO: Change this to StampedDuplicationError (409). 
+            ### Need to phase in on client first (expecting 403 as of 1.0.4)
             raise StampedIllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
         
         # Build stamp
@@ -2355,7 +2356,7 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
+        if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
             if len(stamps) >= genericCollectionSlice.limit:
                 genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
 
@@ -2846,150 +2847,45 @@ class StampedAPI(AStampedAPI):
         
         return mentionedUserIds
     
-    @lazyProperty
-    def _googlePlaces(self):
-        return GooglePlaces()
-    
-    @lazyProperty
-    def _amazonAPI(self):
-        return AmazonAPI()
-    
-    @lazyProperty
-    def _appleAPI(self):
-        return AppleAPI()
-    
-    @lazyProperty
-    def _theTVDB(self):
-        return TheTVDB()
-    
     def _convertSearchId(self, search_id):
         if not search_id.startswith('T_'):
             # already a valid entity id
             return search_id
         
-        # temporary entity_id; lookup in tempentities collection and 
-        # merge result into primary entities db
-        doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
-        entity = None
+        source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
+
+        sources = {
+            'AMAZON':       AmazonSource,
+            'FACTUAL':      FactualSource,
+            'GOOGLEPLACES': GooglePlacesSource,
+            'ITUNES':       iTunesSource,
+            'RDIO':         RdioSource,
+            'SPOTIFY':      SpotifySource,
+            'TMDB':         TMDBSource,
+        }
+
+        if source_name not in sources:
+            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
+            raise StampedUnavailableError
+
+        entity = Entity()
+        source = sources[source_name]()
+        try:
+            source.enrichEntityWithWrapper(source.wrapperFromKey(source_id), entity)
+        except Exception as e:
+            logs.warning('Unable to enrich search_id: %s' % search_id)
+            logs.warning(e)
+            raise
         
-        if doc is not None:
-            entity = self._tempEntityDB._convertFromMongo(doc)
-        
-        if search_id.startswith('T_ITUNES_'):
-            itunes_id = search_id[9:]
-            from iTunesSource import iTunesSource
-            iTunes = iTunesSource()
-            entity = Entity()
-            iTunes.enrichEntityWithWrapper(iTunes.wrapperFromId(itunes_id), entity)
-            if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
-                return entity.entity_id
-            del entity.entity_id
-            entity = self._mergeEntity(entity)
+        if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
             return entity.entity_id
         
-        if search_id.startswith('T_AMAZON_'):
-            asin = search_id[9:]
-            results = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
-            
-            for result in results:
-                if result.asin == asin:
-                    entity = result
-                    break
-        elif search_id.startswith('T_APPLE_'):
-            aid = search_id[8:]
-            results = self._appleAPI.lookup(id=aid, transform=True)
-            
-            for result in results:
-                if result.entity.aid == aid:
-                    entity = result.entity
-                    break
-            
-            if entity is not None:
-                if entity.subcategory == 'album':
-                    results = self._appleAPI.lookup(id=entity.aid, media='music', entity='song', transform=True)
-                    results = filter(lambda r: r.entity.subcategory == 'song', results)
-                    
-                    entity.tracks = list(result.entity.title for result in results)
-                elif entity.subcategory == 'artist':
-                    results = self._appleAPI.lookup(id=entity.aid, 
-                                                    media='music', 
-                                                    entity='album', 
-                                                    limit=200, 
-                                                    transform=True)
-                    results = filter(lambda r: r.entity.subcategory == 'album', results)
-                    
-                    if len(results) > 0:
-                        albums = []
-                        for result in results:
-                            schema = ArtistAlbumsSchema()
-                            schema.album_name = result.entity.title
-                            schema.album_id   = result.entity.aid
-                            albums.append(schema)
-                        
-                        entity.albums = albums
-                        images = results[0].entity.images
-                        for k in images:
-                            entity[k] = images[k]
-                    
-                    results = self._appleAPI.lookup(id=entity.aid, 
-                                                    media='music', 
-                                                    entity='song', 
-                                                    limit=200, 
-                                                    transform=True)
-                    results = filter(lambda r: r.entity.subcategory == 'song', results)
-                    
-                    songs = []
-                    for result in results:
-                        schema = ArtistSongsSchema()
-                        schema.song_id   = result.entity.aid
-                        schema.song_name = result.entity.title
-                        songs.append(schema)
-                    
-                    entity.songs = songs
-        elif search_id.startswith('T_GOOGLE_'):
-            gref = search_id[9:]
-            
-            details = self._googlePlaces.getPlaceDetails(gref)
-            entity2 = None
-            
-            if details is not None:
-                entity2 = self._googlePlaces.parseEntity(details, valid=True)
-                
-                replace  = (entity is None and entity2 is not None)
-                replace |= (entity is not None and entity2 is not None and 
-                            entity.title.lower() == entity2.title.lower())
-                
-                if replace:
-                    entity = entity2
-                    self._googlePlaces.parseEntityDetail(details, entity)
-                elif entity is None:
-                    logs.warn("_convertSearchId: unable to find search_id in tempentities (%s) " \
-                                "and unable to convert google places reference" % search_id)
-                elif entity2 is None:
-                    logs.warn("_convertSearchId: unable to convert google places reference (%s)" % search_id)
-                else:
-                    e1 = pformat(entity.value)
-                    e2 = pformat(entity2.value)
-                    
-                    logs.warn("_convertSearchId: inconsistent google places entities %s vs %s (%s)" % (e1, e2, search_id))
-                
-        elif search_id.startswith('T_TVDB_'):
-            thetvdb_id = search_id[7:]
-            
-            entity = self._theTVDB.lookup(thetvdb_id)
-        
-        if entity is None:
-            logs.warning("ERROR: could not match temp entity id %s" % search_id)
-            return None
-        
         del entity.entity_id
-        entity = self._entityMatcher.addOne(entity)
-        
+        entity = self._mergeEntity(entity)
+
         assert entity.entity_id is not None
-        logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
-        
-        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
-        
+        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity.entity_id))
+
         return entity.entity_id
 
     def _mergeEntity(self, entity):
@@ -3103,58 +2999,7 @@ class StampedAPI(AStampedAPI):
     
     # NOTE: deprecated in terms of integrity checker in bin/checkdb.py
     def _updateUserStats(self):
-        userIds = self._userDB._getAllUserIds()
-        
-        for userId in userIds:
-            user = userDB.getUser(userId)
-            userData = user.exportSparse()
-            
-            if 'stats' not in userData:
-                continue
-            
-            stats = userData['stats']
-            
-            stats_num_stamps        = stats.pop('num_stamps', 0)
-            stats_num_credits       = stats.pop('num_credits', 0)
-            stats_num_likes_given   = stats.pop('num_likes_given', 0)
-            stats_num_friends       = stats.pop('num_friends', 0)
-            stats_num_followers     = stats.pop('num_followers', 0)
-            
-            num_stamps              = self._stampDB.countStamps(userId)
-            num_credits             = self._stampDB.countCredits(userId)
-            num_likes_given         = self._stampDB.countUserLikes(userId)
-            num_friends             = self._friendshipDB.countFriends(userId)
-            num_followers           = self._friendshipDB.countFollowers(userId)
-            
-            if num_stamps != stats_num_stamps:
-                logs.info('user id: %s' % userId)
-                logs.info('num_stamps: old (%s) new (%s)' % (stats_num_stamps, num_stamps))
-                
-                self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
-            
-            if num_credits != stats_num_credits:
-                logs.info('user id: %s' % userId)
-                logs.info('num_credits: old (%s) new (%s)' % (stats_num_credits, num_credits))
-                
-                self._userDB.updateUserStats(userId, 'num_credits', num_credits)
-            
-            if num_likes_given != stats_num_likes_given:
-                logs.info('user id: %s' % userId)
-                logs.info('num_likes_given: old (%s) new (%s)' % (stats_num_likes_given, num_likes_given))
-                
-                self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
-            
-            if num_friends != stats_num_friends:
-                logs.info('user id: %s' % userId)
-                logs.info('num_friends: old (%s) new (%s)' % (stats_num_friends, num_friends))
-                
-                self._userDB.updateUserStats(userId, 'num_friends', num_friends)
-            
-            if num_followers != stats_num_followers:
-                logs.info('user id: %s' % userId)
-                logs.info('num_followers: old (%s) new (%s)' % (stats_num_followers, num_followers))
-                
-                self._userDB.updateUserStats(userId, 'num_followers', num_followers)
+        raise NotImplementedError
     
     def addClientLogsEntry(self, authUserId, entry):
         entry.user_id = authUserId

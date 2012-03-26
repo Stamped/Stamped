@@ -219,8 +219,20 @@ class FactualSource(GenericSource):
                 pass
         return generatorSource(gen())
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            data = self.__factual.data(key)
+            return FactualPlace(factual_id=key, data=data)
+        except KeyError:
+            pass
+        return None
+
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['restaurant', 'bar', 'place', 'other'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         def gen():
             try:
                 raw_results = []

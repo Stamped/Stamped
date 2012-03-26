@@ -177,17 +177,10 @@ class GooglePlacesPlace(ResolverPlace):
             return None
 
     @lazyProperty
-    def url(self):
-        if 'url' in self.data:
-            return self.data['url']
-        else:
-            return None
-
-    @lazyProperty
     def subcategory(self):
         if 'subcategory' in self.data:
             return self.data['subcategory']
-        return None
+        return 'other'
 
     @property 
     def source(self):
@@ -252,7 +245,10 @@ class GooglePlacesSource(GenericSource):
         return self.generatorSource(gen())
 
     def searchAllSource(self, query, timeout=None, types=None):
-        print 'asdf'
+        validTypes = set(['restaurant', 'bar', 'place', 'other'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         def gen():
             try:
                 raw_results = []
@@ -295,6 +291,14 @@ class GooglePlacesSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.generatorSource(gen())
+
+    def wrapperFromKey(self, key, type=None):
+        try:
+            item = self.__places.getPlaceDetails(key)
+            return GooglePlacesPlace(item)
+        except KeyError:
+            pass
+        return None
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if not controller.shouldEnrich('googleplaces', self.sourceName, entity):

@@ -274,9 +274,10 @@ class GenericSource(BasicSource):
                 entity['track_length'] = str(int(wrapper.length))
         if wrapper.type in set(['movie', 'tv']):
             if len(wrapper.cast) > 0:
-                entity['cast'] = [
+                cast = [
                     actor['name'] for actor in wrapper.cast
                 ]
+                entity['cast'] = ', '.join(cast)
             if wrapper.director['name'] != '':
                 entity['director'] = wrapper.director['name']
         return True

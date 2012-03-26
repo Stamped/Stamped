@@ -181,6 +181,14 @@ class TMDBSource(GenericSource):
     def __tmdb(self):
         return globalTMDB()
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            return TMDBMovie(key)
+        except KeyError:
+            logs.warning('UNABLE TO FIND TMDB ITEM FOR ID: %s' % key)
+            raise
+        return None
+
     def matchSource(self, query):
         if query.type == 'movie':
             return self.movieSource(query)
@@ -212,6 +220,10 @@ class TMDBSource(GenericSource):
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['movie'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         def gen():
             try:
                 results = self.__tmdb.movie_search(query.query_string)

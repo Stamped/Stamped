@@ -271,7 +271,6 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-
             'artist_display_name',
             'genre',
             'track_length',
@@ -359,6 +358,10 @@ class AmazonSource(GenericSource):
         )
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['book', 'track', 'album'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         q = query.query_string
         return multipleSource(
             [
@@ -419,6 +422,18 @@ class AmazonSource(GenericSource):
         except Exception:
             logs.warning("no image set for %s" % book.underlying.key)
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            item = _AmazonObject(amazon_id=key)
+            print xp(item.attributes, 'ProductGroup')['v']
+            if xp(item.attributes, 'ProductGroup')['v'].lower() == 'book':
+                # TODO: Avoid additional API call?
+                return AmazonBook(key)
+            raise Exception
+        except KeyError:
+            pass
+        return None
+
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
         entity.amazon_id = wrapper.key
@@ -430,7 +445,7 @@ class AmazonSource(GenericSource):
             entity['amazon_id'] = asin
         else:
             GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        if entity['amazon_id'] != None:
+        if entity['amazon_id'] is not None:
             asin = entity['amazon_id']
             if entity['subcategory'] == 'song':
                 self.__enrichSong(entity, asin)
@@ -440,3 +455,4 @@ class AmazonSource(GenericSource):
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")
+

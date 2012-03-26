@@ -171,6 +171,20 @@ class RdioSource(GenericSource):
     def __rdio(self):
         return globalRdio()
 
+    def wrapperFromKey(self, key, type=None):
+        try:
+            if key.startswith('t'):
+                return RdioTrack(rdio_id=key)
+            if key.startswith('a'):
+                return RdioAlbum(rdio_id=key)
+            if key.startswith('r'):
+                return RdioArtist(rdio_id=key)
+            raise KeyError
+        except KeyError:
+            logs.warning('UNABLE TO FIND RDIO ITEM FOR ID: %s' % key)
+            raise
+        return None
+
     def wrapperFromData(self, data):
         if data['type'] == 'r':
             return RdioArtist(data=data)
@@ -223,6 +237,10 @@ class RdioSource(GenericSource):
             constructor=RdioArtist)
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['track', 'album', 'artist'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return None
+            
         return self.generatorSource(self.__queryGen(
                 query=query.query_string,
                 types='Artist,Album,Track',
@@ -254,3 +272,4 @@ class RdioSource(GenericSource):
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')
+
