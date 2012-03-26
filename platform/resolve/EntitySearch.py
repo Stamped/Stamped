@@ -15,6 +15,7 @@ from logs import report
 
 try:
     import logs, sys, utils
+    import libs.worldcities
     
     from Resolver                   import *
     from GenericSource              import generatorSource
@@ -44,13 +45,29 @@ _verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
     
-    def __init__(self, query_string, coordinates=None, types=None, local=False):
+    def __init__(self, query_string, coords=None, types=None, local=False):
         ResolverSearchAll.__init__(self)
+        
+        if not local:
+            if types and 'place' not in types:
+                # if we're filtering by category / subcategory and the filtered results 
+                # couldn't possibly contain a location, then ensure that coords are 
+                # disabled
+                coords = None
+            else:
+                # process 'in' or 'near' location hint
+                result = libs.worldcities.try_get_region(query_string)
+                
+                if result is not None:
+                    query_string, coords, region_name = result
+                    logs.info("[search] using region %s at %s (parsed from '%s')" % 
+                              (region_name, coords, query_string))
+        
         self.__query_string = query_string
-        self.__coordinates = coordinates
-        self.__types = types
-        self.__local = local
-
+        self.__coordinates  = coords
+        self.__types        = types
+        self.__local        = local
+    
     @property 
     def query_string(self):
         return self.__query_string
@@ -82,7 +99,7 @@ class QuerySearchAll(ResolverSearchAll):
     @property
     def types(self):
         return self.__types
-
+    
     @property
     def source(self):
         return 'search'
@@ -128,9 +145,6 @@ class EntitySearch(object):
                types    = None, 
                offset   = 0, 
                limit    = 10):
-        
-        # TODO: preprocess query / coords for location hints (e.g., X (in|near) Y)
-        # TODO: handle local query here
         
         before  = time()
         query   = QuerySearchAll(query, coords, types, local)
@@ -213,7 +227,7 @@ class EntitySearch(object):
             print("\n\n\nDedupped %d results in %f seconds\n\n\n" % (total - len(chosen), time() - before2))
         
         return chosen
-
+    
     def searchEntities(self, 
                        query, 
                        coords       = None, 
