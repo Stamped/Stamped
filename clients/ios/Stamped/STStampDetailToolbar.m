@@ -52,10 +52,6 @@
   return self;
 }
 
-- (void)dealloc {
-  [super dealloc];
-}
-
 - (void)layoutSubviews {
   [super layoutSubviews];
   _likeLabel.text = _likeButton.selected ? NSLocalizedString(@"Liked", nil) : NSLocalizedString(@"Like", nil);
