@@ -14,6 +14,14 @@
 #import "STHeaderViewFactory.h"
 #import "STActionsViewFactory.h"
 #import "STMetadataViewFactory.h"
+#import "STSynchronousWrapper.h"
+#import "STGalleryViewFactory.h"
+
+@interface STEntityDetailViewFactory()
+
+@property (nonatomic, retain) NSString* style;
+
+@end
 
 @interface STEntityDetailViewFactoryOperation : NSOperation
 
@@ -22,7 +30,7 @@
 @property (nonatomic, readonly) NSMutableDictionary* operations;
 @property (nonatomic, readonly) NSMutableDictionary* components;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;
-@property (nonatomic, readonly) STViewCreatorCallback callback;
+@property (nonatomic, readwrite, copy) STViewCreatorCallback callback;
 
 @end
 
@@ -38,9 +46,9 @@
   self = [super init];
   if (self) {
     entityDetail_ = [anEntityDetail retain];
-    callback_ = [aBlock retain];
-    operations_ = [NSMutableDictionary dictionary];
-    components_ = [NSMutableDictionary dictionary];
+    self.callback = aBlock;
+    operations_ = [[NSMutableDictionary alloc] init];
+    components_ = [[NSMutableDictionary alloc] init];
     NSArray* components = [NSArray arrayWithObjects:
                            @"header",
                            @"actions",
@@ -55,10 +63,10 @@
 
 - (void)dealloc
 {
-  [self.operations release];
-  [self.components release];
-  [self.entityDetail release];
-  [self.callback release];
+  [operations_ release];
+  [components_ release];
+  [entityDetail_ release];
+  self.callback = nil;
   [super dealloc];
 }
 
@@ -69,43 +77,88 @@
   [super cancel];
 }
 
+- (UIView*)createViewWithDelegate:(id<STViewDelegate>)delegate {
+  STViewContainer* view = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 0)] autorelease];
+  NSArray* keys = [NSArray arrayWithObjects:@"header", @"actions", @"metadata", nil];
+  for (NSString* key in keys) {
+    @synchronized(self.components) {
+      STViewCreator creator = [self.components objectForKey:key];
+      if (creator)
+      {
+        UIView* child = creator(view);
+        if (child)
+        {
+          [view appendChildView:child];
+        }
+      }
+    }
+  }
+  id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
+  UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
+                                                      entityDetail:self.entityDetail 
+                                                          andFrame:CGRectMake(0, 0, 320, 200)];
+  [view appendChildView:wrapper];
+  return view;
+}
+
 - (void)main {
+  NSOperationQueue* queue = [[[NSOperationQueue alloc] init] autorelease];
   for (NSString* key in [self.operations allKeys]) {
     NSOperation* operation = [self.operations objectForKey:key];
-    STViewCreator creator = nil;
     id<STEntityDetailComponentFactory> factory = nil;
     if ([key isEqualToString:@"header"]) {
-      creator = ^(id<STViewDelegate> delegate) {
-        UIView* result = nil;
-        [operation start];
-        return result;
-      };
       factory = [[[STHeaderViewFactory alloc] init] autorelease];
     }
     else if ([key isEqualToString:@"actions"]) {
-      creator = ^(id<STViewDelegate> delegate) {
-        UIView* result = nil;
-        [operation start];
-        return result;
-      };
       factory = [[[STActionsViewFactory alloc] init] autorelease];
     }
     else if ([key isEqualToString:@"metadata"]) {
-      creator = ^(id<STViewDelegate> delegate) {
-        UIView* result = nil;
-        [operation start];
-        return result;
-      };
       factory = [[[STMetadataViewFactory alloc] init] autorelease];
     }
-    [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:nil];
+    NSOperation* op = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator creator) {
+      @synchronized(self.components) {
+        STViewCreator copy = [[creator copy] autorelease];
+        [self.components setObject:copy forKey:key];
+        [operation start];
+      }
+    }];
+    [queue addOperation:op];
   }
+  for (NSOperation* operation in [self.operations allValues]) {
+    [operation waitUntilFinished];
+  }
+  dispatch_async(dispatch_get_main_queue(), ^{
+    @autoreleasepool {
+      STViewCreator creator = ^(id<STViewDelegate> delegate) {
+        return [self createViewWithDelegate:delegate];
+      };
+      self.callback(creator);
+    }
+  });
 }
 
 
 @end
 
 @implementation STEntityDetailViewFactory
+
+@synthesize style = style_;
+
+- (id)initWithStyle:(NSString*)style {
+  self = [super init];
+  if (self) {
+    self.style = style;
+  }
+  return self;
+}
+
+- (id)init {
+  self = [super init];
+  if (self) {
+    self.style = @"EntityDetail";
+  }
+  return self;
+}
 
 - (NSOperation*)createViewWithEntityDetail:(id<STEntityDetail>)anEntityDetail andCallbackBlock:(STViewCreatorCallback)aBlock {
   STEntityDetailViewFactoryOperation* operation = [[[STEntityDetailViewFactoryOperation alloc] initWithEntityDetail:anEntityDetail andCallbackBlock:aBlock] autorelease];

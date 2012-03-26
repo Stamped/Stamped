@@ -271,7 +271,6 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-
             'artist_display_name',
             'genre',
             'track_length',
@@ -359,6 +358,10 @@ class AmazonSource(GenericSource):
         )
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['book', 'track', 'album'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return self.emptySource
+            
         q = query.query_string
         return multipleSource(
             [
@@ -452,3 +455,4 @@ class AmazonSource(GenericSource):
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")
+

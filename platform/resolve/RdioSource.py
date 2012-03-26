@@ -237,13 +237,17 @@ class RdioSource(GenericSource):
             constructor=RdioArtist)
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['track', 'album', 'artist'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return self.emptySource
+            
         return self.generatorSource(self.__queryGen(
                 query=query.query_string,
                 types='Artist,Album,Track',
                 extras='albumCount,label,isCompilation',
             ),
             constructor=RdioSearchAll)
-
+    
     def __queryGen(self, batches=(100,), **params):
         def gen():
             try:
@@ -268,3 +272,4 @@ class RdioSource(GenericSource):
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')
+

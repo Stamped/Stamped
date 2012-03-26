@@ -1,6 +1,6 @@
-not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
-* prune iTunes artists which have no AMG id or genre? *landon
+* Google Places and Google Autocomplete sources?
+* 
 * prune national outliers when location hinting is turned on
     * e.g., maybe just prune results more than N threshold miles away
 * create test html / js web client
@@ -8,6 +8,7 @@ not connected to the internet in add stamp search still there after internet com
 * refresh autocomplete
 * autocomplete cron job
 * suggested users => generic news items
+* not connected to the internet in add stamp search still there after internet comes back; displayed on top of search results
 
 OLD:
     * change stamp subtitle in friends of friends stamps to say "screen_name via screen_name"

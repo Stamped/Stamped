@@ -18,44 +18,37 @@ try:
     import libs.Memcache
     import tasks.APITasks
     
-    from datetime           import datetime
-    from auth               import convertPasswordForStorage
-    from utils              import lazyProperty
-    from functools          import wraps
-    from errors             import *
+    from datetime               import datetime
+    from auth                   import convertPasswordForStorage
+    from utils                  import lazyProperty
+    from functools              import wraps
+    from errors                 import *
+    from libs.ec2_utils         import is_prod_stack
+    from pprint                 import pprint, pformat
     
-    from AStampedAPI        import AStampedAPI
-    from AAccountDB         import AAccountDB
-    from AEntityDB          import AEntityDB
-    from APlacesEntityDB    import APlacesEntityDB
-    from AUserDB            import AUserDB
-    from AStampDB           import AStampDB
-    from ACommentDB         import ACommentDB
-    from AFavoriteDB        import AFavoriteDB
-    from ACollectionDB      import ACollectionDB
-    from AFriendshipDB      import AFriendshipDB
-    from AActivityDB        import AActivityDB
-    from api.Schemas        import *
-    
-    # third-party search API wrappers
-    from resolve            import FullResolveContainer
-    from GooglePlaces       import GooglePlaces
-    from libs.apple         import AppleAPI
-    from libs.AmazonAPI     import AmazonAPI
-    from libs.TheTVDB       import TheTVDB
-    from libs.Factual       import Factual
-    from libs.ec2_utils     import is_prod_stack
+    from AStampedAPI            import AStampedAPI
+    from AAccountDB             import AAccountDB
+    from AEntityDB              import AEntityDB
+    from APlacesEntityDB        import APlacesEntityDB
+    from AUserDB                import AUserDB
+    from AStampDB               import AStampDB
+    from ACommentDB             import ACommentDB
+    from AFavoriteDB            import AFavoriteDB
+    from ACollectionDB          import ACollectionDB
+    from AFriendshipDB          import AFriendshipDB
+    from AActivityDB            import AActivityDB
+    from api.Schemas            import *
 
     #resolve classes
-    from resolve.EntitySource import EntitySource
-    from pprint             import pprint, pformat
-    from AmazonSource       import AmazonSource
-    from FactualSource      import FactualSource
-    from GooglePlacesSource import GooglePlacesSource
-    from iTunesSource       import iTunesSource
-    from RdioSource         import RdioSource
-    from SpotifySource      import SpotifySource
-    from TMDBSource         import TMDBSource
+    from resolve.EntitySource   import EntitySource
+    from resolve                import FullResolveContainer
+    from AmazonSource           import AmazonSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
+    from iTunesSource           import iTunesSource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
+    from TMDBSource             import TMDBSource
 except:
     report()
     raise
@@ -1517,7 +1510,8 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            ### TODO: Change this to StampedDuplicationError (409). Need to phase in on client first (expecting 403 as of 1.0.4)
+            ### TODO: Change this to StampedDuplicationError (409). 
+            ### Need to phase in on client first (expecting 403 as of 1.0.4)
             raise StampedIllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
         
         # Build stamp
@@ -2362,7 +2356,7 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort == 'modified' or genericCollectionSlice.sort == 'created'):
+        if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
             if len(stamps) >= genericCollectionSlice.limit:
                 genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
 
@@ -2853,22 +2847,6 @@ class StampedAPI(AStampedAPI):
         
         return mentionedUserIds
     
-    @lazyProperty
-    def _googlePlaces(self):
-        return GooglePlaces()
-    
-    @lazyProperty
-    def _amazonAPI(self):
-        return AmazonAPI()
-    
-    @lazyProperty
-    def _appleAPI(self):
-        return AppleAPI()
-    
-    @lazyProperty
-    def _theTVDB(self):
-        return TheTVDB()
-    
     def _convertSearchId(self, search_id):
         if not search_id.startswith('T_'):
             # already a valid entity id
@@ -3021,58 +2999,7 @@ class StampedAPI(AStampedAPI):
     
     # NOTE: deprecated in terms of integrity checker in bin/checkdb.py
     def _updateUserStats(self):
-        userIds = self._userDB._getAllUserIds()
-        
-        for userId in userIds:
-            user = userDB.getUser(userId)
-            userData = user.exportSparse()
-            
-            if 'stats' not in userData:
-                continue
-            
-            stats = userData['stats']
-            
-            stats_num_stamps        = stats.pop('num_stamps', 0)
-            stats_num_credits       = stats.pop('num_credits', 0)
-            stats_num_likes_given   = stats.pop('num_likes_given', 0)
-            stats_num_friends       = stats.pop('num_friends', 0)
-            stats_num_followers     = stats.pop('num_followers', 0)
-            
-            num_stamps              = self._stampDB.countStamps(userId)
-            num_credits             = self._stampDB.countCredits(userId)
-            num_likes_given         = self._stampDB.countUserLikes(userId)
-            num_friends             = self._friendshipDB.countFriends(userId)
-            num_followers           = self._friendshipDB.countFollowers(userId)
-            
-            if num_stamps != stats_num_stamps:
-                logs.info('user id: %s' % userId)
-                logs.info('num_stamps: old (%s) new (%s)' % (stats_num_stamps, num_stamps))
-                
-                self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
-            
-            if num_credits != stats_num_credits:
-                logs.info('user id: %s' % userId)
-                logs.info('num_credits: old (%s) new (%s)' % (stats_num_credits, num_credits))
-                
-                self._userDB.updateUserStats(userId, 'num_credits', num_credits)
-            
-            if num_likes_given != stats_num_likes_given:
-                logs.info('user id: %s' % userId)
-                logs.info('num_likes_given: old (%s) new (%s)' % (stats_num_likes_given, num_likes_given))
-                
-                self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
-            
-            if num_friends != stats_num_friends:
-                logs.info('user id: %s' % userId)
-                logs.info('num_friends: old (%s) new (%s)' % (stats_num_friends, num_friends))
-                
-                self._userDB.updateUserStats(userId, 'num_friends', num_friends)
-            
-            if num_followers != stats_num_followers:
-                logs.info('user id: %s' % userId)
-                logs.info('num_followers: old (%s) new (%s)' % (stats_num_followers, num_followers))
-                
-                self._userDB.updateUserStats(userId, 'num_followers', num_followers)
+        raise NotImplementedError
     
     def addClientLogsEntry(self, authUserId, entry):
         entry.user_id = authUserId

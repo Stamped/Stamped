@@ -56,3 +56,4 @@ class AFieldGroup(object):
     @abstractmethod
     def eligible(self, entity):
         pass
+

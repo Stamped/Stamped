@@ -245,6 +245,10 @@ class GooglePlacesSource(GenericSource):
         return self.generatorSource(gen())
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['restaurant', 'bar', 'place', 'other'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return self.emptySource
+            
         def gen():
             try:
                 raw_results = []

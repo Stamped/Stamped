@@ -42,10 +42,11 @@ _verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
 
-    def __init__(self, query_string, coordinates=None):
+    def __init__(self, query_string, coordinates=None, types=None):
         ResolverSearchAll.__init__(self)
         self.__query_string = query_string
         self.__coordinates = coordinates
+        self.__types = types
 
     @property 
     def query_string(self):
@@ -68,6 +69,10 @@ class QuerySearchAll(ResolverSearchAll):
         return ''
 
     @property
+    def types(self):
+        return self.__types
+
+    @property
     def source(self):
         return 'search'
 
@@ -77,45 +82,49 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    def __helper(self, query, count, name, source_f, results_list):
-        source = source_f()
+    def __helper(self, query, count, source, results_list, **kwargs):
+        name = source.sourceName
+        gen  = source.searchAllSource(query, **kwargs)
+        
         def callback(result, order):
             if _verbose:
                 print("%3d from %s" % (order, name))
             results_list.append((name,result))
-        self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
+        
+        self.__resolver.resolve(query, gen, count=count, callback=callback, groups=[1,2,7])
 
     def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
-        before = time()
-        query = QuerySearchAll(query_string, coordinates)
+        before  = time()
+        query   = QuerySearchAll(query_string, coordinates, types)
         results = []
-        types = set()
-        sources = {
-            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
-            'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
-            'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
-            'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
-            'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
-            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query, timeout=timeout, types=types),
-            'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
-        }
-
+        
+        sources = [
+            iTunesSource(), 
+            RdioSource(), 
+            StampedSource(), 
+            FactualSource(), 
+            TMDBSource(), 
+            SpotifySource(), 
+            AmazonSource(), 
+            GooglePlacesSource(), 
+        ]
+        
         results_list = []
         pool = Pool(len(sources))
-
-        for name, source_f in sources.items():
-            pool.spawn(self.__helper, query, count, name, source_f, results_list)
-
+        
+        for source in sources:
+            pool.spawn(self.__helper, query, count, source, results_list, timeout=timeout, types=types)
+        
         pool.join(timeout=timeout)
-
-        all_results ={}
+        
+        all_results = {}
         total = 0
         for name,result in list(results_list):
             source_results = all_results.setdefault(name,[])
-            source_results.append(result)
-            total += 1
+            if types is None or result[1].subtype in types:
+                source_results.append(result)
+                total += 1
 
         for name,source_results in all_results.items():
             all_results[name] = sortedResults(source_results)
@@ -124,11 +133,14 @@ class EntitySearch(object):
             print("\n\n\nGenerated %s results in %f seconds from: %s\n\n\n" % (
                 total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.items()])
             ))
+        
         before2 = time()
-        chosen = []
+        chosen  = []
+        
         while len(chosen) < count:
-            best = None
             best_name = None
+            best = None
+            
             for name,results in list(all_results.items()):
                 if len(results) == 0:
                     del all_results[name]
@@ -140,17 +152,22 @@ class EntitySearch(object):
                     else:
                         if _verbose:
                             print("skipped %s with value %s" % (name, cur_best[0]['total']))
+            
             if best is not None:
                 del all_results[best_name][0]
+                
                 if _verbose:
                     print("Chose %s with value %s" % (best_name, best[0]['total']))
                 cur = best[1]
+                
                 def dedup():
                     for entry in chosen:
                         target = entry[1].target
                         if target.type == cur.target.type:
                             yield target
+                
                 dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
+                
                 if len(dups) == 0 or not dups[0][0]['resolved']:
                     chosen.append(best)
                 else:
@@ -158,12 +175,13 @@ class EntitySearch(object):
                         print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
             else:
                 break
+        
         if _verbose:
             print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
+        
         return chosen
 
     def searchEntities(self, query_string, count=10, coords=None, category=None, subcategory=None):
-
         types = None
         if subcategory is not None:
             if subcategory == 'song':
@@ -182,20 +200,19 @@ class EntitySearch(object):
             coordinates = (coords.lat, coords.lng)
 
         sources = {
-            'itunes':   iTunesSource(),
-            'rdio':     RdioSource(),
-            'stamped':  StampedSource(),
-            'factual':  FactualSource(),
-            'tmdb':     TMDBSource(),
-            'spotify':  SpotifySource(),
-            'googleplaces':  GooglePlacesSource(),
-            'amazon':  AmazonSource(),
+            'itunes':       iTunesSource(),
+            'rdio':         RdioSource(),
+            'stamped':      StampedSource(),
+            'factual':      FactualSource(),
+            'tmdb':         TMDBSource(),
+            'spotify':      SpotifySource(),
+            'googleplaces': GooglePlacesSource(),
+            'amazon':       AmazonSource(),
         }
-
-        search = EntitySearch().search(query_string, count=count, coordinates=coordinates, types=types)
-
+        
+        search  = self.search(query_string, count=count, coordinates=coordinates, types=types)
         results = []
-
+        
         for item in search:
             entity = Entity()
             source = item[1].target.source
@@ -203,7 +220,7 @@ class EntitySearch(object):
                 source = sources['stamped']
             sources[source].enrichEntityWithWrapper(item[1].target, entity)
             results.append(entity)
-
+        
         return results
 
 def demo():

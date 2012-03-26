@@ -229,6 +229,10 @@ class FactualSource(GenericSource):
 
 
     def searchAllSource(self, query, timeout=None, types=None):
+        validTypes = set(['restaurant', 'bar', 'place', 'other'])
+        if types is not None and len(validTypes.intersection(types)) == 0:
+            return self.emptySource
+            
         def gen():
             try:
                 raw_results = []
@@ -249,8 +253,9 @@ class FactualSource(GenericSource):
                 else:
                     raw_results = getFactualSearch(query)
 
-                for result in raw_results:
-                    yield FactualPlace(data=result)
+                if raw_results is not None:
+                    for result in raw_results:
+                        yield FactualPlace(data=result)
             except GeneratorExit:
                 pass
         return generatorSource(gen(), constructor=FactualSearchAll)

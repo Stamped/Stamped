@@ -34,13 +34,15 @@
 #import "STGalleryViewFactory.h"
 #import "STActionsViewFactory.h"
 #import "STActionMenuFactory.h"
+#import "STEntityDetailViewFactory.h"
+#import "STSynchronousWrapper.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 #warning Set to NO to revert to old version.
-BOOL const newEDetail = NO;
+BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 static const CGFloat kTodoBarHeight = 44.0;
@@ -137,6 +139,8 @@ static const CGFloat kTodoBarHeight = 44.0;
       }];
     }
     [self.operationQueue addOperation:operation];
+    [self view];
+    [self.loadingView startAnimating];
   }
   else {
     [self loadEntityDataFromServer];
@@ -897,7 +901,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (IBAction)mainActionButtonPressed:(id)sender {}
 
 - (void)didLoad:(id)object withLabel:(id)label {
-
+  
 }
 
 - (void)didLoadGalleryViewCreator:(STViewCreator)viewCreator {
@@ -957,12 +961,20 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)didLoadEntityDetail:(id<STEntityDetail>)anEntityDetail {
   entityDetail_ = [anEntityDetail retain];
   if (self.entityDetail) {
-    STHeaderViewFactory* factory = [[STHeaderViewFactory alloc] init];
-    NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator viewCreator) {
-      [self didLoadHeaderViewCreator:viewCreator];
-    }];
-    [self.operationQueue addOperation:operation];
-    [factory release];
+    /*
+     STEntityDetailViewFactory* factory = [[[STEntityDetailViewFactory alloc] init] autorelease];
+     NSOperation* operation = [factory createViewWithEntityDetail:self.entityDetail andCallbackBlock:^(STViewCreator creator) {
+     UIView* view = creator(self);
+     [self appendChildView:view];
+     [self.loadingView stopAnimating];
+     }];
+     [self.operationQueue addOperation:operation];
+     */
+    [self.loadingView stopAnimating];
+    UIView* view = [STSynchronousWrapper wrapperForEntityDetail:self.entityDetail 
+                                                      withFrame:CGRectMake(0, 0, 320, self.scrollView.frame.size.height) 
+                                                       andStyle:@"EntityDetail" delegate:self];
+    [self appendChildView:view];
   }
 }
 
