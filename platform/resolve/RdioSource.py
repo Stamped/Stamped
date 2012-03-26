@@ -240,14 +240,14 @@ class RdioSource(GenericSource):
         validTypes = set(['track', 'album', 'artist'])
         if types is not None and len(validTypes.intersection(types)) == 0:
             return None
-            
+        
         return self.generatorSource(self.__queryGen(
                 query=query.query_string,
                 types='Artist,Album,Track',
                 extras='albumCount,label,isCompilation',
             ),
             constructor=RdioSearchAll)
-
+    
     def __queryGen(self, batches=(100,), **params):
         def gen():
             try:

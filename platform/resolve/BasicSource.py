@@ -37,4 +37,4 @@ class BasicSource(AExternalSource):
 
     def __str__(self):
         return "Source:%s" % self.__name
-    
+

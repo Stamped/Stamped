@@ -220,7 +220,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 try:
                     count = friends_of_friends[user_id]
                     friends_of_friends[user_id] = count + 1
-                except:
+                except Exception:
                     friends_of_friends[user_id] = 1
             else:
                 visited_users.add(user_id)
@@ -275,7 +275,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 if user_id not in friends:
                     try:
                         potential_friends[user_id]['num_stamp_overlap'] = potential_friends[user_id]['num_stamp_overlap'] + 1
-                    except:
+                    except Exception:
                         potential_friends[user_id]['num_stamp_overlap'] = 1
         
         # seed potential friends with facebook friends
@@ -306,7 +306,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 
                 if 'num_friend_overlap' not in values and 'facebook_friend' not in values and 'twitter_friend' not in values and values['num_stamp_overlap'] <= 1:
                     raise
-            except:
+            except Exception:
                 pruned.add(user_id)
                 continue
             
@@ -317,7 +317,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             try:
                 overlap = values['num_stamp_overlap']
                 values['stamp_overlap'] = overlap * overlap * inv_len_user_entity_ids
-            except:
+            except Exception:
                 pass
             
             summation = 0.0
@@ -433,62 +433,62 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         try:
             friend_overlap_value    = float(values['friend_overlap'])
-        except:
+        except Exception:
             friend_overlap_value    = 0
         
         try:
             num_friend_overlap      = int(values['num_friend_overlap'])
-        except:
+        except Exception:
             num_friend_overlap      = 0
         
         try:
             stamp_overlap_value     = float(values['stamp_overlap'])
-        except:
+        except Exception:
             stamp_overlap_value     = 0
         
         try:
             num_stamp_overlap       = int(values['num_stamp_overlap'])
-        except:
+        except Exception:
             num_stamp_overlap       = 0
         
         try:
             category_overlap_value  = float(values['category_overlap'])
-        except:
+        except Exception:
             category_overlap_value  = 0
         
         try:
             proximity_value         = float(values['proximity'])
-        except:
+        except Exception:
             proximity_value         = 0
         
         try:
             current_proximity_value = float(values['current_proximity'])
-        except:
+        except Exception:
             current_proximity_value = 0
         
         try:
             facebook_friend_value   = int(values['facebook_friend'])
-        except:
+        except Exception:
             facebook_friend_value   = 0
         
         try:
             twitter_friend_value    = int(values['twitter_friend'])
-        except:
+        except Exception:
             twitter_friend_value    = 0
         
         try:
             has_stamps_value        = int(values['has_stamps'])
-        except:
+        except Exception:
             has_stamps_value        = False
         
         try:
             num_stamps_value        = float(values['num_stamps'])
-        except:
+        except Exception:
             num_stamps_value        = 0.0
         
         try:
             clusters                = values['clusters']
-        except:
+        except Exception:
             clusters                = [ (0, None), (0, None) ]
         
         friend_overlap_weight       = 15.0
@@ -586,7 +586,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     if cities:
                         explanation = "tends to stamp in %s" % (" and ".join(cities), )
                         explanations['proximity'] = explanation
-            except:
+            except Exception:
                 utils.printException()
             
             try:
@@ -597,7 +597,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                     if city is not None:
                         explanation = "tends to stamp nearby (in %s)" % city
                         explanations['current_proximity'] = explanation
-            except:
+            except Exception:
                 utils.printException()
             
             ret_explanations = []

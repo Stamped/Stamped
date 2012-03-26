@@ -105,8 +105,7 @@ _artist_removals = [
 
 # movie-specific removal patterns
 _movie_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'^.*( band)')      , [1]),
+    # TODO - unimplemented and unused
 ]
 
 # blacklist words and score

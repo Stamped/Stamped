@@ -77,38 +77,42 @@ class EntitySearch(object):
     def __resolver(self):
         return Resolver()
 
-    def __helper(self, query, count, name, source_f, results_list):
-        source = source_f()
+    def __helper(self, query, count, source, results_list, **kwargs):
+        name = source.sourceName
+        gen  = source.searchAllSource(query, **kwargs)
+        
         def callback(result, order):
             if _verbose:
                 print("%3d from %s" % (order, name))
             results_list.append((name,result))
-        self.__resolver.resolve(query, source, count=count, callback=callback, groups=[1,2,7])
+        
+        self.__resolver.resolve(query, gen, count=count, callback=callback, groups=[1,2,7])
 
     def search(self, query_string, count=10, coordinates=None, types=None):
         timeout = 6
         before  = time()
         query   = QuerySearchAll(query_string, coordinates)
         results = []
-        sources = {
-            'itunes':   lambda: iTunesSource().searchAllSource(query, timeout=timeout, types=types),
-            'rdio':     lambda: RdioSource().searchAllSource(query, timeout=timeout, types=types),
-            'stamped':  lambda: StampedSource().searchAllSource(query, timeout=timeout, types=types),
-            'factual':  lambda: FactualSource().searchAllSource(query, timeout=timeout, types=types),
-            'tmdb':     lambda: TMDBSource().searchAllSource(query, timeout=timeout, types=types),
-            'spotify':  lambda: SpotifySource().searchAllSource(query,timeout=timeout, types=types),
-            'amazon':  lambda: AmazonSource().searchAllSource(query,timeout=timeout, types=types),
-            'googleplaces':  lambda: GooglePlacesSource().searchAllSource(query, timeout=timeout, types=types),
-        }
-
+        
+        sources = [
+            iTunesSource(), 
+            RdioSource(), 
+            StampedSource(), 
+            FactualSource(), 
+            TMDBSource(), 
+            SpotifySource(), 
+            AmazonSource(), 
+            GooglePlacesSource(), 
+        ]
+        
         results_list = []
         pool = Pool(len(sources))
-
-        for name, source_f in sources.items():
-            pool.spawn(self.__helper, query, count, name, source_f, results_list)
-
+        
+        for source in sources:
+            pool.spawn(self.__helper, query, count, source, results_list, timeout=timeout, types=types)
+        
         pool.join(timeout=timeout)
-
+        
         all_results = {}
         total = 0
         for name,result in list(results_list):
@@ -128,8 +132,9 @@ class EntitySearch(object):
         chosen  = []
         
         while len(chosen) < count:
-            best = None
             best_name = None
+            best = None
+            
             for name,results in list(all_results.items()):
                 if len(results) == 0:
                     del all_results[name]
@@ -141,17 +146,22 @@ class EntitySearch(object):
                     else:
                         if _verbose:
                             print("skipped %s with value %s" % (name, cur_best[0]['total']))
+            
             if best is not None:
                 del all_results[best_name][0]
+                
                 if _verbose:
                     print("Chose %s with value %s" % (best_name, best[0]['total']))
                 cur = best[1]
+                
                 def dedup():
                     for entry in chosen:
                         target = entry[1].target
                         if target.type == cur.target.type:
                             yield target
+                
                 dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
+                
                 if len(dups) == 0 or not dups[0][0]['resolved']:
                     chosen.append(best)
                 else:
@@ -159,8 +169,10 @@ class EntitySearch(object):
                         print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
             else:
                 break
+        
         if _verbose:
             print("\n\n\nDedupped %s results in %s seconds\n\n\n" % (total - len(chosen), time() - before2))
+        
         return chosen
 
     def searchEntities(self, query_string, count=10, coords=None, category=None, subcategory=None):
@@ -192,10 +204,9 @@ class EntitySearch(object):
             'amazon':       AmazonSource(),
         }
         
-        search = self.search(query_string, count=count, coordinates=coordinates, types=types)
-
+        search  = self.search(query_string, count=count, coordinates=coordinates, types=types)
         results = []
-
+        
         for item in search:
             entity = Entity()
             source = item[1].target.source
