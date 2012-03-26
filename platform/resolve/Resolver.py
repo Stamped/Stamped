@@ -22,6 +22,7 @@ __all__ = [
     'ResolverMovie',
     'ResolverBook',
     'ResolverTVShow',
+    'ResolverApp',
     'demo',
     'regexRemoval',
     'simplify',
@@ -322,7 +323,7 @@ def sortedResults(results):
         return -pair[0]['total']
     return sorted(results , key=pairSort)
 
-def formatResults(results, reverse=True):
+def formatResults(results, reverse=True, verbose=True):
     n = len(results)
     l = []
     # for result in results:
@@ -360,6 +361,7 @@ def typeToSubcategory(t):
         'book':'book',
         'movie':'movie',
         'tv':'tv',
+        'app':'app'
     }
     if t in m:
         return m[t]
@@ -450,6 +452,10 @@ class ResolverObject(object):
     def subcategory(self):
         return None
 
+    @property 
+    def image(self):
+        return None
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -501,6 +507,10 @@ class ResolverProxy(object):
     @property
     def address(self):
         return self.target.address
+
+    @property
+    def image(self):
+        return self.target.image
 
 class SimpleResolverObject(ResolverObject):
 
@@ -932,6 +942,10 @@ class ResolverBook(ResolverObject):
             v for v in l if v != ''
         ]
 
+#
+# Places
+# 
+
 class ResolverPlace(ResolverObject):
     """
     Interface for place objects
@@ -976,6 +990,50 @@ class ResolverPlace(ResolverObject):
         return [
             v for v in l if v != ''
         ]
+
+#
+# Apps
+#
+
+class ResolverApp(ResolverObject):
+    """
+    Interface for track objects
+
+    Attributes:
+
+    genres - a list containing any applicable genres
+    publisher - an publisher dict containing at least a 'name' string
+    """
+    @abstractproperty
+    def publisher(self):
+        pass
+
+    @property
+    def date(self):
+        return None
+
+    @property 
+    def genres(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'app'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.publisher['name'],
+            ]
+        return [
+            v for v in l if v != ''
+        ]
+
+    @lazyProperty 
+    def screenshots(self):
+        return []
 
 ##
 # Main Resolver class
@@ -1275,6 +1333,20 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
+    def checkApp(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+            ('publisher',   lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher))
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
+                                                exact_boost=2, m_empty=4 ),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+
     def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
@@ -1382,6 +1454,10 @@ class Resolver(object):
             options['callback'] = lambda x,y: None
         if 'count' not in options:
             options['count'] = 1
+        if 'limit' not in options:
+            options['limit'] = 10
+        if 'offset' not in options or options['offset'] is None:
+            options['offset'] = 0
         if 'strict' not in options:
             options['strict'] = False
         if 'symmetric' not in options:
@@ -1465,6 +1541,8 @@ class Resolver(object):
                 options['check'] = self.checkPlace
             elif query.type =='tv':
                 options['check'] = self.checkTVShow
+            elif query.type =='app':
+                options['check'] = self.checkApp
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:
@@ -1688,21 +1766,22 @@ class Resolver(object):
         return results
 
     def __addTotal(self, similarities, weights, query, match, options):
-        total = 0
+        total  = 0
         weight = 0
         actual_weights = {}
+        
         for k,f in weights.items():
             v = f(query, match, similarities, options)
             weight += v
-            total += v * similarities[k]
+            total  += v * similarities[k]
             actual_weights[k] = v
-
+        
         similarities['total'] = total / weight
         similarities['weights'] = actual_weights
-
+    
     def __logSimilarities(self, similarities, query, match):
         print( 'Similarities for %s:\n%s' %(match.name, pformat(similarities) ) )
-
+    
     def __differenceLog(self, label, query_set, match_set, query, match):
         diff = sorted(query_set ^ match_set)
         print('%s %s difference for %s and %s (%s %s vs %s %s)' % (

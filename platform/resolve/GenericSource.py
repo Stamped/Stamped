@@ -22,7 +22,7 @@ try:
     import sys
     from Resolver                   import *
     from abc                        import ABCMeta, abstractmethod
-    from ASourceController          import AlwaysSourceController
+    from ASourceController          import ASourceController
 except:
     report()
     raise
@@ -280,6 +280,9 @@ class GenericSource(BasicSource):
                 entity['cast'] = ', '.join(cast)
             if wrapper.director['name'] != '':
                 entity['director'] = wrapper.director['name']
+        if wrapper.type in set(['app']):
+            if wrapper.publisher['name'] != '':
+                entity['artist_display_name'] = wrapper.publisher['name']
         return True
 
     @property
