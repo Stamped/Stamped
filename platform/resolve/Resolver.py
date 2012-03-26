@@ -42,21 +42,18 @@ import Globals
 from logs import report
 
 try:
-    import re, string
+    import utils, re, string
+    import logs, sys, math
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
-    import logs
     from pprint                     import pprint, pformat
-    import sys
     from Entity                     import getSimplifiedTitle
     from gevent.pool                import Pool
-    import math
     from abc                        import ABCMeta, abstractmethod, abstractproperty
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
-    import utils
 except:
     report()
     raise
@@ -74,42 +71,42 @@ removal dicts are used in a modification-based loop to remove certain patterns.
 
 #generally applicable removal patterns
 _general_regex_removals = [
-    (r'.*(\(.*\)).*'    , [1]),     # a name ( with parens ) anywhere
-    (r'.*(\[.*]).*'     , [1]),     # a name [ with brackets ] anywhere
-    (r'.*(\(.*)'        , [1]),     # a name ( bad parathetical
-    (r'.*(\[.*)'        , [1]),     # a name [ bad brackets
-    (r'.*(\.\.\.).*'    , [1]),     # ellipsis ... anywhere
-    (r".*(').*"         , [1]),
-    (r'.*(").*'         , [1]),
-    (r'^(the ).*$'      , [1]),
+    (re.compile(r'.*(\(.*\)).*')    , [1]),     # a name ( with parens ) anywhere
+    (re.compile(r'.*(\[.*]).*')     , [1]),     # a name [ with brackets ] anywhere
+    (re.compile(r'.*(\(.*)')        , [1]),     # a name ( bad parathetical
+    (re.compile(r'.*(\[.*)')        , [1]),     # a name [ bad brackets
+    (re.compile(r'.*(\.\.\.).*')    , [1]),     # ellipsis ... anywhere
+    (re.compile(r".*(').*")         , [1]),
+    (re.compile(r'.*(").*')         , [1]),
+    (re.compile(r'^(the ).*$')      , [1]),
 ]
 
 # track-specific removal patterns
 _track_removals = [
-    (r'^(the ).*$'      , [1]),
-    (r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm)$)'  , [1]),
+    (re.compile(r'^(the ).*$')      , [1]),
+    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm)$)')  , [1]),
 ]
 
 # album-specific removal patterns
 _album_removals = [
-    (r'^(the ).*$'      , [1]),
-    (r'.*((-|,)( the)? remixes.*$)'    , [1]),
-    (r'.*(- ep$)'                   , [1]),
-    (r'.*( the (\w+ )?remixes$)'     , [1]),
-    (r'.*(- remix ep)' , [1]),
-    (r'.*(- single$)' , [1]),
+    (re.compile(r'^(the ).*$')      , [1]),
+    (re.compile(r'.*((-|,)( the)? remixes.*$)')    , [1]),
+    (re.compile(r'.*(- ep$)')                   , [1]),
+    (re.compile(r'.*( the (\w+ )?remixes$)')     , [1]),
+    (re.compile(r'.*(- remix ep)') , [1]),
+    (re.compile(r'.*(- single$)') , [1]),
 ]
 
 # artist-specific removal patterns
 _artist_removals = [
-    (r'^(the ).*$'      , [1]),
-    (r'^.*( band)'      , [1]),
+    (re.compile(r'^(the ).*$')      , [1]),
+    (re.compile(r'^.*( band)')      , [1]),
 ]
 
 # movie-specific removal patterns
 _movie_removals = [
-    (r'^(the ).*$'      , [1]),
-    (r'^.*( band)'      , [1]),
+    (re.compile(r'^(the ).*$')      , [1]),
+    (re.compile(r'^.*( band)')      , [1]),
 ]
 
 # blacklist words and score
@@ -147,7 +144,7 @@ def regexRemoval(string, patterns):
         modified = False
         for pattern, groups in patterns:
             while True:
-                match = re.match(pattern, string)
+                match = pattern.match(string)
                 if match is None:
                     break
                 else:
