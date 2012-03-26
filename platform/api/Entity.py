@@ -161,7 +161,9 @@ def formatFilmLength(seconds):
         return None
 
 def getGenericSubtitle(entity):
-    return str(entity.subcategory).replace('_', ' ').title()
+    if entity.subcategory is not None:
+        return str(entity.subcategory).replace('_', ' ').title()
+    return None
 
 def getLocationSubtitle(entity, detailed=False):
     # Return detailed address data if requested
@@ -196,7 +198,7 @@ def getLocationSubtitle(entity, detailed=False):
     return getGenericSubtitle(entity)
 
 def setSubtitle(entity):
-    entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+    entity.subtitle = getGenericSubtitle(entity)
 
 def setFields(entity, detailed=False):
     global city_state_re

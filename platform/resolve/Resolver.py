@@ -361,6 +361,7 @@ def typeToSubcategory(t):
         'book':'book',
         'movie':'movie',
         'tv':'tv',
+        'app':'app'
     }
     if t in m:
         return m[t]
