@@ -21,6 +21,7 @@ __all__ = [
     'SimpleResolverTrack',
     'ResolverMovie',
     'ResolverBook',
+    'ResolverTVShow',
     'demo',
     'regexRemoval',
     'simplify',
@@ -358,6 +359,7 @@ def typeToSubcategory(t):
         'artist':'artist',
         'book':'book',
         'movie':'movie',
+        'tv':'tv',
     }
     if t in m:
         return m[t]
@@ -606,14 +608,8 @@ class ResolverArtist(ResolverObject):
         ]
 
 #
-#       #       #       ######  #       # #     #
-#      # #      #       #     # #       # ##   ##
-#     #   #     #       #     # #       # # # # #
-#    #     #    #       ######  #       # #  #  #
-#   #########   #       #     # #       # #     #
-#  #         #  #       #     # #       # #     #
-# #           # ####### ######   #######  #     #
-#
+# Album
+# 
 
 class ResolverAlbum(ResolverObject):
     """
@@ -797,6 +793,66 @@ class ResolverMovie(ResolverObject):
     @property 
     def type(self):
         return 'movie'
+
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type,
+                self.name,
+                self.director['name']
+            ]
+        l.extend(self.genres)
+        for actor in self.cast:
+            l.append(actor['name'])
+            if 'character' in actor:
+                l.append(actor['character'])
+        return [
+            v for v in l if v != ''
+        ]
+#
+# TV Show
+#
+
+class ResolverTVShow(ResolverObject):
+    """
+    Interface for tv show objects
+
+    Attributes:
+
+    cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
+    director - a director dict containing at least a 'name' string
+    date - a datetime indicating the release date or None for unknown
+    rating - a string indicating the MPAA rating of the show or '' for unknown
+    genres - a list of genre strings
+    seasons - the number of seasons of the show
+    """
+    @property
+    def cast(self):
+        return []
+
+    @property
+    def director(self):
+        return {'name':''}
+
+    @property
+    def date(self):
+        return None
+
+    @property
+    def rating(self):
+        return None
+
+    @property 
+    def genres(self):
+        return []
+
+    @property 
+    def type(self):
+        return 'tv'
+
+    @property
+    def seasons(self):
+        return -1
 
     @lazyProperty
     def related_terms(self):
@@ -1204,6 +1260,21 @@ class Resolver(object):
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
+    def checkTVShow(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.movieComparison(q.name, m.name)),
+            ('cast',        lambda q, m, s, o: self.castComparison(q, m, o)),
+            ('director',    lambda q, m, s, o: self.directorComparison(q.director, m.director)),
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
+            'cast':         lambda q, m, s, o: self.__castWeight(q, m),
+            'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+
     def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
@@ -1392,6 +1463,8 @@ class Resolver(object):
                 options['check'] = self.checkBook
             elif query.type =='place':
                 options['check'] = self.checkPlace
+            elif query.type =='tv':
+                options['check'] = self.checkTVShow
             elif query.type == 'search_all':
                 options['check'] = self.checkSearchAll
             else:
@@ -1451,8 +1524,10 @@ class Resolver(object):
         return weight
             
     def __subcategoryTest(self, query, match, tests, options):
-        if match.subcategory == 'other' or match.subcategory is None:
+        if match.subtype == 'other' or match.subtype is None:
             return 0
+        if match.subtype == 'tv':
+            return 0.5
         return 1 
         
     def __keywordsTest(self, query, match, tests, options):
