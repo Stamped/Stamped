@@ -550,6 +550,10 @@ class ResolverProxy(object):
     def subcategories(self):
         return self.target.subcategories
 
+    @property 
+    def subcategory(self):
+        return self.target.subcategory
+
 class SimpleResolverObject(ResolverObject):
 
     def __init__(self, **data):
@@ -644,6 +648,10 @@ class ResolverArtist(ResolverObject):
     def type(self):
         return 'artist'
 
+    @property 
+    def subcategory(self):
+        return 'artist'
+
     @lazyProperty
     def related_terms(self):
         l = [
@@ -687,6 +695,10 @@ class ResolverAlbum(ResolverObject):
 
     @property 
     def type(self):
+        return 'album'
+
+    @property 
+    def subcategory(self):
         return 'album'
 
     @lazyProperty
@@ -739,6 +751,10 @@ class ResolverTrack(ResolverObject):
     @property 
     def type(self):
         return 'track'
+
+    @property 
+    def subcategory(self):
+        return 'song'
         
     @lazyProperty
     def related_terms(self):
@@ -802,6 +818,11 @@ class SimpleResolverTrack(SimpleResolverObject):
     @property 
     def type(self):
         return 'track'
+
+    @property 
+    def subcategory(self):
+        return 'song'
+
 #
 # Movie
 #
@@ -845,6 +866,10 @@ class ResolverMovie(ResolverObject):
 
     @property 
     def type(self):
+        return 'movie'
+
+    @property 
+    def subcategory(self):
         return 'movie'
 
     @lazyProperty
@@ -901,6 +926,10 @@ class ResolverTVShow(ResolverObject):
 
     @property 
     def type(self):
+        return 'tv'
+
+    @property 
+    def subcategory(self):
         return 'tv'
 
     @property
@@ -971,6 +1000,10 @@ class ResolverBook(ResolverObject):
 
     @property 
     def type(self):
+        return 'book'
+
+    @property 
+    def subcategory(self):
         return 'book'
 
     @lazyProperty
@@ -1061,6 +1094,10 @@ class ResolverApp(ResolverObject):
 
     @property 
     def type(self):
+        return 'app'
+
+    @property 
+    def subcategory(self):
         return 'app'
 
     @lazyProperty
