@@ -339,6 +339,22 @@ def parseCommandLine():
     if options.verbose is not None:
         global _verbose
         _verbose = options.verbose
+
+
+    types   = None
+    if options.subcategory is not None:
+        if options.subcategory == 'song':
+            options.subcategory = 'track'
+        types = set(options.subcategory)
+    elif options.category is not None:
+        types = set()
+        for s, c in subcategories.iteritems():
+            if options.category == c:
+                if s == 'song':
+                    s = 'track'
+                types.add(s)
+
+    options.types = types
     
     return (options, args)
 
@@ -351,6 +367,7 @@ def demo():
                               full      = not options.quick, 
                               local     = options.Local, 
                               offset    = options.offset, 
+                              types     = options.types,
                               limit     = options.limit)
     
     print("Final Search Results")
