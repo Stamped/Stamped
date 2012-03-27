@@ -70,8 +70,9 @@
     buttons = [NSArray arrayWithObjects:_todoButton, _shareButton, nil];
     labels = [NSArray arrayWithObjects:_todoLabel, _shareLabel, nil];
   }
-  NSInteger spacing = CGRectGetWidth(self.bounds) / buttons.count;
-  NSInteger xOffset = spacing / 2;
+  CGFloat width = _style == STStampDetailToolbarStyleDefault ? CGRectGetWidth(self.bounds) : 256;
+  NSInteger spacing = width / buttons.count;
+  NSInteger xOffset = (spacing + CGRectGetWidth(self.bounds) - width) / 2;
   for (UIButton* b in buttons) {
     b.frame = buttonFrame;
     b.center = CGPointMake(xOffset, b.center.y);
