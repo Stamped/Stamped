@@ -567,23 +567,30 @@ class iTunesSource(GenericSource):
     def wrapperFromId(self, itunes_id):
         try:
             data = self.__itunes.method('lookup',id=itunes_id)['results'][0]
-            if data['wrapperType'] == 'track':
-                if data['kind'].find('movie') != -1:
+
+            dataWrapperType     = data['wrapperType'] if 'wrapperType' in data else None
+            dataKind            = data['kind'] if 'kind' in data else None
+            dataCollectionType  = data['collectionType'] if 'collectionType' in data else None
+            dataArtistType      = data['artistType'] if 'artistType' in data else None
+
+            if dataWrapperType == 'track':
+                if dataKind is not None and dataKind.find('movie') != -1:
                     return iTunesMovie(data=data)
-                elif data['kind'] == 'song':
+                elif dataKind == 'song':
                     return iTunesTrack(data=data)
-            elif data['wrapperType'] == 'collection' and data['collectionType'] == 'Album':
+            elif dataWrapperType == 'collection' and dataCollectionType == 'Album':
                 return iTunesAlbum(data=data)
-            elif data['wrapperType'] == 'artist':
-                if data['artistType'] == 'TV Show':
+            elif dataWrapperType == 'artist':
+                if dataArtistType == 'TV Show':
                     return iTunesTVShow(data=data)
                 return iTunesArtist(data=data)
-            elif value['wrapperType'] == 'software':
+            elif dataWrapperType == 'software':
                 return iTunesApp(data=data)
-            else:
-                pass
+            elif dataKind == 'ebook':
+                return iTunesBook(data=data)
+            raise KeyError('Unrecognized data: %s' % data)
         except KeyError:
-            pass
+            raise
         return None
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
