@@ -62,6 +62,13 @@ class _EntityObject(object):
     def source(self):
         return "stamped"
 
+    @lazyProperty
+    def subcategory(self):
+        try:
+            return self.entity['subcategory']
+        except Exception:
+            return 'other'
+
     def __repr__(self):
         return pformat( self.entity.value )
 
