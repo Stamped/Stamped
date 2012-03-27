@@ -505,7 +505,10 @@ class ResolverProxy(object):
         return self.target.source
 
     def __repr__(self):
-        return "ResolverProxy:%s" % str(self.target)
+        try:
+            return "ResolverProxy:%s" % str(self.target)
+        except:
+            return "ResolverProxy"
 
     @property
     def keywords(self):
