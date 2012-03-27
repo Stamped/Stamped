@@ -182,10 +182,6 @@ class GooglePlacesPlace(ResolverPlace):
             return self.data['subcategory']
         return 'other'
 
-    @lazyProperty
-    def subcategories(self):
-        return set([self.subcategory])
-
     @property 
     def source(self):
         return 'googleplaces'
