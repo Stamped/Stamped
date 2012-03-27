@@ -152,7 +152,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   if (newEDetail) {
     NSLog(@"releasing eDetail");
     if (self.synchronousWrapper) {
-      [self.synchronousWrapper detatchFromDelegate];
+      self.synchronousWrapper.delegate = nil;
     }
     [self.operationQueue cancelAllOperations];
     [operationQueue_ release];

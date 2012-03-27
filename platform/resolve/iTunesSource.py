@@ -39,14 +39,14 @@ class _iTunesObject(object):
     data - the type specific iTunes data for the object.
     itunes - an instance of iTunes (API wrapper)
     """
-
+    
     def __init__(self, itunes_id=None, data=None, itunes=None):
         if itunes is None:
             itunes = globaliTunes()
         self.__itunes = itunes
         self.__data = data
         self.__itunes_id = itunes_id
-
+    
     @lazyProperty
     def data(self):
         if self.__data == None:
@@ -85,22 +85,22 @@ class _iTunesObject(object):
                 return self.itunes.method('lookup', id=self.__itunes_id)['results'][0]
         else:
             return self.__data
-
+    
     @property 
     def itunes(self):
         return self.__itunes
-
+    
     @property 
     def source(self):
         return "itunes"
-
+    
     @lazyProperty
     def image(self):
         try:
             return self.data['artworkUrl100']
         except:
             return ''
-
+    
     def __repr__(self):
         return pformat( self.data )
 

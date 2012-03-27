@@ -294,15 +294,18 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 class StampedSource(GenericSource):
     """
     """
-    def __init__(self):
+    def __init__(self, stamped_api = None):
         GenericSource.__init__(self, 'stamped')
+        self._stamped_api = stamped_api
 
     @lazyProperty
     def __entityDB(self):
-        import MongoStampedAPI
-        api = MongoStampedAPI.MongoStampedAPI()
+        if not self._stamped_api:
+            import MongoStampedAPI
+            self._stamped_api = MongoStampedAPI.MongoStampedAPI()
+        
         return api._entityDB
-
+    
     def artistFromEntity(self, entity):
         """
         ResolverArtist factory method for entities.
@@ -627,7 +630,7 @@ class StampedSource(GenericSource):
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
-        logs.info(mongo_query)
+        logs.info(str(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING), limit=1000)
 
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):

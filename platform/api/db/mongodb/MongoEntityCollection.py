@@ -37,7 +37,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def places_collection(self):
         return MongoPlacesEntityCollection()
-
+    
     ### PUBLIC
     
     def _convertFromMongo(self, document):
@@ -109,4 +109,4 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def updateDecoration(self, name, value):
         if name == 'menu':
             self.__menu_db.updateMenu(value)
-        
+

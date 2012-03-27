@@ -21,9 +21,6 @@
 		63733FF01521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FF2152112D700EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
 		63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
-		63733FF61521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
-		63733FF71521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
-		63733FF81521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
 		6380A76215066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76315066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
@@ -89,12 +86,12 @@
 		6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
-		63877B541520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
-		63877B551520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
-		63877B561520BAE100DE5A3A /* STEntityDetailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B531520BAE100DE5A3A /* STEntityDetailView.m */; };
 		63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
 		63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
 		63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
+		6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
+		6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
+		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
@@ -1777,8 +1774,6 @@
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
 		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
 		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		63733FF41521179700EEFAB3 /* STViewDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateProxy.h; sourceTree = "<group>"; };
-		63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewDelegateProxy.m; sourceTree = "<group>"; };
 		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
@@ -1832,10 +1827,10 @@
 		6386EF351513E2740019F1DC /* STActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionItem.h; sourceTree = "<group>"; };
 		6386EF361513E2CF0019F1DC /* STSimpleActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActionItem.h; sourceTree = "<group>"; };
 		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
-		63877B521520BAE100DE5A3A /* STEntityDetailView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailView.h; sourceTree = "<group>"; };
-		63877B531520BAE100DE5A3A /* STEntityDetailView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailView.m; sourceTree = "<group>"; };
 		63877B571520C35700DE5A3A /* STSynchronousWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSynchronousWrapper.h; sourceTree = "<group>"; };
 		63877B581520C35700DE5A3A /* STSynchronousWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSynchronousWrapper.m; sourceTree = "<group>"; };
+		6398B926152243C90044BB0C /* STWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STWeakProxy.h; sourceTree = "<group>"; };
+		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
@@ -2952,12 +2947,10 @@
 				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
 				63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */,
 				63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */,
-				63877B521520BAE100DE5A3A /* STEntityDetailView.h */,
-				63877B531520BAE100DE5A3A /* STEntityDetailView.m */,
 				63877B571520C35700DE5A3A /* STSynchronousWrapper.h */,
 				63877B581520C35700DE5A3A /* STSynchronousWrapper.m */,
-				63733FF41521179700EEFAB3 /* STViewDelegateProxy.h */,
-				63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */,
+				6398B926152243C90044BB0C /* STWeakProxy.h */,
+				6398B927152243CA0044BB0C /* STWeakProxy.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -6154,12 +6147,11 @@
 				6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
-				63877B551520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */,
-				63733FF71521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
 				7E05964B1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966415212CBD009D691E /* STStampDetailHeader.m in Sources */,
+				6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */,
 				7E4A6ECC15222E6F0031D7D6 /* Facebook.m in Sources */,
 				7E4A6ED015222E6F0031D7D6 /* FBDialog.m in Sources */,
 				7E4A6ED215222E6F0031D7D6 /* FBFrictionlessRequestSettings.m in Sources */,
@@ -6331,12 +6323,11 @@
 				6386EF381513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
-				63877B541520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */,
-				63733FF61521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
 				7E05964A1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966315212CBD009D691E /* STStampDetailHeader.m in Sources */,
+				6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */,
 				7E4A6ECB15222E6F0031D7D6 /* Facebook.m in Sources */,
 				7E4A6ECF15222E6F0031D7D6 /* FBDialog.m in Sources */,
 				7E4A6ED115222E6F0031D7D6 /* FBFrictionlessRequestSettings.m in Sources */,
@@ -6377,9 +6368,8 @@
 				6386EF3A1513E2D60019F1DC /* STSimpleActionItem.m in Sources */,
 				63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */,
 				63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
-				63877B561520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
-				63733FF81521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
+				6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

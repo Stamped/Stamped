@@ -483,6 +483,10 @@ class ResolverObject(object):
     def date(self):
         return None
 
+    @lazyProperty
+    def subcategories(self):
+        return set([self.type])
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -491,10 +495,6 @@ class ResolverProxy(object):
     @property
     def target(self):
         return self.__target
-
-    @lazyProperty
-    def name(self):
-        return self.target.name
 
     @lazyProperty
     def url(self):
@@ -509,7 +509,10 @@ class ResolverProxy(object):
         return self.target.source
 
     def __repr__(self):
-        return "ResolverProxy:%s" % str(self.target)
+        try:
+            return "ResolverProxy:%s" % str(self.target)
+        except:
+            return "ResolverProxy"
 
     @property
     def keywords(self):
@@ -542,6 +545,10 @@ class ResolverProxy(object):
     @property
     def date(self):
         return self.target.date
+
+    @property
+    def subcategories(self):
+        return self.target.subcategories
 
 class SimpleResolverObject(ResolverObject):
 
@@ -605,6 +612,7 @@ class ResolverSearchAll(ResolverObject):
     @property 
     def type(self):
         return 'search_all'
+
 
 #
 # Artist
@@ -744,6 +752,10 @@ class ResolverTrack(ResolverObject):
             ]
                 if v != ''
         ]
+
+    @lazyProperty
+    def subcategories(self):
+        return set(['song'])
 
 
 class SimpleResolverTrack(SimpleResolverObject):
@@ -917,7 +929,7 @@ class ResolverTVShow(ResolverObject):
 
 class ResolverBook(ResolverObject):
     """
-    Interface for track objects
+    Interface for book objects
 
     Attributes:
 
@@ -1028,7 +1040,7 @@ class ResolverPlace(ResolverObject):
 
 class ResolverApp(ResolverObject):
     """
-    Interface for track objects
+    Interface for app objects
 
     Attributes:
 
