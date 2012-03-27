@@ -3840,7 +3840,6 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				63733FF1152112D600EEFAB3 /* AudioToolbox.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -3864,6 +3863,7 @@
 			children = (
 				7E07EC1C14C73FD400A2B5F0 /* libz.dylib */,
 				7ED043E6149FCA3E00E46284 /* libxml2.dylib */,
+				63733FF1152112D600EEFAB3 /* AudioToolbox.framework */,
 				7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */,
 				7EB03FD314672B40004F7A1C /* MessageUI.framework */,
 				7E99C9B81458B4E000B116AC /* Twitter.framework */,
