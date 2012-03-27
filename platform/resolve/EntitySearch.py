@@ -258,6 +258,11 @@ class EntitySearch(object):
                     if s == 'song':
                         s = 'track'
                     types.add(s)
+
+        try:
+            coords = (coords.lat, coords.lng)
+        except:
+            coords = None
         
         search  = self.search(query, 
                               coords    = coords, 
