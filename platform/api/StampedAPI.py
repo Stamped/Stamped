@@ -1255,7 +1255,7 @@ class StampedAPI(AStampedAPI):
             process -= 1
             if process > 0:
                 # asynchronously merge & enrich entity
-                self.mergeEntity(entity)
+                self.mergeEntity(entity, True)
         
         return results
     
@@ -2908,12 +2908,12 @@ class StampedAPI(AStampedAPI):
             entity_id = entity.entity_id
             
             # enrich and merge entity asynchronously
-            self.mergeEntity(entity)
+            self.mergeEntity(entity, True)
         
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
     
-    def _mergeEntity(self, entity):
+    def _mergeEntity(self, entity, update = False):
         try:
             decorations = {}
             modified    = self.__full_resolve.enrichEntity(entity, decorations)
@@ -2935,20 +2935,24 @@ class StampedAPI(AStampedAPI):
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
             else:
-                logs.info("Inserted new entity on merge %s" % entity.entity_id)
                 self.__handleDecorations(entity, decorations)
-                return self._entityDB.addEntity(entity)
+                
+                if update:
+                    logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
+                    return self._entityDB.updateEntity(entity)
+                else:
+                    logs.info("Inserted new entity on merge %s" % entity.entity_id)
+                    return self._entityDB.addEntity(entity)
         except Exception:
             report()
             raise
     
-    def mergeEntity(self, entity):
-        copy = Entity()
-        copy.importData(entity.value)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
+    def mergeEntity(self, entity, update = False):
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
     
-    def mergeEntityAsync(self, entity):
-        self._mergeEntity(entity)
+    def mergeEntityAsync(self, entity_dict, update = False):
+        entity = Entity(entity_dict)
+        self._mergeEntity(entity, update)
     
     @lazyProperty
     def __full_resolve(self):
