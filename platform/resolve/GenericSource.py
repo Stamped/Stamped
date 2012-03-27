@@ -167,10 +167,11 @@ class GenericSource(BasicSource):
             except Exception:
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
         entity['songs'] = new_songs
-
+    
     def wrapperFromKey(self, key, type=None):
+        raise NotImplementedError
         return None
-
+    
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()

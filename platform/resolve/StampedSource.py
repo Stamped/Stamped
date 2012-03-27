@@ -602,7 +602,7 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), query, constructor_wrapper=EntitySearchAll)
-
+    
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
@@ -626,13 +626,13 @@ class StampedSource(GenericSource):
             except ValueError:
                 pass
         return True
-
+    
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
         logs.info(str(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING), limit=1000)
-
+    
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
         def gen():
             try:
