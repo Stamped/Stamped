@@ -578,12 +578,14 @@ class iTunesSource(GenericSource):
                 if data['artistType'] == 'TV Show':
                     return iTunesTVShow(data=data)
                 return iTunesArtist(data=data)
-            elif value['wrapperType'] == 'software':
+            elif data['wrapperType'] == 'software':
                 return iTunesApp(data=data)
+            elif data['kind'] == 'ebook':
+                return iTunesBook(data=data)
             else:
-                pass
+                raise KeyError('Unrecognized data: %s' % data)
         except KeyError:
-            pass
+            raise
         return None
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):

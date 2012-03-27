@@ -97,9 +97,7 @@ def search(request):
                                             coords=search.coordinates, 
                                             authUserId=authUserId, 
                                             category=search.category, 
-                                            subcategory=search.subcategory, 
-                                            local=search.local, 
-                                            page=search.page)
+                                            subcategory=search.subcategory)
     
     autosuggest = []
     for item in result:

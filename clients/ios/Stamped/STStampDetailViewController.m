@@ -13,9 +13,12 @@
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "Entity.h"
+#import "EntityDetailViewController.h"
+#import "STStampDetailHeader.h"
 #import "STStampDetailToolbar.h"
 #import "Stamp.h"
 #import "User.h"
+#import "Util.h"
 
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
@@ -34,6 +37,7 @@ typedef enum {
 
 - (void)_showEmailViewController;
 - (void)_showTweetViewController;
+- (void)_headerPressed:(id)sender;
 - (void)_todoButtonPressed:(id)sender;
 - (void)_likeButtonPressed:(id)sender;
 - (void)_shareButtonPressed:(id)sender;
@@ -44,6 +48,7 @@ typedef enum {
 
 @synthesize stamp = _stamp;
 @synthesize toolbar = _toolbar;
+@synthesize header = _header;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [super initWithNibName:@"STStampDetailViewController" bundle:nil];
@@ -56,6 +61,7 @@ typedef enum {
 - (void)dealloc {
   [_stamp release];
   self.toolbar = nil;
+  self.header = nil;
   [super dealloc];
 }
 
@@ -78,11 +84,18 @@ typedef enum {
   [_toolbar.stampButton addTarget:self
                            action:@selector(_restampButtonPressed:)
                  forControlEvents:UIControlEventTouchUpInside];
+  
+  _header.subtitleLabel.text = _stamp.entityObject.subtitle;
+  _header.categoryImageView.image = _stamp.entityObject.stampDetailCategoryImage;
+  _header.stampImage = [_stamp.user stampImageWithSize:StampImageSize46];
+  _header.title = _stamp.entityObject.title;
+  [_header addTarget:self action:@selector(_headerPressed:) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.toolbar = nil;
+  self.header = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -151,6 +164,12 @@ typedef enum {
   twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
     [self dismissModalViewControllerAnimated:YES];
   };
+}
+
+- (void)_headerPressed:(id)sender {
+  EntityDetailViewController* vc = (EntityDetailViewController*)[Util detailViewControllerForEntity:_stamp.entityObject];
+  vc.referringStamp = _stamp;
+  [self.navigationController pushViewController:vc animated:YES];
 }
 
 #pragma mark - Toolbar methods.
