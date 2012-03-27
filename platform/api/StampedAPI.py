@@ -2853,7 +2853,7 @@ class StampedAPI(AStampedAPI):
             return search_id
         
         source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
-
+        
         sources = {
             'AMAZON':       AmazonSource,
             'FACTUAL':      FactualSource,
@@ -2863,13 +2863,14 @@ class StampedAPI(AStampedAPI):
             'SPOTIFY':      SpotifySource,
             'TMDB':         TMDBSource,
         }
-
+        
         if source_name not in sources:
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError
-
+        
         entity = Entity()
         source = sources[source_name]()
+        
         try:
             source.enrichEntityWithWrapper(source.wrapperFromKey(source_id), entity)
         except Exception as e:
@@ -2882,26 +2883,31 @@ class StampedAPI(AStampedAPI):
         
         del entity.entity_id
         entity = self._mergeEntity(entity)
-
+        
         assert entity.entity_id is not None
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity.entity_id))
-
+        
         return entity.entity_id
-
+    
     def _mergeEntity(self, entity):
         try:
             decorations = {}
-            modified = self.__full_resolve.enrichEntity(entity, decorations)
+            modified    = self.__full_resolve.enrichEntity(entity, decorations)
+            
             if 'stamped_id' in entity and entity['stamped_id'] is not None:
                 successor_id = entity['stamped_id']
-                successor = self._entityDB.getEntity(successor_id)
+                successor    = self._entityDB.getEntity(successor_id)
+                assert successor is not None
+                
                 merger = FullResolveContainer.FullResolveContainer()
                 merger.addSource(EntitySource(entity, merger.groups))
                 successor_decorations = {}
                 modified_successor = merger.enrichEntity(successor, successor_decorations)
                 self.__handleDecorations(successor, successor_decorations)
+                
                 if modified_successor:
                     self._entityDB.update(successor)
+                
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
             else:
@@ -2911,15 +2917,15 @@ class StampedAPI(AStampedAPI):
         except Exception:
             report()
             raise
-
+    
     def mergeEntity(self, entity):
         copy = Entity()
         copy.importData(entity.value)
         tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
-
+    
     def mergeEntityAsync(self, entity):
         self._mergeEntity(entity)
-
+    
     @lazyProperty
     def __full_resolve(self):
         return FullResolveContainer.FullResolveContainer()
@@ -2931,7 +2937,7 @@ class StampedAPI(AStampedAPI):
                     self.__menuDB.update(v)
                 except Exception:
                     report()
-
+    
     def _enrichEntity(self, entity):
         decorations = {}
         modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
@@ -2942,7 +2948,7 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(entity_id)
         
         if entity is not None:
-            modified  = self._enrichEntity(entity)
+            modified = self._enrichEntity(entity)
             if modified:
                 self._entityDB.update(entity)
         else:
