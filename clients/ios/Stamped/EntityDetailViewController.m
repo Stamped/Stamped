@@ -41,7 +41,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
-#warning Set to NO to revert to old version.
 BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
@@ -153,7 +152,7 @@ static const CGFloat kTodoBarHeight = 44.0;
   if (newEDetail) {
     NSLog(@"releasing eDetail");
     if (self.synchronousWrapper) {
-      [self.synchronousWrapper detatchFromDelegate];
+      self.synchronousWrapper.delegate = nil;
     }
     [self.operationQueue cancelAllOperations];
     [operationQueue_ release];

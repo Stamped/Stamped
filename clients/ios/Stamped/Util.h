@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "STAction.h"
 
 @class User;
 @class Entity;
@@ -67,5 +68,9 @@ extern NSString* const kKeychainTwitterToken;
 + (CGFloat)imageScale;
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
+
++ (void)didChooseAction:(id<STAction>)action;
+
++ (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 
 @end

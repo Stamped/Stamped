@@ -18,6 +18,7 @@
 #import "FilmDetailViewController.h"
 #import "EntityDetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STActionMenuFactory.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -439,6 +440,28 @@ static STPopUpView* volatile _currentPopUp = nil;
     NSLog(@"exception occurred! %@", exception);
   }
   NSLog(@"%@",[NSThread callStackSymbols]);
+}
+
++ (void)didChooseAction:(id<STAction>)action {
+  if (action.sources && [action.sources count] > 1) {
+    STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
+    NSOperation* operation = [factory createViewWithAction:action forBlock:^(STViewCreator init) {
+      if (init) {
+        UIView* view = init(nil);
+        view.frame = [Util centeredAndBounded:view.frame.size inFrame:[[UIApplication sharedApplication] keyWindow].frame];
+        [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.3]];
+      }
+    }];
+    dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+  }
+  if (action.sources && [action.sources count] == 1) {
+    [Util didChooseSource:[action.sources objectAtIndex:0] withAction:action.action];
+  }
+}
+
++ (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
+  
 }
 
 @end

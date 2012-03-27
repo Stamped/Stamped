@@ -19,7 +19,7 @@
 
 @property (nonatomic, retain) id<STSource> source;
 @property (nonatomic, retain) NSString* action;
-@property (nonatomic, readonly, assign) id<STViewDelegate> delegate;
+@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 
 - (void)callback:(id)state;
 
@@ -174,7 +174,7 @@
 }
 
 - (void)callback:(id)state {
-  if (self.delegate) {
+  if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
     [self.delegate didChooseSource:self.source forAction:self.action];
   }
 }

@@ -14,6 +14,4 @@
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
 - (void)appendChildView:(UIView*)child;
 
-@property (nonatomic, readonly, assign) id<STViewDelegate> delegate;
-
 @end

@@ -11,7 +11,6 @@
 
 @interface STViewContainer ()
 
-@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 @property (nonatomic, retain) NSMutableArray* children;
 @property (nonatomic, retain) NSMutableSet* dependents;
 
@@ -29,7 +28,6 @@ static int _count = 0;
 {
   self = [super initWithFrame:frame];
   if (self) {
-    NSLog(@"Creating STViewContainer %d %p %@",_count, self, self);
     _count++;
     self.children = [NSMutableArray array];
     dependents_ = [[NSMutableSet alloc] init];
@@ -42,9 +40,11 @@ static int _count = 0;
 
 - (void)dealloc {
   _count--;
-  NSLog(@"Deleting STViewContainer %d %p",_count, self);
   self.children = nil;
   self.delegate = nil;
+  for (id<STViewDelegateDependent> dependent in self.dependents) {
+    dependent.delegate = nil;
+  }
   [dependents_ release];
   [super dealloc];
 }
@@ -52,7 +52,6 @@ static int _count = 0;
 - (void)appendChildView:(UIView*)child {
   CGRect frame = child.frame;
   frame.origin.y = self.frame.size.height;
-  //NSLog(@"Child frame: %f,%f,%f,%f,%@",frame.origin.x,frame.origin.y,frame.size.width,frame.size.height,self);
   child.frame = frame;
   frame = self.frame;
   frame.size.height += child.frame.size.height;
@@ -62,7 +61,7 @@ static int _count = 0;
 }
 
 - (void)didChooseAction:(id<STAction>)action {
-  if (self.delegate) {
+  if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:)]) {
     [self.delegate didChooseAction:action];
   }
 }
@@ -82,7 +81,7 @@ static int _count = 0;
       }];
     }
   }
-  if (self.delegate) {
+  if (self.delegate && [self.delegate respondsToSelector:@selector(childView:shouldChangeHeightBy:overDuration:)]) {
     [self.delegate childView:self shouldChangeHeightBy:delta overDuration:seconds];
   }
   else {
@@ -95,7 +94,7 @@ static int _count = 0;
 }
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
-  if (self.delegate) {
+  if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
     [self.delegate didChooseSource:source forAction:action];
   }
 }
@@ -104,11 +103,8 @@ static int _count = 0;
   [self.dependents addObject:dependent];
 }
 
-- (void)detatchFromDelegate {
-  self.delegate = nil;
-  for (id<STViewDelegateDependent> dependent in self.dependents) {
-    [dependent detatchFromDelegate];
-  }
+- (void)setDelegate:(id<STViewDelegate>)delegate {
+  delegate_ = delegate;
 }
 
 @end

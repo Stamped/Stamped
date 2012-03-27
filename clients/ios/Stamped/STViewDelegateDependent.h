@@ -8,8 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol STViewDelegate;
+
 @protocol STViewDelegateDependent <NSObject>
 
-- (void)detatchFromDelegate;
+@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 
 @end
