@@ -432,4 +432,3 @@ class SKUNumberGroup(ABookGroup):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
 
-

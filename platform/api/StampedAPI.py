@@ -1168,8 +1168,10 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.addEntity(entity)
         return entity
     
+    @API_CALL
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
+        
         ### TODO: Check if user has access to this entity?
         tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
@@ -2868,26 +2870,23 @@ class StampedAPI(AStampedAPI):
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError
         
-        entity = Entity()
-        source = sources[source_name]()
+        source  = sources[source_name]()
+        wrapper = source.wrapperFromKey(source_id)
         
-        try:
-            source.enrichEntityWithWrapper(source.wrapperFromKey(source_id), entity)
-        except Exception as e:
-            logs.warning('Unable to enrich search_id: %s' % search_id)
-            logs.warning(e)
-            raise
+        stamped = StampedSource(stamped_api = self)
+        results = stamped.resolve(wrapper)
         
-        if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
-            return entity.entity_id
+        if len(results) > 0 and results[0][0]['resolved']:
+            entity_id = results[0][1].key
+        else:
+            entity = Entity()
+            source.enrichEntityWithWrapper(wrapper, entity)
+            
+            entity = self._entityDB.addEntity(entity)
+            entity_id = entity.entity_id
         
-        del entity.entity_id
-        entity = self._mergeEntity(entity)
-        
-        assert entity.entity_id is not None
-        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity.entity_id))
-        
-        return entity.entity_id
+        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
+        return entity_id
     
     def _mergeEntity(self, entity):
         try:

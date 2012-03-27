@@ -294,15 +294,18 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 class StampedSource(GenericSource):
     """
     """
-    def __init__(self):
+    def __init__(self, stamped_api = None):
         GenericSource.__init__(self, 'stamped')
+        self._stamped_api = stamped_api
 
     @lazyProperty
     def __entityDB(self):
-        import MongoStampedAPI
-        api = MongoStampedAPI.MongoStampedAPI()
+        if not self._stamped_api:
+            import MongoStampedAPI
+            self._stamped_api = MongoStampedAPI.MongoStampedAPI()
+        
         return api._entityDB
-
+    
     def artistFromEntity(self, entity):
         """
         ResolverArtist factory method for entities.
