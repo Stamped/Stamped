@@ -131,8 +131,8 @@ def handleHTTPRequest(fn):
         finally:
             try:
                 logs.save()
-            except Exception as e:
-                print e
+            except:
+                pass
     
     return handleHTTPRequest
 
