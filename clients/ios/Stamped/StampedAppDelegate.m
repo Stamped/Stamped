@@ -29,7 +29,6 @@
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
-#warning using stamped dev.
 static NSString* const kDataBaseURL = @"https://dev.stamped.com/v0";
 #else
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";

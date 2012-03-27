@@ -497,10 +497,6 @@ class ResolverProxy(object):
         return self.__target
 
     @lazyProperty
-    def name(self):
-        return self.target.name
-
-    @lazyProperty
     def url(self):
         return self.target.url
 
@@ -513,7 +509,10 @@ class ResolverProxy(object):
         return self.target.source
 
     def __repr__(self):
-        return "ResolverProxy:%s" % str(self.target)
+        try:
+            return "ResolverProxy:%s" % str(self.target)
+        except:
+            return "ResolverProxy"
 
     @property
     def keywords(self):
@@ -930,7 +929,7 @@ class ResolverTVShow(ResolverObject):
 
 class ResolverBook(ResolverObject):
     """
-    Interface for track objects
+    Interface for book objects
 
     Attributes:
 
@@ -1041,7 +1040,7 @@ class ResolverPlace(ResolverObject):
 
 class ResolverApp(ResolverObject):
     """
-    Interface for track objects
+    Interface for app objects
 
     Attributes:
 

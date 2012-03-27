@@ -37,7 +37,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def places_collection(self):
         return MongoPlacesEntityCollection()
-
+    
     ### PUBLIC
     
     def _convertFromMongo(self, document):
@@ -50,7 +50,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def _convertToMongo(self, entity):
         if entity is not None and entity.titlel is None:
             entity.titlel = getSimplifiedTitle(entity.title)
-        if entity.entity_id is not None and entity.entity_id.beginswith('T_'):
+        if entity.entity_id is not None and entity.entity_id.startswith('T_'):
             del entity.entity_id
         document = AMongoCollection._convertToMongo(self, entity)
         
@@ -109,4 +109,4 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def updateDecoration(self, name, value):
         if name == 'menu':
             self.__menu_db.updateMenu(value)
-        
+

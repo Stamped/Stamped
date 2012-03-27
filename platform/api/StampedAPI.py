@@ -49,6 +49,7 @@ try:
     from RdioSource             import RdioSource
     from SpotifySource          import SpotifySource
     from TMDBSource             import TMDBSource
+    from StampedSource          import StampedSource
 except:
     report()
     raise
@@ -1142,6 +1143,7 @@ class StampedAPI(AStampedAPI):
     def _getEntityFromRequest(self, entityRequest):
         if isinstance(entityRequest, SchemaElement):
             entityRequest = entityRequest.value
+        
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
         
@@ -1168,10 +1170,11 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.addEntity(entity)
         return entity
     
+    @API_CALL
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
+        
         ### TODO: Check if user has access to this entity?
-        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
     
     @API_CALL
@@ -1217,15 +1220,27 @@ class StampedAPI(AStampedAPI):
 
         return entity
     
-    @API_CALL
-    def searchEntitiesNew(self, query, coords=None, authUserId=None, category=None, subcategory=None):
-
-
+    @lazyProperty
+    def _entitySearch(self):
         from EntitySearch import EntitySearch
-
-        entities = EntitySearch().searchEntities(query, limit=10, coords=coords, category=category, subcategory=subcategory)
+        return EntitySearch()
+    
+    @API_CALL
+    def searchEntities(self, 
+                       query, 
+                       coords=None, 
+                       authUserId=None, 
+                       category=None, 
+                       subcategory=None):
+        entities = self._entitySearch.searchEntities(query, 
+                                                     limit=10, 
+                                                     coords=coords, 
+                                                     category=category, 
+                                                     subcategory=subcategory)
         
         results = []
+        process = 5
+        
         for entity in entities:
             distance = None
             try:
@@ -1236,21 +1251,26 @@ class StampedAPI(AStampedAPI):
             except:
                 pass
             results.append((entity, distance))
-
+            
+            process -= 1
+            if process > 0:
+                # asynchronously merge & enrich entity
+                self.mergeEntity(entity, True)
+        
         return results
     
     @API_CALL
-    def searchEntities(self, 
-                       query, 
-                       coords=None, 
-                       authUserId=None, 
-                       category=None, 
-                       subcategory=None, 
-                       prefix=False, 
-                       local=False, 
-                       full=True, 
-                       page=0, 
-                       limit=10):
+    def searchEntitiesOld(self, 
+                          query, 
+                          coords=None, 
+                          authUserId=None, 
+                          category=None, 
+                          subcategory=None, 
+                          prefix=False, 
+                          local=False, 
+                          full=True, 
+                          page=0, 
+                          limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
                                                         category_filter=category, 
@@ -1376,7 +1396,7 @@ class StampedAPI(AStampedAPI):
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
-            stampData = [stampData]
+            stampData   = [stampData]
         
         # Users
         if len(userIds) == 0:
@@ -2497,7 +2517,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
-
         count = None
 
         # Use relationships
@@ -2853,7 +2872,7 @@ class StampedAPI(AStampedAPI):
             return search_id
         
         source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
-
+        
         sources = {
             'AMAZON':       AmazonSource,
             'FACTUAL':      FactualSource,
@@ -2863,63 +2882,78 @@ class StampedAPI(AStampedAPI):
             'SPOTIFY':      SpotifySource,
             'TMDB':         TMDBSource,
         }
-
+        
         if source_name not in sources:
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError
-
-        entity = Entity()
-        source = sources[source_name]()
-        try:
-            source.enrichEntityWithWrapper(source.wrapperFromKey(source_id), entity)
-        except Exception as e:
-            logs.warning('Unable to enrich search_id: %s' % search_id)
-            logs.warning(e)
-            raise
         
-        if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
-            return entity.entity_id
+        source  = sources[source_name]()
+        wrapper = source.wrapperFromKey(source_id)
         
-        del entity.entity_id
-        entity = self._mergeEntity(entity)
-
-        assert entity.entity_id is not None
-        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity.entity_id))
-
-        return entity.entity_id
-
-    def _mergeEntity(self, entity):
+        # attempt to resolve against the Stamped DB
+        stamped = StampedSource(stamped_api = self)
+        results = stamped.resolve(wrapper)
+        
+        if len(results) > 0 and results[0][0]['resolved']:
+            # source key was found in the Stamped DB
+            entity_id = results[0][1].key
+            
+            # enrich entity asynchronously
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+        else:
+            entity = Entity()
+            source.enrichEntityWithWrapper(wrapper, entity)
+            
+            entity = self._entityDB.addEntity(entity)
+            entity_id = entity.entity_id
+            
+            # enrich and merge entity asynchronously
+            self.mergeEntity(entity, True)
+        
+        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
+        return entity_id
+    
+    def _mergeEntity(self, entity, update = False):
         try:
             decorations = {}
-            modified = self.__full_resolve.enrichEntity(entity, decorations)
+            modified    = self.__full_resolve.enrichEntity(entity, decorations)
+            
             if 'stamped_id' in entity and entity['stamped_id'] is not None:
                 successor_id = entity['stamped_id']
-                successor = self._entityDB.getEntity(successor_id)
+                successor    = self._entityDB.getEntity(successor_id)
+                assert successor is not None
+                
                 merger = FullResolveContainer.FullResolveContainer()
                 merger.addSource(EntitySource(entity, merger.groups))
                 successor_decorations = {}
                 modified_successor = merger.enrichEntity(successor, successor_decorations)
                 self.__handleDecorations(successor, successor_decorations)
+                
                 if modified_successor:
                     self._entityDB.update(successor)
+                
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
             else:
-                logs.info("Inserted new entity on merge %s" % entity.entity_id)
                 self.__handleDecorations(entity, decorations)
-                return self._entityDB.addEntity(entity)
+                
+                if update:
+                    logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
+                    return self._entityDB.updateEntity(entity)
+                else:
+                    logs.info("Inserted new entity on merge %s" % entity.entity_id)
+                    return self._entityDB.addEntity(entity)
         except Exception:
             report()
             raise
-
-    def mergeEntity(self, entity):
-        copy = Entity()
-        copy.importData(entity.value)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[copy])
-
-    def mergeEntityAsync(self, entity):
-        self._mergeEntity(entity)
-
+    
+    def mergeEntity(self, entity, update = False):
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
+    
+    def mergeEntityAsync(self, entity_dict, update = False):
+        entity = Entity(entity_dict)
+        self._mergeEntity(entity, update)
+    
     @lazyProperty
     def __full_resolve(self):
         return FullResolveContainer.FullResolveContainer()
@@ -2931,7 +2965,7 @@ class StampedAPI(AStampedAPI):
                     self.__menuDB.update(v)
                 except Exception:
                     report()
-
+    
     def _enrichEntity(self, entity):
         decorations = {}
         modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
@@ -2942,7 +2976,7 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(entity_id)
         
         if entity is not None:
-            modified  = self._enrichEntity(entity)
+            modified = self._enrichEntity(entity)
             if modified:
                 self._entityDB.update(entity)
         else:

@@ -260,6 +260,9 @@ class GooglePlacesSource(GenericSource):
                     # Hacky conversion
                     params = {'name': q.query_string, 'radius': 20000}
                     results = self.__places.getEntityResultsByLatLng(q.coordinates, params)
+                    if results is None:
+                        return self.emptySource
+
                     for result in results:
                         data = {}
                         data['reference'] = result.reference

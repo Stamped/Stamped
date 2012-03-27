@@ -502,14 +502,16 @@ class Entity(Schema):
         self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
         self.titlel             = SchemaElement(basestring)
+        
         self.mangled_title              = SchemaElement(basestring)
         self.mangled_title_source       = SchemaElement(basestring)
         self.mangled_title_timestamp    = SchemaElement(datetime) 
+        
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
         self.subtitle_source    = SchemaElement(basestring)
         self.subtitle_timestamp = SchemaElement(datetime)
-
+        
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.subcategory_source = SchemaElement(basestring)
@@ -520,7 +522,7 @@ class Entity(Schema):
         self.desc               = SchemaElement(basestring)
         self.desc_source        = SchemaElement(basestring)
         self.desc_timestamp     = SchemaElement(datetime)
-
+        
         self.image              = SchemaElement(basestring)
         self.popularity         = SchemaElement(int)
         self.timestamp          = TimestampSchema()
@@ -530,7 +532,7 @@ class Entity(Schema):
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
         self.stats              = StatsSchema()
-
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             from Entity import setFields
@@ -628,15 +630,15 @@ class PlaceSchema(Schema):
         self.address_country    = SchemaElement(basestring)
         self.address_source     = SchemaElement(basestring)
         self.address_timestamp  = SchemaElement(datetime)
-
+        
         self.neighborhood               = SchemaElement(basestring)
         self.neighborhood_source        = SchemaElement(basestring)
         self.neighborhood_timestamp     = SchemaElement(datetime)
-
+        
         self.hours              = TimesSchema()
         self.hours_source       = SchemaElement(basestring)
         self.hours_timestamp    = SchemaElement(datetime)
-
+        
         self.address            = SchemaElement(basestring)
         self.address_components = SchemaList(AddressComponentSchema())
         self.types              = SchemaList(SchemaElement(basestring))
@@ -673,20 +675,19 @@ class RestaurantSchema(Schema):
         self.cuisine            = SchemaElement(basestring)
         self.cuisine_source     = SchemaElement(basestring)
         self.cuisine_timestamp  = SchemaElement(datetime)
-
+        
         self.menu               = SchemaElement(bool)
         self.menu_source        = SchemaElement(basestring)
         self.menu_timestamp     = SchemaElement(datetime)
-
+        
         self.price_range        = SchemaElement(int)
         self.price_range_source = SchemaElement(basestring)
         self.price_range_timestamp = SchemaElement(datetime)
-
+        
         self.alcohol_flag       = SchemaElement(bool)
         self.alcohol_flag_source        = SchemaElement(basestring)
         self.alcohol_flag_timestamp     = SchemaElement(datetime)
-
-
+        
         #self.price              = SchemaElement(basestring)
         self.payment            = SchemaElement(basestring)
         self.dressCode          = SchemaElement(basestring)
@@ -711,7 +712,6 @@ class RestaurantSchema(Schema):
 
 class AppSchema(Schema):
     def setSchema(self):
-        
         pass
         #self.developer          = SchemaElement(basestring)
         #self.developerURL       = SchemaElement(basestring)
@@ -1257,6 +1257,4 @@ class HoursSchema(Schema):
         self.open = SchemaElement(basestring)
         self.close = SchemaElement(basestring)
         self.desc = SchemaElement(basestring)
-
-
 

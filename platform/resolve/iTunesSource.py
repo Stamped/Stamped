@@ -39,14 +39,14 @@ class _iTunesObject(object):
     data - the type specific iTunes data for the object.
     itunes - an instance of iTunes (API wrapper)
     """
-
+    
     def __init__(self, itunes_id=None, data=None, itunes=None):
         if itunes is None:
             itunes = globaliTunes()
         self.__itunes = itunes
         self.__data = data
         self.__itunes_id = itunes_id
-
+    
     @lazyProperty
     def data(self):
         if self.__data == None:
@@ -85,22 +85,22 @@ class _iTunesObject(object):
                 return self.itunes.method('lookup', id=self.__itunes_id)['results'][0]
         else:
             return self.__data
-
+    
     @property 
     def itunes(self):
         return self.__itunes
-
+    
     @property 
     def source(self):
         return "itunes"
-
+    
     @lazyProperty
     def image(self):
         try:
             return self.data['artworkUrl100']
         except:
             return ''
-
+    
     def __repr__(self):
         return pformat( self.data )
 
@@ -567,23 +567,30 @@ class iTunesSource(GenericSource):
     def wrapperFromId(self, itunes_id):
         try:
             data = self.__itunes.method('lookup',id=itunes_id)['results'][0]
-            if data['wrapperType'] == 'track':
-                if data['kind'].find('movie') != -1:
+
+            dataWrapperType     = data['wrapperType'] if 'wrapperType' in data else None
+            dataKind            = data['kind'] if 'kind' in data else None
+            dataCollectionType  = data['collectionType'] if 'collectionType' in data else None
+            dataArtistType      = data['artistType'] if 'artistType' in data else None
+
+            if dataWrapperType == 'track':
+                if dataKind is not None and dataKind.find('movie') != -1:
                     return iTunesMovie(data=data)
-                elif data['kind'] == 'song':
+                elif dataKind == 'song':
                     return iTunesTrack(data=data)
-            elif data['wrapperType'] == 'collection' and data['collectionType'] == 'Album':
+            elif dataWrapperType == 'collection' and dataCollectionType == 'Album':
                 return iTunesAlbum(data=data)
-            elif data['wrapperType'] == 'artist':
-                if data['artistType'] == 'TV Show':
+            elif dataWrapperType == 'artist':
+                if dataArtistType == 'TV Show':
                     return iTunesTVShow(data=data)
                 return iTunesArtist(data=data)
-            elif value['wrapperType'] == 'software':
+            elif dataWrapperType == 'software':
                 return iTunesApp(data=data)
-            else:
-                pass
+            elif dataKind == 'ebook':
+                return iTunesBook(data=data)
+            raise KeyError('Unrecognized data: %s' % data)
         except KeyError:
-            pass
+            raise
         return None
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):

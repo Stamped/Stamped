@@ -1,4 +1,12 @@
 
+* Cluster utility library
+    * Generic node lookup, initialization code, etc.
+    * Handle security groups for communication between nodes?
+    * Use ElasticSearch for inspiration
+
+* Python Promises library
+    * Integrated with Celery and gevent
+
 * Google Places and Google Autocomplete sources?
 * 
 * prune national outliers when location hinting is turned on
@@ -21,20 +29,15 @@ OLD:
 * cleanup userRequest instances; enforce screen_name if given in addition to user_id
 * what happens if user_id or screen_name lookup fails?
 
-API v1:
-    * entrypoints:
-        * collections/inbox
-        * collections/user
-        * favorites/show
-        * todo's
-
-
 API:
     * standardize handleHTTPRequest to take in a parameter for whether or not auth is required and input schema
 
 blog:
     * scaling considerations
-        * modular; every component should support async w/ timeouts, fallbacks & monitoring / alerts if dependency fails
+        * modular; every component should support async w/ timeouts, fallbacks, monitoring / alerts if dependency fails
+        * fallbacks:
+            * geographical fallbacks
+            * graceful degradation
 
 platform:
     * redirect useless statsd.node.log to /dev/null
