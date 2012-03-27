@@ -11,8 +11,7 @@
 #import "STViewDelegateDependent.h"
 
 @protocol STViewDelegate <NSObject>
-@required
-
+@optional
 - (void)didChooseAction:(id<STAction>)action;
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 - (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds;

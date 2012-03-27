@@ -111,7 +111,6 @@
 }
 
 - (void)dealloc {
-  NSLog(@"dealloc ActionItemView");
   self.action = nil;
   self.delegate = nil;
   [super dealloc];

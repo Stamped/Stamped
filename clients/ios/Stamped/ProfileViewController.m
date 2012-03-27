@@ -737,7 +737,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id",
                                                                    @"1", @"quality",
-                                                                   @"5", @"limit", nil];
+                                                                   @"5", @"limit",
+                                                                   @"created", @"sort", nil];
   [objectLoader send];
 }
 

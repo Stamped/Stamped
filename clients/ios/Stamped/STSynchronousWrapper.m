@@ -8,6 +8,7 @@
 
 #import "STSynchronousWrapper.h"
 #import "STEntityDetailViewFactory.h"
+#import "STWeakProxy.h"
 
 @interface STSynchronousWrapper()
 
@@ -15,6 +16,7 @@
 
 @property (nonatomic, retain) UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) NSOperationQueue* queue;
+@property (nonatomic, retain) STWeakProxy* proxy;
 
 @end
 
@@ -22,6 +24,7 @@
 
 @synthesize loadingView = _loadingView;
 @synthesize queue = _queue;
+@synthesize proxy = _proxy;
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate
       componentFactory:(id<STEntityDetailComponentFactory>)factory
@@ -29,14 +32,19 @@
               andFrame:(CGRect)frame {
   self = [super initWithDelegate:delegate andFrame:frame];
   if (self) {
+    _proxy = [[STWeakProxy alloc] initWithValue:self];
     _queue = [[NSOperationQueue alloc] init];
     _loadingView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     _loadingView.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
     [self addSubview:_loadingView];
     _loadingView.hidden = NO;
     [_loadingView startAnimating];
+    STWeakProxy* weakproxy = _proxy;
     NSOperation* operation = [factory createViewWithEntityDetail:entityDetail andCallbackBlock:^(STViewCreator creator) {
-      [self handleCallback:creator];
+      STSynchronousWrapper* wrapper = weakproxy.value;
+      if (wrapper) {
+        [wrapper handleCallback:creator];
+      }
     }];
     [_queue addOperation:operation];
   }
@@ -45,6 +53,8 @@
 
 - (void)dealloc
 {
+  self.proxy.value = nil;
+  [_proxy release];
   [_queue release];
   [_loadingView release];
   [super dealloc];

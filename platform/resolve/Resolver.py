@@ -483,6 +483,10 @@ class ResolverObject(object):
     def date(self):
         return None
 
+    @lazyProperty
+    def subcategories(self):
+        return set([self.type])
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -541,6 +545,10 @@ class ResolverProxy(object):
     @property
     def date(self):
         return self.target.date
+
+    @property
+    def subcategories(self):
+        return self.target.subcategories
 
 class SimpleResolverObject(ResolverObject):
 
@@ -604,6 +612,7 @@ class ResolverSearchAll(ResolverObject):
     @property 
     def type(self):
         return 'search_all'
+
 
 #
 # Artist
@@ -743,6 +752,10 @@ class ResolverTrack(ResolverObject):
             ]
                 if v != ''
         ]
+
+    @lazyProperty
+    def subcategories(self):
+        return set(['song'])
 
 
 class SimpleResolverTrack(SimpleResolverObject):
