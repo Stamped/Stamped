@@ -13,6 +13,7 @@
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "Entity.h"
+#import "STStampDetailHeader.h"
 #import "STStampDetailToolbar.h"
 #import "Stamp.h"
 #import "User.h"
@@ -44,6 +45,7 @@ typedef enum {
 
 @synthesize stamp = _stamp;
 @synthesize toolbar = _toolbar;
+@synthesize header = _header;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [super initWithNibName:@"STStampDetailViewController" bundle:nil];
@@ -56,6 +58,7 @@ typedef enum {
 - (void)dealloc {
   [_stamp release];
   self.toolbar = nil;
+  self.header = nil;
   [super dealloc];
 }
 
@@ -78,11 +81,17 @@ typedef enum {
   [_toolbar.stampButton addTarget:self
                            action:@selector(_restampButtonPressed:)
                  forControlEvents:UIControlEventTouchUpInside];
+  
+  _header.subtitleLabel.text = _stamp.entityObject.subtitle;
+  _header.categoryImageView.image = _stamp.entityObject.stampDetailCategoryImage;
+  _header.stampImage = [_stamp.user stampImageWithSize:StampImageSize46];
+  _header.title = _stamp.entityObject.title;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.toolbar = nil;
+  self.header = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
