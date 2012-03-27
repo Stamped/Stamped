@@ -41,7 +41,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
-#warning Set to NO to revert to old version.
 BOOL const newEDetail = YES;
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
