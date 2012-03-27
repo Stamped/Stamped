@@ -6143,9 +6143,7 @@
 				7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */,
 				7E05964B1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966415212CBD009D691E /* STStampDetailHeader.m in Sources */,
-<<<<<<< HEAD
 				6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */,
-=======
 				7E4A6ECC15222E6F0031D7D6 /* Facebook.m in Sources */,
 				7E4A6ED015222E6F0031D7D6 /* FBDialog.m in Sources */,
 				7E4A6ED215222E6F0031D7D6 /* FBFrictionlessRequestSettings.m in Sources */,
@@ -6157,7 +6155,6 @@
 				7E4A6EDE15222E6F0031D7D6 /* SBJsonBase.m in Sources */,
 				7E4A6EE015222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
->>>>>>> 495b75bcfed231aa08a5b4c81ecdd3a3dbf85ff2
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6321,9 +6318,7 @@
 				7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */,
 				7E05964A1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966315212CBD009D691E /* STStampDetailHeader.m in Sources */,
-<<<<<<< HEAD
 				6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */,
-=======
 				7E4A6ECB15222E6F0031D7D6 /* Facebook.m in Sources */,
 				7E4A6ECF15222E6F0031D7D6 /* FBDialog.m in Sources */,
 				7E4A6ED115222E6F0031D7D6 /* FBFrictionlessRequestSettings.m in Sources */,
@@ -6335,7 +6330,6 @@
 				7E4A6EDD15222E6F0031D7D6 /* SBJsonBase.m in Sources */,
 				7E4A6EDF15222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
->>>>>>> 495b75bcfed231aa08a5b4c81ecdd3a3dbf85ff2
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
