@@ -49,6 +49,7 @@ try:
     from RdioSource             import RdioSource
     from SpotifySource          import SpotifySource
     from TMDBSource             import TMDBSource
+    from StampedSource          import StampedSource
 except:
     report()
     raise
@@ -1378,7 +1379,7 @@ class StampedAPI(AStampedAPI):
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
-            stampData = [stampData]
+            stampData   = [stampData]
         
         # Users
         if len(userIds) == 0:
