@@ -13,6 +13,7 @@
 #import "STViewController.h"
 
 @class Stamp;
+@class STStampDetailHeader;
 @class STStampDetailToolbar;
 
 @interface STStampDetailViewController : STViewController<UIActionSheetDelegate,
@@ -21,5 +22,6 @@
 - (id)initWithStamp:(Stamp*)stamp;
 
 @property (nonatomic, retain) IBOutlet STStampDetailToolbar* toolbar;
+@property (nonatomic, retain) IBOutlet STStampDetailHeader* header;
 
 @end

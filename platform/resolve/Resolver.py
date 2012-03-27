@@ -479,6 +479,10 @@ class ResolverObject(object):
     def image(self):
         return None
 
+    @property
+    def date(self):
+        return None
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -534,6 +538,10 @@ class ResolverProxy(object):
     @property
     def image(self):
         return self.target.image
+
+    @property
+    def date(self):
+        return self.target.date
 
 class SimpleResolverObject(ResolverObject):
 
@@ -1349,10 +1357,10 @@ class Resolver(object):
             ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=2.0),
             'cast':         lambda q, m, s, o: self.__castWeight(q, m),
             'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
-            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
@@ -1363,8 +1371,8 @@ class Resolver(object):
             ('publisher',   lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher))
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=4),
-            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
             'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
                                                 exact_boost=2, m_empty=4 ),
         }
