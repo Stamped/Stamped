@@ -58,6 +58,12 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
 
+static Rdio* _rdio;
+
++(void)initialize {
+  _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47" andSecret:@"xJSZwBZxFp" delegate:nil];
+}
+
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {
   NSRange range;
   range.location = 0;  
@@ -462,6 +468,10 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 + (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
   
+}
+
++ (Rdio*)sharedRdio {
+  return _rdio;
 }
 
 @end
