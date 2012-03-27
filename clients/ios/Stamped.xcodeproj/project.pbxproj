@@ -385,6 +385,9 @@
 		7E4A6EE015222E6F0031D7D6 /* SBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A6EC815222E6F0031D7D6 /* SBJsonParser.m */; };
 		7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A6ECA15222E6F0031D7D6 /* SBJsonWriter.m */; };
 		7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A6ECA15222E6F0031D7D6 /* SBJsonWriter.m */; };
+		7E4A6EFA15224F130031D7D6 /* STStampDetailCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A6EF915224F130031D7D6 /* STStampDetailCardView.m */; };
+		7E4A6EFB15224F130031D7D6 /* STStampDetailCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A6EF915224F130031D7D6 /* STStampDetailCardView.m */; };
+		7E4A6EFC152253A80031D7D6 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		7E4A83EC14BE460000A700E9 /* tooltip_tapHere.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */; };
 		7E4A83ED14BE460000A700E9 /* tooltip_tapHere.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */; };
 		7E4A83EE14BE460000A700E9 /* tooltip_tapHere@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */; };
@@ -2111,6 +2114,8 @@
 		7E4A6EC815222E6F0031D7D6 /* SBJsonParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonParser.m; sourceTree = "<group>"; };
 		7E4A6EC915222E6F0031D7D6 /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 		7E4A6ECA15222E6F0031D7D6 /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonWriter.m; sourceTree = "<group>"; };
+		7E4A6EF815224F130031D7D6 /* STStampDetailCardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailCardView.h; sourceTree = "<group>"; };
+		7E4A6EF915224F130031D7D6 /* STStampDetailCardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailCardView.m; sourceTree = "<group>"; };
 		7E4A83EA14BE460000A700E9 /* tooltip_tapHere.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tooltip_tapHere.png; sourceTree = "<group>"; };
 		7E4A83EB14BE460000A700E9 /* tooltip_tapHere@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tooltip_tapHere@2x.png"; sourceTree = "<group>"; };
 		7E4A83F014BE461100A700E9 /* buttonImg_addEmail_grey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = buttonImg_addEmail_grey.png; sourceTree = "<group>"; };
@@ -2829,6 +2834,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E4A6EFC152253A80031D7D6 /* libRestKit.a in Frameworks */,
 				63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */,
 				7E07EC1D14C73FD400A2B5F0 /* libz.dylib in Frameworks */,
 				7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */,
@@ -2994,6 +3000,8 @@
 				7E0596491520EB6B009D691E /* STStampDetailToolbar.m */,
 				7E05966115212CBD009D691E /* STStampDetailHeader.h */,
 				7E05966215212CBD009D691E /* STStampDetailHeader.m */,
+				7E4A6EF815224F130031D7D6 /* STStampDetailCardView.h */,
+				7E4A6EF915224F130031D7D6 /* STStampDetailCardView.m */,
 			);
 			name = "New Stamp Detail";
 			sourceTree = "<group>";
@@ -6163,6 +6171,7 @@
 				7E4A6EDE15222E6F0031D7D6 /* SBJsonBase.m in Sources */,
 				7E4A6EE015222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
+				7E4A6EFB15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6339,6 +6348,7 @@
 				7E4A6EDD15222E6F0031D7D6 /* SBJsonBase.m in Sources */,
 				7E4A6EDF15222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
+				7E4A6EFA15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
