@@ -228,9 +228,9 @@ class FactualSource(GenericSource):
         return None
 
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['restaurant', 'bar', 'place', 'other'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
             
         def gen():

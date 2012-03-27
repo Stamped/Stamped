@@ -207,7 +207,6 @@ class GooglePlacesSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'googleplaces',
-
             'address',
             'phone',
             'site',

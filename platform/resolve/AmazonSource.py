@@ -361,9 +361,9 @@ class AmazonSource(GenericSource):
             }
         )
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['book', 'track', 'album'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
             
         q = query.query_string

@@ -15,7 +15,7 @@ from logs import report
 
 try:
     from libs.iTunes                import globaliTunes
-    from GenericSource              import GenericSource
+    from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     import logs
@@ -93,6 +93,13 @@ class _iTunesObject(object):
     @property 
     def source(self):
         return "itunes"
+
+    @lazyProperty
+    def image(self):
+        try:
+            return self.data['artworkUrl100']
+        except:
+            return ''
 
     def __repr__(self):
         return pformat( self.data )
@@ -505,6 +512,20 @@ class iTunesApp(_iTunesObject, ResolverApp):
         except KeyError:
             return ''
 
+    @lazyProperty
+    def screenshots(self):
+        try:
+            return self.data['screenshotUrls']
+        except:
+            return []
+
+    @lazyProperty 
+    def image(self):
+        try:
+            return self.data['artworkUrl512']
+        except:
+            return ''
+
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, target):
@@ -614,88 +635,32 @@ class iTunesSource(GenericSource):
             return self.emptySource
 
     def trackSource(self, query):
-        tracks = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
-        def source(start, count):
-            if start + count <= len(tracks):
-                result = tracks[start:start+count]
-            elif start < len(tracks):
-                result = tracks[start:]
-            else:
-                result = []
-            return [ iTunesTrack( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
+        return listSource(items)
     
     def albumSource(self, query):
-        albums = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
-        def source(start, count):
-            if start + count <= len(albums):
-                result = albums[start:start+count]
-            elif start < len(albums):
-                result = albums[start:]
-            else:
-                result = []
-            return [ iTunesAlbum( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
+        return listSource(items)
 
     def artistSource(self, query):
-        artists = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(artists):
-                result = artists[start:start+count]
-            elif start < len(artists):
-                result = artists[start:]
-            else:
-                result = []
-            return [ iTunesArtist( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
+        return listSource(items)
 
     def movieSource(self, query):
-        movies = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(movies):
-                result = movies[start:start+count]
-            elif start < len(movies):
-                result = movies[start:]
-            else:
-                result = []
-            return [ iTunesMovie( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
+        return listSource(items)
 
     def bookSource(self, query):
-        movies = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(movies):
-                result = movies[start:start+count]
-            elif start < len(movies):
-                result = movies[start:]
-            else:
-                result = []
-            return [ iTunesBook( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
+        return listSource(items)
 
     def tvSource(self, query):
-        shows = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(shows):
-                result = shows[start:start+count]
-            elif start < len(shows):
-                result = shows[start:]
-            else:
-                result = []
-            return [ iTunesTVShow( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
+        return listSource(items)
 
     def appSource(self, query):
-        apps = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
-        def source(start, count):
-            if start + count <= len(apps):
-                result = apps[start:start+count]
-            elif start < len(apps):
-                result = apps[start:]
-            else:
-                result = []
-            return [ iTunesTVShow( data=entry ) for entry in result ]
-        return source
+        items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
+        return listSource(items)
 
     def __createWrapper(self, value):
         try:
@@ -719,49 +684,51 @@ class iTunesSource(GenericSource):
         except Exception:
             raise ValueError('Malformed iTunes output')
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['book', 'track', 'album', 'artist', 'movie', 'tv', 'app'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
 
         def gen():
             try:
-                if types is None:
+                if query.types is None:
                     queries = [
                         'musicArtist', 'song', 'album', 'movie', 'ebook', 'tvShow', 'software'
                     ]
                 else:
                     queries = []
-                    if 'book' in types:
+                    if 'book' in query.types:
                         queries.append('ebook')
-                    if 'track' in types:
+                    if 'track' in query.types:
                         queries.append('song')
-                    if 'album' in types:
+                    if 'album' in query.types:
                         queries.append('album')
-                    if 'artist' in types:
+                    if 'artist' in query.types:
                         queries.append('musicArtist')
-                    if 'movie' in types:
+                    if 'movie' in query.types:
                         queries.append('movie')
-                    if 'tv' in types:
+                    if 'tv' in query.types:
                         queries.append('tvShow')
-                    if 'app' in types:
+                    if 'app' in query.types:
                         queries.append('software')
-
+                
                 if len(queries) == 0:
                     return 
-
+                
                 raw_results = []
                 def helper(q):
                     raw_results.append(self.__itunes.method(
                         'search',term=query.query_string,entity=q
                     )['results'])
-
+                
                 pool = Pool(len(queries))
                 for q in queries:
                     pool.spawn(helper, q)
                 pool.join(timeout=timeout)
+                
                 final_results = list(raw_results)
                 found = True
+                
                 while found:
                     found = False
                     for results in final_results:
@@ -778,7 +745,6 @@ class iTunesSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.generatorSource( gen(), constructor=iTunesSearchAll )
-
 
 if __name__ == '__main__':
     demo(iTunesSource(), 'Katy Perry')

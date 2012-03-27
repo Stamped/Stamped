@@ -556,7 +556,7 @@ class HTTPEntity(Schema):
             if 'amzstatic.com' in domain:
                 # try to return the maximum-resolution apple photo possible if we have 
                 # a lower-resolution version stored in our db
-                url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+                url = url.replace('100x100', '400x400').replace('170x170', '400x400')
             
             elif 'amazon.com' in domain:
                 # strip the 'look inside' image modifier

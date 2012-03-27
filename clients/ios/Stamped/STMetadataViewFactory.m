@@ -200,7 +200,7 @@ static const CGFloat _kReadMoreHeight = 74;
                       andDelegate:(id<STViewDelegate>)delegate {
   STViewContainer* main = nil;
   if (entity && entity.metadata && [entity.metadata count] > 0) {
-    main = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)];
+    main = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
     STViewContainer* view = [[STViewContainer alloc] initWithDelegate:main andFrame:CGRectMake(15, 0, 290, 0)];
     
     UIImage* image = [UIImage imageNamed:@"eDetailBox_line"];
@@ -231,7 +231,6 @@ static const CGFloat _kReadMoreHeight = 74;
     CGRect frame = main.frame;
     frame.size.height += 10;
     main.frame = frame;
-    [main autorelease];
   }
   return main;
 }

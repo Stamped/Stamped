@@ -15,6 +15,7 @@
 #import "Util.h"
 #import "STEntityDetail.h"
 #import "STViewDelegate.h"
+#import "STSynchronousWrapper.h"
 
 @class Entity;
 @class DetailedEntity;
@@ -59,6 +60,7 @@ extern BOOL const newEDetail;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;
 @property (nonatomic, readonly) NSMutableArray* detailComponents;
 @property (nonatomic, readonly) NSOperationQueue* operationQueue;
+@property (nonatomic, retain) STSynchronousWrapper* synchronousWrapper;
 
 @property (nonatomic, retain) IBOutlet STToolbar* toolbarView;
 @property (nonatomic, retain) IBOutlet UIButton* todoButton;

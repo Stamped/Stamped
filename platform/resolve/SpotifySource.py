@@ -259,9 +259,9 @@ class SpotifySource(GenericSource):
         artists = self.__spotify.search('artist',q=q)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
-    def searchAllSource(self, query, timeout=None, types=None):
+    def searchAllSource(self, query, timeout=None):
         validTypes = set(['track', 'album', 'artist'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
             return self.emptySource
             
         q = query.query_string

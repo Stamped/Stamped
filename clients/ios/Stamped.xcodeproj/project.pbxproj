@@ -15,11 +15,18 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
+		63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
+		63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
+		63733FF01521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
+		63733FF2152112D700EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
+		63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
+		63733FF61521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
+		63733FF71521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
+		63733FF81521179700EEFAB3 /* STViewDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */; };
 		6380A76215066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76315066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
-		6380A7891506779C003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
-		6380A78C15069299003087EF /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6380A78015067776003087EF /* libRestKit.a */; };
 		6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
@@ -1694,28 +1701,28 @@
 			remoteGlobalIDString = 4F35138613EA1FF500E12259;
 			remoteInfo = OAuthTouchNonGoogleStaticLib;
 		};
-		6380A77F15067776003087EF /* PBXContainerItemProxy */ = {
+		63733FD71521046300EEFAB3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6380A77815067776003087EF /* RestKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 25160D1614564E810060A5C5;
 			remoteInfo = RestKit;
 		};
-		6380A78115067776003087EF /* PBXContainerItemProxy */ = {
+		63733FD91521046300EEFAB3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6380A77815067776003087EF /* RestKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 25160D2614564E820060A5C5;
 			remoteInfo = RestKitTests;
 		};
-		6380A78315067776003087EF /* PBXContainerItemProxy */ = {
+		63733FDB1521046300EEFAB3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6380A77815067776003087EF /* RestKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 25160E62145651060060A5C5;
 			remoteInfo = RestKitFramework;
 		};
-		6380A78515067776003087EF /* PBXContainerItemProxy */ = {
+		63733FDD1521046300EEFAB3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6380A77815067776003087EF /* RestKit.xcodeproj */;
 			proxyType = 2;
@@ -1763,6 +1770,11 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
+		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
+		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		63733FF41521179700EEFAB3 /* STViewDelegateProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateProxy.h; sourceTree = "<group>"; };
+		63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewDelegateProxy.m; sourceTree = "<group>"; };
+		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
 		6380A77815067776003087EF /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = "Vendor/gtm-oauth/Source/../../../RestKit/RestKit.xcodeproj"; sourceTree = "<group>"; };
@@ -2783,7 +2795,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6380A78C15069299003087EF /* libRestKit.a in Frameworks */,
+				63733FF2152112D700EEFAB3 /* AudioToolbox.framework in Frameworks */,
+				63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */,
 				7E07EC1E14C73FDF00A2B5F0 /* libz.dylib in Frameworks */,
 				7ED043E8149FD52300E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DB149EABFD00B56FA0 /* Accounts.framework in Frameworks */,
@@ -2804,6 +2817,7 @@
 				7E589435147C468B002268C4 /* Foundation.framework in Frameworks */,
 				7E589436147C468B002268C4 /* CoreGraphics.framework in Frameworks */,
 				7ED2824A14914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
+				63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2811,7 +2825,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6380A7891506779C003087EF /* libRestKit.a in Frameworks */,
+				63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */,
 				7E07EC1D14C73FD400A2B5F0 /* libz.dylib in Frameworks */,
 				7ED043E7149FCA3E00E46284 /* libxml2.dylib in Frameworks */,
 				7ECCF0DA149EABEC00B56FA0 /* Accounts.framework in Frameworks */,
@@ -2832,6 +2846,7 @@
 				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
 				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
 				7ED2824914914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
+				63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2842,6 +2857,7 @@
 				7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */,
 				7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */,
 				7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+				63733FF01521108700EEFAB3 /* Rdio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2862,6 +2878,7 @@
 		1E5AFFC5141D2A5000772F11 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				63733FED1521108700EEFAB3 /* Rdio.framework */,
 				6380A77815067776003087EF /* RestKit.xcodeproj */,
 				7EB503D614CF4C37005DDCA0 /* TWSignedRequest */,
 				7E07EBD114C73EFA00A2B5F0 /* ASIHTTPRequest */,
@@ -2876,10 +2893,10 @@
 		6380A77915067776003087EF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6380A78015067776003087EF /* libRestKit.a */,
-				6380A78215067776003087EF /* RestKitTests.octest */,
-				6380A78415067776003087EF /* RestKit.framework */,
-				6380A78615067776003087EF /* RestKitFrameworkTests.octest */,
+				63733FD81521046300EEFAB3 /* libRestKit.a */,
+				63733FDA1521046300EEFAB3 /* RestKitTests.octest */,
+				63733FDC1521046300EEFAB3 /* RestKit.framework */,
+				63733FDE1521046300EEFAB3 /* RestKitFrameworkTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2929,6 +2946,8 @@
 				63877B531520BAE100DE5A3A /* STEntityDetailView.m */,
 				63877B571520C35700DE5A3A /* STSynchronousWrapper.h */,
 				63877B581520C35700DE5A3A /* STSynchronousWrapper.m */,
+				63733FF41521179700EEFAB3 /* STViewDelegateProxy.h */,
+				63733FF51521179700EEFAB3 /* STViewDelegateProxy.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2947,6 +2966,7 @@
 				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
 				63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */,
+				63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3820,6 +3840,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				63733FF1152112D600EEFAB3 /* AudioToolbox.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -4644,32 +4665,32 @@
 			remoteRef = 1E5AFFC2141D29EC00772F11 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		6380A78015067776003087EF /* libRestKit.a */ = {
+		63733FD81521046300EEFAB3 /* libRestKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRestKit.a;
-			remoteRef = 6380A77F15067776003087EF /* PBXContainerItemProxy */;
+			remoteRef = 63733FD71521046300EEFAB3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		6380A78215067776003087EF /* RestKitTests.octest */ = {
+		63733FDA1521046300EEFAB3 /* RestKitTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitTests.octest;
-			remoteRef = 6380A78115067776003087EF /* PBXContainerItemProxy */;
+			remoteRef = 63733FD91521046300EEFAB3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		6380A78415067776003087EF /* RestKit.framework */ = {
+		63733FDC1521046300EEFAB3 /* RestKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = RestKit.framework;
-			remoteRef = 6380A78315067776003087EF /* PBXContainerItemProxy */;
+			remoteRef = 63733FDB1521046300EEFAB3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		6380A78615067776003087EF /* RestKitFrameworkTests.octest */ = {
+		63733FDE1521046300EEFAB3 /* RestKitFrameworkTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = RestKitFrameworkTests.octest;
-			remoteRef = 6380A78515067776003087EF /* PBXContainerItemProxy */;
+			remoteRef = 63733FDD1521046300EEFAB3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -6131,6 +6152,7 @@
 				63877B551520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				7E0596441520E6B7009D691E /* STStampDetailViewController.m in Sources */,
+				63733FF71521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
 				7E05964B1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966415212CBD009D691E /* STStampDetailHeader.m in Sources */,
 			);
@@ -6305,6 +6327,7 @@
 				63877B541520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */,
+				63733FF61521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
 				7E05964A1520EB6B009D691E /* STStampDetailToolbar.m in Sources */,
 				7E05966315212CBD009D691E /* STStampDetailHeader.m in Sources */,
 			);
@@ -6337,6 +6360,7 @@
 				63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 				63877B561520BAE100DE5A3A /* STEntityDetailView.m in Sources */,
 				63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
+				63733FF81521179700EEFAB3 /* STViewDelegateProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6626,6 +6650,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
@@ -6796,6 +6821,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
@@ -6818,6 +6844,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";

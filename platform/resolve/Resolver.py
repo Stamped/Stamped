@@ -83,6 +83,11 @@ _general_regex_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
 ]
 
+#generally applicable replacements
+_general_replacements = [
+    ('&', ' and '),                             # canonicalize synonyms
+]
+
 # track-specific removal patterns
 _track_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
@@ -190,6 +195,10 @@ def simplify(string):
     string = getSimplifiedTitle(string)
     string = format(string)
     string = regexRemoval(string, _general_regex_removals)
+    
+    for find, replacement in _general_replacements:
+        string = string.replace(find, replacement)
+    
     return format(string)
 
 def trackSimplify(string):
@@ -326,31 +335,45 @@ def sortedResults(results):
 def formatResults(results, reverse=True, verbose=True):
     n = len(results)
     l = []
-    # for result in results:
-    for i in range(len(results)):
-        if reverse:
-            result = results[n - 1]
-            l.append('\n%3s %s' % (n, '=' * 37))
-        else:
+    
+    if reverse:
+        results = list(reversed(results))
+    
+    if verbose:
+        for i in range(len(results)):
             result = results[i]
-            l.append('\n%3s %s' % (i+1, '=' * 37))
-        scores = result[0]
-        weights = scores['weights']
-        total_weight = 0.0
-        for k, v in weights.iteritems():
-            total_weight = total_weight + float(v)
-        l.append('%16s   Val     Wght     Total' % ' ')
-        for k, v in weights.iteritems():
-            s = float(scores[k])
-            w = float(weights[k])
-            t = 0
-            if total_weight > 0:
-                t = s * w / total_weight
-            l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
-        l.append(' ' * 37 + '%.2f' % scores['total'])
-        l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
-        l.append(str(result[1]))
-        n = n - 1
+            l.append('\n%3s %s' % (n - i, '=' * 37))
+            
+            scores  = result[0]
+            weights = scores['weights']
+            total_weight = 0.0
+            for k, v in weights.iteritems():
+                total_weight = total_weight + float(v)
+            l.append('%16s   Val     Wght     Total' % ' ')
+            
+            for k, v in weights.iteritems():
+                s = float(scores[k])
+                w = float(weights[k])
+                t = 0
+                if total_weight > 0:
+                    t = s * w / total_weight
+                l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
+            
+            l.append(' ' * 37 + '%.2f' % scores['total'])
+            l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
+            l.append(str(result[1]))
+    else:
+        for i in range(len(results)):
+            result = results[i]
+            scores = result[0]
+            data   = {
+                'name'   : result[1].name, 
+                'source' : result[1].source, 
+                'key'    : result[1].key, 
+                'score'  : scores['total'], 
+            }
+            l.append("\n%3d) %s" % (n - i, pformat(data)))
+    
     return '\n'.join(l)
 
 def typeToSubcategory(t):
@@ -456,6 +479,10 @@ class ResolverObject(object):
     def image(self):
         return None
 
+    @property
+    def date(self):
+        return None
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -511,6 +538,10 @@ class ResolverProxy(object):
     @property
     def image(self):
         return self.target.image
+
+    @property
+    def date(self):
+        return self.target.date
 
 class SimpleResolverObject(ResolverObject):
 
@@ -1326,10 +1357,10 @@ class Resolver(object):
             ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=2.0),
             'cast':         lambda q, m, s, o: self.__castWeight(q, m),
             'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
-            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
@@ -1340,8 +1371,8 @@ class Resolver(object):
             ('publisher',   lambda q, m, s, o: self.publisherComparison(q.publisher, m.publisher))
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=4),
-            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=4),
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
             'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
                                                 exact_boost=2, m_empty=4 ),
         }
@@ -1357,6 +1388,7 @@ class Resolver(object):
             ('location',            self.__locationTest),
             ('subcategory',         self.__subcategoryTest),
             ('priority',            lambda q, m, s, o: m.priority),
+            ('recency',             self.__recencyTest),
             ('source_priority',     self.__sourceTest),
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
@@ -1367,6 +1399,7 @@ class Resolver(object):
             'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
             'subcategory':          lambda q, m, s, o: 1,
             'priority':             lambda q, m, s, o: 1,
+            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
             'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
@@ -1548,9 +1581,9 @@ class Resolver(object):
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
-
+        
         return options
-
+    
     def __sourceTest(self, query, match, tests, options):
         weights = {
             'stamped'   : 1.0,
@@ -1566,30 +1599,29 @@ class Resolver(object):
         if match.source in weights:
             return weights[match.source]
         return 0
-
+    
     def __sourceWeight(self, source):
         return 1
-
+    
     def __queryStringTest(self, query, match, tests, options):
         return 0
-
+    
     def __nameTest(self, query, match, tests, options):
         return stringComparison(query.query_string, match.name)
-        
+    
     def __locationTest(self, query, match, tests, options):
-
         if query.coordinates is None or match.coordinates is None:
             return 0
-
+        
         distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
         distance = abs(distance * 3959)
         
         if distance < 0 or distance > 50:
             return 0
-    
+        
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
-
+    
     def __locationWeight(self, query, match, tests, options, boost=1):
         weight = 2
         if 'location' in tests:
@@ -1600,14 +1632,14 @@ class Resolver(object):
             if tests['location'] > 0.85:
                 return boost * weight
         return weight
-            
+    
     def __subcategoryTest(self, query, match, tests, options):
         if match.subtype == 'other' or match.subtype is None:
             return 0
         if match.subtype == 'tv':
             return 0.5
         return 1 
-        
+    
     def __keywordsTest(self, query, match, tests, options):
         if len(query.keywords) > 0:
             return self.setComparison(set(query.keywords), set(match.keywords), options)
@@ -1687,6 +1719,22 @@ class Resolver(object):
             weight = exact_boost * weight
         return weight
 
+    def __recencyTest(self, query, match, tests, options):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 1
+        except:
+            pass
+        return 0
+
+    def __recencyWeight(self, query, match, tests, options, boost=1):
+        try:
+            if (datetime.utcnow() - match.date).days < 90:
+                return 5
+        except:
+            pass
+        return 0
+
     def __setWeight(self, q, m):
         size = len( q | m )
         if size == 0:
@@ -1748,9 +1796,13 @@ class Resolver(object):
         return (success, similarities)
 
     def __shouldFinish(self, query, results, options):
-        if len(results) >= options['max']:
+        num_results = len(results)
+        
+        if num_results == 0:
+            return False # TODO: is this right?
+        elif num_results >= options['max']:
             return True
-        elif len(results) < options['count']:
+        elif num_results < options['count']:
             return False
         else:
             cutoff = options['resolvedComparison']

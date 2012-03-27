@@ -13,11 +13,13 @@
 #import "STViewContainer.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface STSourceCell : UIView
+@interface STSourceCell : UIView <STViewDelegateDependent>
+
+- (id)initWithDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, retain) id<STSource> source;
 @property (nonatomic, retain) NSString* action;
-@property (nonatomic, assign) id<STViewDelegate> delegate;
+@property (nonatomic, readonly, assign) id<STViewDelegate> delegate;
 
 - (void)callback:(id)state;
 
@@ -98,12 +100,13 @@
                   
                   for (NSInteger i = 0; i < [array count]; i++) {
                     UIImage* iconImage = [array objectAtIndex:i];
-                    STSourceCell* cell = [[[STSourceCell alloc] initWithFrame:CGRectMake(0, 0, width, cellHeight)] autorelease];
+                    STSourceCell* cell = [[[STSourceCell alloc] initWithDelegate:delegate] autorelease];
+                    
+                    cell.frame = CGRectMake(0, 0, width, cellHeight);
                     UIImageView* icon = [[UIImageView alloc] init];
                     icon.image = iconImage;
                     icon.frame = [Util centeredAndBounded:[Util size:iconImage.size withScale:[Util imageScale]] inFrame:CGRectMake(0, 0, cellHeight, cellHeight)];
                     id<STSource> source = [action.sources objectAtIndex:i];
-                    cell.delegate = delegate;
                     cell.action = action.action;
                     cell.source = source;
                     UIView* text = [Util viewWithText:source.name
@@ -154,15 +157,30 @@
 @synthesize action = action_;
 @synthesize delegate = delegate_;
 
+
+- (id)initWithDelegate:(id<STViewDelegate>)delegate {
+  self = [super init];
+  if (self) {
+    delegate_ = delegate;
+    [delegate registerDependent:self];
+  }
+  return self;
+}
+
 - (void)dealloc {
   self.source = nil;
   self.action = nil;
   [super dealloc];
 }
 
-
 - (void)callback:(id)state {
-  [self.delegate didChooseSource:self.source forAction:self.action];
+  if (self.delegate) {
+    [self.delegate didChooseSource:self.source forAction:self.action];
+  }
+}
+
+- (void)detatchFromDelegate {
+  delegate_ = nil;
 }
 
 @end

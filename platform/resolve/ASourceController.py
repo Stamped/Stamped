@@ -55,3 +55,4 @@ class AlwaysSourceController(ASourceController):
     @lazyProperty
     def now(self):
         return datetime.utcnow()
+

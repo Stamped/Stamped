@@ -15,6 +15,7 @@ from logs import report
 
 try:
     import logs, sys, utils
+    import libs.worldcities
     
     from Resolver                   import *
     from GenericSource              import generatorSource
@@ -44,18 +45,41 @@ _verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
     
-    def __init__(self, query_string, coordinates=None, types=None, local=False):
+    def __init__(self, query_string, coords=None, types=None, local=False):
         ResolverSearchAll.__init__(self)
+        
+        if local:
+            if types is None: types = set()
+            types.add('place')
+        else:
+            if types and 'place' not in types:
+                # if we're filtering by category / subcategory and the filtered results 
+                # couldn't possibly contain a location, then ensure that coords are 
+                # disabled
+                coords = None
+            else:
+                # process 'in' or 'near' location hint
+                result = libs.worldcities.try_get_region(query_string)
+                
+                if result is not None:
+                    new_query_string, coords, region_name = result
+                    if types is None: types = set()
+                    types.add('place')
+                    
+                    logs.info("[search] using region %s at %s (parsed from '%s')" % 
+                              (region_name, coords, query_string))
+                    query_string = new_query_string
+        
         self.__query_string = query_string
-        self.__coordinates = coordinates
-        self.__types = types
-        self.__local = local
-
-    @property 
+        self.__coordinates  = coords
+        self.__types        = types
+        self.__local        = local
+    
+    @property
     def query_string(self):
         return self.__query_string
     
-    @property 
+    @property
     def coordinates(self):
         return self.__coordinates
     
@@ -71,7 +95,7 @@ class QuerySearchAll(ResolverSearchAll):
     def local(self):
         return self.__local
     
-    @property 
+    @property
     def key(self):
         return ''
     
@@ -82,7 +106,7 @@ class QuerySearchAll(ResolverSearchAll):
     @property
     def types(self):
         return self.__types
-
+    
     @property
     def source(self):
         return 'search'
@@ -129,9 +153,6 @@ class EntitySearch(object):
                offset   = 0, 
                limit    = 10):
         
-        # TODO: preprocess query / coords for location hints (e.g., X (in|near) Y)
-        # TODO: handle local query here
-        
         before  = time()
         query   = QuerySearchAll(query, coords, types, local)
         pool    = Pool(len(self._sources))
@@ -153,7 +174,7 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            if types is None or result[1].subtype in types:
+            if query.types is None or result[1].subtype in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
@@ -213,7 +234,7 @@ class EntitySearch(object):
             print("\n\n\nDedupped %d results in %f seconds\n\n\n" % (total - len(chosen), time() - before2))
         
         return chosen
-
+    
     def searchEntities(self, 
                        query, 
                        coords       = None, 
@@ -250,10 +271,10 @@ class EntitySearch(object):
             entity = Entity()
             source = item[1].target.source
             
-            if source not in self._source_map:
-                source = self._source_map['stamped']
-            
-            sources[source].enrichEntityWithWrapper(item[1].target, entity)
+            if source not in self._sources_map:
+                source = 'stamped'
+
+            self._sources_map[source].enrichEntityWithWrapper(item[1].target, entity)
             results.append(entity)
         
         return results
@@ -328,7 +349,7 @@ def demo():
                               limit     = options.limit)
     
     print("Final Search Results")
-    print(formatResults(results))
+    print(formatResults(results, verbose=options.verbose))
 
 if __name__ == '__main__':
     _verbose = True

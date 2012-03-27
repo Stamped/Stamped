@@ -67,6 +67,7 @@ static const CGFloat kTodoBarHeight = 44.0;
 
 @implementation EntityDetailViewController
 
+@synthesize synchronousWrapper = _synchronousWrapper;
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
 @synthesize descriptionLabel = descriptionLabel_;
@@ -151,6 +152,9 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)dealloc {
   if (newEDetail) {
     NSLog(@"releasing eDetail");
+    if (self.synchronousWrapper) {
+      [self.synchronousWrapper detatchFromDelegate];
+    }
     [self.operationQueue cancelAllOperations];
     [operationQueue_ release];
     [entityDetail_ release];
@@ -173,7 +177,7 @@ static const CGFloat kTodoBarHeight = 44.0;
     self.todoButton = nil;
     self.toolbarView = nil;
     self.referringStamp = nil;
-    
+    self.synchronousWrapper = nil;
   }
   else {
     [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -537,7 +541,6 @@ static const CGFloat kTodoBarHeight = 44.0;
 - (void)viewDidUnload {
   [super viewDidUnload];
   if (newEDetail) {
-    
   }
   else {
     [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -971,10 +974,11 @@ static const CGFloat kTodoBarHeight = 44.0;
      [self.operationQueue addOperation:operation];
      */
     [self.loadingView stopAnimating];
-    UIView* view = [STSynchronousWrapper wrapperForEntityDetail:self.entityDetail 
-                                                      withFrame:CGRectMake(0, 0, 320, self.scrollView.frame.size.height) 
-                                                       andStyle:@"EntityDetail" delegate:self];
-    [self appendChildView:view];
+    self.synchronousWrapper = [STSynchronousWrapper wrapperForEntityDetail:self.entityDetail 
+                                                                 withFrame:CGRectMake(0, 0, 320, self.scrollView.frame.size.height) 
+                                                                  andStyle:@"EntityDetail" 
+                                                                  delegate:self];
+    [self appendChildView:self.synchronousWrapper];
   }
 }
 
@@ -1031,6 +1035,10 @@ static const CGFloat kTodoBarHeight = 44.0;
   if (source.link) {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:source.link]];
   }
+}
+
+- (void)registerDependent:(id<STViewDelegateDependent>)dependent {
+  NSLog(@"registering %@", dependent);
 }
 
 @end
