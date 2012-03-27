@@ -1218,7 +1218,7 @@ class StampedAPI(AStampedAPI):
         return entity
     
     @API_CALL
-    def searchEntitiesNew(self, query, coords=None, authUserId=None, category=None, subcategory=None):
+    def searchEntities(self, query, coords=None, authUserId=None, category=None, subcategory=None):
 
 
         from EntitySearch import EntitySearch
@@ -1240,7 +1240,7 @@ class StampedAPI(AStampedAPI):
         return results
     
     @API_CALL
-    def searchEntities(self, 
+    def searchEntitiesOld(self, 
                        query, 
                        coords=None, 
                        authUserId=None, 
