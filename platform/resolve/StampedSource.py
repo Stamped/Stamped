@@ -630,7 +630,7 @@ class StampedSource(GenericSource):
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
-        logs.info(mongo_query)
+        logs.info(str(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING), limit=1000)
 
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
