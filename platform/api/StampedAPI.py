@@ -1143,6 +1143,7 @@ class StampedAPI(AStampedAPI):
     def _getEntityFromRequest(self, entityRequest):
         if isinstance(entityRequest, SchemaElement):
             entityRequest = entityRequest.value
+        
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
         
@@ -1174,7 +1175,6 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
         
         ### TODO: Check if user has access to this entity?
-        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
     
     @API_CALL
@@ -1220,15 +1220,27 @@ class StampedAPI(AStampedAPI):
 
         return entity
     
-    @API_CALL
-    def searchEntities(self, query, coords=None, authUserId=None, category=None, subcategory=None):
-
-
+    @lazyProperty
+    def _entitySearch(self):
         from EntitySearch import EntitySearch
-
-        entities = EntitySearch().searchEntities(query, limit=10, coords=coords, category=category, subcategory=subcategory)
+        return EntitySearch()
+    
+    @API_CALL
+    def searchEntities(self, 
+                       query, 
+                       coords=None, 
+                       authUserId=None, 
+                       category=None, 
+                       subcategory=None):
+        entities = self._entitySearch.searchEntities(query, 
+                                                     limit=10, 
+                                                     coords=coords, 
+                                                     category=category, 
+                                                     subcategory=subcategory)
         
         results = []
+        process = 5
+        
         for entity in entities:
             distance = None
             try:
@@ -1239,21 +1251,26 @@ class StampedAPI(AStampedAPI):
             except:
                 pass
             results.append((entity, distance))
-
+            
+            process -= 1
+            if process > 0:
+                # asynchronously merge & enrich entity
+                self.mergeEntity(entity)
+        
         return results
     
     @API_CALL
     def searchEntitiesOld(self, 
-                       query, 
-                       coords=None, 
-                       authUserId=None, 
-                       category=None, 
-                       subcategory=None, 
-                       prefix=False, 
-                       local=False, 
-                       full=True, 
-                       page=0, 
-                       limit=10):
+                          query, 
+                          coords=None, 
+                          authUserId=None, 
+                          category=None, 
+                          subcategory=None, 
+                          prefix=False, 
+                          local=False, 
+                          full=True, 
+                          page=0, 
+                          limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
                                                         category_filter=category, 
@@ -2500,7 +2517,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
-
         count = None
 
         # Use relationships
@@ -2874,17 +2890,25 @@ class StampedAPI(AStampedAPI):
         source  = sources[source_name]()
         wrapper = source.wrapperFromKey(source_id)
         
+        # attempt to resolve against the Stamped DB
         stamped = StampedSource(stamped_api = self)
         results = stamped.resolve(wrapper)
         
         if len(results) > 0 and results[0][0]['resolved']:
+            # source key was found in the Stamped DB
             entity_id = results[0][1].key
+            
+            # enrich entity asynchronously
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         else:
             entity = Entity()
             source.enrichEntityWithWrapper(wrapper, entity)
             
             entity = self._entityDB.addEntity(entity)
             entity_id = entity.entity_id
+            
+            # enrich and merge entity asynchronously
+            self.mergeEntity(entity)
         
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
