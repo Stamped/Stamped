@@ -3834,7 +3834,6 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				63733FF1152112D600EEFAB3 /* AudioToolbox.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -3856,6 +3855,7 @@
 		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				63733FF1152112D600EEFAB3 /* AudioToolbox.framework */,
 				7E07EC1C14C73FD400A2B5F0 /* libz.dylib */,
 				7ED043E6149FCA3E00E46284 /* libxml2.dylib */,
 				7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */,
@@ -6565,7 +6565,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6584,7 +6584,7 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -6661,8 +6661,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -6682,8 +6682,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -6694,7 +6694,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -6713,7 +6713,7 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
