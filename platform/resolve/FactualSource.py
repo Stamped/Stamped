@@ -165,16 +165,20 @@ class FactualSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'factual',
-            'singleplatform',
-
-            'address',
-            'price_range',
-            'phone',
-            'site',
-            'cuisine',
-            'alcohol_flag',
-            'opentable_nickname',
-            'opentable',
+            groups=[
+                'singleplatform',
+                'address',
+                'price_range',
+                'phone',
+                'site',
+                'cuisine',
+                'alcohol_flag',
+                'opentable_nickname',
+                'opentable',
+            ],
+            types=[
+                'place'
+            ]
         )
         self.__address_fields = {
             ('address_street',):_ppath('address'),
@@ -229,8 +233,7 @@ class FactualSource(GenericSource):
 
 
     def searchAllSource(self, query, timeout=None):
-        validTypes = set(['restaurant', 'bar', 'place', 'other'])
-        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
+        if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
             
         def gen():
@@ -356,3 +359,4 @@ class FactualSource(GenericSource):
 
 if __name__ == '__main__':
     demo(FactualSource(),'Barley Swine')
+

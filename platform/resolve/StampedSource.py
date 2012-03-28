@@ -304,12 +304,12 @@ class StampedSource(GenericSource):
     def __init__(self, stamped_api = None):
         GenericSource.__init__(self, 'stamped')
         self._stamped_api = stamped_api
-
+    
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
-            import MongoStampedAPI
-            self._stamped_api = MongoStampedAPI.MongoStampedAPI()
+            from MongoStampedAPI import MongoStampedAPI
+            self._stamped_api = MongoStampedAPI()
         
         return self._stamped_api._entityDB
     
@@ -609,7 +609,7 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), query, constructor_wrapper=EntitySearchAll)
-
+    
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
             try:
@@ -633,7 +633,7 @@ class StampedSource(GenericSource):
             except ValueError:
                 pass
         return True
-
+    
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
@@ -680,10 +680,44 @@ class StampedSource(GenericSource):
             return self.generatorSource(generator, lambda x: constructor_wrapper(constructor(x)), unique=True, tolerant=True)
         else:
             return self.generatorSource(generator, constructor=constructor, unique=True, tolerant=True)
-
+    
     @property
     def urlField(self):
         return None
+    
+    def resolve_fast(self, source, key):
+        source_keys = {
+            'amazon'            : 'sources.amazon_id', 
+            'spotify'           : 'sources.spotify_id', 
+            'rdio'              : 'sources.rdio_id', 
+            'opentable'         : 'sources.opentable_id', 
+            'tmdb'              : 'sources.tmdb.tmdb_id', 
+            'factual'           : 'sources.factual.factual_id', 
+            'singleplatform'    : 'sources.singleplatform.singleplatform_id', 
+            'fandango'          : 'sources.fandango_id', 
+            'googleplaces'      : 'sources.googlePlaces.gid', 
+            'apple'             : 'sources.apple.aid', 
+            'netflix'           : 'sources.netflix.nid', 
+            'thetvdb'           : 'sources.thetvdb.thetvdb_id', 
+        }
+        
+        try:
+            source_name = source.sourceName.lower().strip()
+            mongo_key   = source_keys[source_name]
+        except Exception:
+            return None
+        
+        query       = { mongo_key : key }
+        entity_id   = None
+        logs.info(str(query))
+        
+        ret         = self.__entityDB._collection.find_one(query, fields=['_id'] )
+        
+        if ret:
+            entity_id = ret['_id']
+            logs.info("resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
+        
+        return entity_id
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')

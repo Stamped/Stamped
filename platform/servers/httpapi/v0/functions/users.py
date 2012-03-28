@@ -132,10 +132,13 @@ def findPhone(request):
             if 11 == len(item) and item.startswith('1'):
                 number = int(item[1:])
                 phoneNumbers.append(item)
+
+            if len(item) <= 3:
+                raise Exception
             
             number = int(item)
             phoneNumbers.append(item)
-        except:
+        except Exception:
             msg = 'Invalid phone number: %s' % item
             logs.warning(msg)
     

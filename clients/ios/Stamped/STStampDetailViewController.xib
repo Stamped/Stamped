@@ -62,7 +62,7 @@
 								<string key="NSFrameSize">{320, 68}</string>
 								<reference key="NSSuperview" ref="380320723"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="31333845"/>
+								<reference key="NSNextKeyView" ref="842579065"/>
 								<string key="NSReuseIdentifierKey">_NS:196</string>
 								<object class="NSColor" key="IBUIBackgroundColor">
 									<int key="NSColorSpace">3</int>
@@ -70,6 +70,21 @@
 									<object class="NSColorSpace" key="NSCustomColorSpace" id="62255603">
 										<int key="NSID">2</int>
 									</object>
+								</object>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+							</object>
+							<object class="IBUIView" id="842579065">
+								<reference key="NSNextResponder" ref="380320723"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{5, 67}, {310, 137}}</string>
+								<reference key="NSSuperview" ref="380320723"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="31333845"/>
+								<string key="NSReuseIdentifierKey">_NS:9</string>
+								<object class="NSColor" key="IBUIBackgroundColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MQA</bytes>
+									<reference key="NSCustomColorSpace" ref="62255603"/>
 								</object>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
@@ -122,6 +137,7 @@
 						<string key="NSFrame">{{0, 367}, {320, 49}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
@@ -182,6 +198,22 @@
 						<reference key="destination" ref="706692302"/>
 					</object>
 					<int key="connectionID">36</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">scrollView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="380320723"/>
+					</object>
+					<int key="connectionID">37</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">cardView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="842579065"/>
+					</object>
+					<int key="connectionID">39</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -252,6 +284,7 @@
 						<reference key="object" ref="380320723"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="706692302"/>
+							<reference ref="842579065"/>
 						</array>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -260,6 +293,12 @@
 						<reference key="object" ref="706692302"/>
 						<reference key="parent" ref="380320723"/>
 						<string key="objectName">Header View</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">38</int>
+						<reference key="object" ref="842579065"/>
+						<reference key="parent" ref="380320723"/>
+						<string key="objectName">Card View</string>
 					</object>
 				</array>
 			</object>
@@ -271,6 +310,8 @@
 				<string key="1.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="35.CustomClassName">STStampDetailHeader</string>
 				<string key="35.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="38.CustomClassName">STStampDetailCardView</string>
+				<string key="38.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="4.CustomClassName">STStampDetailToolbar</string>
 				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -284,7 +325,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">36</int>
+			<int key="maxID">39</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -294,6 +335,14 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/STScrollView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">STStampDetailCardView</string>
+					<string key="superclassName">UIView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/STStampDetailCardView.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -316,13 +365,23 @@
 					<string key="className">STStampDetailViewController</string>
 					<string key="superclassName">STViewController</string>
 					<dictionary class="NSMutableDictionary" key="outlets">
+						<string key="cardView">STStampDetailCardView</string>
 						<string key="header">STStampDetailHeader</string>
+						<string key="scrollView">UIScrollView</string>
 						<string key="toolbar">STStampDetailToolbar</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<object class="IBToOneOutletInfo" key="cardView">
+							<string key="name">cardView</string>
+							<string key="candidateClassName">STStampDetailCardView</string>
+						</object>
 						<object class="IBToOneOutletInfo" key="header">
 							<string key="name">header</string>
 							<string key="candidateClassName">STStampDetailHeader</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="scrollView">
+							<string key="name">scrollView</string>
+							<string key="candidateClassName">UIScrollView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="toolbar">
 							<string key="name">toolbar</string>

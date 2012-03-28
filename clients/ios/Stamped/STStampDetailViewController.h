@@ -13,6 +13,7 @@
 #import "STViewController.h"
 
 @class Stamp;
+@class STStampDetailCardView;
 @class STStampDetailHeader;
 @class STStampDetailToolbar;
 
@@ -21,6 +22,8 @@
 
 - (id)initWithStamp:(Stamp*)stamp;
 
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, retain) IBOutlet STStampDetailCardView* cardView;
 @property (nonatomic, retain) IBOutlet STStampDetailToolbar* toolbar;
 @property (nonatomic, retain) IBOutlet STStampDetailHeader* header;
 

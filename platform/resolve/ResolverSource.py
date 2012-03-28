@@ -31,7 +31,7 @@ class ResolverSource(BasicSource):
     """
     def __init__(self):
         BasicSource.__init__(self, 'resolver',
-            'successor',
+            groups=['successor']
         )
 
     @lazyProperty

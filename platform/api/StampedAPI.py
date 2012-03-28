@@ -2887,28 +2887,30 @@ class StampedAPI(AStampedAPI):
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError
         
-        source  = sources[source_name]()
-        wrapper = source.wrapperFromKey(source_id)
-        
         # attempt to resolve against the Stamped DB
-        stamped = StampedSource(stamped_api = self)
-        results = stamped.resolve(wrapper)
+        source    = sources[source_name]()
+        stamped   = StampedSource(stamped_api = self)
+        entity_id = stamped.resolve_fast(source, source_id)
         
-        if len(results) > 0 and results[0][0]['resolved']:
-            # source key was found in the Stamped DB
-            entity_id = results[0][1].key
+        if entity_id is None:
+            wrapper = source.wrapperFromKey(source_id)
+            results = stamped.resolve(wrapper)
             
-            # enrich entity asynchronously
-            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
-        else:
-            entity = Entity()
-            source.enrichEntityWithWrapper(wrapper, entity)
-            
-            entity = self._entityDB.addEntity(entity)
-            entity_id = entity.entity_id
-            
-            # enrich and merge entity asynchronously
-            self.mergeEntity(entity, True)
+            if len(results) > 0 and results[0][0]['resolved']:
+                # source key was found in the Stamped DB
+                entity_id = results[0][1].key
+                
+                # enrich entity asynchronously
+                tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+            else:
+                entity = Entity()
+                source.enrichEntityWithWrapper(wrapper, entity)
+                
+                entity = self._entityDB.addEntity(entity)
+                entity_id = entity.entity_id
+                
+                # enrich and merge entity asynchronously
+                self.mergeEntity(entity, True)
         
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
