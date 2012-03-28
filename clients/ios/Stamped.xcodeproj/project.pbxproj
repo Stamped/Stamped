@@ -1138,6 +1138,14 @@
 		7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */; };
 		7E90B03B13FF081900875522 /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E90B03913FF081900875522 /* TodoViewController.m */; };
 		7E90B03C13FF081900875522 /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E90B03A13FF081900875522 /* TodoViewController.xib */; };
+		7E91739315237BF00098DC3C /* STStampDetailBlurbView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E91739215237BF00098DC3C /* STStampDetailBlurbView.m */; };
+		7E91739415237BF00098DC3C /* STStampDetailBlurbView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E91739215237BF00098DC3C /* STStampDetailBlurbView.m */; };
+		7E917397152381480098DC3C /* blurbView_keyline.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E917395152381480098DC3C /* blurbView_keyline.png */; };
+		7E917398152381480098DC3C /* blurbView_keyline.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E917395152381480098DC3C /* blurbView_keyline.png */; };
+		7E917399152381480098DC3C /* blurbView_keyline@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E917396152381480098DC3C /* blurbView_keyline@2x.png */; };
+		7E91739A152381480098DC3C /* blurbView_keyline@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E917396152381480098DC3C /* blurbView_keyline@2x.png */; };
+		7E91739D1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E91739C1523B97F0098DC3C /* STStampDetailCommentsView.m */; };
+		7E91739E1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E91739C1523B97F0098DC3C /* STStampDetailCommentsView.m */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E99C9B61458849500B116AC /* DetailedEntity.m */; };
 		7E99C9B91458B4E000B116AC /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E99C9B81458B4E000B116AC /* Twitter.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -2342,6 +2350,12 @@
 		7E90B03813FF081900875522 /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
 		7E90B03913FF081900875522 /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
 		7E90B03A13FF081900875522 /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TodoViewController.xib; path = ../Interfaces/TodoViewController.xib; sourceTree = "<group>"; };
+		7E91739115237BF00098DC3C /* STStampDetailBlurbView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailBlurbView.h; sourceTree = "<group>"; };
+		7E91739215237BF00098DC3C /* STStampDetailBlurbView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailBlurbView.m; sourceTree = "<group>"; };
+		7E917395152381480098DC3C /* blurbView_keyline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blurbView_keyline.png; sourceTree = "<group>"; };
+		7E917396152381480098DC3C /* blurbView_keyline@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blurbView_keyline@2x.png"; sourceTree = "<group>"; };
+		7E91739B1523B97F0098DC3C /* STStampDetailCommentsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailCommentsView.h; sourceTree = "<group>"; };
+		7E91739C1523B97F0098DC3C /* STStampDetailCommentsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailCommentsView.m; sourceTree = "<group>"; };
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 10.xcdatamodel"; sourceTree = "<group>"; };
 		7E99C9B51458849500B116AC /* DetailedEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailedEntity.h; sourceTree = "<group>"; };
@@ -3009,6 +3023,10 @@
 				7E05966215212CBD009D691E /* STStampDetailHeader.m */,
 				7E4A6EF815224F130031D7D6 /* STStampDetailCardView.h */,
 				7E4A6EF915224F130031D7D6 /* STStampDetailCardView.m */,
+				7E91739115237BF00098DC3C /* STStampDetailBlurbView.h */,
+				7E91739215237BF00098DC3C /* STStampDetailBlurbView.m */,
+				7E91739B1523B97F0098DC3C /* STStampDetailCommentsView.h */,
+				7E91739C1523B97F0098DC3C /* STStampDetailCommentsView.m */,
 			);
 			name = "New Stamp Detail";
 			sourceTree = "<group>";
@@ -3184,6 +3202,8 @@
 		7E22679A13D4E94800657A66 /* Stamp Detail */ = {
 			isa = PBXGroup;
 			children = (
+				7E917395152381480098DC3C /* blurbView_keyline.png */,
+				7E917396152381480098DC3C /* blurbView_keyline@2x.png */,
 				CB9C090A147C29E60007D9A6 /* gray_disclosure_arrow_highlighted@2x.png */,
 				7EBD8B5B145B73860034E8A1 /* also_stamped_by_badge@2x.png */,
 				7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */,
@@ -5343,6 +5363,8 @@
 				6386EF2815114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 				7E0596461520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 				7E4A6ECE15222E6F0031D7D6 /* FBDialog.bundle in Resources */,
+				7E917398152381480098DC3C /* blurbView_keyline.png in Resources */,
+				7E91739A152381480098DC3C /* blurbView_keyline@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5972,6 +5994,8 @@
 				7E5EEEC8151BD68E004FFBB9 /* icon@2x.png in Resources */,
 				7E0596451520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 				7E4A6ECD15222E6F0031D7D6 /* FBDialog.bundle in Resources */,
+				7E917397152381480098DC3C /* blurbView_keyline.png in Resources */,
+				7E917399152381480098DC3C /* blurbView_keyline@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6180,6 +6204,8 @@
 				7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFB15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 				63BC667F1522634300DA2579 /* STRdio.m in Sources */,
+				7E91739415237BF00098DC3C /* STStampDetailBlurbView.m in Sources */,
+				7E91739E1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6357,6 +6383,8 @@
 				7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFA15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 				63BC667E1522634300DA2579 /* STRdio.m in Sources */,
+				7E91739315237BF00098DC3C /* STStampDetailBlurbView.m in Sources */,
+				7E91739D1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
