@@ -439,17 +439,20 @@ class AmazonSource(GenericSource):
             kind = xp(item.attributes, 'ProductGroup')['v'].lower()
             logs.info(kind)
             
+            # TODO: Avoid additional API calls here?
+            
             if kind == 'book':
-                # TODO: Avoid additional API call?
                 return AmazonBook(key)
-            elif kind == 'song':
-                # TODO: Avoid additional API call?
+            elif kind == 'digital music track':
                 return AmazonTrack(key)
-            raise Exception
+            elif kind == 'video games':
+                raise NotImplementedError # TODO
+            
+            raise Exception("unknown amazon product type")
         except KeyError:
             pass
         return None
-
+    
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
         entity.amazon_id = wrapper.key
