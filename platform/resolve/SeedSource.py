@@ -30,8 +30,9 @@ class SeedSource(BasicSource):
     Seed data labeler
     """
     def __init__(self):
-        BasicSource.__init__(self, 'seed',
-        )
+        BasicSource.__init__(self, 'seed')
+        
+        # TODO: reassess these seed groups
         self.__simple_groups = [
             'mpaa_rating',
             'artist_display_name',

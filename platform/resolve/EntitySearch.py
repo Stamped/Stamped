@@ -175,19 +175,22 @@ class EntitySearch(object):
         
         for name, result in results:
             # TODO: Check song (subcategory) vs track (query.types)
-            if query.types is None or result[1].type in query.types:
+            if query.types is None or result[1].subtype in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
             else:
-                print "\n\n\nFiltered out %s (subcategory=%s)" % (result[1].name, result[1].subcategory)
+                logs.info("Filtered out %s (subcategory=%s, type=%s)" % 
+                          (result[1].name, result[1].subcategory, result[1].subtype))
         
-        for name, source_results in all_results.items():
+        logs.info("")
+        
+        for name, source_results in all_results.iteritems():
             all_results[name] = sortedResults(source_results)
         
         if _verbose:
             print("\n\n\nGenerated %d results in %f seconds from: %s\n\n\n" % (
-                total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.items()])
+                total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
             ))
         
         before2 = time()
@@ -198,7 +201,7 @@ class EntitySearch(object):
             best_name = None
             best = None
             
-            for name, source_results in list(all_results.items()):
+            for name, source_results in list(all_results.iteritems()):
                 if len(source_results) == 0:
                     del all_results[name]
                 else:
@@ -225,11 +228,11 @@ class EntitySearch(object):
                 
                 dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
                 
-                if len(dups) == 0 or not dups[0][0]['resolved']:
-                    chosen.append(best)
-                else:
+                if len(dups) > 0 and (dups[0][0]['resolved'] or dups[0][0]['name'] > 0.7 or dups[0][0]['total'] > 0.6):
                     if _verbose:
                         print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+                else:
+                    chosen.append(best)
             else:
                 break
         

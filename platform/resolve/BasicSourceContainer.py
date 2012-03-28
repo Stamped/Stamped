@@ -202,3 +202,4 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
 
     def getMaxAge(self, group, source):
         return self.getGlobalMaxAge()
+

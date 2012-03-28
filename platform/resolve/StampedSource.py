@@ -703,19 +703,21 @@ class StampedSource(GenericSource):
         
         try:
             source_name = source.sourceName.lower().strip()
-            logs.info(source_name)
-            logs.info(source_name in source_keys)
             mongo_key   = source_keys[source_name]
         except Exception:
             return None
         
-        query = { mongo_key : key }
+        query       = { mongo_key : key }
+        entity_id   = None
         logs.info(str(query))
-        ret = self.__entityDB._collection.find_one(query, fields=['_id'] )
+        
+        ret         = self.__entityDB._collection.find_one(query, fields=['_id'] )
+        
         if ret:
-            return ret['_id']
-        else:
-            return None
+            entity_id = ret['_id']
+            logs.info("resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
+        
+        return entity_id
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')

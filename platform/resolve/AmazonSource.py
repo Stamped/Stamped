@@ -448,7 +448,7 @@ class AmazonSource(GenericSource):
             elif kind == 'video games':
                 raise NotImplementedError # TODO
             
-            raise Exception("unknown amazon product type")
+            raise Exception("unsupported amazon product type")
         except KeyError:
             pass
         return None

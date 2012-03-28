@@ -261,7 +261,8 @@ class RdioSource(GenericSource):
         def gen():
             try:
                 batches = [100]
-                offset = 0
+                offset  = 0
+                
                 for batch in batches:
                     response = self.__rdio.method('search',
                         start=offset,

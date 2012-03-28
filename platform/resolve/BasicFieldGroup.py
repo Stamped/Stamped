@@ -107,3 +107,4 @@ class BasicFieldGroup(AFieldGroup):
 
     def addNameField(self):
         self.addField([self.groupName])
+
