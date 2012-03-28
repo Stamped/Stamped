@@ -498,6 +498,8 @@ class ViewportSchema(Schema):
 
 class Entity(Schema):
     def setSchema(self):
+        self.schema_version     = SchemaElement(int)
+
         self.entity_id          = SchemaElement(basestring)
         self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
@@ -608,14 +610,14 @@ class EntityDetailsSchema(Schema):
         self.place              = PlaceSchema()
         self.contact            = ContactSchema()
         self.restaurant         = RestaurantSchema()
-        self.app                = AppSchema()
+        # self.app                = AppSchema()
         self.book               = BookSchema()
         self.video              = VideoSchema()
         self.artist             = ArtistSchema()
-        self.song               = SongSchema()
-        self.album              = AlbumSchema()
+        # self.song               = SongSchema()
+        # self.album              = AlbumSchema()
         self.media              = MediaSchema()
-        self.product            = ProductSchema()
+        # self.product            = ProductSchema()
 
 class PlaceSchema(Schema):
     def setSchema(self):
@@ -688,7 +690,6 @@ class RestaurantSchema(Schema):
         self.alcohol_flag_source        = SchemaElement(basestring)
         self.alcohol_flag_timestamp     = SchemaElement(datetime)
         
-        #self.price              = SchemaElement(basestring)
         self.payment            = SchemaElement(basestring)
         self.dressCode          = SchemaElement(basestring)
         self.acceptsReservations        = SchemaElement(basestring)
@@ -710,27 +711,9 @@ class RestaurantSchema(Schema):
         self.reviewLinks        = SchemaElement(basestring)
         self.priceScale         = SchemaElement(basestring)
 
-class AppSchema(Schema):
-    def setSchema(self):
-        pass
-        #self.developer          = SchemaElement(basestring)
-        #self.developerURL       = SchemaElement(basestring)
-        #self.developerSupportURL= SchemaElement(basestring)
-        #self.publisher          = SchemaElement(basestring)
-        #self.releaseDate        = SchemaElement(basestring)
-        #self.appCategory        = SchemaElement(basestring)
-        #self.language           = SchemaElement(basestring)
-        #self.rating             = SchemaElement(basestring)
-        #self.popularity         = SchemaElement(basestring)
-        #self.parentalRating     = SchemaElement(basestring)
-        #self.platform           = SchemaElement(basestring)
-        #self.requirements       = SchemaElement(basestring)
-        #self.size               = SchemaElement(basestring)
-        #self.version            = SchemaElement(basestring)
-        #self.downloadURL        = SchemaElement(basestring)
-        #self.thumbnailURL       = SchemaElement(basestring)
-        #self.screenshotURL      = SchemaElement(basestring)
-        #self.videoURL           = SchemaElement(basestring)
+# class AppSchema(Schema):
+#     def setSchema(self):
+#         pass
 
 class BookSchema(Schema):
     def setSchema(self):
@@ -815,65 +798,53 @@ class ArtistSchema(Schema):
 
 class ArtistAlbumsSchema(Schema):
     def setSchema(self):
-        self.album_id           = SchemaElement(int)
-        self.rank               = SchemaElement(int)
-        self.genre_id           = SchemaElement(int)
+        self.album_id           = SchemaElement(int)            # Deprecated
+        self.rank               = SchemaElement(int)            # Deprecated
+        self.genre_id           = SchemaElement(int)            # Deprecated
         self.album_name         = SchemaElement(basestring)
         self.album_mangled      = SchemaElement(basestring)
         self.source             = SchemaElement(basestring)
-        self.id                 = SchemaElement(basestring)
+        self.id                 = SchemaElement(basestring)     # Rename to album_id?
         self.timestamp          = SchemaElement(datetime)
+        self.entity_id          = SchemaElement(basestring)     # Move to sources?
+        self.sources            = SchemaList(GenericSourceSchema())
 
 class ArtistSongsSchema(Schema):
     def setSchema(self):
-        self.song_id            = SchemaElement(int)
+        self.song_id            = SchemaElement(int)            # Deprecated
         self.song_name          = SchemaElement(basestring)
         self.song_mangled       = SchemaElement(basestring)
         self.source             = SchemaElement(basestring)
-        self.id                 = SchemaElement(basestring)
+        self.id                 = SchemaElement(basestring)     # Rename to song_id?
         self.timestamp          = SchemaElement(datetime)
-        self.entity_id          = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)     # Move to sources?
         self.sources            = SchemaList(GenericSourceSchema())
 
-class SongSchema(Schema):
-    def setSchema(self):
-        self.preview_url        = SchemaElement(basestring)
-        self.preview_length     = SchemaElement(basestring)
-        
-        ### TODO: modify this based on crawler logic (only for custom entities currently)
-        self.album_name         = SchemaElement(basestring) 
-        self.album_name_source  = SchemaElement(basestring)
-        self.album_name_timestamp = SchemaElement(datetime)
-        self.song_album_id      = SchemaElement(basestring) 
+# class AlbumSchema(Schema):
+#     def setSchema(self):
+#         self.label_studio       = SchemaElement(basestring)
+#         self.is_compilation     = SchemaElement(bool)
+#         self.a_retail_price             = SchemaElement(basestring)
+#         self.a_hq_price                 = SchemaElement(basestring)
+#         self.a_currency_code            = SchemaElement(basestring)
+#         self.a_availability_date        = SchemaElement(basestring)
+#         self.track_count                = SchemaElement(int)
+#         self.tracks                     = SchemaList(SchemaElement(basestring))
+#         self.tracks_source              = SchemaElement(basestring)
+#         self.tracks_timestamp           = SchemaElement(datetime)
 
-class AlbumSchema(Schema):
-    def setSchema(self):
-        self.label_studio       = SchemaElement(basestring)
-        self.is_compilation     = SchemaElement(bool)
-        
-        self.a_retail_price             = SchemaElement(basestring)
-        self.a_hq_price                 = SchemaElement(basestring)
-        self.a_currency_code            = SchemaElement(basestring)
-        self.a_availability_date        = SchemaElement(basestring)
-        
-        self.track_count                = SchemaElement(int)
+# class ProductSchema(Schema):
+#     def setSchema(self):
+#         self.manufacturer               = SchemaElement(basestring)
+#         self.brand                      = SchemaElement(basestring)
+#         self.salesRank                  = SchemaElement(int)
+#         self.price                      = PriceSchema()
 
-        self.tracks                     = SchemaList(SchemaElement(basestring))
-        self.tracks_source              = SchemaElement(basestring)
-        self.tracks_timestamp           = SchemaElement(datetime)
-
-class ProductSchema(Schema):
-    def setSchema(self):
-        self.manufacturer               = SchemaElement(basestring)
-        self.brand                      = SchemaElement(basestring)
-        self.salesRank                  = SchemaElement(int)
-        self.price                      = PriceSchema()
-
-class PriceSchema(Schema):
-    def setSchema(self):
-        self.amount                     = SchemaElement(int)
-        self.currency_code              = SchemaElement(basestring)
-        self.formatted_price            = SchemaElement(basestring)
+# class PriceSchema(Schema):
+#     def setSchema(self):
+#         self.amount                     = SchemaElement(int)
+#         self.currency_code              = SchemaElement(basestring)
+#         self.formatted_price            = SchemaElement(basestring)
 
 class MediaSchema(Schema):
     def setSchema(self):
@@ -885,17 +856,17 @@ class MediaSchema(Schema):
         self.track_length_source        = SchemaElement(basestring)
         self.track_length_timestamp     = SchemaElement(datetime)
 
-        self.title_version              = SchemaElement(basestring)
-        self.search_terms               = SchemaElement(basestring)
-        self.parental_advisory_id       = SchemaElement(basestring)
-        self.collection_display_name    = SchemaElement(basestring)
-        self.original_release_date      = SchemaElement(basestring)
-        self.itunes_release_date        = SchemaElement(basestring)
-        self.copyright                  = SchemaElement(basestring)
-        self.p_line                     = SchemaElement(basestring)
-        self.content_provider_name      = SchemaElement(basestring)
-        self.media_type_id              = SchemaElement(basestring)
-        self.artwork_url                = SchemaElement(basestring)
+        self.title_version              = SchemaElement(basestring)     # Deprecated
+        self.search_terms               = SchemaElement(basestring)     # Deprecated
+        self.parental_advisory_id       = SchemaElement(basestring)     # Deprecated
+        self.collection_display_name    = SchemaElement(basestring)     # Deprecated
+        self.original_release_date      = SchemaElement(basestring)     # Deprecated
+        self.itunes_release_date        = SchemaElement(basestring)     # Deprecated
+        self.copyright                  = SchemaElement(basestring)     # Deprecated
+        self.p_line                     = SchemaElement(basestring)     # Deprecated
+        self.content_provider_name      = SchemaElement(basestring)     # Deprecated
+        self.media_type_id              = SchemaElement(basestring)     # Deprecated
+        self.artwork_url                = SchemaElement(basestring)     # Deprecated
 
         self.mpaa_rating                = SchemaElement(basestring)
         self.mpaa_rating_source         = SchemaElement(basestring)
@@ -910,7 +881,36 @@ class MediaSchema(Schema):
         self.genre_timestamp            = SchemaElement(datetime)
 
         self.artist_id                  = SchemaElement(basestring)
+
         self.screenshots                = SchemaList(SchemaElement(basestring))
+        self.screenshots_source         = SchemaElement(basestring)                     # TODO: Populate
+        self.screenshots_timestamp      = SchemaElement(datetime)                       # TODO: Populate
+
+        self.track_list                 = SchemaList(MediaItemSchema())                 # TODO: Populate
+        self.track_list_source          = SchemaElement(basestring)                     # TODO: Populate
+        self.track_list_timestamp       = SchemaElement(basestring)                     # TODO: Populate
+
+        self.album_list                 = SchemaList(MediaItemSchema())                 # TODO: Populate
+        self.album_list_source          = SchemaElement(basestring)                     # TODO: Populate
+        self.album_list_timestamp       = SchemaElement(basestring)                     # TODO: Populate
+
+class MediaItemSchema(Schema):
+    def setSchema(self):
+        self.title              = SchemaElement(basestring)
+        self.mangled_title      = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)     # Move to sources?
+        self.sources            = SchemaList(GenericSourceSchema())
+
+class SongSchema(Schema):
+    def setSchema(self):
+        self.preview_url        = SchemaElement(basestring)
+        self.preview_length     = SchemaElement(basestring)
+        
+        ### TODO: modify this based on crawler logic (only for custom entities currently)
+        self.album_name         = SchemaElement(basestring) 
+        self.album_name_source  = SchemaElement(basestring)
+        self.album_name_timestamp = SchemaElement(datetime)
+        self.song_album_id      = SchemaElement(basestring) 
 
 class TMDBSchema(Schema):
     def setSchema(self):

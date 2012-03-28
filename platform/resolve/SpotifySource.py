@@ -185,7 +185,10 @@ class SpotifySource(GenericSource):
     """
     """
     def __init__(self):
-        GenericSource.__init__(self, 'spotify')
+        GenericSource.__init__(self, 'spotify',
+            'album_list',
+            'track_list',
+        )
 
     @lazyProperty
     def __spotify(self):

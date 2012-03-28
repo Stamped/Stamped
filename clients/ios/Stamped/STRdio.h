@@ -12,6 +12,8 @@
 
 + (STRdio*)sharedRdio;
 
+- (void)launchLoginPage;
+
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 @property (nonatomic, readonly, copy) NSString* accessToken;
 

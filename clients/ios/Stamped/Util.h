@@ -70,10 +70,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
 
-+ (void)didChooseAction:(id<STAction>)action;
-
-+ (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
-
 + (Rdio*)sharedRdio;
 
 @end

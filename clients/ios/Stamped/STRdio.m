@@ -9,10 +9,10 @@
 #import "STRdio.h"
 #import <Rdio/Rdio.h>
 
-@interface STRdio ()
+@interface STRdio () <RdioDelegate>
 
 @property (nonatomic, readonly, retain) Rdio* rdio;
-@property (nonatomic, readwrite, assing) BOOL loggedIn;
+@property (nonatomic, readwrite, assign) BOOL loggedIn;
 @property (nonatomic, readwrite, copy) NSString* accessToken;
 
 @end
@@ -29,7 +29,7 @@ static STRdio* _sharedInstance;
   self = [super init];
   if (self) {
     _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47"
-                                    andSecret:@"xJSZwBZxFp" delegate:viewController];
+                                    andSecret:@"xJSZwBZxFp" delegate:self];
   }
   return self;
 }

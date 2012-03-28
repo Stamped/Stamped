@@ -165,7 +165,10 @@ class RdioSource(GenericSource):
     """
     """
     def __init__(self):
-        GenericSource.__init__(self, 'rdio')
+        GenericSource.__init__(self, 'rdio', 
+            'album_list',
+            'track_list'
+        )
 
     @lazyProperty
     def __rdio(self):

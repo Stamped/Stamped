@@ -139,34 +139,34 @@ class GenericSource(BasicSource):
         for album in artist.albums:
             try:
                 info = {
-                    'album_name'    : album['name'],
-                    'source'        : self.sourceName,
-                    'timestamp'     : controller.now,
-                    'album_mangled' : albumSimplify(album['name']),
+                    'title'    : album['name'],
+                    'mangled_title' : albumSimplify(album['name']),
                 }
                 if 'key' in album:
-                    info['id'] = album['key']
+                    info['sources'] = [ {'source':artist.source, 'source_id':album['key']} ]
                 new_albums.append(info)
-            except:
-                logs.info('Album import failure: %s for artist %s' % (track, artist))
-        entity['albums'] = new_albums
+            except Exception:
+                report()
+                logs.info('Album import failure: %s for artist %s' % (album, artist))
+        #entity['albums'] = new_albums
+        entity['album_list'] = new_albums 
 
     def __repopulateSongs(self, entity, artist, controller):
-        new_songs = []
+        new_tracks = []
         for track in artist.tracks:
             try:
                 info = {
-                    'song_name'     : track['name'],
-                    'source'        : self.sourceName,
-                    'timestamp'     : controller.now,
-                    'song_mangled'  : trackSimplify(track['name']),
+                    'title'    : track['name'],
+                    'mangled_title' : trackSimplify(track['name']),
                 }
                 if 'key' in track:
-                    info['id'] = track['key']
-                new_songs.append(info)
+                    info['sources'] = [ {'source': artist.source, 'source_id': track['key']} ]
+                new_tracks.append(info)
             except Exception:
+                report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
-        entity['songs'] = new_songs
+        #entity['albums'] = new_albums
+        entity['track_list'] = new_tracks
 
     def wrapperFromKey(self, key, type=None):
         return None
@@ -203,10 +203,8 @@ class GenericSource(BasicSource):
                 entity['mpaa_rating'] = wrapper.rating
 
         if wrapper.type == 'artist':
-            if controller.shouldEnrich('albums', self.sourceName, entity):
+            if controller.shouldEnrich('album_list', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
-            if controller.shouldEnrich('songs', self.sourceName, entity):
-                self.__repopulateSongs(entity, wrapper, controller)
 
         if wrapper.type == 'album':
             if len(wrapper.tracks) > 0:
@@ -282,6 +280,9 @@ class GenericSource(BasicSource):
         if wrapper.type in set(['track', 'movie']):
             if wrapper.length > 0:
                 entity['track_length'] = str(int(wrapper.length))
+        if wrapper.type in set(['album', 'artist']):
+            if controller.shouldEnrich('track_list', self.sourceName, entity):
+                self.__repopulateSongs(entity, wrapper, controller)
         if wrapper.type in set(['movie', 'tv']):
             if len(wrapper.cast) > 0:
                 cast = [
