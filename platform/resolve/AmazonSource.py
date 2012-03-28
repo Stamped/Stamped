@@ -436,10 +436,15 @@ class AmazonSource(GenericSource):
     def wrapperFromKey(self, key, type=None):
         try:
             item = _AmazonObject(amazon_id=key)
-            print xp(item.attributes, 'ProductGroup')['v']
-            if xp(item.attributes, 'ProductGroup')['v'].lower() == 'book':
+            kind = xp(item.attributes, 'ProductGroup')['v'].lower()
+            logs.info(kind)
+            
+            if kind == 'book':
                 # TODO: Avoid additional API call?
                 return AmazonBook(key)
+            elif kind == 'song':
+                # TODO: Avoid additional API call?
+                return AmazonTrack(key)
             raise Exception
         except KeyError:
             pass
