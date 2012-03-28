@@ -2892,7 +2892,7 @@ class StampedAPI(AStampedAPI):
         
         # attempt to resolve against the Stamped DB
         stamped   = StampedSource(stamped_api = self)
-        entity_id = stamped.fast_resolve(source, source_id)
+        entity_id = stamped.resolve_fast(source, source_id)
         
         if entity_id is None:
             results = stamped.resolve(wrapper)
