@@ -49,7 +49,7 @@
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
-  return CGSizeMake(310, MAX(size.height, 170));
+  return CGSizeMake(310, MAX(size.height, 137));
 }
 
 - (void)layoutSubviews {
@@ -75,6 +75,10 @@
 
 - (void)_commonInit {
   self.backgroundColor = [UIColor whiteColor];
+  self.layer.shadowColor = [UIColor blackColor].CGColor;
+  self.layer.shadowOpacity = 0.2;
+  self.layer.shadowOffset = CGSizeMake(0, 4);
+  self.layer.shadowRadius = 4;
   _backgroundGradient = [CAGradientLayer layer];
   _backgroundGradient.startPoint = CGPointMake(0, 0);
   _backgroundGradient.endPoint = CGPointMake(1, 1);
