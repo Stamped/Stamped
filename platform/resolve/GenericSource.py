@@ -130,7 +130,7 @@ class GenericSource(BasicSource):
 
     def resolve(self, query, **options):
         return self.resolver.resolve(query, self.matchSource(query), **options)
-
+    
     def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
@@ -165,12 +165,14 @@ class GenericSource(BasicSource):
             except Exception:
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
+        
         #entity['albums'] = new_albums
         entity['track_list'] = new_tracks
-
+    
     def wrapperFromKey(self, key, type=None):
+        raise NotImplementedError
         return None
-
+    
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()
@@ -205,12 +207,6 @@ class GenericSource(BasicSource):
         if wrapper.type == 'artist':
             if controller.shouldEnrich('album_list', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
-
-        if wrapper.type == 'album':
-            if len(wrapper.tracks) > 0:
-                entity['tracks'] = [
-                    track['name'] for track in wrapper.tracks
-                ]
 
         if wrapper.type == 'track':
             if wrapper.album['name'] != '':

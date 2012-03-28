@@ -1419,6 +1419,7 @@ class Resolver(object):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
             return
+        
         tests = [
             ('query_string',        self.__queryStringTest),
             ('name',                self.__nameTest),
@@ -1430,6 +1431,7 @@ class Resolver(object):
             ('keywords',            self.__keywordsTest),
             ('related_terms',       self.__relatedTermsTest),
         ]
+        
         weights = {
             'query_string':         lambda q, m, s, o: 0,
             'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=2.5),
@@ -1441,8 +1443,9 @@ class Resolver(object):
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
         }
+        
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
     def genericCheck(self, tests, weights, results, query, match, options, order):
         mins = options['mins']
         if self.verbose:
@@ -1460,15 +1463,18 @@ class Resolver(object):
         options = self.parseGeneralOptions(query, options)
         results = []
         index = 0
+        
         for i in options['groups']:
-            batch = self.__resolveBatch(options['check'], query, source, (index, i) , options)
-            index += i
+            batch   = self.__resolveBatch(options['check'], query, source, (index, i) , options)
+            index  += i
             results = self.__sortedPairs(results, batch)
+            
             if self.__shouldFinish(query, results, options):
                 break
+        
         results = self.__finish(query, results, options)
         return results
-
+    
     def tracksSet(self, entity):
         return set( [ self.trackSimplify(track['name']) for track in entity.tracks ] )
 
@@ -1808,7 +1814,7 @@ class Resolver(object):
             entry = entries[i]
             pool.spawn(check, results, query, entry, options, start+i)
         pool.join()
-
+        
         return results
 
     def __compareAll(self, query, match, tests, options):

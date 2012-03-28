@@ -166,8 +166,15 @@ class RdioSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'rdio', 
-            'album_list',
-            'track_list'
+            groups=[
+                'album_list',
+                'track_list',
+            ],
+            types=[
+                'artist',
+                'album',
+                'track',
+            ]
         )
 
     @lazyProperty
@@ -240,8 +247,7 @@ class RdioSource(GenericSource):
             constructor=RdioArtist)
 
     def searchAllSource(self, query, timeout=None):
-        validTypes = set(['track', 'album', 'artist'])
-        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
+        if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
             
         return self.generatorSource(self.__queryGen(

@@ -509,11 +509,11 @@ class Entity(Schema):
         self.mangled_title_source       = SchemaElement(basestring)
         self.mangled_title_timestamp    = SchemaElement(datetime) 
         
-        #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
         self.subtitle_source    = SchemaElement(basestring)
         self.subtitle_timestamp = SchemaElement(datetime)
         
+        self.type               = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.subcategory_source = SchemaElement(basestring)
@@ -575,6 +575,7 @@ class EntityMini(Schema):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring)
         self.subtitle           = SchemaElement(basestring)
+        self.type               = SchemaElement(basestring)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
         self.coordinates        = CoordinatesSchema()
@@ -875,6 +876,10 @@ class MediaSchema(Schema):
         self.artist_display_name        = SchemaElement(basestring)
         self.artist_display_name_source = SchemaElement(basestring)
         self.artist_display_name_timestamp = SchemaElement(datetime)
+
+        self.album_name                 = SchemaElement(basestring)
+        self.album_name_source          = SchemaElement(basestring)
+        self.album_name_timestamp       = SchemaElement(datetime)
 
         self.genre                      = SchemaElement(basestring)
         self.genre_source               = SchemaElement(basestring)

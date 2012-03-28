@@ -207,10 +207,15 @@ class GooglePlacesSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'googleplaces',
-            'address',
-            'phone',
-            'site',
-            'neighborhood',
+            groups=[
+                'address',
+                'phone',
+                'site',
+                'neighborhood',
+            ],
+            types=[
+                'place',
+            ]
         )
 
     @lazyProperty
@@ -244,8 +249,7 @@ class GooglePlacesSource(GenericSource):
         return self.generatorSource(gen())
 
     def searchAllSource(self, query, timeout=None, types=None):
-        validTypes = set(['restaurant', 'bar', 'place', 'other'])
-        if types is not None and len(validTypes.intersection(types)) == 0:
+        if types is not None and len(self.types.intersection(types)) == 0:
             return self.emptySource
             
         def gen():
