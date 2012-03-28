@@ -14,6 +14,7 @@
 #import "CreateStampViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
+#import "STStampDetailCardView.h"
 #import "STStampDetailHeader.h"
 #import "STStampDetailToolbar.h"
 #import "Stamp.h"
@@ -49,6 +50,8 @@ typedef enum {
 @synthesize stamp = _stamp;
 @synthesize toolbar = _toolbar;
 @synthesize header = _header;
+@synthesize scrollView = _scrollView;
+@synthesize cardView = _cardView;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [super initWithNibName:@"STStampDetailViewController" bundle:nil];
@@ -60,8 +63,10 @@ typedef enum {
 
 - (void)dealloc {
   [_stamp release];
+  self.scrollView = nil;
   self.toolbar = nil;
   self.header = nil;
+  self.cardView = nil;
   [super dealloc];
 }
 
@@ -90,12 +95,16 @@ typedef enum {
   _header.stampImage = [_stamp.user stampImageWithSize:StampImageSize46];
   _header.title = _stamp.entityObject.title;
   [_header addTarget:self action:@selector(_headerPressed:) forControlEvents:UIControlEventTouchUpInside];
+
+  _cardView.stamp = _stamp;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.scrollView = nil;
   self.toolbar = nil;
   self.header = nil;
+  self.cardView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

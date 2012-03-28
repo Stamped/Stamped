@@ -279,6 +279,21 @@ class AlbumsGroup(ASubcategoryGroup):
         self.addNameField()
         self.addEligible('artist')
 
+class AlbumListGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'album_list')
+        self.addNameField()
+        self.addEligible('artist')
+
+class TrackListGroup(ASubcategoryGroup):
+
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'track_list')
+        self.addNameField()
+        self.addEligible('artist')
+        self.addEligible('album')
+
 class SongsGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):

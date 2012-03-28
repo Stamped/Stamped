@@ -58,6 +58,12 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
 
+static Rdio* _rdio;
+
++(void)initialize {
+  _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47" andSecret:@"xJSZwBZxFp" delegate:nil];
+}
+
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {
   NSRange range;
   range.location = 0;  
@@ -442,26 +448,8 @@ static STPopUpView* volatile _currentPopUp = nil;
   NSLog(@"%@",[NSThread callStackSymbols]);
 }
 
-+ (void)didChooseAction:(id<STAction>)action {
-  if (action.sources && [action.sources count] > 1) {
-    STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
-    NSOperation* operation = [factory createViewWithAction:action forBlock:^(STViewCreator init) {
-      if (init) {
-        UIView* view = init(nil);
-        view.frame = [Util centeredAndBounded:view.frame.size inFrame:[[UIApplication sharedApplication] keyWindow].frame];
-        [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.3]];
-      }
-    }];
-    dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    
-  }
-  if (action.sources && [action.sources count] == 1) {
-    [Util didChooseSource:[action.sources objectAtIndex:0] withAction:action.action];
-  }
-}
-
-+ (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
-  
++ (Rdio*)sharedRdio {
+  return _rdio;
 }
 
 @end

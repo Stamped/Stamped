@@ -545,8 +545,8 @@ class iTunesSource(GenericSource):
             'mpaa_rating',
             'genre',
             'desc',
-            'albums',
-            'songs',
+            'album_list',
+            'track_list',
         )
 
     @lazyProperty
@@ -643,31 +643,31 @@ class iTunesSource(GenericSource):
 
     def trackSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesTrack(data=x))
     
     def albumSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesAlbum(data=x))
 
     def artistSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesArtist(data=x))
 
     def movieSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesMovie(data=x))
 
     def bookSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesBook(data=x))
 
     def tvSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesTVShow(data=x))
 
     def appSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
-        return listSource(items)
+        return listSource(items, constructor=lambda x: iTunesApp(data=x))
 
     def __createWrapper(self, value):
         try:

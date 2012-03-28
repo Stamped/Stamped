@@ -285,6 +285,7 @@ class AmazonSource(GenericSource):
             'amazon_link',
             'amazon_underlying',
             'images',
+            #Consider for album_list, track_list
         )
 
     def matchSource(self, query):

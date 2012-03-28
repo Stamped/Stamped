@@ -92,6 +92,9 @@
 		6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
+		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
+		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
+		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
@@ -1831,6 +1834,8 @@
 		63877B581520C35700DE5A3A /* STSynchronousWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSynchronousWrapper.m; sourceTree = "<group>"; };
 		6398B926152243C90044BB0C /* STWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STWeakProxy.h; sourceTree = "<group>"; };
 		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
+		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
+		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
@@ -2972,6 +2977,15 @@
 				63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */,
 			);
 			name = Protocol;
+			sourceTree = "<group>";
+		};
+		63BC667B1522632900DA2579 /* Third Party */ = {
+			isa = PBXGroup;
+			children = (
+				63BC667C1522634300DA2579 /* STRdio.h */,
+				63BC667D1522634300DA2579 /* STRdio.m */,
+			);
+			name = "Third Party";
 			sourceTree = "<group>";
 		};
 		63F27E6F151CF23700DA7001 /* New Entity Detail */ = {
@@ -4390,6 +4404,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				63BC667B1522632900DA2579 /* Third Party */,
 				6380A7A41506D41A003087EF /* Protocol */,
 				6380A78E1506B67D003087EF /* New Entity Detail */,
 				7E3B6D7813D7509600FBE958 /* Util.h */,
@@ -6164,6 +6179,7 @@
 				7E4A6EE015222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFB15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
+				63BC667F1522634300DA2579 /* STRdio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6340,6 +6356,7 @@
 				7E4A6EDF15222E6F0031D7D6 /* SBJsonParser.m in Sources */,
 				7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFA15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
+				63BC667E1522634300DA2579 /* STRdio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6370,6 +6387,7 @@
 				63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */,
 				63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */,
+				63BC66801522634300DA2579 /* STRdio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -89,7 +89,7 @@
   CGFloat ascender = ceilf(CTFontGetAscent(_titleLayer.font)) + 1;
   _titleLayer.frame = CGRectMake(15, ascender, CGRectGetWidth(self.frame) - 50, 56);
   CGSize imageSize = _categoryImageView.image.size;
-  _categoryImageView.frame = CGRectMake(CGRectGetMinX(_titleLayer.frame), 48, imageSize.width, imageSize.height);
+  _categoryImageView.frame = CGRectMake(CGRectGetMinX(_titleLayer.frame), 47, imageSize.width, imageSize.height);
   CGSize subtitleSize = [_subtitleLabel sizeThatFits:CGSizeMake(280, MAXFLOAT)];
   _subtitleLabel.frame = CGRectMake(CGRectGetMaxX(_categoryImageView.frame) + 4,
                                     CGRectGetMinY(_categoryImageView.frame) - 1,

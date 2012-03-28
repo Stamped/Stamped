@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "STAction.h"
+#import <Rdio/Rdio.h>
 
 @class User;
 @class Entity;
@@ -69,8 +70,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
 
-+ (void)didChooseAction:(id<STAction>)action;
-
-+ (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
++ (Rdio*)sharedRdio;
 
 @end

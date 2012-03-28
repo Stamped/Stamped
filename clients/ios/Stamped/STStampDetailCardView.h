@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+@class Stamp;
+
 @interface STStampDetailCardView : UIView
+
+@property (nonatomic, retain) Stamp* stamp;
 
 @end

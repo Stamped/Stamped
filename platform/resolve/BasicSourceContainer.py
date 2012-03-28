@@ -103,7 +103,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             self.__failedValues[source] = max(value - self.failedCooldown, 0)
         return modified_total
 
-    def shouldEnrich(self, group, source, entity,timestamp=None):
+    def shouldEnrich(self, group, source, entity, timestamp=None):
         if timestamp is None:
             timestamp = self.now
         if group in self.__groups:

@@ -140,10 +140,6 @@ class FactualPlace(ResolverPlace):
             pass
         return 'other'
 
-    @lazyProperty
-    def subcategories(self):
-        return set([self.subcategory])
-
     @property 
     def source(self):
         return 'factual'

@@ -62,6 +62,13 @@ class _EntityObject(object):
     def source(self):
         return "stamped"
 
+    @lazyProperty
+    def subcategory(self):
+        try:
+            return self.entity['subcategory']
+        except Exception:
+            return 'other'
+
     def __repr__(self):
         return pformat( self.entity.value )
 
@@ -304,7 +311,7 @@ class StampedSource(GenericSource):
             from MongoStampedAPI import MongoStampedAPI
             self._stamped_api = MongoStampedAPI()
         
-        return api._entityDB
+        return self._stamped_api._entityDB
     
     def artistFromEntity(self, entity):
         """
@@ -631,8 +638,8 @@ class StampedSource(GenericSource):
         import pymongo
         #print(pformat(mongo_query))
         logs.info(str(mongo_query))
-        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'] ).sort('_id',pymongo.ASCENDING), limit=1000)
-    
+        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000 ).sort('_id',pymongo.ASCENDING))
+
     def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
         def gen():
             try:
@@ -650,7 +657,7 @@ class StampedSource(GenericSource):
                     } )
                     if query_obj.source == 'stamped' and query_obj.key != '':
                         query['_id'] = { '$lt' : ObjectId(query_obj.key) }
-                    matches = self.__id_query(query )
+                    matches = self.__id_query(query)
                     logs.info('Found %d matches for query: %20s' % (len(matches), str(matches)))
                     #print(matches)
                     for match in matches:
@@ -700,7 +707,9 @@ class StampedSource(GenericSource):
         except Exception:
             return None
         
-        ret = self.__entityDB._collection.find_one({ mongo_key : key }, fields=['_id'] )
+        query = { mongo_key : key }
+        logs.info(str(query))
+        ret = self.__entityDB._collection.find_one(query, fields=['_id'] )
         if ret:
             return ret['_id']
         else:

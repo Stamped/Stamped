@@ -66,8 +66,8 @@ class FullResolveContainer(BasicSourceContainer):
             MangledTitleGroup(),
             TrackLengthGroup(),
             ShortDescriptionGroup(),
-            AlbumsGroup(),
-            SongsGroup(),
+            #AlbumsGroup(),
+            #SongsGroup(),
             AlbumNameGroup(),
 
             MPAARatingGroup(),
@@ -89,6 +89,9 @@ class FullResolveContainer(BasicSourceContainer):
             OpenTableGroup(),
             OpenTableNicknameGroup(),
             StampedGroup(),
+
+            AlbumListGroup(),
+            TrackListGroup(),
         ]
         for group in groups:
             self.addGroup(group)

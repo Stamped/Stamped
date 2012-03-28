@@ -174,7 +174,7 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            if query.types is None or result[1].subtype in query.types:
+            if query.types is None or result[1].subcategory in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
