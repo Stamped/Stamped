@@ -130,7 +130,7 @@ class GenericSource(BasicSource):
 
     def resolve(self, query, **options):
         return self.resolver.resolve(query, self.matchSource(query), **options)
-
+    
     def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
