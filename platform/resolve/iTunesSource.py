@@ -542,11 +542,22 @@ class iTunesSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'itunes',
-            'mpaa_rating',
-            'genre',
-            'desc',
-            'album_list',
-            'track_list',
+            groups=[
+                'mpaa_rating',
+                'genre',
+                'desc',
+                'album_list',
+                'track_list',
+            ],
+            types=[
+                'artist',
+                'album',
+                'track',
+                'book',
+                'movie',
+                'tv',
+                'app',
+            ]
         )
 
     @lazyProperty
@@ -692,32 +703,27 @@ class iTunesSource(GenericSource):
             raise ValueError('Malformed iTunes output')
 
     def searchAllSource(self, query, timeout=None):
-        validTypes = set(['book', 'track', 'album', 'artist', 'movie', 'tv', 'app'])
-        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
+        if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
 
         def gen():
             try:
+                mapper = {
+                    'book'      : 'ebook',
+                    'track'     : 'song',
+                    'album'     : 'album',
+                    'artist'    : 'musicArtist',
+                    'movie'     : 'movie',
+                    'tv'        : 'tvShow',
+                    'app'       : 'software',
+                }
                 if query.types is None:
-                    queries = [
-                        'musicArtist', 'song', 'album', 'movie', 'ebook', 'tvShow', 'software'
-                    ]
+                    queries = mapper.values()
                 else:
                     queries = []
-                    if 'book' in query.types:
-                        queries.append('ebook')
-                    if 'track' in query.types:
-                        queries.append('song')
-                    if 'album' in query.types:
-                        queries.append('album')
-                    if 'artist' in query.types:
-                        queries.append('musicArtist')
-                    if 'movie' in query.types:
-                        queries.append('movie')
-                    if 'tv' in query.types:
-                        queries.append('tvShow')
-                    if 'app' in query.types:
-                        queries.append('software')
+                    for t in query.types:
+                        if t in mapper:
+                            queries.append(mapper[t])
                 
                 if len(queries) == 0:
                     return 

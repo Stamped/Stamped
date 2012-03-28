@@ -271,21 +271,28 @@ class AmazonSource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
-            'artist_display_name',
-            'genre',
-            'track_length',
-            'album_name',
-            'release_date',
-            'author',
-            'publisher',
-            'num_pages',
-            'isbn',
-            'desc',
-            'sku_number',
-            'amazon_link',
-            'amazon_underlying',
-            'images',
-            #Consider for album_list, track_list
+            groups=[
+                'artist_display_name',
+                'genre',
+                'track_length',
+                'album_name',
+                'release_date',
+                'author',
+                'publisher',
+                'num_pages',
+                'isbn',
+                'desc',
+                'sku_number',
+                'amazon_link',
+                'amazon_underlying',
+                'images',
+                #Consider for album_list, track_list
+            ],
+            types=[
+                'album',
+                'track',
+                'book',
+            ]
         )
 
     def matchSource(self, query):
@@ -363,8 +370,7 @@ class AmazonSource(GenericSource):
         )
 
     def searchAllSource(self, query, timeout=None):
-        validTypes = set(['book', 'track', 'album'])
-        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
+        if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
             
         q = query.query_string

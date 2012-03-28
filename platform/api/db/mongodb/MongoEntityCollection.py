@@ -13,7 +13,7 @@ try:
     from utils                          import lazyProperty
 
     from Schemas                        import *
-    from Entity                         import setFields, isEqual, getSimplifiedTitle
+    from Entity                         import setFields, isEqual, getSimplifiedTitle, deriveTypeFromSubcategory
 
     from AMongoCollection               import AMongoCollection
     from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
@@ -41,8 +41,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
     
     def _convertFromMongo(self, document):
+        if 'subcategory' in document:
+            document['type'] = deriveTypeFromSubcategory(document['subcategory'])
+            
         entity = AMongoCollection._convertFromMongo(self, document)
-        if entity is not None and entity.titlel is None:
+        if entity is None:
+            return entity
+
+        if entity.titlel is None:
             entity.titlel = getSimplifiedTitle(entity.title)
         
         return entity
@@ -52,6 +58,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             entity.titlel = getSimplifiedTitle(entity.title)
         if entity.entity_id is not None and entity.entity_id.startswith('T_'):
             del entity.entity_id
+        if entity.type is None:
+            entity.type = deriveTypeFromSubcategory(entity.subcategory)
         document = AMongoCollection._convertToMongo(self, entity)
         
         return document

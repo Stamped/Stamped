@@ -36,7 +36,7 @@ try:
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
     from time                       import time
-    from Entity                     import subcategories
+    from Entity                     import subcategories, deriveTypeFromSubcategory
 except:
     report()
     raise
@@ -174,10 +174,13 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            if query.types is None or result[1].subcategory in query.types:
+            # TODO: Check song (subcategory) vs track (query.types)
+            if query.types is None or result[1].type in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
+            else:
+                print "\n\n\nFiltered out %s (subcategory=%s)" % (result[1].name, result[1].subcategory)
         
         for name, source_results in all_results.items():
             all_results[name] = sortedResults(source_results)
@@ -248,19 +251,18 @@ class EntitySearch(object):
         types   = None
         
         if subcategory is not None:
-            if subcategory == 'song':
-                subcategory = 'track'
-            types = set(subcategory)
+            types = set(deriveTypeFromSubcategory(subcategory))
         elif category is not None:
             types = set()
             for s, c in subcategories.iteritems():
                 if category == c:
-                    if s == 'song':
-                        s = 'track'
-                    types.add(s)
+                    types.add(deriveTypeFromSubcategory(s))
 
         try:
-            coords = (coords.lat, coords.lng)
+            if coords.lat is not None and coords.lng is not None:
+                coords = (coords.lat, coords.lng)
+            else:
+                coords = None
         except:
             coords = None
         

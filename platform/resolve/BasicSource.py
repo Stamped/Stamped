@@ -19,10 +19,15 @@ except:
 class BasicSource(AExternalSource):
     """
     """
-    def __init__(self, name, *groups):
+    def __init__(self, name, groups=None, types=None):
         AExternalSource.__init__(self)
         self.__name = name
-        self.__groups = set(groups)
+        self.__groups = set()
+        self.__types = set()
+        if groups is not None:
+            self.__groups = set(groups)
+        if types is not None:
+            self.__types = set(types)
     
     @property
     def sourceName(self):
@@ -31,6 +36,10 @@ class BasicSource(AExternalSource):
     @property
     def groups(self):
         return set(self.__groups)
+
+    @property
+    def types(self):
+        return set(self.__types)
 
     def addGroup(self, group):
         self.__groups.add(group)

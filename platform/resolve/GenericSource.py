@@ -208,12 +208,6 @@ class GenericSource(BasicSource):
             if controller.shouldEnrich('album_list', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
 
-        if wrapper.type == 'album':
-            if len(wrapper.tracks) > 0:
-                entity['tracks'] = [
-                    track['name'] for track in wrapper.tracks
-                ]
-
         if wrapper.type == 'track':
             if wrapper.album['name'] != '':
                 entity['album_name'] = wrapper.album['name']

@@ -49,6 +49,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.failedPunishment = 20
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
+        # 1 / 0
+        print '\n\nENTITY: %s\n' % entity
+        print '\n\nDECORATIONS: %s\n' % decorations
         self.setNow(timestamp)
         if max_iterations == None:
             max_iterations = self.__default_max_iterations
@@ -58,6 +61,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             modified = False
             for source in self.__sources:
                 if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
+                    print '\n\nSOURCE: %s\n' % source
+
                     groups = source.groups
                     targetGroups = set()
                     for group in groups:
@@ -106,6 +111,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
     def shouldEnrich(self, group, source, entity, timestamp=None):
         if timestamp is None:
             timestamp = self.now
+        print '\nGROUP: %s' % (group)
         if group in self.__groups:
             groupObj = self.__groups[group]
             if groupObj.eligible(entity):

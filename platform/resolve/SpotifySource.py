@@ -186,8 +186,15 @@ class SpotifySource(GenericSource):
     """
     def __init__(self):
         GenericSource.__init__(self, 'spotify',
-            'album_list',
-            'track_list',
+            groups=[
+                'album_list',
+                'track_list',
+            ],
+            types=[
+                'artist',
+                'album',
+                'track',
+            ]
         )
 
     @lazyProperty
@@ -263,8 +270,7 @@ class SpotifySource(GenericSource):
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
     def searchAllSource(self, query, timeout=None):
-        validTypes = set(['track', 'album', 'artist'])
-        if query.types is not None and len(validTypes.intersection(query.types)) == 0:
+        if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
             
         q = query.query_string

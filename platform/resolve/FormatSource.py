@@ -35,10 +35,12 @@ class FormatSource(BasicSource):
     """
     def __init__(self):
         BasicSource.__init__(self, 'format',
-            'release_date',
-            'mangled_title',
-            'coordinates',
-            'subcategory',
+            groups=[
+                'release_date',
+                'mangled_title',
+                'coordinates',
+                'subcategory',
+            ]
         )
 
     @lazyProperty

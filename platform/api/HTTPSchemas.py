@@ -13,6 +13,7 @@ from schema             import *
 from api.Schemas        import *
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
+from Entity             import *
 
 # ####### #
 # PRIVATE #
@@ -585,12 +586,11 @@ class HTTPEntity(Schema):
     def importSchema(self, schema, client=None):
         if schema.__class__.__name__ == 'Entity':
 
-            import Entity
-            Entity.setFields(schema)
+            setFields(schema)
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
-            subcategory         = Entity.formatSubcategory(schema.subcategory)
+            subcategory         = formatSubcategory(schema.subcategory)
             
             self.importData(data, overflow=True)
             
@@ -604,7 +604,7 @@ class HTTPEntity(Schema):
             # Restaurant / Bar
             if schema.category == 'food':
 
-                address = Entity.formatAddress(schema, extendStreet=True, breakLines=True)
+                address = formatAddress(schema, extendStreet=True, breakLines=True)
                 if address is not None:
                     self.caption = address 
 
@@ -692,7 +692,7 @@ class HTTPEntity(Schema):
             elif schema.category == 'film':
 
                 if schema.subcategory == 'movie' and schema.track_length is not None:
-                    length = Entity.formatFilmLength(schema.track_length)
+                    length = formatFilmLength(schema.track_length)
                     if length is not None:
                         self.caption = length
 
@@ -703,7 +703,7 @@ class HTTPEntity(Schema):
 
                 self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_film', client=client))
                 self._addMetadata('Overview', schema.desc, key='desc', extended=True)
-                self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
+                self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
                 self._addMetadata('Cast', schema.cast, extended=True, optional=True)
                 self._addMetadata('Director', schema.director, optional=True)
                 self._addMetadata('Genres', schema.genre, optional=True)
@@ -790,12 +790,12 @@ class HTTPEntity(Schema):
 
                 elif schema.subcategory == 'album':
                     self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
+                    self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
                     self._addMetadata('Album Details', schema.desc, key='desc', optional=True)
 
                 elif schema.subcategory == 'song':
                     self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', Entity.formatReleaseDate(schema.release_date))
+                    self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
                     self._addMetadata('Song Details', schema.desc, key='desc', optional=True)
 
                 # Actions: Listen
@@ -986,7 +986,7 @@ class HTTPEntity(Schema):
             # Generic Place
             elif self.coordinates is not None or self.address is not None:
 
-                address = Entity.formatAddress(schema, extendStreet=True, breakLines=True)
+                address = formatAddress(schema, extendStreet=True, breakLines=True)
                 if address is not None:
                     self.caption = address 
 
@@ -1159,6 +1159,7 @@ class HTTPEntityNew(Schema):
                 'subtitle':     self.subtitle,
                 'category':     self.category,
                 'subcategory':  self.subcategory,
+                'type':         deriveTypeFromSubcategory(self.subcategory)
             })
 
             if self.desc is not None:
@@ -1208,6 +1209,7 @@ class HTTPEntityEdit(Schema):
                 'entity_id':    self.entity_id,
                 'title':        self.title,
                 'subtitle':     self.subtitle,
+                'type':         deriveTypeFromSubcategory(self.subcategory),
                 'category':     self.category,
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
@@ -1228,7 +1230,6 @@ class HTTPEntityAutosuggest(Schema):
     
     def importSchema(self, schema, distance):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setFields
             setFields(schema, detailed=True)
 
             if schema.search_id is not None:
@@ -1902,7 +1903,6 @@ class HTTPEntity_stampedtest(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setFields
             setFields(schema)
             
             data                = schema.value
@@ -2010,8 +2010,8 @@ class HTTPEntity_stampedtest(Schema):
             
             # Music
             self.artist_name    = schema.artist_display_name
-            self.album_name     = schema.album_name
-            self.label          = schema.label_studio
+            # self.album_name     = schema.album_name
+            # self.label          = schema.label_studio
             
             if 'preview_url' in schema:
                 self.preview_url = schema.preview_url
