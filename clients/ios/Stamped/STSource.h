@@ -15,5 +15,6 @@
 @property (nonatomic, readonly, retain) NSString* sourceID;
 @property (nonatomic, readonly, retain) NSString* link;
 @property (nonatomic, readonly, retain) NSString* icon;
+//Endpoint
 
 @end

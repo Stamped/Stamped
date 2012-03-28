@@ -14,6 +14,7 @@
 #import "CreateStampViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
+#import "STStampDetailCardView.h"
 #import "STStampDetailHeader.h"
 #import "STStampDetailToolbar.h"
 #import "Stamp.h"
@@ -90,6 +91,11 @@ typedef enum {
   _header.stampImage = [_stamp.user stampImageWithSize:StampImageSize46];
   _header.title = _stamp.entityObject.title;
   [_header addTarget:self action:@selector(_headerPressed:) forControlEvents:UIControlEventTouchUpInside];
+
+  STStampDetailCardView* cardView = [[STStampDetailCardView alloc] initWithFrame:CGRectMake(5, 68, 310, 170)];
+  cardView.stamp = _stamp;
+  [self.view addSubview:cardView];
+  [cardView release];
 }
 
 - (void)viewDidUnload {
