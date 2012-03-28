@@ -15,6 +15,19 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		635EAAC715234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
+		635EAAC815234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
+		635EAAC915234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
+		635EAAD115238D5F00D0378D /* STConfirmationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAD015238D5F00D0378D /* STConfirmationView.m */; };
+		635EAAD215238D5F00D0378D /* STConfirmationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAD015238D5F00D0378D /* STConfirmationView.m */; };
+		635EAAD315238D5F00D0378D /* STConfirmationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAD015238D5F00D0378D /* STConfirmationView.m */; };
+		635EAAD615238F9000D0378D /* 3rd_icon_rdio.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */; };
+		635EAAD715238F9000D0378D /* 3rd_icon_rdio.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */; };
+		635EAAD815238F9000D0378D /* 3rd_icon_rdio.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */; };
+		635EAAD915238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */; };
+		635EAADA15238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */; };
+		635EAADB15238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */; };
+		635EAADD1523D4ED00D0378D /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 635EAADC1523D4ED00D0378D /* StoreKit.framework */; };
 		63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
@@ -1775,6 +1788,13 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
+		635EAAC515234D5800D0378D /* STActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionManager.h; sourceTree = "<group>"; };
+		635EAAC615234D5800D0378D /* STActionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionManager.m; sourceTree = "<group>"; };
+		635EAACF15238D5F00D0378D /* STConfirmationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfirmationView.h; sourceTree = "<group>"; };
+		635EAAD015238D5F00D0378D /* STConfirmationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConfirmationView.m; sourceTree = "<group>"; };
+		635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 3rd_icon_rdio.png; sourceTree = "<group>"; };
+		635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "3rd_icon_rdio@2x.png"; sourceTree = "<group>"; };
+		635EAADC1523D4ED00D0378D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
 		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
@@ -2804,6 +2824,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				635EAADD1523D4ED00D0378D /* StoreKit.framework in Frameworks */,
 				63733FF2152112D700EEFAB3 /* AudioToolbox.framework in Frameworks */,
 				63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */,
 				7E07EC1E14C73FDF00A2B5F0 /* libz.dylib in Frameworks */,
@@ -2956,6 +2977,8 @@
 				63877B581520C35700DE5A3A /* STSynchronousWrapper.m */,
 				6398B926152243C90044BB0C /* STWeakProxy.h */,
 				6398B927152243CA0044BB0C /* STWeakProxy.m */,
+				635EAACF15238D5F00D0378D /* STConfirmationView.h */,
+				635EAAD015238D5F00D0378D /* STConfirmationView.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -2984,6 +3007,8 @@
 			children = (
 				63BC667C1522634300DA2579 /* STRdio.h */,
 				63BC667D1522634300DA2579 /* STRdio.m */,
+				635EAAC515234D5800D0378D /* STActionManager.h */,
+				635EAAC615234D5800D0378D /* STActionManager.m */,
 			);
 			name = "Third Party";
 			sourceTree = "<group>";
@@ -2991,6 +3016,8 @@
 		63F27E6F151CF23700DA7001 /* New Entity Detail */ = {
 			isa = PBXGroup;
 			children = (
+				635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */,
+				635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */,
 				6386EF2215114B950019F1DC /* eDetailBox_line.png */,
 				6386EF2315114B950019F1DC /* eDetailBox_line@2x.png */,
 			);
@@ -3861,6 +3888,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				635EAADC1523D4ED00D0378D /* StoreKit.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -5343,6 +5371,8 @@
 				6386EF2815114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
 				7E0596461520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 				7E4A6ECE15222E6F0031D7D6 /* FBDialog.bundle in Resources */,
+				635EAAD715238F9000D0378D /* 3rd_icon_rdio.png in Resources */,
+				635EAADA15238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5972,6 +6002,8 @@
 				7E5EEEC8151BD68E004FFBB9 /* icon@2x.png in Resources */,
 				7E0596451520E6B7009D691E /* STStampDetailViewController.xib in Resources */,
 				7E4A6ECD15222E6F0031D7D6 /* FBDialog.bundle in Resources */,
+				635EAAD615238F9000D0378D /* 3rd_icon_rdio.png in Resources */,
+				635EAAD915238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5984,6 +6016,8 @@
 				6386EF05150FBF030019F1DC /* NewEntityDetail.xib in Resources */,
 				6386EF2615114B950019F1DC /* eDetailBox_line.png in Resources */,
 				6386EF2915114B950019F1DC /* eDetailBox_line@2x.png in Resources */,
+				635EAAD815238F9000D0378D /* 3rd_icon_rdio.png in Resources */,
+				635EAADB15238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6180,6 +6214,8 @@
 				7E4A6EE215222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFB15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 				63BC667F1522634300DA2579 /* STRdio.m in Sources */,
+				635EAAC815234D5800D0378D /* STActionManager.m in Sources */,
+				635EAAD215238D5F00D0378D /* STConfirmationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6357,6 +6393,8 @@
 				7E4A6EE115222E6F0031D7D6 /* SBJsonWriter.m in Sources */,
 				7E4A6EFA15224F130031D7D6 /* STStampDetailCardView.m in Sources */,
 				63BC667E1522634300DA2579 /* STRdio.m in Sources */,
+				635EAAC715234D5800D0378D /* STActionManager.m in Sources */,
+				635EAAD115238D5F00D0378D /* STConfirmationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6388,6 +6426,8 @@
 				63877B5B1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */,
 				6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */,
 				63BC66801522634300DA2579 /* STRdio.m in Sources */,
+				635EAAC915234D5800D0378D /* STActionManager.m in Sources */,
+				635EAAD315238D5F00D0378D /* STConfirmationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6463,8 +6503,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6492,8 +6532,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "7B61E280-7A74-4141-9DCD-72786E12B906";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7B61E280-7A74-4141-9DCD-72786E12B906";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6514,8 +6554,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6538,8 +6578,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8E43DF55-5D17-4208-A685-5BCD66A05051";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6561,8 +6601,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (XYFL538F8Z)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6585,8 +6625,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "8E43DF55-5D17-4208-A685-5BCD66A05051";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5698C5B4-134F-4266-B153-091A899B790C";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6600,8 +6640,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -6619,8 +6659,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "80A5D7F2-DBC4-40F9-8825-D782B0A56E28";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -6639,8 +6679,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6659,8 +6699,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "D578280E-EB1A-4501-AB8D-F486F490E724";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D578280E-EB1A-4501-AB8D-F486F490E724";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6696,8 +6736,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (GGWQK38856)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -6717,8 +6757,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -6729,8 +6769,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (GGWQK38856)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -6748,8 +6788,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "56F9DFBB-5F92-444F-828C-C5024AC720F4";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -6768,8 +6808,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6789,8 +6829,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "FE224E82-9CED-44BD-9E2F-002044E80370";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "FE224E82-9CED-44BD-9E2F-002044E80370";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6810,8 +6850,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6830,8 +6870,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

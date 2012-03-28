@@ -11,12 +11,12 @@
 
 @implementation STSimpleAction
 
-@synthesize action = action_;
+@synthesize type = _type;
 @synthesize name = name_;
 @synthesize sources = sources_;
 
 - (void)dealloc {
-  self.action = nil;
+  [_type release];
   self.name = nil;
   self.sources = nil;
   
@@ -27,7 +27,7 @@
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleAction class]];
   
   [mapping mapAttributes:
-   @"action",
+   @"type",
    @"name",
    nil];
   

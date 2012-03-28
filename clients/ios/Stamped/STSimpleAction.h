@@ -12,7 +12,7 @@
 
 @interface STSimpleAction : NSObject<STAction>
 
-@property (nonatomic, readwrite, retain) NSString* action;
+@property (nonatomic, readwrite, retain) NSString* type;
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, retain) NSArray<STSource>* sources;
 

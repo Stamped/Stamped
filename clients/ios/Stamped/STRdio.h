@@ -7,12 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STViewDelegate.h"
 
-@interface STRdio : NSObject
+@interface STRdio : NSObject <STViewDelegate>
 
 + (STRdio*)sharedRdio;
 
-- (void)launchLoginPage;
+- (void)ensureLoginWithCompletionBlock:(void(^)(void))block;
+- (void)startPlayback:(NSString*)rdioID;
+
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action;
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 @property (nonatomic, readonly, copy) NSString* accessToken;

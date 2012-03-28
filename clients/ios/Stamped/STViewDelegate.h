@@ -12,6 +12,8 @@
 
 @protocol STViewDelegate <NSObject>
 @optional
+- (BOOL)canHandleAction:(id<STAction>)action;
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action;
 - (void)didChooseAction:(id<STAction>)action;
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
 - (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds;

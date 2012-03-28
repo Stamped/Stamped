@@ -8,6 +8,7 @@
 
 #import "STViewContainer.h"
 #import "STViewDelegateDependent.h"
+#import "STActionManager.h"
 
 @interface STViewContainer ()
 
@@ -33,7 +34,9 @@ static int _count = 0;
     dependents_ = [[NSMutableSet alloc] init];
     self.delegate = delegate;
     self.backgroundColor = [UIColor clearColor];
-    [delegate registerDependent:self];
+    if (delegate && [delegate respondsToSelector:@selector(registerDependent:)]) {
+      [delegate registerDependent:self];
+    }
   }
   return self;
 }
@@ -64,6 +67,9 @@ static int _count = 0;
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:)]) {
     [self.delegate didChooseAction:action];
   }
+  else {
+    [[STActionManager sharedActionManager] didChooseAction:action];
+  }
 }
 
 - (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds {
@@ -93,9 +99,22 @@ static int _count = 0;
   }
 }
 
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action {
+  if (self.delegate && [self.delegate respondsToSelector:@selector(canHandleSource:forAction:)]) {
+    return [self.delegate canHandleSource:source forAction:action];
+  }
+  else {
+    return [[STActionManager sharedActionManager] canHandleSource:source forAction:action];
+  }
+  
+}
+
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
     [self.delegate didChooseSource:source forAction:action];
+  }
+  else {
+    [[STActionManager sharedActionManager] didChooseSource:source forAction:action];
   }
 }
 

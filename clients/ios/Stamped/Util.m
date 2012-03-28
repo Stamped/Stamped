@@ -370,6 +370,16 @@ static Rdio* _rdio;
   return imageView;
 }
 
++ (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame {
+  if (CGRectIsNull(frame)) {
+    frame = CGRectMake(0, 0, image.size.width, image.size.height);
+  }
+  UIImageView* imageView = [[UIImageView alloc] initWithFrame:frame];
+  imageView.image = image;
+  //[imageView autorelease];
+  return imageView;
+}
+
 + (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
   CGSize actualSize = [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
   
@@ -421,13 +431,18 @@ static Rdio* _rdio;
   UIWindow* window = [[UIApplication sharedApplication] keyWindow];
   STPopUpView* cur = _currentPopUp;
   if (cur) {
-    [cur removeFromSuperview];
-    [cur release];
+    for (UIView* v in [window subviews]) {
+      if (v == cur && [v isKindOfClass:[STPopUpView class]]) {
+        [v removeFromSuperview];
+      }
+    }
   }
   if (view) {
-    STPopUpView* popup = [[[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color] autorelease];
+    STPopUpView* popup = [[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color];
     [window addSubview:popup];
-    _currentPopUp = [popup retain];
+    _currentPopUp = popup;
+    //Pointer retained solely for comparison, not ownership
+    [popup release];
   }
   else {
     _currentPopUp = nil;

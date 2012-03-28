@@ -27,7 +27,7 @@
 
 @implementation STActionMenuFactory
 
-- (NSOperation*)createViewWithAction:(id<STAction>)action forBlock:(void (^)(STViewCreator))callback {
+- (NSOperation*)createViewWithAction:(id<STAction>)action andSource:(NSArray*)sources forBlock:(void (^)(STViewCreator))callback {
   __block NSBlockOperation* operation = [[[NSBlockOperation alloc] init] autorelease];
   [operation addExecutionBlock:^{
     @try {
@@ -35,7 +35,7 @@
         BOOL failed = NO;
         NSMutableArray* array = [NSMutableArray array];
         if (action) {
-          for (id<STSource> source in action.sources) {
+          for (id<STSource> source in sources) {
             @autoreleasepool {
               if ([operation isCancelled]) {
                 failed = YES;
@@ -106,8 +106,8 @@
                     UIImageView* icon = [[UIImageView alloc] init];
                     icon.image = iconImage;
                     icon.frame = [Util centeredAndBounded:[Util size:iconImage.size withScale:[Util imageScale]] inFrame:CGRectMake(0, 0, cellHeight, cellHeight)];
-                    id<STSource> source = [action.sources objectAtIndex:i];
-                    cell.action = action.action;
+                    id<STSource> source = [sources objectAtIndex:i];
+                    cell.action = action.type;
                     cell.source = source;
                     UIView* text = [Util viewWithText:source.name
                                                  font:[UIFont stampedBoldFontWithSize:14] 
@@ -128,6 +128,7 @@
                       [view appendChildView:bar];
                       [bar release];
                     }
+                    [icon release];
                   }
                   gradient.frame = CGRectMake(0, 0, width, view.frame.size.height);
                   return view;
@@ -162,7 +163,9 @@
   self = [super init];
   if (self) {
     delegate_ = delegate;
-    [delegate registerDependent:self];
+    if (delegate && [delegate respondsToSelector:@selector(registerDependent:)]) {
+      [delegate registerDependent:self];
+    }
   }
   return self;
 }
@@ -179,8 +182,5 @@
   }
 }
 
-- (void)detatchFromDelegate {
-  delegate_ = nil;
-}
 
 @end
