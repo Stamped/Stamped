@@ -703,6 +703,8 @@ class StampedSource(GenericSource):
         
         try:
             source_name = source.sourceName.lower().strip()
+            logs.info(source_name)
+            logs.info(source_name in source_keys)
             mongo_key   = source_keys[source_name]
         except Exception:
             return None

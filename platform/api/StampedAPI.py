@@ -2887,14 +2887,13 @@ class StampedAPI(AStampedAPI):
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError
         
-        source    = sources[source_name]()
-        wrapper   = source.wrapperFromKey(source_id)
-        
         # attempt to resolve against the Stamped DB
+        source    = sources[source_name]()
         stamped   = StampedSource(stamped_api = self)
         entity_id = stamped.resolve_fast(source, source_id)
         
         if entity_id is None:
+            wrapper = source.wrapperFromKey(source_id)
             results = stamped.resolve(wrapper)
             
             if len(results) > 0 and results[0][0]['resolved']:
