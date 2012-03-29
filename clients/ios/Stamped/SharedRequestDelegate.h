@@ -6,6 +6,10 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
+/*
+Standardize Singleton implementation
+ */
+
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 

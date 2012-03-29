@@ -22,7 +22,7 @@ typedef void (^STCallback)(void);
 
 @end
 
-@interface STRdio () <RdioDelegate, RDAPIRequestDelegate>
+@interface STRdio () <RdioDelegate>
 
 - (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action shouldExecute:(BOOL)flag;
 - (void)addToPlaylist:(NSString*)rdioID;

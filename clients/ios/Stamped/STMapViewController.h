@@ -6,6 +6,10 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ BONS - Ask about caching
+ */
+
 #import <MapKit/MapKit.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
