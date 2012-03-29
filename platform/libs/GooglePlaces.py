@@ -8,11 +8,11 @@ __license__   = "TODO"
 import Globals, utils
 import json, logs, string, urllib, urllib2
 
-from optparse import OptionParser
-from Geocoder import Geocoder
-from AKeyBasedAPI import AKeyBasedAPI
-from AEntitySource import AExternalServiceEntitySource
-from Schemas import Entity
+from optparse       import OptionParser
+from Geocoder       import Geocoder
+from AKeyBasedAPI   import AKeyBasedAPI
+from AEntitySource  import AExternalServiceEntitySource
+from Schemas        import Entity
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'

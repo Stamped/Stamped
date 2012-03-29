@@ -97,11 +97,11 @@ _track_removals = [
 # album-specific removal patterns
 _album_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*((-|,)( the)? remixes.*$)')    , [1]),
-    (re.compile(r'.*(- ep$)')                   , [1]),
-    (re.compile(r'.*( the (\w+ )?remixes$)')     , [1]),
-    (re.compile(r'.*(- remix ep)') , [1]),
-    (re.compile(r'.*(- single$)') , [1]),
+    (re.compile(r'.*((-|,)( the)? remixes.*$)')     , [1]),
+    (re.compile(r'.*(- ep$)')                       , [1]),
+    (re.compile(r'.*( the (\w+ )?remixes$)')        , [1]),
+    (re.compile(r'.*(- remix ep)')  , [1]),
+    (re.compile(r'.*(- single$)')   , [1]),
 ]
 
 # artist-specific removal patterns
@@ -135,6 +135,78 @@ _negative_weights = {
 }
 
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
+
+_subcategory_weights = {
+    # --------------------------
+    #           food
+    # --------------------------
+    'restaurant'        : 100, 
+    'bar'               : 90, 
+    'bakery'            : 70, 
+    'cafe'              : 70, 
+    'market'            : 60, 
+    'food'              : 70, 
+    'night_club'        : 75, 
+    'place'             : 80, 
+    
+    # --------------------------
+    #           book
+    # --------------------------
+    'book'              : 50, 
+    
+    # --------------------------
+    #           film
+    # --------------------------
+    'movie'             : 65, 
+    'tv'                : 60, 
+    
+    # --------------------------
+    #           music
+    # --------------------------
+    'artist'            : 55, 
+    'song'              : 25, 
+    'album'             : 45, 
+    
+    # --------------------------
+    #           other
+    # --------------------------
+    'app'               : 65, 
+    'other'             : 5, 
+    
+    # the following subcategories are from google places
+    'amusement_park'    : 25, 
+    'aquarium'          : 25, 
+    'art_gallery'       : 25, 
+    'beauty_salon'      : 15, 
+    'book_store'        : 15, 
+    'bowling_alley'     : 25, 
+    'campground'        : 20, 
+    'casino'            : 25, 
+    'clothing_store'    : 20, 
+    'department_store'  : 20, 
+    'establishment'     : 5, 
+    'florist'           : 15, 
+    'gym'               : 10, 
+    'home_goods_store'  : 5, 
+    'jewelry_store'     : 15, 
+    'library'           : 5, 
+    'liquor_store'      : 10, 
+    'lodging'           : 45, 
+    'movie_theater'     : 45, 
+    'museum'            : 70, 
+    'park'              : 50, 
+    'school'            : 25, 
+    'shoe_store'        : 20, 
+    'shopping_mall'     : 20, 
+    'spa'               : 25, 
+    'stadium'           : 25, 
+    'store'             : 15, 
+    'university'        : 65, 
+    'zoo'               : 65, 
+    
+    # the following subcategories are from amazon
+    'video_game'        : 65
+}
 
 def regexRemoval(string, patterns):
     """
@@ -270,20 +342,8 @@ def stringComparison(a, b, strict=False):
     if a == b:
         return 1.0
     else:
-        weight = 1.0
-        
-        if len(a) > len(b):
-            b, a = a, b
-        
-        # weight string similarity comparison slightly higher if a is a substring of b
-        if a in b:
-            if b.startswith(a) or b.endswith(a):
-                weight = 1.3
-            else:
-                weight = 1.1
-        
         junk_to_ignore = " \t-.;&".__contains__ # characters for SequenceMatcher to disregard
-        return min(0.98, weight * SequenceMatcher(junk_to_ignore, a, b).ratio())
+        return SequenceMatcher(junk_to_ignore, a, b).ratio()
 
 def setComparison(a, b, symmetric=False, strict=False):
     """
@@ -308,7 +368,7 @@ def setComparison(a, b, symmetric=False, strict=False):
     def asymmetricComparison(a, b):
         score = 0
         total = 0
-
+        
         for x in a:
             total = total + len(x)
             if x in b:
@@ -320,25 +380,23 @@ def setComparison(a, b, symmetric=False, strict=False):
                     if xy_score > x_score:
                         x_score = xy_score
                 score = score + x_score 
-
+        
         if total <= 0:
             return 0
         return 1.0 * score / total
-
-
+    
     if not strict:
         a = cleanSet(a)
         b = cleanSet(b)
-
+    
     if len(b) == 0 or len(a) == 0:
         return 0
-
+    
     if a == b:
         return 1.0
-
+    
     if symmetric:
         return symmetricComparion(a, b)
-
     else:
         return asymmetricComparison(a, b)
 
@@ -381,15 +439,14 @@ def formatResults(results, reverse=True, verbose=True):
         for i in range(len(results)):
             result = results[i]
             scores = result[0]
-            data   = {
-                'name'   : result[1].name, 
-                'source' : result[1].source, 
-                'key'    : result[1].key, 
-                'score'  : scores['total'], 
-            }
-            l.append("\n%3d) %s" % (n - i, pformat(data)))
+            
+            r = result[1]
+            s = "\n%3d) %s (%s) from %s { score=%f, key=%s }" % \
+                (n - i, r.name, r.subtype, r.source, scores['total'], r.key)
+            
+            l.append(s)
     
-    return '\n'.join(l)
+    return utils.normalize('\n'.join(l), strict=True)
 
 def typeToSubcategory(t):
     m = {
@@ -1149,7 +1206,7 @@ class Resolver(object):
                 if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
                     score = score * (1.0 - abs(weight))
         return score
-
+    
     def termComparison(self, query, terms, options):
         def checkTerms(query, valid):
             maxLenTerms = 0
@@ -1166,86 +1223,65 @@ class Resolver(object):
                 if lenTerms > maxLenTerms:
                     maxLenTerms = lenTerms
             return maxLenTerms
-
+        
         def score(query, terms):
             valid = []
             for term in terms:
                 if term.lower() in query.lower():
                     valid.append(term.lower())
             return checkTerms(query.lower(), valid) * 1.0 / len(query)
-
+        
         return score(query, terms)
-
+    
     def albumSimplify(self, album):
-        """
-        Reduces an album name to a simplified form for fuzzy comparison.
-        """
+        """ Reduces an album name to a simplified form for fuzzy comparison. """
         return albumSimplify(album)
-
+    
     def trackSimplify(self, track):
-        """
-        Reduces a track name to a simplified form for fuzzy comparison.
-        """
+        """ Reduces a track name to a simplified form for fuzzy comparison. """
         return trackSimplify(track)
-
+    
+    def movieSimplify(self, movie):
+        """ Reduces a movie name to a simplified form for fuzzy comparison. """
+        return movieSimplify(movie)
+    
     def artistSimplify(self, artist):
-        """
-        Reduces an artist name to a simplified form for fuzzy comparison.
-        """
+        """ Reduces an artist name to a simplified form for fuzzy comparison. """
         return artistSimplify(artist)
-
+    
     def actorSimplify(self, actor):
-        """
-        Reduces an actor name to a simplified form for fuzzy comparison.
-        """
+        """ Reduces an actor name to a simplified form for fuzzy comparison. """
         return nameSimplify(actor)
-
+    
     def nameComparison(self, a, b):
-        """
-        Generic fuzzy name comparison.
-        
-        Returns a comparison decimal [0,1]
-        """
-        
+        """ Generic fuzzy name comparison. Returns a comparison decimal [0,1] """
         return stringComparison(a, b)
     
     def artistComparison(self, q, m):
-        """
-        Artist specific comparison metric.
-        """
-        return self.nameComparison(q, m)
-
+        """ Artist specific comparison metric. """
+        return self.nameComparison(self.artistSimplify(q), self.artistSimplify(m))
+    
     def albumComparison(self, q, m):
-        """
-        Album specific comparison metric.
-        """
-        return self.nameComparison(q, m)
-
+        """ Album specific comparison metric. """
+        return self.nameComparison(self.albumSimplify(q), self.albumSimplify(m))
+    
     def trackComparison(self, q, m):
-        """
-        Track specific comparison metric.
-        """
-        return self.nameComparison(q, m)
-
+        """ Track specific comparison metric. """
+        return self.nameComparison(self.trackSimplify(q), self.trackSimplify(m))
+    
     def movieComparison(self, q, m):
-        """
-        Movie specific comparison metric.
-        """
-        return self.nameComparison(q, m)
-
+        """ Movie specific comparison metric. """
+        return self.nameComparison(self.movieSimplify(q), self.movieSimplify(m))
+    
     def lengthComparison(self, q, m):
-        """
-        length specific comparison metric.
-        """
+        """ Length specific comparison metric. """
         if q <= 0 or m <= 0:
             return 0
         diff = abs(q - m)
         return (1 - (float(diff)/max(q, m)))**2
-
+    
     def dateComparison(self, q, m):
-        """
-        Date specific comparison metric.
-        """
+        """ Date specific comparison metric. """
         if q is None or m is None:
             return 0
         diff = abs((q - m).days)
@@ -1267,27 +1303,19 @@ class Resolver(object):
         return v
 
     def directorComparison(self, q, m):
-        """
-        Director specific comparison metric.
-        """
+        """ Director specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
     def authorComparison(self, q, m):
-        """
-        Author specific comparison metric.
-        """
+        """ Author specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
     def publisherComparison(self, q, m):
-        """
-        Publisher specific comparison metric.
-        """
+        """ Publisher specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
     def placeComparison(self, q, m):
-        """
-        Place specific comparison metric.
-        """
+        """ Place specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
     def checkArtist(self, results, query, match, options, order):
@@ -1311,7 +1339,7 @@ class Resolver(object):
         ]
         weights = {
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name),
-            'artist':       lambda q, m, s, o: self.__nameWeight(q.artist, m.artist),
+            'artist':       lambda q, m, s, o: self.__nameWeight(q.artist['name'], m.artist['name']),
             'tracks':       lambda q, m, s, o: self.__tracksWeight(q, m),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
@@ -1325,8 +1353,8 @@ class Resolver(object):
         ]
         weights = {
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name),
-            'artist':       lambda q, m, s, o: self.__nameWeight(q.artist, m.artist)*2,
-            'album':        lambda q, m, s, o: self.__nameWeight(q.album, m.album)*.3,
+            'artist':       lambda q, m, s, o: self.__nameWeight(q.artist['name'], m.artist['name'])*2,
+            'album':        lambda q, m, s, o: self.__nameWeight(q.album['name'], m.album['name'])*.3,
             'length':       lambda q, m, s, o: self.__lengthWeight(q.length, m.length),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
@@ -1364,18 +1392,18 @@ class Resolver(object):
             'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date) * .2,
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
     def checkPlace(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
             ('location',    self.__locationTest),
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5),
-            'location':     lambda q, m, s, o: 10,
+            'name':         lambda q, m, s, o: 1.0, #self.__nameWeight(q.name, m.name, exact_boost=1.5),
+            'location':     self.__locationWeight, 
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
     def checkTVShow(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.movieComparison(q.name, m.name)),
@@ -1390,7 +1418,7 @@ class Resolver(object):
             'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
     def checkApp(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.nameComparison(q.name, m.name)),
@@ -1401,10 +1429,10 @@ class Resolver(object):
             'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=4),
             'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
             'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name'],
-                                                exact_boost=2, m_empty=4 ),
+                                                                 exact_boost=2, m_empty=4),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
     def checkSearchAll(self, results, query, match, options, order):
         if match.target is None:
             logs.info("Aborted match for %s due to None target" % type(match))
@@ -1423,13 +1451,13 @@ class Resolver(object):
         ]
         
         weights = {
-            'query_string':         lambda q, m, s, o: 0,
-            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=2.5),
-            'location':             lambda q, m, s, o: self.__locationWeight(q, m, s, o, boost=5),
-            'subcategory':          lambda q, m, s, o: 1,
-            'priority':             lambda q, m, s, o: 1,
-            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
-            'source_priority':      lambda q, m, s, o: self.__sourceWeight(m.source),
+            'query_string':         lambda q, m, s, o: 0, 
+            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=20.0), 
+            'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
+            'subcategory':          lambda q, m, s, o: 1, 
+            'priority':             lambda q, m, s, o: 1, 
+            'recency':              lambda q, m, s, o: 5.0, #self.__recencyWeight(q, m, s, o, boost=5),
+            'source_priority':      lambda q, m, s, o: 1.0, #self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
         }
@@ -1445,6 +1473,7 @@ class Resolver(object):
         
         if success:
             self.__addTotal(similarities, weights, query, match, options)
+            
             if 'total' not in mins or similarities['total'] >= mins['total']:
                 #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
                 result = (similarities, match)
@@ -1666,25 +1695,33 @@ class Resolver(object):
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
     
-    def __locationWeight(self, query, match, similarities, options, boost=1):
-        weight = 2
+    def __locationWeightBoost(self, query, match, similarities, options, boost=1):
+        weight = 1.0
         
         if 'location' in similarities:
-            if similarities['location'] > 0.96:
-                return boost * 4 * weight
-            if similarities['location'] > 0.90:
-                return boost * 2 * weight
-            if similarities['location'] > 0.85:
-                return boost * weight
+            weight = (similarities['location'] ** 2)
         
-        return weight
+        return weight * boost
+    
+    def __locationWeight(self, query, match, similarities, options):
+        weight = 1000.0
+        
+        if 'location' in similarities:
+            location = similarities['location']
+            if location > 0:
+                if location >= 0.90:
+                    return 0
+                
+                weight = 1.0 / (5 * location)
+        
+        return max(0, min(1000.0, weight))
     
     def __subcategoryTest(self, query, match, similarities, options):
-        if match.subtype == 'other' or match.subtype is None:
-            return 0
-        if match.subtype == 'tv':
-            return 0.5
-        return 1 
+        try:
+            return _subcategory_weights[match.subtype] / 100.0
+        except Exception:
+            return 0.0
+        return 1
     
     def __keywordsTest(self, query, match, similarities, options):
         if len(query.keywords) > 0:
@@ -1707,40 +1744,72 @@ class Resolver(object):
                     string.replace(term,' ')
             
             string = simplify(string)
-            return len(string) / len(query.query_string)
+            return len(string) / max(1, len(query.query_string))
     
     def __relatedTermsTest(self, query, match, similarities, options):
         return self.termComparison(query.query_string, match.related_terms, options)
-
+    
     def __relatedTermsWeight(self, query, match, similarities, options):
         if len(match.related_terms) == 0:
             if match.target.type == 'place' and similarities['related_terms'] < similarities['name']:
                 return 0
             return 1
         return 5
-
+    
     def __nameWeightBoost(self, query, match, similarities, options, boost=1):
-        if 'name' in similarities and similarities['name'] > 0.95:
-            return boost * 5
-        return 5
-
+        try:
+            value = similarities['name']
+        except KeyError:
+            value = 0.0
+        
+        # note (travis):
+        # the purpose of this formula is to smoothly weight names that are 
+        # very strong matches or very weak matches heavily with partial 
+        # name matches still being weighted proportionally to the name 
+        # similarity but with a much smaller weight because the name 
+        # signal is less important w.r.t. ranking for these cases.
+        weight = 4 * ((value - 0.5) ** 2)
+        weight = weight + (1.0 - weight) / 1.5
+        
+        return boost * weight
+    
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
             return 1
-        la = len(a)
-        lb = len(b)
-        if la == 0:
-            if lb == 0:
-                return both_empty
-            else:
-                return q_empty
-        elif lb == 0:
-            return m_empty
-        weight = 2*float(la+lb)/(math.log(la+1)+math.log(lb+1))
+        
+        assert isinstance(a, basestring)
+        assert isinstance(b, basestring)
+        
+        weight = 1.0
+        
         if a == b:
-            weight = exact_boost * weight
+            weight = exact_boost
+        else:
+            la = len(a)
+            lb = len(b)
+            
+            if la == 0:
+                if lb == 0:
+                    return both_empty
+                else:
+                    return q_empty
+            elif lb == 0:
+                return m_empty
+            
+            weight = 2 * float(la + lb) / (math.log(la + 1) + math.log(lb + 1))
+            
+            if len(a) > len(b):
+                b, a = a, b
+            
+            # weight string similarity comparison slightly higher if a is a substring of b
+            if a in b:
+                if b.startswith(a) or b.endswith(a):
+                    weight = weight * 3
+                else:
+                    weight = weight * 2
+        
         return weight
-
+    
     def __lengthWeight(self, q, m, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if q < 0:
             if m < 0:
@@ -1776,7 +1845,7 @@ class Resolver(object):
         except:
             pass
         return 0
-
+    
     def __recencyWeight(self, query, match, similarities, options, boost=1):
         try:
             if (datetime.utcnow() - match.date).days < 90:
@@ -1784,7 +1853,7 @@ class Resolver(object):
         except:
             pass
         return 0
-
+    
     def __setWeight(self, q, m):
         size = len( q | m )
         if size == 0:
@@ -1793,25 +1862,25 @@ class Resolver(object):
         if q & m == q:
             weight *= 1.2
         return weight
-
+    
     def __albumsWeight(self, query, match):
         return self.__setWeight(self.albumsSet(query), self.albumsSet(match))
-
+    
     def __tracksWeight(self, query, match):
         return self.__setWeight(self.tracksSet(query), self.tracksSet(match))
-
+    
     def __castWeight(self, query, match):
         if query.cast == []:
             return 1
         else:
             return self.__setWeight(self.castSet(query), self.castSet(match))
-
+    
     def __sortedPairs(self, results, batch):
         results.extend(batch)
         def pairSort(pair):
             return -pair[0]['total']
         return sorted(results , key=pairSort)
-
+    
     def __resolveBatch(self, check, query, source, section, options):
         start, count = section
         results = []
@@ -1823,7 +1892,7 @@ class Resolver(object):
         pool.join()
         
         return results
-
+    
     def __compareAll(self, query, match, tests, options):
         similarities = {}
         if 'mins' in options:
@@ -1843,7 +1912,7 @@ class Resolver(object):
                 success = False
                 break
         return (success, similarities)
-
+    
     def __shouldFinish(self, query, results, options):
         num_results = len(results)
         

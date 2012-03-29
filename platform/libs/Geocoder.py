@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals, utils
 import json, re, urllib
 
-from optparse import OptionParser
-from AKeyBasedAPI import AKeyBasedAPI
-from errors import *
+from optparse       import OptionParser
+from AKeyBasedAPI   import AKeyBasedAPI
+from errors         import *
 
 class AGeocoder(AKeyBasedAPI):
     """
@@ -388,10 +388,10 @@ def parseCommandLine():
         return None
     
     if options.all:
-        options.google = True
-        options.bing = True
-        options.yahoo = True
-        options.us = True
+        options.google  = True
+        options.bing    = True
+        options.yahoo   = True
+        options.us      = True
     
     options.geocoders = []
     

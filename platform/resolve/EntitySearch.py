@@ -228,9 +228,11 @@ class EntitySearch(object):
                 
                 dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
                 
-                if len(dups) > 0 and (dups[0][0]['resolved'] or dups[0][0]['name'] > 0.7 or dups[0][0]['total'] > 0.6):
+                if len(dups) > 0 and dups[0][0]['resolved']:
                     if _verbose:
                         print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+                        
+                        print(formatResults(dups[0:1], verbose=True))
                 else:
                     chosen.append(best)
             else:
