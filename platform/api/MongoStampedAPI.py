@@ -16,7 +16,7 @@ from pprint                 import pformat
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
-from match.EntityMatcher    import EntityMatcher
+# from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
 
 from db.mongodb.MongoAccountCollection          import MongoAccountCollection
@@ -30,7 +30,7 @@ from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
 from db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
-from db.mongodb.MongoEntitySearcher             import MongoEntitySearcher
+# from db.mongodb.MongoEntitySearcher             import MongoEntitySearcher
 from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
 from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from db.mongodb.MongoLogsCollection             import MongoLogsCollection
@@ -100,17 +100,17 @@ class MongoStampedAPI(StampedAPI):
     def _inviteDB(self):
         return MongoInvitationCollection()
     
-    @lazyProperty
-    def _entitySearcher(self):
-        return MongoEntitySearcher(self)
+    # @lazyProperty
+    # def _entitySearcher(self):
+    #     return MongoEntitySearcher(self)
     
     @lazyProperty
     def _imageDB(self):
         return S3ImageDB()
     
-    @lazyProperty
-    def _entityMatcher(self):
-        return EntityMatcher(self)
+    # @lazyProperty
+    # def _entityMatcher(self):
+    #     return EntityMatcher(self)
     
     @lazyProperty
     def _logsDB(self):

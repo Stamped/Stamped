@@ -6,6 +6,10 @@
 //  Copyright (c) 2011 Stamped. All rights reserved.
 //
 
+/*
+ TODO - Consider relationship with Third Party group
+ */
+
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 #import "FBConnect.h"

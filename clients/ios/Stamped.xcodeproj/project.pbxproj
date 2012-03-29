@@ -15,6 +15,21 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		6323F0D21524D24700BE408C /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 635EAADC1523D4ED00D0378D /* StoreKit.framework */; };
+		6323F0DD1524E66800BE408C /* STSimpleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0DC1524E66800BE408C /* STSimpleMenu.m */; };
+		6323F0DE1524E66800BE408C /* STSimpleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0DC1524E66800BE408C /* STSimpleMenu.m */; };
+		6323F0E11524E68000BE408C /* STSimpleSubmenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E01524E68000BE408C /* STSimpleSubmenu.m */; };
+		6323F0E21524E68000BE408C /* STSimpleSubmenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E01524E68000BE408C /* STSimpleSubmenu.m */; };
+		6323F0E51524E69400BE408C /* STSimpleMenuSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E41524E69300BE408C /* STSimpleMenuSection.m */; };
+		6323F0E61524E69400BE408C /* STSimpleMenuSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E41524E69300BE408C /* STSimpleMenuSection.m */; };
+		6323F0E91524E6A600BE408C /* STSimpleMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E81524E6A500BE408C /* STSimpleMenuItem.m */; };
+		6323F0EA1524E6A600BE408C /* STSimpleMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0E81524E6A500BE408C /* STSimpleMenuItem.m */; };
+		6323F0ED1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0EC1524E6B300BE408C /* STSimpleMenuPrice.m */; };
+		6323F0EE1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0EC1524E6B300BE408C /* STSimpleMenuPrice.m */; };
+		6323F0F11524E6CA00BE408C /* STSimpleTimes.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F01524E6C900BE408C /* STSimpleTimes.m */; };
+		6323F0F21524E6CA00BE408C /* STSimpleTimes.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F01524E6C900BE408C /* STSimpleTimes.m */; };
+		6323F0F51524E6D800BE408C /* STSimpleHours.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F41524E6D700BE408C /* STSimpleHours.m */; };
+		6323F0F61524E6D800BE408C /* STSimpleHours.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F41524E6D700BE408C /* STSimpleHours.m */; };
 		635EAAC715234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC815234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC915234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
@@ -1796,6 +1811,27 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
+		6323F0D31524DF8900BE408C /* STMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenu.h; sourceTree = "<group>"; };
+		6323F0D41524E08C00BE408C /* STSubmenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSubmenu.h; sourceTree = "<group>"; };
+		6323F0D51524E10E00BE408C /* STMenuSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuSection.h; sourceTree = "<group>"; };
+		6323F0D61524E16900BE408C /* STMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuItem.h; sourceTree = "<group>"; };
+		6323F0D71524E22900BE408C /* STMenuPrice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuPrice.h; sourceTree = "<group>"; };
+		6323F0D91524E3B600BE408C /* STTimes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STTimes.h; path = ../STTimes.h; sourceTree = "<group>"; };
+		6323F0DA1524E3CC00BE408C /* STHours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STHours.h; path = ../STHours.h; sourceTree = "<group>"; };
+		6323F0DB1524E66800BE408C /* STSimpleMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMenu.h; sourceTree = "<group>"; };
+		6323F0DC1524E66800BE408C /* STSimpleMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMenu.m; sourceTree = "<group>"; };
+		6323F0DF1524E68000BE408C /* STSimpleSubmenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleSubmenu.h; sourceTree = "<group>"; };
+		6323F0E01524E68000BE408C /* STSimpleSubmenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleSubmenu.m; sourceTree = "<group>"; };
+		6323F0E31524E69300BE408C /* STSimpleMenuSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMenuSection.h; sourceTree = "<group>"; };
+		6323F0E41524E69300BE408C /* STSimpleMenuSection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMenuSection.m; sourceTree = "<group>"; };
+		6323F0E71524E6A500BE408C /* STSimpleMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMenuItem.h; sourceTree = "<group>"; };
+		6323F0E81524E6A500BE408C /* STSimpleMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMenuItem.m; sourceTree = "<group>"; };
+		6323F0EB1524E6B300BE408C /* STSimpleMenuPrice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMenuPrice.h; sourceTree = "<group>"; };
+		6323F0EC1524E6B300BE408C /* STSimpleMenuPrice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMenuPrice.m; sourceTree = "<group>"; };
+		6323F0EF1524E6C900BE408C /* STSimpleTimes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleTimes.h; sourceTree = "<group>"; };
+		6323F0F01524E6C900BE408C /* STSimpleTimes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleTimes.m; sourceTree = "<group>"; };
+		6323F0F31524E6D700BE408C /* STSimpleHours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleHours.h; sourceTree = "<group>"; };
+		6323F0F41524E6D700BE408C /* STSimpleHours.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleHours.m; sourceTree = "<group>"; };
 		635EAAC515234D5800D0378D /* STActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionManager.h; sourceTree = "<group>"; };
 		635EAAC615234D5800D0378D /* STActionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionManager.m; sourceTree = "<group>"; };
 		635EAACF15238D5F00D0378D /* STConfirmationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfirmationView.h; sourceTree = "<group>"; };
@@ -2869,6 +2905,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6323F0D21524D24700BE408C /* StoreKit.framework in Frameworks */,
 				7E4A6EFC152253A80031D7D6 /* libRestKit.a in Frameworks */,
 				63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */,
 				7E07EC1D14C73FD400A2B5F0 /* libz.dylib in Frameworks */,
@@ -2993,6 +3030,20 @@
 				6398B927152243CA0044BB0C /* STWeakProxy.m */,
 				635EAACF15238D5F00D0378D /* STConfirmationView.h */,
 				635EAAD015238D5F00D0378D /* STConfirmationView.m */,
+				6323F0DB1524E66800BE408C /* STSimpleMenu.h */,
+				6323F0DC1524E66800BE408C /* STSimpleMenu.m */,
+				6323F0DF1524E68000BE408C /* STSimpleSubmenu.h */,
+				6323F0E01524E68000BE408C /* STSimpleSubmenu.m */,
+				6323F0E31524E69300BE408C /* STSimpleMenuSection.h */,
+				6323F0E41524E69300BE408C /* STSimpleMenuSection.m */,
+				6323F0E71524E6A500BE408C /* STSimpleMenuItem.h */,
+				6323F0E81524E6A500BE408C /* STSimpleMenuItem.m */,
+				6323F0EB1524E6B300BE408C /* STSimpleMenuPrice.h */,
+				6323F0EC1524E6B300BE408C /* STSimpleMenuPrice.m */,
+				6323F0EF1524E6C900BE408C /* STSimpleTimes.h */,
+				6323F0F01524E6C900BE408C /* STSimpleTimes.m */,
+				6323F0F31524E6D700BE408C /* STSimpleHours.h */,
+				6323F0F41524E6D700BE408C /* STSimpleHours.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -3012,6 +3063,13 @@
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
 				63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */,
 				63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */,
+				6323F0D31524DF8900BE408C /* STMenu.h */,
+				6323F0D41524E08C00BE408C /* STSubmenu.h */,
+				6323F0D51524E10E00BE408C /* STMenuSection.h */,
+				6323F0D61524E16900BE408C /* STMenuItem.h */,
+				6323F0D71524E22900BE408C /* STMenuPrice.h */,
+				6323F0D91524E3B600BE408C /* STTimes.h */,
+				6323F0DA1524E3CC00BE408C /* STHours.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6242,6 +6300,13 @@
 				635EAAD215238D5F00D0378D /* STConfirmationView.m in Sources */,
 				7E91739415237BF00098DC3C /* STStampDetailBlurbView.m in Sources */,
 				7E91739E1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */,
+				6323F0DE1524E66800BE408C /* STSimpleMenu.m in Sources */,
+				6323F0E21524E68000BE408C /* STSimpleSubmenu.m in Sources */,
+				6323F0E61524E69400BE408C /* STSimpleMenuSection.m in Sources */,
+				6323F0EA1524E6A600BE408C /* STSimpleMenuItem.m in Sources */,
+				6323F0EE1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */,
+				6323F0F21524E6CA00BE408C /* STSimpleTimes.m in Sources */,
+				6323F0F61524E6D800BE408C /* STSimpleHours.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6423,6 +6488,13 @@
 				635EAAD115238D5F00D0378D /* STConfirmationView.m in Sources */,
 				7E91739315237BF00098DC3C /* STStampDetailBlurbView.m in Sources */,
 				7E91739D1523B9800098DC3C /* STStampDetailCommentsView.m in Sources */,
+				6323F0DD1524E66800BE408C /* STSimpleMenu.m in Sources */,
+				6323F0E11524E68000BE408C /* STSimpleSubmenu.m in Sources */,
+				6323F0E51524E69400BE408C /* STSimpleMenuSection.m in Sources */,
+				6323F0E91524E6A600BE408C /* STSimpleMenuItem.m in Sources */,
+				6323F0ED1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */,
+				6323F0F11524E6CA00BE408C /* STSimpleTimes.m in Sources */,
+				6323F0F51524E6D800BE408C /* STSimpleHours.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6707,7 +6779,7 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -6727,7 +6799,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "D578280E-EB1A-4501-AB8D-F486F490E724";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
@@ -6878,7 +6950,7 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -6898,7 +6970,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;

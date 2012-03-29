@@ -60,7 +60,7 @@ import oauth
 import urllib2
 from urlparse import urlparse, parse_qsl
 import sys
-from Schemas            import Entity
+from Schemas            import BasicEntity
 from SinglePlatform     import StampedSinglePlatform
 from pprint             import pprint
 from pymongo            import Connection
@@ -370,7 +370,7 @@ class Factual(object):
         """
         STUB Create a Stamped entity from a factual_id.
         """
-        entity = Entity()
+        entity = BasicEntity()
         self.enrich(entity,factual_id)
         return entity
     

@@ -719,6 +719,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
 #pragma mark - STMapScopeSliderDelegate methods.
 
+/*
+ TODO - modify for granularity caching
+ */
+
 - (void)mapScopeSlider:(STMapScopeSlider*)slider didChangeGranularity:(STMapScopeSliderGranularity)granularity {
   if (currentGranularity_ != granularity) {
     currentGranularity_ = granularity;

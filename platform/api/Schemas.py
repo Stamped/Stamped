@@ -54,6 +54,29 @@ class Client(Schema):
 
 
 # ####### #
+# General #
+# ####### #
+
+class CoordinatesSchema(Schema):
+    def setSchema(self):
+        self.lat                            = SchemaElement(float, required=True)
+        self.lng                            = SchemaElement(float, required=True)
+
+class ImageSchema(Schema):
+    def setSchema(self):
+        self.image                          = SchemaElement(basestring)
+        self.width                          = SchemaElement(int)
+        self.height                         = SchemaElement(int)
+        self.source                         = SchemaElement(basestring)
+
+class TimestampSchema(Schema):
+    def setSchema(self):
+        self.created                        = SchemaElement(datetime, required=True)
+        self.modified                       = SchemaElement(datetime)
+        self.image_cache                    = SchemaElement(datetime)
+
+
+# ####### #
 # Account #
 # ####### #
 
@@ -243,17 +266,6 @@ class StampStatsSchema(Schema):
         self.num_likes          = SchemaElement(int)
         self.like_threshold_hit = SchemaElement(bool)
         self.stamp_num          = SchemaElement(int)
-
-
-# ########## #
-# Timestamps #
-# ########## #
-
-class TimestampSchema(Schema):
-    def setSchema(self):
-        self.created            = SchemaElement(datetime, required=True)
-        self.modified           = SchemaElement(datetime)
-        self.image_cache        = SchemaElement(datetime)
 
 
 # ########### #
@@ -496,6 +508,481 @@ class ViewportSchema(Schema):
 # Entities #
 # ######## #
 
+class BasicEntity(Schema):
+    def setSchema(self):
+        self.schema_version                 = SchemaElement(int, required=True)
+
+        self.entity_id                      = SchemaElement(basestring)
+        self.search_id                      = SchemaElement(basestring)
+        self.title                          = SchemaElement(basestring, required=True)
+        self.title_lower                    = SchemaElement(basestring)
+        self.kind                           = SchemaElement(basestring, required=True)
+        self.locale                         = SchemaElement(basestring)
+        
+        self.subtitle                       = SchemaElement(basestring)
+        self.subtitle_source                = SchemaElement(basestring)
+        self.subtitle_timestamp             = SchemaElement(datetime)
+        
+        self.desc                           = SchemaElement(basestring)
+        self.desc_source                    = SchemaElement(basestring)
+        self.desc_timestamp                 = SchemaElement(datetime)
+
+        self.types                          = SchemaList(SchemaElement(basestring)) 
+        self.types_source                   = SchemaElement(basestring)
+        self.types_timestamp                = SchemaElement(datetime)
+        
+        self.image                          = SchemaElement(basestring)
+
+        self.contact                        = EntityContactSchema()
+        self.stats                          = EntityStatsSchema()
+        self.sources                        = EntitySourcesSchema()
+        self.timestamp                      = TimestampSchema()
+
+        self.kind                           = 'other'
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
+            from Entity import setFields
+            setFields(self)
+            schema.importData(self.value, overflow=True)
+        else:
+            raise NotImplementedError
+        return schema
+
+class EntityStatsSchema(Schema):
+    def setSchema(self):
+        self.titlev                         = SchemaElement(float)
+        self.subcatv                        = SchemaElement(float)
+        self.sourcev                        = SchemaElement(float)
+        self.qualityv                       = SchemaElement(float)
+        self.distancev                      = SchemaElement(float)
+        self.totalv                         = SchemaElement(float)
+
+class EntityContactSchema(Schema):
+    def setSchema(self):
+        self.site                           = SchemaElement(basestring)
+        self.site_source                    = SchemaElement(basestring)
+        self.site_timestamp                 = SchemaElement(datetime)
+
+        self.email                          = SchemaElement(basestring)
+        self.email_source                   = SchemaElement(basestring)
+        self.email_timestamp                = SchemaElement(datetime)
+
+        self.fax                            = SchemaElement(basestring)
+        self.fax_source                     = SchemaElement(basestring)
+        self.fax_timestamp                  = SchemaElement(datetime)
+
+        self.phone                          = SchemaElement(basestring)
+        self.phone_source                   = SchemaElement(basestring)
+        self.phone_timestamp                = SchemaElement(datetime)
+
+class EntitySourcesSchema(Schema):
+    def setSchema(self):
+
+        """
+        Sources follow a generally consistent format:
+
+        * id        The unique source-specific id.
+
+        * url       A url pointing to the entity provided by the source.
+
+        * source    The source of the id. This will usually be the source iteslf, but can be 
+                    a different third-party (e.g. TMDB provides IMDB ids).
+
+        * timestamp The timestamp of when the source was last checked.
+
+        Additional fields may also be stored by appending the key to the source name (e.g. opentable_nickname). 
+
+        Note: The tombstone is a stamped entity that points to a newer, "better" entity.
+        """
+
+        self.tombstone_id                   = SchemaElement(basestring)
+        self.tombstone_source               = SchemaElement(basestring)
+        self.tombstone_timestamp            = SchemaElement(datetime)
+
+        self.user_generated_id              = SchemaElement(basestring)
+        self.user_generated_timestamp       = SchemaElement(datetime)
+
+        self.spotify_id                     = SchemaElement(basestring)
+        self.spotify_url                    = SchemaElement(basestring)
+        self.spotify_source                 = SchemaElement(basestring)
+        self.spotify_timestamp              = SchemaElement(datetime)
+
+        self.itunes_id                      = SchemaElement(basestring)
+        self.itunes_url                     = SchemaElement(basestring)
+        self.itunes_source                  = SchemaElement(basestring)
+        self.itunes_timestamp               = SchemaElement(datetime)
+
+        self.rdio_id                        = SchemaElement(basestring)
+        self.rdio_url                       = SchemaElement(basestring)
+        self.rdio_source                    = SchemaElement(basestring)
+        self.rdio_timestamp                 = SchemaElement(datetime)
+        
+        self.amazon_id                      = SchemaElement(basestring)
+        self.amazon_url                     = SchemaElement(basestring)
+        self.amazon_source                  = SchemaElement(basestring)
+        self.amazon_timestamp               = SchemaElement(datetime)
+        
+        self.opentable_id                   = SchemaElement(basestring)
+        self.opentable_url                  = SchemaElement(basestring)
+        self.opentable_source               = SchemaElement(basestring)
+        self.opentable_nickname             = SchemaElement(basestring)
+        self.opentable_timestamp            = SchemaElement(datetime)
+        
+        self.fandango_id                    = SchemaElement(basestring)
+        self.fandango_url                   = SchemaElement(basestring)
+        self.fandango_source                = SchemaElement(basestring)
+        self.fandango_timestamp             = SchemaElement(datetime)
+
+        self.singleplatform_id              = SchemaElement(basestring)
+        self.singleplatform_url             = SchemaElement(basestring)
+        self.singleplatform_source          = SchemaElement(basestring)
+        self.singleplatform_timestamp       = SchemaElement(datetime)
+
+        self.factual_id                     = SchemaElement(basestring)
+        self.factual_url                    = SchemaElement(basestring)
+        self.factual_source                 = SchemaElement(basestring)
+        self.factual_crosswalk              = SchemaElement(datetime)
+        self.factual_timestamp              = SchemaElement(datetime)
+
+        self.tmdb_id                        = SchemaElement(basestring)
+        self.tmdb_url                       = SchemaElement(basestring)
+        self.tmdb_source                    = SchemaElement(basestring)
+        self.tmdb_timestamp                 = SchemaElement(datetime)
+
+        self.googleplaces_id                = SchemaElement(basestring)
+        self.googleplaces_url               = SchemaElement(basestring)
+        self.googleplaces_source            = SchemaElement(basestring)
+        self.googleplaces_timestamp         = SchemaElement(datetime)
+
+
+class PlaceEntity(BasicEntity):
+    def setSchema(self):
+        BasicEntity.setSchema(self)
+
+        self.coordinates                    = CoordinatesSchema()
+        self.coordinates_source             = SchemaElement(basestring)
+        self.coordinates_timestamp          = SchemaElement(datetime) 
+
+        self.address_street                 = SchemaElement(basestring)
+        self.address_street_ext             = SchemaElement(basestring)
+        self.address_locality               = SchemaElement(basestring)
+        self.address_region                 = SchemaElement(basestring)
+        self.address_postcode               = SchemaElement(basestring)
+        self.address_country                = SchemaElement(basestring)
+        self.address_source                 = SchemaElement(basestring)
+        self.address_timestamp              = SchemaElement(datetime)
+
+        self.formatted_address              = SchemaElement(basestring)
+        self.formatted_address_source       = SchemaElement(basestring)
+        self.formatted_address_timestamp    = SchemaElement(datetime)
+        
+        self.neighborhood                   = SchemaElement(basestring)
+        self.neighborhood_source            = SchemaElement(basestring)
+        self.neighborhood_timestamp         = SchemaElement(datetime)
+        
+        self.hours                          = TimesSchema()
+        self.hours_source                   = SchemaElement(basestring)
+        self.hours_timestamp                = SchemaElement(datetime)
+
+        self.cuisine                        = SchemaList(SchemaElement(basestring))
+        self.cuisine_source                 = SchemaElement(basestring)
+        self.cuisine_timestamp              = SchemaElement(datetime)
+        
+        self.menu                           = SchemaElement(bool)
+        self.menu_source                    = SchemaElement(basestring)
+        self.menu_timestamp                 = SchemaElement(datetime)
+        
+        self.price_range                    = SchemaElement(int)
+        self.price_range_source             = SchemaElement(basestring)
+        self.price_range_timestamp          = SchemaElement(datetime)
+        
+        self.alcohol_flag                   = SchemaElement(bool)
+        self.alcohol_flag_source            = SchemaElement(basestring)
+        self.alcohol_flag_timestamp         = SchemaElement(datetime)
+
+        self.kind                           = 'place'
+
+
+class PersonEntity(BasicEntity):
+    def setSchema(self):
+        BasicEntity.setSchema(self)
+
+        self.genres                         = SchemaList(SchemaElement(basestring))
+        self.genres_source                  = SchemaElement(basestring)
+        self.genres_timestamp               = SchemaElement(datetime)
+
+        self.tracks                         = SchemaList(MediaItemEntityMini())
+        self.tracks_source                  = SchemaElement(basestring)
+        self.tracks_timestamp               = SchemaElement(datetime)
+        
+        self.albums                         = SchemaList(MediaCollectionEntityMini())
+        self.albums_source                  = SchemaElement(basestring)
+        self.albums_timestamp               = SchemaElement(datetime)
+        
+        self.movies                         = SchemaList(MediaItemEntityMini())
+        self.movies_source                  = SchemaElement(basestring)
+        self.movies_timestamp               = SchemaElement(datetime)
+        
+        self.books                          = SchemaList(MediaItemEntityMini())
+        self.books_source                   = SchemaElement(basestring)
+        self.books_timestamp                = SchemaElement(datetime)
+
+        self.kind                           = 'person'
+
+
+class BasicMediaEntity(BasicEntity):
+    def setSchema(self):
+        BasicEntity.setSchema(self)
+
+        self.release_date                   = SchemaElement(datetime)
+        self.release_date_source            = SchemaElement(basestring)
+        self.release_date_timestamp         = SchemaElement(datetime)
+
+        self.length                         = SchemaElement(int)
+        self.length_source                  = SchemaElement(basestring)
+        self.length_timestamp               = SchemaElement(datetime)
+
+        self.genres                         = SchemaList(SchemaElement(basestring))
+        self.genres_source                  = SchemaElement(basestring)
+        self.genres_timestamp               = SchemaElement(datetime)
+
+        self.artists                        = SchemaList(PersonEntityMini())
+        self.artists_source                 = SchemaElement(basestring)
+        self.artists_timestamp              = SchemaElement(datetime)
+
+        self.authors                        = SchemaList(PersonEntityMini())
+        self.authors_source                 = SchemaElement(basestring)
+        self.authors_timestamp              = SchemaElement(datetime)
+        
+        self.directors                      = SchemaList(PersonEntityMini())
+        self.directors_source               = SchemaElement(basestring)
+        self.directors_timestamp            = SchemaElement(datetime)
+
+        self.cast                           = SchemaList(PersonEntityMini())
+        self.cast_source                    = SchemaElement(basestring)
+        self.cast_timestamp                 = SchemaElement(datetime)
+        
+        self.publishers                     = SchemaList(BasicEntityMini())
+        self.publishers_source              = SchemaElement(basestring)
+        self.publishers_timestamp           = SchemaElement(datetime)
+
+        self.studios                        = SchemaList(BasicEntityMini())
+        self.studios_source                 = SchemaElement(basestring)
+        self.studios_timestamp              = SchemaElement(datetime)
+
+        self.networks                       = SchemaList(BasicEntityMini())
+        self.networks_source                = SchemaElement(basestring)
+        self.networks_timestamp             = SchemaElement(datetime)
+
+        self.mpaa_rating                    = SchemaElement(basestring)
+        self.mpaa_rating_source             = SchemaElement(basestring)
+        self.mpaa_rating_timestamp          = SchemaElement(datetime)
+
+        self.parental_advisory              = SchemaElement(basestring)
+        self.parental_advisory_source       = SchemaElement(basestring)
+        self.parental_advisory_timestamp    = SchemaElement(datetime)
+
+
+class MediaCollectionEntity(BasicMediaEntity):
+    def setSchema(self):
+        BasicMediaEntity.setSchema(self)
+
+        self.tracks                         = SchemaList(MediaItemEntityMini())
+        self.tracks_source                  = SchemaElement(basestring)
+        self.tracks_timestamp               = SchemaElement(datetime)
+
+        self.kind                           = 'media_collection'
+
+
+class MediaItemEntity(BasicMediaEntity):
+    def setSchema(self):
+        BasicMediaEntity.setSchema(self)
+
+        # Tracks
+        self.collections                    = SchemaList(MediaCollectionEntityMini())
+        self.collections_source             = SchemaElement(basestring)
+        self.collections_timestamp          = SchemaElement(datetime)
+
+        # Books
+        self.isbn                           = SchemaElement(basestring)
+        self.isbn_source                    = SchemaElement(basestring)
+        self.isbn_timestamp                 = SchemaElement(datetime)
+
+        self.sku_number                     = SchemaElement(basestring)
+        self.sku_number_source              = SchemaElement(basestring)
+        self.sku_number_timestamp           = SchemaElement(datetime)
+
+        self.kind                           = 'media_item'
+
+
+
+class SoftwareEntity(BasicEntity):
+    def setSchema(self):
+        BasicEntity.setSchema(self)
+
+        self.genres                         = SchemaList(SchemaElement(basestring))
+        self.genres_source                  = SchemaElement(basestring)
+        self.genres_timestamp               = SchemaElement(datetime)
+
+        self.release_date                   = SchemaElement(datetime)
+        self.release_date_source            = SchemaElement(basestring)
+        self.release_date_timestamp         = SchemaElement(datetime)
+
+        self.screenshots                    = SchemaList(ImageSchema())
+        self.screenshots_source             = SchemaElement(basestring)
+        self.screenshots_timestamp          = SchemaElement(datetime)
+
+        self.authors                        = SchemaList(PersonEntityMini())
+        self.authors_source                 = SchemaElement(basestring)
+        self.authors_timestamp              = SchemaElement(datetime)
+        
+        self.publishers                     = SchemaList(BasicEntityMini())
+        self.publishers_source              = SchemaElement(basestring)
+        self.publishers_timestamp           = SchemaElement(datetime)
+
+        self.supported_devices              = SchemaList(SchemaElement(basestring))
+        self.supported_devices_source       = SchemaElement(basestring)
+        self.supported_devices_timestamp    = SchemaElement(datetime)
+
+        self.kind                           = 'software'
+
+
+# ############# #
+# Mini Entities #
+# ############# #
+
+class BasicEntityMini(Schema):
+    def setSchema(self):
+        self.entity_id                      = SchemaElement(basestring)
+        self.title                          = SchemaElement(basestring, required=True)
+        self.kind                           = SchemaElement(basestring, required=True)
+        self.subtitle                       = SchemaElement(basestring)
+        self.sources                        = EntitySourcesSchema()
+
+class PlaceEntityMini(BasicEntityMini):
+    def setSchema(self):
+        BasicEntityMini.setSchema(self)
+
+        self.coordinates                    = CoordinatesSchema()
+        self.coordinates_source             = SchemaElement(basestring)
+        self.coordinates_timestamp          = SchemaElement(datetime) 
+
+class PersonEntityMini(BasicEntityMini):
+    def setSchema(self):
+        BasicEntityMini.setSchema(self)
+
+class MediaCollectionEntityMini(BasicEntityMini):
+    def setSchema(self):
+        BasicEntityMini.setSchema(self)
+
+class MediaItemEntityMini(BasicEntityMini):
+    def setSchema(self):
+        BasicEntityMini.setSchema(self)
+
+class SoftwareEntityMini(BasicEntityMini):
+    def setSchema(self):
+        BasicEntityMini.setSchema(self)
+
+
+
+# ##### #
+# Menus #
+# ##### #
+
+class MenuSchema(Schema):
+    def setSchema(self):
+        self.entity_id                      = SchemaElement(basestring)
+        self.source                         = SchemaElement(basestring)
+        self.source_id                      = SchemaElement(basestring)
+        self.source_info                    = SchemaElement(basestring)
+        self.disclaimer                     = SchemaElement(basestring)
+        self.attribution_image              = SchemaElement(basestring)
+        self.attribution_image_link         = SchemaElement(basestring)
+        self.timestamp                      = SchemaElement(datetime)
+        self.quality                        = SchemaElement(float)
+        self.menus                          = SchemaList(SubmenuSchema())
+
+class SubmenuSchema(Schema):
+    def setSchema(self):
+        self.title                          = SchemaElement(basestring)
+        self.times                          = TimesSchema()
+        self.footnote                       = SchemaElement(basestring)
+        self.desc                           = SchemaElement(basestring)
+        self.short_desc                     = SchemaElement(basestring)
+        self.sections                       = SchemaList(MenuSectionSchema())
+
+class MenuSectionSchema(Schema):
+    def setSchema(self):
+        self.title                          = SchemaElement(basestring)
+        self.desc                           = SchemaElement(basestring)
+        self.short_desc                     = SchemaElement(basestring)
+        self.items                          = SchemaList(MenuItemSchema())
+
+class MenuItemSchema(Schema):
+    def setSchema(self):
+        self.title                          = SchemaElement(basestring)
+        self.desc                           = SchemaElement(basestring)
+        self.categories                     = SchemaList(SchemaElement(basestring))
+        self.short_desc                     = SchemaElement(basestring)
+        self.spicy                          = SchemaElement(int)
+        self.allergens                      = SchemaList(SchemaElement(basestring))
+        self.allergen_free                  = SchemaList(SchemaElement(basestring))
+        self.restrictions                   = SchemaList(SchemaElement(basestring))
+        self.prices                         = SchemaList(MenuPriceSchema())
+
+class MenuPriceSchema(Schema):
+    def setSchema(self):
+        self.title                          = SchemaElement(basestring)
+        self.price                          = SchemaElement(basestring)
+        self.calories                       = SchemaElement(int)
+        self.unit                           = SchemaElement(basestring)
+        self.currency                       = SchemaElement(basestring)
+
+class TimesSchema(Schema):
+    def setSchema(self):
+        self.sun                            = SchemaList(HoursSchema())
+        self.mon                            = SchemaList(HoursSchema())
+        self.tue                            = SchemaList(HoursSchema())
+        self.wed                            = SchemaList(HoursSchema())
+        self.thu                            = SchemaList(HoursSchema())
+        self.fri                            = SchemaList(HoursSchema())
+        self.sat                            = SchemaList(HoursSchema())
+
+class HoursSchema(Schema):
+    def setSchema(self):
+        self.open                           = SchemaElement(basestring)
+        self.close                          = SchemaElement(basestring)
+        self.desc                           = SchemaElement(basestring)
+
+
+# #################### #
+# DEPRECATED: Entities #
+# #################### #
+
+class EntityPlace(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.coordinates        = CoordinatesSchema(required=True)
+
+class EntitySearch(Schema):
+    def setSchema(self):
+        self.q                  = SchemaElement(basestring, required=True)
+        self.coordinates        = CoordinatesSchema()
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool)
+        self.page               = SchemaElement(int, default=0)
+
+class EntityNearby(Schema):
+    def setSchema(self):
+        self.coordinates        = CoordinatesSchema()
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.page               = SchemaElement(int, default=0)
+
+
+"""
 class Entity(Schema):
     def setSchema(self):
         self.schema_version     = SchemaElement(int)
@@ -712,9 +1199,6 @@ class RestaurantSchema(Schema):
         self.reviewLinks        = SchemaElement(basestring)
         self.priceScale         = SchemaElement(basestring)
 
-# class AppSchema(Schema):
-#     def setSchema(self):
-#         pass
 
 class BookSchema(Schema):
     def setSchema(self):
@@ -1197,69 +1681,5 @@ class UserGeneratedSchema(Schema):
 class BarnesAndNobleSchema(Schema):
     def setSchema(self):
         self.bid                = SchemaElement(int)
-
-class MenuSchema(Schema):
-    def setSchema(self):
-        self.entity_id = SchemaElement(basestring)
-        self.source = SchemaElement(basestring)
-        self.source_id = SchemaElement(basestring)
-        self.source_info = SchemaElement(basestring)
-        self.disclaimer = SchemaElement(basestring)
-        self.attribution_image = SchemaElement(basestring)
-        self.attribution_image_link = SchemaElement(basestring)
-        self.timestamp = SchemaElement(datetime)
-        self.quality = SchemaElement(float)
-        self.menus = SchemaList(SubmenuSchema())
-
-class SubmenuSchema(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.times = TimesSchema()
-        self.footnote = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.short_desc = SchemaElement(basestring)
-        self.sections = SchemaList(MenuSectionSchema())
-
-class MenuSectionSchema(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.short_desc = SchemaElement(basestring)
-        self.items = SchemaList(MenuItemSchema())
-
-class MenuItemSchema(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
-        self.categories = SchemaList(SchemaElement(basestring))
-        self.short_desc = SchemaElement(basestring)
-        self.spicy = SchemaElement(int)
-        self.allergens = SchemaList(SchemaElement(basestring))
-        self.allergen_free = SchemaList(SchemaElement(basestring))
-        self.restrictions = SchemaList(SchemaElement(basestring))
-        self.prices = SchemaList(MenuPriceSchema())
-
-class MenuPriceSchema(Schema):
-    def setSchema(self):
-        self.title = SchemaElement(basestring)
-        self.price = SchemaElement(basestring)
-        self.calories = SchemaElement(int)
-        self.unit = SchemaElement(basestring)
-        self.currency = SchemaElement(basestring)
-
-class TimesSchema(Schema):
-    def setSchema(self):
-        self.sun = SchemaList(HoursSchema())
-        self.mon = SchemaList(HoursSchema())
-        self.tue = SchemaList(HoursSchema())
-        self.wed = SchemaList(HoursSchema())
-        self.thu = SchemaList(HoursSchema())
-        self.fri = SchemaList(HoursSchema())
-        self.sat = SchemaList(HoursSchema())
-
-class HoursSchema(Schema):
-    def setSchema(self):
-        self.open = SchemaElement(basestring)
-        self.close = SchemaElement(basestring)
-        self.desc = SchemaElement(basestring)
+"""
 

@@ -22,13 +22,11 @@ def _convertHTTPEntity(entity, authClientId=None):
 def create(request):
     authUserId, authClientId = checkOAuth(request)
     
-    schema      = parseRequest(HTTPEntityNew(), request)
-    entity      = schema.exportSchema(Entity())
-
-    entity.generated_by = authUserId
+    httpEntityNew   = parseRequest(HTTPEntityNew(), request)
+    entity          = httpEntityNew.exportEntity(authUserId)
     
-    entity      = stampedAPI.addEntity(entity)
-    entity      = _convertHTTPEntity(entity, authClientId)
+    entity          = stampedAPI.addEntity(entity)
+    entity          = _convertHTTPEntity(entity, authClientId)
 
     return transformOutput(entity.exportSparse())
 

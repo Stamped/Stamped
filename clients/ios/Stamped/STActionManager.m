@@ -121,6 +121,7 @@ static STActionManager* _singleton;
       }
     }
   }
+  
   else if ([source.source isEqualToString:@"itunes"]) {
     SKProductsRequest* request = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObject:source.sourceID]];
     request.delegate = self;

@@ -7,13 +7,13 @@ __license__   = "TODO"
 
 import copy, urllib, urlparse, re, logs, string, time, utils
 
-from datetime           import datetime, date, timedelta
 from errors             import *
 from schema             import *
 from api.Schemas        import *
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
 from Entity             import *
+from datetime           import datetime, date, timedelta
 
 # ####### #
 # PRIVATE #
@@ -1152,45 +1152,61 @@ class HTTPEntityNew(Schema):
         self.album              = SchemaElement(basestring)
         self.author             = SchemaElement(basestring)
 
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            schema.importData({
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-                'type':         deriveTypeFromSubcategory(self.subcategory)
-            })
+    def exportEntity(self, authUserId):
 
-            if self.desc is not None:
-                schema.desc = self.desc
+        kind    = deriveKindFromSubcategory(self.subcategory)
+        entity  = buildEntity(kind=kind)
 
-            if self.address is not None:
-                schema.address = self.address 
+        entity.schema_version   = 0
+        entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
+        entity.title            = self.title 
+        # TODO: Add subtitle
 
-            if self.director is not None:
-                schema.director = self.director
+        def addField(entity, field, value, timestamp):
+            if value is not None:
+                try:
+                    entity[field] = value
+                    entity['%s_source' % field] = 'seed'
+                    entity['%s_timestamp' % field] = timestamp
+                except:
+                    pass
 
-            if self.cast is not None:
-                schema.cast = self.cast
+        now = datetime.utcnow()
 
-            if self.album is not None:
-                schema.album_name = self.album
+        addField(entity, 'desc', self.desc, now)
+        addField(entity, 'formatted_address', self.address, now)
+        addField(entity, 'release_date', self.release_date, now)
 
-            if self.author is not None:
-                schema.author = self.author
+        if _coordinatesFlatToDict(self.coordinates) is not None:
+            entity.coordinates = _coordinatesFlatToDict(self.coordinates)
+            entity.coordinates_source = 'seed'
+            entity.coordinates_timestamp = now 
 
-            if self.artist is not None:
-                schema.artist_display_name = self.artist
+        entity.user_generated_id            = authUserId
+        entity.user_generated_timestamp     = now
 
-            if self.release_date is not None:
-                schema.original_release_date = self.release_date
 
-            if _coordinatesFlatToDict(self.coordinates) is not None:
-                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
+        """
+        if self.director is not None:
+            schema.director = self.director
+
+        if self.cast is not None:
+            schema.cast = self.cast
+
+        if self.album is not None:
+            schema.album_name = self.album
+
+        if self.author is not None:
+            schema.author = self.author
+
+        if self.artist is not None:
+            schema.artist_display_name = self.artist
+
+        if _coordinatesFlatToDict(self.coordinates) is not None:
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        """
+
+        return entity
 
 class HTTPEntityEdit(Schema):
     def setSchema(self):
