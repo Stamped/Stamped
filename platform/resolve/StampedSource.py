@@ -21,7 +21,7 @@ try:
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
-    from Schemas                    import Entity
+    from Schemas                    import BasicEntity
     from datetime                   import datetime
     from bson                       import ObjectId
 except:
@@ -37,7 +37,7 @@ class _EntityObject(object):
     """
 
     def __init__(self, entity):
-        self.__entity = Entity()
+        self.__entity = BasicEntity()
         self.__entity.importData(entity.value)
 
     @property

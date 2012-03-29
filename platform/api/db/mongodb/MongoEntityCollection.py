@@ -13,7 +13,7 @@ try:
     from utils                          import lazyProperty
 
     from Schemas                        import *
-    from Entity                         import setFields, isEqual, getSimplifiedTitle, deriveTypeFromSubcategory
+    from Entity                         import setFields, isEqual, getSimplifiedTitle, upgradeEntityData, buildEntity
 
     from AMongoCollection               import AMongoCollection
     from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
@@ -31,7 +31,7 @@ except:
 class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def __init__(self, collection='entities'):
-        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity, overflow=True)
+        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=BasicEntity, overflow=True)
         AEntityDB.__init__(self)
     
     @lazyProperty
@@ -41,25 +41,28 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
     
     def _convertFromMongo(self, document):
-        if 'subcategory' in document:
-            document['type'] = deriveTypeFromSubcategory(document['subcategory'])
-            
-        entity = AMongoCollection._convertFromMongo(self, document)
-        if entity is None:
-            return entity
+        if document is None:
+            return None
 
-        if entity.titlel is None:
-            entity.titlel = getSimplifiedTitle(entity.title)
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        if 'schema_version' not in document:
+            entity = upgradeEntityData(document)
+        else:
+            entity = buildEntity(document)
+        
+        if entity.title_lower is None:
+            entity.title_lower = getSimplifiedTitle(entity.title)
         
         return entity
     
     def _convertToMongo(self, entity):
-        if entity is not None and entity.titlel is None:
-            entity.titlel = getSimplifiedTitle(entity.title)
+        if entity is not None and entity.title_lower is None:
+            entity.title_lower = getSimplifiedTitle(entity.title)
         if entity.entity_id is not None and entity.entity_id.startswith('T_'):
             del entity.entity_id
-        if entity.type is None:
-            entity.type = deriveTypeFromSubcategory(entity.subcategory)
         document = AMongoCollection._convertToMongo(self, entity)
         
         return document

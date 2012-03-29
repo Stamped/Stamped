@@ -17,7 +17,7 @@ try:
     from datetime               import timedelta
     from copy                   import deepcopy
     from pprint                 import pformat, pprint
-    from Schemas                import Entity
+    from Entity                 import buildEntity
     import logs                 
     from libs.ec2_utils         import is_prod_stack
 except:
@@ -49,9 +49,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.failedPunishment = 20
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
-        # 1 / 0
-        print '\n\nENTITY: %s\n' % entity
-        print '\n\nDECORATIONS: %s\n' % decorations
         self.setNow(timestamp)
         if max_iterations == None:
             max_iterations = self.__default_max_iterations
@@ -61,16 +58,13 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             modified = False
             for source in self.__sources:
                 if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
-                    print '\n\nSOURCE: %s\n' % source
-
                     groups = source.groups
                     targetGroups = set()
                     for group in groups:
                         if self.shouldEnrich(group, source.sourceName, entity, self.now):
                             targetGroups.add(group)
                     if len(targetGroups) > 0:
-                        copy = Entity()
-                        copy.importData(entity.value)
+                        copy = buildEntity(entity.value)
                         timestamps = {}
                         localDecorations = {}
                         logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))

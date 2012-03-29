@@ -12,7 +12,7 @@ from optparse import OptionParser
 from Geocoder import Geocoder
 from AKeyBasedAPI import AKeyBasedAPI
 from AEntitySource import AExternalServiceEntitySource
-from Schemas import Entity
+from Schemas import BasicEntity
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -159,7 +159,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if not valid and subcategory not in self.google_subcategory_whitelist:
             return None
         
-        entity = Entity()
+        entity = BasicEntity()
         entity.title = result['name']
         entity.lat   = result['geometry']['location']['lat']
         entity.lng   = result['geometry']['location']['lng']
@@ -253,7 +253,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         if results is not None:
             for result in results:
-                entity = Entity()
+                entity = BasicEntity()
                 entity.subcategory = 'other'
                 
                 entity.gid = result['id']

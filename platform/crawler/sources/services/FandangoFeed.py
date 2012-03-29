@@ -10,7 +10,7 @@ import feedparser, gevent, os, re
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
-from Schemas import Entity
+from Schemas import BasicEntity
 
 __all__ = [ "FandangoFeed" ]
 
@@ -78,7 +78,7 @@ class FandangoFeed(AExternalDumpEntitySource):
                 fandango_rank = title_match_groups[0]
                 title = title_match_groups[1]
             
-            entity = Entity()
+            entity = BasicEntity()
             entity.subcategory = "movie"
             entity.title = title
             

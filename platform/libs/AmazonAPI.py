@@ -11,7 +11,7 @@ import copy, gevent, os, re, string, sys
 
 from BeautifulSoup  import BeautifulSoup
 from optparse       import OptionParser
-from Schemas        import Entity
+from Schemas        import BasicEntity
 from lxml           import objectify, etree
 from bottlenose     import Amazon
 from errors         import Fail
@@ -89,7 +89,7 @@ class AmazonAPI(object):
     def _parse_entity(self, item, entity=None):
         try:
             if entity is None:
-                entity = Entity()
+                entity = BasicEntity()
             
             attributes = item.find('.//ItemAttributes')
             

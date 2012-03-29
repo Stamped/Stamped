@@ -5,11 +5,15 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import logs, re
+import Globals, logs, re
 import unicodedata, utils
 import libs.CountryData
 
-from difflib    import SequenceMatcher
+from difflib        import SequenceMatcher
+from Schemas        import *
+from libs.LibUtils  import parseDateString
+import datetime
+
 
 categories = set([
     'food', 
@@ -297,8 +301,8 @@ def isEqual(entity1, entity2, prefix=False):
             if not is_google_places_special_case:
                 return False
         
-        if entity1.simplified_title != entity2.simplified_title:
-            return False
+        # if entity1.simplified_title != entity2.simplified_title:
+        #     return False
         elif prefix or is_google_places_special_case:
             return True
         
@@ -403,3 +407,283 @@ def deriveTypeFromSubcategory(subcategory):
     if subcategory in mapping:
         return mapping[subcategory]
     return 'other'
+
+def buildEntity(entityData):
+    kind = entityData['kind']
+
+    if kind == 'place':
+        new = PlaceEntity
+    elif kind == 'artist':
+        new = PersonEntity
+    elif kind == 'media_collection':
+        new = MediaCollectionEntity
+    elif kind == 'media_item':
+        new = MediaItemEntity
+    elif kind == 'software':
+        new = SoftwareEntity
+    else:
+        new = BasicEntity
+
+    return new(entityData)
+
+def upgradeEntityData(entityData):
+    # Just to be explicit..
+    old = entityData
+
+    newType = deriveTypeFromSubcategory(old['subcategory'])
+
+    if newType in ['place']:
+        new = PlaceEntity()
+    elif newType in ['artist']:
+        new = PersonEntity()
+    elif newType in ['album', 'tv']:
+        new = MediaCollectionEntity()
+    elif newType in ['track', 'movie', 'book']:
+        new = MediaItemEntity()
+    elif newType in ['app']:
+        new = SoftwareEntity()
+    else:
+        new = BasicEntity()
+
+    def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None):
+        if newName is None:
+            newName = oldName
+        if oldSuffix is None:
+            item = source.pop(oldName, None)
+        else:
+            item = source.pop('%s_%s' % (oldName, oldSuffix), None)
+
+        if item is not None:
+            # Manual conversions...
+            if oldName == 'track_length':
+                try:
+                    item = int(str(item).split('.')[0])
+                except:
+                    pass
+
+            if newSuffix is None:
+                target[newName] = item 
+            else:
+                target['%s_%s' % (newName, newSuffix)] = item
+
+            if newName != 'tombstone':
+                target['%s_source' % newName] = source.pop('%s_source' % oldName, 'seed')
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.datetime.utcnow())
+
+            if additionalSuffixes is not None:
+                for s in additionalSuffixes:
+                    t = source.pop('%s_%s' % (oldName, s), None)
+                    if t is not None:
+                        target['%s_%s' % (newName, s)] = t 
+
+    def setListGroup(source, target, oldName, newName=None, delimiter=',', wrapper=None):
+        if newName is None:
+            newName = oldName
+
+        item = source.pop(oldName, None)
+
+        if item is not None:
+            items = []
+            for i in item.split(delimiter):
+                if wrapper is not None:
+                    entityMini = wrapper()
+                    entityMini.title = i.strip()
+                    items.append(entityMini)
+                else:
+                    items.append(i.strip())
+            target[newName] = items 
+
+            target['%s_source' % newName]     = source.pop('%s_source' % oldName, 'seed')
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.datetime.utcnow())
+
+
+    sources                 = old.pop('sources', {})
+    details                 = old.pop('details', {})
+    timestamp               = old.pop('timestamp', {})
+    place                   = details.pop('place', {})
+    contact                 = details.pop('contact', {})
+    restaurant              = details.pop('restaurant', {})
+    media                   = details.pop('media', {})
+    video                   = details.pop('video', {})
+    artist                  = details.pop('artist', {})
+    album                   = details.pop('album', {})
+    song                    = details.pop('song', {})
+
+
+    # General
+    new.schema_version      = 0
+    new.entity_id           = old.pop('entity_id', None)
+    new.title               = old.pop('title', None)
+    new.title_lower         = old.pop('titlel', None)
+    new.image               = old.pop('image', None)
+    # TODO: Refactor image
+    # TODO: Include old.sources.netflix.images[large/small/etc.]
+    setBasicGroup(old, new, 'desc')
+    subcategory = old['subcategory']
+    if subcategory == 'song':
+        subcategory = 'track'
+    new.types.append(subcategory)
+
+    # TODO: Add custom subtitle for user-generated
+
+
+    # Sources
+    setBasicGroup(sources, new['sources'], 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new['sources'], 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new['sources'], 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new['sources'], 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('tmdb', {}), new['sources'], 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('factual', {}), new['sources'], 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    # TODO: Add factual_crosswalk
+    setBasicGroup(sources.pop('singleplatform', {}), new['sources'], 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+
+    # Apple / iTunes
+    setBasicGroup(sources, new['sources'], 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    if new.sources.itunes_id is None:
+        setBasicGroup(sources.pop('apple', {}), new['sources'], 'aid', 'itunes', newSuffix='id', additionalSuffixes=['url'])
+
+    # OpenTable
+    setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
+    if new.sources.opentable_id is None:
+        setBasicGroup(sources.pop('openTable', {}), new['sources'], 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
+
+    # Google Places
+    googleplaces = sources.pop('googlePlaces', {})
+    setBasicGroup(googleplaces, new['sources'], 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    if new.sources.googleplaces_id is None:
+        setBasicGroup(googleplaces, new['sources'], 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
+
+    # User Generated
+    userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)
+    if userGenerated is not None:
+        new.sources.user_generated_id = userGenerated
+        if 'created' in timestamp:
+            new.sources.user_generated_timestamp = timestamp['created']
+        else:
+            new.sources.user_generated_timestamp = datetime.datetime.utcnow()
+
+
+    # Contacts
+    setBasicGroup(contact, new.contact, 'phone')
+    setBasicGroup(contact, new.contact, 'site')
+    setBasicGroup(contact, new.contact, 'email')
+    setBasicGroup(contact, new.contact, 'fax')
+
+
+    # Places
+    if newType == 'place':
+        coordinates = old.pop('coordinates', None)
+        if coordinates is not None:
+            new.coordinates = coordinates
+
+        addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
+        setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents)
+
+        setBasicGroup(place, new, 'address', 'formatted_address')
+        setBasicGroup(place, new, 'hours')
+        setBasicGroup(restaurant, new, 'menu')
+        setBasicGroup(restaurant, new, 'price_range')
+        setBasicGroup(restaurant, new, 'alcohol_flag')
+        
+        setListGroup(restaurant, new, 'cuisine')
+
+
+    # Artist
+    if newType == 'artist':
+
+        songs = artist.pop('songs', [])
+        for song in songs:
+            entityMini = MediaItemEntityMini()
+            entityMini.title = song['song_name']
+            if 'id' in song and 'source' in song and song['source'] == 'itunes':
+                entityMini.sources.itunes_id = song['id']
+                entityMini.sources.itunes_source = 'itunes'
+                entityMini.sources.itunes_timestamp = song.pop('timestamp', datetime.datetime.utcnow())
+            new.tracks.append(entityMini)
+        if len(songs) > 0:
+            new.tracks_source = artist.pop('songs_source', 'seed')
+            new.tracks_timestamp = artist.pop('songs_timestamp', datetime.datetime.utcnow())
+
+        albums = artist.pop('albums', [])
+        for item in albums:
+            entityMini = MediaCollectionEntityMini()
+            entityMini.title = item['album_name']
+            if 'id' in item and 'source' in item and item['source'] == 'itunes':
+                entityMini.sources.itunes_id = item['id']
+                entityMini.sources.itunes_source = 'itunes'
+                entityMini.sources.itunes_timestamp = item.pop('timestamp', datetime.datetime.utcnow())
+            new.albums.append(entityMini)
+        if len(albums) > 0:
+            new.albums_source = artist.pop('albums_source', 'seed')
+            new.albums_timestamp = artist.pop('albums_timestamp', datetime.datetime.utcnow())
+
+        setListGroup(media, new, 'genre', 'genres')
+
+
+    # General Media
+    if newType in ['album', 'tv', 'track', 'movie', 'book']:
+        artwork_url = media.pop('artwork_url', None)
+        if new.image is None and artwork_url is not None:
+            new.image = artwork_url
+
+        setBasicGroup(media, new, 'track_length', 'length')
+        setBasicGroup(media, new, 'mpaa_rating')
+        setBasicGroup(media, new, 'release_date')
+
+        setListGroup(media, new, 'genre', 'genres')
+        setListGroup(media, new, 'artist_display_name', 'artists', wrapper=PersonEntityMini)
+        setListGroup(video, new, 'cast', 'cast', wrapper=PersonEntityMini)
+        setListGroup(video, new, 'director', 'directors', wrapper=PersonEntityMini)
+
+        originalReleaseDate = parseDateString(media.pop('original_release_date', None))
+        if new.release_date is None and originalReleaseDate is not None:
+            new.release_date = originalReleaseDate
+            new.release_date_source = 'seed'
+            new.release_date_timestamp = datetime.datetime.utcnow()
+
+
+    # Album
+    if newType == 'album':
+        songs = album.pop('tracks', [])
+        for song in songs:
+            entityMini = MediaItemEntityMini()
+            entityMini.title = song
+            new.tracks.append(entityMini)
+        if len(songs) > 0:
+            new.tracks_source = album.pop('songs_source', 'seed')
+            new.tracks_timestamp = album.pop('songs_timestamp', datetime.datetime.utcnow())
+
+
+    # Track
+    if newType == 'track':
+        albumName = song.pop('album_name', media.pop('album_name', None))
+        print albumName
+        if albumName is not None:
+            entityMini = MediaCollectionEntityMini()
+            entityMini.title = albumName
+            albumId = song.pop('song_album_id', None)
+            if albumId is not None:
+                entityMini.sources.itunes_id = albumId 
+                entityMini.sources.itunes_source = 'seed'
+                entityMini.sources.itunes_timestamp = datetime.datetime.utcnow()
+            new.collections.append(entityMini)
+            new.collections_source = song.pop('album_name_source', 'seed')
+            new.collections_timestamp = song.pop('album_name_timestamp', datetime.datetime.utcnow())
+
+    # Apps
+    if newType == 'app':
+        setBasicGroup(media, new, 'release_date')
+        setListGroup(media, new, 'authors', 'artist_display_name', wrapper=PersonEntityMini)
+
+        screenshots = media.pop('screenshots', [])
+        for screenshot in screenshots:
+            imageSchema = ImageSchema()
+            imageSchema.image = screenshot 
+            imageSchema.source = 'itunes'
+            new.screenshots.append(imageSchema)
+        if len(screenshots) > 0:
+            new.screenshots_source = media.pop('screenshots_source', 'seed')
+            new.screenshots_timestamp = media.pop('screenshots_timestamp', datetime.datetime.utcnow())
+
+    return new 

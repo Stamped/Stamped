@@ -777,7 +777,7 @@ class MongoEntitySearcher(EntitySearcher):
                 entity   = result[0]
                 distance = result[1]
                 
-                entity.simplified_title = self._simplify(entity, entity.title)
+                # entity.simplified_title = self._simplify(entity, entity.title)
                 
                 title_value         = self._get_title_value(input_query, entity, prefix)
                 negative_value      = self._get_negative_value(entity)
@@ -838,7 +838,7 @@ class MongoEntitySearcher(EntitySearcher):
         return _get_entity_weight
     
     def _get_title_value(self, input_query, entity, prefix):
-        candidates = [ entity.title, entity.simplified_title ]
+        candidates = [ entity.title ] #, entity.simplified_title ]
         
         if (entity.subcategory == 'song' or entity.subcategory == 'album') and \
             'artist_display_name' in entity:

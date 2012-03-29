@@ -21,7 +21,7 @@ import MongoStampCommentsCollection
 import MongoUserCollection
 import MongoUserFavEntitiesCollection
 import MongoUserStampsCollection
-import MongoEntitySearcher
+# import MongoEntitySearcher
 import MongoPlacesEntityCollection
 import MongoCollectionProxy
 import MongoSearchCacheCollection
