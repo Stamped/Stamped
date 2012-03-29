@@ -31,7 +31,7 @@ except:
 class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def __init__(self, collection='entities'):
-        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=BasicEntity, overflow=True)
+        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', overflow=True)
         AEntityDB.__init__(self)
     
     @lazyProperty
@@ -68,8 +68,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return document
     
     def addEntity(self, entity):
-        if entity.titlel is None:
-            entity.titlel = getSimplifiedTitle(entity.title)
+        if entity.title_lower is None:
+            entity.title_lower = getSimplifiedTitle(entity.title)
         
         return self._addObject(entity)
     
@@ -112,8 +112,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def addEntities(self, entities):
         for entity in entities:
-            if entity.titlel is None:
-                entity.titlel = getSimplifiedTitle(entity.title)
+            if entity.title_lower is None:
+                entity.title_lower = getSimplifiedTitle(entity.title)
         
         return self._addObjects(entities)
 

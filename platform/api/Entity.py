@@ -95,16 +95,68 @@ subcategories = {
     'video_game'        : 'other', 
 }
 
-types = set([
+kinds = set([
     'place',
+    'person',
+    'media_collection',
+    'media_item',
+    'software',
+    'other',
+])
+
+types = set([
+    # PEOPLE
     'artist',
+
+    # MEDIA COLLECTIONS
+    'tv',
     'album',
+
+    # MEDIA ITEMS
     'track',
     'movie',
-    'tv',
     'book',
+
+    # SOFTWARE
     'app',
-    'other',
+
+    # PLACES
+    'restaurant',
+    'bar',
+    'bakery',
+    'cafe',
+    'market',
+    'food',
+    'night_club',
+    'amusement_park',
+    'aquarium',
+    'art_gallery',
+    'beauty_salon',
+    'book_store',
+    'bowling_alley',
+    'campground',
+    'casino',
+    'clothing_store',
+    'department_store',
+    'establishment',
+    'florist',
+    'gym',
+    'home_goods_store',
+    'jewelry_store',
+    'library',
+    'liquor_store',
+    'lodging',
+    'movie_theater',
+    'museum',
+    'park',
+    'school',
+    'shoe_store',
+    'shopping_mall',
+    'spa',
+    'stadium',
+    'store',
+    'university',
+    'zoo',
 ])
 
 countries = libs.CountryData.countries
@@ -360,6 +412,72 @@ def getSimplifiedTitle(title):
     
     return title
 
+def deriveKindFromSubcategory(subcategory):
+    mapping = {
+        'artist'            : 'person', 
+
+        'album'             : 'media_collection', 
+        'tv'                : 'media_collection', 
+
+        'book'              : 'media_item', 
+        'track'             : 'media_item', 
+        'song'              : 'media_item', 
+        'movie'             : 'media_item', 
+
+        'app'               : 'software', 
+
+        'restaurant'        : 'place', 
+        'bar'               : 'place', 
+        'bakery'            : 'place', 
+        'cafe'              : 'place', 
+        'market'            : 'place', 
+        'food'              : 'place', 
+        'night_club'        : 'place', 
+        'amusement_park'    : 'place', 
+        'aquarium'          : 'place', 
+        'art_gallery'       : 'place', 
+        'beauty_salon'      : 'place', 
+        'book_store'        : 'place', 
+        'bowling_alley'     : 'place', 
+        'campground'        : 'place', 
+        'casino'            : 'place', 
+        'clothing_store'    : 'place', 
+        'department_store'  : 'place', 
+        'establishment'     : 'place', 
+        'florist'           : 'place', 
+        'gym'               : 'place', 
+        'home_goods_store'  : 'place', 
+        'jewelry_store'     : 'place', 
+        'library'           : 'place', 
+        'liquor_store'      : 'place', 
+        'lodging'           : 'place', 
+        'movie_theater'     : 'place', 
+        'museum'            : 'place', 
+        'park'              : 'place', 
+        'school'            : 'place', 
+        'shoe_store'        : 'place', 
+        'shopping_mall'     : 'place', 
+        'spa'               : 'place', 
+        'stadium'           : 'place', 
+        'store'             : 'place', 
+        'university'        : 'place', 
+        'zoo'               : 'place', 
+
+        'other'             : 'other', 
+        'video_game'        : 'other', 
+    }
+    if subcategory in mapping:
+        return mapping[subcategory]
+    return 'other'
+
+def deriveTypesFromSubcategories(subcategories):
+    result = set()
+
+    for item in types.intersection(subcategories):
+        result.add(item)
+
+    return result 
+
 def deriveTypeFromSubcategory(subcategory):
     # This should be deprecated once all db entities are populated with a 'type'
     if subcategory in types:
@@ -408,42 +526,32 @@ def deriveTypeFromSubcategory(subcategory):
         return mapping[subcategory]
     return 'other'
 
-def buildEntity(entityData):
-    kind = entityData['kind']
-
+def _getEntityObjectFromKind(kind):
     if kind == 'place':
-        new = PlaceEntity
-    elif kind == 'artist':
-        new = PersonEntity
-    elif kind == 'media_collection':
-        new = MediaCollectionEntity
-    elif kind == 'media_item':
-        new = MediaItemEntity
-    elif kind == 'software':
-        new = SoftwareEntity
-    else:
-        new = BasicEntity
+        return PlaceEntity
+    if kind == 'person':
+        return PersonEntity
+    if kind == 'media_collection':
+        return MediaCollectionEntity
+    if kind == 'media_item':
+        return MediaItemEntity
+    if kind == 'software':
+        return SoftwareEntity
+    return BasicEntity
 
-    return new(entityData)
+def buildEntity(data=None, kind=None):
+    if data is not None:
+        kind = data.pop('kind', kind)
+    new = _getEntityObjectFromKind(kind)
+    return new(data)
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
     old = entityData
 
-    newType = deriveTypeFromSubcategory(old['subcategory'])
+    kind = deriveKindFromSubcategory(old['subcategory'])
 
-    if newType in ['place']:
-        new = PlaceEntity()
-    elif newType in ['artist']:
-        new = PersonEntity()
-    elif newType in ['album', 'tv']:
-        new = MediaCollectionEntity()
-    elif newType in ['track', 'movie', 'book']:
-        new = MediaItemEntity()
-    elif newType in ['app']:
-        new = SoftwareEntity()
-    else:
-        new = BasicEntity()
+    new = _getEntityObjectFromKind(kind)()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None):
         if newName is None:

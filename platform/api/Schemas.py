@@ -510,7 +510,7 @@ class ViewportSchema(Schema):
 
 class BasicEntity(Schema):
     def setSchema(self):
-        self.schema_version                 = SchemaElement(int)
+        self.schema_version                 = SchemaElement(int, required=True)
 
         self.entity_id                      = SchemaElement(basestring)
         self.search_id                      = SchemaElement(basestring)
