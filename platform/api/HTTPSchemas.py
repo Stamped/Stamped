@@ -1225,7 +1225,7 @@ class HTTPEntityEdit(Schema):
                 'entity_id':    self.entity_id,
                 'title':        self.title,
                 'subtitle':     self.subtitle,
-                'type':         deriveTypeFromSubcategory(self.subcategory),
+                'type':         deriveTypesFromSubcategories([self.subcategory])[-1],
                 'category':     self.category,
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
@@ -1918,50 +1918,49 @@ class HTTPEntity_stampedtest(Schema):
         self.amazon_url         = SchemaElement(basestring)
 
     def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
+        validEntities = set([
+            'BasicEntity',
+            'PlaceEntity',
+            'PersonEntity',
+            'MediaCollectionEntity',
+            'MediaItemEntity',
+            'SoftwareEntity',
+        ])
+        if schema.__class__.__name__ in validEntities:
             setFields(schema)
             
-            data                = schema.value
-            coordinates         = data.pop('coordinates', None)
-            
-            self.importData(data, overflow=True)
-            
-            self.last_modified  = schema.timestamp.created
-            
-            # Place
-            self.address        = schema.address
-            ### TEMP: Remove this until we get good neighborhood data
-            # self.neighborhood   = schema.neighborhood
-            self.coordinates    = _coordinatesDictToFlat(coordinates)
-            
-            if len(schema.address_components) > 0:
-                address = {}
-                for component in schema.address_components:
-                    for i in component['types']:
-                        address[str(i)] = component['short_name']
-                    
-                if 'street_address' in address:
-                    self.address_street = address['street_address']
-                elif 'street_number' in address and 'route' in address:
-                    self.address_street = "%s %s" % \
-                        (address['street_number'], address['route'])
-                
-                if 'locality' in address:
-                    self.address_city = address['locality']
-                
-                if 'administrative_area_level_1' in address:
-                    self.address_state = address['administrative_area_level_1']
-                
-                if 'country' in address:
-                    self.address_country = address['country']
-                
-                if 'postal_code' in address:
-                    self.address_zip = address['postal_code']
-            
-            # Contact
-            self.phone          = schema.phone
-            self.site           = schema.site
-            self.hours          = schema.hoursOfOperation
+            self.entity_id          = schema.entity_id
+            self.title              = schema.title 
+            self.subtitle           = schema.subtitle 
+            self.category           = deriveCategoryFromTypes(schema.types)
+            self.subcategory        = deriveSubcategoryFromTypes(schema.types)
+            self.desc               = schema.desc 
+            # TODO: Image
+            self.last_modified      = schema.timestamp.created 
+
+            self.phone              = schema.phone
+            self.site               = schema.site 
+
+        if schema.__class__.__name__ == 'PlaceEntity':
+
+            self.address            = schema.formatted_address
+            self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
+
+            if schema.cuisine is not None:
+                self.cuisine        = ', '.join(str(i) for i in schema.cuisine)
+
+            if schema.price_range is not None:
+                self.price_scale    = '$' * schema.price_range
+
+        if schema.__class__.__name__ == 'PersonEntity':
+
+            if schema.genres is not None:
+                self.genre          = ', '.join(str(i) for i in schema.genres)
+
+            if schema.release_date is not None:
+                self.release_date   = schema.release_date.strftime("%h %d, %Y")
+
+        if 1 == 0:
             
             # Cross-Category
             
@@ -2006,9 +2005,6 @@ class HTTPEntity_stampedtest(Schema):
             if date_time is not None:
                 self.release_date   = date_time.strftime("%h %d, %Y")
 
-            # Food
-            self.cuisine        = schema.cuisine
-            self.price_scale    = schema.priceScale
 
             # Book
             self.author         = schema.author
@@ -2026,8 +2022,6 @@ class HTTPEntity_stampedtest(Schema):
             
             # Music
             self.artist_name    = schema.artist_display_name
-            # self.album_name     = schema.album_name
-            # self.label          = schema.label_studio
             
             if 'preview_url' in schema:
                 self.preview_url = schema.preview_url

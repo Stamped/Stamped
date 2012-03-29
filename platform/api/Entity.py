@@ -478,52 +478,16 @@ def deriveTypesFromSubcategories(subcategories):
 
     return result 
 
-def deriveTypeFromSubcategory(subcategory):
-    # This should be deprecated once all db entities are populated with a 'type'
-    if subcategory in types:
-        return subcategory 
-    mapping = {
-        'song'              : 'track', 
-        'restaurant'        : 'place', 
-        'bar'               : 'place', 
-        'bakery'            : 'place', 
-        'cafe'              : 'place', 
-        'market'            : 'place', 
-        'food'              : 'place', 
-        'night_club'        : 'place', 
-        'amusement_park'    : 'place', 
-        'aquarium'          : 'place', 
-        'art_gallery'       : 'place', 
-        'beauty_salon'      : 'place', 
-        'book_store'        : 'place', 
-        'bowling_alley'     : 'place', 
-        'campground'        : 'place', 
-        'casino'            : 'place', 
-        'clothing_store'    : 'place', 
-        'department_store'  : 'place', 
-        'establishment'     : 'place', 
-        'florist'           : 'place', 
-        'gym'               : 'place', 
-        'home_goods_store'  : 'place', 
-        'jewelry_store'     : 'place', 
-        'library'           : 'place', 
-        'liquor_store'      : 'place', 
-        'lodging'           : 'place', 
-        'movie_theater'     : 'place', 
-        'museum'            : 'place', 
-        'park'              : 'place', 
-        'school'            : 'place', 
-        'shoe_store'        : 'place', 
-        'shopping_mall'     : 'place', 
-        'spa'               : 'place', 
-        'stadium'           : 'place', 
-        'store'             : 'place', 
-        'university'        : 'place', 
-        'zoo'               : 'place', 
-        'video_game'        : 'other', 
-    }
-    if subcategory in mapping:
-        return mapping[subcategory]
+def deriveSubcategoryFromTypes(types):
+    for t in types:
+        if t in subcategories.keys():
+            return t 
+    return 'other'
+
+def deriveCategoryFromTypes(types):
+    subcategory = deriveSubcategoryFromTypes(types)
+    if subcategory in subcategories:
+        return subcategories[subcategory]
     return 'other'
 
 def _getEntityObjectFromKind(kind):

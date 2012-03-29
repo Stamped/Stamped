@@ -94,7 +94,7 @@ try:
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
     from time                       import time
-    from Entity                     import subcategories, deriveTypeFromSubcategory
+    from Entity                     import subcategories, deriveTypesFromSubcategories
 except:
     report()
     raise
@@ -314,12 +314,14 @@ class EntitySearch(object):
         types   = None
         
         if subcategory is not None:
-            types = set(deriveTypeFromSubcategory(subcategory))
+            types = set(deriveTypesFromSubcategories([subcategory]))
         elif category is not None:
             types = set()
             for s, c in subcategories.iteritems():
                 if category == c:
-                    types.add(deriveTypeFromSubcategory(s))
+                    t = set(deriveTypesFromSubcategories([s]))
+                    for i in t:
+                        types.add(deriveTypesFromSubcategories(i))
 
         try:
             if coords.lat is not None and coords.lng is not None:
