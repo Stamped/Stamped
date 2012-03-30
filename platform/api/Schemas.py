@@ -702,6 +702,7 @@ class EntitySourcesSchema(Schema):
         
         self.amazon_id                      = SchemaElement(basestring)
         self.amazon_url                     = SchemaElement(basestring)
+        self.amazon_underlying              = SchemaElement(basestring)
         self.amazon_source                  = SchemaElement(basestring)
         self.amazon_timestamp               = SchemaElement(datetime)
         
@@ -860,13 +861,13 @@ class PlaceEntity(BasicEntity):
     @property 
     def category(self):
         food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-        if len(food.intersection(self.types)) > 0:
+        if len(food.intersection(self.types.value)) > 0:
             return 'food'
         return 'other'
 
     @property 
     def subcategory(self):
-        for t in self.types:
+        for t in self.types.value:
             return t
         return 'place'
 
@@ -899,19 +900,19 @@ class PersonEntity(BasicEntity):
 
     @property 
     def subtitle(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'Artist'
         return self._genericSubtitle()
 
     @property 
     def category(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'music'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'artist'
         return 'other'
 
@@ -981,12 +982,12 @@ class MediaCollectionEntity(BasicMediaEntity):
 
     @property 
     def subtitle(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             if self.artists is not None:
                 return 'Album by %s' ', '.join(str(i) for i in self.artists)
             return 'Album'
 
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             if self.networks is not None:
                 return 'TV Show (%s)' ', '.join(str(i) for i in self.networks)
             return 'TV Show'
@@ -995,17 +996,17 @@ class MediaCollectionEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             return 'music'
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             return 'film'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             return 'album'
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             return 'tv'
         return 'other'
 
@@ -1032,17 +1033,17 @@ class MediaItemEntity(BasicMediaEntity):
 
     @property 
     def subtitle(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             if self.release_date is not None:
                 return self.release_date.year
             return 'Movie'
 
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             if self.artists is not None:
                 return 'Song by %s' ', '.join(str(i) for i in self.artists)
             return 'Song'
 
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             if self.authors is not None:
                 return '%s' ', '.join(str(i) for i in self.authors)
             return 'Book'
@@ -1051,21 +1052,21 @@ class MediaItemEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             return 'film'
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             return 'music'
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             return 'book'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             return 'movie'
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             return 'song'
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             return 'book'
         return 'other'
 
@@ -1102,7 +1103,7 @@ class SoftwareEntity(BasicEntity):
 
     @property 
     def subtitle(self):
-        if 'app' in self.types:
+        if 'app' in self.types.value:
             if self.authors is not None:
                 return 'App (%s)' % ', '.join(str(i) for i in self.authors)
             return 'App'
@@ -1115,7 +1116,7 @@ class SoftwareEntity(BasicEntity):
 
     @property 
     def subcategory(self):
-        if 'app' in self.types:
+        if 'app' in self.types.value:
             return 'app'
         return 'other'
 

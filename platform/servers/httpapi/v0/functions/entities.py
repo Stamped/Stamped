@@ -14,7 +14,7 @@ def _convertHTTPEntity(entity, authClientId=None):
     if client.api_version < 1:
         return HTTPEntity_stampedtest().importSchema(entity)
     else:
-        return HTTPEntity().importSchema(entity, client)
+        return HTTPEntity().importEntity(entity, client)
 
 
 @handleHTTPRequest

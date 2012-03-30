@@ -478,14 +478,8 @@ class HTTPEntity(Schema):
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
         
-        # Address
+        # Location
         self.address            = SchemaElement(basestring)
-        self.address_street     = SchemaElement(basestring)
-        self.address_city       = SchemaElement(basestring)
-        self.address_state      = SchemaElement(basestring)
-        self.address_country    = SchemaElement(basestring)
-        self.address_zip        = SchemaElement(basestring)
-        
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
         
@@ -518,9 +512,12 @@ class HTTPEntity(Schema):
             self.actions.append(item)
 
     def _addMetadata(self, name, value, **kwargs):
-        if value is not None:
+        if value is not None and len(value) > 0:
             item = HTTPEntityMetadataItem()
             item.name = name
+
+            if isinstance(value, list):
+                value = ', '.join(i for i in value)
             item.value = value
 
             if 'key' in kwargs:
@@ -583,459 +580,458 @@ class HTTPEntity(Schema):
         return '%s/default/%s.png' % (base_url, filename)
 
 
-    def importSchema(self, schema, client=None):
-        if schema.__class__.__name__ == 'Entity':
+    def importEntity(self, entity, client=None):
+        # General
+        self.entity_id          = entity.entity_id
+        self.title              = entity.title 
+        self.subtitle           = entity.subtitle 
+        self.category           = entity.category 
+        self.subcategory        = entity.subcategory
+        
+        self.caption            = self.subtitle # Default
+        self.last_modified      = entity.timestamp.created
 
-            setFields(schema)
+        subcategory             = formatSubcategory(self.subcategory)
+
+        print 
+        print
+        print 'ENTITY: %s' % entity
+        print
+        print
+        
+        # Restaurant / Bar
+        if entity.kind == 'place' and entity.category == 'food':
+            self.address        = entity.formatted_address
+            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+
+            address = formatAddress(entity, extendStreet=True, breakLines=True)
+            if address is not None:
+                self.caption = address 
+
+            # Metadata
+            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_food', client=client))
+            self._addMetadata('Cuisine', entity.cuisine)
+            self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
+            self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
+            self._addMetadata('Description', entity.desc, key='desc', extended=True)
+
+            # Actions: Reservation
+
+            sources = []
+
+            if entity.sources.opentable_id is not None or entity.sources.opentable_nickname is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Reserve on OpenTable'
+                source.source       = 'opentable'
+                source.source_id    = entity.sources.opentable_id
+                source.link         = _buildOpenTableURL(entity.opentable_id, entity.opentable_nickname, client)
+                source.icon         = self._getIconURL('src_opentable', client=client)
+                sources.append(source)
+
+            actionIcon = self._getIconURL('act_reserve_primary', client=client)
+            self._addAction('reserve', 'Reserve a table', sources, icon=actionIcon)
+
+            # Actions: Call
+
+            sources = []
+
+            if entity.contact.phone is not None:
+                source              = HTTPActionSource()
+                source.source       = 'phone'
+                source.source_id    = entity.contact.phone
+                sources.append(source)
+
+            actionIcon = self._getIconURL('act_call', client=client)
+            self._addAction('phone', entity.contact.phone, sources, icon=actionIcon)
+
+            # Actions: View Menu
+
+            sources = []
+
+            if entity.menu is not None:
+                source              = HTTPActionSource()
+                source.name         = 'View menu'
+                source.source       = 'menu'
+                source.source_id    = entity.entity_id
+                sources.append(source)
+
+            actionIcon = self._getIconURL('act_menu', client=client)
+            self._addAction('menu', 'View menu', sources, icon=actionIcon)
+
+        # Generic Place
+        elif entity.kind == 'place':
+            self.address        = entity.formatted_address
+            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+
+            address = formatAddress(entity, extendStreet=True, breakLines=True)
+            if address is not None:
+                self.caption = address 
+
+            # Metadata
             
-            data                = schema.value
-            coordinates         = data.pop('coordinates', None)
-            subcategory         = formatSubcategory(schema.subcategory)
-            
-            self.importData(data, overflow=True)
-            
-            self.caption        = self.subtitle # Default
-            self.last_modified  = schema.timestamp.created
-            
-            # Place
-            self.address        = schema.address
-            self.coordinates    = _coordinatesDictToFlat(coordinates)
-            
-            # Restaurant / Bar
-            if schema.category == 'food':
+            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_place', client=client))
+            self._addMetadata('Description', entity.desc, key='desc')
+            self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
-                address = formatAddress(schema, extendStreet=True, breakLines=True)
-                if address is not None:
-                    self.caption = address 
+            # Actions: Call
 
-                # Metadata
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
-                self._addMetadata('Cuisine', schema.cuisine)
-                self._addMetadata('Price', schema.price_range * '$' if schema.price_range is not None else None)
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
-                self._addMetadata('Description', schema.desc, key='desc', extended=True)
+            sources = []
 
-                # Actions: Reservation
+            if entity.contact.phone is not None:
+                source              = HTTPActionSource()
+                source.source       = 'phone'
+                source.source_id    = entity.contact.phone
+                sources.append(source)
 
-                sources = []
+            actionIcon = self._getIconURL('act_call', client=client)
+            self._addAction('phone', entity.contact.phone, sources, icon=actionIcon)
 
-                if schema.sources.opentable_id is not None or schema.sources.opentable_nickname is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Reserve on OpenTable'
-                    source.source       = 'opentable'
-                    source.source_id    = schema.sources.opentable_id
-                    source.link         = _buildOpenTableURL(schema.opentable_id, schema.opentable_nickname, client)
-                    source.icon         = self._getIconURL('src_opentable', client=client)
-                    sources.append(source)
+        # Book
+        elif entity.kind == 'media_item' and 'book' in entity.types.value:
 
-                actionIcon = self._getIconURL('act_reserve_primary', client=client)
-                self._addAction('reserve', 'Reserve a table', sources, icon=actionIcon)
+            if entity.author is not None:
+                self.caption = 'by %s' % entity.author
 
-                # Actions: Call
+            # Metadata
 
-                sources = []
+            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_book', client=client))
+            self._addMetadata('Publish Date', entity.release_date)
+            self._addMetadata('Description', entity.desc, key='desc', extended=True)
+            self._addMetadata('Publisher', entity.publishers)
 
-                if schema.contact.phone is not None:
-                    source              = HTTPActionSource()
-                    source.source       = 'phone'
-                    source.source_id    = schema.contact.phone
-                    sources.append(source)
+            # Actions: Buy
 
-                actionIcon = self._getIconURL('act_call', client=client)
-                self._addAction('phone', schema.contact.phone, sources, icon=actionIcon)
+            sources = []
 
-                # Actions: View Menu
+            if entity.sources.amazon_underlying is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Buy from Amazon'
+                source.source       = 'amazon'
+                source.source_id    = entity.sources.amazon_underlying
+                source.icon         = self._getIconURL('src_amazon', client=client)
+                source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
+                sources.append(source)
 
-                sources = []
+            actionIcon = self._getIconURL('act_buy_primary', client=client)
+            self._addAction('buy', 'Buy now', sources, icon=actionIcon)
 
-                if schema.menu is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'View menu'
-                    source.source       = 'menu'
-                    source.source_id    = schema.entity_id
-                    sources.append(source)
+        # Movie
+        elif entity.kind == 'media_item' and 'movie' in entity.types.value:
+            print 'MOVIE!'
+            if entity.subcategory == 'movie' and entity.length is not None:
+                length = formatFilmLength(entity.length)
+                if length is not None:
+                    self.caption = length
 
-                actionIcon = self._getIconURL('act_menu', client=client)
-                self._addAction('menu', 'View menu', sources, icon=actionIcon)
+            if entity.subcategory == 'tv' and entity.network_name is not None:
+                self.caption = entity.network_name
 
+            # Metadata
 
-            # Book
-            elif schema.category == 'book':
+            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_film', client=client))
+            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
+            self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+            self._addMetadata('Cast', entity.cast, extended=True, optional=True)
+            self._addMetadata('Director', entity.directors, optional=True)
+            self._addMetadata('Genres', entity.genres, optional=True)
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
-                if schema.author is not None:
-                    self.caption = 'by %s' % schema.author
+            # Actions: Watch Now
 
-                # Metadata
+            sources = []
 
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_book', client=client))
-                self._addMetadata('Publish Date', schema.publish_date)
-                self._addMetadata('Description', schema.desc, key='desc', extended=True)
-                self._addMetadata('Publisher', schema.publisher)
+            if entity.sources.itunes_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Watch on iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                source.icon         = self._getIconURL('src_itunes', client=client)
+                sources.append(source)
 
-                # Actions: Buy
+            actionIcon = self._getIconURL('act_play_primary', client=client)
+            self._addAction('watch', 'Watch now', sources, icon=actionIcon)
 
-                sources = []
+            # Actions: Find Tickets
 
-                if schema.sources.amazon_underlying is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Buy from Amazon'
-                    source.source       = 'amazon'
-                    source.source_id    = schema.sources.amazon_underlying
-                    source.icon         = self._getIconURL('src_amazon', client=client)
-                    source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    sources.append(source)
+            sources = []
 
-                actionIcon = self._getIconURL('act_buy_primary', client=client)
-                self._addAction('buy', 'Buy now', sources, icon=actionIcon)
-
-            
-            elif schema.category == 'film':
-
-                if schema.subcategory == 'movie' and schema.track_length is not None:
-                    length = formatFilmLength(schema.track_length)
-                    if length is not None:
-                        self.caption = length
-
-                if schema.subcategory == 'tv' and schema.network_name is not None:
-                    self.caption = schema.network_name
-
-                # Metadata
-
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_film', client=client))
-                self._addMetadata('Overview', schema.desc, key='desc', extended=True)
-                self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
-                self._addMetadata('Cast', schema.cast, extended=True, optional=True)
-                self._addMetadata('Director', schema.director, optional=True)
-                self._addMetadata('Genres', schema.genre, optional=True)
-                if schema.subcategory == 'movie':
-                    self._addMetadata('Rating', schema.mpaa_rating, key='rating', optional=True)
-
-                # Actions: Watch Now
-
-                sources = []
-
-                if schema.sources.itunes_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Watch on iTunes'
-                    source.source       = 'itunes'
-                    source.source_id    = schema.sources.itunes_id
-                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    source.icon         = self._getIconURL('src_itunes', client=client)
-                    sources.append(source)
-
-                actionIcon = self._getIconURL('act_play_primary', client=client)
-                self._addAction('watch', 'Watch now', sources, icon=actionIcon)
-
-                # Actions: Find Tickets
-
-                sources = []
-
-                if schema.sources.fandango.fid is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Buy from Fandango'
-                    source.source       = 'fandango'
-                    source.source_id    = schema.sources.fandango.fid
-                    source.link         = schema.sources.fandango.f_url 
-                    # Only add icon if no "watch now"
-                    if len(self.actions) == 0:
-                        source.icon   = self._getIconURL('src_fandango', client=client)
-                    sources.append(source)
-
-                actionIcon = self._getIconURL('act_ticket_primary', client=client)
+            if entity.sources.fandango_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Buy from Fandango'
+                source.source       = 'fandango'
+                source.source_id    = entity.sources.fandango_id
+                source.link         = entity.sources.fandango_url 
+                # Only add icon if no "watch now"
                 if len(self.actions) == 0:
-                    actionIcon = self._getIconURL('act_ticket', client=client)
-                self._addAction('tickets', 'Find tickets', sources, icon=actionIcon)
+                    source.icon   = self._getIconURL('src_fandango', client=client)
+                sources.append(source)
 
-                # Actions: Add to Queue
+            actionIcon = self._getIconURL('act_ticket_primary', client=client)
+            if len(self.actions) == 0:
+                actionIcon = self._getIconURL('act_ticket', client=client)
+            self._addAction('tickets', 'Find tickets', sources, icon=actionIcon)
 
-                ### TODO: Add Netflix
+            # Actions: Add to Queue
 
-                # Actions: Watch Trailer
+            ### TODO: Add Netflix
 
-                ### TODO: Add source
+            # Actions: Watch Trailer
 
-                # Actions: Download
+            ### TODO: Add source
 
-                sources = []
+            # Actions: Download
 
-                if schema.sources.amazon_underlying is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Buy from Amazon'
-                    source.source       = 'amazon'
-                    source.source_id    = schema.sources.amazon_underlying
-                    source.link         = _buildAmazonURL(schema.sources.amazon_underlying)
-                    sources.append(source)
+            sources = []
 
-                actionIcon = self._getIconURL('act_buy', client=client)
-                self._addAction('buy', 'Buy', sources, icon=actionIcon)
+            if entity.sources.amazon_underlying is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Buy from Amazon'
+                source.source       = 'amazon'
+                source.source_id    = entity.sources.amazon_underlying
+                source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
+                sources.append(source)
 
+            actionIcon = self._getIconURL('act_buy', client=client)
+            self._addAction('buy', 'Buy', sources, icon=actionIcon)
+
+        # Music
+        elif entity.category == 'music':
+
+            if entity.subcategory == 'artist':
+                self.caption = 'Artist'
+
+            elif entity.subcategory == 'album' and entity.artists is not None:
+                self.caption = 'by %s' % ', '.join(str(i) for i in entity.artists)
+
+            elif entity.subcategory == 'song' and entity.artists is not None:
+                self.caption = 'by %s' % ', '.join(str(i) for i in entity.artists)
+
+            # Metadata
+
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_music', client=client))
+            if entity.subcategory == 'artist':
+                self._addMetadata('Biography', entity.desc, key='desc')
+                self._addMetadata('Genre', entity.genres, optional=True)
+
+            elif entity.subcategory == 'album':
+                self._addMetadata('Genre', entity.genres)
+                self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+                self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
+
+            elif entity.subcategory == 'song':
+                self._addMetadata('Genre', entity.genres)
+                self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+                self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
+
+            # Actions: Listen
+
+            sources = []
+
+            if entity.sources.itunes_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Listen on iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.icon         = self._getIconURL('src_itunes', client=client)
+                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                sources.append(source)
+
+            if entity.sources.rdio_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Listen on Rdio'
+                source.source       = 'rdio'
+                source.source_id    = entity.sources.rdio_id
+                source.icon         = self._getIconURL('src_rdio', client=client)
+                source.link         = entity.rdio_url
+                sources.append(source)
+
+            if entity.sources.spotify_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Listen on Spotify'
+                source.source       = 'spotify'
+                source.source_id    = entity.sources.spotify_id
+                source.icon         = self._getIconURL('src_spotify', client=client)
+                sources.append(source)
+
+            actionTitle = 'Listen'
+            if entity.subcategory == 'artist':
+                actionTitle = 'Listen to top songs'
+            elif entity.subcategory == 'album':
+                actionTitle = 'Listen to album'
+            elif entity.subcategory == 'song':
+                actionTitle = 'Listen to song'
+                    
+            actionIcon = self._getIconURL('act_play_primary', client=client)
+            self._addAction('listen', actionTitle, sources, icon=actionIcon)
+
+            # Actions: Add to Playlist
+
+            sources = []
+
+            if entity.sources.rdio_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Add to playlist on Rdio'
+                source.source       = 'rdio'
+                source.source_id    = entity.sources.rdio_id
+                sources.append(source)
+
+            if entity.sources.spotify_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Add to playlist on Spotify'
+                source.source       = 'spotify'
+                source.source_id    = entity.sources.spotify_id
+                sources.append(source)
+
+            actionTitle = 'Add to playlist'
+            if entity.subcategory == 'artist':
+                actionTitle = 'Add artist to playlist'
             
-            elif schema.category == 'music':
+            actionIcon = self._getIconURL('act_playlist_music', client=client)
+            self._addAction('playlist', actionTitle, sources, icon=actionIcon)
 
-                if schema.subcategory == 'artist':
-                    self.caption = 'Artist'
+            # Actions: Download
 
-                elif schema.subcategory == 'album' and schema.artist_display_name is not None:
-                    self.caption = 'by %s' % schema.artist_display_name
+            sources = []
 
-                elif schema.subcategory == 'song' and schema.artist_display_name is not None:
-                    self.caption = 'by %s' % schema.artist_display_name
+            if entity.sources.itunes_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Download from iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                sources.append(source)
 
-                # Metadata
+            actionTitle = 'Download %s' % entity.subcategory
+            actionIcon  = self._getIconURL('act_download', client=client)
+            self._addAction('download', actionTitle, sources, icon=actionIcon)
 
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_music', client=client))
-                if schema.subcategory == 'artist':
-                    self._addMetadata('Biography', schema.desc, key='desc')
-                    self._addMetadata('Genre', schema.genre, optional=True)
+            # Playlist
+        
+            if entity.subcategory in ["album", "artist"] and entity.tracks is not None:
+                playlist = HTTPEntityPlaylist()
 
-                elif schema.subcategory == 'album':
-                    self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
-                    self._addMetadata('Album Details', schema.desc, key='desc', optional=True)
+                if entity.subcategory == 'album':
+                    playlist.name = 'Tracks'
+                else:
+                    playlist.name = 'Top songs'
 
-                elif schema.subcategory == 'song':
-                    self._addMetadata('Genre', schema.genre)
-                    self._addMetadata('Release Date', formatReleaseDate(schema.release_date))
-                    self._addMetadata('Song Details', schema.desc, key='desc', optional=True)
+                for i in range(len(entity.tracks))[:50]:
+                    try:
+                        song = entity.tracks[i]
+                        item = HTTPEntityPlaylistItem()
+                        # item.length = song.length
+                        item.num = i + 1
+                        item.icon = None ### TODO
 
-                # Actions: Listen
+                        sources = []
 
-                sources = []
+                        if song.sources.itunes_id is not None:
+                            source              = HTTPActionSource()
+                            source.name         = 'Listen on iTunes'
+                            source.source       = 'itunes'
+                            source.source_id    = entity.sources.itunes_id
+                            source.icon         = self._getIconURL('src_itunes', client=client)
+                            sources.append(source)
 
-                if schema.sources.itunes_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Listen on iTunes'
-                    source.source       = 'itunes'
-                    source.source_id    = schema.sources.itunes_id
-                    source.icon         = self._getIconURL('src_itunes', client=client)
-                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    sources.append(source)
+                        if song.sources.rdio_id is not None:
+                            source              = HTTPActionSource()
+                            source.name         = 'Listen on Rdio'
+                            source.source       = 'rdio'
+                            source.source_id    = entity.sources.rdio_id
+                            source.icon         = self._getIconURL('src_rdio', client=client)
+                            sources.append(source)
 
-                if schema.sources.rdio_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Listen on Rdio'
-                    source.source       = 'rdio'
-                    source.source_id    = schema.sources.rdio_id
-                    source.icon         = self._getIconURL('src_rdio', client=client)
-                    source.link         = schema.rdio_url
-                    sources.append(source)
+                        if song.sources.spotify_id is not None:
+                            source              = HTTPActionSource()
+                            source.name         = 'Listen on Spotify'
+                            source.source       = 'spotify'
+                            source.source_id    = entity.sources.spotify_id
+                            source.icon         = self._getIconURL('src_spotify', client=client)
+                            sources.append(source)
 
-                if schema.sources.spotify_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Listen on Spotify'
-                    source.source       = 'spotify'
-                    source.source_id    = schema.sources.spotify_id
-                    source.icon         = self._getIconURL('src_spotify', client=client)
-                    sources.append(source)
+                        if len(sources) > 0:
+                            action = HTTPAction()
+                            action.type = 'listen'
+                            action.name = 'Listen to song'
+                            action.sources = sources
 
-                actionTitle = 'Listen'
-                if schema.subcategory == 'artist':
-                    actionTitle = 'Listen to top songs'
-                elif schema.subcategory == 'album':
-                    actionTitle = 'Listen to album'
-                elif schema.subcategory == 'song':
-                    actionTitle = 'Listen to song'
-                        
-                actionIcon = self._getIconURL('act_play_primary', client=client)
-                self._addAction('listen', actionTitle, sources, icon=actionIcon)
+                            item.action = action
 
-                # Actions: Add to Playlist
+                        playlist.data.append(item)
 
-                sources = []
+                    except Exception:
+                        pass
 
-                if schema.sources.rdio_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Add to playlist on Rdio'
-                    source.source       = 'rdio'
-                    source.source_id    = schema.sources.rdio_id
-                    sources.append(source)
+        elif entity.kind == 'software' and 'app' in entity.types.value:
 
-                if schema.sources.spotify_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Add to playlist on Spotify'
-                    source.source       = 'spotify'
-                    source.source_id    = schema.sources.spotify_id
-                    sources.append(source)
+            if entity.artist_display_name is not None:
+                self.caption = 'by %s' % entity.artist_display_name
 
-                actionTitle = 'Add to playlist'
-                if schema.subcategory == 'artist':
-                    actionTitle = 'Add artist to playlist'
-                
-                actionIcon = self._getIconURL('act_playlist_music', client=client)
-                self._addAction('playlist', actionTitle, sources, icon=actionIcon)
+            # Metadata
 
-                # Actions: Download
+            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_app', client=client))
+            self._addMetadata('Genre', entity.genre)
+            self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
-                sources = []
+            # Actions: Download
 
-                if schema.sources.itunes_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Download from iTunes'
-                    source.source       = 'itunes'
-                    source.source_id    = schema.sources.itunes_id
-                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    sources.append(source)
+            sources = []
 
-                actionTitle = 'Download %s' % schema.subcategory
-                actionIcon  = self._getIconURL('act_download', client=client)
-                self._addAction('download', actionTitle, sources, icon=actionIcon)
+            if entity.sources.itunes_id is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Download from iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.icon         = self._getIconURL('src_itunes', client=client)
+                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                sources.append(source)
+            ### TEMP - apple.aid should be deprecated
+            elif entity.sources.apple.aid is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Download from iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.apple.aid
+                source.icon         = self._getIconURL('src_itunes', client=client)
+                source.link         = _encodeiTunesShortURL(entity.view_url)
+                sources.append(source)
 
-                # Playlist
+            actionIcon = self._getIconURL('act_download_primary', client=client)
+            self._addAction('download', 'Download', sources, icon=actionIcon)
+
+            # Gallery
+
+            if entity.details.media.screenshots is not None:
+
+                for screenshot in entity.details.media.screenshots:
+                    item = HTTPEntityGalleryItem()
+                    item.image = screenshot
+                    self.gallery.data.append(item)
+
+
+        # Generic item
+        else:
+
+            # Metadata
+
+            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_other', client=client))
+            self._addMetadata('Description', entity.desc, key='desc')
+            self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
+
+        
+        # Image
+
+        if self.coordinates is not None or self.address is not None:
+            # Don't add an image if coordinates exist
+            del(self.image)
+        elif entity.image is not None:
+            self._addImage(entity.image)
+
+        return self
             
-                if schema.subcategory in ["album", "artist"] and schema.songs is not None:
-                    playlist = HTTPEntityPlaylist()
-
-                    if schema.subcategory == 'album':
-                        playlist.name = 'Tracks'
-                    else:
-                        playlist.name = 'Top songs'
-
-                    for i in range(len(schema.songs))[:50]:
-                        try:
-                            song = schema.songs[i]
-                            item = HTTPEntityPlaylistItem()
-                            item.length = song.length
-                            item.num = i + 1
-                            item.icon = None ### TODO
-
-                            sources = []
-
-                            if song.sources.itunes_id is not None:
-                                source              = HTTPActionSource()
-                                source.name         = 'Listen on iTunes'
-                                source.source       = 'itunes'
-                                source.source_id    = schema.sources.itunes_id
-                                source.icon         = self._getIconURL('src_itunes', client=client)
-                                sources.append(source)
-
-                            if song.sources.rdio_id is not None:
-                                source              = HTTPActionSource()
-                                source.name         = 'Listen on Rdio'
-                                source.source       = 'rdio'
-                                source.source_id    = schema.sources.rdio_id
-                                source.icon         = self._getIconURL('src_rdio', client=client)
-                                sources.append(source)
-
-                            if song.sources.spotify_id is not None:
-                                source              = HTTPActionSource()
-                                source.name         = 'Listen on Spotify'
-                                source.source       = 'spotify'
-                                source.source_id    = schema.sources.spotify_id
-                                source.icon         = self._getIconURL('src_spotify', client=client)
-                                sources.append(source)
-
-                            if len(sources) > 0:
-                                action = HTTPAction()
-                                action.type = 'listen'
-                                action.name = 'Listen to song'
-                                action.sources = sources
-
-                                item.action = action
-
-                            playlist.data.append(item)
-
-                        except Exception:
-                            pass
-
-            elif schema.subcategory == 'app':
-
-                if schema.artist_display_name is not None:
-                    self.caption = 'by %s' % schema.artist_display_name
-
-                # Metadata
-
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_app', client=client))
-                self._addMetadata('Genre', schema.genre)
-                self._addMetadata('Description', schema.desc, key='desc', extended=True)
-
-                # Actions: Download
-
-                sources = []
-
-                if schema.sources.itunes_id is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Download from iTunes'
-                    source.source       = 'itunes'
-                    source.source_id    = schema.sources.itunes_id
-                    source.icon         = self._getIconURL('src_itunes', client=client)
-                    source.link         = _encodeiTunesShortURL(schema.itunes_url)
-                    sources.append(source)
-                ### TEMP - apple.aid should be deprecated
-                elif schema.sources.apple.aid is not None:
-                    source              = HTTPActionSource()
-                    source.name         = 'Download from iTunes'
-                    source.source       = 'itunes'
-                    source.source_id    = schema.sources.apple.aid
-                    source.icon         = self._getIconURL('src_itunes', client=client)
-                    source.link         = _encodeiTunesShortURL(schema.view_url)
-                    sources.append(source)
-
-                actionIcon = self._getIconURL('act_download_primary', client=client)
-                self._addAction('download', 'Download', sources, icon=actionIcon)
-
-                # Gallery
-
-                if schema.details.media.screenshots is not None:
-
-                    for screenshot in schema.details.media.screenshots:
-                        item = HTTPEntityGalleryItem()
-                        item.image = screenshot
-                        self.gallery.data.append(item)
-
-
-            # Generic Place
-            elif self.coordinates is not None or self.address is not None:
-
-                address = formatAddress(schema, extendStreet=True, breakLines=True)
-                if address is not None:
-                    self.caption = address 
-
-                # Metadata
-                
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_place', client=client))
-                self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
-
-                # Actions: Call
-
-                sources = []
-
-                if schema.contact.phone is not None:
-                    source              = HTTPActionSource()
-                    source.source       = 'phone'
-                    source.source_id    = schema.contact.phone
-                    sources.append(source)
-
-                actionIcon = self._getIconURL('act_call', client=client)
-                self._addAction('phone', schema.contact.phone, sources, icon=actionIcon)
-
-            # Generic item
-            else:
-
-                # Metadata
-
-                self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_other', client=client))
-                self._addMetadata('Description', schema.desc, key='desc')
-                self._addMetadata('Site', _formatURL(schema.site), link=schema.site)
-
-            
-            # Image
-
-            if self.coordinates is not None or self.address is not None:
-                # Don't add an image if coordinates exist
-                del(self.image)
-            elif schema.image is not None:
-                self._addImage(schema.image)
-            elif schema.large is not None:
-                self._addImage(schema.large)
-            elif schema.small is not None:
-                self._addImage(schema.small)
-            elif schema.tiny is not None:
-                self._addImage(schema.tiny)
-            elif schema.artwork_url is not None:
-                self._addImage(schema.artwork_url)
-            
-        elif schema.__class__.__name__ == 'EntityMini':
+    def importSchema(self, schema, client=None):
+        if schema.__class__.__name__ == 'EntityMini':
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
             self.importData(data, overflow=True)
