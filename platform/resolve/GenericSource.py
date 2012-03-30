@@ -23,6 +23,7 @@ try:
     from Resolver                   import *
     from abc                        import ABCMeta, abstractmethod
     from ASourceController          import *
+    from Schemas                    import *
 except:
     report()
     raise
@@ -135,44 +136,63 @@ class GenericSource(BasicSource):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
     def __repopulateAlbums(self, entity, artist, controller):
-        new_albums = []
         for album in artist.albums:
             try:
-                info = {
-                    'title'    : album['name'],
-                    'mangled_title' : albumSimplify(album['name']),
-                }
+                # info = {
+                #     'title'    : album['name'],
+                #     'mangled_title' : albumSimplify(album['name']),
+                # }
+                # if 'key' in album:
+                #     info['sources'] = [ {'source':artist.source, 'source_id':album['key']} ]
+                # new_albums.append(info)
+                entityMini  = MediaCollectionEntityMini()
+                entityMini.title = album['name']
                 if 'key' in album:
-                    info['sources'] = [ {'source':artist.source, 'source_id':album['key']} ]
-                new_albums.append(info)
+                    entityMini.sources['%s_id' % artist.source] = album['key']
+                entity.albums.append(entityMini)
             except Exception:
                 report()
                 logs.info('Album import failure: %s for artist %s' % (album, artist))
-        #entity['albums'] = new_albums
-        entity['album_list'] = new_albums 
 
     def __repopulateSongs(self, entity, artist, controller):
-        new_tracks = []
         for track in artist.tracks:
             try:
-                info = {
-                    'title'    : track['name'],
-                    'mangled_title' : trackSimplify(track['name']),
-                }
+                # info = {
+                #     'title'    : track['name'],
+                #     'mangled_title' : trackSimplify(track['name']),
+                # }
+                # if 'key' in track:
+                #     info['sources'] = [ {'source': artist.source, 'source_id': track['key']} ]
+                # new_tracks.append(info)
+                entityMini  = MediaItemEntityMini()
+                entityMini.title = track['name']
                 if 'key' in track:
-                    info['sources'] = [ {'source': artist.source, 'source_id': track['key']} ]
-                new_tracks.append(info)
+                    entityMini.sources['%s_id' % artist.source] = track['key']
+                entity.tracks.append(entityMini)
             except Exception:
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
-        
-        #entity['albums'] = new_albums
-        entity['track_list'] = new_tracks
     
     def wrapperFromKey(self, key, type=None):
         raise NotImplementedError
         return None
-    
+
+    def buildEntityFromWrapper(self, wrapper, controller=None, decorations=None, timestamps=None):
+        if wrapper.type == 'place':
+            entity = PlaceEntity()
+        elif wrapper.type == 'artist':
+            entity = PersonEntity()
+        elif wrapper.type in set(['album', 'tv']):
+            entity = MediaCollectionEntity()
+        elif wrapper.type in set(['book', 'movie', 'track']):
+            entity = MediaItemEntity()
+        elif wrapper.type == 'app':
+            entity = SoftwareEntity()
+        else:
+            entity = BasicEntity()
+
+        return self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()
@@ -182,77 +202,34 @@ class GenericSource(BasicSource):
             timestamps = {}
 
         if wrapper.source == 'stamped':
-            entity['entity_id'] = wrapper.key 
+            entity.entity_id = wrapper.key 
         else:
-            entity['entity_id'] = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
+            entity.entity_id = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
 
-        # if wrapper.type == 'place':
-        #     subcategory = wrapper.subcategory
-        #     if subcategory is not None:
-        #         entity['subcategory'] = subcategory
-        # else:
-        #     subcategory = typeToSubcategory(wrapper.type)
-        #     if subcategory is not None:
-        #         entity['subcategory'] = subcategory
-        
-        entity['title'] = wrapper.name
+        def setAttribute(source, target):
+            try:
+                if wrapper[source] is not None and wrapper[source] != '':
+                    entity[target] = wrapper[source]
+            except:
+                pass
 
+        ### General
+        entity.title = wrapper.name 
         if wrapper.description != '':
-            entity['desc'] = wrapper.description
+            entity.desc = wrapper.description
         if wrapper.image != '':
-            entity['image'] = wrapper.image
+            ### TODO: Redo images
+            entity.image = wrapper.image
 
-        if wrapper.type == 'movie':
-            entity.kind = 'media_item'
-            entity.types.append(wrapper.type)
+        setAttribute('phone',   'phone')
+        setAttribute('email',   'email')
+        setAttribute('url',     'site')
 
-            if wrapper.rating is not None:
-                entity['mpaa_rating'] = wrapper.rating
-
-        if wrapper.type == 'tv':
-            entity.kind = 'media_collection'
-            entity.types.append(wrapper.type)
-
-        if wrapper.type == 'artist':
-            entity.kind = 'person'
-            entity.types.append(wrapper.type)
-
-            if controller.shouldEnrich('album_list', self.sourceName, entity):
-                self.__repopulateAlbums(entity, wrapper, controller) 
-
-        if wrapper.type == 'track':
-            entity.kind = 'media_item'
-            entity.types.append(wrapper.type)
-
-            if wrapper.album['name'] != '':
-                entity['album_name'] = wrapper.album['name']
-
-        if wrapper.type == 'book':
-            entity.kind = 'media_item'
-            entity.types.append(wrapper.type)
-
-            if wrapper.author['name'] != '':
-                entity['author'] = wrapper.author['name']
-            if wrapper.eisbn is not None:
-                entity['isbn'] = wrapper.eisbn
-            if wrapper.isbn is not None:
-                entity['isbn'] = wrapper.isbn
-            if wrapper.sku is not None:
-                entity['sku_number'] = wrapper.sku
-            if wrapper.publisher['name'] != '':
-                entity['publisher'] = wrapper.publisher['name']
-            if wrapper.length > 0:
-                entity['num_pages'] = int(wrapper.length)
-
-        if wrapper.type == 'place':
-            entity.kind = 'place'
-            entity.types.append(wrapper.subcategory)
-
+        ### Place
+        if entity.kind == 'place':
             if wrapper.coordinates is not None:
-                entity['coordinates'] = {
-                    'lat': wrapper.coordinates[0],
-                    'lng': wrapper.coordinates[1],
-                }
+                entity.coordinates.lat = wrapper.coordinates[0]
+                entity.coordinates.lng = wrapper.coordinates[1]
 
             if len(wrapper.address) > 0:
                 address_set = set([
@@ -270,48 +247,98 @@ class GenericSource(BasicSource):
                     entity['address_%s' % k] = v
 
             if wrapper.address_string is not None:
-                entity['address'] = wrapper.address_string
-            if wrapper.phone is not None:
-                entity['phone'] = wrapper.phone
-            if wrapper.url is not None:
-                entity['site'] = wrapper.url
-            if wrapper.email is not None:
-                entity['email'] = wrapper.email
+                entity['formatted_address'] = wrapper.address_string
 
-        if wrapper.type == 'app':
-            entity.kind = 'software'
-            entity.types.append(wrapper.type)
+        ### Person
+        if entity.kind == 'person':
+            if len(wrapper.genres) > 0:
+                entity.genres = wrapper.genres
+
+            if controller.shouldEnrich('albums', self.sourceName, entity):
+                self.__repopulateAlbums(entity, wrapper, controller) 
+
+            if controller.shouldEnrich('tracks', self.sourceName, entity):
+                self.__repopulateSongs(entity, wrapper, controller)
+
+        ### Media
+        if entity.kind in set(['media_collection', 'media_item']):
+            if wrapper.rating is not None and wrapper.rating != '':
+                entity.mpaa_rating  = wrapper.rating
+
+            if wrapper.date is not None:
+                entity.release_date = wrapper.date
+
+            if wrapper.length > 0:
+                entity.length = int(wrapper.length)
+
+            if len(wrapper.genres) > 0:
+                entity.genres = wrapper.genres
+
+            if len(wrapper.cast) > 0:
+                for actor in wrapper.cast:
+                    entityMini = PersonEntityMini()
+                    entityMini.title = actor['name']
+                    entity.cast.append(entityMini)
+
+            if wrapper.director['name'] != '':
+                entityMini = PersonEntityMini()
+                entityMini.title = wrapper.director['name']
+                entity.directors.append(entityMini)
 
             if wrapper.publisher['name'] != '':
-                entity['artist_display_name'] = wrapper.publisher['name']
+                entityMini = PersonEntityMini()
+                entityMini.title = wrapper.publisher['name']
+                entity.publishers.append(entityMini)
+
+            if wrapper.author['name'] != '':
+                entityMini = PersonEntityMini()
+                entityMini.title = wrapper.author['name']
+                entity.authors.append(entityMini)
+
+            if wrapper.artist['name'] != '':
+                entityMini = PersonEntityMini()
+                entityMini.title = wrapper.artist['name']
+                entity.artists.append(entityMini)
+
+        ### Media Collection
+        if entity.kind == 'media_collection':
+            if wrapper.type == 'album' and controller.shouldEnrich('tracks', self.sourceName, entity):
+                self.__repopulateSongs(entity, wrapper, controller)
+
+        ### Media Item
+        if entity.kind == 'media_item':
+            if wrapper.album['name'] != '':
+                entityMini = MediaCollectionEntityMini()
+                entityMini.title = wrapper.album['name']
+                entity.collections.append(entityMini)
+
+            if wrapper.eisbn is not None:
+                entity.isbn = wrapper.eisbn
+            elif wrapper.isbn is not None:
+                entity.isbn = wrapper.isbn
+
+            if wrapper.sku is not None:
+                entity.sku_number = wrapper.sku
+
+        ### Software
+        if entity.kind == 'software':
+            if wrapper.date is not None:
+                entity.release_date = wrapper.date
+
+            if len(wrapper.genres) > 0:
+                for genre in wrapper.genres:
+                    entity.genres.append(genre)
+
+            if wrapper.publisher['name'] != '':
+                entityMini = PersonEntityMini()
+                entityMini.title = wrapper.publisher['name']
+                entity.authors.append(entityMini)
+
             if len(wrapper.screenshots) > 0:
                 for screenshot in wrapper.screenshots:
-                    entity['screenshots'].append(screenshot)
-
-        if wrapper.type in set(['track','album','artist','movie','book']):
-            if len(wrapper.genres) > 0:
-                entity['genres'] = list(wrapper.genres)
-        if wrapper.type in set(['track','album']):
-            if wrapper.artist['name'] != '':
-                entity['artist_display_name'] = wrapper.artist['name']
-        if wrapper.type in set(['track', 'album', 'movie', 'book', 'tv', 'app']):
-            if wrapper.date is not None:
-                entity['release_date'] = wrapper.date
-        if wrapper.type in set(['track', 'movie']):
-            if wrapper.length > 0:
-                entity['track_length'] = str(int(wrapper.length))
-        if wrapper.type in set(['album', 'artist']):
-            if controller.shouldEnrich('track_list', self.sourceName, entity):
-                self.__repopulateSongs(entity, wrapper, controller)
-        if wrapper.type in set(['movie', 'tv']):
-            if len(wrapper.cast) > 0:
-                cast = [
-                    actor['name'] for actor in wrapper.cast
-                ]
-                entity['cast'] = ', '.join(cast)
-            if wrapper.director['name'] != '':
-                entity['director'] = wrapper.director['name']
-        return True
+                    img = ImageSchema()
+                    img.image = screenshot
+                    entity.screenshots.append(img)
 
     @property
     def idField(self):

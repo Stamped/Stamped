@@ -12,6 +12,9 @@ from schema import *
 from Entity import *
 import libs.CountryData
 
+
+city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
+
 # #### #
 # Auth #
 # #### #
@@ -289,7 +292,7 @@ class Favorite(Schema):
     def setSchema(self):
         self.favorite_id        = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring, required=True)
-        self.entity             = EntityMini(required=True)
+        self.entity             = BasicEntityMini(required=True)
         self.stamp              = Stamp()
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
@@ -302,7 +305,7 @@ class Favorite(Schema):
 class Stamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
-        self.entity             = EntityMini(required=True)
+        self.entity             = BasicEntityMini(required=True)
         self.user               = UserMini(required=True)
         self.blurb              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
@@ -396,7 +399,7 @@ class ActivityLink(Schema):
         self.linked_user_id     = SchemaElement(basestring)
         self.linked_stamp       = Stamp()
         self.linked_stamp_id    = SchemaElement(basestring)
-        self.linked_entity      = Entity()
+        self.linked_entity      = BasicEntity()
         self.linked_entity_id   = SchemaElement(basestring)
         self.linked_comment     = Comment()
         self.linked_comment_id  = SchemaElement(basestring)
@@ -583,7 +586,7 @@ class BasicEntity(Schema):
         self.search_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring, required=True)
         self.title_lower                    = SchemaElement(basestring)
-        self.kind                           = SchemaElement(basestring, required=True)
+        self.kind                           = SchemaElement(basestring, required=True, default='other')
         self.locale                         = SchemaElement(basestring)
         
         self.subtitle                       = SchemaElement(basestring)
@@ -604,8 +607,6 @@ class BasicEntity(Schema):
         self.stats                          = EntityStatsSchema()
         self.sources                        = EntitySourcesSchema()
         self.timestamp                      = TimestampSchema()
-        
-        self.kind                           = 'other'
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
@@ -614,6 +615,17 @@ class BasicEntity(Schema):
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
+        return schema
+
+    def minimize(self, schema=None):
+        if schema is None:
+            schema = BasicEntityMini()
+        schema.entity_id                    = self.entity_id
+        schema.title                        = self.title
+        schema.kind                         = self.kind  
+        schema.types                        = self.types
+        schema.subtitle                     = self.subtitle 
+        schema.sources                      = self.sources
         return schema
 
     @property 
@@ -702,6 +714,7 @@ class EntitySourcesSchema(Schema):
         
         self.amazon_id                      = SchemaElement(basestring)
         self.amazon_url                     = SchemaElement(basestring)
+        self.amazon_underlying              = SchemaElement(basestring)
         self.amazon_source                  = SchemaElement(basestring)
         self.amazon_timestamp               = SchemaElement(datetime)
         
@@ -741,10 +754,9 @@ class EntitySourcesSchema(Schema):
 
 class PlaceEntity(BasicEntity):
 
-    city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
-
     def setSchema(self):
         BasicEntity.setSchema(self)
+        self.kind                           = SchemaElement(basestring, required=True, default='place')
         
         self.coordinates                    = CoordinatesSchema()
         self.coordinates_source             = SchemaElement(basestring)
@@ -786,8 +798,6 @@ class PlaceEntity(BasicEntity):
         self.alcohol_flag                   = SchemaElement(bool)
         self.alcohol_flag_source            = SchemaElement(basestring)
         self.alcohol_flag_timestamp         = SchemaElement(datetime)
-        
-        self.kind                           = 'place'
 
     def _formatAddress(self, extendStreet=False, breakLines=False):
 
@@ -860,20 +870,26 @@ class PlaceEntity(BasicEntity):
     @property 
     def category(self):
         food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-        if len(food.intersection(self.types)) > 0:
+        if len(food.intersection(self.types.value)) > 0:
             return 'food'
         return 'other'
 
     @property 
     def subcategory(self):
-        for t in self.types:
+        for t in self.types.value:
             return t
         return 'place'
+
+    def minimize(self, schema=None):
+        schema = BasicEntity.minimize(self, PlaceEntityMini())
+        schema.coordinates = self.coordinates
+        return schema
 
 
 class PersonEntity(BasicEntity):
     def setSchema(self):
         BasicEntity.setSchema(self)
+        self.kind                           = SchemaElement(basestring, required=True, default='person')
 
         self.genres                         = SchemaList(SchemaElement(basestring))
         self.genres_source                  = SchemaElement(basestring)
@@ -895,23 +911,21 @@ class PersonEntity(BasicEntity):
         self.books_source                   = SchemaElement(basestring)
         self.books_timestamp                = SchemaElement(datetime)
 
-        self.kind                           = 'person'
-
     @property 
     def subtitle(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'Artist'
         return self._genericSubtitle()
 
     @property 
     def category(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'music'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'artist' in self.types:
+        if 'artist' in self.types.value:
             return 'artist'
         return 'other'
 
@@ -972,21 +986,20 @@ class BasicMediaEntity(BasicEntity):
 class MediaCollectionEntity(BasicMediaEntity):
     def setSchema(self):
         BasicMediaEntity.setSchema(self)
+        self.kind                           = SchemaElement(basestring, required=True, default='media_collection')
 
         self.tracks                         = SchemaList(MediaItemEntityMini())
         self.tracks_source                  = SchemaElement(basestring)
         self.tracks_timestamp               = SchemaElement(datetime)
 
-        self.kind                           = 'media_collection'
-
     @property 
     def subtitle(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             if self.artists is not None:
                 return 'Album by %s' ', '.join(str(i) for i in self.artists)
             return 'Album'
 
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             if self.networks is not None:
                 return 'TV Show (%s)' ', '.join(str(i) for i in self.networks)
             return 'TV Show'
@@ -995,17 +1008,17 @@ class MediaCollectionEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             return 'music'
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             return 'film'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'album' in self.types:
+        if 'album' in self.types.value:
             return 'album'
-        if 'tv' in self.types:
+        if 'tv' in self.types.value:
             return 'tv'
         return 'other'
 
@@ -1013,6 +1026,7 @@ class MediaCollectionEntity(BasicMediaEntity):
 class MediaItemEntity(BasicMediaEntity):
     def setSchema(self):
         BasicMediaEntity.setSchema(self)
+        self.kind                           = SchemaElement(basestring, required=True, default='media_item')
 
         # Tracks
         self.collections                    = SchemaList(MediaCollectionEntityMini())
@@ -1028,21 +1042,19 @@ class MediaItemEntity(BasicMediaEntity):
         self.sku_number_source              = SchemaElement(basestring)
         self.sku_number_timestamp           = SchemaElement(datetime)
 
-        self.kind                           = 'media_item'
-
     @property 
     def subtitle(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             if self.release_date is not None:
                 return self.release_date.year
             return 'Movie'
 
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             if self.artists is not None:
                 return 'Song by %s' ', '.join(str(i) for i in self.artists)
             return 'Song'
 
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             if self.authors is not None:
                 return '%s' ', '.join(str(i) for i in self.authors)
             return 'Book'
@@ -1051,21 +1063,21 @@ class MediaItemEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             return 'film'
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             return 'music'
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             return 'book'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'movie' in self.types:
+        if 'movie' in self.types.value:
             return 'movie'
-        if 'track' in self.types:
+        if 'track' in self.types.value:
             return 'song'
-        if 'book' in self.types:
+        if 'book' in self.types.value:
             return 'book'
         return 'other'
 
@@ -1073,6 +1085,7 @@ class MediaItemEntity(BasicMediaEntity):
 class SoftwareEntity(BasicEntity):
     def setSchema(self):
         BasicEntity.setSchema(self)
+        self.kind                           = SchemaElement(basestring, required=True, default='software')
 
         self.genres                         = SchemaList(SchemaElement(basestring))
         self.genres_source                  = SchemaElement(basestring)
@@ -1098,11 +1111,9 @@ class SoftwareEntity(BasicEntity):
         self.supported_devices_source       = SchemaElement(basestring)
         self.supported_devices_timestamp    = SchemaElement(datetime)
 
-        self.kind                           = 'software'
-
     @property 
     def subtitle(self):
-        if 'app' in self.types:
+        if 'app' in self.types.value:
             if self.authors is not None:
                 return 'App (%s)' % ', '.join(str(i) for i in self.authors)
             return 'App'
@@ -1115,7 +1126,7 @@ class SoftwareEntity(BasicEntity):
 
     @property 
     def subcategory(self):
-        if 'app' in self.types:
+        if 'app' in self.types.value:
             return 'app'
         return 'other'
 
@@ -1124,35 +1135,46 @@ class SoftwareEntity(BasicEntity):
 # Mini Entities #
 # ############# #
 
-class BasicEntityMini(Schema):
+class BasicEntityMini(BasicEntity):
     def setSchema(self):
         self.entity_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring, required=True)
         self.kind                           = SchemaElement(basestring, required=True)
+        self.types                          = SchemaList(SchemaElement(basestring))
         self.subtitle                       = SchemaElement(basestring)
         self.sources                        = EntitySourcesSchema()
+        self.coordinates                    = CoordinatesSchema()
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
 
-        self.coordinates                    = CoordinatesSchema()
-        self.coordinates_source             = SchemaElement(basestring)
-        self.coordinates_timestamp          = SchemaElement(datetime) 
+    @property 
+    def category(self):
+        food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
+        if len(food.intersection(self.types.value)) > 0:
+            return 'food'
+        return 'other'
 
-class PersonEntityMini(BasicEntityMini):
+    @property 
+    def subcategory(self):
+        for t in self.types.value:
+            return t
+        return 'place'
+
+class PersonEntityMini(BasicEntityMini, PersonEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
 
-class MediaCollectionEntityMini(BasicEntityMini):
+class MediaCollectionEntityMini(BasicEntityMini, MediaCollectionEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
 
-class MediaItemEntityMini(BasicEntityMini):
+class MediaItemEntityMini(BasicEntityMini, MediaItemEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
 
-class SoftwareEntityMini(BasicEntityMini):
+class SoftwareEntityMini(BasicEntityMini, SoftwareEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
 
