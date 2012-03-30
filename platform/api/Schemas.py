@@ -1138,8 +1138,8 @@ class SoftwareEntity(BasicEntity):
 class BasicEntityMini(BasicEntity):
     def setSchema(self):
         self.entity_id                      = SchemaElement(basestring)
-        self.title                          = SchemaElement(basestring, required=True)
-        self.kind                           = SchemaElement(basestring, required=True)
+        self.title                          = SchemaElement(basestring)
+        self.kind                           = SchemaElement(basestring)
         self.types                          = SchemaList(SchemaElement(basestring))
         self.subtitle                       = SchemaElement(basestring)
         self.sources                        = EntitySourcesSchema()

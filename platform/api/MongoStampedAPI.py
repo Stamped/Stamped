@@ -100,17 +100,9 @@ class MongoStampedAPI(StampedAPI):
     def _inviteDB(self):
         return MongoInvitationCollection()
     
-    # @lazyProperty
-    # def _entitySearcher(self):
-    #     return MongoEntitySearcher(self)
-    
     @lazyProperty
     def _imageDB(self):
         return S3ImageDB()
-    
-    # @lazyProperty
-    # def _entityMatcher(self):
-    #     return EntityMatcher(self)
     
     @lazyProperty
     def _logsDB(self):

@@ -27,7 +27,7 @@ from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def __init__(self):
-        AMongoCollectionView.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp)
+        AMongoCollectionView.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp, overflow=True)
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
