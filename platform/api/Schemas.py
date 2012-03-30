@@ -511,7 +511,7 @@ class ViewportSchema(Schema):
 class BasicEntity(Schema):
     def setSchema(self):
         self.schema_version                 = SchemaElement(int, required=True)
-
+        
         self.entity_id                      = SchemaElement(basestring)
         self.search_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring, required=True)
@@ -526,18 +526,18 @@ class BasicEntity(Schema):
         self.desc                           = SchemaElement(basestring)
         self.desc_source                    = SchemaElement(basestring)
         self.desc_timestamp                 = SchemaElement(datetime)
-
+        
         self.types                          = SchemaList(SchemaElement(basestring)) 
         self.types_source                   = SchemaElement(basestring)
         self.types_timestamp                = SchemaElement(datetime)
         
         self.image                          = SchemaElement(basestring)
-
+        
         self.contact                        = EntityContactSchema()
         self.stats                          = EntityStatsSchema()
         self.sources                        = EntitySourcesSchema()
         self.timestamp                      = TimestampSchema()
-
+        
         self.kind                           = 'other'
     
     def exportSchema(self, schema):
@@ -651,6 +651,7 @@ class EntitySourcesSchema(Schema):
         self.tmdb_timestamp                 = SchemaElement(datetime)
 
         self.googleplaces_id                = SchemaElement(basestring)
+        self.googleplaces_reference         = SchemaElement(basestring)
         self.googleplaces_url               = SchemaElement(basestring)
         self.googleplaces_source            = SchemaElement(basestring)
         self.googleplaces_timestamp         = SchemaElement(datetime)
@@ -659,11 +660,11 @@ class EntitySourcesSchema(Schema):
 class PlaceEntity(BasicEntity):
     def setSchema(self):
         BasicEntity.setSchema(self)
-
+        
         self.coordinates                    = CoordinatesSchema()
         self.coordinates_source             = SchemaElement(basestring)
         self.coordinates_timestamp          = SchemaElement(datetime) 
-
+        
         self.address_street                 = SchemaElement(basestring)
         self.address_street_ext             = SchemaElement(basestring)
         self.address_locality               = SchemaElement(basestring)
@@ -672,7 +673,7 @@ class PlaceEntity(BasicEntity):
         self.address_country                = SchemaElement(basestring)
         self.address_source                 = SchemaElement(basestring)
         self.address_timestamp              = SchemaElement(datetime)
-
+        
         self.formatted_address              = SchemaElement(basestring)
         self.formatted_address_source       = SchemaElement(basestring)
         self.formatted_address_timestamp    = SchemaElement(datetime)
@@ -684,7 +685,7 @@ class PlaceEntity(BasicEntity):
         self.hours                          = TimesSchema()
         self.hours_source                   = SchemaElement(basestring)
         self.hours_timestamp                = SchemaElement(datetime)
-
+        
         self.cuisine                        = SchemaList(SchemaElement(basestring))
         self.cuisine_source                 = SchemaElement(basestring)
         self.cuisine_timestamp              = SchemaElement(datetime)
@@ -700,7 +701,7 @@ class PlaceEntity(BasicEntity):
         self.alcohol_flag                   = SchemaElement(bool)
         self.alcohol_flag_source            = SchemaElement(basestring)
         self.alcohol_flag_timestamp         = SchemaElement(datetime)
-
+        
         self.kind                           = 'place'
 
 

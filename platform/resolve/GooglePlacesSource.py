@@ -265,12 +265,14 @@ class GooglePlacesSource(GenericSource):
                     
                     for result in results:
                         data = {}
-                        data['reference'] = result.reference
+                        data['reference'] = result.googleplaces_reference
                         data['name'] = result.title
                         data['latitude'] = result.lat
                         data['longitude'] = result.lng
                         data['address_string'] = result.neighborhood
-                        data['subcategory'] = result.subcategory
+                        
+                        # TODO: TYPE
+                        #data['subcategory'] = result.subcategory
                         raw_results.append(data)
 
                 def getGoogleNationalSearch(q):
@@ -278,9 +280,9 @@ class GooglePlacesSource(GenericSource):
                     results = self.__places.getEntityAutocompleteResults(q.query_string, q.coordinates)
                     for result in results:
                         data = {}
-                        data['reference'] = result.reference
+                        data['reference'] = result.googleplaces_reference
                         data['name'] = result.title
-                        data['address_string'] = result.address
+                        data['address_string'] = result.formatted_address
                         raw_results.append(data)
 
                 if query.coordinates is not None:

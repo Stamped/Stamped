@@ -12,7 +12,7 @@ from optparse       import OptionParser
 from Geocoder       import Geocoder
 from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
-from Schemas        import BasicEntity
+from Schemas        import PlaceEntity
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -159,13 +159,15 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if not valid and subcategory not in self.google_subcategory_whitelist:
             return None
         
-        entity = BasicEntity()
+        entity = PlaceEntity()
         entity.title = result['name']
         entity.lat   = result['geometry']['location']['lat']
         entity.lng   = result['geometry']['location']['lng']
-        entity.gid   = result['id']
-        entity.reference = result['reference']
-        entity.subcategory = subcategory
+        entity.googleplaces_id          = result['id']
+        entity.googleplaces_reference   = result['reference']
+        
+        # TODO: TYPE
+        #entity.subcategory = subcategory
         
         """
         if result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' and \
@@ -253,11 +255,10 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         if results is not None:
             for result in results:
-                entity = BasicEntity()
-                entity.subcategory = 'other'
+                entity = PlaceEntity()
                 
-                entity.gid = result['id']
-                entity.reference = result['reference']
+                entity.googleplaces_id        = result['id']
+                entity.googleplaces_reference = result['reference']
                 
                 try:
                     terms = result['terms']
@@ -267,8 +268,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
                         if terms[-1]['value'] == "United States":
                             terms = terms[:-1]
                         
-                        entity.address  = string.joinfields((v['value'] for v in terms[1:]), ', ')
-                        entity.subtitle = entity.address
+                        entity.formatted_address = string.joinfields((v['value'] for v in terms[1:]), ', ')
                 except:
                     entity.title = result['description']
                 

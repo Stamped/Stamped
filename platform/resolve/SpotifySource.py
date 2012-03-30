@@ -56,7 +56,9 @@ class _SpotifyObject(object):
         return "spotify"
 
     def __repr__(self):
-        return "<%s %s %s>" % (self.source, self.type, self.name)
+        data = copy(self.data)
+        data.pop('availability', None)
+        return "<%s %s %s> %s" % (self.source, self.type, self.name, pformat(data))
 
 
 class SpotifyArtist(_SpotifyObject, ResolverArtist):

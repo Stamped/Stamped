@@ -406,9 +406,8 @@ def parseCommandLine():
     if options.verbose is not None:
         global _verbose
         _verbose = options.verbose
-
-
-    types   = None
+    
+    types = None
     if options.subcategory is not None:
         if options.subcategory == 'song':
             options.subcategory = 'track'
@@ -420,7 +419,7 @@ def parseCommandLine():
                 if s == 'song':
                     s = 'track'
                 types.add(s)
-
+    
     options.types = types
     
     return (options, args)
