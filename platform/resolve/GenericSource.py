@@ -280,25 +280,37 @@ class GenericSource(BasicSource):
                     entityMini.title = actor['name']
                     entity.cast.append(entityMini)
 
-            if wrapper.director['name'] != '':
-                entityMini = PersonEntityMini()
-                entityMini.title = wrapper.director['name']
-                entity.directors.append(entityMini)
+            try:
+                if wrapper.director['name'] != '':
+                    entityMini = PersonEntityMini()
+                    entityMini.title = wrapper.director['name']
+                    entity.directors.append(entityMini)
+            except AttributeError:
+                pass
 
-            if wrapper.publisher['name'] != '':
-                entityMini = PersonEntityMini()
-                entityMini.title = wrapper.publisher['name']
-                entity.publishers.append(entityMini)
+            try:
+                if wrapper.publisher['name'] != '':
+                    entityMini = PersonEntityMini()
+                    entityMini.title = wrapper.publisher['name']
+                    entity.publishers.append(entityMini)
+            except AttributeError:
+                pass
 
-            if wrapper.author['name'] != '':
-                entityMini = PersonEntityMini()
-                entityMini.title = wrapper.author['name']
-                entity.authors.append(entityMini)
+            try:
+                if wrapper.author['name'] != '':
+                    entityMini = PersonEntityMini()
+                    entityMini.title = wrapper.author['name']
+                    entity.authors.append(entityMini)
+            except AttributeError:
+                pass
 
-            if wrapper.artist['name'] != '':
-                entityMini = PersonEntityMini()
-                entityMini.title = wrapper.artist['name']
-                entity.artists.append(entityMini)
+            try:
+                if wrapper.artist['name'] != '':
+                    entityMini = PersonEntityMini()
+                    entityMini.title = wrapper.artist['name']
+                    entity.artists.append(entityMini)
+            except AttributeError:
+                pass
 
         ### Media Collection
         if entity.kind == 'media_collection':
@@ -307,18 +319,27 @@ class GenericSource(BasicSource):
 
         ### Media Item
         if entity.kind == 'media_item':
-            if wrapper.album['name'] != '':
-                entityMini = MediaCollectionEntityMini()
-                entityMini.title = wrapper.album['name']
-                entity.collections.append(entityMini)
+            try:
+                if wrapper.album['name'] != '':
+                    entityMini = MediaCollectionEntityMini()
+                    entityMini.title = wrapper.album['name']
+                    entity.collections.append(entityMini)
+            except AttributeError:
+                pass
 
-            if wrapper.eisbn is not None:
-                entity.isbn = wrapper.eisbn
-            elif wrapper.isbn is not None:
-                entity.isbn = wrapper.isbn
+            try:
+                if wrapper.eisbn is not None:
+                    entity.isbn = wrapper.eisbn
+                elif wrapper.isbn is not None:
+                    entity.isbn = wrapper.isbn
+            except AttributeError:
+                pass
 
-            if wrapper.sku is not None:
-                entity.sku_number = wrapper.sku
+            try:
+                if wrapper.sku is not None:
+                    entity.sku_number = wrapper.sku
+            except AttributeError:
+                pass
 
         ### Software
         if entity.kind == 'software':

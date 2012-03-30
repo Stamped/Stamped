@@ -290,13 +290,12 @@ class EntitySearch(object):
                               types     = types)
         
         for item in search:
-            entity = BasicEntity()
             source = item[1].target.source
             
             if source not in self._sources_map:
                 source = 'stamped'
-
-            self._sources_map[source].enrichEntityWithWrapper(item[1].target, entity)
+            
+            entity = self._sources_map[source].buildEntityFromWrapper(item[1].target)
             results.append(entity)
         
         return results
