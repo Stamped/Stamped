@@ -2903,8 +2903,7 @@ class StampedAPI(AStampedAPI):
                 # enrich entity asynchronously
                 tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
             else:
-                entity = Entity()
-                source.enrichEntityWithWrapper(wrapper, entity)
+                entity = source.buildEntityFromWrapper(wrapper)
                 
                 entity = self._entityDB.addEntity(entity)
                 entity_id = entity.entity_id

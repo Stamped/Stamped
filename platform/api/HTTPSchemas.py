@@ -1245,12 +1245,26 @@ class HTTPEntityAutosuggest(Schema):
         self.distance           = SchemaElement(float)
     
     def importSchema(self, schema, distance):
-        if schema.__class__.__name__ == 'Entity':
+        if isinstance(schema, BasicEntity):
+
+            if schema.search_id is not None:
+                self.search_id = schema.search_id
+            else:
+                self.search_id = schema.entity_id
+            assert self.search_id is not None
+
+            self.title          = schema.title 
+            self.subtitle       = schema.subtitle
+            self.category       = schema.category 
+
+            if isinstance(distance, float) and distance >= 0:
+                self.distance   = distance    
+
+        elif schema.__class__.__name__ == 'Entity':
             setFields(schema, detailed=True)
 
             if schema.search_id is not None:
                 self.search_id = schema.search_id
-
             else:
                 self.search_id = schema.entity_id
             assert self.search_id is not None
