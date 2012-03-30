@@ -1122,11 +1122,17 @@ class HTTPEntityMini(Schema):
         self.coordinates        = SchemaElement(basestring)
 
     def importSchema(self, schema):
-        if schema.__class__.__name__ == 'EntityMini':
-            data                = schema.value
-            coordinates         = data.pop('coordinates', None)
-            self.importData(data, overflow=True)
-            self.coordinates    = _coordinatesDictToFlat(coordinates)
+        if isinstance(schema, BasicEntityMini):
+            self.entity_id      = schema.entity_id
+            self.title          = schema.title 
+            self.subtitle       = schema.subtitle
+            self.category       = schema.category
+            self.subcategory    = schema.subcategory 
+
+            try:
+                self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
+            except:
+                pass
         else:
             raise NotImplementedError
         return self
@@ -1376,6 +1382,8 @@ class HTTPStamp(Schema):
 
             if len(credit) > 0:
                 data['credit'] = credit
+
+            data['entity'] = HTTPEntityMini().importSchema(schema.entity).exportSparse()
 
             self.importData(data, overflow=True)
             self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
@@ -1682,9 +1690,8 @@ class HTTPFavorite(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Favorite':
             data                = schema.exportSparse()
-            entity              = EntityMini(data.pop('entity', None))
             stamp               = Stamp(data.pop('stamp', None))
-            data['entity']      = HTTPEntityMini().importSchema(entity).exportSparse()
+            data['entity']      = HTTPEntityMini().importSchema(schema.entity).exportSparse()
             
             if stamp.stamp_id != None:
                 data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()

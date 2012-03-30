@@ -36,29 +36,29 @@ class StampedAPIPlacesShow(StampedAPIPlaceTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['title'], self.entity['title'])
 
-class StampedAPIPlacesUpdate(StampedAPIPlaceTest):
-    def test_update(self):
-        path = "entities/update.json"
-        desc = "Gastropub in the West Village, NYC"
-        data = { 
-            "oauth_token": self.token['access_token'],
-            "entity_id": self.entity['entity_id'],
-            "desc": desc,
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['desc'], desc)
+# class StampedAPIPlacesUpdate(StampedAPIPlaceTest):
+#     def test_update(self):
+#         path = "entities/update.json"
+#         desc = "Gastropub in the West Village, NYC"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "entity_id": self.entity['entity_id'],
+#             "desc": desc,
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['desc'], desc)
 
-class StampedAPIPlacesUTF8(StampedAPIPlaceTest):
-    def test_utf8_update(self):
-        path = "entities/update.json"
-        desc = "๓๙ใ1฿"
-        data = { 
-            "oauth_token": self.token['access_token'],
-            "entity_id": self.entity['entity_id'],
-            "desc": desc
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['desc'], desc.decode('utf-8'))
+# class StampedAPIPlacesUTF8(StampedAPIPlaceTest):
+#     def test_utf8_update(self):
+#         path = "entities/update.json"
+#         desc = "๓๙ใ1฿"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "entity_id": self.entity['entity_id'],
+#             "desc": desc
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['desc'], desc.decode('utf-8'))
 
 class StampedAPIPlacesSearch(StampedAPIPlaceTest):
     def test_search(self):
