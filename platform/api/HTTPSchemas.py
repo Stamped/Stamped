@@ -592,12 +592,6 @@ class HTTPEntity(Schema):
         self.last_modified      = entity.timestamp.created
 
         subcategory             = formatSubcategory(self.subcategory)
-
-        print 
-        print
-        print 'ENTITY: %s' % entity
-        print
-        print
         
         # Restaurant / Bar
         if entity.kind == 'place' and entity.category == 'food':
@@ -609,7 +603,7 @@ class HTTPEntity(Schema):
                 self.caption = address 
 
             # Metadata
-            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_food', client=client))
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
             self._addMetadata('Cuisine', entity.cuisine)
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
@@ -648,7 +642,7 @@ class HTTPEntity(Schema):
 
             sources = []
 
-            if entity.menu is not None:
+            if entity.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'menu'
@@ -669,7 +663,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             
-            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_place', client=client))
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_place', client=client))
             self._addMetadata('Description', entity.desc, key='desc')
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
@@ -689,8 +683,8 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and 'book' in entity.types.value:
 
-            if entity.author is not None:
-                self.caption = 'by %s' % entity.author
+            if entity.authors is not None:
+                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)
 
             # Metadata
 
@@ -717,7 +711,7 @@ class HTTPEntity(Schema):
 
         # Movie
         elif entity.kind == 'media_item' and 'movie' in entity.types.value:
-            print 'MOVIE!'
+
             if entity.subcategory == 'movie' and entity.length is not None:
                 length = formatFilmLength(entity.length)
                 if length is not None:
@@ -803,10 +797,10 @@ class HTTPEntity(Schema):
                 self.caption = 'Artist'
 
             elif entity.subcategory == 'album' and entity.artists is not None:
-                self.caption = 'by %s' % ', '.join(str(i) for i in entity.artists)
+                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.artists)
 
             elif entity.subcategory == 'song' and entity.artists is not None:
-                self.caption = 'by %s' % ', '.join(str(i) for i in entity.artists)
+                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.artists)
 
             # Metadata
 
@@ -931,7 +925,7 @@ class HTTPEntity(Schema):
                             source              = HTTPActionSource()
                             source.name         = 'Listen on iTunes'
                             source.source       = 'itunes'
-                            source.source_id    = entity.sources.itunes_id
+                            source.source_id    = song.sources.itunes_id
                             source.icon         = self._getIconURL('src_itunes', client=client)
                             sources.append(source)
 
@@ -939,7 +933,7 @@ class HTTPEntity(Schema):
                             source              = HTTPActionSource()
                             source.name         = 'Listen on Rdio'
                             source.source       = 'rdio'
-                            source.source_id    = entity.sources.rdio_id
+                            source.source_id    = song.sources.rdio_id
                             source.icon         = self._getIconURL('src_rdio', client=client)
                             sources.append(source)
 
@@ -947,7 +941,7 @@ class HTTPEntity(Schema):
                             source              = HTTPActionSource()
                             source.name         = 'Listen on Spotify'
                             source.source       = 'spotify'
-                            source.source_id    = entity.sources.spotify_id
+                            source.source_id    = song.sources.spotify_id
                             source.icon         = self._getIconURL('src_spotify', client=client)
                             sources.append(source)
 
@@ -964,15 +958,18 @@ class HTTPEntity(Schema):
                     except Exception:
                         pass
 
+                if len(playlist.data) > 0:
+                    self.playlist = playlist
+
         elif entity.kind == 'software' and 'app' in entity.types.value:
 
-            if entity.artist_display_name is not None:
-                self.caption = 'by %s' % entity.artist_display_name
+            if entity.authors is not None:
+                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)
 
             # Metadata
 
-            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', entity.genre)
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_app', client=client))
+            self._addMetadata('Genre', entity.genres)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download
@@ -987,26 +984,17 @@ class HTTPEntity(Schema):
                 source.icon         = self._getIconURL('src_itunes', client=client)
                 source.link         = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
-            ### TEMP - apple.aid should be deprecated
-            elif entity.sources.apple.aid is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Download from iTunes'
-                source.source       = 'itunes'
-                source.source_id    = entity.sources.apple.aid
-                source.icon         = self._getIconURL('src_itunes', client=client)
-                source.link         = _encodeiTunesShortURL(entity.view_url)
-                sources.append(source)
 
             actionIcon = self._getIconURL('act_download_primary', client=client)
             self._addAction('download', 'Download', sources, icon=actionIcon)
 
             # Gallery
 
-            if entity.details.media.screenshots is not None:
+            if entity.screenshots is not None:
 
-                for screenshot in entity.details.media.screenshots:
+                for screenshot in entity.screenshots:
                     item = HTTPEntityGalleryItem()
-                    item.image = screenshot
+                    item.image = screenshot.image
                     self.gallery.data.append(item)
 
 
@@ -1015,14 +1003,14 @@ class HTTPEntity(Schema):
 
             # Metadata
 
-            self._addMetadata('Category', self.subcategory, icon=self._getIconURL('cat_other', client=client))
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_other', client=client))
             self._addMetadata('Description', entity.desc, key='desc')
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
         
         # Image
 
-        if self.coordinates is not None or self.address is not None:
+        if entity.kind != 'place':
             # Don't add an image if coordinates exist
             del(self.image)
         elif entity.image is not None:
