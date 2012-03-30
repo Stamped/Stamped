@@ -7,6 +7,7 @@
 //
 
 #import "STSimpleTimes.h"
+#import "STSimpleHours.h"
 
 @implementation STSimpleTimes
 
@@ -17,5 +18,19 @@
 @synthesize thu = _thu;
 @synthesize fri = _fri;
 @synthesize sat = _sat;
+
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleTimes class]];
+  
+  RKObjectMapping* hoursMapping = [STSimpleHours mapping];
+  
+  NSArray* days = [NSArray arrayWithObjects:@"sun", @"mon", @"tue", @"wed", @"thu", @"fri" @"sat", nil];
+  
+  for (NSString* day in days) {
+    [mapping mapRelationship:day withMapping:hoursMapping];
+  }
+  
+  return mapping;
+}
 
 @end

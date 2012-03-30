@@ -30,6 +30,12 @@
 		6323F0F21524E6CA00BE408C /* STSimpleTimes.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F01524E6C900BE408C /* STSimpleTimes.m */; };
 		6323F0F51524E6D800BE408C /* STSimpleHours.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F41524E6D700BE408C /* STSimpleHours.m */; };
 		6323F0F61524E6D800BE408C /* STSimpleHours.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F41524E6D700BE408C /* STSimpleHours.m */; };
+		6323F0F91524F7FC00BE408C /* STMenuFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F81524F7FA00BE408C /* STMenuFactory.m */; };
+		6323F0FA1524F7FC00BE408C /* STMenuFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0F81524F7FA00BE408C /* STMenuFactory.m */; };
+		6323F0FE1525031300BE408C /* STActionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0FD1525031100BE408C /* STActionContext.m */; };
+		6323F0FF1525031300BE408C /* STActionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F0FD1525031100BE408C /* STActionContext.m */; };
+		6323F10615250C8600BE408C /* STMenuPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F10515250C8000BE408C /* STMenuPopUp.m */; };
+		6323F10715250C8600BE408C /* STMenuPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F10515250C8000BE408C /* STMenuPopUp.m */; };
 		635EAAC715234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC815234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC915234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
@@ -1832,6 +1838,12 @@
 		6323F0F01524E6C900BE408C /* STSimpleTimes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleTimes.m; sourceTree = "<group>"; };
 		6323F0F31524E6D700BE408C /* STSimpleHours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleHours.h; sourceTree = "<group>"; };
 		6323F0F41524E6D700BE408C /* STSimpleHours.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleHours.m; sourceTree = "<group>"; };
+		6323F0F71524F7F800BE408C /* STMenuFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuFactory.h; sourceTree = "<group>"; };
+		6323F0F81524F7FA00BE408C /* STMenuFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMenuFactory.m; sourceTree = "<group>"; };
+		6323F0FC1525030E00BE408C /* STActionContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionContext.h; sourceTree = "<group>"; };
+		6323F0FD1525031100BE408C /* STActionContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionContext.m; sourceTree = "<group>"; };
+		6323F10415250C7B00BE408C /* STMenuPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuPopUp.h; sourceTree = "<group>"; };
+		6323F10515250C8000BE408C /* STMenuPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMenuPopUp.m; sourceTree = "<group>"; };
 		635EAAC515234D5800D0378D /* STActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionManager.h; sourceTree = "<group>"; };
 		635EAAC615234D5800D0378D /* STActionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionManager.m; sourceTree = "<group>"; };
 		635EAACF15238D5F00D0378D /* STConfirmationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfirmationView.h; sourceTree = "<group>"; };
@@ -3044,6 +3056,12 @@
 				6323F0F01524E6C900BE408C /* STSimpleTimes.m */,
 				6323F0F31524E6D700BE408C /* STSimpleHours.h */,
 				6323F0F41524E6D700BE408C /* STSimpleHours.m */,
+				6323F0F71524F7F800BE408C /* STMenuFactory.h */,
+				6323F0F81524F7FA00BE408C /* STMenuFactory.m */,
+				6323F0FC1525030E00BE408C /* STActionContext.h */,
+				6323F0FD1525031100BE408C /* STActionContext.m */,
+				6323F10415250C7B00BE408C /* STMenuPopUp.h */,
+				6323F10515250C8000BE408C /* STMenuPopUp.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -6307,6 +6325,9 @@
 				6323F0EE1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */,
 				6323F0F21524E6CA00BE408C /* STSimpleTimes.m in Sources */,
 				6323F0F61524E6D800BE408C /* STSimpleHours.m in Sources */,
+				6323F0FA1524F7FC00BE408C /* STMenuFactory.m in Sources */,
+				6323F0FF1525031300BE408C /* STActionContext.m in Sources */,
+				6323F10715250C8600BE408C /* STMenuPopUp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6495,6 +6516,9 @@
 				6323F0ED1524E6B400BE408C /* STSimpleMenuPrice.m in Sources */,
 				6323F0F11524E6CA00BE408C /* STSimpleTimes.m in Sources */,
 				6323F0F51524E6D800BE408C /* STSimpleHours.m in Sources */,
+				6323F0F91524F7FC00BE408C /* STMenuFactory.m in Sources */,
+				6323F0FE1525031300BE408C /* STActionContext.m in Sources */,
+				6323F10615250C8600BE408C /* STMenuPopUp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

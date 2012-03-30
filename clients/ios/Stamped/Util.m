@@ -380,7 +380,7 @@ static Rdio* _rdio;
   return imageView;
 }
 
-+ (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
++ (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
   CGSize actualSize = [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
   
   UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, actualSize.width, actualSize.height)];
@@ -465,6 +465,10 @@ static Rdio* _rdio;
 
 + (Rdio*)sharedRdio {
   return _rdio;
+}
+
++ (CGRect)getAbsoluteFrame:(UIView*)view {
+  return [view convertRect:view.frame toView:nil];
 }
 
 @end

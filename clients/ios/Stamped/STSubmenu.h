@@ -15,7 +15,7 @@
 @property (nonatomic, readonly, retain) NSString* title;
 @property (nonatomic, readonly, retain) NSString* footnote;
 @property (nonatomic, readonly, retain) NSString* desc;
-@property (nonatomic, readonly, retain) NSString* short_desc;
+@property (nonatomic, readonly, retain) NSString* shortDesc;
 @property (nonatomic, readonly, retain) NSArray<STTimes>* times;
 @property (nonatomic, readonly, retain) NSArray<STMenuSection>* sections;
 

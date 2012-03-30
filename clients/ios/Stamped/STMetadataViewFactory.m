@@ -188,7 +188,7 @@ static const CGFloat _kReadMoreHeight = 74;
 }
 
 - (void)actionClicked:(id<STAction>)action {
-  [self.delegateRef didChooseAction:action];
+  [self.delegateRef didChooseAction:action withContext:[STActionContext contextInView:self]];
 }
 
 @end

@@ -58,7 +58,7 @@ extern NSString* const kKeychainTwitterToken;
 
 + (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
 + (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
-+ (UIView*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
++ (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;
 
 + (CGSize)size:(CGSize)size withScale:(CGFloat)scale;
@@ -72,5 +72,7 @@ extern NSString* const kKeychainTwitterToken;
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
 
 + (Rdio*)sharedRdio;
+
++ (CGRect)getAbsoluteFrame:(UIView*)view;
 
 @end

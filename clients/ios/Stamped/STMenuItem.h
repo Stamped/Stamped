@@ -13,7 +13,7 @@
 
 @property (nonatomic, readonly, retain) NSString* title;
 @property (nonatomic, readonly, retain) NSString* desc;
-@property (nonatomic, readonly, retain) NSString* short_desc;
+@property (nonatomic, readonly, retain) NSString* shortDesc;
 @property (nonatomic, readonly, retain) NSArray* categories;
 @property (nonatomic, readonly, retain) NSArray* allergens;
 @property (nonatomic, readonly, retain) NSArray* allergenFree;

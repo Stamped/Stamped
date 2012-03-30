@@ -12,10 +12,6 @@
 
 @interface STActionManager : NSObject <STViewDelegate>
 
-- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action;
-- (void)didChooseAction:(id<STAction>)action;
-- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
-
 + (STActionManager*)sharedActionManager;
 
 @end

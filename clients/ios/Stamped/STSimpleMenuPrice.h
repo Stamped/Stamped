@@ -15,8 +15,8 @@
 @property (nonatomic, readwrite, retain) NSString* title;
 @property (nonatomic, readwrite, retain) NSString* price;
 @property (nonatomic, readwrite, assign) NSInteger calories;
-@property (nonatomic, readwrite, assign) NSString* unit;
-@property (nonatomic, readwrite, assign) NSString* currency;
+@property (nonatomic, readwrite, retain) NSString* unit;
+@property (nonatomic, readwrite, retain) NSString* currency;
 
 + (RKObjectMapping*)mapping;
 

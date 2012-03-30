@@ -54,21 +54,21 @@ static int _count = 0;
 
 - (void)appendChildView:(UIView*)child {
   CGRect frame = child.frame;
-  frame.origin.y = self.frame.size.height;
+  frame.origin.y += self.frame.size.height;
   child.frame = frame;
   frame = self.frame;
-  frame.size.height += child.frame.size.height;
+  frame.size.height = CGRectGetMaxY(child.frame);
   self.frame = frame;
   [self.children addObject:child];
   [self addSubview:child];
 }
 
-- (void)didChooseAction:(id<STAction>)action {
+- (void)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context {
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:)]) {
-    [self.delegate didChooseAction:action];
+    [self.delegate didChooseAction:action withContext:context];
   }
   else {
-    [[STActionManager sharedActionManager] didChooseAction:action];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
   }
 }
 
@@ -99,22 +99,22 @@ static int _count = 0;
   }
 }
 
-- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action {
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
   if (self.delegate && [self.delegate respondsToSelector:@selector(canHandleSource:forAction:)]) {
-    return [self.delegate canHandleSource:source forAction:action];
+    return [self.delegate canHandleSource:source forAction:action withContext:context];
   }
   else {
-    return [[STActionManager sharedActionManager] canHandleSource:source forAction:action];
+    return [[STActionManager sharedActionManager] canHandleSource:source forAction:action withContext:context];
   }
   
 }
 
-- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
-    [self.delegate didChooseSource:source forAction:action];
+    [self.delegate didChooseSource:source forAction:action withContext:context];
   }
   else {
-    [[STActionManager sharedActionManager] didChooseSource:source forAction:action];
+    [[STActionManager sharedActionManager] didChooseSource:source forAction:action withContext:context];
   }
 }
 

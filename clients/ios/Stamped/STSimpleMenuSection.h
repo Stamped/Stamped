@@ -14,7 +14,7 @@
 
 @property (nonatomic, readwrite, retain) NSString* title;
 @property (nonatomic, readwrite, retain) NSString* desc;
-@property (nonatomic, readwrite, retain) NSString* short_desc;
+@property (nonatomic, readwrite, retain) NSString* shortDesc;
 @property (nonatomic, readwrite, retain) NSArray<STMenuItem>* items;
 
 + (RKObjectMapping*)mapping;

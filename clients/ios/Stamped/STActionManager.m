@@ -11,12 +11,13 @@
 #import "STViewDelegate.h"
 #import "Util.h"
 #import "STRdio.h"
-#import <StoreKit/StoreKit.h>
+#import "STMenuFactory.h"
+#import "STMenuPopUp.h"
 
-@interface STActionManager () <STViewDelegate, SKProductsRequestDelegate>
+@interface STActionManager () <STViewDelegate>
 
-- (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action shouldExecute:(BOOL)flag;
-- (BOOL)didChooseAction:(id<STAction>)action shouldExecute:(BOOL)flag;
+- (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag;
+- (BOOL)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag;
 
 @property (nonatomic, readonly, retain) NSOperationQueue* operationQueue;
 @property (nonatomic, readonly, retain) NSMutableDictionary* sources;
@@ -58,22 +59,23 @@ static STActionManager* _singleton;
 
 - (BOOL)canHandleAction:(id<STAction>)action {
   return YES;
+  //return [self didChooseAction:action shouldExecute:YES];
 }
 
-- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action {
- // return YES;
-  return [self handleSource:source withAction:action shouldExecute:NO];
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
+  // return YES;
+  return [self handleSource:source withAction:action withContext:context shouldExecute:NO];
 }
 
-- (void)didChooseAction:(id<STAction>)action {
-  [self didChooseAction:action shouldExecute:YES];
+- (void)didChooseAction:(id<STAction>)action withContext:(STActionContext *)context {
+  [self didChooseAction:action withContext:context shouldExecute:YES];
 }
 
-- (BOOL)didChooseAction:(id<STAction>)action shouldExecute:(BOOL)flag {
+- (BOOL)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   NSMutableArray* validSources = [NSMutableArray array];
   if (action.sources) {
     for (id<STSource> source in action.sources) {
-      if ([self canHandleSource:source forAction:action.type]) {
+      if ([self canHandleSource:source forAction:action.type withContext:context]) {
         [validSources addObject:source];
       }
     }
@@ -90,25 +92,25 @@ static STActionManager* _singleton;
         [self.operationQueue addOperation:operation];
       }
       else if ([validSources count] == 1) {
-        [self handleSource:[validSources objectAtIndex:0] withAction:action.type shouldExecute:YES];
+        [self handleSource:[validSources objectAtIndex:0] withAction:action.type withContext:context shouldExecute:YES];
       }
     }
   }
   return [validSources count] > 0;
 }
 
-- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
   [Util setFullScreenPopUp:nil dismissible:NO withBackground:nil];
-  [self handleSource:source withAction:action shouldExecute:YES];
+  [self handleSource:source withAction:action withContext:context shouldExecute:YES];
 }
 
-- (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action shouldExecute:(BOOL)flag {
+- (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   BOOL handled = FALSE;
   id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
-  if (sourceObject != nil && [sourceObject canHandleSource:source forAction:action]) {
+  if (sourceObject != nil && [sourceObject canHandleSource:source forAction:action withContext:context]) {
     handled = TRUE;
     if (flag) {
-      [sourceObject didChooseSource:source forAction:action];
+      [sourceObject didChooseSource:source forAction:action withContext:context];
     }
   }
   else if ([action isEqualToString:@"phone"]) {
@@ -121,11 +123,12 @@ static STActionManager* _singleton;
       }
     }
   }
-  
-  else if ([source.source isEqualToString:@"itunes"]) {
-    SKProductsRequest* request = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObject:source.sourceID]];
-    request.delegate = self;
-    [request start];
+  else if ([source.source isEqualToString:@"menu"]) {
+    NSOperation* operation = [[STMenuFactory sharedFactory] menuWithEntityId:@"4e4c6fdd26f05a2b75000a75" andCallbackBlock:^(id<STMenu> menu) {
+      UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
+      [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
+    }];
+    [operation start];
   }
   
   if (!handled && source.link) {
@@ -135,14 +138,6 @@ static STActionManager* _singleton;
     }
   }
   return handled;
-}
-
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
-{
-  NSArray *myProducts = response.products;
-  NSLog(@"%@",myProducts);
-  // Populate your UI from the products list.
-  // Save a reference to the products list.
 }
 
 @end

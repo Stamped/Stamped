@@ -178,7 +178,7 @@
 
 - (void)callback:(id)state {
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
-    [self.delegate didChooseSource:self.source forAction:self.action];
+    [self.delegate didChooseSource:self.source forAction:self.action withContext:[STActionContext contextInView:self]];
   }
 }
 

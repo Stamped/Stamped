@@ -13,7 +13,7 @@
 @property (nonatomic, readonly, retain) NSString* title;
 @property (nonatomic, readonly, retain) NSString* price;
 @property (nonatomic, readonly, assign) NSInteger calories;
-@property (nonatomic, readonly, assign) NSString* unit;
-@property (nonatomic, readonly, assign) NSString* currency;
+@property (nonatomic, readonly, retain) NSString* unit;
+@property (nonatomic, readonly, retain) NSString* currency;
 
 @end

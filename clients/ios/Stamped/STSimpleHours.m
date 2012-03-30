@@ -14,4 +14,16 @@
 @synthesize close = _close;
 @synthesize desc = _desc;
 
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleHours class]];
+  
+  [mapping mapAttributes:
+   @"open",
+   @"close",
+   @"desc",
+   nil];
+  
+  return mapping;
+}
+
 @end

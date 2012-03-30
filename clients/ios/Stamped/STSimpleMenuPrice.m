@@ -16,4 +16,18 @@
 @synthesize unit = _unit;
 @synthesize currency = _currency;
 
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleMenuPrice class]];
+  
+  [mapping mapAttributes:
+   @"title",
+   @"price",
+   @"calories",
+   @"unit",
+   @"currency",
+   nil];
+
+  return mapping;
+}
+
 @end

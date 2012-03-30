@@ -9,13 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "STAction.h"
 #import "STViewDelegateDependent.h"
+#import "STActionContext.h"
 
 @protocol STViewDelegate <NSObject>
 @optional
-- (BOOL)canHandleAction:(id<STAction>)action;
-- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action;
-- (void)didChooseAction:(id<STAction>)action;
-- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action;
+- (BOOL)canHandleAction:(id<STAction>)action withContext:(STActionContext*)context;
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
+- (void)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context;
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 - (void)childView:(UIView*)view shouldChangeHeightBy:(CGFloat)delta overDuration:(CGFloat)seconds;
 - (void)registerDependent:(id<STViewDelegateDependent>)dependent;
 

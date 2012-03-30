@@ -7,6 +7,8 @@
 //
 
 #import "STSimpleSubmenu.h"
+#import "STSimpleTimes.h"
+#import "STSimpleMenuSection.h"
 
 @implementation STSimpleSubmenu
 
@@ -14,7 +16,26 @@
 @synthesize times = _times;
 @synthesize footnote = _footnote;
 @synthesize desc = _desc;
-@synthesize short_desc = _short_desc;
+@synthesize shortDesc = _shortDesc;
 @synthesize sections = _sections;
+
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleSubmenu class]];
+  
+  [mapping mapKeyPathsToAttributes:
+   @"short_desc", @"shortDesc",
+   nil];
+  
+  [mapping mapAttributes:
+   @"title",
+   @"footnote",
+   @"desc",
+   nil];
+  
+  [mapping mapRelationship:@"times" withMapping:[STSimpleTimes mapping]];
+  [mapping mapRelationship:@"sections" withMapping:[STSimpleMenuSection mapping]];
+  
+  return mapping;
+}
 
 @end

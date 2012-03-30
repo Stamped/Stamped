@@ -23,6 +23,7 @@
 
 @property (nonatomic, assign) id<STViewDelegate> delegate;
 @property (nonatomic, retain) id<STActionItem> action;
+@property (nonatomic, retain) id<STEntityDetail> entityDetail;
 
 @end
 
@@ -30,6 +31,7 @@
 
 @synthesize delegate = delegate_;
 @synthesize action = action_;
+@synthesize entityDetail = _entityDetail;
 
 
 /*
@@ -113,12 +115,15 @@
 - (void)dealloc {
   self.action = nil;
   self.delegate = nil;
+  [_entityDetail release];
   [super dealloc];
 }
 
 - (void)selected:(id)button {
-  if (self.delegate) {
-    [self.delegate didChooseAction:self.action.action];
+  if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:withContext:)]) {
+    STActionContext* context = [STActionContext contextInView:self];
+    context.entityDetail = self.entityDetail;
+    [self.delegate didChooseAction:self.action.action withContext:context];
   }
 }
 
@@ -146,7 +151,8 @@
     CGFloat cell_padding_w = (320 - cell_width) / 2.0;
     for (id<STActionItem> action in detail.actions) {
       CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
-      UIView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
+      ActionItemView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
+      actionView.entityDetail = detail;
       [view appendChildView:actionView];
       [actionView release];
       CGRect viewFrame = view.frame;
