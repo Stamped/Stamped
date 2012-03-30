@@ -340,7 +340,7 @@ class EntitySearch(object):
                               types     = types)
         
         for item in search:
-            entity = Entity()
+            entity = BasicEntity()
             source = item[1].target.source
             
             if source not in self._sources_map:

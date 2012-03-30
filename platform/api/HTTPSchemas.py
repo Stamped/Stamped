@@ -1918,6 +1918,10 @@ class HTTPEntity_stampedtest(Schema):
         self.amazon_url         = SchemaElement(basestring)
 
     def importSchema(self, schema):
+
+        if 'ntity' not in schema.__class__.__name__:
+            raise NotImplementedError
+
         validEntities = set([
             'BasicEntity',
             'PlaceEntity',
@@ -1926,20 +1930,45 @@ class HTTPEntity_stampedtest(Schema):
             'MediaItemEntity',
             'SoftwareEntity',
         ])
+
         if schema.__class__.__name__ in validEntities:
-            setFields(schema)
+            # setFields(schema)
             
             self.entity_id          = schema.entity_id
             self.title              = schema.title 
             self.subtitle           = schema.subtitle 
-            self.category           = deriveCategoryFromTypes(schema.types)
-            self.subcategory        = deriveSubcategoryFromTypes(schema.types)
+            self.category           = schema.category
+            self.subcategory        = schema.subcategory
             self.desc               = schema.desc 
-            # TODO: Image
             self.last_modified      = schema.timestamp.created 
 
             self.phone              = schema.phone
             self.site               = schema.site 
+
+            # TODO: Image
+            if schema.image is not None:
+                self.image = self._handle_image(schema.image)
+
+            # Affiliates
+
+            if schema.sources.fandango_url is not None:
+                self.fandango_url   = schema.sources.fandango_url
+
+            if schema.sources.itunes_url is not None:
+                base        = "http://click.linksynergy.com/fs-bin/stat"
+                params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" % LINKSHARE_TOKEN
+                deep_url    = "%s?%s&RD_PARM1=%s" % (base, params, _encodeLinkShareDeepURL(schema.sources.itunes_url))
+                short_url   = _encodeiTunesShortURL(schema.sources.itunes_url)
+                self.itunes_url       = deep_url
+                self.itunes_short_url = short_url
+
+            if schema.sources.amazon_url is not None:
+                self.amazon_url     = _encodeAmazonURL(schema.sources.amazon_url)
+
+            if schema.sources.opentable_id is not None:
+                opentable_id = schema.sources.opentable_id
+                self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % opentable_id
+                self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % opentable_id
 
         if schema.__class__.__name__ == 'PlaceEntity':
 
@@ -1957,155 +1986,71 @@ class HTTPEntity_stampedtest(Schema):
             if schema.genres is not None:
                 self.genre          = ', '.join(str(i) for i in schema.genres)
 
+            if schema.tracks is not None:
+                tracks = schema.tracks[:10]
+                for track in tracks:
+                    self.songs.append(track['title'])
+
+            for album in schema.albums:
+                self.albums.append(album['title'])
+
+        if schema.__class__.__name__ in ['MediaCollectionEntity', 'MediaItemEntity']:
+
+            self.length             = schema.length 
+            self.rating             = schema.mpaa_rating
+
             if schema.release_date is not None:
                 self.release_date   = schema.release_date.strftime("%h %d, %Y")
 
-        if 1 == 0:
-            
-            # Cross-Category
-            
-            date_time = None
-
-            ### TODO: Unify these within Schemas.py where possible
-            if self.category == 'book':
-                self.release_date   = schema.publish_date
-                self.length         = schema.num_pages
-            
-            elif self.category == 'film':                
-                self.length         = schema.track_length
-                self.rating         = schema.mpaa_rating
-                
-                if schema.genre is not None:
-                    self.genre = schema.genre
-                elif schema.ngenres is not None:
-                    self.genre = string.join((str(i) for i in schema.ngenres), '; ')
-                
-                if schema.short_description != None:
-                    new_desc = schema.short_description
-                    if new_desc != '' and new_desc != None  and ( self.desc == None or self.desc == '' ):
-                        self.desc = new_desc
-            
-            elif self.category == 'music':                
-                if schema.genre is not None:
-                    self.genre = schema.genre
-                
-                self.length         = schema.track_length
-                if schema.parental_advisory_id == 1:
-                    self.rating     = "Parental Advisory"
-
-            if self.category in ['music', 'film']:
-                try:
-                    if schema.release_date is not None:
-                        date_time = schema.release_date
-                    else:
-                        date_time = parseDateString(schema.original_release_date)
-                except Exception:
-                    pass
-
-            if date_time is not None:
-                self.release_date   = date_time.strftime("%h %d, %Y")
+            if schema.genres is not None:
+                self.genre          = ', '.join(str(i) for i in schema.genres)
 
 
-            # Book
-            self.author         = schema.author
-            self.isbn           = schema.isbn
-            self.publisher      = schema.publisher
-            self.format         = schema.book_format
-            self.language       = schema.language
-            self.edition        = schema.edition
+            if schema.authors is not None:
+                self.author         = ', '.join(str(i) for i in schema.authors)
 
-            # Film
-            self.cast           = schema.cast
-            self.director       = schema.director
-            self.network        = schema.network_name
-            self.in_theaters    = schema.in_theaters
-            
-            # Music
-            self.artist_name    = schema.artist_display_name
-            
-            if 'preview_url' in schema:
-                self.preview_url = schema.preview_url
-            
-            # Affiliates
-            if schema.rid is not None:
-                self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % \
-                                      schema.rid
-                self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % \
-                                      schema.rid
-            if schema.reserveURL is not None:
-                self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                                      schema.reserveURL
-            
-            if schema.sources.fandango.f_url is not None:
-                self.fandango_url = schema.f_url
-            
-            if schema.sources.apple.view_url != None:
-                itunes_url  = schema.sources.apple.view_url
-                base_url    = "http://click.linksynergy.com/fs-bin/stat"
-                params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
-                               % (LINKSHARE_TOKEN)
-                deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
-                                    _encodeLinkShareDeepURL(itunes_url))
-                short_url   = _encodeiTunesShortURL(itunes_url)
-                
-                self.itunes_url       = deep_url
-                self.itunes_short_url = short_url
-            
-            if schema.amazon_link != None:
-                self.amazon_url = _encodeAmazonURL(schema.amazon_link)
-            
-            is_apple = 'apple' in schema
-            
-            # Image
-            if schema.image is not None:
-                self.image = self._handle_image(schema.image, is_apple)
-            elif schema.large is not None:
-                self.image = self._handle_image(schema.large, is_apple)
-            elif schema.small is not None:
-                self.image = self._handle_image(schema.small, is_apple)
-            elif schema.tiny is not None:
-                self.image = self._handle_image(schema.tiny, is_apple)
-            elif schema.artwork_url is not None:
-                self.image = self._handle_image(schema.artwork_url, is_apple)
-            
-            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
-                songs = schema.songs
-                
-                # for an artist, only return up to 10 songs
-                if schema.subcategory == "artist":
-                    songs = songs[0: min(10, len(songs))]
-                
-                songs = list(song.song_name for song in songs)
-                self.songs = songs
-            
-            if schema.subcategory == "album" and schema.tracks is not None:
-                self.songs = schema.tracks
-            
-            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
-                try:
-                    albums = list(album.album_name for album in schema.albums)
-                    self.albums = albums
-                except:
-                    utils.printException()
-                    pass
-        elif schema.__class__.__name__ == 'EntityMini':
+            if schema.artists is not None:
+                self.artist_name    = ', '.join(str(i) for i in schema.artists)
+
+            if schema.publishers is not None:
+                self.publisher      = ', '.join(str(i) for i in schema.publishers)
+
+            if schema.cast is not None:
+                self.cast           = ', '.join(str(i) for i in schema.cast)
+
+            if schema.directors is not None:
+                self.director       = ', '.join(str(i) for i in schema.directors)
+
+            if schema.networks is not None:
+                self.network        = ', '.join(str(i) for i in schema.networks)
+
+        if schema.__class__.__name__ == 'MediaItemEntity':
+
+            self.isbn               = schema.isbn
+
+        if schema.__class__.__name__ == 'SoftwareEntity':
+
+            pass
+
+        if schema.__class__.__name__ == 'EntityMini':
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
             self.importData(data, overflow=True)
             self.coordinates    = _coordinatesDictToFlat(coordinates)
-        else:
-            raise NotImplementedError
+
         return self
     
-    def _handle_image(self, url, is_apple):
-        if is_apple:
-            # try to return the maximum-resolution apple photo possible if we have 
-            # a lower-resolution version stored in our db
-            return url.replace('100x100', '200x200').replace('170x170', '200x200')
-        
-        if 'amazon.com' in url:
-            # strip the 'look inside' image modifier
-            return amazon_image_re.sub(r'\1.jpg', url)
-        
-        return url
+    def _handle_image(self, url):
+        if url is not None:
+            domain = urlparse.urlparse(url).netloc
 
+            if 'amzstatic.com' in domain:
+                # try to return the maximum-resolution apple photo possible if we have 
+                # a lower-resolution version stored in our db
+                url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+            
+            elif 'amazon.com' in domain:
+                # strip the 'look inside' image modifier
+                url = amazon_image_re.sub(r'\1.jpg', url)
+            
+        return url

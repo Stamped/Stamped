@@ -5,10 +5,12 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import copy
+import copy, re
 from datetime import datetime
 from schema import *
-
+### TEMP
+from Entity import *
+import libs.CountryData
 
 # #### #
 # Auth #
@@ -509,6 +511,71 @@ class ViewportSchema(Schema):
 # ######## #
 
 class BasicEntity(Schema):
+
+    validKinds = set([
+        'place',
+        'person',
+        'media_collection',
+        'media_item',
+        'software',
+        'other',
+    ])
+
+    validTypes = set([
+        # PEOPLE
+        'artist',
+
+        # MEDIA COLLECTIONS
+        'tv',
+        'album',
+
+        # MEDIA ITEMS
+        'track',
+        'movie',
+        'book',
+
+        # SOFTWARE
+        'app',
+
+        # PLACES
+        'restaurant',
+        'bar',
+        'bakery',
+        'cafe',
+        'market',
+        'food',
+        'night_club',
+        'amusement_park',
+        'aquarium',
+        'art_gallery',
+        'beauty_salon',
+        'book_store',
+        'bowling_alley',
+        'campground',
+        'casino',
+        'clothing_store',
+        'department_store',
+        'establishment',
+        'florist',
+        'gym',
+        'home_goods_store',
+        'jewelry_store',
+        'library',
+        'liquor_store',
+        'lodging',
+        'movie_theater',
+        'museum',
+        'park',
+        'school',
+        'shoe_store',
+        'shopping_mall',
+        'spa',
+        'stadium',
+        'store',
+        'university',
+        'zoo',
+    ])
+
     def setSchema(self):
         self.schema_version                 = SchemaElement(int, required=True)
 
@@ -548,6 +615,21 @@ class BasicEntity(Schema):
         else:
             raise NotImplementedError
         return schema
+
+    @property 
+    def subtitle(self):
+        return 'Other'
+
+    @property 
+    def category(self):
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        return 'other'
+
+    def _genericSubtitle(self):
+        return str(self.subcategory).replace('_', ' ').title()
 
 class EntityStatsSchema(Schema):
     def setSchema(self):
@@ -657,6 +739,9 @@ class EntitySourcesSchema(Schema):
 
 
 class PlaceEntity(BasicEntity):
+
+    city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
+
     def setSchema(self):
         BasicEntity.setSchema(self)
 
@@ -703,6 +788,87 @@ class PlaceEntity(BasicEntity):
 
         self.kind                           = 'place'
 
+    def _formatAddress(self, extendStreet=False, breakLines=False):
+
+        countries = libs.CountryData.countries
+
+        street      = self.address_street
+        street_ext  = self.address_street_ext
+        locality    = self.address_locality
+        region      = self.address_region
+        postcode    = self.address_postcode
+        country     = self.address_country
+
+        delimiter = '\n' if breakLines else ', '
+
+        if street is not None and locality is not None and country is not None:
+
+            # Expand street 
+            if extendStreet == True and street_ext is not None:
+                street = '%s %s' % (street, street_ext)
+
+            # Use state if in US
+            if country == 'US':
+                if region is not None and postcode is not None:
+                    return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
+                elif region is not None:
+                    return '%s%s%s, %s' % (street, delimiter, locality, postcode)
+                elif postcode is not None:
+                    return '%s%s%s, %s' % (street, delimiter, locality, region)
+
+            # Use country if outside US
+            else:
+                if country in countries:
+                    return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
+                else:
+                    return '%s%s%s, %s' % (street, delimiter, locality, country)
+
+        if self.formatted_address is not None:
+            return self.formatted_address
+            
+        if self.neighborhood is not None:
+            return self.neighborhood
+
+        return None
+
+    @property 
+    def subtitle(self):
+        # Check if address components exist
+        if self.address_country is not None and self.address_locality is not None:
+            if self.address_country.upper() == 'US':
+                if self.address_region is not None:
+                    return "%s, %s" % (self.address_locality, self.address_region)
+            else:
+                countries = libs.CountryData.countries
+                country = self.address_country
+                if self.address_country.upper() in countries:
+                    country = countries[self.address_country.upper()]
+                return "%s, %s" % (self.address_locality, country)
+        
+        # Extract city / state with regex as fallback
+        if self.formatted_address is not None:
+            match = city_state_re.match(self.formatted_address)
+            
+            if match is not None:
+                # city, state
+                return "%s, %s" % match.groups()
+
+        # Fallback to generic
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
+        if len(food.intersection(self.types)) > 0:
+            return 'food'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        for t in self.types:
+            return t
+        return 'place'
+
 
 class PersonEntity(BasicEntity):
     def setSchema(self):
@@ -729,6 +895,24 @@ class PersonEntity(BasicEntity):
         self.books_timestamp                = SchemaElement(datetime)
 
         self.kind                           = 'person'
+
+    @property 
+    def subtitle(self):
+        if 'artist' in self.types:
+            return 'Artist'
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        if 'artist' in self.types:
+            return 'music'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if 'artist' in self.types:
+            return 'artist'
+        return 'other'
 
 
 class BasicMediaEntity(BasicEntity):
@@ -794,6 +978,36 @@ class MediaCollectionEntity(BasicMediaEntity):
 
         self.kind                           = 'media_collection'
 
+    @property 
+    def subtitle(self):
+        if 'album' in self.types:
+            if self.artists is not None:
+                return 'Album by %s' ', '.join(str(i) for i in self.artists)
+            return 'Album'
+
+        if 'tv' in self.types:
+            if self.networks is not None:
+                return 'TV Show (%s)' ', '.join(str(i) for i in self.networks)
+            return 'TV Show'
+
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        if 'album' in self.types:
+            return 'music'
+        if 'tv' in self.types:
+            return 'film'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if 'album' in self.types:
+            return 'album'
+        if 'tv' in self.types:
+            return 'tv'
+        return 'other'
+
 
 class MediaItemEntity(BasicMediaEntity):
     def setSchema(self):
@@ -815,6 +1029,44 @@ class MediaItemEntity(BasicMediaEntity):
 
         self.kind                           = 'media_item'
 
+    @property 
+    def subtitle(self):
+        if 'movie' in self.types:
+            if self.release_date is not None:
+                return self.release_date.year
+            return 'Movie'
+
+        if 'track' in self.types:
+            if self.artists is not None:
+                return 'Song by %s' ', '.join(str(i) for i in self.artists)
+            return 'Song'
+
+        if 'book' in self.types:
+            if self.authors is not None:
+                return '%s' ', '.join(str(i) for i in self.authors)
+            return 'Book'
+
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        if 'movie' in self.types:
+            return 'film'
+        if 'track' in self.types:
+            return 'music'
+        if 'book' in self.types:
+            return 'book'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if 'movie' in self.types:
+            return 'movie'
+        if 'track' in self.types:
+            return 'song'
+        if 'book' in self.types:
+            return 'book'
+        return 'other'
 
 
 class SoftwareEntity(BasicEntity):
@@ -846,6 +1098,25 @@ class SoftwareEntity(BasicEntity):
         self.supported_devices_timestamp    = SchemaElement(datetime)
 
         self.kind                           = 'software'
+
+    @property 
+    def subtitle(self):
+        if 'app' in self.types:
+            if self.authors is not None:
+                return 'App (%s)' % ', '.join(str(i) for i in self.authors)
+            return 'App'
+
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if 'app' in self.types:
+            return 'app'
+        return 'other'
 
 
 # ############# #
