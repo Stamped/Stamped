@@ -8,57 +8,6 @@
 TODO:
     * fix TMDB search only returning one result in many cases
     * add caching to third-party API calls (RateLimiter)
-    * add regression-oriented tests to search
-        * run these tests regularly on prod via cron job
-        * verify:
-            * movies
-                * movie in theaters (pull from fandango)
-                * popular movie
-                * really old movie
-                * different language movie
-            * tv
-                * new / recent shows
-                * upcoming shows
-                * really popular shows
-                * really old shows
-                * different language show
-            * tracks
-                * itunes top chart lists
-                * rdio / spotify top chart lists
-                * track_name by artist_name
-                * track_name artist_name
-                * track_name album_name artist_name (and all permutations)
-                * different language track
-            * albums
-                * itunes otp chart lists
-                * album_name
-                * album_name by artist_name
-                * album_name artist_name (and vice-versa)
-            * artist
-                * search for artist alias / non-exact name
-                    * (e.g., jayz, jay-z, and jay z should all work as expected)
-                * search for track => artist in results
-                * search for album => artist in results
-                * international artist
-            * app
-                * app_name by company_name
-                * app_name company_name (and vice-versa)
-                * search for ipad-only app
-            * restaurant
-                * same permutations as place
-                * new / recent restaurants from opentable
-                * remote restaurants
-                * search for generic chain (e.g., mcdonald's)
-                * search for really unique name (e.g., absinthe)
-            * place
-                * search w/ and w/out coordinates
-                * search w/ and w/out location hints
-                * several international places
-            * book
-                * new / recent book
-                * book_name
-                * book_name by artist_name
-                * book_name artist_name (and vice-versa)
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -189,8 +138,8 @@ class EntitySearch(object):
     
     @lazyProperty
     def __resolver(self):
-        return Resolver()
-
+        return Resolver(verbose=_verbose)
+    
     def __search_helper(self, query, limit, offset, source, results, **kwargs):
         name = source.sourceName
         gen  = source.searchAllSource(query, **kwargs)
@@ -288,7 +237,8 @@ class EntitySearch(object):
                 
                 if len(dups) > 0 and dups[0][0]['resolved']:
                     if _verbose:
-                        print("Discarded %s:%s as a duplicate to %s:%s" % (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+                        print("Discarded %s:%s as a duplicate to %s:%s" % 
+                              (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
                         
                         print(formatResults(dups[0:1], verbose=True))
                 else:
@@ -424,7 +374,7 @@ def parseCommandLine():
     
     return (options, args)
 
-def demo():
+def main():
     options, args = parseCommandLine()
     searcher = EntitySearch()
     
@@ -440,6 +390,5 @@ def demo():
     print(formatResults(results, verbose=options.verbose))
 
 if __name__ == '__main__':
-    _verbose = True
-    demo()
+    main()
 

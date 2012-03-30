@@ -134,14 +134,14 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
         if 'albums' in self.data:
             results = self.data['albums']
         else:
-            results = self.itunes.method('lookup',id=self.key,entity='album')['results']
+            results = self.itunes.method('lookup', id=self.key,entity='album')['results']
         return [
             {
-                'name'  : album['collectionName'],
-                'key'   : str(album['collectionId']),
-                'data'  : album,
+                'name'  : album['collectionName'], 
+                'key'   : str(album['collectionId']), 
+                'data'  : album, 
             }
-                for album in results if album.pop('collectionType',None) == 'Album' ]
+                for album in results if album.pop('collectionType', None) == 'Album' ]
 
     @lazyProperty
     def genres(self):
@@ -156,15 +156,18 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            results = self.itunes.method('lookup',id=self.key,entity='song')['results']
+            results = self.itunes.method('lookup', id=self.key,entity='song')['results']
         return [
             {
                 'name':track['trackName'],
                 'key':track['trackId'],
                 'data':track,
             }
-                for track in results if track.pop('wrapperType',None) == 'track'
+                for track in results if track.pop('wrapperType', None) == 'track'
         ]
+    
+    #def __repr__(self):
+    #    return "%s, %s" % (pformat(self.tracks), pformat(self.albums))
 
 class iTunesAlbum(_iTunesObject, ResolverAlbum):
     """
@@ -242,7 +245,7 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
     def artist(self):
         try:
             return {'name' : self.data['artistName'] }
-        except:
+        except Exception:
             return {'name' : ''}
 
     @lazyProperty

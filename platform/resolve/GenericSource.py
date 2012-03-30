@@ -290,7 +290,7 @@ class GenericSource(BasicSource):
 
         if wrapper.type in set(['track','album','artist','movie','book']):
             if len(wrapper.genres) > 0:
-                entity['genre'] = wrapper.genres[0]
+                entity['genres'] = list(wrapper.genres)
         if wrapper.type in set(['track','album']):
             if wrapper.artist['name'] != '':
                 entity['artist_display_name'] = wrapper.artist['name']

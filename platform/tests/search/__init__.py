@@ -1,3 +1,3 @@
 
-import SearchTests
+import MovieSearchTests
 

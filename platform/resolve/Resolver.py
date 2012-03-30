@@ -348,23 +348,23 @@ def stringComparison(a, b, strict=False):
 def setComparison(a, b, symmetric=False, strict=False):
     """
     Generic comparison of two sets.
-
+    
     This method does not make any assumptions about set
     members except equality.
-
+    
     assymetric - denotes if a and b are interchangable
     strict - avoid fuzzy matching, etc.
     """
-
+    
     def cleanSet(s):
         clean = set()
         for i in s:
             clean.add(simplify(i).lower())
         return clean
-
+    
     def symmetricComparion(a, b):
         return (asymmetricComparison(a, b) + asymmetricComparison(b, a)) / 2.0
-
+    
     def asymmetricComparison(a, b):
         score = 0
         total = 0
@@ -376,29 +376,82 @@ def setComparison(a, b, symmetric=False, strict=False):
             else:
                 x_score = 0
                 for y in b:
-                    xy_score = stringComparison(x, y, strict=True)
+                    xy_score = stringComparison(x, y, strict=strict)
                     if xy_score > x_score:
                         x_score = xy_score
+                
                 score = score + x_score 
         
         if total <= 0:
             return 0
+        
         return 1.0 * score / total
     
     if not strict:
         a = cleanSet(a)
         b = cleanSet(b)
     
-    if len(b) == 0 or len(a) == 0:
-        return 0
-    
     if a == b:
         return 1.0
+    
+    if len(b) == 0 or len(a) == 0:
+        return 0
     
     if symmetric:
         return symmetricComparion(a, b)
     else:
         return asymmetricComparison(a, b)
+
+def weightedDictComparison(a, b, symmetric=False, strict=False):
+    def _simplifyDict(d):
+        clean = {}
+        for k, v in d.iteritems():
+            k2 = simplify(k).lower()
+            clean[k2] = v
+        return clean
+    
+    def _symmetricComparison(a, b):
+        return (_asymmetricComparison(a, b) + _asymmetricComparison(b, a)) / 2.0
+    
+    def _asymmetricComparison(a, b):
+        score = 0.0
+        total = 0.0
+        
+        for x, wa in a.iteritems():
+            value  = 0.0
+            weight = 0.0
+            
+            try:
+                weight = b[x]
+                value  = 1.0
+            except KeyError:
+                for y, wb in b.iteritems():
+                    xy_value = stringComparison(x, y, strict=strict)
+                    
+                    if xy_value > value:
+                        value  = xy_value
+                        weight = wb
+            
+            weight *= wa
+            score  += value * weight
+            total  += weight
+        
+        if total <= 0:
+            return 0.0
+        
+        return score / total
+    
+    if not strict:
+        a = _simplifyDict(a)
+        b = _simplifyDict(b)
+    
+    if len(b) == 0 or len(a) == 0:
+        return 0
+    
+    if symmetric:
+        return _symmetricComparion(a, b)
+    else:
+        return _asymmetricComparison(a, b)
 
 def sortedResults(results):
     def pairSort(pair):
@@ -1194,11 +1247,11 @@ class Resolver(object):
     """
     def __init__(self,verbose=False):
         self.__verbose = verbose
-
+    
     @property 
     def verbose(self):
         return self.__verbose
-
+    
     def setComparison(self, a, b, options):
         score = setComparison(a, b, options['symmetric'])
         if options['negative'] and not options['symmetric']:
@@ -1320,14 +1373,14 @@ class Resolver(object):
 
     def checkArtist(self, results, query, match, options, order):
         tests = [
-            ('name',        lambda q, m, s, o: self.artistComparison(q.name, m.name)),
-            ('albums',      lambda q, m, s, o: self.albumsComparison(q, m, o)),
-            ('tracks',      lambda q, m, s, o: self.tracksComparison(q, m, o)),
+            ('name',        lambda q, m, s, o: self.artistComparison(q.name, m.name)), 
+            ('albums',      lambda q, m, s, o: self.albumsComparison(q, m, o)), 
+            ('tracks',      lambda q, m, s, o: self.tracksComparison(q, m, o)), 
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name),
-            'albums':       lambda q, m, s, o: self.__albumsWeight(q, m),
-            'tracks':       lambda q, m, s, o: self.__tracksWeight(q, m),
+            'name':         lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=5.0), 
+            'albums':       lambda q, m, s, o: self.__albumsWeight(q, m), 
+            'tracks':       lambda q, m, s, o: self.__tracksWeight(q, m), 
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
@@ -1452,7 +1505,7 @@ class Resolver(object):
         
         weights = {
             'query_string':         lambda q, m, s, o: 0, 
-            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=20.0), 
+            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=50.0), 
             'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
             'subcategory':          lambda q, m, s, o: 1, 
             'priority':             lambda q, m, s, o: 1, 
@@ -1498,20 +1551,20 @@ class Resolver(object):
     
     def tracksSet(self, entity):
         return set( [ self.trackSimplify(track['name']) for track in entity.tracks ] )
-
+    
     def albumsSet(self, entity):
         return set( [ self.albumSimplify(album['name']) for album in entity.albums ] )
-
+    
     def castSet(self, entity):
         return set( [ self.actorSimplify(actor['name']) for actor in entity.cast ] )
 
     def albumsComparison(self, query, match, options):
         query_album_set = self.albumsSet(query)
         match_album_set = self.albumsSet(match)
-
+        
         if self.verbose:
             self.__differenceLog('Album', query_album_set, match_album_set, query, match)
-
+        
         return self.setComparison(query_album_set, match_album_set, options)
 
     def tracksComparison(self, query, match, options):
@@ -1956,13 +2009,16 @@ class Resolver(object):
     
     def __differenceLog(self, label, query_set, match_set, query, match):
         diff = sorted(query_set ^ match_set)
+        
         print('%s %s difference for %s and %s (%s %s vs %s %s)' % (
             len(diff), label, match.name , query.name, len(match_set), match.source, len(query_set), query.source
         ))
+        
         for item in diff:
             source = match.source
             if item in query_set:
                 source = query.source
+            
             print( "%s: %s" % (source, item))
 
 def demo(generic_source, default_title):

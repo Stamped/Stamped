@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals
 from StampedTestUtils import *
-import tests.search
 
 if __name__ == '__main__':
+    import tests.search
     StampedTestRunner(tests.search).run()
 

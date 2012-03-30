@@ -307,9 +307,8 @@ class TMDBSource(GenericSource):
                 if movie.imdb is not None:
                     entity['imdb_id'] = movie.imdb;
                 if len(movie.genres) > 0:
-                    entity['genre'] = movie.genres[0]
-
-
+                    entity['genres'] = list(movie.genres)
+        
         return True
 
 if __name__ == '__main__':

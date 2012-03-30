@@ -14,11 +14,12 @@ import Globals
 from logs import report
 
 try:
+    import logs
     from libs.Spotify               import globalSpotify
+    from copy                       import copy
     from GenericSource              import GenericSource, multipleSource, listSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
-    import logs
     from Resolver                   import *
     from pprint                     import pformat
 except:
