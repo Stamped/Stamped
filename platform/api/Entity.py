@@ -12,7 +12,7 @@ import libs.CountryData
 from difflib        import SequenceMatcher
 from Schemas        import *
 from libs.LibUtils  import parseDateString
-import datetime
+from datetime       import datetime
 
 
 categories = set([
@@ -171,45 +171,45 @@ def formatReleaseDate(date):
         return None
 
 def formatAddress(entity, extendStreet=False, breakLines=False):
-
-    street      = entity.address_street
-    street_ext  = entity.address_street_ext
-    locality    = entity.address_locality
-    region      = entity.address_region
-    postcode    = entity.address_postcode
-    country     = entity.address_country
-
-    delimiter = '\n' if breakLines else ', '
-
-    if street is not None and locality is not None and country is not None:
-
-        # Expand street 
-        if extendStreet == True and street_ext is not None:
-            street = '%s %s' % (street, street_ext)
-
-        # Use state if in US
-        if country == 'US':
-            if region is not None and postcode is not None:
-                return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
-            elif region is not None:
-                return '%s%s%s, %s' % (street, delimiter, locality, postcode)
-            elif postcode is not None:
-                return '%s%s%s, %s' % (street, delimiter, locality, region)
-
-        # Use country if outside US
-        else:
-            if country in countries:
-                return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
-            else:
-                return '%s%s%s, %s' % (street, delimiter, locality, country)
-
-    if entity.address is not None:
-        return entity.address
-        
-    if entity.neighborhood is not None:
-        return entity.neighborhood
-
     return None
+    # street      = entity.address_street
+    # street_ext  = entity.address_street_ext
+    # locality    = entity.address_locality
+    # region      = entity.address_region
+    # postcode    = entity.address_postcode
+    # country     = entity.address_country
+
+    # delimiter = '\n' if breakLines else ', '
+
+    # if street is not None and locality is not None and country is not None:
+
+    #     # Expand street 
+    #     if extendStreet == True and street_ext is not None:
+    #         street = '%s %s' % (street, street_ext)
+
+    #     # Use state if in US
+    #     if country == 'US':
+    #         if region is not None and postcode is not None:
+    #             return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
+    #         elif region is not None:
+    #             return '%s%s%s, %s' % (street, delimiter, locality, postcode)
+    #         elif postcode is not None:
+    #             return '%s%s%s, %s' % (street, delimiter, locality, region)
+
+    #     # Use country if outside US
+    #     else:
+    #         if country in countries:
+    #             return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
+    #         else:
+    #             return '%s%s%s, %s' % (street, delimiter, locality, country)
+
+    # if entity.address is not None:
+    #     return entity.address
+        
+    # if entity.neighborhood is not None:
+    #     return entity.neighborhood
+
+    # return None
 
 def formatSubcategory(subcategory):
     if subcategory == 'tv':
@@ -229,9 +229,10 @@ def formatFilmLength(seconds):
         return None
 
 def getGenericSubtitle(entity):
-    if entity.subcategory is not None:
-        return str(entity.subcategory).replace('_', ' ').title()
     return None
+    # if entity.subcategory is not None:
+    #     return str(entity.subcategory).replace('_', ' ').title()
+    # return None
 
 def getLocationSubtitle(entity, detailed=False):
     # Return detailed address data if requested
@@ -243,27 +244,29 @@ def getLocationSubtitle(entity, detailed=False):
         
         return getGenericSubtitle(entity)
     
-    # Check if address components exist
-    if entity.address_country is not None and entity.address_locality is not None:
-        if entity.address_country == 'US':
-            if entity.address_region is not None:
-                return "%s, %s" % (entity.address_locality, entity.address_region)
-        else:
-            country = entity.address_country
-            if entity.address_country in countries:
-                country = countries[entity.address_country]
-            return "%s, %s" % (entity.address_locality, country)
+    return None
+
+    # # Check if address components exist
+    # if entity.address_country is not None and entity.address_locality is not None:
+    #     if entity.address_country == 'US':
+    #         if entity.address_region is not None:
+    #             return "%s, %s" % (entity.address_locality, entity.address_region)
+    #     else:
+    #         country = entity.address_country
+    #         if entity.address_country in countries:
+    #             country = countries[entity.address_country]
+    #         return "%s, %s" % (entity.address_locality, country)
     
-    # Extract city / state with regex as fallback
-    if entity.address is not None:
-        match = city_state_re.match(entity.address)
+    # # Extract city / state with regex as fallback
+    # if entity.address is not None:
+    #     match = city_state_re.match(entity.address)
         
-        if match is not None:
-            # city, state
-            return "%s, %s" % match.groups()
+    #     if match is not None:
+    #         # city, state
+    #         return "%s, %s" % match.groups()
     
-    # Use generic subtitle as last resort
-    return getGenericSubtitle(entity)
+    # # Use generic subtitle as last resort
+    # return getGenericSubtitle(entity)
 
 def setSubtitle(entity):
     entity.subtitle = getGenericSubtitle(entity)
@@ -514,6 +517,7 @@ def upgradeEntityData(entityData):
     old = entityData
 
     kind = deriveKindFromSubcategory(old['subcategory'])
+    types = deriveTypesFromSubcategories([old['subcategory']])
 
     new = _getEntityObjectFromKind(kind)()
 
@@ -540,7 +544,7 @@ def upgradeEntityData(entityData):
 
             if newName != 'tombstone':
                 target['%s_source' % newName] = source.pop('%s_source' % oldName, 'seed')
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.datetime.utcnow())
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.utcnow())
 
             if additionalSuffixes is not None:
                 for s in additionalSuffixes:
@@ -566,7 +570,7 @@ def upgradeEntityData(entityData):
             target[newName] = items 
 
             target['%s_source' % newName]     = source.pop('%s_source' % oldName, 'seed')
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.datetime.utcnow())
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.utcnow())
 
 
     sources                 = old.pop('sources', {})
@@ -613,7 +617,9 @@ def upgradeEntityData(entityData):
     # Apple / iTunes
     setBasicGroup(sources, new['sources'], 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.itunes_id is None:
-        setBasicGroup(sources.pop('apple', {}), new['sources'], 'aid', 'itunes', newSuffix='id', additionalSuffixes=['url'])
+        apple = sources.pop('apple', {})
+        setBasicGroup(apple, new['sources'], 'aid', 'itunes', newSuffix='id')
+        setBasicGroup(apple, new['sources'], 'view_url', 'itunes', newSuffix='url')
 
     # OpenTable
     setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
@@ -633,7 +639,7 @@ def upgradeEntityData(entityData):
         if 'created' in timestamp:
             new.sources.user_generated_timestamp = timestamp['created']
         else:
-            new.sources.user_generated_timestamp = datetime.datetime.utcnow()
+            new.sources.user_generated_timestamp = datetime.utcnow()
 
 
     # Contacts
@@ -644,7 +650,7 @@ def upgradeEntityData(entityData):
 
 
     # Places
-    if newType == 'place':
+    if kind == 'place':
         coordinates = old.pop('coordinates', None)
         if coordinates is not None:
             new.coordinates = coordinates
@@ -662,8 +668,7 @@ def upgradeEntityData(entityData):
 
 
     # Artist
-    if newType == 'artist':
-
+    if kind == 'person':
         songs = artist.pop('songs', [])
         for song in songs:
             entityMini = MediaItemEntityMini()
@@ -671,11 +676,11 @@ def upgradeEntityData(entityData):
             if 'id' in song and 'source' in song and song['source'] == 'itunes':
                 entityMini.sources.itunes_id = song['id']
                 entityMini.sources.itunes_source = 'itunes'
-                entityMini.sources.itunes_timestamp = song.pop('timestamp', datetime.datetime.utcnow())
+                entityMini.sources.itunes_timestamp = song.pop('timestamp', datetime.utcnow())
             new.tracks.append(entityMini)
         if len(songs) > 0:
             new.tracks_source = artist.pop('songs_source', 'seed')
-            new.tracks_timestamp = artist.pop('songs_timestamp', datetime.datetime.utcnow())
+            new.tracks_timestamp = artist.pop('songs_timestamp', datetime.utcnow())
 
         albums = artist.pop('albums', [])
         for item in albums:
@@ -684,17 +689,17 @@ def upgradeEntityData(entityData):
             if 'id' in item and 'source' in item and item['source'] == 'itunes':
                 entityMini.sources.itunes_id = item['id']
                 entityMini.sources.itunes_source = 'itunes'
-                entityMini.sources.itunes_timestamp = item.pop('timestamp', datetime.datetime.utcnow())
+                entityMini.sources.itunes_timestamp = item.pop('timestamp', datetime.utcnow())
             new.albums.append(entityMini)
         if len(albums) > 0:
             new.albums_source = artist.pop('albums_source', 'seed')
-            new.albums_timestamp = artist.pop('albums_timestamp', datetime.datetime.utcnow())
+            new.albums_timestamp = artist.pop('albums_timestamp', datetime.utcnow())
 
         setListGroup(media, new, 'genre', 'genres')
 
 
     # General Media
-    if newType in ['album', 'tv', 'track', 'movie', 'book']:
+    if kind in ['media_collection', 'media_item']:
         artwork_url = media.pop('artwork_url', None)
         if new.image is None and artwork_url is not None:
             new.image = artwork_url
@@ -712,11 +717,11 @@ def upgradeEntityData(entityData):
         if new.release_date is None and originalReleaseDate is not None:
             new.release_date = originalReleaseDate
             new.release_date_source = 'seed'
-            new.release_date_timestamp = datetime.datetime.utcnow()
+            new.release_date_timestamp = datetime.utcnow()
 
 
     # Album
-    if newType == 'album':
+    if 'album' in types:
         songs = album.pop('tracks', [])
         for song in songs:
             entityMini = MediaItemEntityMini()
@@ -724,11 +729,11 @@ def upgradeEntityData(entityData):
             new.tracks.append(entityMini)
         if len(songs) > 0:
             new.tracks_source = album.pop('songs_source', 'seed')
-            new.tracks_timestamp = album.pop('songs_timestamp', datetime.datetime.utcnow())
+            new.tracks_timestamp = album.pop('songs_timestamp', datetime.utcnow())
 
 
     # Track
-    if newType == 'track':
+    if 'track' in types:
         albumName = song.pop('album_name', media.pop('album_name', None))
         print albumName
         if albumName is not None:
@@ -738,13 +743,13 @@ def upgradeEntityData(entityData):
             if albumId is not None:
                 entityMini.sources.itunes_id = albumId 
                 entityMini.sources.itunes_source = 'seed'
-                entityMini.sources.itunes_timestamp = datetime.datetime.utcnow()
+                entityMini.sources.itunes_timestamp = datetime.utcnow()
             new.collections.append(entityMini)
             new.collections_source = song.pop('album_name_source', 'seed')
-            new.collections_timestamp = song.pop('album_name_timestamp', datetime.datetime.utcnow())
+            new.collections_timestamp = song.pop('album_name_timestamp', datetime.utcnow())
 
     # Apps
-    if newType == 'app':
+    if 'app' in types:
         setBasicGroup(media, new, 'release_date')
         setListGroup(media, new, 'authors', 'artist_display_name', wrapper=PersonEntityMini)
 
@@ -756,6 +761,6 @@ def upgradeEntityData(entityData):
             new.screenshots.append(imageSchema)
         if len(screenshots) > 0:
             new.screenshots_source = media.pop('screenshots_source', 'seed')
-            new.screenshots_timestamp = media.pop('screenshots_timestamp', datetime.datetime.utcnow())
+            new.screenshots_timestamp = media.pop('screenshots_timestamp', datetime.utcnow())
 
     return new 

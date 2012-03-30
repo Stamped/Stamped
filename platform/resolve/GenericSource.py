@@ -186,33 +186,51 @@ class GenericSource(BasicSource):
         else:
             entity['entity_id'] = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
 
-        if wrapper.type == 'place':
-            subcategory = wrapper.subcategory
-            if subcategory is not None:
-                entity['subcategory'] = subcategory
-        else:
-            subcategory = typeToSubcategory(wrapper.type)
-            if subcategory is not None:
-                entity['subcategory'] = subcategory
+        # if wrapper.type == 'place':
+        #     subcategory = wrapper.subcategory
+        #     if subcategory is not None:
+        #         entity['subcategory'] = subcategory
+        # else:
+        #     subcategory = typeToSubcategory(wrapper.type)
+        #     if subcategory is not None:
+        #         entity['subcategory'] = subcategory
+        
         entity['title'] = wrapper.name
+
         if wrapper.description != '':
             entity['desc'] = wrapper.description
         if wrapper.image != '':
             entity['image'] = wrapper.image
 
         if wrapper.type == 'movie':
+            entity.kind = 'media_item'
+            entity.types.append(wrapper.type)
+
             if wrapper.rating is not None:
                 entity['mpaa_rating'] = wrapper.rating
 
+        if wrapper.type == 'tv':
+            entity.kind = 'media_collection'
+            entity.types.append(wrapper.type)
+
         if wrapper.type == 'artist':
+            entity.kind = 'person'
+            entity.types.append(wrapper.type)
+
             if controller.shouldEnrich('album_list', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
 
         if wrapper.type == 'track':
+            entity.kind = 'media_item'
+            entity.types.append(wrapper.type)
+
             if wrapper.album['name'] != '':
                 entity['album_name'] = wrapper.album['name']
 
         if wrapper.type == 'book':
+            entity.kind = 'media_item'
+            entity.types.append(wrapper.type)
+
             if wrapper.author['name'] != '':
                 entity['author'] = wrapper.author['name']
             if wrapper.eisbn is not None:
@@ -227,6 +245,9 @@ class GenericSource(BasicSource):
                 entity['num_pages'] = int(wrapper.length)
 
         if wrapper.type == 'place':
+            entity.kind = 'place'
+            entity.types.append(wrapper.subcategory)
+
             if wrapper.coordinates is not None:
                 entity['coordinates'] = {
                     'lat': wrapper.coordinates[0],
@@ -258,6 +279,9 @@ class GenericSource(BasicSource):
                 entity['email'] = wrapper.email
 
         if wrapper.type == 'app':
+            entity.kind = 'software'
+            entity.types.append(wrapper.type)
+
             if wrapper.publisher['name'] != '':
                 entity['artist_display_name'] = wrapper.publisher['name']
             if len(wrapper.screenshots) > 0:
