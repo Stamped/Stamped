@@ -473,7 +473,7 @@ class HTTPEntity(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.caption            = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
+        self.images             = SchemaList(ImageSchema())
         self.last_modified      = SchemaElement(basestring)
         
         # Location
@@ -545,20 +545,24 @@ class HTTPEntity(Schema):
 
             self.metadata.append(item)
     
-    def _addImage(self, url):
-        if url is not None:
-            domain = urlparse.urlparse(url).netloc
+    def _addImages(self, images):
+        for image in images:
+            if image.image is not None:
+                url = image.image
+                domain = urlparse.urlparse(url).netloc
 
-            if 'amzstatic.com' in domain:
-                # try to return the maximum-resolution apple photo possible if we have 
-                # a lower-resolution version stored in our db
-                url = url.replace('100x100', '400x400').replace('170x170', '400x400')
+                if 'amzstatic.com' in domain:
+                    # try to return the maximum-resolution apple photo possible if we have 
+                    # a lower-resolution version stored in our db
+                    url = url.replace('100x100', '400x400').replace('170x170', '400x400')
+                
+                elif 'amazon.com' in domain:
+                    # strip the 'look inside' image modifier
+                    url = amazon_image_re.sub(r'\1.jpg', url)
             
-            elif 'amazon.com' in domain:
-                # strip the 'look inside' image modifier
-                url = amazon_image_re.sub(r'\1.jpg', url)
-            
-            self.image = url
+                item = ImageSchema()
+                item.image = url 
+                self.images.append(item)
 
     def _getIconURL(self, filename, client=None):
         base_url = 'http://static.stamped.com/assets/icons'
@@ -1008,11 +1012,11 @@ class HTTPEntity(Schema):
         
         # Image
 
-        if entity.kind != 'place':
+        if entity.kind == 'place':
             # Don't add an image if coordinates exist
-            del(self.image)
-        elif entity.image is not None:
-            self._addImage(entity.image)
+            del(self.images)
+        elif len(entity.images) > 0:
+            self._addImages(entity.images)
 
         return self
             
@@ -1235,10 +1239,7 @@ class HTTPEntityAutosuggest(Schema):
     def importSchema(self, schema, distance):
         if isinstance(schema, BasicEntity):
 
-            if schema.search_id is not None:
-                self.search_id = schema.search_id
-            else:
-                self.search_id = schema.entity_id
+            self.search_id = schema.entity_id
             assert self.search_id is not None
 
             self.title          = schema.title 
@@ -1949,8 +1950,8 @@ class HTTPEntity_stampedtest(Schema):
             self.site               = schema.site 
 
             # TODO: Image
-            if schema.image is not None:
-                self.image = self._handle_image(schema.image)
+            if len(schema.images) > 0:
+                self.image = self._handle_image(schema.images[0]['image'])
 
             # Affiliates
 

@@ -584,6 +584,7 @@ def upgradeEntityData(entityData):
     artist                  = details.pop('artist', {})
     album                   = details.pop('album', {})
     song                    = details.pop('song', {})
+    netflix                 = sources.pop('netflix', {})
 
 
     # General
@@ -591,9 +592,21 @@ def upgradeEntityData(entityData):
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
     new.title_lower         = old.pop('titlel', None)
-    new.image               = old.pop('image', None)
-    # TODO: Refactor image
-    # TODO: Include old.sources.netflix.images[large/small/etc.]
+
+    # Images
+    oldImages = [
+        old.pop('image', None),
+        media.pop('artwork_url', None),
+        netflix.pop('hd', None),
+        netflix.pop('large', None),
+    ]
+    for oldImage in oldImages:
+        if oldImage is not None:
+            item = ImageSchema()
+            item.image = oldImage
+            new.images.append(item)
+            break
+
     setBasicGroup(old, new, 'desc')
     subcategory = old['subcategory']
     if subcategory == 'song':
@@ -700,9 +713,6 @@ def upgradeEntityData(entityData):
 
     # General Media
     if kind in ['media_collection', 'media_item']:
-        artwork_url = media.pop('artwork_url', None)
-        if new.image is None and artwork_url is not None:
-            new.image = artwork_url
 
         setBasicGroup(media, new, 'track_length', 'length')
         setBasicGroup(media, new, 'mpaa_rating')

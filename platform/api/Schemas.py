@@ -583,7 +583,6 @@ class BasicEntity(Schema):
         self.schema_version                 = SchemaElement(int, required=True, default=0)
         
         self.entity_id                      = SchemaElement(basestring)
-        self.search_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring, required=True)
         self.title_lower                    = SchemaElement(basestring)
         self.kind                           = SchemaElement(basestring, required=True, default='other')
@@ -601,7 +600,9 @@ class BasicEntity(Schema):
         self.types_source                   = SchemaElement(basestring)
         self.types_timestamp                = SchemaElement(datetime)
         
-        self.image                          = SchemaElement(basestring)
+        self.images                         = SchemaList(ImageSchema()) 
+        self.images_source                  = SchemaElement(basestring)
+        self.images_timestamp               = SchemaElement(datetime)
         
         self.contact                        = EntityContactSchema()
         self.stats                          = EntityStatsSchema()

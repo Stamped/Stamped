@@ -220,8 +220,9 @@ class GenericSource(BasicSource):
         if wrapper.description != '':
             entity.desc = wrapper.description
         if wrapper.image != '':
-            ### TODO: Redo images
-            entity.image = wrapper.image
+            img = ImageSchema()
+            img.image = wrapper.image
+            entity.images.append(img)
 
         setAttribute('phone',   'phone')
         setAttribute('email',   'email')
