@@ -1427,7 +1427,7 @@ class StampedAPI(AStampedAPI):
             entities = self._entityDB.getEntities(entityIds.keys())
             
             for entity in entities:
-                entityIds[entity.entity_id] = entity.minimize()
+                entityIds[entity.entity_id] = entity
         
         if authUserId:
             ### TODO: Intelligent matching with stampId
@@ -1537,7 +1537,7 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp                       = Stamp()
         stamp.user_id               = user.user_id
-        stamp.entity                = entity.minimize()
+        stamp.entity                = entity
         stamp.timestamp.created     = datetime.utcnow()
         stamp.timestamp.modified    = datetime.utcnow()
         stamp.stamp_num             = user.num_stamps_total + 1
@@ -1604,7 +1604,7 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[stamp.stamp_id, image_url])
         
         # Enrich linked user, entity, favorites, etc. within the stamp
-        entityIds = {entity.entity_id: entity.minimize()}
+        entityIds = {entity.entity_id: entity}
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
             userIds=userIds, entityIds=entityIds)
         
@@ -2562,7 +2562,7 @@ class StampedAPI(AStampedAPI):
     def addFavorite(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        favorite = Favorite(entity=entity.minimize(), 
+        favorite = Favorite(entity=entity, 
                             user_id=authUserId)
         favorite.timestamp.created = datetime.utcnow()
         
@@ -2592,7 +2592,7 @@ class StampedAPI(AStampedAPI):
         
         # Enrich stamp
         if stampId is not None:
-            entityIds = {entity.entity_id: entity.minimize()}
+            entityIds = {entity.entity_id: entity}
             favorite.stamp = self._enrichStampObjects(favorite.stamp, \
                                 authUserId=authUserId, entityIds=entityIds)
         
@@ -2673,7 +2673,7 @@ class StampedAPI(AStampedAPI):
         entities = self._entityDB.getEntities(entityIds.keys())
         
         for entity in entities:
-            entityIds[str(entity.entity_id)] = entity.minimize()
+            entityIds[str(entity.entity_id)] = entity
         
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys(), limit=len(stampIds.keys()))

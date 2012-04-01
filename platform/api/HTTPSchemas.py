@@ -48,8 +48,6 @@ def _coordinatesFlatToDict(coordinates):
 
 def _profileImageURL(screenName, cache=None):
     if not cache:
-        # url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg' % \
-        #     str(screenName).lower()
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
         url = 'http://static.stamped.com/users/%s.jpg?%s' % \
@@ -1110,7 +1108,7 @@ class HTTPEntityMini(Schema):
         self.coordinates        = SchemaElement(basestring)
 
     def importSchema(self, schema):
-        if isinstance(schema, BasicEntityMini):
+        if isinstance(schema, BasicEntity):
             self.entity_id      = schema.entity_id
             self.title          = schema.title 
             self.subtitle       = schema.subtitle
@@ -1677,15 +1675,15 @@ class HTTPFavorite(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Favorite':
-            data                = schema.exportSparse()
-            stamp               = Stamp(data.pop('stamp', None))
-            data['entity']      = HTTPEntityMini().importSchema(schema.entity).exportSparse()
-            
-            if stamp.stamp_id != None:
-                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+            self.favorite_id    = schema.favorite_id 
+            self.user_id        = schema.user_id
+            self.entity         = HTTPEntityMini().importSchema(schema.entity).exportSparse()
+            self.created        = schema.timestamp.created
+            self.complete       = schema.complete 
 
-            self.importData(data, overflow=True)
-            self.created = schema.timestamp.created
+            if schema.stamp.isSet:
+                self.stamp      = HTTPStamp().importSchema(schema.stamp).exportSparse()
+
         else:
             raise NotImplementedError
         

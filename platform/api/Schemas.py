@@ -292,7 +292,7 @@ class Favorite(Schema):
     def setSchema(self):
         self.favorite_id        = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring, required=True)
-        self.entity             = BasicEntityMini(required=True)
+        self.entity             = BasicEntity(required=True)
         self.stamp              = Stamp()
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
@@ -305,7 +305,7 @@ class Favorite(Schema):
 class Stamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
-        self.entity             = BasicEntityMini(required=True)
+        self.entity             = BasicEntity(required=True)
         self.user               = UserMini(required=True)
         self.blurb              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
@@ -580,7 +580,7 @@ class BasicEntity(Schema):
     ])
 
     def setSchema(self):
-        self.schema_version                 = SchemaElement(int, required=True)
+        self.schema_version                 = SchemaElement(int, required=True, default=0)
         
         self.entity_id                      = SchemaElement(basestring)
         self.search_id                      = SchemaElement(basestring)
@@ -607,15 +607,6 @@ class BasicEntity(Schema):
         self.stats                          = EntityStatsSchema()
         self.sources                        = EntitySourcesSchema()
         self.timestamp                      = TimestampSchema()
-    
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            from Entity import setFields
-            setFields(self)
-            schema.importData(self.value, overflow=True)
-        else:
-            raise NotImplementedError
-        return schema
 
     def minimize(self, schema=None):
         if schema is None:
@@ -1148,19 +1139,6 @@ class BasicEntityMini(BasicEntity):
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
-
-    @property 
-    def category(self):
-        food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-        if len(food.intersection(self.types.value)) > 0:
-            return 'food'
-        return 'other'
-
-    @property 
-    def subcategory(self):
-        for t in self.types.value:
-            return t
-        return 'place'
 
 class PersonEntityMini(BasicEntityMini, PersonEntity):
     def setSchema(self):

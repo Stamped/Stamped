@@ -191,7 +191,9 @@ class GenericSource(BasicSource):
         else:
             entity = BasicEntity()
 
-        return self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+        self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+
+        return entity
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
@@ -227,9 +229,12 @@ class GenericSource(BasicSource):
 
         ### Place
         if entity.kind == 'place':
-            if wrapper.coordinates is not None:
-                entity.coordinates.lat = wrapper.coordinates[0]
-                entity.coordinates.lng = wrapper.coordinates[1]
+            try:
+                if wrapper.coordinates is not None:
+                    entity.coordinates.lat = wrapper.coordinates[0]
+                    entity.coordinates.lng = wrapper.coordinates[1]
+            except:
+                pass
 
             if len(wrapper.address) > 0:
                 address_set = set([
@@ -246,13 +251,15 @@ class GenericSource(BasicSource):
                         v = wrapper.address[k]
                     entity['address_%s' % k] = v
 
-            if wrapper.address_string is not None:
-                entity['formatted_address'] = wrapper.address_string
+            setAttribute('address_string', 'formatted_address')
 
         ### Person
         if entity.kind == 'person':
-            if len(wrapper.genres) > 0:
-                entity.genres = wrapper.genres
+            try:
+                if len(wrapper.genres) > 0:
+                    entity.genres = wrapper.genres
+            except:
+                pass
 
             if controller.shouldEnrich('albums', self.sourceName, entity):
                 self.__repopulateAlbums(entity, wrapper, controller) 
@@ -262,23 +269,29 @@ class GenericSource(BasicSource):
 
         ### Media
         if entity.kind in set(['media_collection', 'media_item']):
-            if wrapper.rating is not None and wrapper.rating != '':
-                entity.mpaa_rating  = wrapper.rating
+            setAttribute('rating', 'mpaa_rating')
+            setAttribute('date', 'release_date')
 
-            if wrapper.date is not None:
-                entity.release_date = wrapper.date
+            try:
+                if wrapper.length > 0:
+                    entity.length = int(wrapper.length)
+            except:
+                pass
 
-            if wrapper.length > 0:
-                entity.length = int(wrapper.length)
+            try:
+                if len(wrapper.genres) > 0:
+                    entity.genres = wrapper.genres
+            except:
+                pass
 
-            if len(wrapper.genres) > 0:
-                entity.genres = wrapper.genres
-
-            if len(wrapper.cast) > 0:
-                for actor in wrapper.cast:
-                    entityMini = PersonEntityMini()
-                    entityMini.title = actor['name']
-                    entity.cast.append(entityMini)
+            try:
+                if len(wrapper.cast) > 0:
+                    for actor in wrapper.cast:
+                        entityMini = PersonEntityMini()
+                        entityMini.title = actor['name']
+                        entity.cast.append(entityMini)
+            except:
+                pass
 
             try:
                 if wrapper.director['name'] != '':
@@ -343,23 +356,31 @@ class GenericSource(BasicSource):
 
         ### Software
         if entity.kind == 'software':
-            if wrapper.date is not None:
-                entity.release_date = wrapper.date
+            setAttribute('date', 'release_date')
 
-            if len(wrapper.genres) > 0:
-                for genre in wrapper.genres:
-                    entity.genres.append(genre)
+            try:
+                if len(wrapper.genres) > 0:
+                    for genre in wrapper.genres:
+                        entity.genres.append(genre)
+            except:
+                pass
 
-            if wrapper.publisher['name'] != '':
-                entityMini = PersonEntityMini()
-                entityMini.title = wrapper.publisher['name']
-                entity.authors.append(entityMini)
+            try:
+                if wrapper.publisher['name'] != '':
+                    entityMini = PersonEntityMini()
+                    entityMini.title = wrapper.publisher['name']
+                    entity.authors.append(entityMini)
+            except:
+                pass
 
-            if len(wrapper.screenshots) > 0:
-                for screenshot in wrapper.screenshots:
-                    img = ImageSchema()
-                    img.image = screenshot
-                    entity.screenshots.append(img)
+            try:
+                if len(wrapper.screenshots) > 0:
+                    for screenshot in wrapper.screenshots:
+                        img = ImageSchema()
+                        img.image = screenshot
+                        entity.screenshots.append(img)
+            except:
+                pass
 
     @property
     def idField(self):
