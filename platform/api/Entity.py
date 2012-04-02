@@ -356,7 +356,6 @@ def upgradeEntityData(entityData):
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-    new.title_lower         = old.pop('titlel', None)
 
     # Images
     oldImages = [

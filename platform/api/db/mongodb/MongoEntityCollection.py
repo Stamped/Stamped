@@ -48,26 +48,21 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         entity = buildEntity(document)
         
-        if entity.title_lower is None:
-            entity.title_lower = getSimplifiedTitle(entity.title)
-        
         return entity
     
     def _convertToMongo(self, entity):
-        if entity is not None and entity.title_lower is None:
-            entity.title_lower = getSimplifiedTitle(entity.title)
         if entity.entity_id is not None and entity.entity_id.startswith('T_'):
             del entity.entity_id
         document = AMongoCollection._convertToMongo(self, entity)
-        
+        if document is None:
+            return None
+        if 'title' in document:
+            document['titlel'] = getSimplifiedTitle(document['title'])
         return document
     
     ### PUBLIC
     
     def addEntity(self, entity):
-        if entity.title_lower is None:
-            entity.title_lower = getSimplifiedTitle(entity.title)
-        
         return self._addObject(entity)
     
     def getEntity(self, entityId):
@@ -108,10 +103,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             raise Exception
     
     def addEntities(self, entities):
-        for entity in entities:
-            if entity.title_lower is None:
-                entity.title_lower = getSimplifiedTitle(entity.title)
-        
         return self._addObjects(entities)
 
     def updateDecoration(self, name, value):
