@@ -229,6 +229,10 @@ def deriveTypesFromSubcategories(subcategories):
     for item in types.intersection(subcategories):
         result.add(item)
 
+    if 'song' in result:
+        result.remove('song')
+        result.add('track')
+
     return result 
 
 def deriveSubcategoryFromTypes(types):

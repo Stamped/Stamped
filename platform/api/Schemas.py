@@ -961,7 +961,7 @@ class MediaItemEntity(BasicMediaEntity):
     def subtitle(self):
         if 'movie' in self.types.value:
             if self.release_date is not None:
-                return self.release_date.year
+                return 'Movie (%s)' % self.release_date.year
             return 'Movie'
 
         if 'track' in self.types.value:
