@@ -1163,6 +1163,20 @@ class HTTPEntityNew(Schema):
                 except:
                     pass
 
+        def addListField(entity, field, value, entityMini=None, timestamp=None):
+            if value is not None:
+                try:
+                    if entityMini is not None:
+                        item = entityMini()
+                        entityMini.title = value
+                    else:
+                        item = value
+                    entity[field].append(item)
+                    entity['%s_source' % field] = 'seed'
+                    entity['%s_timestamp' % field] = timestamp
+                except:
+                    pass
+
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
@@ -1170,33 +1184,17 @@ class HTTPEntityNew(Schema):
         addField(entity, 'release_date', self.release_date, now)
 
         if _coordinatesFlatToDict(self.coordinates) is not None:
-            entity.coordinates = _coordinatesFlatToDict(self.coordinates)
-            entity.coordinates_source = 'seed'
-            entity.coordinates_timestamp = now 
+            addField(entity, 'coordinates', _coordinatesFlatToDict(self.coordinates), now)
 
         entity.user_generated_id            = authUserId
+        entity.user_generated_subtitle      = self.subtitle
         entity.user_generated_timestamp     = now
 
-
-        """
-        if self.director is not None:
-            schema.director = self.director
-
-        if self.cast is not None:
-            schema.cast = self.cast
-
-        if self.album is not None:
-            schema.album_name = self.album
-
-        if self.author is not None:
-            schema.author = self.author
-
-        if self.artist is not None:
-            schema.artist_display_name = self.artist
-
-        if _coordinatesFlatToDict(self.coordinates) is not None:
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        """
+        addListField(entity, 'directors', self.director, PersonEntityMini, now)
+        addListField(entity, 'cast', self.cast, PersonEntityMini, now)
+        addListField(entity, 'authors', self.author, PersonEntityMini, now)
+        addListField(entity, 'artists', self.artist, PersonEntityMini, now)
+        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, now)
 
         return entity
 

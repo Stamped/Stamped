@@ -588,10 +588,6 @@ class BasicEntity(Schema):
         self.kind                           = SchemaElement(basestring, required=True, default='other')
         self.locale                         = SchemaElement(basestring)
         
-        self.subtitle                       = SchemaElement(basestring)
-        self.subtitle_source                = SchemaElement(basestring)
-        self.subtitle_timestamp             = SchemaElement(datetime)
-        
         self.desc                           = SchemaElement(basestring)
         self.desc_source                    = SchemaElement(basestring)
         self.desc_timestamp                 = SchemaElement(datetime)
@@ -622,7 +618,7 @@ class BasicEntity(Schema):
 
     @property 
     def subtitle(self):
-        return 'Other'
+        return self._genericSubtitle()
 
     @property 
     def category(self):
@@ -633,6 +629,8 @@ class BasicEntity(Schema):
         return 'other'
 
     def _genericSubtitle(self):
+        if self.user_generated_subtitle is not None:
+            return self.user_generated_subtitle
         return str(self.subcategory).replace('_', ' ').title()
 
 class EntityStatsSchema(Schema):
@@ -687,6 +685,7 @@ class EntitySourcesSchema(Schema):
         self.tombstone_timestamp            = SchemaElement(datetime)
 
         self.user_generated_id              = SchemaElement(basestring)
+        self.user_generated_subtitle        = SchemaElement(basestring)
         self.user_generated_timestamp       = SchemaElement(datetime)
 
         self.spotify_id                     = SchemaElement(basestring)
