@@ -37,6 +37,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('stats.stamp_num', pymongo.ASCENDING)])
     
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        entity = {'entity_id': document['entity']['entity_id']}
+        entityTitle = document['entity'].pop('title', None)
+        if entityTitle is not None:
+            entity['title'] = entityTitle
+        document['entity'] = entity
+        
+        stamp = self._obj(document, overflow=self._overflow)        
+        
+        return stamp 
+    
     ### PUBLIC
     
     @lazyProperty

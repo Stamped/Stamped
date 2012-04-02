@@ -36,10 +36,13 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
 
-        entityId = document['entity']['entity_id']
-        document['entity'] = {'entity_id': entityId}
+        entity = {'entity_id': document['entity']['entity_id']}
+        entityTitle = document['entity'].pop('title', None)
+        if entityTitle is not None:
+            entity['title'] = entityTitle
+        document['entity'] = entity
         if 'stamp' in document:
-            document['stamp']['entity'] = {'entity_id': entityId}
+            document['stamp']['entity'] = entity
         
         favorite = self._obj(document, overflow=self._overflow)        
         

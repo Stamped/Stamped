@@ -1143,7 +1143,8 @@ class HTTPEntityMini(Schema):
             self.subcategory    = schema.subcategory 
 
             try:
-                self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
+                if 'coordinates' in schema.value:
+                    self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
             except:
                 pass
         else:
