@@ -1980,7 +1980,7 @@ class HTTPEntity_stampedtest(Schema):
             self.address            = schema.formatted_address
             self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
 
-            if schema.cuisine is not None:
+            if len(schema.cuisine) > 0:
                 self.cuisine        = ', '.join(str(i) for i in schema.cuisine)
 
             if schema.price_range is not None:
@@ -1988,10 +1988,10 @@ class HTTPEntity_stampedtest(Schema):
 
         if schema.__class__.__name__ == 'PersonEntity':
 
-            if schema.genres is not None:
+            if len(schema.genres) > 0:
                 self.genre          = ', '.join(str(i) for i in schema.genres)
 
-            if schema.tracks is not None:
+            if len(schema.tracks) > 0:
                 tracks = schema.tracks[:10]
                 for track in tracks:
                     self.songs.append(track['title'])
@@ -2007,26 +2007,26 @@ class HTTPEntity_stampedtest(Schema):
             if schema.release_date is not None:
                 self.release_date   = schema.release_date.strftime("%h %d, %Y")
 
-            if schema.genres is not None:
+            if len(schema.genres) > 0:
                 self.genre          = ', '.join(str(i) for i in schema.genres)
 
 
-            if schema.authors is not None:
+            if len(schema.authors) > 0:
                 self.author         = ', '.join(str(i['title']) for i in schema.authors)
 
-            if schema.artists is not None:
+            if len(schema.artists) > 0:
                 self.artist_name    = ', '.join(str(i['title']) for i in schema.artists)
 
-            if schema.publishers is not None:
+            if len(schema.publishers) > 0:
                 self.publisher      = ', '.join(str(i['title']) for i in schema.publishers)
 
-            if schema.cast is not None:
+            if len(schema.cast) > 0:
                 self.cast           = ', '.join(str(i['title']) for i in schema.cast)
 
-            if schema.directors is not None:
+            if len(schema.directors) > 0:
                 self.director       = ', '.join(str(i['title']) for i in schema.directors)
 
-            if schema.networks is not None:
+            if len(schema.networks) > 0:
                 self.network        = ', '.join(str(i['title']) for i in schema.networks)
 
         if schema.__class__.__name__ == 'MediaItemEntity':

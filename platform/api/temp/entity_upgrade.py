@@ -35,6 +35,77 @@ data = {
     }
 }
 
+data = {
+    "entity_id" : "4f3ec71d64c79428bb000014",
+    "category" : "other",
+    "subcategory" : "art_gallery",
+    "title" : "RH Gallery",
+    "titlel" : "rh gallery",
+    "coordinates" : {
+        "lat" : 40.71637,
+        "lng" : -74.007706
+    },
+    "sources" : {
+        "googlePlaces" : {
+            "gid" : "d3f21d98ee61381fc290ae288892c55e56570a2e",
+            "reference" : "CmRgAAAA06n-U04-LkzlutwfEaSBfJYKyArzEzm_7AFL9KU_alFdokBc1sPZSSewYvGqFWhS1tqbxef0GAQ9gwGTzs6ySFnt8dEHMcNX2cs0jeUt6-NjVw9g7CoxyOZbDscMLiSkEhD_Wh0-01sUPg5OGb2CPlXjGhQmlQU677u0o_jlDjzJSWvjKTthgw"
+        }
+    },
+    "details" : {
+        "contact" : {
+            "site" : "http://www.rhgallery.com/",
+            "phone_source" : "googleplaces",
+            "phone" : "(646) 490-6355",
+            "site_source" : "googleplaces",
+        },
+        "place" : {
+            "neighborhood" : "137 Duane Street, New York",
+            "address_region" : "NY",
+            "address_locality" : "New York",
+            "address" : "137 Duane Street, New York, NY 10013, United States",
+            "address_components" : [
+                {
+                    "long_name" : "New York",
+                    "types" : [
+                        "locality",
+                        "political"
+                    ],
+                    "short_name" : "New York"
+                },
+                {
+                    "long_name" : "NY",
+                    "types" : [
+                        "administrative_area_level_1",
+                        "political"
+                    ],
+                    "short_name" : "NY"
+                },
+                {
+                    "long_name" : "US",
+                    "types" : [
+                        "country",
+                        "political"
+                    ],
+                    "short_name" : "US"
+                },
+                {
+                    "long_name" : "10013",
+                    "types" : [
+                        "postal_code"
+                    ],
+                    "short_name" : "10013"
+                }
+            ],
+            "address_postcode" : "10013",
+            "address_country" : "US",
+            "address_source" : "googleplaces"
+        }
+    },
+    "mangled_title" : "rh gallery",
+    "mangled_title_source" : "format"
+}
+
+
 entity = upgradeEntityData(data)
 
 print entity

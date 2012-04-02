@@ -508,7 +508,6 @@ def upgradeEntityData(entityData):
 
     # Book
     if 'book' in types:
-        print 'BOOK: %s' % book
         setBasicGroup(book, new, 'isbn')
         setBasicGroup(book, new, 'sku_number')
         setBasicGroup(book, new, 'num_pages', 'length')
