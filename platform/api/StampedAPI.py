@@ -2792,13 +2792,13 @@ class StampedAPI(AStampedAPI):
     """
     
     def getMenu(self, entityId):
-        menu = self.__menuDB.getMenu(entityId)
+        menu = self._menuDB.getMenu(entityId)
         if menu is None:
             try:
                 entity = self._entityDB.getEntity(entity_id)
                 if entity is not None:
                     self._enrichEntity(entity)
-                    menu = self.__menuDB.getMenu(entityId)
+                    menu = self._menuDB.getMenu(entityId)
             except Exception:
                 pass
         if menu is None:

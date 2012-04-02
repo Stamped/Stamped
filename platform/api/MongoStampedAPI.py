@@ -112,7 +112,7 @@ class MongoStampedAPI(StampedAPI):
         return MongoStatsCollection()
 
     @lazyProperty
-    def __menuDB(self):
+    def _menuDB(self):
         return MongoMenuCollection()
     
     @lazyProperty
