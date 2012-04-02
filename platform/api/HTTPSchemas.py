@@ -2012,22 +2012,22 @@ class HTTPEntity_stampedtest(Schema):
 
 
             if schema.authors is not None:
-                self.author         = ', '.join(str(i) for i in schema.authors)
+                self.author         = ', '.join(str(i['title']) for i in schema.authors)
 
             if schema.artists is not None:
-                self.artist_name    = ', '.join(str(i) for i in schema.artists)
+                self.artist_name    = ', '.join(str(i['title']) for i in schema.artists)
 
             if schema.publishers is not None:
-                self.publisher      = ', '.join(str(i) for i in schema.publishers)
+                self.publisher      = ', '.join(str(i['title']) for i in schema.publishers)
 
             if schema.cast is not None:
-                self.cast           = ', '.join(str(i) for i in schema.cast)
+                self.cast           = ', '.join(str(i['title']) for i in schema.cast)
 
             if schema.directors is not None:
-                self.director       = ', '.join(str(i) for i in schema.directors)
+                self.director       = ', '.join(str(i['title']) for i in schema.directors)
 
             if schema.networks is not None:
-                self.network        = ', '.join(str(i) for i in schema.networks)
+                self.network        = ', '.join(str(i['title']) for i in schema.networks)
 
         if schema.__class__.__name__ == 'MediaItemEntity':
 
