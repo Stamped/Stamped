@@ -30,8 +30,8 @@ from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
 from db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
-# from db.mongodb.MongoEntitySearcher             import MongoEntitySearcher
 from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
+from db.mongodb.MongoMenuCollection             import MongoMenuCollection
 from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from db.mongodb.MongoLogsCollection             import MongoLogsCollection
 from db.mongodb.MongoStatsCollection            import MongoStatsCollection
@@ -111,6 +111,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _statsDB(self):
         return MongoStatsCollection()
+
+    @lazyProperty
+    def __menuDB(self):
+        return MongoMenuCollection()
     
     @lazyProperty
     def _tempEntityDB(self):

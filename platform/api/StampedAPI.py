@@ -2790,10 +2790,6 @@ class StampedAPI(AStampedAPI):
     #     # #      #    ## #     #
     #     # ###### #     #  #####
     """
-
-    @lazyProperty
-    def __menuDB(self):
-        return MongoMenuCollection()
     
     def getMenu(self, entityId):
         menu = self.__menuDB.getMenu(entityId)
