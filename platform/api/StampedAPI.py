@@ -1454,7 +1454,7 @@ class StampedAPI(AStampedAPI):
             if entityIds[stamp.entity_id] == 1:
                 msg = 'Unable to match entity_id %s for stamp_id %s' % (stamp.entity_id, stamp.stamp_id)
                 logs.warning(msg)
-                ### TODO: Raise?
+                continue
             else:
                 stamp.entity = entityIds[stamp.entity_id]
             
