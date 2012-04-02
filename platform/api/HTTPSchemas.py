@@ -515,10 +515,6 @@ class HTTPEntity(Schema):
             item = HTTPEntityMetadataItem()
             item.name = name
 
-            if isinstance(value, list) or isinstance(value, SchemaList):
-                value = ', '.join(str(i) for i in value)
-            item.value = value
-
             if 'key' in kwargs:
                 item.key = kwargs['key']
 
@@ -630,7 +626,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
-            self._addMetadata('Cuisine', entity.cuisine)
+            self._addMetadata('Cuisine', ', '.join(str(i) for i in entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
@@ -719,7 +715,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', entity.release_date)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', entity.publishers)
+            self._addMetadata('Publisher', ', '.join(str(i['title']) for i in entity.publishers))
 
             # Actions: Buy
 
@@ -753,9 +749,9 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', entity.cast, extended=True, optional=True)
-            self._addMetadata('Director', entity.directors, optional=True)
-            self._addMetadata('Genres', entity.genres, optional=True)
+            self._addMetadata('Cast', ', '.join(str(i['title']) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(str(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(str(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
@@ -835,15 +831,15 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_music', client=client))
             if entity.subcategory == 'artist':
                 self._addMetadata('Biography', entity.desc, key='desc')
-                self._addMetadata('Genre', entity.genres, optional=True)
+                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres), optional=True)
 
             elif entity.subcategory == 'album':
-                self._addMetadata('Genre', entity.genres)
+                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.subcategory == 'song':
-                self._addMetadata('Genre', entity.genres)
+                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
@@ -997,7 +993,7 @@ class HTTPEntity(Schema):
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', entity.genres)
+            self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download

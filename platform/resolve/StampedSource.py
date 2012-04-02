@@ -24,6 +24,7 @@ try:
     from Schemas                    import BasicEntity
     from datetime                   import datetime
     from bson                       import ObjectId
+    from Entity                     import buildEntity
 except:
     report()
     raise
@@ -37,8 +38,9 @@ class _EntityObject(object):
     """
 
     def __init__(self, entity):
-        self.__entity = BasicEntity()
-        self.__entity.importData(entity.value)
+        # self.__entity = BasicEntity()
+        # self.__entity.importData(entity.value)
+        self.__entity = buildEntity(entity.value)
 
     @property
     def entity(self):
@@ -376,7 +378,7 @@ class StampedSource(GenericSource):
         This method will create a type specific ResolverObject
         based on the type of the given entity.
         """
-        sub = entity['subcategory']
+        sub = entity.subcategory
         if sub == 'song':
             return self.trackFromEntity(entity)
         elif sub == 'album':
