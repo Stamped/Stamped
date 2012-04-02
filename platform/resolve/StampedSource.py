@@ -714,7 +714,7 @@ class StampedSource(GenericSource):
         ret         = self.__entityDB._collection.find_one(query, fields=['_id'] )
         
         if ret:
-            entity_id = ret['_id']
+            entity_id = str(ret['_id'])
             logs.info("resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
         
         return entity_id
