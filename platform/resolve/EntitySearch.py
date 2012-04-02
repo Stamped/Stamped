@@ -272,7 +272,7 @@ class EntitySearch(object):
                     t = set(deriveTypesFromSubcategories([s]))
                     for i in t:
                         types.add(deriveTypesFromSubcategories(i))
-
+        
         try:
             if coords.lat is not None and coords.lng is not None:
                 coords = (coords.lat, coords.lng)
@@ -296,6 +296,7 @@ class EntitySearch(object):
                 source = 'stamped'
             
             entity = self._sources_map[source].buildEntityFromWrapper(item[1].target)
+            #entity.types = [ item[1].target.subtype ]
             results.append(entity)
         
         return results

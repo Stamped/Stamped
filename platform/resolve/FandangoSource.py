@@ -98,11 +98,3 @@ def testFandango(fandango_id, title, release_date):
 if __name__ == '__main__':
     testFandango('1234', '21 Jump Street', parseDateString('2012-03-12'))
 
-
-
-
-
-
-
-
-

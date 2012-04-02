@@ -9,6 +9,7 @@ import Globals, utils
 
 from StampedTestUtils       import *
 from resolve.EntitySearch   import EntitySearch
+from resolve.Resolver       import simplify
 from pprint                 import pprint
 from copy                   import copy
 
@@ -75,20 +76,29 @@ class ASearchTestSuite(AStampedTestCase):
     def tearDown(self):
         pass
     
-    def _run_tests(self, tests, base_args, retries=0):
+    def _run_tests(self, tests, base_args, retries=3):
         for test in tests:
             args = copy(base_args)
             
             for k, v in test[0].iteritems():
-                assert k in args
                 args[k] = v
             
+            assert 'query' in args
             def validate(results):
                 for constraint in test[1]:
                     if not constraint.validate(results):
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
             
+            utils.log("")
+            utils.log("-" * 80)
+            utils.log("[%s] SEARCH TEST query '%s'" % (self, args['query'], ))
+            utils.log("-" * 80)
+            utils.log("")
+            
             self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
+    
+    def __str__(self):
+        return self.__class__.__name__
 
 class SearchResultConstraint(object):
     
@@ -113,25 +123,27 @@ class SearchResultConstraint(object):
         self.id     = id
         self.types  = types
         self.index  = index
+        self.strict = strict
+        self.soft   = soft
         self.extras = extras
     
     def _eq(self, a, b):
-        a = str(a)
-        b = str(b)
+        a = unicode(a)
+        b = unicode(b)
         
         if not self.strict:
-            a = a.lower().strip()
-            b = b.lower().strip()
+            a = simplify(a)
+            b = simplify(b)
         
         return a == b
     
     def validate(self, results):
+        pprint(utils.normalize(results[0].value, strict=True))
+        
         for i in xrange(len(results)):
             result = results[i]
-            utils.log(str(result))
-            while True:
-                pass
             
+            utils.log("VALIDATE: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             if self.title  is not None and not self._eq(self.title, result.title):
                 continue
             
@@ -144,16 +156,22 @@ class SearchResultConstraint(object):
                 if self.id is not None and not self._eq(self.id, result[source_id_key]):
                     continue
             
+            utils.log("VALIDATE2: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             if self.types is not None:
-                match = True
+                match = False
                 for t in self.types:
-                    if t not in result.types:
-                        match = False
+                    for t2 in result.types:
+                        if self._eq(t, t2):
+                            match = True
+                            break
+                    
+                    if not match:
                         break
                 
                 if not match:
                     continue
             
+            utils.log("VALIDATE3: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             if self.extras is not None:
                 match = True
                 for key, value in self.extras.iteritems():
@@ -164,6 +182,7 @@ class SearchResultConstraint(object):
                 if not match:
                     continue
             
+            utils.log("VALIDATE4: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             # constrainted result was matched
             if self.index is None or self.index == i or (self.index != -1 and self.soft):
                 return True

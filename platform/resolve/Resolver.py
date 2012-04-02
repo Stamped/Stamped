@@ -257,11 +257,11 @@ def format(string):
 def simplify(string):
     """
     General purpose string simplification
-
+    
     Maps unicode characters to simplified ascii versions.
     Removes parenthesized strings, bracked stings, and ellipsis
     Performs whitespace unification.
-
+    
     Multipass safe and partially optimized
     """
     string = getSimplifiedTitle(string)
@@ -1509,7 +1509,7 @@ class Resolver(object):
             'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
             'subcategory':          lambda q, m, s, o: 1, 
             'priority':             lambda q, m, s, o: 1, 
-            'recency':              lambda q, m, s, o: 5.0, #self.__recencyWeight(q, m, s, o, boost=5),
+            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
             'source_priority':      lambda q, m, s, o: 1.0, #self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
             'related_terms':        self.__relatedTermsWeight,
@@ -1890,21 +1890,33 @@ class Resolver(object):
         if q == m:
             weight = exact_boost * weight
         return weight
-
+    
     def __recencyTest(self, query, match, similarities, options):
+        factor = 0.9
+        
+        if match.subtype == 'movie':
+            factor = 1
+        
         try:
             if (datetime.utcnow() - match.date).days < 90:
-                return 1
+                return factor
         except:
             pass
+        
         return 0
     
     def __recencyWeight(self, query, match, similarities, options, boost=1):
+        if match.subtype == 'movie':
+            boost *= 3
+        
         try:
-            if (datetime.utcnow() - match.date).days < 90:
-                return 5
+            diff = (datetime.utcnow() - match.date).days
+            
+            if diff <= 90:
+                return boost
         except:
             pass
+        
         return 0
     
     def __setWeight(self, q, m):

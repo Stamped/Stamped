@@ -37,6 +37,8 @@ class AStampedTestCase(unittest.TestCase):
         result = None
         
         while True:
+            error = None
+            
             try:
                 result = func()
                 
@@ -44,14 +46,24 @@ class AStampedTestCase(unittest.TestCase):
                     assertion(result)
                 
                 break
-            except:
-                retries -= 1
-                if retries < 0:
-                    if result is not None:
-                        pprint(result)
-                    raise
-                
-                time.sleep(delay)
+            except SyntaxError:
+                raise
+            except Exception, e:
+                error = e
+            
+            retries -= 1
+            if retries < 0:
+                if result is not None:
+                    pprint(result)
+                raise
+            
+            utils.log("")
+            utils.log("[%s] error '%s' (%d more retries)" % (self, str(error)))
+            
+            time.sleep(delay)
+    
+    def __str__(self):
+        return self.__class__.__name__
 
 class StampedTestRunner(object):
     """

@@ -9,10 +9,12 @@ import Globals, utils
 
 from StampedTestUtils       import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
+from libs.Fandango          import Fandango
 
 class MovieSearchTests(ASearchTestSuite):
     
-    def test_basic_movies(self):
+    """
+    def test_basic(self):
         args = {
             'query'  : '', 
             'coords' : None, 
@@ -49,6 +51,45 @@ class MovieSearchTests(ASearchTestSuite):
         ]
         
         self._run_tests(tests, args)
+    """
+    
+    def __test_movie_search(self, movies, **extra_constraint_args):
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = []
+        
+        for movie in movies:
+            tests.append( ({ 'query' : movie.title, }, [ 
+                SearchResultConstraint(title=movie.title, 
+                                       types='movie'), 
+            ]))
+        
+        self._run_tests(tests, args)
+    
+    def test_in_theaters(self):
+        fandango = Fandango(verbose=True)
+        movies   = fandango.get_top_box_office_movies()
+        
+        return self.__test_movie_search(movies, index = 0)
+    
+    def test_coming_soon(self):
+        fandango = Fandango(verbose=True)
+        movies   = fandango.get_coming_soon_movies()
+        
+        return self.__test_movie_search(movies)
+    
+    def test_opening_this_week(self):
+        fandango = Fandango(verbose=True)
+        movies   = fandango.get_opening_this_week_movies()
+        
+        return self.__test_movie_search(movies)
 
 if __name__ == '__main__':
     StampedTestRunner().run()

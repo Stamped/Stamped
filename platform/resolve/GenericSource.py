@@ -190,9 +190,10 @@ class GenericSource(BasicSource):
             entity = SoftwareEntity()
         else:
             entity = BasicEntity()
-
+        
+        entity.types = [ wrapper.type ]
         self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
-
+        
         return entity
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
