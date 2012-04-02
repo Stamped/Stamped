@@ -494,6 +494,7 @@ def upgradeEntityData(entityData):
         setListGroup(media, new, 'artist_display_name', 'artists', wrapper=PersonEntityMini)
         setListGroup(video, new, 'cast', 'cast', wrapper=PersonEntityMini)
         setListGroup(video, new, 'director', 'directors', wrapper=PersonEntityMini)
+        setListGroup(video, new, 'network_name', 'networks', wrapper=PersonEntityMini)
 
         originalReleaseDate = parseDateString(media.pop('original_release_date', None))
         if new.release_date is None and originalReleaseDate is not None:
