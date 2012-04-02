@@ -6,9 +6,10 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import Entity
 import copy, json, urllib, utils
 
-from Schemas    import Entity
+from Schemas    import *
 from optparse   import OptionParser
 from utils      import AttributeDict
 from pprint     import pprint
@@ -109,7 +110,7 @@ class AppleAPICall(object):
                     except KeyError:
                         continue
                 
-                entity = Entity()
+                entity = utils.AttributeDict()
                 entity.subcategory = subcategory
                 
                 if wrapperType == u'track':
@@ -165,7 +166,7 @@ class AppleAPICall(object):
                     # in case i'm wrong for robustness purposes if we receive 
                     # an unexpected result
                     print "warning: unexpected / invalid entity type returned from iTunes API"
-                    pprint(reuslt)
+                    pprint(result)
                     continue
                 
                 if subcategory != 'artist':
@@ -213,6 +214,7 @@ class AppleAPICall(object):
                 if u'genres' in result:
                     entity.genre = u', '.join(result[u'genres'])
                 
+                entity = Entity.upgradeEntityData(dict(entity))
                 output.append(AttributeDict(result=result, entity=entity))
             except:
                 utils.printException()

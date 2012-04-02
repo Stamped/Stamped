@@ -271,20 +271,20 @@ def buildEntity(data=None, kind=None):
 def upgradeEntityData(entityData):
     # Just to be explicit..
     old     = entityData
-
+    
     kind    = deriveKindFromSubcategory(old['subcategory'])
     types   = deriveTypesFromSubcategories([old['subcategory']])
-
+    
     if kind == 'other' and ('coordinates' in old or 'address' in old):
         kind = PlaceEntity
-
+    
     new     = _getEntityObjectFromKind(kind)()
-
+    
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time
     except:
         seedTimestamp = datetime.utcnow()
-
+    
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None):
         if newName is None:
             newName = oldName
@@ -315,7 +315,7 @@ def upgradeEntityData(entityData):
                     t = source.pop('%s_%s' % (oldName, s), None)
                     if t is not None:
                         target['%s_%s' % (newName, s)] = t 
-
+    
     def setListGroup(source, target, oldName, newName=None, delimiter=',', wrapper=None):
         if newName is None:
             newName = oldName
@@ -335,8 +335,7 @@ def upgradeEntityData(entityData):
 
             target['%s_source' % newName]     = source.pop('%s_source' % oldName, 'seed')
             target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
-
-
+    
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
     timestamp               = old.pop('timestamp', {})
@@ -350,13 +349,12 @@ def upgradeEntityData(entityData):
     song                    = details.pop('song', {})
     book                    = details.pop('book', {})
     netflix                 = sources.pop('netflix', {})
-
-
+    
     # General
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-
+    
     # Images
     oldImages = [
         old.pop('image', None),
@@ -373,14 +371,13 @@ def upgradeEntityData(entityData):
     if len(new.images) > 0:
         new.images_source = 'seed'
         new.images_timestamp = seedTimestamp
-
+    
     setBasicGroup(old, new, 'desc')
     subcategory = old['subcategory']
     if subcategory == 'song':
         subcategory = 'track'
     new.types.append(subcategory)
-
-
+    
     # Sources
     setBasicGroup(sources, new['sources'], 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     setBasicGroup(sources, new['sources'], 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
@@ -390,32 +387,32 @@ def upgradeEntityData(entityData):
     setBasicGroup(sources.pop('factual', {}), new['sources'], 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     # TODO: Add factual_crosswalk
     setBasicGroup(sources.pop('singleplatform', {}), new['sources'], 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-
+    
     # Apple / iTunes
     setBasicGroup(sources, new['sources'], 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.itunes_id is None:
         apple = sources.pop('apple', {})
         setBasicGroup(apple, new['sources'], 'aid', 'itunes', newSuffix='id')
         setBasicGroup(apple, new['sources'], 'view_url', 'itunes', newSuffix='url')
-
+    
     # Amazon
     setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.amazon_id is None:
         amazon = sources.pop('amazon', {})
         setBasicGroup(amazon, new['sources'], 'asin', 'amazon', newSuffix='id')
         setBasicGroup(amazon, new['sources'], 'amazon_link', 'amazon', newSuffix='url')
-
+    
     # OpenTable
     setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
         setBasicGroup(sources.pop('openTable', {}), new['sources'], 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
-
+    
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
     setBasicGroup(googleplaces, new['sources'], 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.googleplaces_id is None:
         setBasicGroup(googleplaces, new['sources'], 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
-
+    
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)
     if userGenerated is not None:
@@ -427,15 +424,13 @@ def upgradeEntityData(entityData):
         subtitle = old.pop('subtitle', None)
         if subtitle is not None:
             new.sources.user_generated_subtitle = subtitle
-
-
+    
     # Contacts
     setBasicGroup(contact, new.contact, 'phone')
     setBasicGroup(contact, new.contact, 'site')
     setBasicGroup(contact, new.contact, 'email')
     setBasicGroup(contact, new.contact, 'fax')
-
-
+    
     # Places
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
@@ -452,8 +447,7 @@ def upgradeEntityData(entityData):
         setBasicGroup(restaurant, new, 'alcohol_flag')
         
         setListGroup(restaurant, new, 'cuisine')
-
-
+    
     # Artist
     if kind == 'person':
         songs = artist.pop('songs', [])
@@ -483,8 +477,7 @@ def upgradeEntityData(entityData):
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
 
         setListGroup(media, new, 'genre', 'genres')
-
-
+    
     # General Media
     if kind in ['media_collection', 'media_item']:
 
@@ -503,8 +496,7 @@ def upgradeEntityData(entityData):
             new.release_date = originalReleaseDate
             new.release_date_source = 'seed'
             new.release_date_timestamp = seedTimestamp
-
-
+    
     # Book
     if 'book' in types:
         setBasicGroup(book, new, 'isbn')
@@ -513,8 +505,7 @@ def upgradeEntityData(entityData):
 
         setListGroup(book, new, 'author', 'authors', wrapper=PersonEntityMini)
         setListGroup(book, new, 'publishers', 'publisher', wrapper=PersonEntityMini)
-
-
+    
     # Album
     if 'album' in types:
         songs = album.pop('tracks', [])
@@ -525,8 +516,7 @@ def upgradeEntityData(entityData):
         if len(songs) > 0:
             new.tracks_source = album.pop('songs_source', 'seed')
             new.tracks_timestamp = album.pop('songs_timestamp', seedTimestamp)
-
-
+    
     # Track
     if 'track' in types:
         albumName = song.pop('album_name', media.pop('album_name', None))
@@ -542,7 +532,7 @@ def upgradeEntityData(entityData):
             new.collections.append(entityMini)
             new.collections_source = song.pop('album_name_source', 'seed')
             new.collections_timestamp = song.pop('album_name_timestamp', seedTimestamp)
-
+    
     # Apps
     if 'app' in types:
         setBasicGroup(media, new, 'release_date')
@@ -557,6 +547,6 @@ def upgradeEntityData(entityData):
         if len(screenshots) > 0:
             new.screenshots_source = media.pop('screenshots_source', 'seed')
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
-
+    
     return new 
 

@@ -90,6 +90,11 @@ class ASearchTestSuite(AStampedTestCase):
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
             
             todo = [ args ]
+            
+            # optionally run each test twice, once with coordinates enabled, and once with them 
+            # disabled and expect the same constraints to be satisfied; note: test_coords should 
+            # not be set to true for non-national place search tests, but all other search tests 
+            # should be agnostic to coords (e.g., movies, books, etc.)
             if test_coords:
                 args2  = copy(args)
                 coords = (40.736, -73.989)

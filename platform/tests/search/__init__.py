@@ -1,3 +1,4 @@
 
+import ArtistSearchTests
 import MovieSearchTests
 

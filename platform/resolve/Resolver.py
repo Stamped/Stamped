@@ -91,7 +91,8 @@ _general_replacements = [
 # track-specific removal patterns
 _track_removals = [
     (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm)$)')  , [1]),
+    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)')  , [1]),
+    (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)') , [1]),
 ]
 
 # album-specific removal patterns
@@ -244,7 +245,7 @@ def format(string):
     Multipass safe and partially optimzed
     """
     modified = True
-    li = [ '\t' , '\n', '\r', '  ' ]
+    li = [ '\t' , '\n', '\r', '  ', '-' ]
     while modified:
         modified = False
         for ch in li:
@@ -252,6 +253,7 @@ def format(string):
             if string2 != string:
                 modified = True
                 string = string2
+    
     return string.strip()
 
 def simplify(string):
@@ -273,14 +275,38 @@ def simplify(string):
     
     return format(string)
 
-def trackSimplify(string):
+def trackSimplify(name, artist=None):
     """
     Track specific simplification for fuzzy comparisons.
 
     Multipass safe and partially optimized
     """
-    string = simplify(string)
+    string = simplify(name)
     string = regexRemoval(string, _track_removals)
+    
+    # occasionally track names have their artist's name embedded within them, 
+    # so attempt to canonicalize track names by removing their artist's name 
+    # if present. 
+    if artist:
+        artist = artist.lower().strip()
+        
+        artist_names = [
+            artist, 
+            simplify(artist), 
+            artistSimplify(artist), 
+        ]
+        
+        for name in artist_names:
+            if len(name) > 3:
+                n = string.find(name)
+                
+                if n >= 0:
+                    s2 = "%s %s" % (string[:n].strip(), string[n + len(name):].strip())
+                    
+                    if len(s2) > 3:
+                        string = s2
+                        break
+    
     return format(string)
 
 def albumSimplify(string):
@@ -342,8 +368,11 @@ def stringComparison(a, b, strict=False):
     if a == b:
         return 1.0
     else:
-        junk_to_ignore = " \t-.;&".__contains__ # characters for SequenceMatcher to disregard
-        return SequenceMatcher(junk_to_ignore, a, b).ratio()
+        junk_to_ignore = "\t-.;&".__contains__ # characters for SequenceMatcher to disregard
+        v = SequenceMatcher(junk_to_ignore, a, b).ratio()
+        
+        #utils.log("DEBUG: %s vs %s (%f)" % (a, b, v))
+        return v
 
 def setComparison(a, b, symmetric=False, strict=False):
     """
@@ -1290,9 +1319,9 @@ class Resolver(object):
         """ Reduces an album name to a simplified form for fuzzy comparison. """
         return albumSimplify(album)
     
-    def trackSimplify(self, track):
+    def trackSimplify(self, track, artist=None):
         """ Reduces a track name to a simplified form for fuzzy comparison. """
-        return trackSimplify(track)
+        return trackSimplify(track, artist)
     
     def movieSimplify(self, movie):
         """ Reduces a movie name to a simplified form for fuzzy comparison. """
@@ -1320,7 +1349,8 @@ class Resolver(object):
     
     def trackComparison(self, q, m):
         """ Track specific comparison metric. """
-        return self.nameComparison(self.trackSimplify(q), self.trackSimplify(m))
+        return self.nameComparison(self.trackSimplify(q.name, q.artist['name']), 
+                                   self.trackSimplify(m.name, m.artist['name']))
     
     def movieComparison(self, q, m):
         """ Movie specific comparison metric. """
@@ -1399,7 +1429,7 @@ class Resolver(object):
 
     def checkTrack(self, results, query, match, options, order):
         tests = [
-            ('name',        lambda q, m, s, o: self.trackComparison(q.name, m.name)),
+            ('name',        lambda q, m, s, o: self.trackComparison(q, m)),
             ('artist',      lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
             ('album',       lambda q, m, s, o: self.albumComparison(q.album['name'], m.album['name'])),
             ('length',      lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
@@ -1552,7 +1582,12 @@ class Resolver(object):
         return results
     
     def tracksSet(self, entity):
-        return set( [ self.trackSimplify(track['name']) for track in entity.tracks ] )
+        try:
+            artist = entity.artist['name']
+        except Exception:
+            artist = entity.name
+        
+        return set( [ self.trackSimplify(track['name'], artist) for track in entity.tracks ] )
     
     def albumsSet(self, entity):
         return set( [ self.albumSimplify(album['name']) for album in entity.albums ] )
@@ -1572,10 +1607,10 @@ class Resolver(object):
     def tracksComparison(self, query, match, options):
         query_track_set = self.tracksSet(query)
         match_track_set = self.tracksSet(match)
-
+        
         if self.verbose:
             self.__differenceLog('Track', query_track_set, match_track_set, query, match)
-
+        
         return self.setComparison(query_track_set, match_track_set, options)
 
     def castComparison(self, query, match, options):
@@ -1734,7 +1769,7 @@ class Resolver(object):
     def __nameTest(self, query, match, similarities, options):
         value = stringComparison(query.query_string, match.name)
         
-        a = simplify(query.query_string)
+        a = simplify(query.name)
         b = simplify(match.name)
         
         if len(a) > len(b):
@@ -1842,7 +1877,7 @@ class Resolver(object):
         except KeyError:
             value = 0.0
         
-        a = simplify(query.query_string)
+        a = simplify(query.name)
         b = simplify(match.name)
         
         if len(a) > len(b):

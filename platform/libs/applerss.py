@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import Entity
 import copy, json, re, urllib, utils
 
 from Schemas    import *
@@ -129,15 +130,15 @@ class AppleRSS(object):
         return entities
     
     def _parse_entity(self, entry, full=False):
-        entity = Entity()
+        entity = utils.AttributeDict()
         entity.title = entry['im:name']['label']
         
         details_map = {
-            'artist_display_name'   : [ 'im:artist', 'label' ], 
+            'artist'                : [ 'im:artist', 'label' ], 
             'artist_id'             : [ 'im:artist', 'attributes', 'href' ], 
             'genre'                 : [ 'category', 'attributes', 'term' ], 
-            'original_release_date' : [ 'im:releaseDate', 'attributes', 'label' ], 
-            'label_studio'          : [ 'rights', 'label' ], 
+            'release_date'          : [ 'im:releaseDate', 'attributes', 'label' ], 
+            'studio'                : [ 'rights', 'label' ], 
             'subcategory'           : ([ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
                                        [ 'im:contentType', 'attributes', 'term' ], ), 
             'album_name'            : [ 'im:collection', 'im:name', 'label' ], 
@@ -146,8 +147,8 @@ class AppleRSS(object):
         
         # parse entity details
         for k, v in details_map.iteritems():
-            
             v3 = v
+            
             if not isinstance(v, tuple):
                 v3 = [ v ]
             
@@ -228,7 +229,8 @@ class AppleRSS(object):
             elif entity.subcategory == 'song':
                 self.parse_song(entity)
         
-        return entity
+        pprint(dict(entity))
+        return Entity.updgradeEntityData(dict(entity))
     
     def _get_id(self, s):
         match = self._id_re.match(s)

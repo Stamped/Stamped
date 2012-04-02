@@ -108,7 +108,7 @@ class QuerySearchAll(ResolverSearchAll):
     
     @property
     def name(self):
-        return ''
+        return self.query_string
     
     @property
     def types(self):
