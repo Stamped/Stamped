@@ -24,6 +24,7 @@ FANDANGO_TOKEN  = '5348839'
 AMAZON_TOKEN    = 'stamped01-20'
 
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
+non_numeric_re  = re.compile('\D')
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -658,6 +659,7 @@ class HTTPEntity(Schema):
                 source              = HTTPActionSource()
                 source.source       = 'phone'
                 source.source_id    = entity.contact.phone
+                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_call', client=client)
@@ -700,6 +702,7 @@ class HTTPEntity(Schema):
                 source              = HTTPActionSource()
                 source.source       = 'phone'
                 source.source_id    = entity.contact.phone
+                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_call', client=client)
