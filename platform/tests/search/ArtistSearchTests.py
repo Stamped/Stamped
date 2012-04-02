@@ -10,6 +10,10 @@ import Globals, utils
 from StampedTestUtils       import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 
+
+# TODO: utilize artists from applerss' top songs / albums
+
+
 class ArtistSearchTests(ASearchTestSuite):
     
     def test_basic(self):

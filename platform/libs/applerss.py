@@ -9,9 +9,8 @@ import Globals
 import Entity
 import copy, json, re, urllib, utils
 
-from Schemas    import *
-from pprint     import pprint
-from libs.apple import AppleAPI
+from resolve.iTunesSource   import iTunesSource
+from pprint                 import pprint
 
 __all__ = [ "AppleRSS", "AppleRSSError" ]
 
@@ -22,13 +21,6 @@ class AppleRSS(object):
     
     DEFAULT_FORMAT = 'json'
     
-    _subcategory_map = {
-        'artist'        : 'artist', 
-        'track'         : 'song', 
-        'album'         : 'album', 
-        'application'   : 'app', 
-    }
-    
     _webobject_feeds = set([
         'newreleases', 
         'justadded', 
@@ -36,7 +28,7 @@ class AppleRSS(object):
     
     def __init__(self):
         self._id_re = re.compile('.*\/id([0-9]+).*')
-        self._apple = AppleAPI(country='us')
+        self._source = iTunesSource()
     
     def get_top_albums(self, **kwargs):
         return self._parse_feed('topalbums', **kwargs)
@@ -124,113 +116,17 @@ class AppleRSS(object):
                 entity = self._parse_entity(entry, full=full)
                 if entity is not None:
                     entities.append(entity)
+                    break
             except:
-                pass
+                utils.printException()
         
         return entities
     
     def _parse_entity(self, entry, full=False):
-        entity = utils.AttributeDict()
-        entity.title = entry['im:name']['label']
+        aid = entry['id']['attributes']['im:id']
         
-        details_map = {
-            'artist'                : [ 'im:artist', 'label' ], 
-            'artist_id'             : [ 'im:artist', 'attributes', 'href' ], 
-            'genre'                 : [ 'category', 'attributes', 'term' ], 
-            'release_date'          : [ 'im:releaseDate', 'attributes', 'label' ], 
-            'studio'                : [ 'rights', 'label' ], 
-            'subcategory'           : ([ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
-                                       [ 'im:contentType', 'attributes', 'term' ], ), 
-            'album_name'            : [ 'im:collection', 'im:name', 'label' ], 
-            'desc'                  : [ 'summary', 'label' ], 
-        }
-        
-        # parse entity details
-        for k, v in details_map.iteritems():
-            v3 = v
-            
-            if not isinstance(v, tuple):
-                v3 = [ v ]
-            
-            for v in v3:
-                e = entry
-                
-                try:
-                    for v2 in v:
-                        e = e[v2]
-                    
-                    if e is not None:
-                        entity[k] = e
-                        break
-                except:
-                    pass
-        
-        try:
-            entity.subcategory = self._subcategory_map[entity.subcategory.lower()]
-        except:
-            return None
-        
-        if entity.artist_id is not None:
-            entity.artist_id = self._get_id(entity.artist_id)
-        
-        # parse largest image available for this entity
-        try:
-            height = -1
-            
-            for image in entry['im:image']:
-                cur_height = int(image['attributes']['height'])
-                
-                if cur_height > height:
-                    height = cur_height
-                    entity.image = image['label']
-            
-            if entity.image is not None and entity.subcategory != 'app':
-                entity.image = entity.image.replace('100x100', '200x200').replace('170x170', '200x200')
-        except:
-            utils.printException()
-            pass
-        
-        entity.aid = self._get_id(entry['id']['label'])
-        
-        # parse links (view_url, preview_url)
-        links = entry['link']
-        if not isinstance(links, list):
-            links = [ links ]
-        
-        for link in links:
-            try:
-                href = link['attributes']['href']
-                
-                if 'im:duration' in link:
-                    if link['attributes']['im:assetType'].lower() == 'preview':
-                        if entity.subcategory == 'app':
-                            entity.screenshots = [ href ]
-                        else:
-                            entity.preview_url = href
-                            entity.preview_length = link['im:duration']['label']
-                else:
-                    entity.view_url = href
-            except:
-                utils.printException()
-                utils.log(json.dumps(entry['link'], indent=2))
-                pass
-        
-        # parse song-specific fields
-        if entity.subcategory == 'song':
-            album_url = entry['im:collection']['link']['attributes']['href']
-            entity.song_album_id = self._get_id(album_url)
-        
-        # optionally parse extra entity data via apple API
-        if full and entity.aid is not None:
-            if entity.subcategory == 'album':
-                self.parse_album(entity)
-            elif entity.subcategory == 'artist':
-                self.parse_artist(entity)
-            elif entity.subcategory == 'song':
-                self.parse_song(entity)
-        
-        pprint(dict(entity))
-        return Entity.updgradeEntityData(dict(entity))
+        wrapper = self._source.wrapperFromKey(aid)
+        return self._source.buildEntityFromWrapper(wrapper)
     
     def _get_id(self, s):
         match = self._id_re.match(s)
@@ -238,50 +134,6 @@ class AppleRSS(object):
             return match.groups()[0]
         
         return None
-    
-    def parse_album(self, entity):
-        assert entity.subcategory == 'album'
-        
-        results = self._apple.lookup(id=entity.aid, media='music', entity='song', transform=True)
-        results = filter(lambda r: r.entity.subcategory == 'song', results)
-        
-        entity.tracks = list(result.entity.title for result in results)
-    
-    def parse_song(self, entity):
-        assert entity.subcategory == 'song'
-        pass
-    
-    def parse_artist(self, entity):
-        assert entity.subcategory == 'artist'
-        
-        results = self._apple.lookup(id=entity.aid, media='music', entity='album', limit=200, transform=True)
-        results = filter(lambda r: r.entity.subcategory == 'album', results)
-        
-        if len(results) > 0:
-            albums = []
-            
-            for result in results:
-                schema = ArtistAlbumsSchema()
-                schema.album_name = result.entity.title
-                schema.album_id   = result.entity.aid
-                albums.append(schema)
-            
-            entity.albums = albums
-            images = results[0].entity.images
-            for k in images:
-                entity[k] = images[k]
-        
-        results = self._apple.lookup(id=entity.aid, media='music', entity='song', limit=200, transform=True)
-        results = filter(lambda r: r.entity.subcategory == 'song', results)
-        
-        songs = []
-        for result in results:
-            schema = ArtistSongsSchema()
-            schema.song_id   = result.entity.aid
-            schema.song_name = result.entity.title
-            songs.append(schema)
-        
-        entity.songs = songs
 
 def main():
     rss = AppleRSS()

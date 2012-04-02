@@ -292,7 +292,7 @@ def upgradeEntityData(entityData):
             item = source.pop(oldName, None)
         else:
             item = source.pop('%s_%s' % (oldName, oldSuffix), None)
-
+        
         if item is not None:
             # Manual conversions...
             if oldName == 'track_length':
