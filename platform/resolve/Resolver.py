@@ -2206,8 +2206,7 @@ def demo(generic_source, default_title):
                     print("Inverted to different entity! (dup or false positive)")
             else:
                 print("Inversion failed! (low asymetric comparison?)")
-            blank = Schemas.Entity()
-            generic_source.enrichEntityWithWrapper(new_query, blank)
+            blank = generic_source.buildEntityFromWrapper(new_query)
             pprint(blank.value)
 
     else:
