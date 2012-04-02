@@ -12,6 +12,7 @@ from difflib        import SequenceMatcher
 from Schemas        import *
 from libs.LibUtils  import parseDateString
 from datetime       import datetime
+from bson .objectid import ObjectId 
 
 
 categories = set([
@@ -265,12 +266,17 @@ def buildEntity(data=None, kind=None):
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
-    old = entityData
+    old     = entityData
 
-    kind = deriveKindFromSubcategory(old['subcategory'])
-    types = deriveTypesFromSubcategories([old['subcategory']])
+    kind    = deriveKindFromSubcategory(old['subcategory'])
+    types   = deriveTypesFromSubcategories([old['subcategory']])
 
-    new = _getEntityObjectFromKind(kind)()
+    new     = _getEntityObjectFromKind(kind)()
+
+    try:
+        seedTimestamp = ObjectId(old['entity_id']).generation_time
+    except:
+        seedTimestamp = datetime.utcnow()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None):
         if newName is None:
@@ -295,7 +301,7 @@ def upgradeEntityData(entityData):
 
             if newName != 'tombstone':
                 target['%s_source' % newName] = source.pop('%s_source' % oldName, 'seed')
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.utcnow())
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
 
             if additionalSuffixes is not None:
                 for s in additionalSuffixes:
@@ -321,7 +327,7 @@ def upgradeEntityData(entityData):
             target[newName] = items 
 
             target['%s_source' % newName]     = source.pop('%s_source' % oldName, 'seed')
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, datetime.utcnow())
+            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
 
 
     sources                 = old.pop('sources', {})
@@ -358,6 +364,9 @@ def upgradeEntityData(entityData):
             item.image = oldImage
             new.images.append(item)
             break
+    if len(new.images) > 0:
+        new.images_source = 'seed'
+        new.images_timestamp = seedTimestamp
 
     setBasicGroup(old, new, 'desc')
     subcategory = old['subcategory']
@@ -365,13 +374,10 @@ def upgradeEntityData(entityData):
         subcategory = 'track'
     new.types.append(subcategory)
 
-    # TODO: Add custom subtitle for user-generated
-
 
     # Sources
     setBasicGroup(sources, new['sources'], 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     setBasicGroup(sources, new['sources'], 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     setBasicGroup(sources, new['sources'], 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     setBasicGroup(sources, new['sources'], 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     setBasicGroup(sources.pop('tmdb', {}), new['sources'], 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
@@ -385,6 +391,13 @@ def upgradeEntityData(entityData):
         apple = sources.pop('apple', {})
         setBasicGroup(apple, new['sources'], 'aid', 'itunes', newSuffix='id')
         setBasicGroup(apple, new['sources'], 'view_url', 'itunes', newSuffix='url')
+
+    # Amazon
+    setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    if new.sources.amazon_id is None:
+        amazon = sources.pop('amazon', {})
+        setBasicGroup(amazon, new['sources'], 'asin', 'amazon', newSuffix='id')
+        setBasicGroup(amazon, new['sources'], 'amazon_link', 'amazon', newSuffix='url')
 
     # OpenTable
     setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
@@ -404,7 +417,10 @@ def upgradeEntityData(entityData):
         if 'created' in timestamp:
             new.sources.user_generated_timestamp = timestamp['created']
         else:
-            new.sources.user_generated_timestamp = datetime.utcnow()
+            new.sources.user_generated_timestamp = seedTimestamp
+        subtitle = old.pop('subtitle', None)
+        if subtitle is not None:
+            new.sources.user_generated_subtitle = subtitle
 
 
     # Contacts
@@ -441,11 +457,11 @@ def upgradeEntityData(entityData):
             if 'id' in song and 'source' in song and song['source'] == 'itunes':
                 entityMini.sources.itunes_id = song['id']
                 entityMini.sources.itunes_source = 'itunes'
-                entityMini.sources.itunes_timestamp = song.pop('timestamp', datetime.utcnow())
+                entityMini.sources.itunes_timestamp = song.pop('timestamp', seedTimestamp)
             new.tracks.append(entityMini)
         if len(songs) > 0:
             new.tracks_source = artist.pop('songs_source', 'seed')
-            new.tracks_timestamp = artist.pop('songs_timestamp', datetime.utcnow())
+            new.tracks_timestamp = artist.pop('songs_timestamp', seedTimestamp)
 
         albums = artist.pop('albums', [])
         for item in albums:
@@ -454,11 +470,11 @@ def upgradeEntityData(entityData):
             if 'id' in item and 'source' in item and item['source'] == 'itunes':
                 entityMini.sources.itunes_id = item['id']
                 entityMini.sources.itunes_source = 'itunes'
-                entityMini.sources.itunes_timestamp = item.pop('timestamp', datetime.utcnow())
+                entityMini.sources.itunes_timestamp = item.pop('timestamp', seedTimestamp)
             new.albums.append(entityMini)
         if len(albums) > 0:
             new.albums_source = artist.pop('albums_source', 'seed')
-            new.albums_timestamp = artist.pop('albums_timestamp', datetime.utcnow())
+            new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
 
         setListGroup(media, new, 'genre', 'genres')
 
@@ -479,18 +495,19 @@ def upgradeEntityData(entityData):
         if new.release_date is None and originalReleaseDate is not None:
             new.release_date = originalReleaseDate
             new.release_date_source = 'seed'
-            new.release_date_timestamp = datetime.utcnow()
+            new.release_date_timestamp = seedTimestamp
 
 
     # Book
     if 'book' in types:
+        print 'BOOK: %s' % book
         setBasicGroup(book, new, 'isbn')
         setBasicGroup(book, new, 'sku_number')
         setBasicGroup(book, new, 'num_pages', 'length')
 
-        setListGroup(book, new, 'authors', 'author')
-        setListGroup(book, new, 'publishers', 'publisher')
-        
+        setListGroup(book, new, 'author', 'authors', wrapper=PersonEntityMini)
+        setListGroup(book, new, 'publishers', 'publisher', wrapper=PersonEntityMini)
+
 
     # Album
     if 'album' in types:
@@ -501,7 +518,7 @@ def upgradeEntityData(entityData):
             new.tracks.append(entityMini)
         if len(songs) > 0:
             new.tracks_source = album.pop('songs_source', 'seed')
-            new.tracks_timestamp = album.pop('songs_timestamp', datetime.utcnow())
+            new.tracks_timestamp = album.pop('songs_timestamp', seedTimestamp)
 
 
     # Track
@@ -515,15 +532,15 @@ def upgradeEntityData(entityData):
             if albumId is not None:
                 entityMini.sources.itunes_id = albumId 
                 entityMini.sources.itunes_source = 'seed'
-                entityMini.sources.itunes_timestamp = datetime.utcnow()
+                entityMini.sources.itunes_timestamp = seedTimestamp
             new.collections.append(entityMini)
             new.collections_source = song.pop('album_name_source', 'seed')
-            new.collections_timestamp = song.pop('album_name_timestamp', datetime.utcnow())
+            new.collections_timestamp = song.pop('album_name_timestamp', seedTimestamp)
 
     # Apps
     if 'app' in types:
         setBasicGroup(media, new, 'release_date')
-        setListGroup(media, new, 'authors', 'artist_display_name', wrapper=PersonEntityMini)
+        setListGroup(media, new, 'artist_display_name', 'authors', wrapper=PersonEntityMini)
 
         screenshots = media.pop('screenshots', [])
         for screenshot in screenshots:
@@ -533,6 +550,6 @@ def upgradeEntityData(entityData):
             new.screenshots.append(imageSchema)
         if len(screenshots) > 0:
             new.screenshots_source = media.pop('screenshots_source', 'seed')
-            new.screenshots_timestamp = media.pop('screenshots_timestamp', datetime.utcnow())
+            new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
 
     return new 
