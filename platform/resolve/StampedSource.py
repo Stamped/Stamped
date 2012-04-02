@@ -38,8 +38,6 @@ class _EntityObject(object):
     """
 
     def __init__(self, entity):
-        # self.__entity = BasicEntity()
-        # self.__entity.importData(entity.value)
         self.__entity = buildEntity(entity.value)
 
     @property
@@ -67,7 +65,7 @@ class _EntityObject(object):
     @lazyProperty
     def subcategory(self):
         try:
-            return self.entity['subcategory']
+            return self.entity.subcategory
         except Exception:
             return 'other'
 
@@ -86,14 +84,14 @@ class EntityArtist(_EntityObject, ResolverArtist):
     @lazyProperty
     def albums(self):
         try:
-            return [ {'name' : album['album_name'] } for album in self.entity['albums'] ]
+            return [ {'name' : album['title'] } for album in self.entity['albums'] ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ {'name' : song['song_name'] } for song in self.entity['songs'] ]
+            return [ {'name' : track['title'] } for track in self.entity['tracks'] ]
         except Exception:
             return []
 
@@ -109,14 +107,14 @@ class EntityAlbum(_EntityObject, ResolverAlbum):
     @lazyProperty
     def artist(self):
         try:
-            return { 'name' : self.entity['artist_display_name'] }
+            return { 'name' : self.entity['artists'][0]['title'] }
         except Exception:
             return { 'name' : '' }
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ {'name':entry.value} for entry in self.entity['tracks'] ]
+            return [ {'name' : track['title'] } for track in self.entity['tracks'] ]
         except Exception:
             return []
 
@@ -131,22 +129,22 @@ class EntityTrack(_EntityObject, ResolverTrack):
 
     @lazyProperty
     def artist(self):
-        if self.entity['artist_display_name'] is not None:
-            return {'name':self.entity['artist_display_name']}
-        else:
-            return {'name':''}
+        try:
+            return { 'name' : self.entity['artists'][0]['title'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty
     def album(self):
-        if self.entity['album_name'] is not None:
-            return {'name':self.entity['album_name']}
-        else:
-            return {'name':''}
+        try:
+            return { 'name' : self.entity['collections'][0]['title'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty
     def length(self):
         try:
-            return float(self.entity['track_length'])
+            return int(self.entity['length'])
         except Exception:
             return -1
 
@@ -161,61 +159,37 @@ class EntityMovie(_EntityObject, ResolverMovie):
 
     @lazyProperty 
     def cast(self):
-        cast = self.entity['cast']
-        if cast is not None:
-            return [
-                {
-                    'name':entry.strip()
-                }
-                    for entry in cast.split(',')
-            ]
-        else:
+        try:
+            return [ {'name' : item['title'] } for item in self.entity['cast'] ]
+        except Exception:
             return []
 
     @lazyProperty 
     def director(self):
-        name = self.entity['director']
-        if name is not None:
-            return { 'name': name }
-        else:
-            name = self.entity['artist_display_name']
-            if name is not None:
-                return { 'name': name }
-        return { 'name':'' }
+        try:
+            return { 'name' : self.entity['directors'][0]['title'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty 
     def date(self):
-        date = self.entity['release_date']
-        if date is not None:
-            return date
-        else:
-            date = self.entity['original_release_date']
-            if date is not None:
-                parsed_date = parseDateString(date)
-                if parsed_date is None:
-                    try:
-                        year = int(date)
-                        date = datetime(year,1,1)
-                    except Exception:
-                        date = None
-                else:
-                    date = parsed_date
-        return date
+        try:
+            return self.entity['release_date']
+        except Exception:
+            return None
 
     @lazyProperty 
     def length(self):
-        value = self.entity['track_length']
-        if value is not None:
-            return float(value)
-        else:
+        try:
+            return int(self.entity['length'])
+        except Exception:
             return -1
 
     @lazyProperty 
     def rating(self):
-        value = self.entity['mpaa_rating']
-        if value is not None:
-            return value
-        else:
+        try:
+            return self.entity['mpaa_rating']
+        except Exception:
             return None
 
 
@@ -229,35 +203,38 @@ class EntityBook(_EntityObject, ResolverBook):
 
     @lazyProperty
     def author(self):
-        author = self.entity['author']
-        if author is None:
-            author = ''
-        return {'name':author}
+        try:
+            return { 'name' : self.entity['authors'][0]['title'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty
     def publisher(self):
-        publisher = self.entity['publisher']
-        if publisher is None:
-            publisher = ''
-        return {'name':publisher}
+        try:
+            return { 'name' : self.entity['publishers'][0]['title'] }
+        except Exception:
+            return { 'name' : '' }
 
     @lazyProperty
     def date(self):
         try:
-            return parseDateString(self.entity['publish_date'])
+            return self.entity['release_date']
         except Exception:
             return None
 
     @lazyProperty
     def length(self):
         try:
-            return float(self.entity['num_pages'])
+            return int(self.entity['length'])
         except Exception:
             return -1
 
     @lazyProperty
     def isbn(self):
-        return self.entity['isbn']
+        try:
+            return self.entity['isbn']
+        except:
+            return ''
 
     @lazyProperty
     def eisbn(self):
@@ -278,15 +255,10 @@ class EntityPlace(_EntityObject, ResolverPlace):
 
     @lazyProperty
     def address(self):
-        m = set(['street','street_ext','locality','region','postcode','country'])
-        address = {}
-        for k in m:
-            actual = 'address_%s' % k
-            if actual in self.entity:
-                value = self.entity[actual]
-                if value is not None and value != '':
-                    address[k] = value
-        return address
+        try:
+            return self.entity.formatAddress()
+        except Exception:
+            return ''
 
 
 class EntitySearchAll(ResolverProxy, ResolverSearchAll):
