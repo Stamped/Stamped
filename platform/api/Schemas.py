@@ -910,12 +910,12 @@ class MediaCollectionEntity(BasicMediaEntity):
     @property 
     def subtitle(self):
         if 'album' in self.types.value:
-            if self.artists is not None:
+            if len(self.artists) > 0:
                 return 'Album by %s' ', '.join(str(i) for i in self.artists)
             return 'Album'
 
         if 'tv' in self.types.value:
-            if self.networks is not None:
+            if len(self.networks) > 0:
                 return 'TV Show (%s)' ', '.join(str(i) for i in self.networks)
             return 'TV Show'
 
@@ -965,12 +965,12 @@ class MediaItemEntity(BasicMediaEntity):
             return 'Movie'
 
         if 'track' in self.types.value:
-            if self.artists is not None:
+            if len(self.artists) > 0:
                 return 'Song by %s' ', '.join(str(i) for i in self.artists)
             return 'Song'
 
         if 'book' in self.types.value:
-            if self.authors is not None:
+            if len(self.authors) > 0:
                 return '%s' ', '.join(str(i) for i in self.authors)
             return 'Book'
 
@@ -1029,7 +1029,7 @@ class SoftwareEntity(BasicEntity):
     @property 
     def subtitle(self):
         if 'app' in self.types.value:
-            if self.authors is not None:
+            if len(self.authors) > 0:
                 return 'App (%s)' % ', '.join(str(i) for i in self.authors)
             return 'App'
 
