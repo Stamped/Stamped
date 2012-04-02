@@ -35,11 +35,14 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-
+        
         entity = {'entity_id': document['entity']['entity_id']}
-        entityTitle = document['entity'].pop('title', None)
-        if entityTitle is not None:
-            entity['title'] = entityTitle
+        if 'title' in document['entity']:
+            entity['title'] = document['entity']['title']
+        if 'types' in document['entity']:
+            entity['types'] = document['entity']['types']
+        if 'kind' in document['entity']:
+            entity['kind'] = document['entity']['kind']
         document['entity'] = entity
         if 'stamp' in document:
             document['stamp']['entity'] = entity

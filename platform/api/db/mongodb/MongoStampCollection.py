@@ -46,9 +46,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             del(document['_id'])
 
         entity = {'entity_id': document['entity']['entity_id']}
-        entityTitle = document['entity'].pop('title', None)
-        if entityTitle is not None:
-            entity['title'] = entityTitle
+        if 'title' in document['entity']:
+            entity['title'] = document['entity']['title']
+        if 'types' in document['entity']:
+            entity['types'] = document['entity']['types']
+        if 'kind' in document['entity']:
+            entity['kind'] = document['entity']['kind']
         document['entity'] = entity
         
         stamp = self._obj(document, overflow=self._overflow)        
