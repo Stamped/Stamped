@@ -911,12 +911,12 @@ class MediaCollectionEntity(BasicMediaEntity):
     def subtitle(self):
         if 'album' in self.types.value:
             if len(self.artists) > 0:
-                return 'Album by %s' ', '.join(str(i['title']) for i in self.artists)
+                return 'Album by %s' % ', '.join(str(i['title']) for i in self.artists)
             return 'Album'
 
         if 'tv' in self.types.value:
             if len(self.networks) > 0:
-                return 'TV Show (%s)' ', '.join(str(i['title']) for i in self.networks)
+                return 'TV Show (%s)' % ', '.join(str(i['title']) for i in self.networks)
             return 'TV Show'
 
         return self._genericSubtitle()
@@ -966,12 +966,12 @@ class MediaItemEntity(BasicMediaEntity):
 
         if 'track' in self.types.value:
             if len(self.artists) > 0:
-                return 'Song by %s' ', '.join(str(i['title']) for i in self.artists)
+                return 'Song by %s' % ', '.join(str(i['title']) for i in self.artists)
             return 'Song'
 
         if 'book' in self.types.value:
             if len(self.authors) > 0:
-                return '%s' ', '.join(str(i['title']) for i in self.authors)
+                return '%s' % ', '.join(str(i['title']) for i in self.authors)
             return 'Book'
 
         return self._genericSubtitle()
