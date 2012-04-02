@@ -46,6 +46,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
 
+        document.pop('titlel')
+
         entity = buildEntity(document)
         
         return entity

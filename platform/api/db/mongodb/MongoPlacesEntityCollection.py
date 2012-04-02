@@ -34,6 +34,8 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
+            
+        document.pop('titlel')
 
         entity = buildEntity(document)
         
