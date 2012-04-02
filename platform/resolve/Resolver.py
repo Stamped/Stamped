@@ -1495,8 +1495,9 @@ class Resolver(object):
             ('query_string',        self.__queryStringTest),
             ('name',                self.__nameTest),
             ('location',            self.__locationTest),
-            ('subcategory',         self.__subcategoryTest),
-            ('priority',            lambda q, m, s, o: m.priority),
+            ('subcategory',         self.__subcategoryTest), 
+            ('priority',            lambda q, m, s, o: m.priority), 
+            ('popularity',          self.__popularityTest), 
             ('recency',             self.__recencyTest),
             ('source_priority',     self.__sourceTest),
             ('keywords',            self.__keywordsTest),
@@ -1509,6 +1510,7 @@ class Resolver(object):
             'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
             'subcategory':          lambda q, m, s, o: 1, 
             'priority':             lambda q, m, s, o: 1, 
+            'popularity':           self.__popularityWeight, 
             'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
             'source_priority':      lambda q, m, s, o: 1.0, #self.__sourceWeight(m.source),
             'keywords':             self.__keywordsWeight,
@@ -1730,7 +1732,32 @@ class Resolver(object):
         return 0
     
     def __nameTest(self, query, match, similarities, options):
-        return stringComparison(query.query_string, match.name)
+        value = stringComparison(query.query_string, match.name)
+        
+        a = simplify(query.query_string)
+        b = simplify(match.name)
+        
+        if len(a) > len(b):
+            a, b = b, a
+        
+        if a in b:
+            if b.startswith(a):
+                value = min(0.99, value * 1.2)
+            else:
+                value = min(0.99, value * 1.1)
+        
+        return value
+    
+    def __popularityTest(self, query, match, similarities, options):
+        try:
+            popularity = math.log(float(match.target.popularity) + 1)
+            
+            if popularity > 3:
+                return 1.0
+        except AttributeError:
+            pass
+        
+        return 0
     
     def __locationTest(self, query, match, similarities, options):
         if query.coordinates is None or match.coordinates is None:
@@ -1815,6 +1842,18 @@ class Resolver(object):
         except KeyError:
             value = 0.0
         
+        a = simplify(query.query_string)
+        b = simplify(match.name)
+        
+        if len(a) > len(b):
+            a, b = b, a
+        
+        if a in b:
+            if b.startswith(a):
+                value = min(0.99, value * 1.2)
+            else:
+                value = min(0.99, value * 1.1)
+        
         # note (travis):
         # the purpose of this formula is to smoothly weight names that are 
         # very strong matches or very weak matches heavily with partial 
@@ -1825,6 +1864,17 @@ class Resolver(object):
         weight = weight + (1.0 - weight) / 1.5
         
         return boost * weight
+    
+    def __popularityWeight(self, query, match, similarities, options):
+        try:
+            popularity = math.log(float(match.target.popularity) + 1)
+            
+            if popularity > 3:
+                return popularity
+        except AttributeError:
+            pass
+        
+        return 0.0
     
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None:
@@ -1898,7 +1948,8 @@ class Resolver(object):
             factor = 1
         
         try:
-            if (datetime.utcnow() - match.date).days < 90:
+            diff = (datetime.utcnow() - match.date).days
+            if diff <= 90 and diff > -60:
                 return factor
         except:
             pass
@@ -1912,7 +1963,7 @@ class Resolver(object):
         try:
             diff = (datetime.utcnow() - match.date).days
             
-            if diff <= 90:
+            if diff <= 90 and diff > -60:
                 return boost
         except:
             pass

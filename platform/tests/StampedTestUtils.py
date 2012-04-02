@@ -58,7 +58,7 @@ class AStampedTestCase(unittest.TestCase):
                 raise
             
             utils.log("")
-            utils.log("[%s] error '%s' (%d more retries)" % (self, str(error)))
+            utils.log("[%s] error '%s' (%d more retries)" % (self, str(error), retries))
             
             time.sleep(delay)
     

@@ -76,7 +76,7 @@ class ASearchTestSuite(AStampedTestCase):
     def tearDown(self):
         pass
     
-    def _run_tests(self, tests, base_args, retries=3):
+    def _run_tests(self, tests, base_args, retries=3, test_coords=True):
         for test in tests:
             args = copy(base_args)
             
@@ -89,13 +89,26 @@ class ASearchTestSuite(AStampedTestCase):
                     if not constraint.validate(results):
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
             
-            utils.log("")
-            utils.log("-" * 80)
-            utils.log("[%s] SEARCH TEST query '%s'" % (self, args['query'], ))
-            utils.log("-" * 80)
-            utils.log("")
+            todo = [ args ]
+            if test_coords:
+                args2  = copy(args)
+                coords = (40.736, -73.989)
+                
+                if 'coords' not in args2 or args2['coords'] is None:
+                    args2['coords'] = coords
+                else:
+                    args2['coords'] = None
+                
+                todo.append(args2)
             
-            self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
+            for args in todo:
+                utils.log("")
+                utils.log("-" * 80)
+                utils.log("[%s] SEARCH TEST query '%s'" % (self, args['query'], ))
+                utils.log("-" * 80)
+                utils.log("")
+                
+                self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
     
     def __str__(self):
         return self.__class__.__name__
@@ -110,6 +123,7 @@ class SearchResultConstraint(object):
                  index      = None, 
                  strict     = False, 
                  soft       = True, 
+                 match      = None, 
                  **extras):
         
         if types is not None and not isinstance(types, set):
@@ -125,6 +139,7 @@ class SearchResultConstraint(object):
         self.index  = index
         self.strict = strict
         self.soft   = soft
+        self.match  = match
         self.extras = extras
     
     def _eq(self, a, b):
@@ -134,6 +149,15 @@ class SearchResultConstraint(object):
         if not self.strict:
             a = simplify(a)
             b = simplify(b)
+            
+            if len(a) > len(b):
+                a, b = b, a
+            
+            if self.match == 'prefix':
+                return b.startswith(a)
+            
+            if self.match == 'contains':
+                return a in b
         
         return a == b
     
@@ -156,7 +180,6 @@ class SearchResultConstraint(object):
                 if self.id is not None and not self._eq(self.id, result[source_id_key]):
                     continue
             
-            utils.log("VALIDATE2: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             if self.types is not None:
                 match = False
                 for t in self.types:
@@ -171,7 +194,6 @@ class SearchResultConstraint(object):
                 if not match:
                     continue
             
-            utils.log("VALIDATE3: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             if self.extras is not None:
                 match = True
                 for key, value in self.extras.iteritems():
@@ -182,7 +204,6 @@ class SearchResultConstraint(object):
                 if not match:
                     continue
             
-            utils.log("VALIDATE4: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
             # constrainted result was matched
             if self.index is None or self.index == i or (self.index != -1 and self.soft):
                 return True
