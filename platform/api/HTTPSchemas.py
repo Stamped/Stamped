@@ -512,8 +512,9 @@ class HTTPEntity(Schema):
 
     def _addMetadata(self, name, value, **kwargs):
         if value is not None and len(value) > 0:
-            item = HTTPEntityMetadataItem()
-            item.name = name
+            item        = HTTPEntityMetadataItem()
+            item.name   = name
+            item.value  = value
 
             if 'key' in kwargs:
                 item.key = kwargs['key']
