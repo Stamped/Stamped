@@ -38,6 +38,7 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
+    from Entity                 import buildEntity 
 
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -2948,7 +2949,7 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
     
     def mergeEntityAsync(self, entity_dict, update = False):
-        entity = Entity(entity_dict)
+        entity = buildEntity(entity_dict)
         self._mergeEntity(entity, update)
     
     @lazyProperty
