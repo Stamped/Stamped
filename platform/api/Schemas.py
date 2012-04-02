@@ -520,7 +520,6 @@ class BasicEntity(Schema):
         
         self.entity_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring)
-        self.title_lower                    = SchemaElement(basestring)
         self.kind                           = SchemaElement(basestring, required=True, default='other')
         self.locale                         = SchemaElement(basestring)
         

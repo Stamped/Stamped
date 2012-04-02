@@ -515,8 +515,8 @@ class HTTPEntity(Schema):
             item = HTTPEntityMetadataItem()
             item.name = name
 
-            if isinstance(value, list):
-                value = ', '.join(i for i in value)
+            if isinstance(value, list) or isinstance(value, SchemaList):
+                value = ', '.join(str(i) for i in value)
             item.value = value
 
             if 'key' in kwargs:

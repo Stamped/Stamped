@@ -21,20 +21,6 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
     
     ### TODO: Rework this (hacking it right now)
     
-    def _convertToMongo(self, entity):
-        if entity is not None and entity.title_lower is None:
-            entity.title_lower = getSimplifiedTitle(entity.title)
-        if entity.entity_id is not None and entity.entity_id.startswith('T_'):
-            del entity.entity_id
-        document = AMongoCollection._convertToMongo(self, entity)
-        
-        if 'coordinates' in document:
-            document['coordinates'] = [
-                document['coordinates']['lng'], 
-                document['coordinates']['lat'], 
-            ]
-        return document
-    
     def _convertFromMongo(self, document):
         if document is None:
             return None
@@ -48,16 +34,27 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
+            
+        document.pop('titlel')
 
-        if 'schema_version' not in document:
-            entity = upgradeEntityData(document)
-        else:
-            entity = buildEntity(document)
-        
-        if entity.title_lower is None:
-            entity.title_lower = getSimplifiedTitle(entity.title)
+        entity = buildEntity(document)
         
         return entity
+    
+    def _convertToMongo(self, entity):
+        if entity.entity_id is not None and entity.entity_id.startswith('T_'):
+            del entity.entity_id
+        document = AMongoCollection._convertToMongo(self, entity)
+        if document is None:
+            return None
+        if 'title' in document:
+            document['titlel'] = getSimplifiedTitle(document['title'])
+        if 'coordinates' in document:
+            document['coordinates'] = [
+                document['coordinates']['lng'], 
+                document['coordinates']['lat'], 
+            ]
+        return document
     
     ### PUBLIC
     
