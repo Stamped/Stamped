@@ -275,6 +275,9 @@ def upgradeEntityData(entityData):
     kind    = deriveKindFromSubcategory(old['subcategory'])
     types   = deriveTypesFromSubcategories([old['subcategory']])
 
+    if kind == 'other' and ('coordinates' in old or 'address' in old):
+        kind = PlaceEntity
+
     new     = _getEntityObjectFromKind(kind)()
 
     try:
@@ -442,7 +445,7 @@ def upgradeEntityData(entityData):
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents)
-
+        
         setBasicGroup(place, new, 'address', 'formatted_address')
         setBasicGroup(place, new, 'hours')
         setBasicGroup(restaurant, new, 'menu')
