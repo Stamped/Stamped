@@ -275,6 +275,9 @@ def upgradeEntityData(entityData):
     kind    = deriveKindFromSubcategory(old['subcategory'])
     types   = deriveTypesFromSubcategories([old['subcategory']])
 
+    if kind == 'other' and ('coordinates' in old or 'address' in old):
+        kind = PlaceEntity
+
     new     = _getEntityObjectFromKind(kind)()
 
     try:
@@ -442,7 +445,7 @@ def upgradeEntityData(entityData):
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents)
-
+        
         setBasicGroup(place, new, 'address', 'formatted_address')
         setBasicGroup(place, new, 'hours')
         setBasicGroup(restaurant, new, 'menu')
@@ -494,6 +497,7 @@ def upgradeEntityData(entityData):
         setListGroup(media, new, 'artist_display_name', 'artists', wrapper=PersonEntityMini)
         setListGroup(video, new, 'cast', 'cast', wrapper=PersonEntityMini)
         setListGroup(video, new, 'director', 'directors', wrapper=PersonEntityMini)
+        setListGroup(video, new, 'network_name', 'networks', wrapper=PersonEntityMini)
 
         originalReleaseDate = parseDateString(media.pop('original_release_date', None))
         if new.release_date is None and originalReleaseDate is not None:
@@ -504,7 +508,6 @@ def upgradeEntityData(entityData):
 
     # Book
     if 'book' in types:
-        print 'BOOK: %s' % book
         setBasicGroup(book, new, 'isbn')
         setBasicGroup(book, new, 'sku_number')
         setBasicGroup(book, new, 'num_pages', 'length')
