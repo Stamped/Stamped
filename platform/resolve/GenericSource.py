@@ -228,6 +228,11 @@ class GenericSource(BasicSource):
         setAttribute('email',   'email')
         setAttribute('url',     'site')
 
+        try:
+            entity.tags.append(wrapper.subcategory)
+        except:
+            pass
+
         ### Place
         if entity.kind == 'place':
             try:

@@ -515,70 +515,6 @@ class ViewportSchema(Schema):
 
 class BasicEntity(Schema):
 
-    validKinds = set([
-        'place',
-        'person',
-        'media_collection',
-        'media_item',
-        'software',
-        'other',
-    ])
-
-    validTypes = set([
-        # PEOPLE
-        'artist',
-
-        # MEDIA COLLECTIONS
-        'tv',
-        'album',
-
-        # MEDIA ITEMS
-        'track',
-        'movie',
-        'book',
-
-        # SOFTWARE
-        'app',
-
-        # PLACES
-        'restaurant',
-        'bar',
-        'bakery',
-        'cafe',
-        'market',
-        'food',
-        'night_club',
-        'amusement_park',
-        'aquarium',
-        'art_gallery',
-        'beauty_salon',
-        'book_store',
-        'bowling_alley',
-        'campground',
-        'casino',
-        'clothing_store',
-        'department_store',
-        'establishment',
-        'florist',
-        'gym',
-        'home_goods_store',
-        'jewelry_store',
-        'library',
-        'liquor_store',
-        'lodging',
-        'movie_theater',
-        'museum',
-        'park',
-        'school',
-        'shoe_store',
-        'shopping_mall',
-        'spa',
-        'stadium',
-        'store',
-        'university',
-        'zoo',
-    ])
-
     def setSchema(self):
         self.schema_version                 = SchemaElement(int, required=True, default=0)
         
@@ -604,17 +540,6 @@ class BasicEntity(Schema):
         self.stats                          = EntityStatsSchema()
         self.sources                        = EntitySourcesSchema()
         self.timestamp                      = TimestampSchema()
-
-    def minimize(self, schema=None):
-        if schema is None:
-            schema = BasicEntityMini()
-        schema.entity_id                    = self.entity_id
-        schema.title                        = self.title
-        schema.kind                         = self.kind  
-        schema.types                        = self.types
-        schema.subtitle                     = self.subtitle 
-        schema.sources                      = self.sources
-        return schema
 
     @property 
     def subtitle(self):
@@ -790,9 +715,7 @@ class PlaceEntity(BasicEntity):
         self.alcohol_flag_source            = SchemaElement(basestring)
         self.alcohol_flag_timestamp         = SchemaElement(datetime)
 
-    def _formatAddress(self, extendStreet=False, breakLines=False):
-
-        countries = libs.CountryData.countries
+    def formatAddress(self, extendStreet=False, breakLines=False):
 
         street      = self.address_street
         street_ext  = self.address_street_ext
@@ -820,6 +743,7 @@ class PlaceEntity(BasicEntity):
 
             # Use country if outside US
             else:
+                countries = libs.CountryData.countries
                 if country in countries:
                     return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
                 else:

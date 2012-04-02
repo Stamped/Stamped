@@ -13,7 +13,7 @@ try:
     from utils                          import lazyProperty
 
     from Schemas                        import *
-    from Entity                         import setFields, isEqual, getSimplifiedTitle, upgradeEntityData, buildEntity
+    from Entity                         import getSimplifiedTitle, buildEntity
 
     from AMongoCollection               import AMongoCollection
     from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
@@ -48,10 +48,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
 
-        if 'schema_version' not in document:
-            entity = upgradeEntityData(document)
-        else:
-            entity = buildEntity(document)
+        entity = buildEntity(document)
         
         if entity.title_lower is None:
             entity.title_lower = getSimplifiedTitle(entity.title)

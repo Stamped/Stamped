@@ -581,6 +581,29 @@ class HTTPEntity(Schema):
 
         return '%s/default/%s.png' % (base_url, filename)
 
+    def _formatReleaseDate(self, date):
+        try:
+            return date.strftime("%h %d, %Y")
+        except:
+            return None
+
+    def _formatFilmLength(self, seconds):
+        try:
+            seconds = int(seconds)
+            m = (seconds % 3600) / 60
+            h = (seconds - (seconds % 3600)) / 3600
+            if h > 0:
+                return '%s hr %s min' % (h, m)
+            else:
+                return '%s min' % m
+        except Exception:
+            return None
+
+    def _formatSubcategory(self, subcategory):
+        if subcategory == 'tv':
+            return 'TV'
+        return subcategory.replace('_', ' ').title()
+
 
     def importEntity(self, entity, client=None):
         # General
@@ -593,14 +616,14 @@ class HTTPEntity(Schema):
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
 
-        subcategory             = formatSubcategory(self.subcategory)
+        subcategory             = self._formatSubcategory(self.subcategory)
         
         # Restaurant / Bar
         if entity.kind == 'place' and entity.category == 'food':
-            self.address        = entity.formatted_address
+            self.address        = entity.formatAddress(extendStreet=True)
             self.coordinates    = _coordinatesDictToFlat(self.coordinates)
 
-            address = formatAddress(entity, extendStreet=True, breakLines=True)
+            address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
                 self.caption = address 
 
@@ -656,10 +679,10 @@ class HTTPEntity(Schema):
 
         # Generic Place
         elif entity.kind == 'place':
-            self.address        = entity.formatted_address
+            self.address        = entity.formatAddress(extendStreet=True)
             self.coordinates    = _coordinatesDictToFlat(self.coordinates)
 
-            address = formatAddress(entity, extendStreet=True, breakLines=True)
+            address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
                 self.caption = address 
 
@@ -715,18 +738,18 @@ class HTTPEntity(Schema):
         elif entity.kind == 'media_item' and 'movie' in entity.types.value:
 
             if entity.subcategory == 'movie' and entity.length is not None:
-                length = formatFilmLength(entity.length)
+                length = self._formatFilmLength(entity.length)
                 if length is not None:
                     self.caption = length
 
-            if entity.subcategory == 'tv' and entity.network_name is not None:
-                self.caption = entity.network_name
+            if entity.subcategory == 'tv' and len(entity.networks) > 0:
+                self.caption = ', '.join(str(i['title']) for i in entity.networks)
 
             # Metadata
 
             self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
-            self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Cast', entity.cast, extended=True, optional=True)
             self._addMetadata('Director', entity.directors, optional=True)
             self._addMetadata('Genres', entity.genres, optional=True)
@@ -813,12 +836,12 @@ class HTTPEntity(Schema):
 
             elif entity.subcategory == 'album':
                 self._addMetadata('Genre', entity.genres)
-                self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+                self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.subcategory == 'song':
                 self._addMetadata('Genre', entity.genres)
-                self._addMetadata('Release Date', formatReleaseDate(entity.release_date))
+                self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
             # Actions: Listen
@@ -1152,7 +1175,6 @@ class HTTPEntityNew(Schema):
         entity.schema_version   = 0
         entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
         entity.title            = self.title 
-        # TODO: Add subtitle
 
         def addField(entity, field, value, timestamp):
             if value is not None:
@@ -1215,7 +1237,6 @@ class HTTPEntityEdit(Schema):
                 'entity_id':    self.entity_id,
                 'title':        self.title,
                 'subtitle':     self.subtitle,
-                'type':         deriveTypesFromSubcategories([self.subcategory])[-1],
                 'category':     self.category,
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
@@ -1245,25 +1266,7 @@ class HTTPEntityAutosuggest(Schema):
             self.category       = schema.category 
 
             if isinstance(distance, float) and distance >= 0:
-                self.distance   = distance    
-
-        elif schema.__class__.__name__ == 'Entity':
-            setFields(schema, detailed=True)
-
-            if schema.search_id is not None:
-                self.search_id = schema.search_id
-            else:
-                self.search_id = schema.entity_id
-            assert self.search_id is not None
-
-            self.title = schema.title
-            self.subtitle = schema.subtitle
-            self.category = schema.category
-            if isinstance(distance, float) and distance >= 0:
-                self.distance = distance
-            
-            if self.subtitle is None:
-                entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+                self.distance   = distance
         else:
             raise NotImplementedError
         return self
@@ -1934,7 +1937,6 @@ class HTTPEntity_stampedtest(Schema):
         ])
 
         if schema.__class__.__name__ in validEntities:
-            # setFields(schema)
             
             self.entity_id          = schema.entity_id
             self.title              = schema.title 
