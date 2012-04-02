@@ -142,6 +142,7 @@ class GenericSource(BasicSource):
                 entityMini.title = album['name']
                 if 'key' in album:
                     entityMini.sources['%s_id' % artist.source] = album['key']
+                    entityMini.sources['%s_source' % artist.source] = artist.source
                 entity.albums.append(entityMini)
             except Exception:
                 report()
