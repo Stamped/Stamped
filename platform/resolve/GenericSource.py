@@ -230,7 +230,8 @@ class GenericSource(BasicSource):
         setAttribute('url',     'site')
 
         try:
-            entity.tags.append(wrapper.subcategory)
+            if wrapper.subcategory not in entity.types.value:
+                entity.types.append(wrapper.subcategory)
         except:
             pass
 
