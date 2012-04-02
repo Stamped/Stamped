@@ -520,7 +520,6 @@ def upgradeEntityData(entityData):
     # Track
     if 'track' in types:
         albumName = song.pop('album_name', media.pop('album_name', None))
-        print albumName
         if albumName is not None:
             entityMini = MediaCollectionEntityMini()
             entityMini.title = albumName
