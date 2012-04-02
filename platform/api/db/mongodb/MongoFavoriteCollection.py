@@ -14,6 +14,7 @@ from AFavoriteDB                    import AFavoriteDB
 from AMongoCollectionView           import AMongoCollectionView
 from MongoUserFavEntitiesCollection import MongoUserFavEntitiesCollection
 from Schemas                        import *
+from Entity                         import buildEntity
 
 class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
     
@@ -35,7 +36,10 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
 
-        document['entity'] = buildEntity(document.pop('entity', {}))
+        entityId = document['entity']['entity_id']
+        document['entity'] = {'entity_id': entityId}
+        if 'stamp' in document:
+            document['stamp']['entity'] = {'entity_id': entityId}
         
         favorite = self._obj(document, overflow=self._overflow)        
         
