@@ -272,7 +272,7 @@ class GooglePlacesSource(GenericSource):
                         data['address_string'] = result.neighborhood
                         
                         # TODO: TYPE
-                        #data['subcategory'] = result.subcategory
+                        data['subcategory'] = result.subcategory
                         raw_results.append(data)
 
                 def getGoogleNationalSearch(q):
