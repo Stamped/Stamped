@@ -519,7 +519,7 @@ class BasicEntity(Schema):
         self.schema_version                 = SchemaElement(int, required=True, default=0)
         
         self.entity_id                      = SchemaElement(basestring)
-        self.title                          = SchemaElement(basestring, required=True)
+        self.title                          = SchemaElement(basestring)
         self.title_lower                    = SchemaElement(basestring)
         self.kind                           = SchemaElement(basestring, required=True, default='other')
         self.locale                         = SchemaElement(basestring)

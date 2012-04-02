@@ -16,7 +16,6 @@ from pprint                 import pformat
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
-# from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
 
 from db.mongodb.MongoAccountCollection          import MongoAccountCollection

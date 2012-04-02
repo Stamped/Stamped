@@ -27,6 +27,20 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
         self._collection.ensure_index([('user_id', pymongo.ASCENDING), \
                                         ('timestamp.created', pymongo.DESCENDING)])
     
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        document['entity'] = buildEntity(document.pop('entity', {}))
+        
+        favorite = self._obj(document, overflow=self._overflow)        
+        
+        return favorite 
+    
     ### PUBLIC
     
     @lazyProperty

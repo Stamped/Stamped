@@ -38,8 +38,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def places_collection(self):
         return MongoPlacesEntityCollection()
     
-    ### PUBLIC
-    
     def _convertFromMongo(self, document):
         if document is None:
             return None
@@ -63,6 +61,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document = AMongoCollection._convertToMongo(self, entity)
         
         return document
+    
+    ### PUBLIC
     
     def addEntity(self, entity):
         if entity.title_lower is None:

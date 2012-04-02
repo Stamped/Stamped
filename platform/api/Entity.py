@@ -335,6 +335,7 @@ def upgradeEntityData(entityData):
     artist                  = details.pop('artist', {})
     album                   = details.pop('album', {})
     song                    = details.pop('song', {})
+    book                    = details.pop('book', {})
     netflix                 = sources.pop('netflix', {})
 
 
@@ -480,6 +481,16 @@ def upgradeEntityData(entityData):
             new.release_date_source = 'seed'
             new.release_date_timestamp = datetime.utcnow()
 
+
+    # Book
+    if 'book' in types:
+        setBasicGroup(book, new, 'isbn')
+        setBasicGroup(book, new, 'sku_number')
+        setBasicGroup(book, new, 'num_pages', 'length')
+
+        setListGroup(book, new, 'authors', 'author')
+        setListGroup(book, new, 'publishers', 'publisher')
+        
 
     # Album
     if 'album' in types:

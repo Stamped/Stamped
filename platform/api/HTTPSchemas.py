@@ -1744,11 +1744,11 @@ class HTTPActivity(Schema):
                 self.user = HTTPUserMini().importSchema(UserMini(user)).value 
             
             if linked_stamp is not None:
-                self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
+                self.linked_stamp = HTTPStamp().importSchema(schema.linked_stamp).value
             elif linked_user is not None:
-                self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
+                self.linked_user = HTTPUserMini().importSchema(schema.linked_user).value
             elif linked_entity is not None:
-                self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
+                self.linked_entity = HTTPEntity().importSchema(schema.linked_entity).value
             elif linked_url is not None:
                 self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
 
