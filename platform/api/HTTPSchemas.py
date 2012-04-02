@@ -713,7 +713,7 @@ class HTTPEntity(Schema):
 
             # Metadata
 
-            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_book', client=client))
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', entity.release_date)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
             self._addMetadata('Publisher', ', '.join(str(i['title']) for i in entity.publishers))
@@ -747,7 +747,7 @@ class HTTPEntity(Schema):
 
             # Metadata
 
-            self._addMetadata('Category', entity.subcategory, icon=self._getIconURL('cat_film', client=client))
+            self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Cast', ', '.join(str(i['title']) for i in entity.cast), extended=True, optional=True)
