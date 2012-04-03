@@ -11,9 +11,16 @@
 #import "Util.h"
 #import "STConfirmationView.h"
 
-typedef void (^STCallback)(void);
-
 @interface STRdioPlaylistHelper : NSObject <RDAPIRequestDelegate>
+
+- (id)initWithID:(NSString*)rdioID;
++ (void)dispatchWithID:(NSString*)rdioID;
+
+@property (nonatomic, readonly, copy) NSString* rdioId;
+
+@end
+
+@interface STRdioPlayerHelper : NSObject <RDAPIRequestDelegate>
 
 - (id)initWithID:(NSString*)rdioID;
 + (void)dispatchWithID:(NSString*)rdioID;
@@ -24,7 +31,7 @@ typedef void (^STCallback)(void);
 
 @interface STRdio () <RdioDelegate>
 
-- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action shouldExecute:(BOOL)flag;
+- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag;
 - (void)addToPlaylist:(NSString*)rdioID;
 
 @property (nonatomic, readonly, retain) Rdio* rdio;
@@ -103,16 +110,15 @@ static STRdio* _sharedInstance;
 }
 
 
-- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action {
-  return [self didChooseSource:source forAction:action shouldExecute:NO];
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
+  return [self didChooseSource:source forAction:action withContext:context shouldExecute:NO];
 }
 
-- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action {
-  [self didChooseSource:source forAction:action shouldExecute:YES];
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
+  [self didChooseSource:source forAction:action withContext:context shouldExecute:YES];
 }
 
-
-- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action shouldExecute:(BOOL)flag {
+- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   BOOL handled = NO;
   if ([source.source isEqualToString:@"rdio"]) {
     if ([action isEqualToString:@"listen"] && source.sourceID != nil) {

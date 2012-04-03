@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "STEntityDetail.h"
+#import "Stamp.h"
 
 @interface STActionContext : NSObject
 
 @property (nonatomic, readwrite, retain) id<STEntityDetail> entityDetail;
+@property (nonatomic, readwrite, retain) Stamp* stamp;
 @property (nonatomic, readwrite, assign) CGRect frame;
 
 + (STActionContext*)context;

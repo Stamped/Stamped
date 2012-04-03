@@ -10,21 +10,13 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STViewController.h"
+#import "STStandardViewController.h"
+#import "STContainerViewController.h"
 
 @class Stamp;
-@class STStampDetailCardView;
-@class STStampDetailHeader;
-@class STStampDetailToolbar;
 
-@interface STStampDetailViewController : STViewController<UIActionSheetDelegate,
-                                                          MFMailComposeViewControllerDelegate>
+@interface STStampDetailViewController : STContainerViewController
 
 - (id)initWithStamp:(Stamp*)stamp;
-
-@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet STStampDetailCardView* cardView;
-@property (nonatomic, retain) IBOutlet STStampDetailToolbar* toolbar;
-@property (nonatomic, retain) IBOutlet STStampDetailHeader* header;
 
 @end

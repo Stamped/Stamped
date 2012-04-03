@@ -142,6 +142,7 @@
   subtitleLabel_.frame = CGRectMake(CGRectGetMaxX(categoryImageView_.frame) + 4,
                                     CGRectGetMinY(categoryImageView_.frame) - 1,
                                     280, subtitleSize.height);
+  //NSLog(@"header frame:%f,%f,%f,%f",self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
 }
 
 - (void)setStamp:(Stamp*)stamp {

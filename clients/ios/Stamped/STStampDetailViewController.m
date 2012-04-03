@@ -14,235 +14,107 @@
 #import "CreateStampViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
-#import "STStampDetailCardView.h"
-#import "STStampDetailHeader.h"
-#import "STStampDetailToolbar.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
+#import "STSynchronousWrapper.h"
+#import "STEntityDetailFactory.h"
+#import "STScrollViewContainer.h"
+#import "STStampedActions.h"
+#import "STActionManager.h"
+#import "StampDetailHeaderView.h"
+#import "STActionManager.h"
+#import "STStampedActions.h"
 
-static NSString* const kCreateFavoritePath = @"/favorites/create.json";
-static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
-static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
-static NSString* const kRemoveLikePath = @"/stamps/likes/remove.json";
+@interface STStampDetailViewController () <StampDetailHeaderViewDelegate>
 
-typedef enum {
-  StampDetailActionTypeDeleteComment = 0,
-  StampDetailActionTypeRetrySend,
-  StampDetailActionTypeDeleteStamp,
-  StampDetailActionTypeShare
-} StampDetailActionType;
-
-@interface STStampDetailViewController ()
 @property (nonatomic, retain) Stamp* stamp;
 
-- (void)_showEmailViewController;
-- (void)_showTweetViewController;
-- (void)_headerPressed:(id)sender;
-- (void)_todoButtonPressed:(id)sender;
-- (void)_likeButtonPressed:(id)sender;
-- (void)_shareButtonPressed:(id)sender;
-- (void)_restampButtonPressed:(id)sender;
+- (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
+
+@property (nonatomic, readonly, retain) StampDetailHeaderView* headerView;
+
 @end
 
 @implementation STStampDetailViewController
 
+@synthesize headerView = _headerView;
+
 @synthesize stamp = _stamp;
-@synthesize toolbar = _toolbar;
-@synthesize header = _header;
-@synthesize scrollView = _scrollView;
-@synthesize cardView = _cardView;
 
 - (id)initWithStamp:(Stamp*)stamp {
-  self = [super initWithNibName:@"STStampDetailViewController" bundle:nil];
+  self = [super init];
   if (self) {
     _stamp = [stamp retain];
   }
   return self;
 }
 
+- (void)loadView {
+  [super loadView];
+  
+  UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:_stamp.entityObject.title]
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil] autorelease];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  
+  _headerView = [[StampDetailHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 68)];
+  _headerView.stamp = self.stamp;
+  _headerView.delegate = self;
+  //_headerView.backgroundColor = [UIColor redColor];
+  [self.scrollView appendChildView:_headerView];
+  
+  
+  NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:_stamp.entityObject.entityID 
+                                                                                 andCallbackBlock:^(id<STEntityDetail> detail) {
+                                                                                   [self _didLoadEntityDetail:detail];
+                                                                                 }];
+  [Util runOperationAsynchronously:operation];
+}
+
 - (void)dealloc {
   [_stamp release];
-  self.scrollView = nil;
-  self.toolbar = nil;
-  self.header = nil;
-  self.cardView = nil;
+  [_headerView release];
   [super dealloc];
 }
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  if ([[AccountManager sharedManager].currentUser.screenName isEqualToString:_stamp.user.screenName])
-    _toolbar.style = STStampDetailToolbarStyleMine;
-
-  _toolbar.likeButton.selected = _stamp.isLiked.boolValue;
-  [_toolbar.likeButton addTarget:self
-                          action:@selector(_likeButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
-  _toolbar.todoButton.selected = _stamp.entityObject.favorite != nil;
-  [_toolbar.todoButton addTarget:self
-                          action:@selector(_todoButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
-  [_toolbar.shareButton addTarget:self
-                           action:@selector(_shareButtonPressed:)
-                 forControlEvents:UIControlEventTouchUpInside];
-  [_toolbar.stampButton addTarget:self
-                           action:@selector(_restampButtonPressed:)
-                 forControlEvents:UIControlEventTouchUpInside];
-  
-  _header.subtitleLabel.text = _stamp.entityObject.subtitle;
-  _header.categoryImageView.image = _stamp.entityObject.stampDetailCategoryImage;
-  _header.stampImage = [_stamp.user stampImageWithSize:StampImageSize46];
-  _header.title = _stamp.entityObject.title;
-  [_header addTarget:self action:@selector(_headerPressed:) forControlEvents:UIControlEventTouchUpInside];
-
-  _cardView.stamp = _stamp;
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
 }
 
-- (void)viewDidUnload {
-  [super viewDidUnload];
-  self.scrollView = nil;
-  self.toolbar = nil;
-  self.header = nil;
-  self.cardView = nil;
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  //[self setUpToolbar];
+  _headerView.inverted = NO;
+  [_headerView setNeedsDisplay];
 }
 
-#pragma mark - UIActionSheetDelegate methods.
-
-- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  if (actionSheet.tag == StampDetailActionTypeShare) {
-    BOOL canTweet = NO;
-    if ([TWTweetComposeViewController canSendTweet] &&
-        [AccountManager.sharedManager.currentUser.screenName isEqualToString:_stamp.user.screenName]) {
-      canTweet = YES;
-    }
-    if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Copy link", nil)]) {  // Copy link...
-      [UIPasteboard generalPasteboard].string = _stamp.URL;
-    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
-      [self _showTweetViewController];
-    } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
-      [self _showEmailViewController];
-    }
-  }
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  //stampPhotoView_.imageURL = stamp_.imageURL;
 }
 
-#pragma mark - MFMailComposeViewControllerDelegate methods.
 
-- (void)mailComposeController:(MFMailComposeViewController*)controller 
-          didFinishWithResult:(MFMailComposeResult)result
-                        error:(NSError*)error {
-  [self dismissModalViewControllerAnimated:YES];
+- (void)_didLoadEntityDetail:(id<STEntityDetail>)detail {
+
+  CGFloat wrapperHeight = 200;
+  CGRect wrapperFrame = CGRectMake(0, 0 , 320, wrapperHeight);
+  STSynchronousWrapper* eDetailView = [STSynchronousWrapper wrapperForEntityDetail:detail
+                                                                         withFrame:wrapperFrame 
+                                                                          andStyle:@"StampDetail" 
+                                                                          delegate:self.scrollView];
+  [self.scrollView appendChildView:eDetailView];
 }
 
-#pragma mark - Private methods.
-
-- (void)_showEmailViewController {
-  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
-  vc.mailComposeDelegate = self;
-  [vc setSubject:[NSString stringWithFormat:NSLocalizedString(@"Check out this stamp of %@", nil), _stamp.entityObject.title]];
-  [vc setMessageBody:[NSString stringWithFormat:NSLocalizedString(@"<a href=\"%@\">%@</a><br/><br/>(Sent via <a href=\"http://stamped.com/\">Stamped</a>)", nil), _stamp.URL, _stamp.URL]
-              isHTML:YES];
-  [self presentModalViewController:vc animated:YES];
-  [vc release];
-}
-
-- (void)_showTweetViewController {
-  TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
-  NSString* blurb = [NSString stringWithFormat:NSLocalizedString(@"%@. \u201c%@\u201d", nil), _stamp.entityObject.title, _stamp.blurb];
-  if (_stamp.blurb.length == 0)
-    blurb = [_stamp.entityObject.title stringByAppendingString:@"."];
-  
-  BOOL hasImage = _stamp.imageURL != nil;
-  
-  NSString* substring = [blurb substringToIndex:MIN(blurb.length, hasImage ? 98 : 104)];
-  if (blurb.length > substring.length)
-    blurb = [substring stringByAppendingString:@"..."];
-  
-  NSString* initial = hasImage ? NSLocalizedString(@"Stamped [pic]:", nil) : NSLocalizedString(@"Stamped:", nil);
-  // Stamped ([pic]): [blurb] [link]
-  [twitter setInitialText:[NSString stringWithFormat:@"%@ %@ %@", initial, blurb, _stamp.URL]];
-  
-  if ([TWTweetComposeViewController canSendTweet]) {
-    [self presentViewController:twitter animated:YES completion:nil];
-  }
-  
-  twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
-    [self dismissModalViewControllerAnimated:YES];
-  };
-}
-
-- (void)_headerPressed:(id)sender {
-  EntityDetailViewController* vc = (EntityDetailViewController*)[Util detailViewControllerForEntity:_stamp.entityObject];
-  vc.referringStamp = _stamp;
-  [self.navigationController pushViewController:vc animated:YES];
-}
-
-#pragma mark - Toolbar methods.
-
-- (void)_todoButtonPressed:(id)sender {
-  BOOL shouldRemove = _stamp.entityObject.favorite != nil;
-  NSString* path = shouldRemove ? kRemoveFavoritePath : kCreateFavoritePath;
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
-  objectLoader.method = RKRequestMethodPOST;
-  objectLoader.objectMapping = favoriteMapping;
-  if (shouldRemove) {
-    objectLoader.params = [NSDictionary dictionaryWithObject:_stamp.entityObject.entityID forKey:@"entity_id"];
-    _stamp.entityObject.favorite = nil;
-    [Stamp.managedObjectContext save:NULL];
-  } else {
-    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                           _stamp.entityObject.entityID, @"entity_id",
-                           _stamp.stampID, @"_stampid", nil];
-  }
-  [objectLoader send];
-}
-
-- (void)_likeButtonPressed:(id)sender {
-  BOOL shouldRemove = _stamp.isLiked.boolValue;
-  NSString* path = shouldRemove ? kRemoveLikePath : kCreateLikePath;
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
-  objectLoader.method = RKRequestMethodPOST;
-  objectLoader.objectMapping = stampMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:_stamp.stampID, @"_stampid", nil];
-
-  [objectLoader send];
-}
-
-- (void)_shareButtonPressed:(id)sender {
-  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
-                                                      delegate:self
-                                             cancelButtonTitle:nil
-                                        destructiveButtonTitle:nil
-                                             otherButtonTitles:nil] autorelease];
-  
-  if ([TWTweetComposeViewController canSendTweet] &&
-      [AccountManager.sharedManager.currentUser.screenName isEqualToString:_stamp.user.screenName]) {
-    [sheet addButtonWithTitle:NSLocalizedString(@"Share to Twitter", nil)];
-  }
-  
-  if ([MFMailComposeViewController canSendMail])
-    [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
-  
-  [sheet addButtonWithTitle:NSLocalizedString(@"Copy link", nil)];
-  sheet.cancelButtonIndex = [sheet addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
-  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
-  sheet.tag = StampDetailActionTypeShare;
-  [sheet showInView:self.view];
-}
-
-- (void)_restampButtonPressed:(id)sender {
-  CreateStampViewController* vc = [[CreateStampViewController alloc] initWithEntityObject:_stamp.entityObject
-                                                                               creditedTo:_stamp.user];
-  [self.navigationController pushViewController:vc animated:YES];
-  [vc release];
+- (IBAction)handleEntityTap:(id)sender {
+  STActionContext* context = [STActionContext context];
+  id<STAction> action = [STStampedActions actionViewEntity:self.stamp.entityObject.entityID withOutputContext:context];
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
 @end

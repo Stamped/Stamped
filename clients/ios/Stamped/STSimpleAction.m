@@ -12,15 +12,31 @@
 @implementation STSimpleAction
 
 @synthesize type = _type;
-@synthesize name = name_;
-@synthesize sources = sources_;
+@synthesize name = _name;
+@synthesize sources = _sources;
+
+- (id)init
+{
+  self = [super init];
+  if (self) {
+    _sources = (NSArray<STSource>*) [[NSArray alloc] init];
+  }
+  return self;
+}
 
 - (void)dealloc {
   [_type release];
-  self.name = nil;
-  self.sources = nil;
+  [_name release];
+  [_sources release];
   
   [super dealloc];
+}
+
++ (STSimpleAction*)actionWithType:(NSString*)type andSource:(id<STSource>)source {
+  STSimpleAction* action = [[[STSimpleAction alloc] init] autorelease];
+  action.sources = [NSArray arrayWithObject:source];
+  action.type = type;
+  return  action;
 }
 
 + (RKObjectMapping*)mapping {

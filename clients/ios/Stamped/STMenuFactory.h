@@ -11,7 +11,7 @@
 
 @interface STMenuFactory : NSObject
 
-- (NSOperation*)menuWithEntityId:(NSString*)entityID andCallbackBlock:(void (^)(id<STMenu>))aBlock;
+- (void)menuWithEntityId:(NSString*)entityID andCallbackBlock:(void (^)(id<STMenu>))aBlock;
 
 + (STMenuFactory*)sharedFactory;
 

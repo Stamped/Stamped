@@ -13,10 +13,12 @@
 
 @synthesize entityDetail = _entityDetail;
 @synthesize frame = _frame;
+@synthesize stamp = _stamp;
 
 - (void)dealloc
 {
   [_entityDetail release];
+  [_stamp release];
   [super dealloc];
 }
 

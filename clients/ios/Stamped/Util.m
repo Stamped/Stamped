@@ -11,14 +11,10 @@
 #import "User.h"
 #import "Entity.h"
 #import "SearchResult.h"
-#import "PlaceDetailViewController.h"
-#import "MusicDetailViewController.h"
-#import "BookDetailViewController.h"
-#import "OtherDetailViewController.h"
-#import "FilmDetailViewController.h"
 #import "EntityDetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STActionMenuFactory.h"
+#import "StampedAppDelegate.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -39,8 +35,9 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 @property (nonatomic, assign) id target;
 @property (nonatomic, assign) SEL selector; 
 @property (nonatomic, retain) id state;
+@property (nonatomic, readwrite, retain) STCallback callback;
 
-- (void)callback:(id)view;
+- (void)callbackMethod:(id)view;
 
 @end
 
@@ -245,61 +242,13 @@ static Rdio* _rdio;
 
 + (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject {
   UIViewController* detailViewController = nil;
-  if (newEDetail) {
-    detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:entityObject];
-  }
-  else {
-    switch (entityObject.entityCategory) {
-      case EntityCategoryFood:
-        detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-      case EntityCategoryMusic:
-        detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-      case EntityCategoryBook:
-        detailViewController = [[BookDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-      case EntityCategoryFilm:
-        detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-      case EntityCategoryOther:
-        detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-      default:
-        //      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
-        break;
-    }
-  }
+  detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:entityObject];
   return [detailViewController autorelease];
 }
 
 + (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult {
-  UIViewController* detailViewController = nil;
-  if (newEDetail) {
-    detailViewController = [[EntityDetailViewController alloc] initWithSearchResult:searchResult];
-  }
-  else {
-    switch (searchResult.searchCategory) {
-      case SearchCategoryFood:
-        detailViewController = [[PlaceDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-      case SearchCategoryMusic:
-        detailViewController = [[MusicDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-      case SearchCategoryBook:
-        detailViewController = [[BookDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-      case SearchCategoryFilm:
-        detailViewController = [[FilmDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-      case SearchCategoryOther:
-        detailViewController = [[OtherDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-      default:
-        //      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
-        break;
-    }
-  }
+  UIViewController* detailViewController = nil;    
+  detailViewController = [[EntityDetailViewController alloc] initWithSearchResult:searchResult];
   return [detailViewController autorelease];
 }
 
@@ -422,10 +371,19 @@ static Rdio* _rdio;
   button.selector = selector;
   button.target = target;
   button.state = message;
-  [button addTarget:button action:@selector(callback:) forControlEvents:UIControlEventTouchUpInside];
+  [button addTarget:button action:@selector(callbackMethod:) forControlEvents:UIControlEventTouchUpInside];
   button.backgroundColor = [UIColor clearColor];
   return button;
 }
+
++ (UIView*)tapViewWithFrame:(CGRect)frame andCallback:(STCallback)callback {
+  STUtilButton* button = [[[STUtilButton alloc] initWithFrame:frame] autorelease];
+  button.callback = callback;
+  [button addTarget:button action:@selector(callbackMethod:) forControlEvents:UIControlEventTouchUpInside];
+  button.backgroundColor = [UIColor clearColor];
+  return button;
+}
+
 
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color {
   UIWindow* window = [[UIApplication sharedApplication] keyWindow];
@@ -471,6 +429,78 @@ static Rdio* _rdio;
   return [view convertRect:view.frame toView:nil];
 }
 
++ (void)runOperationAsynchronously:(NSOperation*)operation {
+  dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  dispatch_async(aQueue, ^{
+    @autoreleasepool {
+      [operation start];
+    }
+  });
+}
+
++ (UINavigationController*)sharedNavigationController {
+  StampedAppDelegate* delegate = (StampedAppDelegate*) [UIApplication sharedApplication].delegate;
+  return delegate.navigationController;
+}
+
++ (void)globalLoadingLock {
+  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] 
+                                            initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
+  activityView.frame = [Util centeredAndBounded:CGSizeMake(44, 44) inFrame:window.frame];
+  activityView.backgroundColor = [UIColor colorWithRed:.8 green:.8 blue:.8 alpha:.4];
+  
+  activityView.layer.cornerRadius = 2.0;
+  activityView.layer.borderColor =[UIColor colorWithRed:.8 green:.8 blue:.8 alpha:.7].CGColor;
+  activityView.layer.borderWidth = 1.0;
+  activityView.layer.shadowColor = [UIColor blackColor].CGColor;
+  activityView.layer.shadowOpacity = .1;
+  activityView.layer.shadowRadius = 1.0;
+  activityView.layer.shadowOffset = CGSizeMake(0, 1);
+  
+  [window addSubview:activityView];
+  [activityView startAnimating];
+  activityView.hidden = NO;
+  //activityView.backgroundColor = [UIColor redColor];
+  window.userInteractionEnabled = NO;
+}
+
++ (void)globalLoadingUnlock {
+  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  [[window.subviews lastObject] removeFromSuperview];
+  window.userInteractionEnabled = YES;
+}
+
++ (void)globalInteractionLock {
+  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  window.userInteractionEnabled = NO;
+}
+
++ (void)globalInteractionUnlock {
+  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  window.userInteractionEnabled = YES;
+}
+
++ (void)executeAsync:(void(^)(void))block {
+  void(^block2)(void) = [block copy];
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    @autoreleasepool {
+      block2();
+      [block2 release];
+    }
+  });
+}
+
++ (void)executeOnMainThread:(void(^)(void))block {
+  void(^block2)(void) = [block copy];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    @autoreleasepool {
+      block2();
+      [block2 release];
+    }
+  });
+}
+
 @end
 
 @implementation STPopUpView
@@ -505,15 +535,23 @@ static Rdio* _rdio;
 
 @synthesize target = target_;
 @synthesize selector = selector_;
-@synthesize state = state_;
+@synthesize state = _state;
+@synthesize callback = _callback;
+
 
 - (void)dealloc {
-  self.state = nil;
+  [_state release];
+  [_callback release];
   [super dealloc];
 }
 
-- (void)callback:(id)view {
-  [self.target performSelector:self.selector withObject:self.state];
+- (void)callbackMethod:(id)view {
+  if (self.callback) {
+    self.callback();
+  }
+  else {
+    [self.target performSelector:self.selector withObject:self.state];
+  }
 }
 
 @end

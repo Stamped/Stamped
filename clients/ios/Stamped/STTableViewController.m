@@ -95,13 +95,13 @@ static const CGFloat kReloadHeight = 60.0;
     arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
     arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(self.shelfView.bounds) - 58 - bottomPadding, 18, 40);
     [self.shelfView addSubview:arrowImageView_];
-    [arrowImageView_ release];
+    //[arrowImageView_ release];
 
     spinnerView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     spinnerView_.hidesWhenStopped = YES;
     spinnerView_.center = arrowImageView_.center;
     [self.shelfView addSubview:spinnerView_];
-    [spinnerView_ release];
+    //[spinnerView_ release];
     
     reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     reloadLabel_.text = kNotConnectedText;
@@ -112,7 +112,7 @@ static const CGFloat kReloadHeight = 60.0;
     reloadLabel_.textColor = [UIColor stampedGrayColor];
     reloadLabel_.textAlignment = UITextAlignmentCenter;
     [self.shelfView addSubview:reloadLabel_];
-    [reloadLabel_ release];
+    //[reloadLabel_ release];
     
     lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     lastUpdatedLabel_.text = @"Last updated a long time ago";
@@ -123,7 +123,7 @@ static const CGFloat kReloadHeight = 60.0;
     lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
     lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
     [self.shelfView addSubview:lastUpdatedLabel_];
-    [lastUpdatedLabel_ release];
+    //[lastUpdatedLabel_ release];
   }
 }
 
@@ -232,7 +232,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [super scrollViewDidScroll:scrollView];
-
+  
   if (isLoading_ && hasHeaders_) {
     if (scrollView.contentOffset.y >= 0)
       scrollView.contentInset = UIEdgeInsetsZero;
@@ -253,7 +253,6 @@ static const CGFloat kReloadHeight = 60.0;
   
   if (isLoading_ || disableReload_)
     return;
-  
   shouldReload_ = scrollView.contentOffset.y < -kReloadHeight;
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable)
     reloadLabel_.text = kNotConnectedText;

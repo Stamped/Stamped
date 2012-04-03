@@ -88,43 +88,6 @@ static const CGFloat _padding_h = 10;
     [scrollView release];
     self.frame = CGRectMake(0, 0, 320, CGRectGetMaxY(self.pageControl.frame)+10);
     
-    for (NSInteger i = 0; i < 2; i++) {
-      CAGradientLayer* gradient = [CAGradientLayer layer];
-      gradient.anchorPoint = CGPointMake(0, 0);
-      gradient.position = CGPointMake(0, 0);
-      CGRect gradientFrame = self.frame;
-      gradientFrame.size.width = CGRectGetMinX(scrollView.frame);
-      gradient.startPoint = CGPointMake(0, .5);
-      gradient.endPoint = CGPointMake(1, .5);
-      gradient.startPoint = CGPointMake(0, .5);
-      gradient.endPoint = CGPointMake(1, .5);
-      NSArray* colors = [NSArray arrayWithObjects:
-                         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.7].CGColor,
-                         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.6].CGColor,
-                         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.5].CGColor,
-                         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.3].CGColor,
-                         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0].CGColor,
-                         nil];
-      if (i == 0) {
-        //Left
-      }
-      else {
-        //Right
-        gradientFrame.origin.x = CGRectGetMaxX(scrollView.frame);
-        NSMutableArray* colors2 = [NSMutableArray array];
-        for (id obj in [colors reverseObjectEnumerator]) {
-          [colors2 addObject:obj];
-        }
-        colors = colors2;
-      }
-      gradient.frame = gradientFrame;
-      gradient.cornerRadius = 0;
-      gradient.startPoint = CGPointMake(0, .5);
-      gradient.endPoint = CGPointMake(1, .5);
-      gradient.colors = colors;
-      
-      [self.layer addSublayer:gradient];
-    }
   }
   return self;
 }

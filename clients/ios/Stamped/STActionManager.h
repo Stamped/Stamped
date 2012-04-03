@@ -14,4 +14,6 @@
 
 + (STActionManager*)sharedActionManager;
 
+@property (nonatomic, readwrite, assign) id actionsLocked;
+
 @end

@@ -36,4 +36,22 @@
 @dynamic user;
 @dynamic via;
 
+- (NSString*)entityID {
+  if (self.entityObject) {
+    return self.entityObject.entityID;
+  }
+  else {
+    return nil;
+  }
+}
+
+- (NSString*)userID {
+  if (self.user) {
+    return self.user.userID;
+  }
+  else {
+    return nil;
+  }
+}
+
 @end

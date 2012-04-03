@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import "STAction.h"
 #import <Rdio/Rdio.h>
+#import "STTypes.h"
 
 @class User;
 @class Entity;
@@ -60,6 +61,7 @@ extern NSString* const kKeychainTwitterToken;
 + (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
 + (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;
++ (UIView*)tapViewWithFrame:(CGRect)frame andCallback:(STCallback)callback;
 
 + (CGSize)size:(CGSize)size withScale:(CGFloat)scale;
 
@@ -74,5 +76,21 @@ extern NSString* const kKeychainTwitterToken;
 + (Rdio*)sharedRdio;
 
 + (CGRect)getAbsoluteFrame:(UIView*)view;
+
++ (void)runOperationAsynchronously:(NSOperation*)operation;
+
++ (UINavigationController*)sharedNavigationController;
+
++ (void)globalLoadingLock;
+
++ (void)globalLoadingUnlock;
+
++ (void)globalInteractionLock;
+
++ (void)globalInteractionUnlock;
+
++ (void)executeAsync:(void(^)(void))block;
+
++ (void)executeOnMainThread:(void(^)(void))block;
 
 @end

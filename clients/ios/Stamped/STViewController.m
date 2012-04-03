@@ -40,16 +40,19 @@
   shelfFrame.origin.y = MAX([self minimumShelfYPosition], [self maximumShelfYPosition] - scrollView.contentOffset.y);
   shelfView_.frame = shelfFrame;
   CGFloat yInset = CGRectGetMaxY(shelfFrame) - 9.0;
-  if (self.navigationController.navigationBarHidden)
+  if (self.navigationController.navigationBarHidden) {
     yInset -= 44;  // Height of the nav bar.
+  }
 
   scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(yInset, 0, 0, 0);
 }
 
+//TODO investigate value
 - (CGFloat)minimumShelfYPosition {
   return -356;
 }
 
+//TODO investigate value
 - (CGFloat)maximumShelfYPosition {
   return -356;
 }
