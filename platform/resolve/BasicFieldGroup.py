@@ -22,6 +22,7 @@ class BasicFieldGroup(AFieldGroup):
     """
     """
 
+    # TODO: Shouldn't *fields be before kwargs???
     def __init__(self, name, source_path=None, timestamp_path=None, *fields):
         if source_path is None:
             source_path = [ '%s_source' % name ]

@@ -8,6 +8,7 @@ __license__   = "TODO"
 import copy, re
 from datetime import datetime
 from schema import *
+from pprint import pformat
 ### TEMP
 from Entity import *
 import libs.CountryData
@@ -556,6 +557,15 @@ class BasicEntity(Schema):
         if self.user_generated_subtitle is not None:
             return self.user_generated_subtitle
         return str(self.subcategory).replace('_', ' ').title()
+    
+    def __str__(self):
+        t = list(self.types)
+        if len(t) == 1: t = t[0]
+        
+        return "%s:%s (%s)" % (self.__class__.__name__, self.title, t)
+    
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, pformat(self.value))
 
 class EntityStatsSchema(Schema):
     def setSchema(self):
@@ -941,17 +951,17 @@ class MediaItemEntity(BasicMediaEntity):
     def setSchema(self):
         BasicMediaEntity.setSchema(self)
         self.kind                           = SchemaElement(basestring, required=True, default='media_item')
-
+        
         # Tracks
         self.collections                    = SchemaList(MediaCollectionEntityMini())
         self.collections_source             = SchemaElement(basestring)
         self.collections_timestamp          = SchemaElement(datetime)
-
+        
         # Books
         self.isbn                           = SchemaElement(basestring)
         self.isbn_source                    = SchemaElement(basestring)
         self.isbn_timestamp                 = SchemaElement(datetime)
-
+        
         self.sku_number                     = SchemaElement(basestring)
         self.sku_number_source              = SchemaElement(basestring)
         self.sku_number_timestamp           = SchemaElement(datetime)
@@ -1053,11 +1063,12 @@ class BasicEntityMini(BasicEntity):
     def setSchema(self):
         self.entity_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring)
-        self.kind                           = SchemaElement(basestring)
+        self.kind                           = SchemaElement(basestring, default='other')
         self.types                          = SchemaList(SchemaElement(basestring))
-        self.subtitle                       = SchemaElement(basestring)
         self.sources                        = EntitySourcesSchema()
         self.coordinates                    = CoordinatesSchema()
+
+        self.schema_version                 = SchemaElement(int, default=0)
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):

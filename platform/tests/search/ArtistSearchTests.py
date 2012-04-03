@@ -9,14 +9,13 @@ import Globals, utils
 
 from StampedTestUtils       import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
-
-
-# TODO: utilize artists from applerss' top songs / albums
-
+from libs.applerss          import AppleRSS
 
 class ArtistSearchTests(ASearchTestSuite):
     
     def test_basic(self):
+        """ Test basic artist searches """
+        
         args = {
             'query'  : '', 
             'coords' : None, 
@@ -125,6 +124,135 @@ class ArtistSearchTests(ASearchTestSuite):
             #                           index=0), 
             #]), 
         ]
+        
+        self._run_tests(tests, args)
+    
+    def test_international(self):
+        """ Test international artist support.  """
+        
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = [
+            ({ 'query' : 'the beatles', }, [ 
+                SearchResultConstraint(title='the beatles', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'david guetta', }, [ 
+                SearchResultConstraint(title='david guetta', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'susan boyle', }, [ 
+                SearchResultConstraint(title='susan boyle', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'rammstein', }, [ 
+                SearchResultConstraint(title='rammstein', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'empire of the sun', }, [ 
+                SearchResultConstraint(title='empire of the sun', 
+                                       types='artist'), 
+            ]), 
+            ({ 'query' : 'deadmau5', }, [ 
+                SearchResultConstraint(title='deadmau5', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : '2face idibia', }, [ 
+                SearchResultConstraint(title='2face idibia', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'angelique kidjo', }, [ 
+                SearchResultConstraint(title='angelique kidjo', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'gotye', }, [ 
+                SearchResultConstraint(title='gotye', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'michel telo', }, [ 
+                SearchResultConstraint(title='michel telo', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'stereo total', }, [ 
+                SearchResultConstraint(title='stereo total', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'yelle', }, [ 
+                SearchResultConstraint(title='yelle', 
+                                       types='artist'), 
+            ]), 
+            ({ 'query' : 'stefanie heinzmann', }, [ 
+                SearchResultConstraint(title='stefanie heinzmann', 
+                                       types='artist'), 
+            ]), 
+            ({ 'query' : 'flo rida', }, [ 
+                SearchResultConstraint(title='flo rida', 
+                                       types='artist'), 
+            ]), 
+            ({ 'query' : 'olly murs', }, [ 
+                SearchResultConstraint(title='olly murs', 
+                                       types='artist'), 
+            ]), 
+        ]
+        
+        self._run_tests(tests, args)
+    
+    def test_top_songs(self):
+        """ Test artists from top songs from iTunes """
+        
+        rss  = AppleRSS()
+        objs = rss.get_top_songs(limit=10)
+        
+        self.__test_artists(objs)
+    
+    def test_top_albums(self):
+        """ Test artists from top albums from iTunes """
+        
+        rss  = AppleRSS()
+        objs = rss.get_top_albums(limit=10)
+        
+        self.__test_artists(objs)
+    
+    def __test_artists(self, objs):
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = []
+        
+        for obj in objs:
+            artist = None
+            try:
+                artist = obj.artists[0].title
+            except Exception:
+                pass
+            
+            if artist is not None:
+                tests.append(({ 'query' : artist, }, [ 
+                    SearchResultConstraint(title=artist, types='artist'), 
+                ]))
         
         self._run_tests(tests, args)
 

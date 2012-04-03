@@ -26,7 +26,7 @@ class ASubcategoryGroup(BasicFieldGroup):
         self.__eligible.remove(subcategory)
     
     def eligible(self, entity):
-        if 'subcategory' in entity and entity['subcategory'] in self.__eligible:
+        if entity.subcategory in self.__eligible:
             return True
         else:
             return False  
@@ -249,13 +249,6 @@ class ArtistDisplayNameGroup(AMediaGroup):
         AMediaGroup.__init__(self, 'artist_display_name')
         self.addNameField()
 
-class TracksGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'tracks')
-        self.addNameField()
-        self.addEligible('album')
-
 class TrackLengthGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
@@ -272,25 +265,20 @@ class ShortDescriptionGroup(ASubcategoryGroup):
         self.addEligible('movie')
         self.addEligible('tv')
 
-class AlbumsGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'albums')
-        self.addNameField()
-        self.addEligible('artist')
-
 class AlbumListGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'album_list')
-        self.addNameField()
+        ASubcategoryGroup.__init__(self, 'album_list', source_path=['albums_source'], timestamp_path=['albums_timestamp'])
+        # self.addNameField()
+        self.addField(['albums'])
         self.addEligible('artist')
 
 class TrackListGroup(ASubcategoryGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'track_list')
-        self.addNameField()
+        ASubcategoryGroup.__init__(self, 'track_list', source_path=['tracks_source'], timestamp_path=['tracks_timestamp'])
+        # self.addNameField()
+        self.addField(['tracks'])
         self.addEligible('artist')
         self.addEligible('album')
 
@@ -395,11 +383,11 @@ class SubcategoryGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
-class StampedGroup(BasicFieldGroup):
+class StampedTombstoneGroup(BasicFieldGroup):
 
     def __init__(self):
-        BasicFieldGroup.__init__(self, 'stamped')
-        self.addField(['stamped_id'])
+        BasicFieldGroup.__init__(self, 'tombstone')
+        self.addField(['tombstone_id'])
 
     def eligible(self, entity):
         return True

@@ -50,6 +50,12 @@ class FullResolveContainer(BasicSourceContainer):
             iTunesGroup(),
             AmazonGroup(),
             FandangoGroup(),
+            StampedTombstoneGroup(),
+
+            AmazonLinkGroup(),
+            AmazonUnderlyingGroup(),
+            OpenTableGroup(),
+            OpenTableNicknameGroup(),
 
             AddressGroup(),
             CoordinatesGroup(),
@@ -66,13 +72,13 @@ class FullResolveContainer(BasicSourceContainer):
             MangledTitleGroup(),
             TrackLengthGroup(),
             ShortDescriptionGroup(),
+            AlbumNameGroup(),
             #AlbumsGroup(),
             #SongsGroup(),
-            AlbumNameGroup(),
+            # TracksGroup(),
 
             MPAARatingGroup(),
             ArtistDisplayNameGroup(),
-            TracksGroup(),
             GenreGroup(),
 
             AuthorGroup(),
@@ -82,13 +88,7 @@ class FullResolveContainer(BasicSourceContainer):
             NumPagesGroup(),
 
             SubcategoryGroup(),
-            AmazonLinkGroup(),
-            AmazonUnderlyingGroup(),
             ImagesGroup(),
-
-            OpenTableGroup(),
-            OpenTableNicknameGroup(),
-            StampedGroup(),
 
             AlbumListGroup(),
             TrackListGroup(),
@@ -119,7 +119,7 @@ def demo(default_title='Katy Perry'):
     import sys
     import bson
 
-    title = default_title
+    title = default_title.lower()
     subcategory = None
     index = 0
 
@@ -135,7 +135,7 @@ def demo(default_title='Katy Perry'):
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
-    query = {'title':title}
+    query = {'titlel':title}
     if subcategory is not None:
         query['subcategory'] = subcategory
     print("Query: %s" % query)

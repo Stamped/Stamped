@@ -10,11 +10,12 @@ import Globals, utils
 from StampedTestUtils       import *
 from resolve.EntitySearch   import EntitySearch
 from resolve.Resolver       import simplify
-from pprint                 import pprint
+from pprint                 import pprint, pformat
 from copy                   import copy
 
 """
 TODO:
+    * make test_unique_results into a separate SearchResultConstraint
     * add regression-oriented tests to search
         * run these tests regularly on prod via cron job
         * verify:
@@ -77,6 +78,8 @@ class ASearchTestSuite(AStampedTestCase):
         pass
     
     def _run_tests(self, tests, base_args, retries=3, test_coords=True):
+        # TODO: test uniqueness / dedupping w.r.t. results
+        
         for test in tests:
             args = copy(base_args)
             
@@ -127,7 +130,6 @@ class SearchResultConstraint(object):
                  types      = None, 
                  index      = None, 
                  strict     = False, 
-                 soft       = True, 
                  match      = None, 
                  **extras):
         
@@ -143,7 +145,6 @@ class SearchResultConstraint(object):
         self.types  = types
         self.index  = index
         self.strict = strict
-        self.soft   = soft
         self.match  = match
         self.extras = extras
     
@@ -167,12 +168,21 @@ class SearchResultConstraint(object):
         return a == b
     
     def validate(self, results):
-        pprint(utils.normalize(results[0].value, strict=True))
-        
         for i in xrange(len(results)):
             result = results[i]
+            valid  = (self.index is None or self.index == i)
             
-            utils.log("VALIDATE: %s vs %s (%s vs %s)" % (self.title, result.title, self.types, result.types))
+            if valid:
+                t0 = list(self.types)
+                t1 = list(result.types)
+                
+                if len(t0) == 1: t0 = t0[0]
+                if len(t1) == 1: t1 = t1[0]
+                
+                utils.log("VALIDATE %s/%s) %s vs %s (%s vs %s)" % 
+                          (i, self.index, self.title, result.title, t0, t1))
+                utils.log(pformat(utils.normalize(result.value, strict=True)))
+            
             if self.title  is not None and not self._eq(self.title, result.title):
                 continue
             
@@ -210,11 +220,12 @@ class SearchResultConstraint(object):
                     continue
             
             # constrainted result was matched
-            if self.index is None or self.index == i or (self.index != -1 and self.soft):
+            if valid:
                 return True
             
-            # match was not found at the desired index
-            return False
+            if self.index != -1:
+                # match was not found at the desired index
+                return False
         
         # specified result was not found; constraint is only satisfied if the 
         # expected index is invalid (e.g., constraint specifies that the result 

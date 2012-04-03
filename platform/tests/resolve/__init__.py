@@ -1,3 +1,4 @@
 
-import FactualSourceTests
+import FullResolveContainerTests
+import SimplifyTests
 

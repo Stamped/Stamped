@@ -454,6 +454,8 @@ def upgradeEntityData(entityData):
         for song in songs:
             entityMini = MediaItemEntityMini()
             entityMini.title = song['song_name']
+            entityMini.kind = 'media_item'
+            entityMini.types.append('track')
             if 'id' in song and 'source' in song and song['source'] == 'itunes':
                 entityMini.sources.itunes_id = song['id']
                 entityMini.sources.itunes_source = 'itunes'
