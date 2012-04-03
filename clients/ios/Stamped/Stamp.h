@@ -8,30 +8,32 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "STStamp.h"
 
 @class Comment, Entity, Event, Favorite, User;
 
-@interface Stamp : NSManagedObject
+@interface Stamp : NSManagedObject <STStamp>
 
-@property (nonatomic, retain) NSString * blurb;
-@property (nonatomic, retain) NSDate * created;
-@property (nonatomic, retain) NSNumber * deleted;
-@property (nonatomic, retain) NSString * imageDimensions;
-@property (nonatomic, retain) NSString * imageURL;
-@property (nonatomic, retain) NSNumber * isFavorited;
-@property (nonatomic, retain) NSNumber * isLiked;
-@property (nonatomic, retain) NSDate * modified;
-@property (nonatomic, retain) NSNumber * numComments;
-@property (nonatomic, retain) NSNumber * numLikes;
-@property (nonatomic, retain) NSString * stampID;
-@property (nonatomic, retain) NSString * URL;
-@property (nonatomic, retain) NSString * via;
-@property (nonatomic, retain) NSSet *comments;
-@property (nonatomic, retain) NSSet *credits;
-@property (nonatomic, retain) Entity *entityObject;
-@property (nonatomic, retain) NSSet *events;
-@property (nonatomic, retain) NSSet *favorites;
-@property (nonatomic, retain) User *user;
+@property (nonatomic, readwrite, retain) NSString* blurb;
+@property (nonatomic, readwrite, retain) NSDate* created;
+@property (nonatomic, readwrite, retain) NSNumber* deleted;
+@property (nonatomic, readwrite, retain) NSString* imageDimensions;
+@property (nonatomic, readwrite, retain) NSString* imageURL;
+@property (nonatomic, readwrite, retain) NSNumber* isFavorited;
+@property (nonatomic, readwrite, retain) NSNumber* isLiked;
+@property (nonatomic, readwrite, retain) NSDate* modified;
+@property (nonatomic, readwrite, retain) NSNumber* numComments;
+@property (nonatomic, readwrite, retain) NSNumber* numLikes;
+@property (nonatomic, readwrite, retain) NSString* stampID;
+@property (nonatomic, readwrite, retain) NSString* URL;
+@property (nonatomic, readwrite, retain) NSString* via;
+@property (nonatomic, readwrite, retain) NSSet* comments;
+@property (nonatomic, readwrite, retain) NSSet* credits;
+@property (nonatomic, readwrite, retain) Entity* entityObject;
+@property (nonatomic, readwrite, retain) NSSet* events;
+@property (nonatomic, readwrite, retain) NSSet* favorites;
+@property (nonatomic, readwrite, retain) User* user;
+
 @end
 
 @interface Stamp (CoreDataGeneratedAccessors)

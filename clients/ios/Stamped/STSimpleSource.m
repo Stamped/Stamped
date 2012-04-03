@@ -43,4 +43,11 @@
   return mapping;
 }
 
++ (STSimpleSource*)sourceWithSource:(NSString*)source andSourceID:(NSString*)sourceID {
+  STSimpleSource* sourceObj = [[[STSimpleSource alloc] init] autorelease];
+  sourceObj.source = source;
+  sourceObj.sourceID = sourceID;
+  return sourceObj;
+}
+
 @end

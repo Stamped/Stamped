@@ -25,7 +25,7 @@
 
 @interface STEntityDetailViewFactoryOperation : NSOperation
 
-- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail andCallbackBlock:(STViewCreatorCallback)aBlock;
+- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
 
 @property (nonatomic, readonly) NSMutableDictionary* operations;
 @property (nonatomic, readonly) NSMutableDictionary* components;
@@ -41,7 +41,7 @@
 @synthesize entityDetail = entityDetail_;
 @synthesize callback = callback_;
 
-- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail andCallbackBlock:(STViewCreatorCallback)aBlock;
+- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
 {
   self = [super init];
   if (self) {
@@ -49,11 +49,19 @@
     self.callback = aBlock;
     operations_ = [[NSMutableDictionary alloc] init];
     components_ = [[NSMutableDictionary alloc] init];
-    NSArray* components = [NSArray arrayWithObjects:
-                           @"header",
-                           @"actions",
-                           @"metadata",
-                           nil];
+    NSArray* components;
+    if ([style isEqualToString:@"StampDetail"]) {
+      components = [NSArray arrayWithObjects:
+                    @"actions",
+                    nil];
+    }
+    else {
+      components = [NSArray arrayWithObjects:
+                    @"header",
+                    @"actions",
+                    @"metadata",
+                    nil];
+    }
     for (id k in components) {
       [self.operations setObject:[[[NSOperation alloc] init] autorelease] forKey:k];
     }
@@ -161,7 +169,7 @@
 }
 
 - (NSOperation*)createViewWithEntityDetail:(id<STEntityDetail>)anEntityDetail andCallbackBlock:(STViewCreatorCallback)aBlock {
-  STEntityDetailViewFactoryOperation* operation = [[[STEntityDetailViewFactoryOperation alloc] initWithEntityDetail:anEntityDetail andCallbackBlock:aBlock] autorelease];
+  STEntityDetailViewFactoryOperation* operation = [[[STEntityDetailViewFactoryOperation alloc] initWithEntityDetail:anEntityDetail style:self.style andCallbackBlock:aBlock] autorelease];
   return operation;
 }
 

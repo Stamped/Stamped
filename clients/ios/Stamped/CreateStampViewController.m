@@ -713,7 +713,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
   } else {
     vc = [Util detailViewControllerForSearchResult:(SearchResult*)objectToStamp_];
   }
-  [(EntityDetailViewController*)vc hideMainToolbar];
+  //[(EntityDetailViewController*)vc hideMainToolbar];
   [self.navigationController pushViewController:vc animated:YES];
 }
 

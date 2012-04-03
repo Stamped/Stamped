@@ -17,6 +17,29 @@
 
 @end
 
+/*
+ 
+ Sample image push from old eDetail
+ 
+ - (void)imageViewTapped {
+ ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+ if (self.imageView.image) {
+ controller.image = self.imageView.image;
+ } else if (detailedEntity_.image && detailedEntity_.image.length > 0) {
+ controller.imageURL = detailedEntity_.image;
+ } else {
+ [controller release];
+ return;
+ }
+ [self.navigationController pushViewController:controller animated:YES];
+ [controller release];
+ }
+ 
+ - (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image {
+ // Default does nothing. Override in subclasses.
+ }
+ */
+
 @implementation STHeaderViewFactory
 
 - (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)entity
@@ -46,7 +69,7 @@
                                       mode:UILineBreakModeWordWrap
                                 andMaxSize:CGSizeMake(maxWidth, CGFLOAT_MAX)];
     
-    UIView* captionView = [Util viewWithText:entity.caption
+    UIView* captionView = [Util viewWithText:entity.subtitle
                                         font:captionFont
                                        color:[UIColor stampedGrayColor]
                                         mode:UILineBreakModeWordWrap

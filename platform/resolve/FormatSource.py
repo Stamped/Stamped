@@ -52,8 +52,8 @@ class FormatSource(BasicSource):
         return globalFactual()
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        if entity['subcategory'] == 'other':
-            print('here')
+        subcategory = entity.subcategory
+        if subcategory == 'other':
             if entity['lat'] != None and entity['lng'] != None and entity['gid'] != None:
                 factual_id = self.__factual.factual_from_entity(entity)
                 if factual_id is not None:
@@ -74,64 +74,65 @@ class FormatSource(BasicSource):
                                 entity['category'] = 'food'
                                 break
 
-        if entity['subcategory'] == 'artist':
-            entity['mangled_title'] = artistSimplify(entity['title'])
-        elif entity['subcategory'] == 'song':
-            entity['mangled_title'] = trackSimplify(entity['title'])
-        elif entity['subcategory'] == 'album':
-            entity['mangled_title'] = albumSimplify(entity['title'])
-        elif entity['subcategory'] == 'movie':
-            entity['mangled_title'] = movieSimplify(entity['title'])
-        else:
-            entity['mangled_title'] = simplify(entity['title'])
-        if entity['lat'] == None and entity['address'] != None:
-            latLng = self.__geocoder.addressToLatLng(entity['address'])
-            if latLng is not None:
-                entity['coordinates'] = {'lat':latLng[0],'lng':latLng[1]}
-        if controller.shouldEnrich('release_date',self.sourceName,entity):
-            if 'original_release_date' in entity:
-                date = entity['original_release_date']
-                if date is not None:
-                    new_date = None
-                    match = re.match(r'^(\d\d\d\d) (\d\d) (\d\d)$',date)
-                    if match is not None:
-                        try:
-                            new_date = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-                        except ValueError:
-                            pass
-                        except TypeError:
-                            pass
-                    match = re.match(r'^(\w+) (\d+), (\d\d\d\d)$',date)
-                    if match is not None:
-                        try:
-                            month = match.group(1)
-                            if month in months:
-                                new_date = datetime(int(match.group(3)),months[month],int(match.group(2)))
-                        except ValueError:
-                            pass
-                        except TypeError:
-                            pass
-                    #sample 2009-05-29T07:00:00Z
-                    match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$',date)
-                    if match is not None:
-                        try:
-                            new_date = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-                        except ValueError:
-                            pass
-                        except TypeError:
-                            pass
-                    if new_date is not None:
-                        entity['release_date'] = new_date
-                        logs.info('created release date (%s) from %s' % (new_date, date))
-            elif 'fid' in entity:
-                desc = entity['desc'].replace('\n',' ')
+        # if subcategory == 'artist':
+        #     entity['mangled_title'] = artistSimplify(entity['title'])
+        # elif entity['subcategory'] == 'song':
+        #     entity['mangled_title'] = trackSimplify(entity['title'])
+        # elif entity['subcategory'] == 'album':
+        #     entity['mangled_title'] = albumSimplify(entity['title'])
+        # elif entity['subcategory'] == 'movie':
+        #     entity['mangled_title'] = movieSimplify(entity['title'])
+        # else:
+        #     entity['mangled_title'] = simplify(entity['title'])
+        if entity.kind == 'place':
+            if entity.lat is None and (entity.formatted_address is not None or entity.address_country is not None):
+                latLng = self.__geocoder.addressToLatLng(entity.formatted_address)
+                if latLng is not None:
+                    entity['coordinates'] = {'lat':latLng[0],'lng':latLng[1]}
+        # if controller.shouldEnrich('release_date', self.sourceName, entity):
+        #     if 'original_release_date' in entity:
+        #         date = entity['original_release_date']
+        #         if date is not None:
+        #             new_date = None
+        #             match = re.match(r'^(\d\d\d\d) (\d\d) (\d\d)$',date)
+        #             if match is not None:
+        #                 try:
+        #                     new_date = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+        #                 except ValueError:
+        #                     pass
+        #                 except TypeError:
+        #                     pass
+        #             match = re.match(r'^(\w+) (\d+), (\d\d\d\d)$',date)
+        #             if match is not None:
+        #                 try:
+        #                     month = match.group(1)
+        #                     if month in months:
+        #                         new_date = datetime(int(match.group(3)),months[month],int(match.group(2)))
+        #                 except ValueError:
+        #                     pass
+        #                 except TypeError:
+        #                     pass
+        #             #sample 2009-05-29T07:00:00Z
+        #             match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$',date)
+        #             if match is not None:
+        #                 try:
+        #                     new_date = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
+        #                 except ValueError:
+        #                     pass
+        #                 except TypeError:
+        #                     pass
+        #             if new_date is not None:
+        #                 entity['release_date'] = new_date
+        #                 logs.info('created release date (%s) from %s' % (new_date, date))
+        #     elif 'fid' in entity:
+        #         desc = entity['desc'].replace('\n',' ')
 
-                release_date_match = desc[-23:].split('Release Date:')
-                if len(release_date_match) == 2:
-                    month, day, year = map(lambda x: int(x), release_date_match[-1].split('/'))
-                    if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:
-                        entity['release_date'] = datetime(year, month, day)
-                        logs.info('created release_date (%s) from Fandango description' % entity['release_date'] )
+        #         release_date_match = desc[-23:].split('Release Date:')
+        #         if len(release_date_match) == 2:
+        #             month, day, year = map(lambda x: int(x), release_date_match[-1].split('/'))
+        #             if month >= 1 and month <= 12 and day >= 1 and day <= 31 and year > 1800 and year < 2200:
+        #                 entity['release_date'] = datetime(year, month, day)
+        #                 logs.info('created release_date (%s) from Fandango description' % entity['release_date'] )
 
         return True
 

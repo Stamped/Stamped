@@ -459,11 +459,11 @@ class AmazonSource(GenericSource):
         return True
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        asin = entity['asin']
-        if asin is not None and asin != '':
-            entity['amazon_id'] = asin
-        else:
-            GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
+        # asin = entity['asin']
+        # if asin is not None and asin != '':
+        #     entity['amazon_id'] = asin
+        # else:
+        #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
         if entity['amazon_id'] is not None:
             asin = entity['amazon_id']
             if entity['subcategory'] == 'song':

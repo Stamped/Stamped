@@ -669,7 +669,7 @@ class HTTPEntity(Schema):
             if entity.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
-                source.source       = 'menu'
+                source.source       = 'stamped'
                 source.source_id    = entity.entity_id
                 sources.append(source)
 

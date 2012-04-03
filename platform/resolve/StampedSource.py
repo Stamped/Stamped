@@ -283,9 +283,15 @@ class StampedSource(GenericSource):
     """
     """
     def __init__(self, stamped_api = None):
-        GenericSource.__init__(self, 'stamped')
+        GenericSource.__init__(self, 'stamped',
+            groups=['tombstone']
+        )
         self._stamped_api = stamped_api
     
+    @property 
+    def idName(self):
+        return 'tombstone'
+
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
@@ -591,11 +597,12 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query, constructor_wrapper=EntitySearchAll)
     
+    """
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
+        if controller.shouldEnrich('tombstone', self.sourceName, entity):
             try:
                 query = self.wrapperFromEntity(entity)
-                timestamps[self.sourceName] = controller.now
+                timestamps['tombstone'] = controller.now
                 mins = None
                 if query.type == 'artist':
                     mins = {
@@ -614,6 +621,7 @@ class StampedSource(GenericSource):
             except ValueError:
                 pass
         return True
+        """
     
     def __id_query(self, mongo_query):
         import pymongo
@@ -632,8 +640,8 @@ class StampedSource(GenericSource):
                     and_list = query.setdefault('$and',[])
                     and_list.append( {
                         '$or' : [
-                            {'sources.stamped_id' : { '$exists':False }},
-                            {'sources.stamped_id' : None},
+                            {'sources.tombstone_id' : { '$exists':False }},
+                            {'sources.tombstone_id' : None},
                         ]
                     } )
                     if query_obj.source == 'stamped' and query_obj.key != '':
@@ -672,12 +680,12 @@ class StampedSource(GenericSource):
             'spotify'           : 'sources.spotify_id', 
             'rdio'              : 'sources.rdio_id', 
             'opentable'         : 'sources.opentable_id', 
-            'tmdb'              : 'sources.tmdb.tmdb_id', 
-            'factual'           : 'sources.factual.factual_id', 
-            'singleplatform'    : 'sources.singleplatform.singleplatform_id', 
+            'tmdb'              : 'sources.tmdb_id', 
+            'factual'           : 'sources.factual_id', 
+            'singleplatform'    : 'sources.singleplatform_id', 
             'fandango'          : 'sources.fandango_id', 
-            'googleplaces'      : 'sources.googlePlaces.gid', 
-            'apple'             : 'sources.apple.aid', 
+            'googleplaces'      : 'sources.googleplaces_id', 
+            'itunes'            : 'sources.itunes_id', 
             'netflix'           : 'sources.netflix.nid', 
             'thetvdb'           : 'sources.thetvdb.thetvdb_id', 
         }
@@ -696,7 +704,7 @@ class StampedSource(GenericSource):
         
         if ret:
             entity_id = str(ret['_id'])
-            logs.info("resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
+            logs.info("Resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
         
         return entity_id
 

@@ -80,7 +80,7 @@ static NSString* const kUserLookupPath = @"/users/lookup.json";
     title = @"Credits";
   else if (sourceType_ == PeopleListSourceTypeLikes)
     title = @"Likes";
-
+  NSLog(@"here1");
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:title
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil

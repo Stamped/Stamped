@@ -730,8 +730,8 @@ typedef enum {
     }
     case SearchIntentTodo: {
       EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
-      [detailViewController hideMainToolbar];
-      [detailViewController addTodoToolbar];
+      //[detailViewController hideMainToolbar];
+      //[detailViewController addTodoToolbar];
       [self.navigationController pushViewController:detailViewController animated:YES];
       break;
     }

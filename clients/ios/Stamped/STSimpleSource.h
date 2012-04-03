@@ -19,5 +19,6 @@
 @property (nonatomic, readwrite, retain) NSString* icon;
 
 + (RKObjectMapping*)mapping;
++ (STSimpleSource*)sourceWithSource:(NSString*)source andSourceID:(NSString*)sourceID;
 
 @end

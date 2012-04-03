@@ -13,6 +13,8 @@
 #import "STRdio.h"
 #import "STMenuFactory.h"
 #import "STMenuPopUp.h"
+#import "STStampedActions.h"
+#import "STStampedAPI.h"
 
 @interface STActionManager () <STViewDelegate>
 
@@ -28,6 +30,7 @@
 
 @synthesize operationQueue = _operationQueue;
 @synthesize sources = _sources;
+@synthesize actionsLocked = _actionsLocked;
 
 static STActionManager* _singleton;
 
@@ -46,6 +49,7 @@ static STActionManager* _singleton;
     _operationQueue = [[NSOperationQueue alloc] init];
     _sources = [[NSMutableDictionary alloc] init];
     [_sources setObject:[STRdio sharedRdio] forKey:@"rdio"];
+    [_sources setObject:[STStampedActions sharedInstance] forKey:@"stamped"];
   }
   return self;
 }
@@ -107,28 +111,24 @@ static STActionManager* _singleton;
 - (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   BOOL handled = FALSE;
   id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
-  if (sourceObject != nil && [sourceObject canHandleSource:source forAction:action withContext:context]) {
+  if (sourceObject != nil && 
+      [sourceObject respondsToSelector:@selector(canHandleSource:forAction:withContext:)] &&
+      [sourceObject canHandleSource:source forAction:action withContext:context] &&
+      [sourceObject respondsToSelector:@selector(didChooseSource:forAction:withContext:)]) {
     handled = TRUE;
     if (flag) {
       [sourceObject didChooseSource:source forAction:action withContext:context];
     }
   }
-  else if ([action isEqualToString:@"phone"]) {
-    if ([source.source isEqualToString:@"phone"] && source.sourceID != nil) {
-      NSString* telURL = [NSString stringWithFormat:@"tel://%@",
-                          [Util sanitizedPhoneNumberFromString:source.sourceID]];
-      handled = TRUE;
-      if (flag) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
-      }
-    }
-  }
   else if ([source.source isEqualToString:@"menu"]) {
-    NSOperation* operation = [[STMenuFactory sharedFactory] menuWithEntityId:@"4e4c6fdd26f05a2b75000a75" andCallbackBlock:^(id<STMenu> menu) {
-      UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
-      [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
+    [Util globalLoadingLock];
+    [[STStampedAPI sharedInstance] menuForEntityID:@"4e4c6fdd26f05a2b75000a75" andCallback:^(id<STMenu> menu) {
+      [Util globalLoadingUnlock];
+      if (menu) {
+        UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
+        [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
+      }
     }];
-    [operation start];
   }
   
   if (!handled && source.link) {

@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CollapsibleViewController.h"
 
 @interface TOSViewController : UIViewController {
   NSURL* URL;

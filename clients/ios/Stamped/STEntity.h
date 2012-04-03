@@ -1,0 +1,20 @@
+//
+//  STEntity.h
+//  Stamped
+//
+//  Created by Landon Judkins on 4/2/12.
+//  Copyright (c) 2012 Stamped, Inc. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@protocol STEntity <NSObject>
+
+@property (nonatomic, readonly, retain) NSString* entityID;
+@property (nonatomic, readonly, retain) NSString* title;
+@property (nonatomic, readonly, retain) NSString* subtitle;
+@property (nonatomic, readonly, retain) NSString* category;
+@property (nonatomic, readonly, retain) NSString* subcategory;
+@property (nonatomic, readonly, retain) NSString* coordinates;
+
+@end

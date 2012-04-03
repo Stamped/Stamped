@@ -16,6 +16,7 @@
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, retain) NSArray<STSource>* sources;
 
++ (STSimpleAction*)actionWithType:(NSString*)type andSource:(id<STSource>)source;
 + (RKObjectMapping*)mapping;
 
 @end

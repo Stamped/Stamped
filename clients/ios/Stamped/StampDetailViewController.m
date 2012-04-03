@@ -587,6 +587,8 @@ typedef enum {
   [self addUserGradientBackground];
   [self setMainCommentContainerFrame:mainCommentFrame];
   [self addCreditedUsers];
+  NSLog(@"view %@", self.view);
+  NSLog(@"shelf %@", self.shelfView);
 }
 
 - (void)addUserGradientBackground {
