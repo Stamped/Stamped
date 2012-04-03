@@ -256,6 +256,13 @@ class EntityPlace(_EntityObject, ResolverPlace):
     @lazyProperty
     def address(self):
         try:
+            return {
+                'address':  self.entity.address_street,
+                'locality': self.entity.address_locality,
+                'region':   self.entity.address_region,
+                'postcode': self.entity.address_postcode,
+                'country':  self.entity.address_country,
+            }
             return self.entity.formatAddress()
         except Exception:
             return ''

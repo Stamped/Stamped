@@ -101,7 +101,9 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
                 track_key = track['href']
                 if track_key not in tracks:
                     tracks[track_key] = {
+                        'key': track_key,
                         'name': track['name'],
+                        'length': int(track['length']),
                     }
         pool = Pool(min(1+len(self.albums),20))
         for album in self.albums:

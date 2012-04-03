@@ -182,7 +182,8 @@ class EntitySearch(object):
         
         for name, result in results:
             # TODO: Check song (subcategory) vs track (query.types)
-            if query.types is None or result[1].subtype in query.types:
+            # TODO: Merge subcategory, entity.types, entity.kind, query.types, and wrapper.type. Blargh.
+            if query.types is None or result[1].subcategory in query.types:
                 source_results = all_results.setdefault(name,[])
                 source_results.append(result)
                 total += 1
@@ -271,7 +272,7 @@ class EntitySearch(object):
                 if category == c:
                     t = set(deriveTypesFromSubcategories([s]))
                     for i in t:
-                        types.add(deriveTypesFromSubcategories(i))
+                        types.add(i)
         
         try:
             if coords.lat is not None and coords.lng is not None:

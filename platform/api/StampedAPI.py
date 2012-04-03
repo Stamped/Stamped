@@ -2916,8 +2916,8 @@ class StampedAPI(AStampedAPI):
             decorations = {}
             modified    = self.__full_resolve.enrichEntity(entity, decorations)
             
-            if 'stamped_id' in entity and entity['stamped_id'] is not None:
-                successor_id = entity['stamped_id']
+            if 'tombstone_id' in entity and entity['tombstone_id'] is not None:
+                successor_id = entity['tombstone_id']
                 successor    = self._entityDB.getEntity(successor_id)
                 assert successor is not None
                 

@@ -2176,14 +2176,14 @@ def demo(generic_source, default_title):
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
-    query = {'title':title}
+    query = {'titlel':title.lower()}
     if subcategory is not None:
         query['subcategory'] = subcategory
     else:
         query = {
             '$or': [
                 { 'mangled_title' : simplify(title) },
-                { 'title' : title },
+                { 'titlel' : title.lower() },
             ]
         }
     pprint(query)

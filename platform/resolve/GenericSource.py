@@ -138,17 +138,11 @@ class GenericSource(BasicSource):
     def __repopulateAlbums(self, entity, artist, controller):
         for album in artist.albums:
             try:
-                # info = {
-                #     'title'    : album['name'],
-                #     'mangled_title' : albumSimplify(album['name']),
-                # }
-                # if 'key' in album:
-                #     info['sources'] = [ {'source':artist.source, 'source_id':album['key']} ]
-                # new_albums.append(info)
                 entityMini  = MediaCollectionEntityMini()
                 entityMini.title = album['name']
                 if 'key' in album:
                     entityMini.sources['%s_id' % artist.source] = album['key']
+                    entityMini.sources['%s_source' % artist.source] = artist.source
                 entity.albums.append(entityMini)
             except Exception:
                 report()
@@ -157,17 +151,12 @@ class GenericSource(BasicSource):
     def __repopulateSongs(self, entity, artist, controller):
         for track in artist.tracks:
             try:
-                # info = {
-                #     'title'    : track['name'],
-                #     'mangled_title' : trackSimplify(track['name']),
-                # }
-                # if 'key' in track:
-                #     info['sources'] = [ {'source': artist.source, 'source_id': track['key']} ]
-                # new_tracks.append(info)
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
                 if 'key' in track:
                     entityMini.sources['%s_id' % artist.source] = track['key']
+                    entityMini.sources['%s_source' % artist.source] = artist.source
+                    
                 entity.tracks.append(entityMini)
             except Exception:
                 report()
@@ -230,7 +219,8 @@ class GenericSource(BasicSource):
         setAttribute('url',     'site')
 
         try:
-            entity.types.append(wrapper.subcategory)
+            if wrapper.subcategory not in entity.types.value:
+                entity.types.append(wrapper.subcategory)
         except:
             pass
 
