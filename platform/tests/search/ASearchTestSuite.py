@@ -20,9 +20,6 @@ TODO:
         * run these tests regularly on prod via cron job
         * verify:
             * movies
-                * movie in theaters (pull from fandango)
-                * popular movie
-                * really old movie
                 * different language movie
             * tv
                 * new / recent shows
@@ -31,46 +28,36 @@ TODO:
                 * really old shows
                 * different language show
             * tracks
-                * itunes top chart lists
                 * rdio / spotify top chart lists
-                * track_name by artist_name
-                * track_name artist_name
-                * track_name album_name artist_name (and all permutations)
-                * different language track
             * albums
-                * itunes otp chart lists
-                * album_name
-                * album_name by artist_name
-                * album_name artist_name (and vice-versa)
             * artist
-                * search for artist alias / non-exact name
-                    * (e.g., jayz, jay-z, and jay z should all work as expected)
-                * search for track => artist in results
-                * search for album => artist in results
-                * international artist
             * app
-                * app_name by company_name
-                * app_name company_name (and vice-versa)
                 * search for ipad-only app
+            * place
+                * search w/ and w/out coordinates
+                * search w/ and w/out location hints
+                * several international places
             * restaurant
                 * same permutations as place
                 * new / recent restaurants from opentable
                 * remote restaurants
                 * search for generic chain (e.g., mcdonald's)
                 * search for really unique name (e.g., absinthe)
-            * place
-                * search w/ and w/out coordinates
-                * search w/ and w/out location hints
-                * several international places
             * book
                 * new / recent book
                 * book_name
                 * book_name by artist_name
                 * book_name artist_name (and vice-versa)
-
+            * video games
 """
 
 class ASearchTestSuite(AStampedTestCase):
+    
+    """
+        Base class for all search-related test suites, providing the core _run_tests 
+        method which is used extensively in all subclasses.
+    """
+    
     def setUp(self):
         self.searcher = EntitySearch()
     
@@ -78,7 +65,19 @@ class ASearchTestSuite(AStampedTestCase):
         pass
     
     def _run_tests(self, tests, base_args, retries=3, test_coords=True):
-        # TODO: test uniqueness / dedupping w.r.t. results
+        """
+            Runs a list of search tests, verifying that each one satisfies its accompanying 
+            SearchResultConstraint(s).
+            
+            tests       - list of tests, where each test is a tuple(dict, list(SearchResultConstraint))
+            base_args   - dict containing base entity search parameters shared across all tests, all or 
+                          some of which may override specific args.
+            retries     - int denoting the number of times to retry a test case if one or more 
+                          constraints fail before aborting.
+            test_coords - boolean denoting whether or not to perform each test twice, once with coords 
+                          enabled, and once without coords enabled (useful for verifying that certain 
+                          searches really are coordinate agnostic).
+        """
         
         for test in tests:
             args = copy(base_args)
@@ -88,6 +87,8 @@ class ASearchTestSuite(AStampedTestCase):
             
             assert 'query' in args
             def validate(results):
+                # TODO: optionally test uniqueness / dedupping w.r.t. results via another SearchResultConstraint
+                
                 for constraint in test[1]:
                     if not constraint.validate(results):
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
@@ -116,12 +117,21 @@ class ASearchTestSuite(AStampedTestCase):
                 utils.log("-" * 80)
                 utils.log("")
                 
+                # perform the actual search itself, validating the results against all constraints 
+                # specified by this test case, and retrying if necessary until either the test case 
+                # satisfies its constraints or the maximum number of allotted retries is exceeded.
                 self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
     
     def __str__(self):
         return self.__class__.__name__
 
 class SearchResultConstraint(object):
+    
+    """
+        Represents a single constraint with respect to entity search results, 
+        providing the ability to verify that the constraint is satisfied via 
+        the validate function.
+    """
     
     def __init__(self, 
                  title      = None, 
@@ -148,33 +158,24 @@ class SearchResultConstraint(object):
         self.match  = match
         self.extras = extras
     
-    def _eq(self, a, b):
-        a = unicode(a)
-        b = unicode(b)
-        
-        if not self.strict:
-            a = simplify(a)
-            b = simplify(b)
-            
-            if len(a) > len(b):
-                a, b = b, a
-            
-            if self.match == 'prefix':
-                return b.startswith(a)
-            
-            if self.match == 'contains':
-                return a in b
-        
-        return a == b
-    
     def validate(self, results):
+        """
+            Validates this constraint against the given search results, verifying 
+            one or more of the following:
+                * a specific result exists
+                * a specific result exists at the desired index in the results
+                * a specific result does *not* exist in the results
+            
+            Returns True iff the constraint was satisfied or False otherwise.
+        """
+        
         for i in xrange(len(results)):
             result = results[i]
             valid  = (self.index is None or self.index == i)
             
             if valid:
                 t0 = list(self.types)
-                t1 = list(result.types)
+                t1 = list(map(lambda t: t.value, result.types))
                 
                 if len(t0) == 1: t0 = t0[0]
                 if len(t1) == 1: t1 = t1[0]
@@ -183,9 +184,11 @@ class SearchResultConstraint(object):
                           (i, self.index, self.title, result.title, t0, t1))
                 utils.log(pformat(utils.normalize(result.value, strict=True)))
             
+            # optionally verify the validity of this result's title
             if self.title  is not None and not self._eq(self.title, result.title):
                 continue
             
+            # optionally verify the origin of this result and/or it's source_id
             if self.source is not None:
                 source_id_key = "%s_id" % self.source
                 
@@ -195,10 +198,16 @@ class SearchResultConstraint(object):
                 if self.id is not None and not self._eq(self.id, result[source_id_key]):
                     continue
             
+            # optionally ensure the validity of this result's type
             if self.types is not None:
                 match = False
                 for t in self.types:
                     for t2 in result.types:
+                        try:
+                            t2 = t2.value
+                        except Exception:
+                            pass
+                        
                         if self._eq(t, t2):
                             match = True
                             break
@@ -209,6 +218,7 @@ class SearchResultConstraint(object):
                 if not match:
                     continue
             
+            # optionally ensure the validity of other misc entity attributes
             if self.extras is not None:
                 match = True
                 for key, value in self.extras.iteritems():
@@ -232,8 +242,30 @@ class SearchResultConstraint(object):
         # should not be found in the result set)
         return (self.index == -1)
     
+    def _eq(self, a, b):
+        """ Returns whether or not a fuzzily matches b """
+        
+        a = unicode(a)
+        b = unicode(b)
+        
+        if not self.strict:
+            a = simplify(a)
+            b = simplify(b)
+            
+            if len(a) > len(b):
+                a, b = b, a
+            
+            if self.match == 'prefix':
+                return b.startswith(a)
+            
+            if self.match == 'contains':
+                return a in b
+        
+        return a == b
+    
     def __str__(self):
         options = { }
+        
         if self.title is not None:  options['title']    = self.title
         if self.source is not None: options['source']   = self.source
         if self.id is not None:     options['id']       = self.id

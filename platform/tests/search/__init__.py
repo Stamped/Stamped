@@ -4,5 +4,6 @@ import AppSearchTests
 import ArtistSearchTests
 import BookSearchTests
 import MovieSearchTests
+import OtherSearchTests
 import TrackSearchTests
 

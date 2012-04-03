@@ -31,7 +31,7 @@ class TrackSearchTests(ASearchTestSuite):
                                        types='track'), 
             ]), 
             ({ 'query' : 'What\'s wrong is everyhere', }, [ 
-                SearchResultConstraint(title='what\'s wrong is everyhere', 
+                SearchResultConstraint(title='what\'s wrong is everywhere', 
                                        types='track'), 
             ]), 
             ({ 'query' : 'midnight city', }, [ 

@@ -61,7 +61,7 @@ class MovieSearchTests(ASearchTestSuite):
         
         self._run_tests(tests, args)
     
-    def test_in_theaters(self):
+    def test_top_box_office(self):
         fandango = Fandango(verbose=True)
         movies   = fandango.get_top_box_office_movies()
         
