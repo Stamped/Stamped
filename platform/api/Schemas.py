@@ -562,10 +562,10 @@ class BasicEntity(Schema):
         t = list(self.types)
         if len(t) == 1: t = t[0]
         
-        return "%s:%s (%s)" % (self.__class__.__name__, self.title, t)
+        return "%s: %s (%s)" % (self.__class__.__name__, self.title, t)
     
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, pformat(self.value))
+        return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
 
 class EntityStatsSchema(Schema):
     def setSchema(self):
@@ -803,11 +803,6 @@ class PlaceEntity(BasicEntity):
         for t in self.types.value:
             return t
         return 'place'
-
-    def minimize(self, schema=None):
-        schema = BasicEntity.minimize(self, PlaceEntityMini())
-        schema.coordinates = self.coordinates
-        return schema
 
 
 class PersonEntity(BasicEntity):

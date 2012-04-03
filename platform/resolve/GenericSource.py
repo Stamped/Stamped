@@ -332,6 +332,8 @@ class GenericSource(BasicSource):
                 if wrapper.artist['name'] != '':
                     entityMini = PersonEntityMini()
                     entityMini.title = wrapper.artist['name']
+                    entityMini.kind = 'person'
+                    entityMini.types.append('artist')
                     entity.artists.append(entityMini)
             except AttributeError:
                 pass
@@ -347,6 +349,8 @@ class GenericSource(BasicSource):
                 if wrapper.album['name'] != '':
                     entityMini = MediaCollectionEntityMini()
                     entityMini.title = wrapper.album['name']
+                    entityMini.kind = 'media_collection'
+                    entityMini.types.append('album')
                     entity.collections.append(entityMini)
             except AttributeError:
                 pass

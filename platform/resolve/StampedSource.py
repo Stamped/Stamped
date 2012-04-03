@@ -401,7 +401,13 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'titlel' : query.name.lower(),
+                    '$and': [
+                        {'titlel' : query.name.lower()},
+                        {'$or': [
+                            {'subcategory': 'song'},
+                            {'types': 'song'}
+                        ]}
+                    ],
                 }
                 yield {
                     'mangled_title' : trackSimplify( query.name ),
@@ -414,7 +420,7 @@ class StampedSource(GenericSource):
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, subcategory='song')
+        return self.__querySource(query_gen(), query)
 
     def albumSource(self, query):
         def query_gen():

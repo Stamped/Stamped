@@ -11,6 +11,8 @@ from MongoStampedAPI import MongoStampedAPI
 from HTTPSchemas import *
 from Schemas import *
 from pprint import pprint
+from iTunesSource import iTunesSource
+from StampedSource import StampedSource
 
 stampedAPI = MongoStampedAPI()
 
@@ -27,8 +29,57 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # coords = None
 
 e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
-print stampedAPI._enrichEntity(e)
-print e
+
+print '\n\nBEGIN\n%s\n' % ('='*40)
+# pprint(e.value)
+
+# if len(e.tracks) > 0:
+#     for track in e.tracks:
+#         print track
+
+source    = iTunesSource()
+stamped   = StampedSource(stamped_api = stampedAPI)
+
+
+t = e.tracks[7]
+# t.itunes_id = '420843675'
+print t
+# stampedAPI._enrichEntity(t)
+# print t
+#print stampedAPI._enrichEntity(e)
+
+source_id = t['itunes_id']
+
+# attempt to resolve against the Stamped DB
+# entity_id = stamped.resolve_fast(source, source_id)
+entity_id = None
+
+if entity_id is None:
+    wrapper = source.wrapperFromKey(source_id)
+    results = stamped.resolve(wrapper)
+
+    print 'RESULTS: %s' % results
+
+    if len(results) > 0 and results[0][0]['resolved']:
+        # source key was found in the Stamped DB
+        entity_id = results[0][1].key
+        print 'FOUND IN STAMPED DB: %s' % entity_id
+        
+        # enrich entity asynchronously
+        # tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+    else:
+        entity = source.buildEntityFromWrapper(wrapper)
+        print '\n\n\nBUILT ENTITY\n%s' % entity
+        # stampedAPI._enrichEntity(entity)
+        # entity = self._entityDB.addEntity(entity)
+        # entity_id = entity.entity_id
+        
+        # enrich and merge entity asynchronously
+        stampedAPI._mergeEntity(entity, True)
+
+        print '\n\n\nENRICHED ENTITY\n%s' % entity
+else:
+    print 'FAST RESOLVE: %s' % entity_id
 
 
 # results = stampedAPI.searchEntities(q, coords=coords, category=None)
