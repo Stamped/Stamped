@@ -1,6 +1,8 @@
 
 import AlbumSearchTests
+import AppSearchTests
 import ArtistSearchTests
+import BookSearchTests
 import MovieSearchTests
 import TrackSearchTests
 

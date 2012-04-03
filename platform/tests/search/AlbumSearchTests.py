@@ -181,7 +181,12 @@ class AlbumSearchTests(ASearchTestSuite):
         tests = []
         
         for album in albums:
-            name = album.title
+            name  = album.title.lower().strip()
+            name2 = utils.normalize(name, strict=True)
+            
+            # don't test albums whose names contain weird unicode strings
+            if name != name2:
+                continue
             
             tests.append(({ 'query' : name, }, [ 
                 SearchResultConstraint(title=name, types='album', match='contains'), 

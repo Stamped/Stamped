@@ -165,8 +165,9 @@ _subcategory_weights = {
     #           music
     # --------------------------
     'artist'            : 55, 
-    'song'              : 25, 
     'album'             : 45, 
+    'song'              : 25, 
+    'track'             : 25, 
     
     # --------------------------
     #           other

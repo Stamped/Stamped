@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 __all__ = [ 'SpotifySource', 'SpotifyArtist', 'SpotifyAlbum', 'SpotifyTrack' ]
 
-import Globals
+import Globals, utils
 from logs import report
 
 try:
@@ -94,21 +94,35 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
     @lazyProperty
     def tracks(self):
         tracks = {}
+        
         def lookupTrack(key):
             result = self.spotify.lookup(key, 'trackdetail')
             track_list = result['album']['tracks']
+            
             for track in track_list:
                 track_key = track['href']
+                
                 if track_key not in tracks:
-                    tracks[track_key] = {
+                    data = {
                         'key': track_key,
                         'name': track['name'],
-                        'length': int(track['length']),
                     }
-        pool = Pool(min(1+len(self.albums),20))
+                    
+                    try:
+                        # (travis): as of 4/3/12, track length is only sometimes returned by spotify
+                        data['length'] = int(track['length']),
+                    except KeyError:
+                        pass
+                    
+                    tracks[track_key] = data
+        
+        size = min(1 + len(self.albums), 20)
+        pool = Pool(size)
+        
         for album in self.albums:
             key = album['key']
             pool.spawn(lookupTrack, key)
+        
         pool.join()
         return list(tracks.values())
 
