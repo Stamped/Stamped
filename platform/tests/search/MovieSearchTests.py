@@ -49,12 +49,12 @@ class MovieSearchTests(ASearchTestSuite):
                                        types='movie'), 
             ]), 
             ({ 'query' : 'the hunger games', }, [ 
-                SearchResultConstraint(title='the the hunger games', 
+                SearchResultConstraint(title='the hunger games', 
                                        types='movie', 
                                        index=0), 
             ]), 
             ({ 'query' : 'hunger games', }, [ 
-                SearchResultConstraint(title='the the hunger games', 
+                SearchResultConstraint(title='the hunger games', 
                                        types='movie'), 
             ]), 
         ]
