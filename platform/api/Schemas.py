@@ -1063,11 +1063,12 @@ class BasicEntityMini(BasicEntity):
     def setSchema(self):
         self.entity_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring)
-        self.kind                           = SchemaElement(basestring)
+        self.kind                           = SchemaElement(basestring, default='other')
         self.types                          = SchemaList(SchemaElement(basestring))
-        self.subtitle                       = SchemaElement(basestring)
         self.sources                        = EntitySourcesSchema()
         self.coordinates                    = CoordinatesSchema()
+
+        self.schema_version                 = SchemaElement(int, default=0)
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):

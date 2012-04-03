@@ -617,19 +617,19 @@ class iTunesSource(GenericSource):
         itunes_id = entity['itunes_id']
         if itunes_id != None:
             obj = None
-            if entity['subcategory'] == 'movie':
+            if entity.subcategory == 'movie':
                 obj = iTunesMovie(itunes_id)
-            elif entity['subcategory'] == 'artist':
+            elif entity.subcategory == 'artist':
                 obj = iTunesArtist(itunes_id)
-            elif entity['subcategory'] == 'album':
+            elif entity.subcategory == 'album':
                 obj = iTunesAlbum(itunes_id)
-            elif entity['subcategory'] == 'song':
+            elif entity.subcategory == 'song':
                 obj = iTunesTrack(itunes_id)
-            elif entity['subcategory'] == 'book':
+            elif entity.subcategory == 'book':
                 obj = iTunesBook(itunes_id)
-            elif entity['subcategory'] == 'tv':
+            elif entity.subcategory == 'tv':
                 obj = iTunesTVShow(itunes_id)
-            elif entity['subcategory'] == 'app':
+            elif entity.subcategory == 'app':
                 obj = iTunesApp(itunes_id)
             if obj is not None:
                 self.enrichEntityWithWrapper(obj, entity, controller, decorations, timestamps)

@@ -135,7 +135,10 @@ class GenericSource(BasicSource):
     def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
-    def __repopulateAlbums(self, entity, artist, controller):
+    def __repopulateAlbums(self, entity, artist, controller, decorations=None):
+        if decorations is None:
+            decorations = {}
+
         for album in artist.albums:
             try:
                 entityMini  = MediaCollectionEntityMini()
@@ -148,7 +151,10 @@ class GenericSource(BasicSource):
                 report()
                 logs.info('Album import failure: %s for artist %s' % (album, artist))
 
-    def __repopulateSongs(self, entity, artist, controller):
+    def __repopulateSongs(self, entity, artist, controller, decorations=None):
+        if decorations is None:
+            decorations = {}
+
         for track in artist.tracks:
             try:
                 entityMini  = MediaItemEntityMini()
@@ -156,7 +162,15 @@ class GenericSource(BasicSource):
                 if 'key' in track:
                     entityMini.sources['%s_id' % artist.source] = track['key']
                     entityMini.sources['%s_source' % artist.source] = artist.source
-                    
+
+                    # Attempt fast resolve
+                    # entity_id = self.stamped.resolve_fast(artist.source, track['key'])
+                    # to_enrich = decorations.setdefault('track_ids', [])
+                    # if entity_id is not None:
+                    #     to_enrich.append(('stamped', entity_id))
+                    # else:
+                    #     to_enrich.append((artist.source, track['key']))
+
                 entity.tracks.append(entityMini)
             except Exception:
                 report()
@@ -258,11 +272,11 @@ class GenericSource(BasicSource):
             except:
                 pass
 
-            if controller.shouldEnrich('albums', self.sourceName, entity):
-                self.__repopulateAlbums(entity, wrapper, controller) 
+            if controller.shouldEnrich('album_list', self.sourceName, entity):
+                self.__repopulateAlbums(entity, wrapper, controller, decorations) 
 
-            if controller.shouldEnrich('tracks', self.sourceName, entity):
-                self.__repopulateSongs(entity, wrapper, controller)
+            if controller.shouldEnrich('track_list', self.sourceName, entity):
+                self.__repopulateSongs(entity, wrapper, controller, decorations)
 
         ### Media
         if entity.kind in set(['media_collection', 'media_item']):
@@ -381,17 +395,21 @@ class GenericSource(BasicSource):
 
     @property
     def idField(self):
-        return "%s_id" % self.sourceName
+        return "%s_id" % self.idName
 
     @property
     def urlField(self):
-        return "%s_url" % self.sourceName
+        return "%s_url" % self.idName
+
+    @property 
+    def idName(self):
+        return self.sourceName
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        if controller.shouldEnrich(self.sourceName, self.sourceName, entity):
+        if controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.wrapperFromEntity(entity)
-                timestamps[self.sourceName] = controller.now
+                timestamps[self.idName] = controller.now
                 results = self.resolver.resolve(query, self.matchSource(query))
                 if len(results) != 0:
                     best = results[0]
@@ -401,5 +419,12 @@ class GenericSource(BasicSource):
                             entity[self.urlField] = best[1].url
             except ValueError:
                 pass
+        source_id = entity[self.idField]
+        if source_id is not None:
+            try:
+                wrapper = self.wrapperFromKey(source_id)
+                self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+            except Exception:
+                print 'Whoops'
         return True
 

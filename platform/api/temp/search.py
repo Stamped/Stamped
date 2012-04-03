@@ -21,29 +21,35 @@ q = '21 jump street'
 # q = 'boyfriend'
 # q = 'avec'
 q = 'kanye west'
+q = 'katy perry'
 coords = CoordinatesSchema({'lat': 37.781697, 'lng':-122.392146})   # SF
 coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # coords = None
 
-results = stampedAPI.searchEntities(q, coords=coords, category=None)
+e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
+print stampedAPI._enrichEntity(e)
+print e
 
-for i in range(len(results)):
-    # pprint(results[i][0].value)
-    entity = HTTPEntityAutosuggest().importSchema(results[i][0], results[i][1]).exportSparse()
 
-    print '%2s. %s' % (i+1, entity['search_id'])
-    print '    title:     %s' % entity['title']
-    print '    subtitle:  %s' % entity['subtitle']
-    print '    category:  %s' % entity['category']
-    if 'distance' in entity:
-        print '    distance:  %s' % entity['distance']
+# results = stampedAPI.searchEntities(q, coords=coords, category=None)
 
-    # print '%2s. %s %10s %s' % (i+1, results[i].entity_id, results[i].subcategory, results[i].title)
+# for i in range(len(results)):
+#     # pprint(results[i][0].value)
+#     entity = HTTPEntityAutosuggest().importSchema(results[i][0], results[i][1]).exportSparse()
 
-    # pprint(entity)
-    print 
+#     print '%2s. %s' % (i+1, entity['search_id'])
+#     print '    title:     %s' % entity['title']
+#     print '    subtitle:  %s' % entity['subtitle']
+#     print '    category:  %s' % entity['category']
+#     if 'distance' in entity:
+#         print '    distance:  %s' % entity['distance']
 
-if len(results) > 0:
-    pprint(results[0][0].value)
-else:
-    print'\n\nNO RESULTS\n\n'
+#     # print '%2s. %s %10s %s' % (i+1, results[i].entity_id, results[i].subcategory, results[i].title)
+
+#     # pprint(entity)
+#     print 
+
+# if len(results) > 0:
+#     pprint(results[0][0].value)
+# else:
+#     print'\n\nNO RESULTS\n\n'

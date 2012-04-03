@@ -34,32 +34,35 @@ class SeedSource(BasicSource):
         
         # TODO: reassess these seed groups
         self.__simple_groups = [
-            'mpaa_rating',
-            'artist_display_name',
-            'tracks',
-            'genre',
-            'desc',
-            'subtitle',
-            'track_length',
-            'cast',
-            'short_description',
-            'coordinates',
-            'author',
-            'publisher',
-            'isbn',
-            'release_date',
+            # 'mpaa_rating',
+            # 'artist_display_name',
+            # 'tracks',
+            # 'genre',
+            # 'desc',
+            # 'subtitle',
+            # 'track_length',
+            # 'cast',
+            # 'short_description',
+            # 'coordinates',
+            # 'author',
+            # 'publisher',
+            # 'isbn',
+            # 'release_date',
         ]
         for group in self.__simple_groups:
             self.addGroup(group)
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         for group in self.__simple_groups:
-            source = "%s_source" % group
-            cur = entity[source]
-            value = entity[group]
-            if isinstance(value, SchemaElement):
-                value = value.value
-            if cur == None and value is not None and value != '' and value != {} and value != []:
-                timestamps[group] = controller.now
+            try:
+                source = "%s_source" % group
+                cur = entity[source]
+                value = entity[group]
+                if isinstance(value, SchemaElement):
+                    value = value.value
+                if cur == None and value is not None and value != '' and value != {} and value != []:
+                    timestamps[group] = controller.now
+            except Exception as e:
+                print e
         return True
 
