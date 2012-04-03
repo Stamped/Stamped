@@ -148,7 +148,7 @@ _subcategory_weights = {
     'market'            : 60, 
     'food'              : 70, 
     'night_club'        : 75, 
-    'place'             : 80, 
+    'place'             : 50, 
     
     # --------------------------
     #           book
@@ -245,7 +245,7 @@ def format(string):
     Multipass safe and partially optimzed
     """
     modified = True
-    li = [ '\t' , '\n', '\r', '  ', '-' ]
+    li = [ '\t' , '\n', '\r', '  ', ]
     while modified:
         modified = False
         for ch in li:
@@ -1839,10 +1839,19 @@ class Resolver(object):
         return 1
     
     def __keywordsTest(self, query, match, similarities, options):
-        if len(query.keywords) > 0:
-            return self.setComparison(set(query.keywords), set(match.keywords), options)
+        #utils.log()
+        #utils.log("%s (%s)" % (match.name, match.subtype))
+        #utils.log(query.keywords)
+        #utils.log(match.keywords)
+        #utils.log()
+        query_keywords = None
         
-        return self.setComparison(set(query.query_string.split()), set(match.keywords), options)
+        if len(query.keywords) > 0:
+            query_keywords = set(query.keywords)
+        else:
+            query_keywords = set(query.query_string.split())
+        
+        return self.setComparison(query_keywords, set(match.keywords), options)
     
     def __keywordsWeight(self, query, match, similarities, options):
         if len(query.keywords) > 0:

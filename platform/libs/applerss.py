@@ -9,6 +9,7 @@ import Globals
 import Entity
 import copy, json, re, urllib, utils
 
+from gevent.pool            import Pool
 from resolve.iTunesSource   import iTunesSource
 from pprint                 import pprint
 
@@ -52,14 +53,14 @@ class AppleRSS(object):
         return self._parse_feed('justadded', **kwargs)
     
     def _parse_feed(self, feedname, **kwargs):
-        webobject = (feedname in self._webobject_feeds)
+        webobject   = (feedname in self._webobject_feeds)
         
         # extract keyword arguments and defaults
         region      = kwargs.pop('region', 'us')
         limit       = kwargs.pop('limit', 10)
         genre       = kwargs.pop('genre', None)
         explicit    = kwargs.pop('explicit', True)
-        transform   = kwargs.pop('transform', 1)
+        transform   = kwargs.pop('transform', True)
         format      = kwargs.pop('format', 'xml' if webobject else self.DEFAULT_FORMAT)
         
         if format not in [ 'xml', 'json' ]:
@@ -94,7 +95,7 @@ class AppleRSS(object):
         f.close()
         """
         
-        if 0 == transform:
+        if not transform:
             return data
         
         try:
@@ -105,24 +106,27 @@ class AppleRSS(object):
         
         entries  = data['feed']['entry']
         entities = []
-        full     = (2 == transform)
         #print json.dumps(entries, indent=2)
         
         if isinstance(entries, dict):
             entries = [ entries ]
         
-        for entry in entries:
+        def _parse_entry(entities, entry):
             try:
-                entity = self._parse_entity(entry, full=full)
+                entity = self._parse_entity(entry)
                 if entity is not None:
                     entities.append(entity)
-                    break
             except:
                 utils.printException()
         
+        pool = Pool(16)
+        for entry in entries:
+            pool.spawn(_parse_entry, entities, entry)
+        
+        pool.join()
         return entities
     
-    def _parse_entity(self, entry, full=False):
+    def _parse_entity(self, entry):
         aid = entry['id']['attributes']['im:id']
         
         wrapper = self._source.wrapperFromKey(aid)
@@ -137,8 +141,8 @@ class AppleRSS(object):
 
 def main():
     rss = AppleRSS()
-    #ret = rss.get_top_albums(limit=10, transform=2)
-    ret = rss.get_top_songs(limit=10, transform=2)
+    #ret = rss.get_top_albums(limit=10, transform=True)
+    ret = rss.get_top_songs(limit=10, transform=True)
     
     for entity in ret:
         pprint(entity.value)

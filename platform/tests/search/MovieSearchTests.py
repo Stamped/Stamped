@@ -61,27 +61,6 @@ class MovieSearchTests(ASearchTestSuite):
         
         self._run_tests(tests, args)
     
-    def __test_movie_search(self, movies, **extra_constraint_args):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
-        tests = []
-        
-        for movie in movies:
-            tests.append( ({ 'query' : movie.title, }, [ 
-                SearchResultConstraint(title=movie.title, 
-                                       types='movie', 
-                                       **extra_constraint_args), 
-            ]))
-        
-        self._run_tests(tests, args)
-    
     def test_in_theaters(self):
         fandango = Fandango(verbose=True)
         movies   = fandango.get_top_box_office_movies()
@@ -106,6 +85,27 @@ class MovieSearchTests(ASearchTestSuite):
         
         return self.__test_movie_search(movies)
     """
+    
+    def __test_movie_search(self, movies, **extra_constraint_args):
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = []
+        
+        for movie in movies:
+            tests.append( ({ 'query' : movie.title, }, [ 
+                SearchResultConstraint(title=movie.title, 
+                                       types='movie', 
+                                       **extra_constraint_args), 
+            ]))
+        
+        self._run_tests(tests, args)
 
 if __name__ == '__main__':
     StampedTestRunner().run()
