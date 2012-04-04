@@ -514,6 +514,32 @@ class ViewportSchema(Schema):
 # Entities #
 # ######## #
 
+def getEntityObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntity
+    if kind == 'person':
+        return PersonEntity
+    if kind == 'media_collection':
+        return MediaCollectionEntity
+    if kind == 'media_item':
+        return MediaItemEntity
+    if kind == 'software':
+        return SoftwareEntity
+    return BasicEntity
+
+def getEntityMiniObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntityMini
+    if kind == 'person':
+        return PersonEntityMini
+    if kind == 'media_collection':
+        return MediaCollectionEntityMini
+    if kind == 'media_item':
+        return MediaItemEntityMini
+    if kind == 'software':
+        return SoftwareEntityMini
+    return BasicEntityMini
+
 class BasicEntity(Schema):
 
     def setSchema(self):
@@ -557,6 +583,22 @@ class BasicEntity(Schema):
         if self.user_generated_subtitle is not None:
             return self.user_generated_subtitle
         return str(self.subcategory).replace('_', ' ').title()
+
+    def minimize(self):
+        mini            = getEntityMiniObjectFromKind(self.kind)()
+        mini.entity_id  = self.entity_id 
+        mini.title      = self.title 
+        mini.types      = self.types 
+        mini.sources    = self.sources 
+        return mini
+
+    def isType(self, t):
+        try:
+            if t in self.types.value:
+                return True
+        except:
+            pass
+        return False
     
     # def __str__(self):
     #     t = list(self.types)
@@ -832,19 +874,19 @@ class PersonEntity(BasicEntity):
 
     @property 
     def subtitle(self):
-        if 'artist' in self.types.value:
+        if self.isType('artist'):
             return 'Artist'
         return self._genericSubtitle()
 
     @property 
     def category(self):
-        if 'artist' in self.types.value:
+        if self.isType('artist'):
             return 'music'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'artist' in self.types.value:
+        if self.isType('artist'):
             return 'artist'
         return 'other'
 
@@ -913,12 +955,12 @@ class MediaCollectionEntity(BasicMediaEntity):
 
     @property 
     def subtitle(self):
-        if 'album' in self.types.value:
+        if self.isType('album'):
             if len(self.artists) > 0:
                 return 'Album by %s' % ', '.join(str(i['title']) for i in self.artists)
             return 'Album'
 
-        if 'tv' in self.types.value:
+        if self.isType('tv'):
             if len(self.networks) > 0:
                 return 'TV Show (%s)' % ', '.join(str(i['title']) for i in self.networks)
             return 'TV Show'
@@ -927,17 +969,17 @@ class MediaCollectionEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'album' in self.types.value:
+        if self.isType('album'):
             return 'music'
-        if 'tv' in self.types.value:
+        if self.isType('tv'):
             return 'film'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'album' in self.types.value:
+        if self.isType('album'):
             return 'album'
-        if 'tv' in self.types.value:
+        if self.isType('tv'):
             return 'tv'
         return 'other'
 
@@ -963,17 +1005,17 @@ class MediaItemEntity(BasicMediaEntity):
 
     @property 
     def subtitle(self):
-        if 'movie' in self.types.value:
+        if self.isType('movie'):
             if self.release_date is not None:
                 return 'Movie (%s)' % self.release_date.year
             return 'Movie'
 
-        if 'track' in self.types.value:
+        if self.isType('track'):
             if len(self.artists) > 0:
                 return 'Song by %s' % ', '.join(str(i['title']) for i in self.artists)
             return 'Song'
 
-        if 'book' in self.types.value:
+        if self.isType('book'):
             if len(self.authors) > 0:
                 return '%s' % ', '.join(str(i['title']) for i in self.authors)
             return 'Book'
@@ -982,21 +1024,21 @@ class MediaItemEntity(BasicMediaEntity):
 
     @property 
     def category(self):
-        if 'movie' in self.types.value:
+        if self.isType('movie'):
             return 'film'
-        if 'track' in self.types.value:
+        if self.isType('track'):
             return 'music'
-        if 'book' in self.types.value:
+        if self.isType('book'):
             return 'book'
         return 'other'
 
     @property 
     def subcategory(self):
-        if 'movie' in self.types.value:
+        if self.isType('movie'):
             return 'movie'
-        if 'track' in self.types.value:
+        if self.isType('track'):
             return 'song'
-        if 'book' in self.types.value:
+        if self.isType('book'):
             return 'book'
         return 'other'
 
@@ -1032,7 +1074,7 @@ class SoftwareEntity(BasicEntity):
 
     @property 
     def subtitle(self):
-        if 'app' in self.types.value:
+        if self.isType('app'):
             if len(self.authors) > 0:
                 return 'App (%s)' % ', '.join(str(i['title']) for i in self.authors)
             return 'App'
@@ -1045,7 +1087,7 @@ class SoftwareEntity(BasicEntity):
 
     @property 
     def subcategory(self):
-        if 'app' in self.types.value:
+        if self.isType('app'):
             return 'app'
         return 'other'
 
@@ -1056,14 +1098,13 @@ class SoftwareEntity(BasicEntity):
 
 class BasicEntityMini(BasicEntity):
     def setSchema(self):
+        self.schema_version                 = SchemaElement(int, default=0)
         self.entity_id                      = SchemaElement(basestring)
         self.title                          = SchemaElement(basestring)
         self.kind                           = SchemaElement(basestring, default='other')
         self.types                          = SchemaList(SchemaElement(basestring))
         self.sources                        = EntitySourcesSchema()
         self.coordinates                    = CoordinatesSchema()
-
-        self.schema_version                 = SchemaElement(int, default=0)
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):

@@ -706,7 +706,7 @@ class HTTPEntity(Schema):
             self._addAction('phone', entity.contact.phone, sources, icon=actionIcon)
 
         # Book
-        elif entity.kind == 'media_item' and 'book' in entity.types.value:
+        elif entity.kind == 'media_item' and entity.isType('book'):
 
             if entity.authors is not None:
                 self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)
@@ -735,7 +735,7 @@ class HTTPEntity(Schema):
             self._addAction('buy', 'Buy now', sources, icon=actionIcon)
 
         # Movie
-        elif entity.kind == 'media_item' and 'movie' in entity.types.value:
+        elif entity.kind == 'media_item' and entity.isType('movie'):
 
             if entity.subcategory == 'movie' and entity.length is not None:
                 length = self._formatFilmLength(entity.length)
@@ -986,7 +986,7 @@ class HTTPEntity(Schema):
                 if len(playlist.data) > 0:
                     self.playlist = playlist
 
-        elif entity.kind == 'software' and 'app' in entity.types.value:
+        elif entity.kind == 'software' and entity.isType('app'):
 
             if entity.authors is not None:
                 self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)

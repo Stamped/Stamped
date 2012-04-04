@@ -2897,16 +2897,17 @@ class StampedAPI(AStampedAPI):
                 # source key was found in the Stamped DB
                 entity_id = results[0][1].key
                 
-                # enrich entity asynchronously
-                tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
-            else:
-                entity = source.buildEntityFromWrapper(wrapper)
-                
-                entity = self._entityDB.addEntity(entity)
-                entity_id = entity.entity_id
-                
-                # enrich and merge entity asynchronously
-                self.mergeEntity(entity, True)
+        if entity_id is None:
+            entity = source.buildEntityFromWrapper(wrapper)
+            
+            entity = self._entityDB.addEntity(entity)
+            entity_id = entity.entity_id
+            
+            # enrich and merge entity asynchronously
+            self.mergeEntity(entity, True)
+        else:
+            # enrich entity asynchronously
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity_id])
         
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
@@ -2951,6 +2952,7 @@ class StampedAPI(AStampedAPI):
     def mergeEntityAsync(self, entity_dict, update = False):
         entity = buildEntity(entity_dict)
         self._mergeEntity(entity, update)
+        self._enrichEntityTracks(entity)
     
     @lazyProperty
     def __full_resolve(self):
@@ -2973,13 +2975,92 @@ class StampedAPI(AStampedAPI):
     def _enrichEntityAsync(self, entity_id):
         entity = self._entityDB.getEntity(entity_id)
         
-        if entity is not None:
-            modified = self._enrichEntity(entity)
-            if modified:
-                self._entityDB.update(entity)
-        else:
+        if entity is None:
             logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
-    
+            raise Exception
+
+        modified = self._enrichEntity(entity)
+        if modified:
+            self._entityDB.update(entity)
+
+        self._enrichEntityTracks(entity)
+
+    def _enrichEntityTracks(self, entity):
+        if entity.isType('album') or entity.isType('artist'):
+            stamped   = StampedSource(stamped_api = self)
+            sources = {
+                'amazon':       AmazonSource,
+                'factual':      FactualSource,
+                'googleplaces': GooglePlacesSource,
+                'itunes':       iTunesSource,
+                'rdio':         RdioSource,
+                'spotify':      SpotifySource,
+                'tmdb':         TMDBSource,
+            }
+            track_list = []
+
+            for stub in entity.tracks:
+                source      = None
+                source_id   = None
+                entity_id   = None
+                wrapper     = None
+
+                # Enrich track
+                if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+                    entity_id = stub.entity_id
+                else:
+                    for sourceName in sources:
+                        try:
+                            if stub.sources['%s_id' % sourceName] is not None:
+                                source = sources[sourceName]()
+                                source_id = stub.sources['%s_id' % sourceName]
+                                # Attempt to resolve against the Stamped DB (quick)
+                                entity_id = stamped.resolve_fast(source, source_id)
+                                if entity_id is None:
+                                    # Attempt to resolve against the Stamped DB (full)
+                                    wrapper = source.wrapperFromKey(source_id)
+                                    results = stamped.resolve(wrapper)
+                                    if len(results) > 0 and results[0][0]['resolved']:
+                                        entity_id = results[0][1].key
+                                break
+                        except:
+                            pass
+                if entity_id is not None:
+                    track = self.getEntity({'entity_id': entity_id})
+                elif source_id is not None and wrapper is not None:
+                    track = source.buildEntityFromWrapper(wrapper)
+                else:
+                    print 'Unable to enrich track'
+                    track_list.append(stub)
+                    continue
+
+                # Update track's album with album entity_id
+                if entity.isType('album'):
+                    collectionUpdated = False
+                    for collection in track.collections:
+                        commonSources = set(entity.sources.value.keys()).intersection(set(collection.sources.value.keys()))
+                        for commonSource in commonSources:
+                            if commonSource[-3:] == '_id' and entity.sources[commonSource] == collection.sources[commonSource]:
+                                collection.entity_id = entity.entity_id
+                                collectionUpdated = True
+                                break
+                        if collectionUpdated:
+                            break
+                    if not collectionUpdated:
+                        track.collections.append(entity.minimize())
+
+                # TODO: Enrich artist
+
+                # Merge track
+                track = self._mergeEntity(track, True)
+
+                # Add track to album
+                track_list.append(track.minimize())
+
+            if len(track_list) > 0:
+                entity.tracks = track_list
+                entity = self._mergeEntity(entity, True)
+        
     def _saveTempEntityAsync(self, results):
         results = map(lambda r: (Entity(r[0]), r[1]), results)
         self._entitySearcher._add_temp(results)

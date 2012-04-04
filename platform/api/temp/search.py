@@ -41,7 +41,11 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
 # e = stampedAPI.getEntity({'entity_id': '4e4c6e76db6bbe2bcd01ce85'})
 
-e = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})
+# album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
+stampedAPI.getEntity({'search_id': 'T_ITUNES_64387566'}) # Katy Perry (Artist)
+
+"""
+album = stampedAPI._mergeEntity(album, True)
 
 print '\n\nBEGIN\n%s\n' % ('='*40)
 # pprint(e.value)
@@ -51,27 +55,24 @@ print '\n\nBEGIN\n%s\n' % ('='*40)
 #         print track
 
 stamped   = StampedSource(stamped_api = stampedAPI)
-
+sources = {
+    'amazon':       AmazonSource,
+    'factual':      FactualSource,
+    'googleplaces': GooglePlacesSource,
+    'itunes':       iTunesSource,
+    'rdio':         RdioSource,
+    'spotify':      SpotifySource,
+    'tmdb':         TMDBSource,
+}
 track_list = []
 
-for stub in e.tracks:
-    # stub = e.tracks[7]
-    print stub
-
-    sources = {
-        'amazon':       AmazonSource,
-        'factual':      FactualSource,
-        'googleplaces': GooglePlacesSource,
-        'itunes':       iTunesSource,
-        'rdio':         RdioSource,
-        'spotify':      SpotifySource,
-        'tmdb':         TMDBSource,
-    }
+for stub in album.tracks:
     source      = None
     source_id   = None
     entity_id   = None
     wrapper     = None
 
+    # Enrich track
     if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
         entity_id = stub.entity_id
     else:
@@ -81,46 +82,56 @@ for stub in e.tracks:
                     source = sources[sourceName]()
                     source_id = stub.sources['%s_id' % sourceName]
 
-                    # attempt to resolve against the Stamped DB
+                    # Attempt to resolve against the Stamped DB (quick)
                     entity_id = stamped.resolve_fast(source, source_id)
 
                     if entity_id is None:
+                        # Attempt to resolve against the Stamped DB (full)
                         wrapper = source.wrapperFromKey(source_id)
                         results = stamped.resolve(wrapper)
-
                         if len(results) > 0 and results[0][0]['resolved']:
-                            # source key was found in the Stamped DB
                             entity_id = results[0][1].key
                     break
             except:
                 pass
 
     if entity_id is not None:
-        entity = stampedAPI.getEntity({'entity_id': entity_id})
-
+        track = stampedAPI.getEntity({'entity_id': entity_id})
     elif source_id is not None and wrapper is not None:
-        entity = source.buildEntityFromWrapper(wrapper)
-
+        track = source.buildEntityFromWrapper(wrapper)
     else:
-        raise Exception
+        print 'Unable to enrich track'
+        track_list.append(stub)
+        continue
 
-    entity = stampedAPI._mergeEntity(entity, True)
+    # Update track's album with album entity_id
+    collectionUpdated = False
+    for collection in track.collections:
+        commonSources = set(album.sources.value.keys()).intersection(set(collection.sources.value.keys()))
+        for commonSource in commonSources:
+            if commonSource[-3:] == '_id' and album.sources[commonSource] == collection.sources[commonSource]:
+                collection.entity_id = album.entity_id
+                collectionUpdated = True
+                break
+        if collectionUpdated:
+            break
+    if not collectionUpdated:
+        track.collections.append(album.minimize())
 
-    newStub = Entity.buildEntity(kind=entity.kind)
-    newStub.sources     = entity.sources
-    newStub.artists     = entity.artists
-    newStub.collections = entity.collections
-    newStub.entity_id   = entity.entity_id
-    newStub.title       = entity.title 
-    newStub.kind        = entity.kind 
-    newStub.types       = entity.types
-    track_list.append(newStub)
+    track = stampedAPI._mergeEntity(track, True)
+
+    # TODO: Enrich artist
+
+    # Add track to album
+    track_list.append(track.minimize())
+
 
 print '\n\n\n%s\n%s\n\n\n' % ('='*40, '='*40)
 
-for track in track_list:
-    print track
-
+e.tracks = track_list
+e = stampedAPI._mergeEntity(e, True)
+print e
+"""
 
 # results = stampedAPI.searchEntities(q, coords=coords, category=None)
 
