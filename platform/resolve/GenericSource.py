@@ -171,8 +171,6 @@ class GenericSource(BasicSource):
             except Exception:
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
-        if len(entity.tracks) > 0:
-            entity.tracks_source = artist.source 
     
     def wrapperFromKey(self, key, type=None):
         raise NotImplementedError
