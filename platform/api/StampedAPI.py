@@ -1162,6 +1162,9 @@ class StampedAPI(AStampedAPI):
     def _getEntity(self, entityId):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
+        else:
+            ### TODO: Add async enrichment?
+            tasks.invoke(tasks.APITasks._enrichEntity, args=[entityId])
         
         return self._entityDB.getEntity(entityId)
     

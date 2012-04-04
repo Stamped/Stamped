@@ -167,19 +167,12 @@ class GenericSource(BasicSource):
                     entityMini.sources['%s_source' % artist.source] = artist.source
                 if 'url' in track:
                     entityMini.sources['%s_url' % artist.source] = track['url']
-
-                    # Attempt fast resolve
-                    # entity_id = self.stamped.resolve_fast(artist.source, track['key'])
-                    # to_enrich = decorations.setdefault('track_ids', [])
-                    # if entity_id is not None:
-                    #     to_enrich.append(('stamped', entity_id))
-                    # else:
-                    #     to_enrich.append((artist.source, track['key']))
-
                 entity.tracks.append(entityMini)
             except Exception:
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
+        if len(entity.tracks) > 0:
+            entity.tracks_source = artist.source 
     
     def wrapperFromKey(self, key, type=None):
         raise NotImplementedError
