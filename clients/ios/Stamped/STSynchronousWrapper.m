@@ -9,44 +9,54 @@
 #import "STSynchronousWrapper.h"
 #import "STEntityDetailViewFactory.h"
 #import "STWeakProxy.h"
+#import "Util.h"
 
 @interface STSynchronousWrapper()
 
 - (void)handleCallback:(STViewCreator)creator;
 
 @property (nonatomic, retain) UIActivityIndicatorView* loadingView;
-@property (nonatomic, retain) NSOperationQueue* queue;
 @property (nonatomic, retain) STWeakProxy* proxy;
+@property (nonatomic, copy) void(^completion)(STSynchronousWrapper*);
 
 @end
 
 @implementation STSynchronousWrapper
 
 @synthesize loadingView = _loadingView;
-@synthesize queue = _queue;
 @synthesize proxy = _proxy;
+@synthesize completion = _completion;
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate
       componentFactory:(id<STEntityDetailComponentFactory>)factory
           entityDetail:(id<STEntityDetail>)entityDetail
               andFrame:(CGRect)frame {
+  return [self initWithDelegate:delegate completion:nil factoryBlock:^(STViewCreatorCallback callback) {
+    NSOperation* operation = [factory createViewWithEntityDetail:entityDetail andCallbackBlock:callback];
+    [Util runOperationAsynchronously:operation];
+  } andFrame:frame];
+}
+
+- (id)initWithDelegate:(id<STViewDelegate>)delegate 
+            completion:(void(^)(STSynchronousWrapper*))completionBlock
+          factoryBlock:(STViewFactoryBlock)factoryBlock
+              andFrame:(CGRect)frame {
   self = [super initWithDelegate:delegate andFrame:frame];
   if (self) {
     _proxy = [[STWeakProxy alloc] initWithValue:self];
-    _queue = [[NSOperationQueue alloc] init];
     _loadingView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     _loadingView.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+    _completion = [completionBlock copy];
     [self addSubview:_loadingView];
     _loadingView.hidden = NO;
     [_loadingView startAnimating];
     STWeakProxy* weakproxy = _proxy;
-    NSOperation* operation = [factory createViewWithEntityDetail:entityDetail andCallbackBlock:^(STViewCreator creator) {
+    factoryBlock(^(STViewCreator creator) {
       STSynchronousWrapper* wrapper = weakproxy.value;
       if (wrapper) {
         [wrapper handleCallback:creator];
       }
-    }];
-    [_queue addOperation:operation];
+    });
   }
   return self;
 }
@@ -55,8 +65,8 @@
 {
   self.proxy.value = nil;
   [_proxy release];
-  [_queue release];
   [_loadingView release];
+  [_completion release];
   [super dealloc];
 }
 
@@ -74,12 +84,15 @@
       frame.size.height = 0;
       self.frame = frame;
       [self appendChildView:child];
+      if (self.completion) {
+        self.completion(self);
+      }
     };
   }
   else {
     delta = -self.frame.size.height;
   }
-  CGFloat duration = .25;
+  CGFloat duration = .15;
   if ([self.delegate respondsToSelector:@selector(childView:shouldChangeHeightBy:overDuration:)]) {
     [self.delegate childView:self shouldChangeHeightBy:delta overDuration:duration];
   }

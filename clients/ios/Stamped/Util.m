@@ -397,8 +397,12 @@ static Rdio* _rdio;
   }
   if (view) {
     STPopUpView* popup = [[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color];
+    popup.alpha = 0;
     [window addSubview:popup];
     _currentPopUp = popup;
+    [UIView animateWithDuration:.25 animations:^{
+      popup.alpha = 1;
+    }];
     //Pointer retained solely for comparison, not ownership
     [popup release];
   }
@@ -458,9 +462,14 @@ static Rdio* _rdio;
   activityView.layer.shadowRadius = 1.0;
   activityView.layer.shadowOffset = CGSizeMake(0, 1);
   
+  activityView.alpha = 0;
+  
   [window addSubview:activityView];
-  [activityView startAnimating];
   activityView.hidden = NO;
+  [activityView startAnimating];
+  [UIView animateWithDuration:.5 animations:^{
+    activityView.alpha = 1;
+  }];
   //activityView.backgroundColor = [UIColor redColor];
   window.userInteractionEnabled = NO;
 }

@@ -10,10 +10,10 @@
 
 @protocol STComment <NSObject>
 
-@property (nonatomic, retain) NSString* blurb;
-@property (nonatomic, retain) NSString* commentID;
-@property (nonatomic, retain) NSString* stampID;
-@property (nonatomic, retain) NSDate* created;
-@property (nonatomic, retain) NSString* userID;
+@property (nonatomic, readonly, copy) NSString* blurb;
+@property (nonatomic, readonly, copy) NSString* commentID;
+@property (nonatomic, readonly, copy) NSString* stampID;
+@property (nonatomic, readonly, copy) NSDate* created;
+@property (nonatomic, readonly, copy) NSString* userID;
 
 @end

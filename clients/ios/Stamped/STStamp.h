@@ -8,29 +8,31 @@
 
 #import <Foundation/Foundation.h>
 #import "STEntity.h"
-#import "User.h"
+#import "STUser.h"
+#import "STComment.h"
+#import "STMention.h"
+#import "STCredit.h"
 
 @protocol STStamp <NSObject>
 
-@property (nonatomic, retain) NSString* blurb;
-@property (nonatomic, retain) NSDate* created;
-@property (nonatomic, retain) NSNumber* deleted;
-@property (nonatomic, retain) NSString* imageDimensions;
-@property (nonatomic, retain) NSString* imageURL;
-@property (nonatomic, retain) NSNumber* isFavorited;
-@property (nonatomic, retain) NSNumber* isLiked;
-@property (nonatomic, retain) NSDate* modified;
-@property (nonatomic, retain) NSNumber* numComments;
-@property (nonatomic, retain) NSNumber* numLikes;
-@property (nonatomic, retain) NSString* stampID;
-@property (nonatomic, retain) NSString* URL;
-@property (nonatomic, retain) NSString* via;
-@property (nonatomic, retain) NSSet* comments;
-@property (nonatomic, retain) NSSet* credits;
-@property (nonatomic, retain) NSSet* events;
-@property (nonatomic, retain) NSSet* favorites;
+@property (nonatomic, readonly, copy) NSString* blurb;
+@property (nonatomic, readonly, copy) NSDate* created;
+@property (nonatomic, readonly, copy) NSNumber* deleted;
+@property (nonatomic, readonly, copy) NSString* imageDimensions;
+@property (nonatomic, readonly, copy) NSString* imageURL;
+@property (nonatomic, readonly, copy) NSNumber* isFavorited;
+@property (nonatomic, readonly, copy) NSNumber* isLiked;
+@property (nonatomic, readonly, copy) NSDate* modified;
+@property (nonatomic, readonly, copy) NSNumber* numComments;
+@property (nonatomic, readonly, copy) NSNumber* numLikes;
+@property (nonatomic, readonly, copy) NSString* stampID;
+@property (nonatomic, readonly, copy) NSString* URL;
+@property (nonatomic, readonly, copy) NSString* via;
 
-@property (nonatomic, readonly, retain) NSString* entityID;
-@property (nonatomic, readonly, retain) NSString* userID;
+@property (nonatomic, readonly, copy) id<STEntity> entity;
+@property (nonatomic, readonly, copy) id<STUser> user;
+@property (nonatomic, readonly, copy) NSArray<STComment>* commentsPreview;
+@property (nonatomic, readonly, copy) NSArray<STMention>* mentions;
+@property (nonatomic, readonly, copy) NSArray<STCredit>* credits;
 
 @end

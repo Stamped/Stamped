@@ -22,11 +22,12 @@
 @synthesize mainKey = _mainKey;
 @synthesize cache = _cache;
 
-- (id)initWithMainKey:(NSString*)key {
+- (id)initWithMainKey:(NSString*)key andDelegate:(id<STCacheModelSourceDelegate>)delegate {
   self = [super init];
   if (self) {
     _mainKey = [key copy];
     _cache = [[NSCache alloc] init];
+    _delegate = delegate;
   }
   return self;
 }
@@ -43,14 +44,21 @@
   id object = [self.cache objectForKey:key];
   id<STCacheModelSourceDelegate> delegate = self.delegate;
   [Util executeAsync:^{
-    [delegate objectForCache:self withKey:key andCurrentObject:object withCallback:^(id result) {
-      if (result) {
-        [self.cache setObject:result forKey:key];
-      }
-      [Util executeOnMainThread:^{
-        block(result);
+    if (delegate) {
+      [delegate objectForCache:self withKey:key andCurrentObject:object withCallback:^(id result) {
+        if (result) {
+          [self.cache setObject:result forKey:key];
+        }
+        [Util executeOnMainThread:^{
+          block(result);
+        }];
       }];
-    }];
+    }
+    else {
+      [Util executeOnMainThread:^{
+        block(nil);
+      }];
+    }
   }];
 }
 

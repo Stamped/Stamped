@@ -11,12 +11,20 @@
 #import "STEntityDetailFactory.h"
 #import "Util.h"
 #import "STCacheModelSource.h"
+#import "STRestKitLoader.h"
+#import "STSimpleStamp.h"
 
 @interface STStampedAPI () <STCacheModelSourceDelegate>
+
+@property (nonatomic, readonly, retain) STCacheModelSource* menuCache;
+@property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
 
 @end
 
 @implementation STStampedAPI
+
+@synthesize menuCache = _menuCache;
+@synthesize stampCache = _stampCache;
 
 static STStampedAPI* _sharedInstance;
 
@@ -26,6 +34,20 @@ static STStampedAPI* _sharedInstance;
 
 + (STStampedAPI*)sharedInstance {
   return _sharedInstance;
+}
+
+- (id)init
+{
+  self = [super init];
+  if (self) {
+    _menuCache = [[STCacheModelSource alloc] initWithMainKey:@"entityID" andDelegate:self];
+    _stampCache = [[STCacheModelSource alloc] initWithMainKey:@"stampID" andDelegate:self];
+  }
+  return self;
+}
+
+- (void)stampForStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>))block {
+  [self.stampCache fetchWithKey:stampID callback:block];
 }
 
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block {
@@ -45,13 +67,26 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)menuForEntityID:(NSString*)entityID andCallback:(void(^)(id<STMenu>))block {
-  [[STMenuFactory sharedFactory] menuWithEntityId:entityID andCallbackBlock:^(id<STMenu> menu) {
-    block(menu);
-  }];
+  [self.menuCache fetchWithKey:entityID callback:block];
 }
 
 - (void)objectForCache:(STCacheModelSource*)cache withKey:(NSString*)key andCurrentObject:(id)object withCallback:(void(^)(id))block {
-  
+  if (cache == self.menuCache) {
+    [[STMenuFactory sharedFactory] menuWithEntityId:key andCallbackBlock:^(id<STMenu> menu) {
+      block(menu);
+    }];
+  }
+  else if (cache == self.stampCache) {
+    NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamped_id"];
+    NSString* path = @"/stamps/show.json";
+    [[STRestKitLoader sharedInstance] loadWithPath:path params:params mapping:[STSimpleStamp mapping] andCallback:^(NSArray* array, NSError* error) {
+      id<STStamp> stamp = nil;
+      if (array && [array count] > 0) {
+        stamp = [array objectAtIndex:0];
+      }
+      block(stamp);
+    }];
+  }
 }
 
 @end

@@ -18,52 +18,38 @@
 
 @implementation STSimpleEntityDetail
 
-@synthesize entityID = entityID_;
-@synthesize title = title_;
-@synthesize subtitle = subtitle_;
-@synthesize desc = desc_;
-@synthesize category = category_;
-@synthesize subcategory = subcategory_;
-@synthesize image = image_;
-@synthesize caption = caption_;
+@synthesize image = _image;
+@synthesize caption = _caption;
 
-@synthesize address = address_;
-@synthesize addressStreet = addressStreet_;
-@synthesize addressCity = addressCity_;
-@synthesize addressState = addressState_;
-@synthesize addressZip = addressZip_;
-@synthesize addressCountry = addressCountry_;
-@synthesize neighborhood = neighborhood_;
-@synthesize coordinates = coordinates_;
+@synthesize address = _address;
+@synthesize addressStreet = _addressStreet;
+@synthesize addressCity = _addressCity;
+@synthesize addressState = _addressState;
+@synthesize addressZip = _addressZip;
+@synthesize addressCountry = _addressCountry;
+@synthesize neighborhood = _neighborhood;
 
-@synthesize actions = actions_;
-@synthesize metadata = metadata_;
-@synthesize gallery = gallery_;
-@synthesize playlist = playlist_;
+@synthesize actions = _actions;
+@synthesize metadata = _metadata;
+@synthesize gallery = _gallery;
+@synthesize playlist = _playlist;
 
 - (void)dealloc {
-  self.entityID = nil;
-  self.title = nil;
-  self.subtitle = nil;
-  self.desc = nil;
-  self.category = nil;
-  self.subcategory = nil;
-  self.image = nil;
-  self.caption = nil;
+  [_image release];
+  [_caption release];
   
-  self.address = nil;
-  self.addressStreet = nil;
-  self.addressCity = nil;
-  self.addressState = nil;
-  self.addressZip = nil;
-  self.addressCountry = nil;
-  self.neighborhood = nil;
-  self.coordinates = nil;
+  [_address release];
+  [_addressStreet release];
+  [_addressCity release];
+  [_addressState release];
+  [_addressZip release];
+  [_addressCountry release];
+  [_neighborhood release];
   
-  self.actions = nil;
-  self.metadata = nil;
-  self.gallery = nil;
-  self.playlist = nil;
+  [_actions release];
+  [_metadata release];
+  [_gallery release];
+  [_playlist release];
   
   [super dealloc];
 }
@@ -83,15 +69,15 @@
   [mapping mapAttributes:
    @"title",
    @"subtitle",
-   @"desc",
    @"category",
    @"subcategory",
+   @"coordinates",
    @"image",
    @"address",
    @"neighborhood",
-   @"coordinates",
    @"caption",
    nil];
+  
   [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
   [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];

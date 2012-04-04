@@ -120,4 +120,10 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   }
 }
 
+/*
+- (void)reloadData {
+  [self performSelector:@selector(shouldFinishLoading) withObject:nil afterDelay:.5];
+}
+*/
+
 @end

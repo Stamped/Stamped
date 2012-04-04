@@ -25,6 +25,7 @@
 #import "StampDetailHeaderView.h"
 #import "STActionManager.h"
 #import "STStampedActions.h"
+#import "STStampedAPI.h"
 
 @interface STStampDetailViewController () <StampDetailHeaderViewDelegate>
 
@@ -54,23 +55,34 @@
   [super loadView];
   
   UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:_stamp.entityObject.title]
-                                                                 style:UIBarButtonItemStyleBordered
-                                                                target:nil
-                                                                action:nil] autorelease];
+                                                                  style:UIBarButtonItemStyleBordered
+                                                                 target:nil
+                                                                 action:nil] autorelease];
   [[self navigationItem] setBackBarButtonItem:backButton];
   
-  _headerView = [[StampDetailHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 68)];
-  _headerView.stamp = self.stamp;
-  _headerView.delegate = self;
+  STSynchronousWrapper* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:self.scrollView completion:^(STSynchronousWrapper* aWrapper) {
+    [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entityObject.entityID andCallback:^(id<STEntityDetail> detail) {
+      STSynchronousWrapper* eDetail = [STSynchronousWrapper wrapperForEntityDetail:detail withFrame:CGRectMake(0, 0, 320, 200) andStyle:@"StampDetail" delegate:aWrapper];
+      [aWrapper appendChildView:eDetail];
+    }];
+  } factoryBlock:^(STViewCreatorCallback creator) {
+    [Util executeOnMainThread:^{
+      creator(^(id<STViewDelegate> del){
+        _headerView = [[StampDetailHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 68)];
+        _headerView.stamp = self.stamp;
+        _headerView.delegate = self;
+        return _headerView;
+      });
+    }];
+  } andFrame:CGRectMake(0, 0, 320, 100)];
   //_headerView.backgroundColor = [UIColor redColor];
-  [self.scrollView appendChildView:_headerView];
+  [self.scrollView appendChildView:wrapper];
   
   
-  NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:_stamp.entityObject.entityID 
-                                                                                 andCallbackBlock:^(id<STEntityDetail> detail) {
-                                                                                   [self _didLoadEntityDetail:detail];
-                                                                                 }];
-  [Util runOperationAsynchronously:operation];
+  /*[[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entityObject.entityID andCallback:^(id<STEntityDetail> detail) {
+    [self _didLoadEntityDetail:detail];
+  }];
+   */
 }
 
 - (void)dealloc {
@@ -101,7 +113,7 @@
 
 
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail {
-
+  
   CGFloat wrapperHeight = 200;
   CGRect wrapperFrame = CGRectMake(0, 0 , 320, wrapperHeight);
   STSynchronousWrapper* eDetailView = [STSynchronousWrapper wrapperForEntityDetail:detail

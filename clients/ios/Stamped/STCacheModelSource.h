@@ -21,7 +21,7 @@
 
 @property (nonatomic, readwrite, assign) id<STCacheModelSourceDelegate> delegate;
 
-- (id)initWithMainKey:(NSString*)key;
+- (id)initWithMainKey:(NSString*)key andDelegate:(id<STCacheModelSourceDelegate>)delegate;
 
 - (void)setObject:(id)object forKey:(NSString*)key;
 

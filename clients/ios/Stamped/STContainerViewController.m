@@ -244,8 +244,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 #pragma mark - To be implemented by subclasses.
 
-- (void)finishLoading {
-  NSLog(@"finishLoading");
+- (void)shouldFinishLoading {
   NSDate* now = [NSDate date];
   [self updateLastUpdatedTo:now];
   [self setLoading:NO];
@@ -256,7 +255,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)reloadData {
-  [self performSelector:@selector(finishLoading) withObject:nil afterDelay:.5];
+  [self performSelector:@selector(shouldFinishLoading) withObject:nil afterDelay:.5];
 }
 
 

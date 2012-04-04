@@ -1,5 +1,5 @@
 //
-//  STUser.h
+//  STCredit.h
 //  Stamped
 //
 //  Created by Landon Judkins on 4/3/12.
@@ -8,13 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol STUser <NSObject>
+@protocol STCredit <NSObject>
 
 @property (nonatomic, readonly, copy) NSString* userID;
 @property (nonatomic, readonly, copy) NSString* screenName;
+@property (nonatomic, readonly, copy) NSString* stampID;
 @property (nonatomic, readonly, copy) NSString* colorPrimary;
 @property (nonatomic, readonly, copy) NSString* colorSecondary;
-@property (nonatomic, readonly, copy) NSNumber* privacy;
-@property (nonatomic, readonly, copy) NSString* imageURL;
+@property (nonatomic, readonly, copy) NSString* privacy;
 
 @end

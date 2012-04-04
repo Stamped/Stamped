@@ -21,3 +21,4 @@
 
 typedef UIView* (^STViewCreator)(id<STViewDelegate>);
 typedef void (^STViewCreatorCallback)(STViewCreator);
+typedef void (^STViewFactoryBlock)(STViewCreatorCallback);

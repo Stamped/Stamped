@@ -14,4 +14,10 @@
 
 @property (nonatomic, readonly, retain) STScrollViewContainer* scrollView;
 
+- (void)shouldFinishLoading;
+
+- (void)userPulledToReload;
+
+- (void)reloadData;
+
 @end

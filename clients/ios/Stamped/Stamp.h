@@ -12,7 +12,7 @@
 
 @class Comment, Entity, Event, Favorite, User;
 
-@interface Stamp : NSManagedObject <STStamp>
+@interface Stamp : NSManagedObject
 
 @property (nonatomic, readwrite, retain) NSString* blurb;
 @property (nonatomic, readwrite, retain) NSDate* created;
