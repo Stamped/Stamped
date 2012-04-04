@@ -49,19 +49,19 @@ class MovieSearchTests(ASearchTestSuite):
                                        types='movie'), 
             ]), 
             ({ 'query' : 'the hunger games', }, [ 
-                SearchResultConstraint(title='the the hunger games', 
+                SearchResultConstraint(title='the hunger games', 
                                        types='movie', 
                                        index=0), 
             ]), 
             ({ 'query' : 'hunger games', }, [ 
-                SearchResultConstraint(title='the the hunger games', 
+                SearchResultConstraint(title='the hunger games', 
                                        types='movie'), 
             ]), 
         ]
         
         self._run_tests(tests, args)
     
-    def test_in_theaters(self):
+    def test_top_box_office(self):
         fandango = Fandango(verbose=True)
         movies   = fandango.get_top_box_office_movies()
         

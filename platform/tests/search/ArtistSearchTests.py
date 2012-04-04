@@ -128,7 +128,7 @@ class ArtistSearchTests(ASearchTestSuite):
         self._run_tests(tests, args)
     
     def test_international(self):
-        """ Test international artist support.  """
+        """ Test international artist support """
         
         args = {
             'query'  : '', 
@@ -214,6 +214,46 @@ class ArtistSearchTests(ASearchTestSuite):
         
         self._run_tests(tests, args)
     
+    def test_keywords(self):
+        """ Test artist searches containing other keywords (songs, albums, etc.) """
+        
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = [
+            ({ 'query' : 'adele 21', }, [ 
+                SearchResultConstraint(title='adele', 
+                                       types='artist', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'kanye power', }, [ 
+                SearchResultConstraint(title='power',               types='track'), 
+                SearchResultConstraint(title='kanye west',          types='artist'), 
+                SearchResultConstraint(title='my beautiful dark twisted fantasy', types='album', match='prefix'), 
+            ]), 
+            ({ 'query' : 'ratat party with children', }, [ 
+                SearchResultConstraint(title='party with children', types='track'), 
+                SearchResultConstraint(title='ratatat',             types='artist'), 
+            ]), 
+            ({ 'query' : 'ratatat party with children', }, [ 
+                SearchResultConstraint(title='party with children', types='track'), 
+                SearchResultConstraint(title='ratatat',             types='artist'), 
+            ]), 
+            ({ 'query' : 'flobot fight with tools handlebars', }, [ 
+                SearchResultConstraint(title='handlebars',          types='track'), 
+                SearchResultConstraint(title='flobots',             types='artist'), 
+                SearchResultConstraint(title='fight with tools',    types='album'), 
+            ]), 
+        ]
+        
+        self._run_tests(tests, args)
+    
     def test_top_songs(self):
         """ Test artists from top songs from iTunes """
         
@@ -243,16 +283,19 @@ class ArtistSearchTests(ASearchTestSuite):
         tests = []
         
         for obj in objs:
-            artist = None
             try:
-                artist = obj.artists[0].title
+                artist  = obj.artists[0].title.lower().strip()
+                artist2 = utils.normalize(artist, strict=True)
+                
+                if artist != artist2:
+                    # don't test artists whose names contain weird unicode strings
+                    continue
             except Exception:
-                pass
+                continue
             
-            if artist is not None:
-                tests.append(({ 'query' : artist, }, [ 
-                    SearchResultConstraint(title=artist, types='artist'), 
-                ]))
+            tests.append(({ 'query' : artist, }, [ 
+                SearchResultConstraint(title=artist, types='artist'), 
+            ]))
         
         self._run_tests(tests, args)
 

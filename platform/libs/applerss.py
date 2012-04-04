@@ -101,12 +101,12 @@ class AppleRSS(object):
         try:
             data = json.loads(data)
         except ValueError:
+            utils.printException()
             utils.log(data)
             return []
         
         entries  = data['feed']['entry']
         entities = []
-        #print json.dumps(entries, indent=2)
         
         if isinstance(entries, dict):
             entries = [ entries ]
