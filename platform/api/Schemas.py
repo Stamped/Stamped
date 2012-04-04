@@ -558,11 +558,11 @@ class BasicEntity(Schema):
             return self.user_generated_subtitle
         return str(self.subcategory).replace('_', ' ').title()
     
-    def __str__(self):
-        t = list(self.types)
-        if len(t) == 1: t = t[0]
+    # def __str__(self):
+    #     t = list(self.types)
+    #     # if len(t) == 1: t = t[0]
         
-        return "%s: %s (%s)" % (self.__class__.__name__, self.title, t)
+    #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(str(i) for i in t))
     
     def __repr__(self):
         return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
@@ -1068,22 +1068,27 @@ class BasicEntityMini(BasicEntity):
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
+        self.kind                           = SchemaElement(basestring, default='place')
 
 class PersonEntityMini(BasicEntityMini, PersonEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
+        self.kind                           = SchemaElement(basestring, default='person')
 
 class MediaCollectionEntityMini(BasicEntityMini, MediaCollectionEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
+        self.kind                           = SchemaElement(basestring, default='media_collection')
 
 class MediaItemEntityMini(BasicEntityMini, MediaItemEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
+        self.kind                           = SchemaElement(basestring, default='media_item')
 
 class SoftwareEntityMini(BasicEntityMini, SoftwareEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
+        self.kind                           = SchemaElement(basestring, default='software')
 
 
 

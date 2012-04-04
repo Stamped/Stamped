@@ -11,8 +11,18 @@ from MongoStampedAPI import MongoStampedAPI
 from HTTPSchemas import *
 from Schemas import *
 from pprint import pprint
-from iTunesSource import iTunesSource
-from StampedSource import StampedSource
+import Entity
+
+from resolve.EntitySource   import EntitySource
+from resolve                import FullResolveContainer
+from AmazonSource           import AmazonSource
+from FactualSource          import FactualSource
+from GooglePlacesSource     import GooglePlacesSource
+from iTunesSource           import iTunesSource
+from RdioSource             import RdioSource
+from SpotifySource          import SpotifySource
+from TMDBSource             import TMDBSource
+from StampedSource          import StampedSource
 
 stampedAPI = MongoStampedAPI()
 
@@ -28,7 +38,10 @@ coords = CoordinatesSchema({'lat': 37.781697, 'lng':-122.392146})   # SF
 coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # coords = None
 
-e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
+# e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
+# e = stampedAPI.getEntity({'entity_id': '4e4c6e76db6bbe2bcd01ce85'})
+
+e = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})
 
 print '\n\nBEGIN\n%s\n' % ('='*40)
 # pprint(e.value)
@@ -37,49 +50,76 @@ print '\n\nBEGIN\n%s\n' % ('='*40)
 #     for track in e.tracks:
 #         print track
 
-source    = iTunesSource()
 stamped   = StampedSource(stamped_api = stampedAPI)
 
+track_list = []
 
-t = e.tracks[7]
-# t.itunes_id = '420843675'
-print t
-# stampedAPI._enrichEntity(t)
-# print t
-#print stampedAPI._enrichEntity(e)
+for stub in e.tracks:
+    # stub = e.tracks[7]
+    print stub
 
-source_id = t['itunes_id']
+    sources = {
+        'amazon':       AmazonSource,
+        'factual':      FactualSource,
+        'googleplaces': GooglePlacesSource,
+        'itunes':       iTunesSource,
+        'rdio':         RdioSource,
+        'spotify':      SpotifySource,
+        'tmdb':         TMDBSource,
+    }
+    source      = None
+    source_id   = None
+    entity_id   = None
+    wrapper     = None
 
-# attempt to resolve against the Stamped DB
-# entity_id = stamped.resolve_fast(source, source_id)
-entity_id = None
-
-if entity_id is None:
-    wrapper = source.wrapperFromKey(source_id)
-    results = stamped.resolve(wrapper)
-
-    print 'RESULTS: %s' % results
-
-    if len(results) > 0 and results[0][0]['resolved']:
-        # source key was found in the Stamped DB
-        entity_id = results[0][1].key
-        print 'FOUND IN STAMPED DB: %s' % entity_id
-        
-        # enrich entity asynchronously
-        # tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+    if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+        entity_id = stub.entity_id
     else:
-        entity = source.buildEntityFromWrapper(wrapper)
-        print '\n\n\nBUILT ENTITY\n%s' % entity
-        # stampedAPI._enrichEntity(entity)
-        # entity = self._entityDB.addEntity(entity)
-        # entity_id = entity.entity_id
-        
-        # enrich and merge entity asynchronously
-        stampedAPI._mergeEntity(entity, True)
+        for sourceName in sources:
+            try:
+                if stub.sources['%s_id' % sourceName] is not None:
+                    source = sources[sourceName]()
+                    source_id = stub.sources['%s_id' % sourceName]
 
-        print '\n\n\nENRICHED ENTITY\n%s' % entity
-else:
-    print 'FAST RESOLVE: %s' % entity_id
+                    # attempt to resolve against the Stamped DB
+                    entity_id = stamped.resolve_fast(source, source_id)
+
+                    if entity_id is None:
+                        wrapper = source.wrapperFromKey(source_id)
+                        results = stamped.resolve(wrapper)
+
+                        if len(results) > 0 and results[0][0]['resolved']:
+                            # source key was found in the Stamped DB
+                            entity_id = results[0][1].key
+                    break
+            except:
+                pass
+
+    if entity_id is not None:
+        entity = stampedAPI.getEntity({'entity_id': entity_id})
+
+    elif source_id is not None and wrapper is not None:
+        entity = source.buildEntityFromWrapper(wrapper)
+
+    else:
+        raise Exception
+
+    entity = stampedAPI._mergeEntity(entity, True)
+
+    newStub = Entity.buildEntity(kind=entity.kind)
+    newStub.sources     = entity.sources
+    newStub.artists     = entity.artists
+    newStub.collections = entity.collections
+    newStub.entity_id   = entity.entity_id
+    newStub.title       = entity.title 
+    newStub.kind        = entity.kind 
+    newStub.types       = entity.types
+    track_list.append(newStub)
+
+print '\n\n\n%s\n%s\n\n\n' % ('='*40, '='*40)
+
+for track in track_list:
+    print track
 
 
 # results = stampedAPI.searchEntities(q, coords=coords, category=None)

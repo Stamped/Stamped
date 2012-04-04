@@ -159,9 +159,10 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
             results = self.itunes.method('lookup', id=self.key,entity='song')['results']
         return [
             {
-                'name':track['trackName'],
-                'key':track['trackId'],
-                'data':track,
+                'name':             track['trackName'],
+                'key':              track['trackId'],
+                'url':              track['trackViewUrl'],
+                'track_number':     track['trackNumber'],
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]
@@ -194,7 +195,14 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
 
     @lazyProperty
     def artist(self):
-        return {'name' : self.data['artistName'] }
+        try:
+            return {
+                'name':     self.data['artistName'],
+                'key':      self.data['artistId'],
+                'url':      self.data['artistViewUrl'],
+            }
+        except Exception:
+            return {'name' : ''}
 
     @lazyProperty
     def genres(self):
@@ -212,7 +220,10 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
             results = self.itunes.method('lookup', id=self.key, entity='song')['results']
         return [
             {
-                'name':track['trackName'],
+                'name':             track['trackName'],
+                'key':              track['trackId'],
+                'url':              track['trackViewUrl'],
+                'track_number':     track['trackNumber'],
             }
                 for track in results if track.pop('wrapperType',None) == 'track' 
         ]
@@ -244,14 +255,22 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
     @lazyProperty
     def artist(self):
         try:
-            return {'name' : self.data['artistName'] }
+            return {
+                'name':     self.data['artistName'],
+                'key':      self.data['artistId'],
+                'url':      self.data['artistViewUrl'],
+            }
         except Exception:
             return {'name' : ''}
 
     @lazyProperty
     def album(self):
         try:
-            return {'name' : self.data['collectionName'] }
+            return {
+                'name':     self.data['collectionName'],
+                'key':      self.data['collectionId'],
+                'url':      self.data['collectionViewUrl'],
+            }
         except Exception:
             return {'name' : ''}
 

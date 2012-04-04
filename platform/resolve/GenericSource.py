@@ -146,6 +146,8 @@ class GenericSource(BasicSource):
                 if 'key' in album:
                     entityMini.sources['%s_id' % artist.source] = album['key']
                     entityMini.sources['%s_source' % artist.source] = artist.source
+                if 'url' in album:
+                    entityMini.sources['%s_url' % artist.source] = album['url']
                 entity.albums.append(entityMini)
             except Exception:
                 report()
@@ -154,14 +156,17 @@ class GenericSource(BasicSource):
     def __repopulateSongs(self, entity, artist, controller, decorations=None):
         if decorations is None:
             decorations = {}
-
         for track in artist.tracks:
             try:
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
+                entityMini.types.append('song')
+                entityMini.types.append('track')
                 if 'key' in track:
                     entityMini.sources['%s_id' % artist.source] = track['key']
                     entityMini.sources['%s_source' % artist.source] = artist.source
+                if 'url' in track:
+                    entityMini.sources['%s_url' % artist.source] = track['url']
 
                     # Attempt fast resolve
                     # entity_id = self.stamped.resolve_fast(artist.source, track['key'])
@@ -332,8 +337,12 @@ class GenericSource(BasicSource):
                 if wrapper.artist['name'] != '':
                     entityMini = PersonEntityMini()
                     entityMini.title = wrapper.artist['name']
-                    entityMini.kind = 'person'
                     entityMini.types.append('artist')
+                    if 'key' in wrapper.artist:
+                        entityMini.sources['%s_id' % wrapper.source] = wrapper.artist['key']
+                        entityMini.sources['%s_source' % wrapper.source] = wrapper.source
+                    if 'url' in wrapper.artist:
+                        entityMini.sources['%s_url' % wrapper.source] = wrapper.artist['url']
                     entity.artists.append(entityMini)
             except AttributeError:
                 pass
@@ -349,8 +358,12 @@ class GenericSource(BasicSource):
                 if wrapper.album['name'] != '':
                     entityMini = MediaCollectionEntityMini()
                     entityMini.title = wrapper.album['name']
-                    entityMini.kind = 'media_collection'
                     entityMini.types.append('album')
+                    if 'key' in wrapper.album:
+                        entityMini.sources['%s_id' % wrapper.source] = wrapper.album['key']
+                        entityMini.sources['%s_source' % wrapper.source] = wrapper.source
+                    if 'url' in wrapper.album:
+                        entityMini.sources['%s_url' % wrapper.source] = wrapper.album['url']
                     entity.collections.append(entityMini)
             except AttributeError:
                 pass

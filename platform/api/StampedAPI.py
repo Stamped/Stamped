@@ -2970,7 +2970,7 @@ class StampedAPI(AStampedAPI):
         self.__handleDecorations(entity, decorations)
         return modified
     
-    def _enrichEntityAsync(self,entity_id):
+    def _enrichEntityAsync(self, entity_id):
         entity = self._entityDB.getEntity(entity_id)
         
         if entity is not None:

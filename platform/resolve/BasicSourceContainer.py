@@ -105,7 +105,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
     def shouldEnrich(self, group, source, entity, timestamp=None):
         if timestamp is None:
             timestamp = self.now
-        print '\nGROUP: %s' % (group)
         if group in self.__groups:
             groupObj = self.__groups[group]
             if groupObj.eligible(entity):
