@@ -116,7 +116,7 @@ class URLResolver(object):
             if movie.valid:
                 return movie
         return None
-
+    
     def demo(self, url):
         url = url[url.find('://')+3:]
         domain = url[:url.find('/')]
@@ -137,3 +137,4 @@ class URLResolver(object):
 if __name__ == '__main__':
     import sys
     URLResolver().demo(sys.argv[1])
+

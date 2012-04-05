@@ -135,7 +135,7 @@ class FandangoGroup(AMovieGroup):
         self.addField(['fandango_url'])
 
 class RdioGroup(ASubcategoryGroup):
-
+    
     def __init__(self, *args, **kwargs):
         ASubcategoryGroup.__init__(self, 'rdio')
         self.addField(['rdio_id'])
@@ -143,6 +143,15 @@ class RdioGroup(ASubcategoryGroup):
         self.addEligible('song')
         self.addEligible('artist')
         self.addEligible('album')
+
+class TheTVDBGroup(ASubcategoryGroup):
+    
+    def __init__(self, *args, **kwargs):
+        ASubcategoryGroup.__init__(self, 'thetvdb')
+        self.addField(['thetvdb_id'])
+        self.addField(['imdb_id'])
+        self.addEligible('album')
+        self.addEligible('tv')
 
 class SpotifyGroup(ASubcategoryGroup):
 

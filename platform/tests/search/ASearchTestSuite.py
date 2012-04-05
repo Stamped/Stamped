@@ -10,6 +10,7 @@ import Globals, utils
 from StampedTestUtils       import *
 from resolve.EntitySearch   import EntitySearch
 from resolve.Resolver       import simplify
+from gevent.pool            import Pool
 from pprint                 import pprint, pformat
 from copy                   import copy
 
@@ -36,6 +37,7 @@ TODO:
             * place
                 * search w/ and w/out coordinates
                 * search w/ and w/out location hints
+                    * test invalid location hints (e.g., it's always sunny IN philadelphia)
                 * several international places
             * restaurant
                 * same permutations as place
@@ -48,6 +50,7 @@ TODO:
                 * book_name
                 * book_name by artist_name
                 * book_name artist_name (and vice-versa)
+                * target NYTimes or Amazon RSS feed
             * video games
 """
 
@@ -64,7 +67,7 @@ class ASearchTestSuite(AStampedTestCase):
     def tearDown(self):
         pass
     
-    def _run_tests(self, tests, base_args, retries=3, test_coords=True):
+    def _run_tests(self, tests, base_args, retries=3, test_coords=True, async=True):
         """
             Runs a list of search tests, verifying that each one satisfies its accompanying 
             SearchResultConstraint(s).
@@ -77,7 +80,30 @@ class ASearchTestSuite(AStampedTestCase):
             test_coords - boolean denoting whether or not to perform each test twice, once with coords 
                           enabled, and once without coords enabled (useful for verifying that certain 
                           searches really are coordinate agnostic).
+            
+            Example usage with a single test case (excerpt from MovieSearchTests subclass):
+                args = {
+                    'query'  : '', 
+                    'coords' : None, 
+                    'limit'  : 10, 
+                }
+                
+                tests = [
+                    # search for 'ninja turtles' and expect a movie entity of the same name 
+                    # as the top result (e.g., at index 0)
+                    ({ 'query' : 'ninja turtles', }, [ 
+                        SearchResultConstraint(title='teenage mutant ninja turtles', 
+                                               types='movie', 
+                                               index=0), 
+                    ]), 
+                ]
+                
+                self._run_tests(tests, args)
         """
+        
+        # optionally run test cases in parallel
+        if async:
+            pool = Pool(4)
         
         for test in tests:
             args = copy(base_args)
@@ -93,7 +119,7 @@ class ASearchTestSuite(AStampedTestCase):
                     if not constraint.validate(results):
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
             
-            todo = [ args ]
+            subtests = [ args ]
             
             # optionally run each test twice, once with coordinates enabled, and once with them 
             # disabled and expect the same constraints to be satisfied; note: test_coords should 
@@ -108,9 +134,9 @@ class ASearchTestSuite(AStampedTestCase):
                 else:
                     args2['coords'] = None
                 
-                todo.append(args2)
+                subtests.append(args2)
             
-            for args in todo:
+            def __do_search(args):
                 utils.log("")
                 utils.log("-" * 80)
                 utils.log("[%s] SEARCH TEST query '%s'" % (self, args['query'], ))
@@ -121,6 +147,15 @@ class ASearchTestSuite(AStampedTestCase):
                 # specified by this test case, and retrying if necessary until either the test case 
                 # satisfies its constraints or the maximum number of allotted retries is exceeded.
                 self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
+            
+            for args in subtests:
+                if async:
+                    g = pool.spawn_link_exception(__do_search, args)
+                else:
+                    __do_search(args)
+        
+        if async:
+            pool.join()
     
     def __str__(self):
         return self.__class__.__name__
@@ -163,10 +198,10 @@ class SearchResultConstraint(object):
             Validates this constraint against the given search results, verifying 
             one or more of the following:
                 * a specific result exists
-                * a specific result exists at the desired index in the results
-                * a specific result does *not* exist in the results
+                * a specific result exists at the desired index
+                * a specific result does *not* exist
             
-            Returns True iff the constraint was satisfied or False otherwise.
+            Returns True if the constraint was satisfied or False otherwise.
         """
         
         for i in xrange(len(results)):

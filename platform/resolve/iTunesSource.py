@@ -366,7 +366,7 @@ class iTunesTVShow(_iTunesObject, ResolverTVShow):
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverTVShow.__init__(self)
-
+    
     @lazyProperty
     def name(self):
         return self.data['artistName']
@@ -705,17 +705,19 @@ class iTunesSource(GenericSource):
     def __createWrapper(self, value):
         try:
             if 'wrapperType' in value:
-                if value['wrapperType'] == 'track' and value['kind'] == 'song':
+                w = value['wrapperType']
+                 
+                if w == 'track' and value['kind'] == 'song':
                     return iTunesTrack(data=value)
-                elif value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
+                elif w == 'collection' and value['collectionType'] == 'Album':
                     return iTunesAlbum(data=value)
-                elif value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
+                elif w == 'artist' and value['artistType'] == 'Artist':
                     return iTunesArtist(data=value)
-                elif value['wrapperType'] == 'track' and value['kind'] == 'feature-movie':
+                elif w == 'track' and value['kind'] == 'feature-movie':
                     return iTunesMovie(data=value)
-                elif value['wrapperType'] == 'artist' and value['artistType'] == 'TV Show':
+                elif w == 'artist' and value['artistType'] == 'TV Show':
                     return iTunesTVShow(data=value)
-                elif value['wrapperType'] == 'software':
+                elif w == 'software':
                     return iTunesApp(data=value)
             else:
                 if value['kind'] == 'ebook':
@@ -739,6 +741,7 @@ class iTunesSource(GenericSource):
                     'tv'        : 'tvShow',
                     'app'       : 'software',
                 }
+                
                 if query.types is None:
                     queries = mapper.values()
                 else:
@@ -772,6 +775,7 @@ class iTunesSource(GenericSource):
                             del results[0]
                             try:
                                 wrapper = self.__createWrapper(value)
+                                
                                 if wrapper is not None:
                                     found = True
                                     yield wrapper

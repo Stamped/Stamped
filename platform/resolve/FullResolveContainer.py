@@ -12,9 +12,9 @@ from logs import report
 
 try:
     from BasicSourceContainer   import BasicSourceContainer
-
     from EntityGroups           import *
-
+    
+    # sources
     from SeedSource             import SeedSource
     from FactualSource          import FactualSource
     from GooglePlacesSource     import GooglePlacesSource
@@ -25,7 +25,9 @@ try:
     from SpotifySource          import SpotifySource
     from iTunesSource           import iTunesSource
     from AmazonSource           import AmazonSource
+    from TheTVDBSource          import TheTVDBSource
     from StampedSource          import StampedSource
+    
     from pprint                 import pformat
 except:
     report()
@@ -46,6 +48,7 @@ class FullResolveContainer(BasicSourceContainer):
             GooglePlacesGroup(),
             TMDBGroup(),
             RdioGroup(),
+            TheTVDBGroup(),
             SpotifyGroup(),
             iTunesGroup(),
             AmazonGroup(),
@@ -104,6 +107,7 @@ class FullResolveContainer(BasicSourceContainer):
             SinglePlatformSource(),
             AmazonSource(),
             TMDBSource(),
+            TheTVDBSource(),
             RdioSource(),
             SpotifySource(),
             iTunesSource(),
@@ -111,18 +115,19 @@ class FullResolveContainer(BasicSourceContainer):
         ]
         for source in sources:
             self.addSource(source)
+        
         self.setGlobalPriority('seed',seedPriority)
         self.setGlobalPriority('entity',-1)
+        self.setGlobalPriority('thetvdb',2)
         self.setGlobalPriority('itunes',1)
 
 def demo(default_title='Katy Perry'):
-    import sys
-    import bson
-
+    import bson, sys
+    
     title = default_title.lower()
     subcategory = None
     index = 0
-
+    
     print(sys.argv)
     if len(sys.argv) > 1:
         title = sys.argv[1]
@@ -130,33 +135,38 @@ def demo(default_title='Katy Perry'):
         subcategory = sys.argv[2]
     if len(sys.argv) > 3:
         index = int(sys.argv[3])
-
-    _verbose = True
+    
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
-    db = api._entityDB
+    db  = api._entityDB
     query = {'titlel':title}
+    
     if subcategory is not None:
         query['subcategory'] = subcategory
+    
     print("Query: %s" % query)
     cursor = db._collection.find(query)
+    
     if cursor.count() == 0:
         print("Could not find a matching entity for %s" % title)
         return
+    
     result = cursor[index]
     entity = db._convertFromMongo(result)
     print( "Before:\n%s" % pformat( entity.value ) )
-
+    
     container = FullResolveContainer()
-
+    
     decorations = {}
     container.enrichEntity( entity, decorations )
-
+    
     print( "After:\n%s" % pformat( entity.value ) )
     if len(decorations) > 0:
         print( "With decorations:")
+        
         for k,v in decorations.items():
             print( "%s decoration:" % k )
+            
             try:
                 print( "%s" % pformat(v.value) )
             except Exception:
@@ -164,3 +174,4 @@ def demo(default_title='Katy Perry'):
 
 if __name__ == "__main__":
     demo()
+

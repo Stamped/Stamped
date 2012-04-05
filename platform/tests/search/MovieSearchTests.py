@@ -55,8 +55,100 @@ class MovieSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'hunger games', }, [ 
                 SearchResultConstraint(title='the hunger games', 
+                                       types='movie', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'drive' }, [ 
+                SearchResultConstraint(title='drive', 
+                                       types='movie', 
+                                       imdb_id='tt0780504', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'drive (2011)' }, [ 
+                SearchResultConstraint(title='drive', 
+                                       types='movie', 
+                                       imdb_id='tt0780504', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'inception', }, [ 
+                SearchResultConstraint(title='inception', 
+                                       types='movie', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'die hard', }, [ 
+                SearchResultConstraint(title='die hard', 
+                                       types='movie', 
+                                       imdb_id='tt0095016', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'the fifth element', }, [ 
+                SearchResultConstraint(title='the fifth element', 
+                                       types='movie', 
+                                       imdb_id='tt0119116', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'raiders of the lost ark', }, [ 
+                SearchResultConstraint(title='raiders of the lost ark', 
+                                       types='movie', 
+                                       imdb_id='tt0082971', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'tomorrow never dies', }, [ 
+                SearchResultConstraint(title='tomorrow never dies', 
+                                       types='movie', 
+                                       imdb_id='tt0120347', 
+                                       index=0), 
+            ]), 
+        ]
+        
+        self._run_tests(tests, args)
+    
+    def test_fuzzy(self):
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = [
+            ({ 'query' : 'futurama movie', }, [ 
+                SearchResultConstraint(title='futurama: bender\'s game', 
+                                       types='movie'), 
+                SearchResultConstraint(title='futurama: into the wild green yonder', 
+                                       types='movie'), 
+                SearchResultConstraint(title='futurama: the beast with a million backs', 
                                        types='movie'), 
             ]), 
+            ({ 'query' : 'mission impossible ghost protocol', }, [ 
+                SearchResultConstraint(title='mission impossible - ghost protocol', 
+                                       types='movie', 
+                                       index=0), 
+            ]), 
+        ]
+        
+        self._run_tests(tests, args)
+    
+    def test_international(self):
+        args = {
+            'query'  : '', 
+            'coords' : None, 
+            'full'   : True, 
+            'local'  : False, 
+            'offset' : 0, 
+            'limit'  : 10, 
+        }
+        
+        tests = [
+            ({ 'query' : 'Le ragazze di Piazza di Spagna', }, [ 
+                SearchResultConstraint(title='Le ragazze di Piazza di Spagna', 
+                                       types='movie', 
+                                       index=0), 
+            ]), 
+            
+            # TODO: add more internationl movie coverage
         ]
         
         self._run_tests(tests, args)

@@ -21,9 +21,10 @@ class BasicSource(AExternalSource):
     """
     def __init__(self, name, groups=None, types=None):
         AExternalSource.__init__(self)
-        self.__name = name
+        self.__name   = name
         self.__groups = set()
-        self.__types = set()
+        self.__types  = set()
+        
         if groups is not None:
             self.__groups = set(groups)
         if types is not None:

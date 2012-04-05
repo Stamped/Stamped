@@ -23,6 +23,7 @@ __all__ = [
     'ResolverBook',
     'ResolverTVShow',
     'ResolverApp',
+    'ResolverVideoGame',
     'demo',
     'regexRemoval',
     'simplify',
@@ -33,6 +34,7 @@ __all__ = [
     'movieSimplify',
     'bookSimplify',
     'nameSimplify',
+    'videoGameSimplify', 
     'stringComparison',
     'setComparison',
     'sortedResults',
@@ -135,6 +137,7 @@ _negative_weights = {
     'edition'       : 0.05,
 }
 
+_prefix_delimeters = set([ ':', '-', ';' ])
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
 
 _subcategory_weights = {
@@ -148,7 +151,7 @@ _subcategory_weights = {
     'market'            : 60, 
     'food'              : 70, 
     'night_club'        : 75, 
-    'place'             : 50, 
+    'place'             : 55, 
     
     # --------------------------
     #           book
@@ -336,22 +339,28 @@ def movieSimplify(string):
 
     Multipass safe and partially optimized
     """
-    string = simplify(string)
-    return format(string)
+    return format(simplify(string))
 
 def bookSimplify(string):
     """
-    book specific simplification for fuzzy comparisons.
+    Book specific simplification for fuzzy comparisons.
 
     Multipass safe and partially optimized
     """
-    string = simplify(string)
-    return format(string)
+    return format(simplify(string))
 
 def nameSimplify(string):
     """
     Name (person) specific simplification for fuzzy comparisons.
+    
+    Multipass safe and partially optimized
+    """
+    return format(simplify(string))
 
+def videoGameSimplify(string):
+    """
+    Video Game specific simplification for fuzzy comparisons.
+    
     Multipass safe and partially optimized
     """
     return format(simplify(string))
@@ -539,7 +548,8 @@ def typeToSubcategory(t):
         'book':'book',
         'movie':'movie',
         'tv':'tv',
-        'app':'app'
+        'app':'app', 
+        'video_game':'video_game', 
     }
     if t in m:
         return m[t]
@@ -588,10 +598,14 @@ class ResolverObject(object):
     def keywords(self):
         words = set()
         for term in self.related_terms:
-            term = punctuation_re.sub(' ', term)
-            for w in term.split():
-                if w != '':
-                    words.add(w)
+            try:
+                term = punctuation_re.sub(' ', term)
+                for w in term.split():
+                    if w != '':
+                        words.add(w)
+            except Exception:
+                pass
+        
         return words
     
     @property 
@@ -1027,9 +1041,8 @@ class ResolverMovie(ResolverObject):
             l.append(actor['name'])
             if 'character' in actor:
                 l.append(actor['character'])
-        return [
-            v for v in l if v != ''
-        ]
+        
+        return [ v for v in l if v != '' ]
 #
 # TV Show
 #
@@ -1091,9 +1104,8 @@ class ResolverTVShow(ResolverObject):
             l.append(actor['name'])
             if 'character' in actor:
                 l.append(actor['character'])
-        return [
-            v for v in l if v != ''
-        ]
+        
+        return [ v for v in l if v != '' ]
 
 #
 # Books
@@ -1157,9 +1169,7 @@ class ResolverBook(ResolverObject):
                 self.author['name'],
                 self.publisher['name'],
             ]
-        return [
-            v for v in l if v != ''
-        ]
+        return [ v for v in l if v != '' ]
 
 #
 # Places
@@ -1200,15 +1210,12 @@ class ResolverPlace(ResolverObject):
 
     @lazyProperty
     def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-            ]
+        l = [ self.type, self.name, ]
+        
         for k,v in self.address.items():
             l.append(v)
-        return [
-            v for v in l if v != ''
-        ]
+        
+        return [ v for v in l if v != '' ]
 
 #
 # Apps
@@ -1250,13 +1257,59 @@ class ResolverApp(ResolverObject):
                 self.name,
                 self.publisher['name'],
             ]
-        return [
-            v for v in l if v != ''
-        ]
+        return [ v for v in l if v != '' ]
 
     @lazyProperty 
     def screenshots(self):
         return []
+
+class ResolverVideoGame(ResolverObject):
+    """
+    Interface for video game objects
+    
+    Attributes:
+    
+    author - an author dict containing at least a 'name' string
+    publisher - an publisher dict containing at least a 'name' string
+    """
+    
+    @abstractproperty
+    def author(self):
+        pass
+    
+    @abstractproperty
+    def publisher(self):
+        pass
+    
+    @property
+    def date(self):
+        return None
+    
+    @property
+    def sku(self):
+        return None
+    
+    @property 
+    def genres(self):
+        return []
+    
+    @property 
+    def type(self):
+        return 'video_game'
+    
+    @property 
+    def subcategory(self):
+        return 'video_game'
+    
+    @lazyProperty
+    def related_terms(self):
+        l = [
+                self.type, 
+                self.name, 
+                self.author['name'], 
+                self.publisher['name'], 
+            ]
+        return [ v for v in l if v != '' ]
 
 ##
 # Main Resolver class
@@ -1336,6 +1389,10 @@ class Resolver(object):
         """ Reduces an actor name to a simplified form for fuzzy comparison. """
         return nameSimplify(actor)
     
+    def videoGameSimplify(self, game):
+        """ Reduces a video game name to a simplified form for fuzzy comparison. """
+        return videoGameSimplify(game)
+    
     def nameComparison(self, a, b):
         """ Generic fuzzy name comparison. Returns a comparison decimal [0,1] """
         return stringComparison(a, b)
@@ -1352,6 +1409,10 @@ class Resolver(object):
         """ Track specific comparison metric. """
         return self.nameComparison(self.trackSimplify(q.name, q.artist['name']), 
                                    self.trackSimplify(m.name, m.artist['name']))
+    
+    def videoGameComparison(self, q, m):
+        """ Video Game specific comparison metric. """
+        return self.nameComparison(self.videoGameSimplify(q), self.videoGameSimplify(m))
     
     def movieComparison(self, q, m):
         """ Movie specific comparison metric. """
@@ -1442,7 +1503,22 @@ class Resolver(object):
             'length':       lambda q, m, s, o: self.__lengthWeight(q.length, m.length),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
-
+    
+    def checkVideoGame(self, results, query, match, options, order):
+        tests = [
+            ('name',        lambda q, m, s, o: self.videoGameComparison(q.name, m.name)), 
+            ('publisher',   lambda q, m, s, o: self.nameComparison(q.publisher['name'], m.publisher['name'])), 
+            ('platform',    lambda q, m, s, o: self.nameComparison(q.platform['name'], m.platform['name'])), 
+            ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+        ]
+        weights = {
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name), 
+            'publisher':    lambda q, m, s, o: self.__nameWeight(q.publisher['name'], m.publisher['name']), 
+            'platform':     lambda q, m, s, o: self.__nameWeight(q.platform['name'], m.platform['name']), 
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
+        }
+        self.genericCheck(tests, weights, results, query, match, options, order)
+    
     def checkMovie(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.movieComparison(q.name, m.name)),
@@ -1452,11 +1528,11 @@ class Resolver(object):
             ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name,exact_boost=2.0),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=2.0),
             'cast':         lambda q, m, s, o: self.__castWeight(q, m),
             'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
-            'length':       lambda q, m, s, o: self.__lengthWeight(q.length, m.length,q_empty=.2) * 3,
-            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date,exact_boost=4),
+            'length':       lambda q, m, s, o: self.__lengthWeight(q.length, m.length, q_empty=.2) * 3,
+            'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
         }
         self.genericCheck(tests, weights, results, query, match, options, order)
 
@@ -1496,7 +1572,7 @@ class Resolver(object):
             ('date',        lambda q, m, s, o: self.dateComparison(q.date, m.date)),
         ]
         weights = {
-            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=2.0),
+            'name':         lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=8.0),
             'cast':         lambda q, m, s, o: self.__castWeight(q, m),
             'director':     lambda q, m, s, o: self.__nameWeight(q.director['name'], m.director['name']),
             'date':         lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4),
@@ -1600,8 +1676,8 @@ class Resolver(object):
         query_album_set = self.albumsSet(query)
         match_album_set = self.albumsSet(match)
         
-        if self.verbose:
-            self.__differenceLog('Album', query_album_set, match_album_set, query, match)
+        #if self.verbose:
+        #    self.__differenceLog('Album', query_album_set, match_album_set, query, match)
         
         return self.setComparison(query_album_set, match_album_set, options)
 
@@ -1609,8 +1685,8 @@ class Resolver(object):
         query_track_set = self.tracksSet(query)
         match_track_set = self.tracksSet(match)
         
-        if self.verbose:
-            self.__differenceLog('Track', query_track_set, match_track_set, query, match)
+        #if self.verbose:
+        #    self.__differenceLog('Track', query_track_set, match_track_set, query, match)
         
         return self.setComparison(query_track_set, match_track_set, options)
 
@@ -1618,8 +1694,8 @@ class Resolver(object):
         query_cast_set = self.castSet(query)
         match_cast_set = self.castSet(match)
 
-        if self.verbose:
-            self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
+        #if self.verbose:
+        #    self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
 
         return self.setComparison(query_cast_set, match_cast_set, options)
 
@@ -1721,6 +1797,8 @@ class Resolver(object):
                 options['check'] = self.checkAlbum
             elif query.type =='artist':
                 options['check'] = self.checkArtist
+            elif query.type =='video_game':
+                options['check'] = self.checkVideoGame
             elif query.type =='movie':
                 options['check'] = self.checkMovie
             elif query.type =='book':
@@ -1743,15 +1821,16 @@ class Resolver(object):
         source_name = match.source.lower()
         
         weights = {
-            'stamped'       : 1.0,
-            'itunes'        : 0.8,
-            'rdio'          : 0.6,
-            'spotify'       : 0.6,
-            'factual'       : 0.6,
-            'tmdb'          : 0.8,
-            'amazon'        : 0.6,
-            'netflix'       : 0.8,
-            'googleplaces'  : 0.7,
+            'stamped'       : 1.0, 
+            'itunes'        : 0.8, 
+            'rdio'          : 0.6, 
+            'spotify'       : 0.6, 
+            'factual'       : 0.6, 
+            'tmdb'          : 0.8, 
+            'amazon'        : 0.6, 
+            'netflix'       : 0.8, 
+            'googleplaces'  : 0.8, 
+            'thetvdb'       : 0.8, 
         }
         
         try:
@@ -1773,12 +1852,21 @@ class Resolver(object):
         a = simplify(query.name)
         b = simplify(match.name)
         
+        #utils.log("__nameTest: '%s' vs '%s'" % (a, b))
+        if a == b:
+            return 1.0
+        
         if len(a) > len(b):
             a, b = b, a
         
         if a in b:
             if b.startswith(a):
-                value = min(0.99, value * 1.2)
+                c = b[len(a):].strip()
+                
+                if len(c) > 0 and c[0] in _prefix_delimeters:
+                    value = 0.995
+                else:
+                    value = min(0.99, value * 1.2)
             else:
                 value = min(0.99, value * 1.1)
         
@@ -1887,21 +1975,9 @@ class Resolver(object):
         except KeyError:
             value = 0.0
         
-        a = simplify(query.name)
-        b = simplify(match.name)
-        
-        if len(a) > len(b):
-            a, b = b, a
-        
-        if a in b:
-            if b.startswith(a):
-                value = min(0.99, value * 1.2)
-            else:
-                value = min(0.99, value * 1.1)
-        
         # note (travis):
         # the purpose of this formula is to smoothly weight names that are 
-        # very strong matches or very weak matches heavily with partial 
+        # very strong matches or very weak matches heavily, with partial 
         # name matches still being weighted proportionally to the name 
         # similarity but with a much smaller weight because the name 
         # signal is less important w.r.t. ranking for these cases.
@@ -1919,10 +1995,10 @@ class Resolver(object):
         except AttributeError:
             pass
         
-        return 0.0
+        return 2.0
     
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
-        if a is None or b is None:
+        if a is None or b is None or a == '' or b == '':
             return 1
         
         assert isinstance(a, basestring)
@@ -2013,15 +2089,17 @@ class Resolver(object):
         except:
             pass
         
-        return 0
+        return boost
     
     def __setWeight(self, q, m):
         size = len( q | m )
         if size == 0:
             return 1
+        
         weight = float(size)/math.log(size+1)
         if q & m == q:
             weight *= 1.2
+        
         return weight
     
     def __albumsWeight(self, query, match):

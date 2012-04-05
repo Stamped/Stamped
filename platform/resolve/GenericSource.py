@@ -14,14 +14,13 @@ import Globals
 from logs import report
 
 try:
+    import logs, sys
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
-    import logs
     from pprint                     import pprint, pformat
-    import sys
-    from Resolver                   import *
     from abc                        import ABCMeta, abstractmethod
+    from Resolver                   import *
     from ASourceController          import *
     from Schemas                    import *
 except:
@@ -82,23 +81,30 @@ def multipleSource(source_functions, initial_timeout=None, final_timeout=None, *
         try:
             pool = Pool(len(source_functions))
             sources = []
-            def helper(source_function):
+            
+            def _helper(source_function):
                 source = source_function()
                 if source is not None:
                     sources.append(source)
+            
             for source_function in source_functions:
-                pool.spawn(helper, source_function)
+                pool.spawn(_helper, source_function)
+            
             pool.join(timeout=initial_timeout)
-
+            
             offset = 0
-            found = True
+            found  = True
+            
             while found:
                 found = False
+                
                 for source in sources:
-                    cur = source(offset,1)
+                    cur = source(offset, 1)
+                    
                     for item in cur:
                         found = True
                         yield item
+                
                 offset += 1
         except GeneratorExit:
             pass
@@ -184,17 +190,17 @@ class GenericSource(BasicSource):
     def wrapperFromKey(self, key, type=None):
         raise NotImplementedError
         return None
-
+    
     def buildEntityFromWrapper(self, wrapper, controller=None, decorations=None, timestamps=None):
         if wrapper.type == 'place':
             entity = PlaceEntity()
         elif wrapper.type == 'artist':
             entity = PersonEntity()
-        elif wrapper.type in set(['album', 'tv']):
+        elif wrapper.type in set([ 'album', 'tv', ]):
             entity = MediaCollectionEntity()
-        elif wrapper.type in set(['book', 'movie', 'track']):
+        elif wrapper.type in set([ 'book', 'movie', 'track', ]):
             entity = MediaItemEntity()
-        elif wrapper.type == 'app':
+        elif wrapper.type in set([ 'app', 'video_game', ]):
             entity = SoftwareEntity()
         else:
             entity = BasicEntity()
@@ -203,7 +209,7 @@ class GenericSource(BasicSource):
         self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
         
         return entity
-
+    
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()
@@ -211,19 +217,19 @@ class GenericSource(BasicSource):
             decorations = {}
         if timestamps is None:
             timestamps = {}
-
+        
         if wrapper.source == 'stamped':
             entity.entity_id = wrapper.key 
         else:
             entity.entity_id = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
-
+        
         def setAttribute(source, target):
             try:
                 if wrapper[source] is not None and wrapper[source] != '':
                     entity[target] = wrapper[source]
             except:
                 pass
-
+        
         ### General
         entity.title = wrapper.name 
         if wrapper.description != '':
@@ -232,17 +238,17 @@ class GenericSource(BasicSource):
             img = ImageSchema()
             img.image = wrapper.image
             entity.images.append(img)
-
+        
         setAttribute('phone',   'phone')
         setAttribute('email',   'email')
         setAttribute('url',     'site')
-
+        
         try:
             if wrapper.subcategory not in entity.types.value:
                 entity.types.append(wrapper.subcategory)
         except:
             pass
-
+        
         ### Place
         if entity.kind == 'place':
             try:
@@ -268,7 +274,7 @@ class GenericSource(BasicSource):
                     entity['address_%s' % k] = v
 
             setAttribute('address_string', 'formatted_address')
-
+        
         ### Person
         if entity.kind == 'person':
             try:
@@ -282,7 +288,7 @@ class GenericSource(BasicSource):
 
             if controller.shouldEnrich('track_list', self.sourceName, entity):
                 self.__repopulateSongs(entity, wrapper, controller, decorations)
-
+        
         ### Media
         if entity.kind in set(['media_collection', 'media_item']):
             setAttribute('rating', 'mpaa_rating')
@@ -346,12 +352,12 @@ class GenericSource(BasicSource):
                     entity.artists.append(entityMini)
             except AttributeError:
                 pass
-
+        
         ### Media Collection
         if entity.kind == 'media_collection':
             if wrapper.type == 'album' and controller.shouldEnrich('tracks', self.sourceName, entity):
                 self.__repopulateSongs(entity, wrapper, controller)
-
+        
         ### Media Item
         if entity.kind == 'media_item':
             try:
@@ -381,7 +387,7 @@ class GenericSource(BasicSource):
                     entity.sku_number = wrapper.sku
             except AttributeError:
                 pass
-
+        
         ### Software
         if entity.kind == 'software':
             setAttribute('date', 'release_date')
@@ -409,19 +415,19 @@ class GenericSource(BasicSource):
                         entity.screenshots.append(img)
             except:
                 pass
-
+    
     @property
     def idField(self):
         return "%s_id" % self.idName
-
+    
     @property
     def urlField(self):
         return "%s_url" % self.idName
-
+    
     @property 
     def idName(self):
         return self.sourceName
-
+    
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
@@ -436,6 +442,7 @@ class GenericSource(BasicSource):
                             entity[self.urlField] = best[1].url
             except ValueError:
                 pass
+        
         source_id = entity[self.idField]
         if source_id is not None:
             try:
@@ -443,5 +450,6 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
             except Exception:
                 print 'Whoops'
+        
         return True
 

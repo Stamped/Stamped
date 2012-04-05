@@ -28,7 +28,7 @@ class AppleRSS(object):
     ])
     
     def __init__(self):
-        self._id_re = re.compile('.*\/id([0-9]+).*')
+        self._id_re  = re.compile('.*\/id([0-9]+).*')
         self._source = iTunesSource()
     
     def get_top_albums(self, **kwargs):

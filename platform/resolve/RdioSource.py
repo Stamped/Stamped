@@ -14,11 +14,11 @@ import Globals
 from logs import report
 
 try:
+    import logs
+    from Resolver                   import *
     from libs.Rdio                  import Rdio, globalRdio
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
-    import logs
-    from Resolver                   import *
     from pprint                     import pformat
 except:
     report()
@@ -249,7 +249,7 @@ class RdioSource(GenericSource):
     def searchAllSource(self, query, timeout=None):
         if query.types is not None and len(self.types.intersection(query.types)) == 0:
             return self.emptySource
-            
+        
         return self.generatorSource(self.__queryGen(
                 query=query.query_string,
                 types='Artist,Album,Track',

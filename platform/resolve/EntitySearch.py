@@ -39,6 +39,7 @@ try:
     from StampedSource              import StampedSource
     from FactualSource              import FactualSource
     from TMDBSource                 import TMDBSource
+    from TheTVDBSource              import TheTVDBSource
     from SpotifySource              import SpotifySource
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
@@ -125,6 +126,7 @@ class EntitySearch(object):
             StampedSource(), 
             iTunesSource(), 
             TMDBSource(), 
+            TheTVDBSource(), 
             GooglePlacesSource(), 
             FactualSource(), 
             AmazonSource(), 
@@ -244,6 +246,14 @@ class EntitySearch(object):
                         print(formatResults(dups[0:1], verbose=True))
                 else:
                     chosen.append(best)
+                    
+                    """# useful debugging aid if you find dupes in the search results
+                    if len(best) == 2 and len(dups) > 0:
+                        print("COMPARED %s:%s with %s:%s" % 
+                              (cur.source, cur.name, dups[0][1].source, dups[0][1].name))
+                        
+                        print(formatResults(dups[0:2], verbose=True))
+                    """
             else:
                 break
         

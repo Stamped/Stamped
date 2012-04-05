@@ -8,11 +8,9 @@ __license__   = "TODO"
 import copy, re
 from datetime import datetime
 from schema import *
-from pprint import pformat
 ### TEMP
 from Entity import *
 import libs.CountryData
-
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')
 
@@ -565,6 +563,7 @@ class BasicEntity(Schema):
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(str(i) for i in t))
     
     def __repr__(self):
+        from pprint import pformat
         return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
 
 class EntityStatsSchema(Schema):
@@ -669,7 +668,17 @@ class EntitySourcesSchema(Schema):
         self.tmdb_url                       = SchemaElement(basestring)
         self.tmdb_source                    = SchemaElement(basestring)
         self.tmdb_timestamp                 = SchemaElement(datetime)
-
+        
+        self.thetvdb_id                     = SchemaElement(basestring)
+        self.thetvdb_url                    = SchemaElement(basestring)
+        self.thetvdb_source                 = SchemaElement(basestring)
+        self.thetvdb_timestamp              = SchemaElement(datetime)
+        
+        self.imdb_id                        = SchemaElement(basestring)
+        self.imdb_url                       = SchemaElement(basestring)
+        self.imdb_source                    = SchemaElement(basestring)
+        self.imdb_timestamp                 = SchemaElement(datetime)
+        
         self.googleplaces_id                = SchemaElement(basestring)
         self.googleplaces_reference         = SchemaElement(basestring)
         self.googleplaces_url               = SchemaElement(basestring)
@@ -725,22 +734,20 @@ class PlaceEntity(BasicEntity):
         self.alcohol_flag_timestamp         = SchemaElement(datetime)
 
     def formatAddress(self, extendStreet=False, breakLines=False):
-
         street      = self.address_street
         street_ext  = self.address_street_ext
         locality    = self.address_locality
         region      = self.address_region
         postcode    = self.address_postcode
         country     = self.address_country
-
+        
         delimiter = '\n' if breakLines else ', '
-
+        
         if street is not None and locality is not None and country is not None:
-
             # Expand street 
             if extendStreet == True and street_ext is not None:
                 street = '%s %s' % (street, street_ext)
-
+            
             # Use state if in US
             if country == 'US':
                 if region is not None and postcode is not None:
@@ -749,7 +756,7 @@ class PlaceEntity(BasicEntity):
                     return '%s%s%s, %s' % (street, delimiter, locality, postcode)
                 elif postcode is not None:
                     return '%s%s%s, %s' % (street, delimiter, locality, region)
-
+            
             # Use country if outside US
             else:
                 countries = libs.CountryData.countries
@@ -757,15 +764,15 @@ class PlaceEntity(BasicEntity):
                     return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
                 else:
                     return '%s%s%s, %s' % (street, delimiter, locality, country)
-
+        
         if self.formatted_address is not None:
             return self.formatted_address
-            
+        
         if self.neighborhood is not None:
             return self.neighborhood
-
+        
         return None
-
+    
     @property 
     def subtitle(self):
         # Check if address components exist
@@ -901,30 +908,34 @@ class BasicMediaEntity(BasicEntity):
         self.parental_advisory_source       = SchemaElement(basestring)
         self.parental_advisory_timestamp    = SchemaElement(datetime)
 
-
 class MediaCollectionEntity(BasicMediaEntity):
     def setSchema(self):
         BasicMediaEntity.setSchema(self)
         self.kind                           = SchemaElement(basestring, required=True, default='media_collection')
-
+        
         self.tracks                         = SchemaList(MediaItemEntityMini())
         self.tracks_source                  = SchemaElement(basestring)
         self.tracks_timestamp               = SchemaElement(datetime)
-
+        
+        #self.seasons                        = SchemaList(SeasonSchema())
+        #self.status                         = SchemaElement(basestring)
+    
     @property 
     def subtitle(self):
         if 'album' in self.types.value:
             if len(self.artists) > 0:
                 return 'Album by %s' % ', '.join(str(i['title']) for i in self.artists)
+            
             return 'Album'
-
+        
         if 'tv' in self.types.value:
             if len(self.networks) > 0:
                 return 'TV Show (%s)' % ', '.join(str(i['title']) for i in self.networks)
+            
             return 'TV Show'
-
+        
         return self._genericSubtitle()
-
+    
     @property 
     def category(self):
         if 'album' in self.types.value:
@@ -932,7 +943,7 @@ class MediaCollectionEntity(BasicMediaEntity):
         if 'tv' in self.types.value:
             return 'film'
         return 'other'
-
+    
     @property 
     def subcategory(self):
         if 'album' in self.types.value:
@@ -940,7 +951,6 @@ class MediaCollectionEntity(BasicMediaEntity):
         if 'tv' in self.types.value:
             return 'tv'
         return 'other'
-
 
 class MediaItemEntity(BasicMediaEntity):
     def setSchema(self):
@@ -1029,24 +1039,39 @@ class SoftwareEntity(BasicEntity):
         self.supported_devices              = SchemaList(SchemaElement(basestring))
         self.supported_devices_source       = SchemaElement(basestring)
         self.supported_devices_timestamp    = SchemaElement(datetime)
-
+        
+        self.platform                       = SchemaElement(basestring)
+        self.platform_source                = SchemaElement(basestring)
+        self.platform_timestamp             = SchemaElement(datetime)
+    
     @property 
     def subtitle(self):
         if 'app' in self.types.value:
+            suffix = ''
             if len(self.authors) > 0:
-                return 'App (%s)' % ', '.join(str(i['title']) for i in self.authors)
-            return 'App'
-
+                suffix = ' (%s)' % ', '.join(str(i['title']) for i in self.authors)
+            
+            return 'App%s' % suffix
+        elif 'video_game' in self.types.value:
+            suffix = ''
+            if self.platform:
+                suffix = ' (%s)' % self.platform
+            
+            return 'Video Game%s' % suffix
+        
         return self._genericSubtitle()
-
+    
     @property 
     def category(self):
         return 'other'
-
+    
     @property 
     def subcategory(self):
         if 'app' in self.types.value:
             return 'app'
+        elif 'video_game' in self.types.value:
+            return 'video_game'
+        
         return 'other'
 
 
@@ -1160,7 +1185,6 @@ class HoursSchema(Schema):
         self.open                           = SchemaElement(basestring)
         self.close                          = SchemaElement(basestring)
         self.desc                           = SchemaElement(basestring)
-
 
 # #################### #
 # DEPRECATED: Entities #

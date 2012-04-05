@@ -8,7 +8,6 @@ __license__   = "TODO"
 import Globals, utils
 
 from StampedTestUtils       import *
-from api.Schemas            import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 from libs.applerss          import AppleRSS
 

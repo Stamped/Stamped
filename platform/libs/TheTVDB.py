@@ -5,12 +5,15 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+__all__       = [ 'TheTVDB', 'globalTheTVDB' ]
+
 import Globals
 import string, sys, urllib, utils
 
+from Schemas    import *
 from optparse   import OptionParser
+from LibUtils   import parseDateString
 from lxml       import objectify, etree
-from Schemas    import Entity
 from pprint     import pprint
 
 class TheTVDB(object):
@@ -58,8 +61,8 @@ class TheTVDB(object):
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         
-        """
-        f = open('out.xml', 'w')
+        """# useful debugging aid
+        f = open('thetvdb.%s.xml' % thetvdb_id, 'w')
         f.write(xml)
         f.close()
         """
@@ -77,19 +80,20 @@ class TheTVDB(object):
             'Overview'      : 'desc', 
             'IMDB_ID'       : 'imdb_id', 
             'id'            : 'thetvdb_id', 
-            'FirstAired'    : 'original_release_date', 
             'ContentRating' : 'mpaa_rating', 
-            'Network'       : 'network_name', 
-            'Actors'        : 'cast', 
-            'Genre'         : 'genre', 
         }
         
-        def _strip(s):
-            return string.joinfields(filter(lambda g: len(g) > 0, s.split('|')), ', ')
+        _map2 = {
+            'Network'       : ('networks', lambda n: [ BasicEntityMini({ 'title' : n }) ]), 
+            'Actors'        : ('cast',     lambda n: map(lambda _: BasicEntityMini({ 'title' : _ }), filter(lambda _: len(_) > 0, n.split('|')))), 
+            'Genre'         : ('genres',   lambda n: filter(lambda _: len(_) > 0, n.split('|'))), 
+            'Runtime'       : ('length',   lambda n: 60 * int(n)), 
+            'FirstAired'    : ('release_date', parseDateString), 
+        }
         
         try:
-            entity = Entity()
-            entity.subcategory = 'tv'
+            entity = MediaCollectionEntity()
+            entity.types = [ 'tv', ]
             
             for k, v in _map.iteritems():
                 elem = item.find(k)
@@ -100,10 +104,22 @@ class TheTVDB(object):
                     if len(elem) > 0:
                         entity[v] = elem
             
+            for k, v in _map2.iteritems():
+                elem = item.find(k)
+                
+                if elem is not None and elem.text is not None:
+                    elem = elem.text.strip()
+                    
+                    if len(elem) > 0:
+                        entity_key, func = v
+                        
+                        entity[entity_key] = func(elem)
+            
             if entity.title is None:
                 return None
             
             images = [ 'poster', 'fanart', 'banner' ]
+            entity.images = []
             
             for image in images:
                 image = item.find(image)
@@ -112,14 +128,12 @@ class TheTVDB(object):
                     image = image.text.strip()
                     
                     if len(image) > 0:
-                        entity.image = 'http://thetvdb.com/banners/%s' % image
+                        image = ImageSchema({
+                            'image' : 'http://thetvdb.com/banners/%s' % image, 
+                        })
+                        
+                        entity.images.append(image)
                         break
-            
-            if entity.genre is not None:
-                entity.genre = _strip(entity.genre)
-            
-            if entity.cast is not None:
-                entity.cast = _strip(entity.cast)
             
             return entity
         except:
@@ -131,6 +145,15 @@ class TheTVDB(object):
         
         return 'http://www.thetvdb.com/api/GetSeries.php?%s' % (urllib.urlencode(params))
 
+_globalTheTVDB = None
+
+def globalTheTVDB():
+    global _globalTheTVDB
+    if _globalTheTVDB is None:
+        _globalTheTVDB = TheTVDB()
+    
+    return _globalTheTVDB
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
     version = "%prog " + __version__
@@ -140,7 +163,7 @@ def parseCommandLine():
                       help="Print out verbose results")
     
     parser.add_option("-d", "--detailed", action="store_true", default=False, 
-                      help="Print out verbose results")
+                      help="Perform detailed lookup")
     
     (options, args) = parser.parse_args()
     
@@ -153,7 +176,7 @@ def parseCommandLine():
 def main():
     options, args = parseCommandLine()
     
-    db = TheTVDB()
+    db = globalTheTVDB()
     results = db.search(args[0], 
                         transform = not options.verbose, 
                         detailed  = options.detailed)
@@ -168,7 +191,7 @@ if __name__ == '__main__':
     main()
 
 """
-db = TheTVDB()
-ret = db.search('archer', transform=False)
+api = TheTVDB()
+ret = api.search('archer', transform=False)
 """
 

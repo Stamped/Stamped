@@ -39,6 +39,14 @@ class Amazon(object):
     
     def _item_helper(self, func, **kwargs):
         string = func(**kwargs)
+        
+        """# useful for debugging amazon queries
+        if 'ItemId' in kwargs:
+            f = open('amazon.%s.xml' % kwargs['ItemId'], 'w')
+            f.write(string)
+            f.close()
+        """
+        
         return xmlToPython(string)
 
 _globalAmazon = Amazon()

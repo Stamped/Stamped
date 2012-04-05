@@ -60,9 +60,11 @@ class AmazonAPI(object):
         kwargs['transform'] = True
         entities = self.item_search(**kwargs)
         
-        #for entity in entities:
-        #    pprint(entity.value)
-        #print '\n\n\n'
+        """
+        for entity in entities:
+            pprint(entity.value)
+        print '\n\n\n'
+        """
         
         item_ids = string.joinfields((e.asin for e in entities), ',')
         
