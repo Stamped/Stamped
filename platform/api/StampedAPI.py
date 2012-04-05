@@ -43,13 +43,13 @@ try:
     #resolve classes
     from resolve.EntitySource   import EntitySource
     from resolve                import FullResolveContainer
-    from AmazonSource           import AmazonSource
-    from FactualSource          import FactualSource
-    from GooglePlacesSource     import GooglePlacesSource
+    # from AmazonSource           import AmazonSource
+    # from FactualSource          import FactualSource
+    # from GooglePlacesSource     import GooglePlacesSource
     from iTunesSource           import iTunesSource
-    from RdioSource             import RdioSource
-    from SpotifySource          import SpotifySource
-    from TMDBSource             import TMDBSource
+    # from RdioSource             import RdioSource
+    # from SpotifySource          import SpotifySource
+    # from TMDBSource             import TMDBSource
     from StampedSource          import StampedSource
 except:
     report()

@@ -13,21 +13,6 @@ from logs import report
 try:
     from BasicSourceContainer   import BasicSourceContainer
     from EntityGroups           import *
-    
-    # sources
-    from SeedSource             import SeedSource
-    from FactualSource          import FactualSource
-    from GooglePlacesSource     import GooglePlacesSource
-    from SinglePlatformSource   import SinglePlatformSource
-    from TMDBSource             import TMDBSource
-    from FormatSource           import FormatSource
-    from RdioSource             import RdioSource
-    from SpotifySource          import SpotifySource
-    from iTunesSource           import iTunesSource
-    from AmazonSource           import AmazonSource
-    from TheTVDBSource          import TheTVDBSource
-    from StampedSource          import StampedSource
-
     from pprint                 import pformat
 except:
     report()
@@ -41,79 +26,10 @@ class FullResolveContainer(BasicSourceContainer):
 
     def __init__(self):
         BasicSourceContainer.__init__(self)
-        
-        groups = [
-            FactualGroup(),
-            SinglePlatformGroup(),
-            GooglePlacesGroup(),
-            TMDBGroup(),
-            RdioGroup(),
-            TheTVDBGroup(),
-            SpotifyGroup(),
-            iTunesGroup(),
-            AmazonGroup(),
-            FandangoGroup(),
-            StampedTombstoneGroup(),
 
-            AmazonLinkGroup(),
-            AmazonUnderlyingGroup(),
-            OpenTableGroup(),
-            OpenTableNicknameGroup(),
-
-            AddressGroup(),
-            CoordinatesGroup(),
-            PhoneGroup(),
-            SiteGroup(),
-            PriceRangeGroup(),
-            CuisineGroup(),
-            MenuGroup(),
-            ReleaseDateGroup(),
-            DirectorGroup(),
-            CastGroup(),
-            SubtitleGroup(),
-            DescGroup(),
-            MangledTitleGroup(),
-            TrackLengthGroup(),
-            ShortDescriptionGroup(),
-            AlbumNameGroup(),
-            #AlbumsGroup(),
-            #SongsGroup(),
-            # TracksGroup(),
-
-            MPAARatingGroup(),
-            ArtistDisplayNameGroup(),
-            GenreGroup(),
-
-            AuthorGroup(),
-            PublisherGroup(),
-            ISBNGroup(),
-            SKUNumberGroup(),
-            NumPagesGroup(),
-
-            SubcategoryGroup(),
-            ImagesGroup(),
-
-            AlbumListGroup(),
-            TrackListGroup(),
-        ]
-        for group in groups:
+        for group in allGroups:
             self.addGroup(group)
-
-        sources = [
-            SeedSource(),
-            FormatSource(),
-            FactualSource(),
-            GooglePlacesSource(),
-            SinglePlatformSource(),
-            AmazonSource(),
-            TMDBSource(),
-            TheTVDBSource(),
-            RdioSource(),
-            SpotifySource(),
-            iTunesSource(),
-            StampedSource(),
-        ]
-        for source in sources:
+        for source in allSources:
             self.addSource(source)
         
         self.setGlobalPriority('seed',seedPriority)

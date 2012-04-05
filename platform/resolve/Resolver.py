@@ -10,20 +10,7 @@ __license__   = "TODO"
 
 __all__ = [
     'Resolver',
-    'ResolverObject',
     'ResolverProxy',
-    'SimpleResolverObject',
-    'ResolverSearchAll',
-    'ResolverArtist',
-    'ResolverAlbum',
-    'ResolverTrack',
-    'ResolverPlace',
-    'SimpleResolverTrack',
-    'ResolverMovie',
-    'ResolverBook',
-    'ResolverTVShow',
-    'ResolverApp',
-    'ResolverVideoGame',
     'demo',
     'regexRemoval',
     'simplify',
@@ -58,6 +45,7 @@ try:
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
+    from ResolverObject             import *
 except:
     report()
     raise
@@ -556,102 +544,6 @@ def typeToSubcategory(t):
     else:
         return None
 
-class ResolverObject(object):
-    """
-    Abstract superclass for all resolver interface objects.
-
-    The Resolver class uses subtypes of ResolverObject to remain
-    source agnostic for resolution. These wrapper types provide an
-    interface to all of the necessary data needed for query/match
-    comparisons.
-
-    All ResolverObject must have a name, key, source, and type:
-
-    name - a string that represents the name of the object (often not unique)
-    key - a key that identifies the object to its source (usually unique)
-    source - a string that names the source (i.e. tmdb, rdio, etc.)
-    type - a string that identifies the type of the object (i.e. track, album, etc.)
-
-    ResolverObjects also typically override their string representation methods to
-    provide meaningful, human-readable output.
-    """
-    
-    __metaclass__ = ABCMeta
-
-    @abstractproperty
-    def name(self):
-        pass
-
-    @abstractproperty
-    def key(self):
-        pass
-
-    @abstractproperty
-    def source(self):
-        pass
-
-    @abstractproperty
-    def type(self):
-        pass
-
-    @lazyProperty
-    def keywords(self):
-        words = set()
-        for term in self.related_terms:
-            try:
-                term = punctuation_re.sub(' ', term)
-                for w in term.split():
-                    if w != '':
-                        words.add(w)
-            except Exception:
-                pass
-        
-        return words
-    
-    @property 
-    def related_terms(self):
-        return []
-
-    @property 
-    def description(self):
-        return ''
-
-    @property 
-    def url(self):
-        return None
-
-    @property 
-    def priority(self):
-        return 0
-
-    @property
-    def coordinates(self):
-        return None
-
-    @property
-    def address(self):
-        return {}
-
-    @property
-    def address_string(self):
-        return None
-
-    @property 
-    def neighborhoods(self):
-        return []
-
-    @property 
-    def subcategory(self):
-        return None
-
-    @property 
-    def image(self):
-        return None
-
-    @property
-    def date(self):
-        return None
-
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -715,601 +607,6 @@ class ResolverProxy(object):
     def subcategory(self):
         return self.target.subcategory
 
-class SimpleResolverObject(ResolverObject):
-
-    def __init__(self, **data):
-        self.__data = data
-
-    @property
-    def data(self):
-        return self.__data
-
-    @lazyProperty
-    def name(self):
-        try:
-            return str(self.data['name'])
-        except KeyError:
-            return ''
-
-    @lazyProperty
-    def key(self):
-        try:
-            return str(self.data['key'])
-        except KeyError:
-            return ''
-
-    @lazyProperty
-    def source(self):
-        try:
-            return str(self.data['source'])
-        except KeyError:
-            return ''
-
-    @property
-    def description(self):
-        try:
-            return str(self.data['description'])
-        except KeyError:
-            return ''
-
-    @property 
-    def url(self):
-        try:
-            return str(self.data['url'])
-        except KeyError:
-            return None
-
-
-class ResolverSearchAll(ResolverObject):
-
-    @property
-    def coordinates(self):
-        return None
-
-    @property
-    def query_string(self):
-        return ''
-
-    @property
-    def subtype(self):
-        return None
-
-    @property 
-    def type(self):
-        return 'search_all'
-
-
-#
-# Artist
-#
-
-
-class ResolverArtist(ResolverObject):
-    """
-    Interface for Artist objects.
-
-    Attributes:
-
-    albums - a list of artist dicts which must at least contain a 'name' string.
-    tracks - a list of track dicts which must at least contain a 'name' string.
-    """
-    @abstractproperty
-    def albums(self):
-        pass
-
-    @abstractproperty
-    def tracks(self):
-        pass
-
-    @property
-    def genres(self):
-        return []
-        
-    @property 
-    def type(self):
-        return 'artist'
-
-    @property 
-    def subcategory(self):
-        return 'artist'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-            ]
-        l.extend([ track['name'] for track in self.tracks])
-        l.extend([ album['name'] for album in self.albums])
-        return [
-            v for v in l if v != ''
-        ]
-
-#
-# Album
-# 
-
-class ResolverAlbum(ResolverObject):
-    """
-    Interface for album objects
-
-    Attributes:
-
-    artist - an artist dict containing at least a 'name' string.
-    tracks - a list of track dicts each containing at least a 'name' string.
-    """
-    @abstractproperty
-    def artist(self):
-        pass
-
-    @abstractproperty
-    def tracks(self):
-        pass
-
-    @property
-    def genres(self):
-        return []
-
-    @property
-    def date(self):
-        return None
-
-    @property 
-    def type(self):
-        return 'album'
-
-    @property 
-    def subcategory(self):
-        return 'album'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-                self.artist['name'],
-            ]
-        l.extend([ track['name'] for track in self.tracks])
-        return [
-            v for v in l if v != ''
-        ]
-
-
-#
-# Tracks
-#
-
-class ResolverTrack(ResolverObject):
-    """
-    Interface for track objects
-
-    Attributes:
-
-    artist - an artist dict containing at least a 'name' string
-    album - an album dict containing at least a 'name' string
-    length - a number (possibly float) inticating the length of the track in seconds
-    """
-    @abstractproperty
-    def artist(self):
-        pass
-
-    @abstractproperty
-    def album(self):
-        pass
-
-    @abstractproperty
-    def length(self):
-        pass
-
-    @property
-    def genres(self):
-        return []
-
-    @property
-    def date(self):
-        return None
-
-    @property 
-    def type(self):
-        return 'track'
-
-    @property 
-    def subcategory(self):
-        return 'song'
-        
-    @lazyProperty
-    def related_terms(self):
-        return [
-            v for v in [
-                self.type,
-                'song',
-                self.name,
-                self.artist['name'],
-                self.album['name'],
-            ]
-                if v != ''
-        ]
-
-
-class SimpleResolverTrack(SimpleResolverObject):
-    """
-    """
-    def __init__(self, **data):
-        SimpleResolverObject.__init__(self, **data)
-
-    @lazyProperty
-    def artist(self):
-        try:
-            return self.data['artist']
-        except KeyError:
-            return {'name':''}
-
-    @lazyProperty
-    def album(self):
-        try:
-            return self.data['album']
-        except KeyError:
-            return {'name':''}
-
-    @lazyProperty
-    def length(self):
-        try:
-            return float(self.data['length'])
-        except Exception:
-            return -1
-
-    @lazyProperty
-    def genres(self):
-        try:
-            return self.data['genres']
-        except KeyError:
-            return []
-
-    @lazyProperty
-    def date(self):
-        try:
-            return self.data['date']
-        except KeyError:
-            return None
-
-    @property 
-    def type(self):
-        return 'track'
-
-    @property 
-    def subcategory(self):
-        return 'song'
-
-#
-# Movie
-#
-
-class ResolverMovie(ResolverObject):
-    """
-    Interface for movie objects
-
-    Attributes:
-
-    cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
-    director - a director dict containing at least a 'name' string
-    date - a datetime indicating the release date or None for unknown
-    length - a number indicating the length of the movie in seconds or a negative number (-1) for unknown
-    rating - a string indicating the MPAA rating of the movie or '' for unknown
-    genres - a list of genre strings
-    """
-    @property
-    def cast(self):
-        return []
-
-    @property
-    def director(self):
-        return {'name':''}
-
-    @property
-    def date(self):
-        return None
-
-    @property
-    def length(self):
-        return -1
-
-    @property
-    def rating(self):
-        return None
-
-    @property 
-    def genres(self):
-        return []
-
-    @property 
-    def type(self):
-        return 'movie'
-
-    @property 
-    def subcategory(self):
-        return 'movie'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-                self.director['name']
-            ]
-        l.extend(self.genres)
-        for actor in self.cast:
-            l.append(actor['name'])
-            if 'character' in actor:
-                l.append(actor['character'])
-        
-        return [ v for v in l if v != '' ]
-#
-# TV Show
-#
-
-class ResolverTVShow(ResolverObject):
-    """
-    Interface for tv show objects
-
-    Attributes:
-
-    cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
-    director - a director dict containing at least a 'name' string
-    date - a datetime indicating the release date or None for unknown
-    rating - a string indicating the MPAA rating of the show or '' for unknown
-    genres - a list of genre strings
-    seasons - the number of seasons of the show
-    """
-    @property
-    def cast(self):
-        return []
-
-    @property
-    def director(self):
-        return {'name':''}
-
-    @property
-    def date(self):
-        return None
-
-    @property
-    def rating(self):
-        return None
-
-    @property 
-    def genres(self):
-        return []
-
-    @property 
-    def type(self):
-        return 'tv'
-
-    @property 
-    def subcategory(self):
-        return 'tv'
-
-    @property
-    def seasons(self):
-        return -1
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-                self.director['name']
-            ]
-        l.extend(self.genres)
-        for actor in self.cast:
-            l.append(actor['name'])
-            if 'character' in actor:
-                l.append(actor['character'])
-        
-        return [ v for v in l if v != '' ]
-
-#
-# Books
-#
-
-class ResolverBook(ResolverObject):
-    """
-    Interface for book objects
-
-    Attributes:
-
-    author - an author dict containing at least a 'name' string
-    publisher - an publisher dict containing at least a 'name' string
-    length - a number (possibly float) inticating the length of the book in pages
-    """
-    @abstractproperty
-    def author(self):
-        pass
-
-    @abstractproperty
-    def publisher(self):
-        pass
-
-    @property
-    def date(self):
-        return None
-
-    @property
-    def length(self):
-        return -1
-
-    @property
-    def isbn(self):
-        return None
-
-    @property
-    def eisbn(self):
-        return None
-
-    @property
-    def sku(self):
-        return None
-
-    @property 
-    def genres(self):
-        return []
-
-    @property 
-    def type(self):
-        return 'book'
-
-    @property 
-    def subcategory(self):
-        return 'book'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-                self.author['name'],
-                self.publisher['name'],
-            ]
-        return [ v for v in l if v != '' ]
-
-#
-# Places
-# 
-
-class ResolverPlace(ResolverObject):
-    """
-    Interface for place objects
-
-    Attributes:
-
-    TODO
-    """
-
-    @property
-    def phone(self):
-        return None
-
-    @property
-    def email(self):
-        return None
-
-    @property 
-    def has_food(self):
-        return False
-
-    @property 
-    def has_drinks(self):
-        return False
-
-    @property 
-    def cuisines(self):
-        return []
-
-    @property 
-    def type(self):
-        return 'place'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [ self.type, self.name, ]
-        
-        for k,v in self.address.items():
-            l.append(v)
-        
-        return [ v for v in l if v != '' ]
-
-#
-# Apps
-#
-
-class ResolverApp(ResolverObject):
-    """
-    Interface for app objects
-
-    Attributes:
-
-    genres - a list containing any applicable genres
-    publisher - an publisher dict containing at least a 'name' string
-    """
-    @abstractproperty
-    def publisher(self):
-        pass
-
-    @property
-    def date(self):
-        return None
-
-    @property 
-    def genres(self):
-        return []
-
-    @property 
-    def type(self):
-        return 'app'
-
-    @property 
-    def subcategory(self):
-        return 'app'
-
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type,
-                self.name,
-                self.publisher['name'],
-            ]
-        return [ v for v in l if v != '' ]
-
-    @lazyProperty 
-    def screenshots(self):
-        return []
-
-class ResolverVideoGame(ResolverObject):
-    """
-    Interface for video game objects
-    
-    Attributes:
-    
-    author - an author dict containing at least a 'name' string
-    publisher - an publisher dict containing at least a 'name' string
-    """
-    
-    @abstractproperty
-    def author(self):
-        pass
-    
-    @abstractproperty
-    def publisher(self):
-        pass
-    
-    @property
-    def date(self):
-        return None
-    
-    @property
-    def sku(self):
-        return None
-    
-    @property 
-    def genres(self):
-        return []
-    
-    @property 
-    def type(self):
-        return 'video_game'
-    
-    @property 
-    def subcategory(self):
-        return 'video_game'
-    
-    @lazyProperty
-    def related_terms(self):
-        l = [
-                self.type, 
-                self.name, 
-                self.author['name'], 
-                self.publisher['name'], 
-            ]
-        return [ v for v in l if v != '' ]
 
 ##
 # Main Resolver class
@@ -1397,7 +694,17 @@ class Resolver(object):
         """ Generic fuzzy name comparison. Returns a comparison decimal [0,1] """
         return stringComparison(a, b)
     
-    def artistComparison(self, q, m):
+    def typesComparison(self, q, m):
+        """ Types comparison metric. """
+        types = self.__typesIntersection(q, m)
+        if len(types) == 0:
+            return 0
+        try:
+            return 2.0 * len(types) / (len(q.types) + len(m.types))
+        except Exception:
+            return 0
+    
+    def personComparison(self, q, m):
         """ Artist specific comparison metric. """
         return self.nameComparison(self.artistSimplify(q), self.artistSimplify(m))
     
@@ -1463,23 +770,34 @@ class Resolver(object):
         """ Place specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
-    def checkArtist(self, results, query, match, options, order):
+    def checkPerson(self, results, query, match, options, order):
         tests = [
-            ('name',        lambda q, m, s, o: self.artistComparison(q.name, m.name)), 
-            ('albums',      lambda q, m, s, o: self.albumsComparison(q, m, o)), 
-            ('tracks',      lambda q, m, s, o: self.tracksComparison(q, m, o)), 
+            ('name',        lambda q, m, s, o: self.personComparison(q.name, m.name)), 
+            ('types',       lambda q, m, s, o: self.typesComparison(q, m)), 
         ]
         weights = {
             'name':         lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=5.0), 
-            'albums':       lambda q, m, s, o: self.__albumsWeight(q, m), 
-            'tracks':       lambda q, m, s, o: self.__tracksWeight(q, m), 
+            'types':        lambda q, m, s, o: self.__typesWeight(q, m, s, o), 
         }
+
+        types = self.__typesIntersection(query, match)
+
+        if 'artist' in types:
+            tests.extend([
+                ('albums',      lambda q, m, s, o: self.albumsComparison(q, m, o)), 
+                ('tracks',      lambda q, m, s, o: self.tracksComparison(q, m, o)), 
+            ])
+        
+            weights['albums']   = lambda q, m, s, o: self.__albumsWeight(q, m) 
+            weights['tracks']   = lambda q, m, s, o: self.__tracksWeight(q, m)
+
         self.genericCheck(tests, weights, results, query, match, options, order)
+
 
     def checkAlbum(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.albumComparison(q.name, m.name)),
-            ('artist',      lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
+            ('artist',      lambda q, m, s, o: self.personComparison(q.artist['name'], m.artist['name'])),
             ('tracks',      lambda q, m, s, o: self.tracksComparison(q, m, o)),
         ]
         weights = {
@@ -1492,7 +810,7 @@ class Resolver(object):
     def checkTrack(self, results, query, match, options, order):
         tests = [
             ('name',        lambda q, m, s, o: self.trackComparison(q, m)),
-            ('artist',      lambda q, m, s, o: self.artistComparison(q.artist['name'], m.artist['name'])),
+            ('artist',      lambda q, m, s, o: self.personComparison(q.artist['name'], m.artist['name'])),
             ('album',       lambda q, m, s, o: self.albumComparison(q.album['name'], m.album['name'])),
             ('length',      lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
         ]
@@ -1735,87 +1053,98 @@ class Resolver(object):
         if 'pool' not in options:
             options['pool'] = 10
         if 'mins' not in options:
-            if query.type == 'album':
-                options['mins'] = {
-                    'name':-1,
-                    'artist':-1,
-                    'tracks':-1,
-                    'total':-1,
-                }
-            elif query.type == 'track':
-                options['mins'] = {
-                    'name':-1,
-                    'artist':-1,
-                    'album':-1,
-                    'length':-1,
-                    'total':-1,
-                }
-            elif query.type == 'artist':
+            if query.kind == 'person':
                 options['mins'] = {
                     'name':-1,
                     'albums':-1,
                     'tracks':-1,
                     'total':-1,
                 }
-            elif query.type == 'movie':
-                options['mins'] = {
-                    'name':-1,
-                    'cast':-1,
-                    'director':-1,
-                    'releaseDate':-1,
-                    'length':-1,
-                    'rating':-1,
-                    'genres':-1,
-                }
+            # elif query.type == 'album':
+            #     options['mins'] = {
+            #         'name':-1,
+            #         'artist':-1,
+            #         'tracks':-1,
+            #         'total':-1,
+            #     }
+            # elif query.type == 'track':
+            #     options['mins'] = {
+            #         'name':-1,
+            #         'artist':-1,
+            #         'album':-1,
+            #         'length':-1,
+            #         'total':-1,
+            #     }
+            # elif query.type == 'movie':
+            #     options['mins'] = {
+            #         'name':-1,
+            #         'cast':-1,
+            #         'director':-1,
+            #         'releaseDate':-1,
+            #         'length':-1,
+            #         'rating':-1,
+            #         'genres':-1,
+            #     }
             else:
                 #generic
                 options['mins'] = {
                     'name':-1,
                 }
+            options['mins']['types'] = 0.01
+
         if 'groups' not in options:
             groups = [options['count']]
-            if query.type == 'artist':
+            if query.kind == 'person':
                 groups.extend([4, 20, 30])
-            elif query.type == 'album':
-                groups.extend([5, 10, 50])
-            elif query.type == 'track':
-                groups.extend([20, 50, 100])
-            elif query.type == 'movie':
-                groups.extend([10, 20, 50]) 
-            elif query.type == 'book':
-                groups.extend([20, 50, 100])
-            elif query.type == 'search_all':
-                groups.extend([])
+            # elif query.type == 'album':
+            #     groups.extend([5, 10, 50])
+            # elif query.type == 'track':
+            #     groups.extend([20, 50, 100])
+            # elif query.type == 'movie':
+            #     groups.extend([10, 20, 50]) 
+            # elif query.type == 'book':
+            #     groups.extend([20, 50, 100])
+            # elif query.type == 'search_all':
+            #     groups.extend([])
             else:
                 #generic
                 groups.extend([10, 20, 50]) 
             options['groups'] = groups
         if 'check' not in options:
-            if query.type =='track':
-                options['check'] = self.checkTrack
-            elif query.type =='album':
-                options['check'] = self.checkAlbum
-            elif query.type =='artist':
-                options['check'] = self.checkArtist
-            elif query.type =='video_game':
-                options['check'] = self.checkVideoGame
-            elif query.type =='movie':
-                options['check'] = self.checkMovie
-            elif query.type =='book':
-                options['check'] = self.checkBook
-            elif query.type =='place':
-                options['check'] = self.checkPlace
-            elif query.type =='tv':
-                options['check'] = self.checkTVShow
-            elif query.type =='app':
-                options['check'] = self.checkApp
-            elif query.type == 'search_all':
-                options['check'] = self.checkSearchAll
+            if query.kind =='person':
+                options['check'] = self.checkPerson
+            # elif query.type =='track':
+            #     options['check'] = self.checkTrack
+            # elif query.type =='album':
+            #     options['check'] = self.checkAlbum
+            # elif query.type =='video_game':
+            #     options['check'] = self.checkVideoGame
+            # elif query.type =='movie':
+            #     options['check'] = self.checkMovie
+            # elif query.type =='book':
+            #     options['check'] = self.checkBook
+            # elif query.type =='place':
+            #     options['check'] = self.checkPlace
+            # elif query.type =='tv':
+            #     options['check'] = self.checkTVShow
+            # elif query.type =='app':
+            #     options['check'] = self.checkApp
+            # elif query.type == 'search_all':
+            #     options['check'] = self.checkSearchAll
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.type))
         
         return options
+
+    def __typesIntersection(self, q, m):
+        try:
+            return set(q.types).intersection(m.types)
+        except:
+            return set()
+
+    def __typesWeight(self, query, match, similarities, options):
+        return 0
     
     def __sourceTest(self, query, match, similarities, options):
         source_name = match.source.lower()
@@ -2294,7 +1623,7 @@ def demo(generic_source, default_title):
                     print("Inverted to different entity! (dup or false positive)")
             else:
                 print("Inversion failed! (low asymetric comparison?)")
-            blank = generic_source.buildEntityFromWrapper(new_query)
+            blank = generic_source.buildEntityFromEntityProxy(new_query)
             pprint(blank.value)
 
     else:

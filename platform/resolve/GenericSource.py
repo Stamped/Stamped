@@ -21,6 +21,7 @@ try:
     from pprint                     import pprint, pformat
     from abc                        import ABCMeta, abstractmethod
     from Resolver                   import *
+    from ResolverObject             import *
     from ASourceController          import *
     from Schemas                    import *
 except:
@@ -180,23 +181,22 @@ class GenericSource(BasicSource):
     
     def wrapperFromKey(self, key, type=None):
         raise NotImplementedError
-        return None
     
-    def buildEntityFromWrapper(self, wrapper, controller=None, decorations=None, timestamps=None):
-        if wrapper.type == 'place':
+    def buildEntityFromEntityProxy(self, entityProxy, controller=None, decorations=None, timestamps=None):
+        if entityProxy.kind == 'place':
             entity = PlaceEntity()
-        elif wrapper.type == 'artist':
+        elif entityProxy.kind == 'person':
             entity = PersonEntity()
-        elif wrapper.type in set([ 'album', 'tv', ]):
+        elif entityProxy.kind == 'media_collection':
             entity = MediaCollectionEntity()
-        elif wrapper.type in set([ 'book', 'movie', 'track', ]):
+        elif entityProxy.kind == 'media_item':
             entity = MediaItemEntity()
-        elif wrapper.type in set([ 'app', 'video_game', ]):
+        elif entityProxy.kind == 'software':
             entity = SoftwareEntity()
         else:
             entity = BasicEntity()
         
-        self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+        self.enrichEntityWithWrapper(entityProxy, entity, controller, decorations, timestamps)
         
         return entity
     
@@ -233,11 +233,8 @@ class GenericSource(BasicSource):
         setAttribute('email',   'email')
         setAttribute('url',     'site')
         
-        try:
-            if not entity.isType(wrapper.subcategory):
-                entity.types.append(wrapper.subcategory)
-        except:
-            pass
+        entity.types = wrapper.types
+
         
         ### Place
         if entity.kind == 'place':

@@ -21,6 +21,7 @@ try:
     import logs
     from pprint                     import pformat
     from Resolver                   import *
+    from ResolverObject             import *
     from libs.LibUtils              import parseDateString
     from StampedSource              import StampedSource
 except:
@@ -105,13 +106,13 @@ class _iTunesObject(object):
         return pformat( self.data )
 
 
-class iTunesArtist(_iTunesObject, ResolverArtist):
+class iTunesArtist(_iTunesObject, ResolverPerson):
     """
     iTunes artist wrapper
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverArtist.__init__(self)
+        ResolverPerson.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -127,6 +128,10 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     @lazyProperty
     def key(self):
         return self.data['artistId']
+
+    @property 
+    def types(self):
+        return ['artist']
 
     @lazyProperty
     def albums(self):
@@ -170,13 +175,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     #def __repr__(self):
     #    return "%s, %s" % (pformat(self.tracks), pformat(self.albums))
 
-class iTunesAlbum(_iTunesObject, ResolverAlbum):
+class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     """
     iTunes album wrapper
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -229,13 +234,13 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
         ]
 
 
-class iTunesTrack(_iTunesObject, ResolverTrack):
+class iTunesTrack(_iTunesObject, ResolverMediaItem):
     """
     iTunes track wrapper
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -286,13 +291,13 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
         return float(self.data['trackTimeMillis']) / 1000
 
 
-class iTunesMovie(_iTunesObject, ResolverMovie):
+class iTunesMovie(_iTunesObject, ResolverMediaItem):
     """
     iTunes movie wrapper
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverMovie.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -359,13 +364,13 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
             return ''
 
 
-class iTunesTVShow(_iTunesObject, ResolverTVShow):
+class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
     """
     iTunes tv show wrapper
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverTVShow.__init__(self)
+        ResolverMediaCollection.__init__(self)
     
     @lazyProperty
     def name(self):
@@ -424,11 +429,11 @@ class iTunesTVShow(_iTunesObject, ResolverTVShow):
     def subcategory(self):
         return 'tv'
 
-class iTunesBook(_iTunesObject, ResolverBook):
+class iTunesBook(_iTunesObject, ResolverMediaItem):
 
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverBook.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -481,11 +486,11 @@ class iTunesBook(_iTunesObject, ResolverBook):
     def sku(self):
         return None
 
-class iTunesApp(_iTunesObject, ResolverApp):
+class iTunesApp(_iTunesObject, ResolverSoftware):
 
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverApp.__init__(self)
+        ResolverSoftware.__init__(self)
 
     @lazyProperty
     def name(self):
@@ -655,8 +660,13 @@ class iTunesSource(GenericSource):
         return True
 
     def matchSource(self, query):
-        if query.type == 'artist':
+        print 'MATCH SOURCE: QUERY.KIND: %s' % query.kind 
+        print 'MATCH SOURCE: QUERY.TYPES: %s' % query.types
+
+        if query.kind == 'person' and query.isType('artist'):
             return self.artistSource(query)
+
+        ### TODO: Finish this list
         elif query.type == 'album':
             return self.albumSource(query)
         elif query.type == 'track':

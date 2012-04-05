@@ -17,6 +17,7 @@ try:
     import logs
     
     from Resolver                   import *
+    from ResolverObject             import *
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
@@ -58,6 +59,13 @@ class _EntityObject(object):
         except Exception:
             return ''
 
+    @lazyProperty
+    def types(self):
+        try:
+            return [ str(i) for i in self.entity.types ]
+        except:
+            return []
+
     @property 
     def source(self):
         return "stamped"
@@ -73,13 +81,13 @@ class _EntityObject(object):
         return pformat( self.entity.value )
 
 
-class EntityArtist(_EntityObject, ResolverArtist):
+class EntityArtist(_EntityObject, ResolverPerson):
     """
     Entity artist wrapper
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverArtist.__init__(self)
+        ResolverPerson.__init__(self)
 
     @lazyProperty
     def albums(self):
@@ -96,13 +104,13 @@ class EntityArtist(_EntityObject, ResolverArtist):
             return []
 
 
-class EntityAlbum(_EntityObject, ResolverAlbum):
+class EntityAlbum(_EntityObject, ResolverMediaCollection):
     """
     Entity album wrapper
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self)
 
     @lazyProperty
     def artist(self):
@@ -119,13 +127,13 @@ class EntityAlbum(_EntityObject, ResolverAlbum):
             return []
 
 
-class EntityTrack(_EntityObject, ResolverTrack):
+class EntityTrack(_EntityObject, ResolverMediaItem):
     """
     Entity track wrapper
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty
     def artist(self):
@@ -149,13 +157,13 @@ class EntityTrack(_EntityObject, ResolverTrack):
             return -1
 
 
-class EntityMovie(_EntityObject, ResolverMovie):
+class EntityMovie(_EntityObject, ResolverMediaItem):
     """
     Entity movie wrapper
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverMovie.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty 
     def cast(self):
@@ -193,13 +201,13 @@ class EntityMovie(_EntityObject, ResolverMovie):
             return None
 
 
-class EntityBook(_EntityObject, ResolverBook):
+class EntityBook(_EntityObject, ResolverMediaItem):
     """
     Entity book wrapper
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverBook.__init__(self)
+        ResolverMediaItem.__init__(self)
 
     @lazyProperty
     def author(self):
@@ -380,8 +388,10 @@ class StampedSource(GenericSource):
             raise ValueError('Unrecognized subcategory %s for %s' % (sub, entity['title']))
 
     def matchSource(self, query):
-        if query.type == 'artist':
+        if query.kind == 'person':
             return self.artistSource(query)
+
+        ### TODO: Finish this list
         elif query.type == 'album':
             return self.albumSource(query)
         elif query.type == 'track':
@@ -448,26 +458,47 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'titlel' : query.name.lower(),
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'artist',
                 }
                 yield {
-                    'mangled_title' : artistSimplify( query.name ),
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'artist',
+                }
+                # yield {
+                #     'mangled_title' : artistSimplify( query.name ),
+                # }
+                yield {
+                    '$or': [
+                        { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
+                            for album in query.albums[20:]
+                    ],
+                    'types'         : 'artist',
+                }
+                yield {
+                    '$or': [
+                        { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
+                            for track in query.tracks[20:]
+                    ],
+                    'types'         : 'artist',
                 }
                 yield {
                     '$or': [
                         { 'details.artist.albums': {'$elemMatch':{ 'album_name': album['name'] } } }
-                            for album in query.albums
-                    ]
+                            for album in query.albums[20:]
+                    ],
+                    'subcategory'   : 'artist',
                 }
                 yield {
                     '$or': [
                         { 'details.artist.songs': {'$elemMatch':{ 'song_name': track['name'] } } }
-                            for track in query.tracks
-                    ]
+                            for track in query.tracks[20:]
+                    ],
+                    'subcategory'   : 'artist',
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, subcategory='artist')
+        return self.__querySource(query_gen(), query)
 
     def movieSource(self, query):
         def query_gen():
