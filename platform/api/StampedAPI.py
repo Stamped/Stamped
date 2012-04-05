@@ -1151,10 +1151,7 @@ class StampedAPI(AStampedAPI):
         if entityId is None and searchId is None:
             raise StampedInputError("Required field missing (entity_id or search_id)")
         
-        if searchId is not None and searchId.startswith('T_'):
-            entityId = self._convertSearchId(searchId)
-        
-        if not entityId:
+        if entityId is None:
             entityId = searchId
         
         return self._getEntity(entityId)
@@ -1163,7 +1160,6 @@ class StampedAPI(AStampedAPI):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
         else:
-            ### TODO: Add async enrichment?
             tasks.invoke(tasks.APITasks._enrichEntity, args=[entityId])
         
         return self._entityDB.getEntity(entityId)
@@ -2909,7 +2905,7 @@ class StampedAPI(AStampedAPI):
             # enrich and merge entity asynchronously
             self.mergeEntity(entity, True)
         else:
-            # enrich entity asynchronously
+            # Enrich entity asynchronously
             tasks.invoke(tasks.APITasks._enrichEntity, args=[entity_id])
         
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
@@ -3001,8 +2997,9 @@ class StampedAPI(AStampedAPI):
                 'tmdb':         TMDBSource,
             }
             track_list = []
-
+            # print '\n\n'
             for stub in entity.tracks:
+                # print '%s\n%s\n\nBEGIN TRACK\n' % ('= '*40, ' ='*40)
                 source      = None
                 source_id   = None
                 entity_id   = None
@@ -3059,6 +3056,8 @@ class StampedAPI(AStampedAPI):
 
                 # Add track to album
                 track_list.append(track.minimize())
+
+                # print '\nEND TRACK\n'
 
             if len(track_list) > 0:
                 entity.tracks = track_list

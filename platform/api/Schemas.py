@@ -10,7 +10,7 @@ from datetime import datetime
 from schema import *
 from pprint import pformat
 ### TEMP
-from Entity import *
+# from Entity import *
 import libs.CountryData
 
 

@@ -190,7 +190,6 @@ class GenericSource(BasicSource):
         else:
             entity = BasicEntity()
         
-        entity.types = [ wrapper.type ]
         self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
         
         return entity
@@ -229,7 +228,7 @@ class GenericSource(BasicSource):
         setAttribute('url',     'site')
 
         try:
-            if not isType(wrapper.subcategory):
+            if not entity.isType(wrapper.subcategory):
                 entity.types.append(wrapper.subcategory)
         except:
             pass
@@ -432,7 +431,7 @@ class GenericSource(BasicSource):
             try:
                 wrapper = self.wrapperFromKey(source_id)
                 self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
-            except Exception:
-                print 'Whoops'
+            except Exception as e:
+                print 'Error: %s' % e
         return True
 

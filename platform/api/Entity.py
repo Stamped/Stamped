@@ -8,11 +8,15 @@ __license__   = "TODO"
 import Globals, logs, re
 import unicodedata, utils
 
-from difflib        import SequenceMatcher
-from Schemas        import *
-from libs.LibUtils  import parseDateString
-from datetime       import datetime
-from bson .objectid import ObjectId 
+try:
+    from difflib        import SequenceMatcher
+    from libs.LibUtils  import parseDateString
+    from datetime       import datetime
+    from bson.objectid  import ObjectId 
+    from Schemas        import *
+except:
+    logs.report()
+    raise
 
 
 categories = set([
