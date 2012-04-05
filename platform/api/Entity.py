@@ -8,11 +8,15 @@ __license__   = "TODO"
 import Globals, logs, re
 import unicodedata, utils
 
-from Schemas        import *
-from difflib        import SequenceMatcher
-from libs.LibUtils  import parseDateString
-from datetime       import datetime
-from bson .objectid import ObjectId 
+try:
+    from Schemas        import *
+    from difflib        import SequenceMatcher
+    from libs.LibUtils  import parseDateString
+    from datetime       import datetime
+    from bson.objectid  import ObjectId 
+except:
+    logs.report()
+    raise
 
 categories = set([
     'food', 
@@ -246,25 +250,15 @@ def deriveCategoryFromTypes(types):
         return subcategories[subcategory]
     return 'other'
 
-def _getEntityObjectFromKind(kind):
-    if kind == 'place':
-        return PlaceEntity
-    if kind == 'person':
-        return PersonEntity
-    if kind == 'media_collection':
-        return MediaCollectionEntity
-    if kind == 'media_item':
-        return MediaItemEntity
-    if kind == 'software':
-        return SoftwareEntity
-    return BasicEntity
-
-def buildEntity(data=None, kind=None):
+def buildEntity(data=None, kind=None, mini=False):
     if data is not None:
         if 'schema_version' not in data:
             return upgradeEntityData(data)
         kind = data.pop('kind', kind)
-    new = _getEntityObjectFromKind(kind)
+    if mini:
+        new = getEntityMiniObjectFromKind(kind)
+    else:
+        new = getEntityObjectFromKind(kind)
     return new(data)
 
 def upgradeEntityData(entityData):
@@ -277,7 +271,7 @@ def upgradeEntityData(entityData):
     if kind == 'other' and ('coordinates' in old or 'address' in old):
         kind = PlaceEntity
     
-    new     = _getEntityObjectFromKind(kind)()
+    new     = getEntityObjectFromKind(kind)()
     
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time

@@ -9,7 +9,18 @@ import Globals
 from logs import report
 
 try:
-    from BasicFieldGroup    import BasicFieldGroup
+    from BasicFieldGroup        import BasicFieldGroup
+    from SeedSource             import SeedSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
+    from SinglePlatformSource   import SinglePlatformSource
+    from TMDBSource             import TMDBSource
+    from FormatSource           import FormatSource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
+    from iTunesSource           import iTunesSource
+    from AmazonSource           import AmazonSource
+    from StampedSource          import StampedSource
 except:
     report()
     raise
@@ -444,3 +455,70 @@ class SKUNumberGroup(ABookGroup):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
 
+allGroups = [
+    FactualGroup,
+    SinglePlatformGroup,
+    GooglePlacesGroup,
+    TMDBGroup,
+    RdioGroup,
+    SpotifyGroup,
+    iTunesGroup,
+    AmazonGroup,
+    FandangoGroup,
+    StampedTombstoneGroup,
+
+    AmazonLinkGroup,
+    AmazonUnderlyingGroup,
+    OpenTableGroup,
+    OpenTableNicknameGroup,
+
+    AddressGroup,
+    CoordinatesGroup,
+    PhoneGroup,
+    SiteGroup,
+    PriceRangeGroup,
+    CuisineGroup,
+    MenuGroup,
+    ReleaseDateGroup,
+    DirectorGroup,
+    CastGroup,
+    SubtitleGroup,
+    DescGroup,
+    MangledTitleGroup,
+    TrackLengthGroup,
+    ShortDescriptionGroup,
+    AlbumNameGroup,
+    #AlbumsGroup,
+    #SongsGroup,
+    # TracksGroup,
+
+    MPAARatingGroup,
+    ArtistDisplayNameGroup,
+    GenreGroup,
+
+    AuthorGroup,
+    PublisherGroup,
+    ISBNGroup,
+    SKUNumberGroup,
+    NumPagesGroup,
+
+    SubcategoryGroup,
+    ImagesGroup,
+
+    AlbumListGroup,
+    TrackListGroup,
+]
+
+allSources = [
+    SeedSource,
+    FormatSource,
+    FactualSource,
+    GooglePlacesSource,
+    SinglePlatformSource,
+    AmazonSource,
+    TMDBSource,
+    RdioSource,
+    SpotifySource,
+    iTunesSource,
+    StampedSource,
+]

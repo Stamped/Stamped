@@ -28,7 +28,7 @@ class ASourceController(object):
         pass
 
     @abstractmethod
-    def shouldEnrich(self, group, source, entity,timestamp=None):
+    def shouldEnrich(self, group, source, entity, timestamp=None):
         """
         Returns whether an EntitySource should write to the given group.
 
@@ -49,7 +49,7 @@ class AlwaysSourceController(ASourceController):
     def __init__(self):
         ASourceController.__init__(self)
 
-    def shouldEnrich(self, group, source, entity,timestamp=None):
+    def shouldEnrich(self, group, source, entity, timestamp=None):
         return True
 
     @lazyProperty

@@ -125,10 +125,13 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         else:
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
-                            if self.now - currentTimestamp > currentMaxAge:
-                                return True
-                            else:
-                                return False
+                            try:
+                                if self.now - currentTimestamp > currentMaxAge:
+                                    return True
+                            except Exception:
+                                logs.warning('FAIL: self.now (%s) - currentTimestamp(%s) > currentMaxAge (%s)' % \
+                                    (self.now, currentTimestamp, currentMaxAge))
+                            return False
             else:
                 return False
         else:

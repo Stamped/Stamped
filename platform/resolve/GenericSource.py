@@ -173,15 +173,6 @@ class GenericSource(BasicSource):
                     entityMini.sources['%s_source' % artist.source] = artist.source
                 if 'url' in track:
                     entityMini.sources['%s_url' % artist.source] = track['url']
-
-                    # Attempt fast resolve
-                    # entity_id = self.stamped.resolve_fast(artist.source, track['key'])
-                    # to_enrich = decorations.setdefault('track_ids', [])
-                    # if entity_id is not None:
-                    #     to_enrich.append(('stamped', entity_id))
-                    # else:
-                    #     to_enrich.append((artist.source, track['key']))
-
                 entity.tracks.append(entityMini)
             except Exception:
                 report()
@@ -205,7 +196,6 @@ class GenericSource(BasicSource):
         else:
             entity = BasicEntity()
         
-        entity.types = [ wrapper.type ]
         self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
         
         return entity
@@ -244,7 +234,7 @@ class GenericSource(BasicSource):
         setAttribute('url',     'site')
         
         try:
-            if wrapper.subcategory not in entity.types.value:
+            if not entity.isType(wrapper.subcategory):
                 entity.types.append(wrapper.subcategory)
         except:
             pass
@@ -448,8 +438,8 @@ class GenericSource(BasicSource):
             try:
                 wrapper = self.wrapperFromKey(source_id)
                 self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
-            except Exception:
-                print 'Whoops'
+            except Exception as e:
+                print 'Error: %s' % e
         
         return True
 

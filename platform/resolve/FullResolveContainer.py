@@ -27,7 +27,7 @@ try:
     from AmazonSource           import AmazonSource
     from TheTVDBSource          import TheTVDBSource
     from StampedSource          import StampedSource
-    
+
     from pprint                 import pformat
 except:
     report()

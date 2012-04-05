@@ -53,7 +53,7 @@ class FormatSource(BasicSource):
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
         subcategory = entity.subcategory
-        if subcategory == 'other':
+        if subcategory == 'other' and entity.kind == 'place':
             if entity['lat'] != None and entity['lng'] != None and entity['gid'] != None:
                 factual_id = self.__factual.factual_from_entity(entity)
                 if factual_id is not None:
