@@ -50,8 +50,7 @@ TODO:
                 * book_name
                 * book_name by artist_name
                 * book_name artist_name (and vice-versa)
-                * target NYTimes or Amazon RSS feed
-            * video games
+                * target NYTimes' or Amazon's RSS feed
 """
 
 class ASearchTestSuite(AStampedTestCase):
@@ -67,7 +66,7 @@ class ASearchTestSuite(AStampedTestCase):
     def tearDown(self):
         pass
     
-    def _run_tests(self, tests, base_args, retries=3, test_coords=True, async=True):
+    def _run_tests(self, tests, base_args, retries=3, delay=1, test_coords=True, async=True):
         """
             Runs a list of search tests, verifying that each one satisfies its accompanying 
             SearchResultConstraint(s).
@@ -101,6 +100,7 @@ class ASearchTestSuite(AStampedTestCase):
                 self._run_tests(tests, args)
         """
         
+        async = False
         # optionally run test cases in parallel
         if async:
             pool = Pool(4)
@@ -112,11 +112,18 @@ class ASearchTestSuite(AStampedTestCase):
                 args[k] = v
             
             assert 'query' in args
-            def validate(results):
+            def validate(results, args, constraints):
                 # TODO: optionally test uniqueness / dedupping w.r.t. results via another SearchResultConstraint
-                
-                for constraint in test[1]:
+                for constraint in constraints:
                     if not constraint.validate(results):
+                        utils.log("")
+                        utils.log("-" * 80)
+                        utils.log("[%s] SEARCH ERROR query '%s'" % (self, args['query'], ))
+                        for r in results:
+                            utils.log(r.value)
+                        utils.log("-" * 80)
+                        utils.log("")
+                        
                         raise Exception("search constraint failed (%s) (%s)" % (args, constraint))
             
             subtests = [ args ]
@@ -136,7 +143,7 @@ class ASearchTestSuite(AStampedTestCase):
                 
                 subtests.append(args2)
             
-            def __do_search(args):
+            def __do_search(args, constraints):
                 utils.log("")
                 utils.log("-" * 80)
                 utils.log("[%s] SEARCH TEST query '%s'" % (self, args['query'], ))
@@ -146,13 +153,16 @@ class ASearchTestSuite(AStampedTestCase):
                 # perform the actual search itself, validating the results against all constraints 
                 # specified by this test case, and retrying if necessary until either the test case 
                 # satisfies its constraints or the maximum number of allotted retries is exceeded.
-                self.async(lambda: self.searcher.searchEntities(**args), validate, retries=retries)
+                self.async(lambda: self.searcher.searchEntities(**args), 
+                           lambda r: validate(r, args, constraints), 
+                           retries=retries, 
+                           delay=delay)
             
             for args in subtests:
                 if async:
-                    g = pool.spawn_link_exception(__do_search, args)
+                    pool.spawn_link_exception(__do_search, args, test[1])
                 else:
-                    __do_search(args)
+                    __do_search(args, test[1])
         
         if async:
             pool.join()

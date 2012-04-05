@@ -40,7 +40,7 @@ class AppSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'tiny wings', }, [ 
                 SearchResultConstraint(title='tiny wings', types='app', 
-                                       index=0, itunes_id=417817520), 
+                                       itunes_id=417817520), 
             ]), 
             ({ 'query' : 'flipboard', }, [ 
                 SearchResultConstraint(title='flipboard', types='app', 

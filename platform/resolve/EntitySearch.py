@@ -166,7 +166,7 @@ class EntitySearch(object):
         query   = QuerySearchAll(query, coords, types, local)
         pool    = Pool(len(self._sources))
         results = []
-        timeout = 6
+        timeout = 6.5
         
         # NOTE: order is important here; e.g., we want to give precedence to 
         # certain third-party APIs to begin their requests before others.
@@ -198,10 +198,9 @@ class EntitySearch(object):
         for name, source_results in all_results.iteritems():
             all_results[name] = sortedResults(source_results)
         
-        if _verbose:
-            print("\n\n\nGenerated %d results in %f seconds from: %s\n\n\n" % (
-                total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
-            ))
+        print("\n\n\nGenerated %d results in %f seconds from: %s\n\n\n" % (
+            total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
+        ))
         
         before2 = time()
         chosen  = []

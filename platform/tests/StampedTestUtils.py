@@ -61,6 +61,7 @@ class AStampedTestCase(unittest.TestCase):
             utils.log("[%s] error '%s' (%d more retries)" % (self, str(error), retries))
             
             time.sleep(delay)
+            delay *= 2
     
     def __str__(self):
         return self.__class__.__name__
