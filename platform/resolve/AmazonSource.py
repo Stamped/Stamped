@@ -327,14 +327,13 @@ class AmazonSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
             groups=[
-                'artist_display_name',
-                'genre',
-                'track_length',
-                'album_name',
+                'artists',
+                'genres',
+                'length',
+                'albums',
                 'release_date',
-                'author',
-                'publisher',
-                'num_pages',
+                'authors',
+                'publishers',
                 'isbn',
                 'desc',
                 'sku_number',
@@ -489,7 +488,7 @@ class AmazonSource(GenericSource):
 
         if len(sources) == 0:
             return self.emptySource 
-            
+
         return multipleSource(
             sources,
             constructor=AmazonSearchAll
@@ -592,19 +591,6 @@ class AmazonSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.amazon_id = proxy.key
-        return True
-    
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        if entity['amazon_id'] is not None:
-            asin = entity['amazon_id']
-            
-            if entity.isType('track'):
-                self.__enrichSong(entity, asin)
-            elif entity.isType('book'):
-                self.__enrichBook(entity, asin)
-            elif entity.isType('video_game'):
-                self.__enrichVideoGame(entity, asin)
-        
         return True
 
 if __name__ == '__main__':

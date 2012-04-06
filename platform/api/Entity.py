@@ -53,7 +53,6 @@ subcategories = {
     #           music
     # --------------------------
     'artist'            : 'music', 
-    'song'              : 'music', 
     'album'             : 'music', 
     'track'             : 'music', 
     
@@ -177,7 +176,6 @@ def deriveKindFromSubcategory(subcategory):
 
         'book'              : 'media_item', 
         'track'             : 'media_item', 
-        'song'              : 'media_item', 
         'movie'             : 'media_item', 
 
         'app'               : 'software', 
@@ -229,12 +227,11 @@ def deriveKindFromSubcategory(subcategory):
 def deriveTypesFromSubcategories(subcategories):
     result = set()
 
+    if 'song' in subcategories:
+        result.add('track')
+
     for item in types.intersection(subcategories):
         result.add(item)
-
-    if 'song' in result:
-        result.remove('song')
-        result.add('track')
 
     return result 
 

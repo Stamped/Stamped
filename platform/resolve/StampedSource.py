@@ -437,7 +437,7 @@ class StampedSource(GenericSource):
                 return self.tvFromEntity(entity)
 
         if entity.kind == 'media_item':
-            if entity.isType('track') or entity.isType('song'):
+            if entity.isType('track'):
                 return self.trackFromEntity(entity)
             if entity.isType('movie'):
                 return self.movieFromEntity(entity)
@@ -481,7 +481,7 @@ class StampedSource(GenericSource):
             try:
                 yield {
                     'titlel'        : query.name.lower(),
-                    'types'         : 'song',
+                    'types'         : 'track',
                 }
                 yield {
                     'titlel'        : query.name.lower(),
@@ -492,7 +492,7 @@ class StampedSource(GenericSource):
                         { 'collections': {'$elemMatch':{ 'title': album['name'] } } }
                             for album in query.albums[20:]
                     ],
-                    'types'         : 'song',
+                    'types'         : 'track',
                 }
                 yield {
                     'details.song.album.name': query.album['name'],
@@ -503,7 +503,7 @@ class StampedSource(GenericSource):
                         { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
                             for artist in query.artists[20:]
                     ],
-                    'types'         : 'song',
+                    'types'         : 'track',
                 }
                 yield {
                     'details.media.artist_display_title' : query.artist['name'],

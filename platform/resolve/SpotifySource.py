@@ -211,8 +211,8 @@ class SpotifySource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'spotify',
             groups=[
-                'album_list',
-                'track_list',
+                'albums',
+                'tracks',
             ],
             kinds=[
                 'person',
