@@ -129,8 +129,8 @@ class AppleRSS(object):
     def _parse_entity(self, entry):
         aid = entry['id']['attributes']['im:id']
         
-        wrapper = self._source.wrapperFromKey(aid)
-        return self._source.buildEntityFromWrapper(wrapper)
+        wrapper = self._source.entityProxyFromKey(aid)
+        return self._source.buildEntityFromEntityProxy(wrapper)
     
     def _get_id(self, s):
         match = self._id_re.match(s)
