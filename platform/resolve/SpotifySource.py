@@ -214,6 +214,11 @@ class SpotifySource(GenericSource):
                 'album_list',
                 'track_list',
             ],
+            kinds=[
+                'person',
+                'media_collection',
+                'media_item',
+            ],
             types=[
                 'artist',
                 'album',
@@ -300,8 +305,15 @@ class SpotifySource(GenericSource):
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
             
         q = query.query_string
         return multipleSource(

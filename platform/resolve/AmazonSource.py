@@ -343,6 +343,11 @@ class AmazonSource(GenericSource):
                 'images',
                 #Consider for album_list, track_list
             ],
+            kinds=[
+                'media_collection',
+                'media_item',
+                'software',
+            ],
             types=[
                 'album',
                 'track',
@@ -459,17 +464,34 @@ class AmazonSource(GenericSource):
         })
     
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
         
         q = query.query_string
+
+        sources = []
+
+        if query.types is None or query.isType('album'):
+            sources.append(lambda : self.albumSource(query_string=q))
+        if query.types is None or query.isType('book'):
+            sources.append(lambda : self.bookSource(query_string=q))
+        if query.types is None or query.isType('track'):
+            sources.append(lambda : self.trackSource(query_string=q))
+        if query.types is None or query.isType('video_game'):
+            sources.append(lambda : self.videoGameSource(query_string=q))
+
+        if len(sources) == 0:
+            return self.emptySource 
+            
         return multipleSource(
-            [
-                lambda : self.videoGameSource(query_string=q), 
-                lambda : self.bookSource(query_string=q), 
-                lambda : self.albumSource(query_string=q), 
-                lambda : self.trackSource(query_string=q), 
-            ],
+            sources,
             constructor=AmazonSearchAll
         )
     

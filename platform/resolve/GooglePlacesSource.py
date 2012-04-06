@@ -215,7 +215,7 @@ class GooglePlacesSource(GenericSource):
                 'site',
                 'neighborhood',
             ],
-            types=[
+            kinds=[
                 'place',
             ]
         )
@@ -252,9 +252,12 @@ class GooglePlacesSource(GenericSource):
         
         return self.generatorSource(gen())
 
-    def searchAllSource(self, query, timeout=None, types=None):
-        if types is not None and len(self.types.intersection(types)) == 0:
+    def searchAllSource(self, query, timeout=None):
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
         
         def gen():
             try:

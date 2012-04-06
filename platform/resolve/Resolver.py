@@ -541,7 +541,7 @@ def formatResults(results, reverse=True, verbose=True):
             
             r = result[1]
             s = "\n%3d) %s (%s) from %s { score=%f, key=%s }" % \
-                (n - i, r.name, r.kind, r.source, scores['total'], r.key)
+                (n - i, r.name, r.target.kind, r.source, scores['total'], r.key)
             
             l.append(s)
     
@@ -620,8 +620,8 @@ class ResolverProxy(object):
         return self.target.image
 
     @property
-    def date(self):
-        return self.target.date
+    def release_date(self):
+        return self.target.release_date
 
     @property 
     def subcategory(self):
@@ -860,13 +860,13 @@ class Resolver(object):
                 ('name',            lambda q, m, s, o: self.movieComparison(q.name, m.name)),
                 ('cast',            lambda q, m, s, o: self.castComparison(q, m, o)),
                 ('directors',       lambda q, m, s, o: self.directorsComparison(q, m, o)),
-                ('date',            lambda q, m, s, o: self.dateComparison(q.date, m.date)),
+                ('date',            lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
             ])
 
             weights['name']         = lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=8.0)
             weights['cast']         = lambda q, m, s, o: self.__castWeight(q, m)
             weights['directors']    = lambda q, m, s, o: self.__directorsWeight(q, m)
-            weights['date']         = lambda q, m, s, o: self.__dateWeight(q.date, m.date, exact_boost=4)
+            weights['date']         = lambda q, m, s, o: self.__dateWeight(q.release_date, m.release_date, exact_boost=4)
 
 
         self.genericCheck(tests, weights, results, query, match, options, order)
@@ -1606,7 +1606,7 @@ class Resolver(object):
             factor = 1
         
         try:
-            diff = (datetime.utcnow() - match.date).days
+            diff = (datetime.utcnow() - match.release_date).days
             if diff <= 90 and diff > -60:
                 return factor
         except:
@@ -1619,7 +1619,7 @@ class Resolver(object):
             boost *= 3
         
         try:
-            diff = (datetime.utcnow() - match.date).days
+            diff = (datetime.utcnow() - match.release_date).days
             
             if diff <= 90 and diff > -60:
                 return boost

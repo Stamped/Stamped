@@ -171,8 +171,8 @@ class FactualSource(GenericSource):
                 'opentable_nickname',
                 'opentable',
             ],
-            types=[
-                'place'
+            kinds=[
+                'place',
             ]
         )
         self.__address_fields = {
@@ -229,8 +229,11 @@ class FactualSource(GenericSource):
 
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
             
         def gen():
             try:

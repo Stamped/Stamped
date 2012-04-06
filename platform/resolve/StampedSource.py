@@ -327,10 +327,6 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 
 class StampedSource(GenericSource):
     """
@@ -459,6 +455,9 @@ class StampedSource(GenericSource):
         raise ValueError('Unrecognized entity %s (%s)' % (entity['title'], entity))
 
     def matchSource(self, query):
+        if query.kind == 'search':
+            return self.searchAllSource(query)
+
         if query.kind == 'person':
             return self.artistSource(query)
         if query.kind == 'place':
@@ -479,25 +478,7 @@ class StampedSource(GenericSource):
             if query.isType('app'):
                 raise NotImplementedError
 
-        ### TODO: SEARCH ALL SOURCE
-        print 'FAIL'
         return self.emptySource
-
-        ### TODO: Finish this list
-        # elif query.type == 'album':
-        #     return self.albumSource(query)
-        # elif query.type == 'track':
-        #     return self.trackSource(query)
-        # elif query.type == 'movie':
-        #     return self.movieSource(query)
-        # elif query.type == 'book':
-        #     return self.bookSource(query)
-        # elif query.type == 'place':
-        #     return self.placeSource(query)
-        if query.type == 'search_all':
-            return self.searchAllSource(query)
-        else:
-            return self.emptySource
 
     def trackSource(self, query):
         def query_gen():

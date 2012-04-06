@@ -176,8 +176,11 @@ class TMDBSource(GenericSource):
                 'genre',
                 'imdb',
             ],
+            kinds=[
+                'media_item',
+            ],
             types=[
-                'movie'
+                'movie',
             ]
         )
         self.__max_cast = 6
@@ -225,8 +228,15 @@ class TMDBSource(GenericSource):
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
             
         def gen():
             try:    

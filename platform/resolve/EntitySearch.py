@@ -45,7 +45,7 @@ try:
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
     from time                       import time
-    from Entity                     import subcategories, deriveTypesFromSubcategories
+    from Entity                     import subcategories, deriveTypesFromSubcategories, deriveKindFromSubcategory
 except:
     report()
     raise
@@ -190,9 +190,6 @@ class EntitySearch(object):
         total = 0
         
         for name, result in results:
-            # TODO: Check song (subcategory) vs track (query.types)
-            # TODO: Merge subcategory, entity.types, entity.kind, query.types, and wrapper.type. Blargh.
-
             if query.kinds is None or result[1].target.kind in query.kinds:
                 if query.types is None or len(query.types.intersection(result[1].target.types)) > 0:
                     source_results = all_results.setdefault(name,[])
@@ -283,19 +280,8 @@ class EntitySearch(object):
                        offset       = 0, 
                        limit        = 10):
         results = []
-        types   = None
         
-        if subcategory is not None:
-            kinds = set(deriveKindFromSubcategory(subcategory))
-            types = set(deriveTypesFromSubcategories([subcategory]))
-            print kinds, sets
-        elif category is not None:
-            types = set()
-            for s, c in subcategories.iteritems():
-                if category == c:
-                    t = set(deriveTypesFromSubcategories([s]))
-                    for i in t:
-                        types.add(i)
+        kinds, types = _convertCategorySubcategory(category, subcategory)
         
         try:
             if coords.lat is not None and coords.lng is not None:
@@ -311,6 +297,7 @@ class EntitySearch(object):
                               local     = local, 
                               offset    = offset, 
                               limit     = limit, 
+                              kinds     = kinds,
                               types     = types)
         
         for item in search:
@@ -324,6 +311,31 @@ class EntitySearch(object):
             results.append(entity)
         
         return results
+
+def _convertCategorySubcategory(category, subcategory):
+    kinds   = None
+    types   = None
+
+    if subcategory is not None:
+        kinds = set([deriveKindFromSubcategory(subcategory)])
+        types = set(deriveTypesFromSubcategories([subcategory]))
+
+    elif category is not None:
+        kinds = set()
+        types = set()
+        for s, c in subcategories.iteritems():
+            if category == c:
+                kinds.add(deriveKindFromSubcategory(s))
+                t = set(deriveTypesFromSubcategories([s]))
+                for i in t:
+                    types.add(i)
+
+    logs.debug('KINDS: %s' % kinds)
+    logs.debug('TYPES: %s' % types)
+
+    return kinds, types
+
+
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -380,21 +392,8 @@ def parseCommandLine():
     if options.verbose is not None:
         global _verbose
         _verbose = options.verbose
-    
-    types = None
-    if options.subcategory is not None:
-        if options.subcategory == 'song':
-            options.subcategory = 'track'
-        types = set(options.subcategory)
-    elif options.category is not None:
-        types = set()
-        for s, c in subcategories.iteritems():
-            if options.category == c:
-                if s == 'song':
-                    s = 'track'
-                types.add(s)
-    
-    options.types = types
+
+    options.kinds, options.types = _convertCategorySubcategory(options.category, options.subcategory)
     
     return (options, args)
 
@@ -407,6 +406,7 @@ def main():
                               full      = not options.quick, 
                               local     = options.Local, 
                               offset    = options.offset, 
+                              kinds     = options.kinds,
                               types     = options.types,
                               limit     = options.limit)
     
