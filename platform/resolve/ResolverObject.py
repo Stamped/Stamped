@@ -13,15 +13,6 @@ __all__ = [
     'ResolverMediaItem',
     'ResolverSoftware',
     'ResolverSearchAll',
-    # 'ResolverArtist',
-    # 'ResolverAlbum',
-    # 'ResolverTrack',
-    # 'ResolverPlace',
-    # 'ResolverMovie',
-    # 'ResolverBook',
-    # 'ResolverTVShow',
-    # 'ResolverApp',
-    # 'ResolverVideoGame',
 ]
 
 import Globals
