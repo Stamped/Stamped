@@ -332,3 +332,13 @@ class MongoStampedAPI(StampedAPI):
         
         return stats
 
+__globalMongoStampedAPI = None
+
+def globalMongoStampedAPI()
+    global __globalMongoStampedAPI
+    
+    if __globalMongoStampedAPI is None:
+        __globalMongoStampedAPI = MongoStampedAPI()
+    
+    return __globalMongoStampedAPI
+

@@ -309,15 +309,14 @@ class EntityPlace(_EntityObject, ResolverPlace):
             return ''
 
 
-class EntityApp(_EntityObject, ResolverMediaItem):
+class EntityApp(_EntityObject, ResolverSoftware):
     """
     Entity app proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
         ResolverSoftware.__init__(self, types=entity.types)
-        raise NotImplementedError
-
+    
     ### TODO: Finish creating this
 
 
@@ -329,12 +328,9 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 
 
 class StampedSource(GenericSource):
-    """
-    """
     def __init__(self, stamped_api = None):
-        GenericSource.__init__(self, 'stamped',
-            groups=['tombstone']
-        )
+        GenericSource.__init__(self, 'stamped', groups=['tombstone'])
+        
         self._stamped_api = stamped_api
     
     @property 
@@ -344,8 +340,8 @@ class StampedSource(GenericSource):
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
-            from MongoStampedAPI import MongoStampedAPI
-            self._stamped_api = MongoStampedAPI()
+            import MongoStampedAPI
+            self._stamped_api = MongoStampedAPI.globalMongoStampedAPI()
         
         return self._stamped_api._entityDB
     
@@ -453,7 +449,7 @@ class StampedSource(GenericSource):
                 return self.appFromEntity(entity)
 
         raise ValueError('Unrecognized entity %s (%s)' % (entity['title'], entity))
-
+    
     def matchSource(self, query):
         if query.kind == 'search':
             return self.searchAllSource(query)

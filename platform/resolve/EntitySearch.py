@@ -306,7 +306,7 @@ class EntitySearch(object):
             if source not in self._sources_map:
                 source = 'stamped'
             
-            entity = self._sources_map[source].buildEntityFromWrapper(item[1].target)
+            entity = self._sources_map[source].buildEntityFromEntityProxy(item[1].target)
             #entity.types = [ item[1].target.subtype ]
             results.append(entity)
         
@@ -334,8 +334,6 @@ def _convertCategorySubcategory(category, subcategory):
     logs.debug('TYPES: %s' % types)
 
     return kinds, types
-
-
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
