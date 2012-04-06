@@ -167,8 +167,8 @@ class RdioSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'rdio', 
             groups=[
-                'album_list',
-                'track_list',
+                'albums',
+                'tracks',
             ],
             kinds=[
                 'person',

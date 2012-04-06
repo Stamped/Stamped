@@ -160,14 +160,13 @@ class GenericSource(BasicSource):
                 report()
                 logs.info('Album import failure: %s for artist %s' % (album, artist))
 
-    def __repopulateSongs(self, entity, artist, controller, decorations=None):
+    def __repopulateTracks(self, entity, artist, controller, decorations=None):
         if decorations is None:
             decorations = {}
         for track in artist.tracks:
             try:
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
-                entityMini.types.append('song')
                 entityMini.types.append('track')
                 if 'key' in track:
                     entityMini.sources['%s_id' % artist.source] = track['key']
@@ -274,7 +273,7 @@ class GenericSource(BasicSource):
                 self.__repopulateAlbums(entity, proxy, controller, decorations) 
 
             if controller.shouldEnrich('track_list', self.sourceName, entity):
-                self.__repopulateSongs(entity, proxy, controller, decorations)
+                self.__repopulateTracks(entity, proxy, controller, decorations)
         
         ### Media
         if entity.kind in set(['media_collection', 'media_item']):
@@ -343,7 +342,7 @@ class GenericSource(BasicSource):
         ### Media Collection
         if entity.kind == 'media_collection':
             if proxy.isType('album') and controller.shouldEnrich('tracks', self.sourceName, entity):
-                self.__repopulateSongs(entity, proxy, controller)
+                self.__repopulateTracks(entity, proxy, controller)
         
         ### Media Item
         if entity.kind == 'media_item':

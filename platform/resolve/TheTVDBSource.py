@@ -140,7 +140,7 @@ class TheTVDBSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'thetvdb', 
             groups=[
-                'genre',
+                'genres',
                 'desc',
                 'cast', 
                 'imdb', 

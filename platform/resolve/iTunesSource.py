@@ -545,10 +545,10 @@ class iTunesSource(GenericSource):
         GenericSource.__init__(self, 'itunes',
             groups=[
                 'mpaa_rating',
-                'genre',
+                'genres',
                 'desc',
-                'album_list',
-                'track_list',
+                'albums',
+                'tracks',
             ],
             kinds=[
                 'person',

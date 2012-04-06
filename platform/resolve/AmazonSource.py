@@ -327,14 +327,13 @@ class AmazonSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
             groups=[
-                'artist_display_name',
-                'genre',
-                'track_length',
-                'album_name',
+                'artists',
+                'genres',
+                'length',
+                'albums',
                 'release_date',
-                'author',
-                'publisher',
-                'num_pages',
+                'authors',
+                'publishers',
                 'isbn',
                 'desc',
                 'sku_number',
@@ -489,7 +488,7 @@ class AmazonSource(GenericSource):
 
         if len(sources) == 0:
             return self.emptySource 
-            
+
         return multipleSource(
             sources,
             constructor=AmazonSearchAll

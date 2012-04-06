@@ -26,7 +26,6 @@ __all__ = [
     'setComparison',
     'sortedResults',
     'formatResults',
-    'typeToSubcategory',
 ]
 
 import Globals
@@ -130,7 +129,7 @@ _negative_weights = {
 _prefix_delimeters = set([ ':', '-', ';' ])
 punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
 
-_subcategory_weights = {
+_types_weights = {
     # --------------------------
     #           food
     # --------------------------
@@ -159,7 +158,6 @@ _subcategory_weights = {
     # --------------------------
     'artist'            : 56, 
     'album'             : 45, 
-    'song'              : 25, 
     'track'             : 25, 
     
     # --------------------------
@@ -547,22 +545,6 @@ def formatResults(results, reverse=True, verbose=True):
     
     return utils.normalize('\n'.join(l), strict=True)
 
-def typeToSubcategory(t):
-    m = {
-        'track':'song',
-        'album':'album',
-        'artist':'artist',
-        'book':'book',
-        'movie':'movie',
-        'tv':'tv',
-        'app':'app', 
-        'video_game':'video_game', 
-    }
-    if t in m:
-        return m[t]
-    else:
-        return None
-
 
 class ResolverProxy(object):
 
@@ -622,10 +604,6 @@ class ResolverProxy(object):
     @property
     def release_date(self):
         return self.target.release_date
-
-    @property 
-    def subcategory(self):
-        return self.target.subcategory
 
 
 ##
@@ -959,7 +937,7 @@ class Resolver(object):
             ('query_string',        self.__queryStringTest),
             ('name',                self.__nameTest),
             ('location',            self.__locationTest),
-            ('subcategory',         self.__subcategoryTest), 
+            ('classification',      self.__classificationTest), 
             ('priority',            lambda q, m, s, o: m.priority), 
             ('popularity',          self.__popularityTest), 
             ('recency',             self.__recencyTest),
@@ -972,7 +950,7 @@ class Resolver(object):
             'query_string':         lambda q, m, s, o: 0, 
             'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=50.0), 
             'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
-            'subcategory':          lambda q, m, s, o: 1, 
+            'classification':       lambda q, m, s, o: 1, 
             'priority':             lambda q, m, s, o: 1, 
             'popularity':           self.__popularityWeight, 
             'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
@@ -1291,11 +1269,11 @@ class Resolver(object):
         
         return max(0, min(1000.0, weight))
     
-    def __subcategoryTest(self, query, match, similarities, options):
+    def __classificationTest(self, query, match, similarities, options):
         try:
             weight = 0.0
             for i in match.types:
-                weight = max(weight, _subcategory_weights[i])
+                weight = max(weight, _types_weights[i])
             return weight / 100.0
         except Exception:
             return 0.0
@@ -1658,6 +1636,7 @@ def demo(generic_source, default_title):
     db = api._entityDB
     query = {'titlel':title.lower()}
     if subcategory is not None:
+        raise NotImplementedError
         query['subcategory'] = subcategory
     else:
         query = {

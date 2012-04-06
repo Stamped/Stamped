@@ -39,7 +39,6 @@ class FormatSource(BasicSource):
                 'release_date',
                 'mangled_title',
                 'coordinates',
-                'subcategory',
             ]
         )
 
@@ -52,9 +51,8 @@ class FormatSource(BasicSource):
         return globalFactual()
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        subcategory = entity.subcategory
-        if subcategory == 'other' and entity.kind == 'place':
-            if entity['lat'] != None and entity['lng'] != None and entity['gid'] != None:
+        if entity.kind == 'place' and len(entity.types) == 0:
+            if entity['lat'] is not None and entity['lng'] is not None and entity['googleplaces_id'] is not None:
                 factual_id = self.__factual.factual_from_entity(entity)
                 if factual_id is not None:
                     data = self.__factual.place(factual_id)
@@ -70,9 +68,14 @@ class FormatSource(BasicSource):
                         category = data['category']
                         for prefix, subcategory in prefixes:
                             if category.startswith(prefix):
-                                entity['subcategory'] = subcategory
-                                entity['category'] = 'food'
+                                entity['types'].add(subcategory)
                                 break
+
+        if entity.kind == 'place':
+            if entity.lat is None and (entity.formatted_address is not None or entity.address_country is not None):
+                latLng = self.__geocoder.addressToLatLng(entity.formatted_address)
+                if latLng is not None:
+                    entity['coordinates'] = {'lat':latLng[0],'lng':latLng[1]}
 
         # if subcategory == 'artist':
         #     entity['mangled_title'] = artistSimplify(entity['title'])
@@ -84,11 +87,7 @@ class FormatSource(BasicSource):
         #     entity['mangled_title'] = movieSimplify(entity['title'])
         # else:
         #     entity['mangled_title'] = simplify(entity['title'])
-        if entity.kind == 'place':
-            if entity.lat is None and (entity.formatted_address is not None or entity.address_country is not None):
-                latLng = self.__geocoder.addressToLatLng(entity.formatted_address)
-                if latLng is not None:
-                    entity['coordinates'] = {'lat':latLng[0],'lng':latLng[1]}
+        
         # if controller.shouldEnrich('release_date', self.sourceName, entity):
         #     if 'original_release_date' in entity:
         #         date = entity['original_release_date']

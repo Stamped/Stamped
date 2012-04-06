@@ -169,11 +169,11 @@ class TMDBSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'tmdb',
             groups=[
-                'director',
+                'directors',
                 'cast',
                 'desc',
                 'short_description',
-                'genre',
+                'genres',
                 'imdb',
             ],
             kinds=[
