@@ -365,6 +365,7 @@ class GenericSource(BasicSource):
         return self.sourceName
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        proxy = None
         if controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
@@ -376,13 +377,15 @@ class GenericSource(BasicSource):
                         entity[self.idField] = best[1].key
                         if self.urlField is not None and best[1].url is not None:
                             entity[self.urlField] = best[1].url
+                            proxy = best[1]
             except ValueError:
                 pass
         
         source_id = entity[self.idField]
         if source_id is not None:
             try:
-                proxy = self.entityProxyFromKey(source_id)
+                if proxy is None:
+                    proxy = self.entityProxyFromKey(source_id)
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e

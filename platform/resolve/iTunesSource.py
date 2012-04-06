@@ -157,7 +157,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            results = self.itunes.method('lookup', id=self.key,entity='song')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='song')['results']
         return [
             {
                 'name':             track['trackName'],
@@ -236,7 +236,7 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverMediaItem.__init__(self, types=['track', 'song'])
+        ResolverMediaItem.__init__(self, types=['track'])
 
     @lazyProperty
     def name(self):
@@ -612,38 +612,6 @@ class iTunesSource(GenericSource):
         entity.itunes_id = proxy.key
         return True
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        itunes_id = entity['itunes_id']
-        if itunes_id != None:
-            obj = None
-
-            if entity.kind == 'person':
-                if entity.isType('artist'):
-                    obj = iTunesArtist(itunes_id)
-
-            if entity.kind == 'media_collection':
-                if entity.isType('album'):
-                    obj = iTunesAlbum(itunes_id)
-                if entity.isType('tv'):
-                    obj = iTunesTVShow(itunes_id)
-
-            if entity.kind == 'media_item':
-                if entity.isType('track') or query.isType('song'):
-                    obj = iTunesTrack(itunes_id)
-                if entity.isType('movie'):
-                    obj = iTunesMovie(itunes_id)
-                if entity.isType('book'):
-                    obj = iTunesBook(itunes_id)
-
-            if entity.kind == 'software':
-                if entity.isType('app'):
-                    obj = iTunesApp(itunes_id)
-
-            if obj is not None:
-                self.enrichEntityWithEntityProxy(obj, entity, controller, decorations, timestamps)
-        return True
-
     def matchSource(self, query):
         if query.kind == 'person':
             if query.isType('artist'):
@@ -656,7 +624,7 @@ class iTunesSource(GenericSource):
                 return self.tvSource(query)
 
         if query.kind == 'media_item':
-            if query.isType('track') or query.isType('song'):
+            if query.isType('track'):
                 return self.trackSource(query)
             if query.isType('movie'):
                 return self.movieSource(query)

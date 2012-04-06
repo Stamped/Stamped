@@ -39,7 +39,10 @@ class BasicSource(AExternalSource):
 
     @property
     def groups(self):
-        return set(self.__groups)
+        try:
+            return set(self.__groups)
+        except:
+            return set()
 
     @property
     def kinds(self):

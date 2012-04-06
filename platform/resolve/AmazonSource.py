@@ -592,19 +592,6 @@ class AmazonSource(GenericSource):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.amazon_id = proxy.key
         return True
-    
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        if entity['amazon_id'] is not None:
-            asin = entity['amazon_id']
-            
-            if entity.isType('track'):
-                self.__enrichSong(entity, asin)
-            elif entity.isType('book'):
-                self.__enrichBook(entity, asin)
-            elif entity.isType('video_game'):
-                self.__enrichVideoGame(entity, asin)
-        
-        return True
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")

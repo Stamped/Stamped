@@ -2889,7 +2889,7 @@ class StampedAPI(AStampedAPI):
         entity_id = stamped.resolve_fast(source, source_id)
         
         if entity_id is None:
-            proxy = source.proxyFromKey(source_id)
+            proxy = source.entityProxyFromKey(source_id)
             results = stamped.resolve(proxy)
             
             if len(results) > 0 and results[0][0]['resolved']:

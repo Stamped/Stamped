@@ -28,9 +28,9 @@ class FullResolveContainer(BasicSourceContainer):
         BasicSourceContainer.__init__(self)
 
         for group in allGroups:
-            self.addGroup(group)
+            self.addGroup(group())
         for source in allSources:
-            self.addSource(source)
+            self.addSource(source())
         
         self.setGlobalPriority('seed',seedPriority)
         self.setGlobalPriority('entity',-1)
