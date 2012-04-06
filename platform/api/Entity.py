@@ -222,6 +222,8 @@ def deriveKindFromSubcategory(subcategory):
     }
     if subcategory in mapping:
         return mapping[subcategory]
+    if subcategory == 'song':
+        return 'media_item'
     return 'other'
 
 def deriveTypesFromSubcategories(subcategories):
