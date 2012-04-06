@@ -35,10 +35,11 @@ from logs import report
 try:
     import utils, re, string
     import logs, sys, math
+    import unicodedata
+    
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
     from pprint                     import pprint, pformat
-    from Entity                     import getSimplifiedTitle
     from gevent.pool                import Pool
     from abc                        import ABCMeta, abstractmethod, abstractproperty
     from libs.LibUtils              import parseDateString
@@ -71,6 +72,7 @@ _general_regex_removals = [
     (re.compile(r".*(').*")         , [1]),
     (re.compile(r'.*(").*')         , [1]),
     (re.compile(r'^(the ).*$')      , [1]),
+    (re.compile(r'.*\w(-)\w.*$')    , [1], ' '),
 ]
 
 #generally applicable replacements
@@ -139,7 +141,7 @@ _subcategory_weights = {
     'market'            : 60, 
     'food'              : 70, 
     'night_club'        : 75, 
-    'place'             : 55, 
+    'place'             : 54, 
     
     # --------------------------
     #           book
@@ -155,7 +157,7 @@ _subcategory_weights = {
     # --------------------------
     #           music
     # --------------------------
-    'artist'            : 55, 
+    'artist'            : 56, 
     'album'             : 45, 
     'song'              : 25, 
     'track'             : 25, 
@@ -213,18 +215,31 @@ def regexRemoval(string, patterns):
     modified = True
     while modified:
         modified = False
-        for pattern, groups in patterns:
+        
+        for case in patterns:
+            replacement = ''
+            
+            if len(case) == 2:
+                pattern, groups = case
+            else:
+                assert len(case) == 3
+                pattern, groups, replacement = case
+            
             while True:
                 match = pattern.match(string)
+                
                 if match is None:
                     break
                 else:
                     for group in groups:
-                        string2 = string.replace(match.group(group),'')
+                        string2 = string.replace(match.group(group), replacement)
+                        
                         if _very_verbose:
                             print('Replaced %s with %s' % (string, string2))
-                        string = string2
+                        
+                        string   = string2
                         modified = True
+    
     return string
 
 def format(string):
@@ -238,10 +253,13 @@ def format(string):
     """
     modified = True
     li = [ '\t' , '\n', '\r', '  ', ]
+    
     while modified:
         modified = False
+        
         for ch in li:
             string2 = string.replace(ch, ' ')
+            
             if string2 != string:
                 modified = True
                 string = string2
@@ -258,8 +276,9 @@ def simplify(string):
     
     Multipass safe and partially optimized
     """
-    string = getSimplifiedTitle(string)
-    string = format(string)
+    
+    string = unicodedata.normalize('NFKD', unicode(string)).encode('ascii', 'ignore')
+    string = format(string.lower().strip())
     string = regexRemoval(string, _general_regex_removals)
     
     for find, replacement in _general_replacements:
@@ -544,6 +563,7 @@ def typeToSubcategory(t):
     else:
         return None
 
+
 class ResolverProxy(object):
 
     def __init__(self, target):
@@ -567,7 +587,7 @@ class ResolverProxy(object):
 
     def __repr__(self):
         try:
-            return "ResolverProxy:%s" % str(self.target)
+            return "ResolverProxy:%s\n%s" % (str(self.target), str(self.target.keywords))
         except:
             return "ResolverProxy"
 
@@ -634,10 +654,12 @@ class Resolver(object):
     
     def setComparison(self, a, b, options):
         score = setComparison(a, b, options['symmetric'])
+        
         if options['negative'] and not options['symmetric']:
             for word, weight in _negative_weights.iteritems():
                 if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
                     score = score * (1.0 - abs(weight))
+        
         return score
     
     def termComparison(self, query, terms, options):
@@ -1444,7 +1466,18 @@ class Resolver(object):
         else:
             query_keywords = set(query.query_string.split())
         
-        return self.setComparison(query_keywords, set(match.keywords), options)
+        """
+        if match.subtype == 'artist' and match.name.lower() == 'red hot chili peppers':
+            utils.log()
+            utils.log("DEBUG: %s (%s)" % (query_keywords, match.subtype))
+            utils.log(query.keywords)
+            utils.log(match.keywords)
+            utils.log()
+        """
+        
+        ret = setComparison(query_keywords, set(match.keywords), symmetric=False)
+        
+        return ret
     
     def __keywordsWeight(self, query, match, similarities, options):
         if len(query.keywords) > 0:

@@ -53,11 +53,11 @@ class PlaceSearchTests(ASearchTestSuite):
                                        types='place', 
                                        index=0), 
             ]), 
-            ({ 'query' : 'paddy\'s irish pub', 'coords' : (35.042481, -78.928133) }, [ 
-                SearchResultConstraint(title='paddy\'s irish pub', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
+            #({ 'query' : 'paddy\'s irish', 'coords' : (35.042481, -78.928133) }, [ 
+            #    SearchResultConstraint(title='paddy\'s irish pub', 
+            #                           types='place', 
+            #                           index=0), 
+            #]), 
             ({ 'query' : 'le poisson rouge', 'coords' : (40.734466, -73.990742) }, [ 
                 SearchResultConstraint(title='le poisson rouge', 
                                        types='place', 

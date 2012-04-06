@@ -42,7 +42,8 @@ class _SpotifyObject(object):
     def __init__(self, spotify_id, spotify=None):
         if spotify is None:
             spotify = globalSpotify()
-        self.__spotify = spotify
+        
+        self.__spotify    = spotify
         self.__spotify_id = spotify_id
 
     @property
@@ -58,6 +59,8 @@ class _SpotifyObject(object):
         return "spotify"
 
     def __repr__(self):
+        # NOTE: availability generally includes *many* ISO country codes which 
+        # make sifting through debug printouts painful, so disable them here.
         data = copy(self.data)
         data.pop('availability', None)
         return "<%s %s %s> %s" % (self.source, self.types, self.name, pformat(data))
@@ -154,12 +157,8 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
     @lazyProperty
     def tracks(self):
         track_list = self.data['tracks']
-        return [
-            {
-                'name':track['name'],
-            }
-                for track in track_list
-        ]
+        
+        return [ { 'name' : track['name'], } for track in track_list ]
 
 
 class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
@@ -233,16 +232,19 @@ class SpotifySource(GenericSource):
     def entityProxyFromKey(self, key, type=None):
         try:
             item = self.__spotify.lookup(key)
+            
             if item['info']['type'] == 'artist':
                 return SpotifyArtist(key)
             if item['info']['type'] == 'album':
                 return SpotifyAlbum(key)
             if item['info']['type'] == 'track':
                 return SpotifyTrack(key)
+            
             raise KeyError
         except KeyError:
             logs.warning('Unable to find Spotify item for key: %s' % key)
             raise
+        
         return None
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
@@ -269,6 +271,7 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         tracks = self.__spotify.search('track',q=q)['tracks']
         return listSource(tracks, constructor=lambda x: SpotifyTrack( x['href'] ))
     
@@ -279,6 +282,7 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         albums = self.__spotify.search('album',q=q)['albums']
         albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
         return listSource(albums, constructor=lambda x: SpotifyAlbum( x['href'] ))
@@ -291,6 +295,7 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         artists = self.__spotify.search('artist',q=q)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 

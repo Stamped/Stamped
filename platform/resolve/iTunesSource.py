@@ -724,31 +724,32 @@ class iTunesSource(GenericSource):
 
         def gen():
             try:
-                mapper = {
-                    'book'      : 'ebook',
-                    'track'     : 'song',
-                    'album'     : 'album',
-                    'artist'    : 'musicArtist',
-                    'movie'     : 'movie',
-                    'tv'        : 'tvShow',
-                    'app'       : 'software',
-                }
+                mapper = [
+                    ('track',   'song'), 
+                    ('album',   'album'), 
+                    ('artist',  'musicArtist'), 
+                    ('app',     'software'), 
+                    ('book',    'ebook'), 
+                    ('movie',   'movie'), 
+                    ('tv',      'tvShow'), 
+                ]
                 
                 if query.types is None:
-                    queries = mapper.values()
+                    queries = [v[1] for v in mapper]
                 else:
                     queries = []
                     for t in query.types:
-                        if t in mapper:
-                            queries.append(mapper[t])
+                        for t2 in mapper:
+                            if t == t2[0]:
+                                queries.append(t2[1])
                 
                 if len(queries) == 0:
-                    return 
+                    return
                 
                 raw_results = []
                 def helper(q):
                     raw_results.append(self.__itunes.method(
-                        'search',term=query.query_string,entity=q
+                        'search', term=query.query_string, entity=q
                     )['results'])
                 
                 pool = Pool(len(queries))

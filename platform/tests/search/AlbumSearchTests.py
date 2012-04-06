@@ -129,8 +129,7 @@ class AlbumSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'Tuskegee Lionel Richie', }, [ 
                 SearchResultConstraint(title='tuskegee', 
-                                       types='album', 
-                                       index=0), 
+                                       types='album'), 
             ]), 
             ({ 'query' : 'Tuskegee by Lionel Richie', }, [ 
                 SearchResultConstraint(title='tuskegee', 
