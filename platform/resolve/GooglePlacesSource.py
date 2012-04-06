@@ -111,9 +111,10 @@ class GooglePlacesPlace(ResolverPlace):
             return None
     
     @lazyProperty
-    def address_string(self):
+    def formatted_address(self):
         if 'address_string' in self.data:
             return self.data['address_string']
+        return None
     
     @lazyProperty
     def address(self):

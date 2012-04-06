@@ -315,6 +315,7 @@ class GenresGroup(AKindTypeGroup):
 
     def __init__(self):
         AKindTypeGroup.__init__(self, 'genres')
+        self.addKind('person')
         self.addKind('media_collection')
         self.addKind('media_item')
         self.addKind('software')
