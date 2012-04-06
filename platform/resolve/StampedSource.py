@@ -59,12 +59,12 @@ class _EntityObject(object):
         except Exception:
             return ''
 
-    @lazyProperty
-    def types(self):
-        try:
-            return [ str(i) for i in self.entity.types ]
-        except:
-            return []
+    # @lazyProperty
+    # def types(self):
+    #     try:
+    #         return [ str(i) for i in self.entity.types ]
+    #     except:
+    #         return []
 
     @property 
     def source(self):
@@ -83,71 +83,71 @@ class _EntityObject(object):
 
 class EntityArtist(_EntityObject, ResolverPerson):
     """
-    Entity artist wrapper
+    Entity artist proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverPerson.__init__(self)
+        ResolverPerson.__init__(self, types=entity.types)
 
     @lazyProperty
     def albums(self):
         try:
-            return [ {'name' : album['title'] } for album in self.entity['albums'] ]
+            return [ { 'name' : item['title'] } for item in self.entity['albums'] ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ {'name' : track['title'] } for track in self.entity['tracks'] ]
+            return [ { 'name' : item['title'] } for item in self.entity['tracks'] ]
         except Exception:
             return []
 
 
 class EntityAlbum(_EntityObject, ResolverMediaCollection):
     """
-    Entity album wrapper
+    Entity album proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverMediaCollection.__init__(self)
+        ResolverMediaCollection.__init__(self, types=entity.types)
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         try:
-            return { 'name' : self.entity['artists'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['artists'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ {'name' : track['title'] } for track in self.entity['tracks'] ]
+            return [ { 'name' : item['title'] } for item in self.entity['tracks'] ]
         except Exception:
             return []
 
 
 class EntityTrack(_EntityObject, ResolverMediaItem):
     """
-    Entity track wrapper
+    Entity track proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverMediaItem.__init__(self)
+        ResolverMediaItem.__init__(self, types=entity.types)
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         try:
-            return { 'name' : self.entity['artists'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['artists'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
     @lazyProperty
-    def album(self):
+    def albums(self):
         try:
-            return { 'name' : self.entity['collections'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['collections'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
     @lazyProperty
     def length(self):
@@ -159,32 +159,69 @@ class EntityTrack(_EntityObject, ResolverMediaItem):
 
 class EntityMovie(_EntityObject, ResolverMediaItem):
     """
-    Entity movie wrapper
+    Entity movie proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverMediaItem.__init__(self)
+        ResolverMediaItem.__init__(self, types=entity.types)
 
     @lazyProperty 
     def cast(self):
         try:
-            return [ {'name' : item['title'] } for item in self.entity['cast'] ]
+            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
         except Exception:
             return []
 
     @lazyProperty 
-    def director(self):
+    def directors(self):
         try:
-            return { 'name' : self.entity['directors'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['directors'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
     @lazyProperty 
-    def date(self):
+    def release_date(self):
         try:
             return self.entity['release_date']
         except Exception:
             return None
+
+    @lazyProperty 
+    def length(self):
+        try:
+            return int(self.entity['length'])
+        except Exception:
+            return -1
+
+    @lazyProperty 
+    def mpaa_rating(self):
+        try:
+            return self.entity['mpaa_rating']
+        except Exception:
+            return None
+
+
+class EntityTV(_EntityObject, ResolverMediaItem):
+    """
+    Entity tv proxy
+    """
+    def __init__(self, entity):
+        _EntityObject.__init__(self, entity)
+        ResolverMediaCollection.__init__(self, types=entity.types)
+
+    @lazyProperty 
+    def cast(self):
+        try:
+            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+        except Exception:
+            return []
+
+    @lazyProperty 
+    def directors(self):
+        try:
+            return [ { 'name' : item['title'] } for item in self.entity['directors'] ]
+        except Exception:
+            return []
 
     @lazyProperty 
     def length(self):
@@ -203,28 +240,28 @@ class EntityMovie(_EntityObject, ResolverMediaItem):
 
 class EntityBook(_EntityObject, ResolverMediaItem):
     """
-    Entity book wrapper
+    Entity book proxy
     """
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverMediaItem.__init__(self)
+        ResolverMediaItem.__init__(self, types=entity.types)
 
-    @lazyProperty
-    def author(self):
+    @lazyProperty 
+    def authors(self):
         try:
-            return { 'name' : self.entity['authors'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['authors'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
-    @lazyProperty
-    def publisher(self):
+    @lazyProperty 
+    def publishers(self):
         try:
-            return { 'name' : self.entity['publishers'][0]['title'] }
+            return [ { 'name' : item['title'] } for item in self.entity['publishers'] ]
         except Exception:
-            return { 'name' : '' }
+            return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             return self.entity['release_date']
         except Exception:
@@ -244,15 +281,11 @@ class EntityBook(_EntityObject, ResolverMediaItem):
         except:
             return ''
 
-    @lazyProperty
-    def eisbn(self):
-        return None
-
 class EntityPlace(_EntityObject, ResolverPlace):
 
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
-        ResolverPlace.__init__(self)
+        ResolverPlace.__init__(self, types=entity.types)
 
     @lazyProperty
     def coordinates(self):
@@ -274,6 +307,18 @@ class EntityPlace(_EntityObject, ResolverPlace):
             return self.entity.formatAddress()
         except Exception:
             return ''
+
+
+class EntityApp(_EntityObject, ResolverMediaItem):
+    """
+    Entity app proxy
+    """
+    def __init__(self, entity):
+        _EntityObject.__init__(self, entity)
+        ResolverSoftware.__init__(self, types=entity.types)
+        raise NotImplementedError
+
+    ### TODO: Finish creating this
 
 
 class EntitySearchAll(ResolverProxy, ResolverSearchAll):
@@ -356,6 +401,18 @@ class StampedSource(GenericSource):
         """
         return EntityMovie(entity)
 
+    def tvFromEntity(self, entity):
+        """
+        ResolverMovie factory method for entities.
+
+        This method may or may not return a simple EntityTrack or
+        it could return a different implementation of ResolverTrack.
+        This method should be used optimistically with the hope that
+        should an entity be deficient in some way, StampedSource may be
+        able to safely enrich it.
+        """
+        return EntityTV(entity)
+
     def bookFromEntity(self, entity):
         """
         """
@@ -364,45 +421,80 @@ class StampedSource(GenericSource):
     def placeFromEntity(self, entity):
         return EntityPlace(entity)
 
-    def wrapperFromEntity(self, entity):
+    def appFromEntity(self, entity):
+        return EntityApp(entity)
+
+    def proxyFromEntity(self, entity):
         """
         Generic ResolverObject factory method for entities.
 
         This method will create a type specific ResolverObject
         based on the type of the given entity.
         """
-        sub = entity.subcategory
-        if sub == 'song':
-            return self.trackFromEntity(entity)
-        elif sub == 'album':
-            return self.albumFromEntity(entity)
-        elif sub == 'artist':
-            return self.artistFromEntity(entity)
-        elif sub == 'movie':
-            return self.movieFromEntity(entity)
-        elif sub == 'book':
-            return self.bookFromEntity(entity)
-        elif sub in set(['restaurant','bar','bakery','cafe','market','food','nightclub']):
+        if entity.kind == 'person':
+            if entity.isType('artist'):
+                return self.artistFromEntity(entity)
+
+        if entity.kind == 'place':
             return self.placeFromEntity(entity)
-        else:
-            raise ValueError('Unrecognized subcategory %s for %s' % (sub, entity['title']))
+
+        if entity.kind == 'media_collection':
+            if entity.isType('album'):
+                return self.albumFromEntity(entity)
+            if entity.isType('tv'):
+                return self.tvFromEntity(entity)
+
+        if entity.kind == 'media_item':
+            if entity.isType('track') or entity.isType('song'):
+                return self.trackFromEntity(entity)
+            if entity.isType('movie'):
+                return self.movieFromEntity(entity)
+            if entity.isType('book'):
+                return self.bookFromEntity(entity)
+
+        if entity.kind == 'software':
+            if entity.isType('app'):
+                return self.appFromEntity(entity)
+
+        raise ValueError('Unrecognized entity %s (%s)' % (entity['title'], entity))
 
     def matchSource(self, query):
         if query.kind == 'person':
             return self.artistSource(query)
+        if query.kind == 'place':
+            return self.placeSource(query)
+        if query.kind == 'media_collection':
+            if query.isType('album'):
+                return self.albumSource(query)
+            if query.isType('tv'):
+                raise NotImplementedError
+        if query.kind == 'media_item':
+            if query.isType('track'):
+                return self.trackSource(query)
+            if query.isType('movie'):
+                return self.movieSource(query)
+            if query.isType('book'):
+                return self.bookSource(query)
+        if query.kind == 'software':
+            if query.isType('app'):
+                raise NotImplementedError
+
+        ### TODO: SEARCH ALL SOURCE
+        print 'FAIL'
+        return self.emptySource
 
         ### TODO: Finish this list
-        elif query.type == 'album':
-            return self.albumSource(query)
-        elif query.type == 'track':
-            return self.trackSource(query)
-        elif query.type == 'movie':
-            return self.movieSource(query)
-        elif query.type == 'book':
-            return self.bookSource(query)
-        elif query.type == 'place':
-            return self.placeSource(query)
-        elif query.type == 'search_all':
+        # elif query.type == 'album':
+        #     return self.albumSource(query)
+        # elif query.type == 'track':
+        #     return self.trackSource(query)
+        # elif query.type == 'movie':
+        #     return self.movieSource(query)
+        # elif query.type == 'book':
+        #     return self.bookSource(query)
+        # elif query.type == 'place':
+        #     return self.placeSource(query)
+        if query.type == 'search_all':
             return self.searchAllSource(query)
         else:
             return self.emptySource
@@ -411,22 +503,34 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    '$and': [
-                        {'titlel' : query.name.lower()},
-                        {'$or': [
-                            {'subcategory': 'song'},
-                            {'types': 'song'}
-                        ]}
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'song',
+                }
+                yield {
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'song',
+                }
+                yield {
+                    '$or': [
+                        { 'collections': {'$elemMatch':{ 'title': album['name'] } } }
+                            for album in query.albums[20:]
                     ],
-                }
-                yield {
-                    'mangled_title' : trackSimplify( query.name ),
-                }
-                yield {
-                    'details.media.artist_display_title' : query.artist['name'],
+                    'types'         : 'song',
                 }
                 yield {
                     'details.song.album.name': query.album['name'],
+                    'subcategory'   : 'song',
+                }
+                yield {
+                    '$or': [
+                        { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
+                            for artist in query.artists[20:]
+                    ],
+                    'types'         : 'song',
+                }
+                yield {
+                    'details.media.artist_display_title' : query.artist['name'],
+                    'subcategory'   : 'song',
                 }
             except GeneratorExit:
                 pass
@@ -436,23 +540,41 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'titlel' : query.name.lower(),
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'album',
                 }
                 yield {
-                    'mangled_title' : albumSimplify( query.name ),
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'album',
+                }
+                yield {
+                    '$or': [
+                        { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
+                            for artist in query.artists[20:]
+                    ],
+                    'types'         : 'album',
                 }
                 yield {
                     'details.media.artist_display_title' : query.artist['name'],
+                    'subcategory'   : 'album',
                 } 
+                yield {
+                    '$or': [
+                        { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
+                            for track in query.tracks[20:]
+                    ],
+                    'types'         : 'album',
+                }
                 yield {
                     '$or': [
                         { 'details.album.tracks': track['name'] }
                             for track in query.tracks
-                    ]
+                    ],
+                    'subcategory'   : 'album',
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, subcategory='album')
+        return self.__querySource(query_gen(), query)
 
     def artistSource(self, query):
         def query_gen():
@@ -465,9 +587,6 @@ class StampedSource(GenericSource):
                     'titlel'        : query.name.lower(),
                     'subcategory'   : 'artist',
                 }
-                # yield {
-                #     'mangled_title' : artistSimplify( query.name ),
-                # }
                 yield {
                     '$or': [
                         { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
@@ -504,49 +623,71 @@ class StampedSource(GenericSource):
         def query_gen():
             try:
                 yield {
-                    'titlel' : query.name.lower(),
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'movie',
                 }
                 yield {
-                    'mangled_title' : movieSimplify( query.name ),
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'movie',
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, subcategory='movie')
+        return self.__querySource(query_gen(), query)
+
+    def tvSource(self, query):
+        def query_gen():
+            try:
+                yield {
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'tv',
+                }
+                yield {
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'tv',
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), query)
 
     def bookSource(self, query):
         def query_gen():
             try:
                 yield {
-                    'titlel' : query.name.lower(),
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'book',
                 }
                 yield {
-                    'mangled_title' : bookSimplify( query.name ),
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'book',
+                }
+                yield {
+                    '$or': [
+                        { 'authors': {'$elemMatch':{ 'title': author['name'] } } }
+                            for author in query.authors[20:]
+                    ],
+                    'types'         : 'book',
                 }
                 yield {
                     'details.book.author' : query.author['name'],
+                    'subcategory'   : 'book',
                 }
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, subcategory='book')
+        return self.__querySource(query_gen(), query)
 
     def placeSource(self, query):
         def query_gen():
             try:
-                or_clause = [
-                    {'subcategory' : 'bar'},
-                    {'subcategory' : 'restaurant'},
-                ]
                 yield {
-                    'titlel' : query.name.lower(),
-                    '$or' : or_clause,
+                    'titlel'        : query.name.lower(),
+                    'kind'          : 'place',
                 }
                 yield {
-                    'mangled_title' : bookSimplify( query.name ),
-                    '$or' : or_clause,
-                }
-                yield {
-                    'details.book.author' : query.author['name'],
-                    '$or' : or_clause,
+                    'titlel'        : query.name.lower(),
+                    '$or' : [
+                        {'subcategory' : 'bar'},
+                        {'subcategory' : 'restaurant'},
+                    ],
                 }
             except GeneratorExit:
                 pass
@@ -632,7 +773,7 @@ class StampedSource(GenericSource):
                 """
             except GeneratorExit:
                 pass
-        return self.__querySource(query_gen(), query, constructor_wrapper=EntitySearchAll)
+        return self.__querySource(query_gen(), query, constructor_proxy=EntitySearchAll)
     
     """
     def enrichEntity(self, entity, controller, decorations, timestamps):
@@ -666,7 +807,7 @@ class StampedSource(GenericSource):
         logs.info(str(mongo_query))
         return list(self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000 ).sort('_id',pymongo.ASCENDING))
 
-    def __querySource(self, query_gen, query_obj, constructor_wrapper=None, **kwargs):
+    def __querySource(self, query_gen, query_obj, constructor_proxy=None, **kwargs):
         def gen():
             try:
                 id_set = set()
@@ -696,14 +837,14 @@ class StampedSource(GenericSource):
         generator = gen()
         
         def constructor(entity_id):
-            return self.wrapperFromEntity(
+            return self.proxyFromEntity(
                 self.__entityDB.getEntity(
                     self.__entityDB._getStringFromObjectId(entity_id)
                 )
             )
         
-        if constructor_wrapper is not None:
-            return self.generatorSource(generator, lambda x: constructor_wrapper(constructor(x)), unique=True, tolerant=True)
+        if constructor_proxy is not None:
+            return self.generatorSource(generator, lambda x: constructor_proxy(constructor(x)), unique=True, tolerant=True)
         else:
             return self.generatorSource(generator, constructor=constructor, unique=True, tolerant=True)
     

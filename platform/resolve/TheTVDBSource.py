@@ -16,6 +16,7 @@ from logs import report
 try:
     import logs, utils
     from Resolver                   import *
+    from ResolverObject             import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
@@ -36,7 +37,7 @@ class _TheTVDBObject(object):
     Attributes:
     
     data    - the type-specific thetvdb data for the entity
-    thetvdb - an instance of TheTVDB (API wrapper)
+    thetvdb - an instance of TheTVDB (API proxy)
     """
     
     def __init__(self, data=None, thetvdb_id=None, thetvdb=None, extras=''):
@@ -77,14 +78,14 @@ class _TheTVDBObject(object):
     def __repr__(self):
         return pformat( self.data.value )
 
-class TheTVDBShow(_TheTVDBObject, ResolverTVShow):
+class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     """
-        TheTVDB show wrapper
+        TheTVDB show proxy
     """
     
     def __init__(self, data=None, thetvdb_id=None, thetvdb=None):
         _TheTVDBObject.__init__(self, data=data, thetvdb_id=thetvdb_id, thetvdb=thetvdb)
-        ResolverTVShow.__init__(self)
+        ResolverMediaCollection.__init__(self, types=['tv'])
     
     @lazyProperty
     def key(self):
@@ -94,10 +95,11 @@ class TheTVDBShow(_TheTVDBObject, ResolverTVShow):
     def cast(self):
         if self.data.cast is not None:
             return map(lambda x: { 'name' : x['title'] }, self.data.cast)
+        return []
     
     @lazyProperty
-    def director(self):
-        return { 'name':'' }
+    def directors(self):
+        return []
     
     @lazyProperty
     def date(self):
@@ -125,10 +127,6 @@ class TheTVDBShow(_TheTVDBObject, ResolverTVShow):
         except Exception:
             return ''
     
-    @property
-    def subcategory(self):
-        return 'tv'
-
 class TheTVDBSearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, data):
@@ -136,10 +134,6 @@ class TheTVDBSearchAll(ResolverProxy, ResolverSearchAll):
         
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
-    
-    @property
-    def subtype(self):
-        return self.target.type
 
 class TheTVDBSource(GenericSource):
     
@@ -161,7 +155,7 @@ class TheTVDBSource(GenericSource):
     def __thetvdb(self):
         return globalTheTVDB()
     
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             if key.startswith('t'):
                 return TheTVDBTrack(rdio_id=key)
@@ -171,26 +165,27 @@ class TheTVDBSource(GenericSource):
                 return TheTVDBArtist(rdio_id=key)
             raise KeyError
         except KeyError:
-            logs.warning('UNABLE TO FIND RDIO ITEM FOR ID: %s' % key)
+            logs.warning('Unable to find TVDB item for key: %s' % key)
             raise
         
         return None
     
-    def wrapperFromData(self, data):
+    def entityProxyFromData(self, data):
         return TheTVDBSource(data=data)
     
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.thetvdb_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.thetvdb_id = proxy.key
         return True
     
     def matchSource(self, query):
-        if query.type == 'tv':
-            return self.tvSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+
+        if query.isType('tv'):
+            return self.tvSource(query)
+        
+        return self.emptySource
     
     def tvSource(self, query):
         return self.generatorSource(self.__queryGen(query=query.name), 

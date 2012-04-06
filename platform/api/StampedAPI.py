@@ -43,13 +43,13 @@ try:
     #resolve classes
     from resolve.EntitySource   import EntitySource
     from resolve                import FullResolveContainer
-    # from AmazonSource           import AmazonSource
-    # from FactualSource          import FactualSource
-    # from GooglePlacesSource     import GooglePlacesSource
+    from AmazonSource           import AmazonSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
     from iTunesSource           import iTunesSource
-    # from RdioSource             import RdioSource
-    # from SpotifySource          import SpotifySource
-    # from TMDBSource             import TMDBSource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
+    from TMDBSource             import TMDBSource
     from StampedSource          import StampedSource
 except:
     report()
@@ -2889,15 +2889,15 @@ class StampedAPI(AStampedAPI):
         entity_id = stamped.resolve_fast(source, source_id)
         
         if entity_id is None:
-            wrapper = source.wrapperFromKey(source_id)
-            results = stamped.resolve(wrapper)
+            proxy = source.proxyFromKey(source_id)
+            results = stamped.resolve(proxy)
             
             if len(results) > 0 and results[0][0]['resolved']:
                 # source key was found in the Stamped DB
                 entity_id = results[0][1].key
                 
         if entity_id is None:
-            entity = source.buildEntityFromWrapper(wrapper)
+            entity = source.buildEntityFromEntityProxy(proxy)
             
             entity = self._entityDB.addEntity(entity)
             entity_id = entity.entity_id
@@ -3003,7 +3003,7 @@ class StampedAPI(AStampedAPI):
                 source      = None
                 source_id   = None
                 entity_id   = None
-                wrapper     = None
+                proxy       = None
 
                 # Enrich track
                 if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
@@ -3018,8 +3018,8 @@ class StampedAPI(AStampedAPI):
                                 entity_id = stamped.resolve_fast(source, source_id)
                                 if entity_id is None:
                                     # Attempt to resolve against the Stamped DB (full)
-                                    wrapper = source.wrapperFromKey(source_id)
-                                    results = stamped.resolve(wrapper)
+                                    proxy = source.entityProxyFromKey(source_id)
+                                    results = stamped.resolve(proxy)
                                     if len(results) > 0 and results[0][0]['resolved']:
                                         entity_id = results[0][1].key
                                 break
@@ -3027,8 +3027,8 @@ class StampedAPI(AStampedAPI):
                             pass
                 if entity_id is not None:
                     track = self.getEntity({'entity_id': entity_id})
-                elif source_id is not None and wrapper is not None:
-                    track = source.buildEntityFromWrapper(wrapper)
+                elif source_id is not None and proxy is not None:
+                    track = source.buildEntityFromEntityProxy(proxy)
                 else:
                     print 'Unable to enrich track'
                     track_list.append(stub)

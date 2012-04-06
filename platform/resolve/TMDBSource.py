@@ -14,17 +14,17 @@ import Globals
 from logs import report
 
 try:
+    import re, logs
+    from Resolver                   import *
+    from ResolverObject             import *
     from libs.TMDB                  import globalTMDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
-    import logs
     from urllib2                    import HTTPError
     from datetime                   import datetime
-    from Resolver                   import *
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
-    import re
 except:
     report()
     raise
@@ -38,7 +38,7 @@ class _TMDBObject(object):
 
     Attributes:
 
-    tmdb - an instance of TMDB (API wrapper)
+    tmdb - an instance of TMDB (API proxy)
     info (abstract) - the type-specific TMDB data for the object
     """
     def __init__(self, tmdb_id):
@@ -66,13 +66,13 @@ class _TMDBObject(object):
         return pformat( self.info )
 
 
-class TMDBMovie(_TMDBObject, ResolverMovie):
+class TMDBMovie(_TMDBObject, ResolverMediaItem):
     """
-    TMDB movie wrapper
+    TMDB movie proxy
     """
     def __init__(self, tmdb_id):
         _TMDBObject.__init__(self, tmdb_id)
-        ResolverMovie.__init__(self)        
+        ResolverMediaItem.__init__(self, types=['movie'])
 
     @property
     def valid(self):
@@ -87,7 +87,7 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
         return self.tmdb.movie_info(self.key)
 
     @lazyProperty
-    def castsRaw(self):
+    def _castsRaw(self):
         return self.tmdb.movie_casts(self.key)
 
     @lazyProperty
@@ -114,26 +114,26 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
                 'source':self.source,
                 'key':entry['id'],
             }
-                for entry in self.castsRaw['cast']
+                for entry in self._castsRaw['cast']
         ]
 
     @lazyProperty
-    def director(self):
+    def directors(self):
         try:
-            crew = self.castsRaw['crew']
+            crew = self._castsRaw['crew']
             for entry in crew:
                 if entry['job'] == 'Director':
-                    return {
+                    return [{
                         'name': entry['name'],
                         'source': self.source,
                         'key': entry['id'],
-                    }
+                    }]
         except Exception:
             pass
-        return { 'name':'' }
+        return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             string = self.info['release_date']
             return parseDateString(string)
@@ -163,10 +163,6 @@ class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 class TMDBSource(GenericSource):
     """
     """
@@ -190,25 +186,25 @@ class TMDBSource(GenericSource):
     def __tmdb(self):
         return globalTMDB()
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             return TMDBMovie(key)
         except KeyError:
-            logs.warning('UNABLE TO FIND TMDB ITEM FOR ID: %s' % key)
+            logs.warning('Unable to find TMDB item for key: %s' % key)
             raise
         return None
 
     def matchSource(self, query):
-        if query.type == 'movie':
+        if query.isType('movie'):
             return self.movieSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        
+        return self.emptySource
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.tmdb_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.tmdb_id = proxy.key
         return True
 
     def movieSource(self, query):

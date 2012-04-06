@@ -16,6 +16,7 @@ from logs import report
 try:
     import logs
     from Resolver                   import *
+    from ResolverObject             import *
     from libs.Rdio                  import Rdio, globalRdio
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
@@ -36,7 +37,7 @@ class _RdioObject(object):
     Attributes:
 
     data - the type-specific rdio data for the entity
-    rdio - an instance of Rdio (API wrapper)
+    rdio - an instance of Rdio (API proxy)
     """
 
     def __init__(self, data=None, rdio_id=None, rdio=None, extras=''):
@@ -83,13 +84,13 @@ class _RdioObject(object):
         return pformat( self.data )
 
 
-class RdioArtist(_RdioObject, ResolverArtist):
+class RdioArtist(_RdioObject, ResolverPerson):
     """
-    Rdio artist wrapper
+    Rdio artist proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')  
-        ResolverArtist.__init__(self)
+        ResolverPerson.__init__(self, types=['artist'])
 
     @lazyProperty
     def albums(self):
@@ -101,17 +102,20 @@ class RdioArtist(_RdioObject, ResolverArtist):
         track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
         return [ {'name':entry['name']} for entry in track_list ]
 
-class RdioAlbum(_RdioObject, ResolverAlbum):
+class RdioAlbum(_RdioObject, ResolverMediaCollection):
     """
-    Rdio album wrapper
+    Rdio album proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self, types=['album'])
 
     @lazyProperty
-    def artist(self):
-        return { 'name' : self.data['artist'] }
+    def artists(self):
+        try:
+            return [ { 'name' : self.data['artist'] } ]
+        except Exception:
+            return []
 
     @lazyProperty
     def tracks(self):
@@ -120,21 +124,21 @@ class RdioAlbum(_RdioObject, ResolverAlbum):
         return [ {'name':entry['name']} for k, entry in track_dict.items() ]
 
 
-class RdioTrack(_RdioObject, ResolverTrack):
+class RdioTrack(_RdioObject, ResolverMediaItem):
     """
-    Rdio track wrapper
+    Rdio track proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self, types=['track'])
 
     @lazyProperty
-    def artist(self):
-        return {'name':self.data['artist']}
+    def artists(self):
+        return [ { 'name':self.data['artist'] } ]
 
     @lazyProperty
-    def album(self):
-        return {'name':self.data['album']}
+    def albums(self):
+        return [ { 'name':self.data['album'] } ]
 
     @lazyProperty
     def length(self):
@@ -157,10 +161,6 @@ class RdioSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 class RdioSource(GenericSource):
     """
     """
@@ -181,7 +181,7 @@ class RdioSource(GenericSource):
     def __rdio(self):
         return globalRdio()
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             if key.startswith('t'):
                 return RdioTrack(rdio_id=key)
@@ -191,11 +191,11 @@ class RdioSource(GenericSource):
                 return RdioArtist(rdio_id=key)
             raise KeyError
         except KeyError:
-            logs.warning('UNABLE TO FIND RDIO ITEM FOR ID: %s' % key)
+            logs.warning('Unable to find rdio item for key: %s' % key)
             raise
         return None
 
-    def wrapperFromData(self, data):
+    def entityProxyFromData(self, data):
         if data['type'] == 'r':
             return RdioArtist(data=data)
         elif data['type'] == 'a':
@@ -205,22 +205,22 @@ class RdioSource(GenericSource):
         else:
             return None
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.rdio_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.rdio_id = proxy.key
         return True
     
     def matchSource(self, query):
-        if query.type == 'artist':
+        if query.isType('artist'):
             return self.artistSource(query)
-        elif query.type == 'album':
+        if query.isType('album'):
             return self.albumSource(query)
-        elif query.type == 'track':
+        if query.isType('track'):
             return self.trackSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        
+        return self.emptySource
 
     def trackSource(self, query):
         return self.generatorSource(self.__queryGen(

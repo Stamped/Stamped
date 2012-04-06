@@ -11,15 +11,15 @@ from logs import report
 try:
     from BasicFieldGroup        import BasicFieldGroup
     from SeedSource             import SeedSource
-    # from FactualSource          import FactualSource
-    # from GooglePlacesSource     import GooglePlacesSource
-    # from SinglePlatformSource   import SinglePlatformSource
-    # from TMDBSource             import TMDBSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
+    from SinglePlatformSource   import SinglePlatformSource
+    from TMDBSource             import TMDBSource
     from FormatSource           import FormatSource
-    # from RdioSource             import RdioSource
-    # from SpotifySource          import SpotifySource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
     from iTunesSource           import iTunesSource
-    # from AmazonSource           import AmazonSource
+    from AmazonSource           import AmazonSource
     from StampedSource          import StampedSource
 except:
     report()
@@ -512,13 +512,13 @@ allGroups = [
 allSources = [
     SeedSource,
     FormatSource,
-    # FactualSource,
-    # GooglePlacesSource,
-    # SinglePlatformSource,
-    # AmazonSource,
-    # TMDBSource,
-    # RdioSource,
-    # SpotifySource,
+    FactualSource,
+    GooglePlacesSource,
+    SinglePlatformSource,
+    AmazonSource,
+    TMDBSource,
+    RdioSource,
+    SpotifySource,
     iTunesSource,
     StampedSource,
 ]

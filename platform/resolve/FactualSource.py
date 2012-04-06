@@ -14,18 +14,17 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource      import GenericSource
-    from libs.Factual       import globalFactual
-    from Resolver           import *
-    from utils              import lazyProperty
-    from functools          import partial
-    import json
-    import logs
-    import re
-    from urllib2            import HTTPError
-    from GenericSource      import generatorSource
-    from pprint             import pformat
-    from gevent.pool        import Pool
+    import json, re, logs
+    from GenericSource              import GenericSource
+    from libs.Factual               import globalFactual
+    from Resolver                   import *
+    from ResolverObject             import *
+    from utils                      import lazyProperty
+    from functools                  import partial
+    from urllib2                    import HTTPError
+    from GenericSource              import generatorSource
+    from pprint                     import pformat
+    from gevent.pool                import Pool
 except:
     report()
     raise
@@ -115,7 +114,7 @@ class FactualPlace(ResolverPlace):
             return None
 
     @lazyProperty
-    def subcategory(self):
+    def types(self):
         arts = {
             'Bars': 'bar',
             'Night Clubs': 'night_club',
@@ -131,14 +130,14 @@ class FactualPlace(ResolverPlace):
             if c[0] == 'Food & Beverage':
                 if c[1] in food:
                     return food[c[1]]
-                return 'restaurant'
+                return ['restaurant']
 
             elif c[0] == 'Arts, Entertainment & Nightlife':
                 if c[1] in arts:
-                    return arts[c[1]]
+                    return [arts[c[1]]]
         except Exception:
             pass
-        return 'other'
+        return []
 
     @property 
     def source(self):
@@ -154,14 +153,10 @@ class FactualSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 
 class FactualSource(GenericSource):
     """
-    Data-Source wrapper for Factual services.
+    Data-Source proxy for Factual services.
     """
     def __init__(self):
         GenericSource.__init__(self, 'factual',
@@ -200,18 +195,19 @@ class FactualSource(GenericSource):
     def __factual(self):
         return globalFactual()
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.factual_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.factual_id = proxy.key
         return True
 
     def matchSource(self, query):
-        if query.type == 'place':
-            return self.placeSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        
+        if query.kind == 'place':
+            return self.placeSource(query)
+        
+        return self.emptySource
 
     def placeSource(self, query):
         def gen():
@@ -223,7 +219,7 @@ class FactualSource(GenericSource):
                 pass
         return generatorSource(gen())
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             data = self.__factual.data(key)
             return FactualPlace(factual_id=key, data=data)

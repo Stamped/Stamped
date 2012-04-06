@@ -179,28 +179,28 @@ class GenericSource(BasicSource):
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
     
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key, type=None):
         raise NotImplementedError
     
-    def buildEntityFromEntityProxy(self, entityProxy, controller=None, decorations=None, timestamps=None):
-        if entityProxy.kind == 'place':
+    def buildEntityFromEntityProxy(self, proxy, controller=None, decorations=None, timestamps=None):
+        if proxy.kind == 'place':
             entity = PlaceEntity()
-        elif entityProxy.kind == 'person':
+        elif proxy.kind == 'person':
             entity = PersonEntity()
-        elif entityProxy.kind == 'media_collection':
+        elif proxy.kind == 'media_collection':
             entity = MediaCollectionEntity()
-        elif entityProxy.kind == 'media_item':
+        elif proxy.kind == 'media_item':
             entity = MediaItemEntity()
-        elif entityProxy.kind == 'software':
+        elif proxy.kind == 'software':
             entity = SoftwareEntity()
         else:
             entity = BasicEntity()
         
-        self.enrichEntityWithWrapper(entityProxy, entity, controller, decorations, timestamps)
+        self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
         
         return entity
     
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()
         if decorations is None:
@@ -208,44 +208,44 @@ class GenericSource(BasicSource):
         if timestamps is None:
             timestamps = {}
         
-        if wrapper.source == 'stamped':
-            entity.entity_id = wrapper.key 
+        if proxy.source == 'stamped':
+            entity.entity_id = proxy.key 
         else:
-            entity.entity_id = 'T_%s_%s' % (wrapper.source.upper(), wrapper.key)
+            entity.entity_id = 'T_%s_%s' % (proxy.source.upper(), proxy.key)
         
         def setAttribute(source, target):
             try:
-                if wrapper[source] is not None and wrapper[source] != '':
-                    entity[target] = wrapper[source]
+                if proxy[source] is not None and proxy[source] != '':
+                    entity[target] = proxy[source]
             except:
                 pass
         
         ### General
-        entity.title = wrapper.name 
-        if wrapper.description != '':
-            entity.desc = wrapper.description
-        if wrapper.image != '':
+        entity.title = proxy.name 
+        if proxy.description != '':
+            entity.desc = proxy.description
+        if proxy.image != '':
             img = ImageSchema()
-            img.image = wrapper.image
+            img.image = proxy.image
             entity.images.append(img)
         
         setAttribute('phone',   'phone')
         setAttribute('email',   'email')
         setAttribute('url',     'site')
         
-        entity.types = wrapper.types
+        entity.types = proxy.types
 
         
         ### Place
         if entity.kind == 'place':
             try:
-                if wrapper.coordinates is not None:
-                    entity.coordinates.lat = wrapper.coordinates[0]
-                    entity.coordinates.lng = wrapper.coordinates[1]
+                if proxy.coordinates is not None:
+                    entity.coordinates.lat = proxy.coordinates[0]
+                    entity.coordinates.lng = proxy.coordinates[1]
             except:
                 pass
 
-            if len(wrapper.address) > 0:
+            if len(proxy.address) > 0:
                 address_set = set([
                     'street',
                     'street_ext',
@@ -256,8 +256,8 @@ class GenericSource(BasicSource):
                 ])
                 for k in address_set:
                     v = None
-                    if k in wrapper.address:
-                        v = wrapper.address[k]
+                    if k in proxy.address:
+                        v = proxy.address[k]
                     entity['address_%s' % k] = v
 
             setAttribute('address_string', 'formatted_address')
@@ -265,16 +265,16 @@ class GenericSource(BasicSource):
         ### Person
         if entity.kind == 'person':
             try:
-                if len(wrapper.genres) > 0:
-                    entity.genres = wrapper.genres
+                if len(proxy.genres) > 0:
+                    entity.genres = proxy.genres
             except:
                 pass
 
             if controller.shouldEnrich('album_list', self.sourceName, entity):
-                self.__repopulateAlbums(entity, wrapper, controller, decorations) 
+                self.__repopulateAlbums(entity, proxy, controller, decorations) 
 
             if controller.shouldEnrich('track_list', self.sourceName, entity):
-                self.__repopulateSongs(entity, wrapper, controller, decorations)
+                self.__repopulateSongs(entity, proxy, controller, decorations)
         
         ### Media
         if entity.kind in set(['media_collection', 'media_item']):
@@ -282,20 +282,20 @@ class GenericSource(BasicSource):
             setAttribute('date', 'release_date')
 
             try:
-                if wrapper.length > 0:
-                    entity.length = int(wrapper.length)
+                if proxy.length > 0:
+                    entity.length = int(proxy.length)
             except:
                 pass
 
             try:
-                if len(wrapper.genres) > 0:
-                    entity.genres = wrapper.genres
+                if len(proxy.genres) > 0:
+                    entity.genres = proxy.genres
             except:
                 pass
 
             try:
-                if len(wrapper.cast) > 0:
-                    for actor in wrapper.cast:
+                if len(proxy.cast) > 0:
+                    for actor in proxy.cast:
                         entityMini = PersonEntityMini()
                         entityMini.title = actor['name']
                         entity.cast.append(entityMini)
@@ -303,75 +303,75 @@ class GenericSource(BasicSource):
                 pass
 
             try:
-                if wrapper.director['name'] != '':
+                if proxy.director['name'] != '':
                     entityMini = PersonEntityMini()
-                    entityMini.title = wrapper.director['name']
+                    entityMini.title = proxy.director['name']
                     entity.directors.append(entityMini)
             except AttributeError:
                 pass
 
             try:
-                if wrapper.publisher['name'] != '':
+                if proxy.publisher['name'] != '':
                     entityMini = PersonEntityMini()
-                    entityMini.title = wrapper.publisher['name']
+                    entityMini.title = proxy.publisher['name']
                     entity.publishers.append(entityMini)
             except AttributeError:
                 pass
 
             try:
-                if wrapper.author['name'] != '':
+                if proxy.author['name'] != '':
                     entityMini = PersonEntityMini()
-                    entityMini.title = wrapper.author['name']
+                    entityMini.title = proxy.author['name']
                     entity.authors.append(entityMini)
             except AttributeError:
                 pass
 
             try:
-                if wrapper.artist['name'] != '':
+                if proxy.artist['name'] != '':
                     entityMini = PersonEntityMini()
-                    entityMini.title = wrapper.artist['name']
+                    entityMini.title = proxy.artist['name']
                     entityMini.types.append('artist')
-                    if 'key' in wrapper.artist:
-                        entityMini.sources['%s_id' % wrapper.source] = wrapper.artist['key']
-                        entityMini.sources['%s_source' % wrapper.source] = wrapper.source
-                    if 'url' in wrapper.artist:
-                        entityMini.sources['%s_url' % wrapper.source] = wrapper.artist['url']
+                    if 'key' in proxy.artist:
+                        entityMini.sources['%s_id' % proxy.source] = proxy.artist['key']
+                        entityMini.sources['%s_source' % proxy.source] = proxy.source
+                    if 'url' in proxy.artist:
+                        entityMini.sources['%s_url' % proxy.source] = proxy.artist['url']
                     entity.artists.append(entityMini)
             except AttributeError:
                 pass
         
         ### Media Collection
         if entity.kind == 'media_collection':
-            if wrapper.type == 'album' and controller.shouldEnrich('tracks', self.sourceName, entity):
-                self.__repopulateSongs(entity, wrapper, controller)
+            if proxy.isType('album') and controller.shouldEnrich('tracks', self.sourceName, entity):
+                self.__repopulateSongs(entity, proxy, controller)
         
         ### Media Item
         if entity.kind == 'media_item':
             try:
-                if wrapper.album['name'] != '':
+                if proxy.album['name'] != '':
                     entityMini = MediaCollectionEntityMini()
-                    entityMini.title = wrapper.album['name']
+                    entityMini.title = proxy.album['name']
                     entityMini.types.append('album')
-                    if 'key' in wrapper.album:
-                        entityMini.sources['%s_id' % wrapper.source] = wrapper.album['key']
-                        entityMini.sources['%s_source' % wrapper.source] = wrapper.source
-                    if 'url' in wrapper.album:
-                        entityMini.sources['%s_url' % wrapper.source] = wrapper.album['url']
+                    if 'key' in proxy.album:
+                        entityMini.sources['%s_id' % proxy.source] = proxy.album['key']
+                        entityMini.sources['%s_source' % proxy.source] = proxy.source
+                    if 'url' in proxy.album:
+                        entityMini.sources['%s_url' % proxy.source] = proxy.album['url']
                     entity.collections.append(entityMini)
             except AttributeError:
                 pass
 
             try:
-                if wrapper.eisbn is not None:
-                    entity.isbn = wrapper.eisbn
-                elif wrapper.isbn is not None:
-                    entity.isbn = wrapper.isbn
+                if proxy.eisbn is not None:
+                    entity.isbn = proxy.eisbn
+                elif proxy.isbn is not None:
+                    entity.isbn = proxy.isbn
             except AttributeError:
                 pass
 
             try:
-                if wrapper.sku is not None:
-                    entity.sku_number = wrapper.sku
+                if proxy.sku is not None:
+                    entity.sku_number = proxy.sku
             except AttributeError:
                 pass
         
@@ -380,23 +380,23 @@ class GenericSource(BasicSource):
             setAttribute('date', 'release_date')
 
             try:
-                if len(wrapper.genres) > 0:
-                    for genre in wrapper.genres:
+                if len(proxy.genres) > 0:
+                    for genre in proxy.genres:
                         entity.genres.append(genre)
             except:
                 pass
 
             try:
-                if wrapper.publisher['name'] != '':
+                if proxy.publisher['name'] != '':
                     entityMini = PersonEntityMini()
-                    entityMini.title = wrapper.publisher['name']
+                    entityMini.title = proxy.publisher['name']
                     entity.authors.append(entityMini)
             except:
                 pass
 
             try:
-                if len(wrapper.screenshots) > 0:
-                    for screenshot in wrapper.screenshots:
+                if len(proxy.screenshots) > 0:
+                    for screenshot in proxy.screenshots:
                         img = ImageSchema()
                         img.image = screenshot
                         entity.screenshots.append(img)
@@ -418,7 +418,7 @@ class GenericSource(BasicSource):
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
-                query = self.stamped.wrapperFromEntity(entity)
+                query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
                 results = self.resolver.resolve(query, self.matchSource(query))
                 if len(results) != 0:
@@ -433,8 +433,8 @@ class GenericSource(BasicSource):
         source_id = entity[self.idField]
         if source_id is not None:
             try:
-                wrapper = self.wrapperFromKey(source_id)
-                self.enrichEntityWithWrapper(wrapper, entity, controller, decorations, timestamps)
+                proxy = self.entityProxyFromKey(source_id)
+                self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e
         

@@ -61,6 +61,10 @@ class ResolverObject(object):
     ResolverObjects also typically override their string representation methods to
     provide meaningful, human-readable output.
     """
+
+    def __init__(self, types=None):
+        if types is not None:
+            self.__types = set(types)
     
     __metaclass__ = ABCMeta
 
@@ -80,9 +84,12 @@ class ResolverObject(object):
     def kind(self):
         pass
 
-    @abstractproperty
+    @lazyProperty
     def types(self):
-        pass
+        try:
+            return list(str(i) for i in self.__types)
+        except:
+            return []
 
     @lazyProperty
     def keywords(self):
@@ -123,9 +130,9 @@ class ResolverObject(object):
         return None
 
     def isType(self, t):
-    	if t in self.types:
-    		return True
-    	return False
+        if t in self.types:
+            return True
+        return False
 
 
 ### KINDS
@@ -430,6 +437,10 @@ class ResolverSoftware(ResolverObject):
 
 class ResolverSearchAll(ResolverObject):
 
+    @property 
+    def kind(self):
+        return 'search'
+
     @property
     def query_string(self):
         return ''
@@ -437,14 +448,6 @@ class ResolverSearchAll(ResolverObject):
     @property
     def coordinates(self):
         return None
-
-    @property
-    def subtype(self):
-        return None
-
-    @property 
-    def type(self):
-        return 'search_all'
 
 
 # #

@@ -25,6 +25,7 @@ try:
     import libs.worldcities
     
     from Resolver                   import *
+    from ResolverObject             import *
     from GenericSource              import generatorSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
@@ -53,14 +54,14 @@ _verbose = False
 
 class QuerySearchAll(ResolverSearchAll):
     
-    def __init__(self, query_string, coords=None, types=None, local=False):
+    def __init__(self, query_string, coords=None, kinds=None, types=None, local=False):
         ResolverSearchAll.__init__(self)
         
         if local:
-            if types is None: types = set()
-            types.add('place')
+            if kinds is None: kinds = set()
+            kinds.add('place')
         else:
-            if types and 'place' not in types:
+            if kinds and 'place' not in kinds:
                 # if we're filtering by category / subcategory and the filtered results 
                 # couldn't possibly contain a location, then ensure that coords are 
                 # disabled
@@ -71,8 +72,8 @@ class QuerySearchAll(ResolverSearchAll):
                 
                 if result is not None:
                     new_query_string, coords, region_name = result
-                    if types is None: types = set()
-                    types.add('place')
+                    if kinds is None: kinds = set()
+                    kinds.add('place')
                     
                     logs.info("[search] using region %s at %s (parsed from '%s')" % 
                               (region_name, coords, query_string))
@@ -80,6 +81,7 @@ class QuerySearchAll(ResolverSearchAll):
         
         self.__query_string = query_string
         self.__coordinates  = coords
+        self.__kinds        = kinds
         self.__types        = types
         self.__local        = local
     
@@ -94,6 +96,10 @@ class QuerySearchAll(ResolverSearchAll):
     @property
     def keywords(self):
         return self.query_string.split()
+    
+    @property
+    def kinds(self):
+        return self.__kinds
     
     @property
     def types(self):
@@ -158,12 +164,13 @@ class EntitySearch(object):
                coords   = None, 
                full     = True, 
                local    = False, 
+               kinds    = None,
                types    = None, 
                offset   = 0, 
                limit    = 10):
         
         before  = time()
-        query   = QuerySearchAll(query, coords, types, local)
+        query   = QuerySearchAll(query, coords, kinds, types, local)
         pool    = Pool(len(self._sources))
         results = []
         timeout = 6
@@ -185,13 +192,18 @@ class EntitySearch(object):
         for name, result in results:
             # TODO: Check song (subcategory) vs track (query.types)
             # TODO: Merge subcategory, entity.types, entity.kind, query.types, and wrapper.type. Blargh.
-            if query.types is None or result[1].subcategory in query.types:
-                source_results = all_results.setdefault(name,[])
-                source_results.append(result)
-                total += 1
+
+            if query.kinds is None or result[1].target.kind in query.kinds:
+                if query.types is None or len(query.types.intersection(result[1].target.types)) > 0:
+                    source_results = all_results.setdefault(name,[])
+                    source_results.append(result)
+                    total += 1
+                else:
+                    logs.info("Filtered out %s (types=%s)" % 
+                              (result[1].name, result[1].target.types))
             else:
-                logs.info("Filtered out %s (subcategory=%s, type=%s)" % 
-                          (result[1].name, result[1].subcategory, result[1].subtype))
+                logs.info("Filtered out %s (kind=%s)" % 
+                          (result[1].name, result[1].target.kind))
         
         logs.info("")
         
@@ -233,7 +245,7 @@ class EntitySearch(object):
                 def dedup():
                     for entry in chosen:
                         target = entry[1].target
-                        if target.type == cur.target.type:
+                        if target.types == cur.target.types:
                             yield target
                 
                 dups = self.__resolver.resolve(cur.target, generatorSource(dedup()), count=1)
@@ -275,7 +287,9 @@ class EntitySearch(object):
         types   = None
         
         if subcategory is not None:
+            kinds = set(deriveKindFromSubcategory(subcategory))
             types = set(deriveTypesFromSubcategories([subcategory]))
+            print kinds, sets
         elif category is not None:
             types = set()
             for s, c in subcategories.iteritems():

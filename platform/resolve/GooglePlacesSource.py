@@ -14,16 +14,17 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource          import GenericSource
-    from GooglePlaces           import GooglePlaces
-    from Resolver               import *
-    from utils                  import lazyProperty
-    from gevent.pool            import Pool
-    from datetime               import datetime
-    from functools              import partial
-    from LibUtils               import states
-    from pprint                 import pformat
     import logs
+    from GenericSource              import GenericSource
+    from GooglePlaces               import GooglePlaces
+    from Resolver                   import *
+    from ResolverObject             import *
+    from utils                      import lazyProperty
+    from gevent.pool                import Pool
+    from datetime                   import datetime
+    from functools                  import partial
+    from LibUtils                   import states
+    from pprint                     import pformat
 except:
     report()
     raise
@@ -177,10 +178,10 @@ class GooglePlacesPlace(ResolverPlace):
             return None
 
     @lazyProperty
-    def subcategory(self):
-        if 'subcategory' in self.data:
-            return self.data['subcategory']
-        return 'other'
+    def types(self):
+        if 'type' in self.data:
+            return [ self.data['type'] ]
+        return []
 
     @property 
     def source(self):
@@ -196,14 +197,10 @@ class GooglePlacesSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 
 class GooglePlacesSource(GenericSource):
     """
-    Data-Source wrapper for Google Places.
+    Data-Source proxy for Google Places.
     """
     def __init__(self):
         GenericSource.__init__(self, 'googleplaces',
@@ -270,9 +267,7 @@ class GooglePlacesSource(GenericSource):
                         data['latitude'] = result.lat
                         data['longitude'] = result.lng
                         data['address_string'] = result.neighborhood
-                        
-                        # TODO: TYPE
-                        data['subcategory'] = result.subcategory
+                        data['type'] = result.subcategory
                         raw_results.append(data)
 
                 def getGoogleNationalSearch(q):
@@ -300,7 +295,7 @@ class GooglePlacesSource(GenericSource):
                 pass
         return self.generatorSource(gen())
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             item = self.__places.getPlaceDetails(key)
             return GooglePlacesPlace(item)
