@@ -286,7 +286,7 @@ class GenericSource(BasicSource):
 
             for director in proxy.directors:
                 entityMini = PersonEntityMini()
-                entityMini.title = proxy.director['name']
+                entityMini.title = director['name']
                 entity.directors.append(entityMini)
 
             for publisher in proxy.publishers:
