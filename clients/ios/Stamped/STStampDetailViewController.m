@@ -23,27 +23,36 @@
 #import "STStampedActions.h"
 #import "STActionManager.h"
 #import "StampDetailHeaderView.h"
+#import "STStampDetailHeaderView.h"
 #import "STActionManager.h"
 #import "STStampedActions.h"
 #import "STStampedAPI.h"
+#import "STStampDetailCommentsView.h"
+#import "STToolbarView.h"
+#import "STLikeButton.h"
+#import "STTodoButton.h"
+#import "STStampButton.h"
 
-@interface STStampDetailViewController () <StampDetailHeaderViewDelegate>
 
-@property (nonatomic, retain) Stamp* stamp;
+@interface STStampDetailViewController () <StampDetailHeaderViewDelegate, UIActionSheetDelegate, UITextFieldDelegate>
+
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
+- (void)_deleteStampButtonPressed:(id)caller;
 
-@property (nonatomic, readonly, retain) StampDetailHeaderView* headerView;
+@property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
+@property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
 
 @end
 
 @implementation STStampDetailViewController
 
 @synthesize headerView = _headerView;
-
+@synthesize commentsView = _commentsView;
 @synthesize stamp = _stamp;
 
-- (id)initWithStamp:(Stamp*)stamp {
+- (id)initWithStamp:(id<STStamp>)stamp {
   self = [super init];
   if (self) {
     _stamp = [stamp retain];
@@ -54,35 +63,36 @@
 - (void)loadView {
   [super loadView];
   
-  UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:_stamp.entityObject.title]
+  UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:self.stamp.entity.title]
                                                                   style:UIBarButtonItemStyleBordered
                                                                  target:nil
                                                                  action:nil] autorelease];
   [[self navigationItem] setBackBarButtonItem:backButton];
   
-  STSynchronousWrapper* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:self.scrollView completion:^(STSynchronousWrapper* aWrapper) {
-    [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entityObject.entityID andCallback:^(id<STEntityDetail> detail) {
-      STSynchronousWrapper* eDetail = [STSynchronousWrapper wrapperForEntityDetail:detail withFrame:CGRectMake(0, 0, 320, 200) andStyle:@"StampDetail" delegate:aWrapper];
-      [aWrapper appendChildView:eDetail];
-    }];
-  } factoryBlock:^(STViewCreatorCallback creator) {
-    [Util executeOnMainThread:^{
-      creator(^(id<STViewDelegate> del){
-        _headerView = [[StampDetailHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 68)];
-        _headerView.stamp = self.stamp;
-        _headerView.delegate = self;
-        return _headerView;
-      });
-    }];
-  } andFrame:CGRectMake(0, 0, 320, 100)];
-  //_headerView.backgroundColor = [UIColor redColor];
-  [self.scrollView appendChildView:wrapper];
+  _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
+  [self.scrollView appendChildView:_headerView];
+  _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp andDelegate:self.scrollView];
+  _commentsView.addCommentView.delegate = self;
+  [self.scrollView appendChildView:_commentsView];
   
+  STToolbarView* toolbar = [[STToolbarView alloc] initWithFrame:CGRectMake(0, 0, 320, 70)];
+  NSMutableArray* views = [NSMutableArray arrayWithObjects:
+                           [[[STLikeButton alloc] initWithStamp:self.stamp] autorelease],
+                           [[[STTodoButton alloc] initWithStamp:self.stamp] autorelease],
+                           nil];
+  if (![AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
+    [views addObject:[[[STStampButton alloc] initWithStamp:self.stamp] autorelease]];
+  }
+  else {
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
+                                                                    style:UIBarButtonItemStylePlain
+                                                                   target:self
+                                                                   action:@selector(_deleteStampButtonPressed:)];
+    self.navigationItem.rightBarButtonItem = rightButton;
+  }
+  [toolbar packViews:views withPadding:10];
+  [self setToolbar:toolbar withAnimation:YES];
   
-  /*[[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entityObject.entityID andCallback:^(id<STEntityDetail> detail) {
-    [self _didLoadEntityDetail:detail];
-  }];
-   */
 }
 
 - (void)dealloc {
@@ -93,6 +103,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
+  NSLog(@"viewWillDisappear");
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -102,8 +113,8 @@
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   //[self setUpToolbar];
-  _headerView.inverted = NO;
   [_headerView setNeedsDisplay];
+  NSLog(@"viewWillAppear");
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -111,9 +122,21 @@
   //stampPhotoView_.imageURL = stamp_.imageURL;
 }
 
+- (void)_deleteStampButtonPressed:(id)caller {
+  [Util confirmWithMessage:@"Are you sure?" action:@"Delete" destructive:YES withBlock:^(BOOL confirmed) {
+    if (confirmed) {
+      STActionContext* context = [STActionContext contextWithCompletionBlock:^(id success, NSError *error) {
+        if (!error) {
+          [[Util sharedNavigationController] popViewControllerAnimated:YES];
+        }
+      }];
+      id<STAction> action = [STStampedActions actionDeleteStamp:self.stamp.stampID withOutputContext:context];
+      [[STActionManager sharedActionManager] didChooseAction:action withContext:context];    }
+  }];
+}
 
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail {
-  
+  NSLog(@"detail");
   CGFloat wrapperHeight = 200;
   CGRect wrapperFrame = CGRectMake(0, 0 , 320, wrapperHeight);
   STSynchronousWrapper* eDetailView = [STSynchronousWrapper wrapperForEntityDetail:detail
@@ -123,9 +146,9 @@
   [self.scrollView appendChildView:eDetailView];
 }
 
-- (IBAction)handleEntityTap:(id)sender {
+- (void)handleEntityTap:(id)sender {
   STActionContext* context = [STActionContext context];
-  id<STAction> action = [STStampedActions actionViewEntity:self.stamp.entityObject.entityID withOutputContext:context];
+  id<STAction> action = [STStampedActions actionViewEntity:self.stamp.entity.entityID withOutputContext:context];
   [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 

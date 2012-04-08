@@ -24,7 +24,7 @@ static STMenuFactory* _sharedInstance;
 
 - (void)menuWithEntityId:(NSString*)anEntityID andCallbackBlock:(void (^)(id<STMenu>))aBlock {
   NSDictionary* params = [NSDictionary dictionaryWithObject:anEntityID forKey: @"entity_id"];
-  [[STRestKitLoader sharedInstance] loadWithPath:kMenuLookupPath params:params mapping:[STSimpleMenu mapping] andCallback:^(NSArray* array, NSError* error) {
+  [[STRestKitLoader sharedInstance] loadWithPath:kMenuLookupPath post:NO params:params mapping:[STSimpleMenu mapping] andCallback:^(NSArray* array, NSError* error) {
     id<STMenu> menu = nil;
     if (array && [array count] > 0) {
       menu = [array objectAtIndex:0];

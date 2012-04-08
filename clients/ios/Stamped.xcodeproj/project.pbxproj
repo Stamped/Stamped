@@ -160,6 +160,8 @@
 		638D7754152BBBD8006E4988 /* STSimpleCredit.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7752152BBBD7006E4988 /* STSimpleCredit.m */; };
 		638D7757152BBC93006E4988 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		638D7758152BBC93006E4988 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
+		638D775B152CA018006E4988 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
+		638D775C152CA018006E4988 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
 		6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
@@ -169,6 +171,32 @@
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
+		63CC4439152D12AA0026BB25 /* STTodoButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4438152D12AA0026BB25 /* STTodoButton.m */; };
+		63CC443A152D12AA0026BB25 /* STTodoButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4438152D12AA0026BB25 /* STTodoButton.m */; };
+		63CC443D152D12FE0026BB25 /* STAStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC443C152D12FE0026BB25 /* STAStampButton.m */; };
+		63CC443E152D12FE0026BB25 /* STAStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC443C152D12FE0026BB25 /* STAStampButton.m */; };
+		63CC4442152DEF500026BB25 /* STSimpleTodo.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4441152DEF500026BB25 /* STSimpleTodo.m */; };
+		63CC4443152DEF500026BB25 /* STSimpleTodo.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4441152DEF500026BB25 /* STSimpleTodo.m */; };
+		63CC4447152DFF940026BB25 /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4446152DFF940026BB25 /* STCreateStampViewController.m */; };
+		63CC4448152DFF940026BB25 /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4446152DFF940026BB25 /* STCreateStampViewController.m */; };
+		63DC7B56152E1867001BA610 /* STStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DC7B55152E1867001BA610 /* STStampButton.m */; };
+		63DC7B57152E1867001BA610 /* STStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DC7B55152E1867001BA610 /* STStampButton.m */; };
+		63E5E6AB152E2B8900579369 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
+		63E5E6AC152E2B8900579369 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
+		63E5E6B4152E3D3E00579369 /* STInboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */; };
+		63E5E6B5152E3D3E00579369 /* STInboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */; };
+		63E5E6BC152E432200579369 /* STInboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BB152E432200579369 /* STInboxViewController.m */; };
+		63E5E6BD152E432200579369 /* STInboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BB152E432200579369 /* STInboxViewController.m */; };
+		63E5E6C0152E48A300579369 /* STStampsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BF152E48A300579369 /* STStampsView.m */; };
+		63E5E6C1152E48A300579369 /* STStampsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BF152E48A300579369 /* STStampsView.m */; };
+		63E5E6C4152E496100579369 /* STStampCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6C3152E496100579369 /* STStampCell.m */; };
+		63E5E6C5152E496100579369 /* STStampCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6C3152E496100579369 /* STStampCell.m */; };
+		63F016C1152CC6420069B930 /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
+		63F016C2152CC6420069B930 /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
+		63F016C5152CC7570069B930 /* STToolbarButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C4152CC7570069B930 /* STToolbarButton.m */; };
+		63F016C6152CC7570069B930 /* STToolbarButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C4152CC7570069B930 /* STToolbarButton.m */; };
+		63F016C9152CDFFA0069B930 /* STToolbarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C8152CDFFA0069B930 /* STToolbarView.m */; };
+		63F016CA152CDFFA0069B930 /* STToolbarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C8152CDFFA0069B930 /* STToolbarView.m */; };
 		63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
@@ -1948,12 +1976,42 @@
 		638D7752152BBBD7006E4988 /* STSimpleCredit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleCredit.m; sourceTree = "<group>"; };
 		638D7755152BBC91006E4988 /* STSimpleUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleUser.h; sourceTree = "<group>"; };
 		638D7756152BBC92006E4988 /* STSimpleUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleUser.m; sourceTree = "<group>"; };
+		638D7759152CA016006E4988 /* STStampDetailCommentsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailCommentsView.h; sourceTree = "<group>"; };
+		638D775A152CA017006E4988 /* STStampDetailCommentsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailCommentsView.m; sourceTree = "<group>"; };
 		6398B926152243C90044BB0C /* STWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STWeakProxy.h; sourceTree = "<group>"; };
 		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
 		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
+		63CC4437152D12A90026BB25 /* STTodoButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoButton.h; sourceTree = "<group>"; };
+		63CC4438152D12AA0026BB25 /* STTodoButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoButton.m; sourceTree = "<group>"; };
+		63CC443B152D12FE0026BB25 /* STAStampButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAStampButton.h; sourceTree = "<group>"; };
+		63CC443C152D12FE0026BB25 /* STAStampButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAStampButton.m; sourceTree = "<group>"; };
+		63CC443F152DEE6D0026BB25 /* STTodo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodo.h; sourceTree = "<group>"; };
+		63CC4440152DEF500026BB25 /* STSimpleTodo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleTodo.h; sourceTree = "<group>"; };
+		63CC4441152DEF500026BB25 /* STSimpleTodo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleTodo.m; sourceTree = "<group>"; };
+		63CC4445152DFF940026BB25 /* STCreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreateStampViewController.h; sourceTree = "<group>"; };
+		63CC4446152DFF940026BB25 /* STCreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreateStampViewController.m; sourceTree = "<group>"; };
+		63DC7B54152E1867001BA610 /* STStampButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampButton.h; sourceTree = "<group>"; };
+		63DC7B55152E1867001BA610 /* STStampButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampButton.m; sourceTree = "<group>"; };
+		63E5E6A8152E2B1F00579369 /* STImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImage.h; sourceTree = "<group>"; };
+		63E5E6A9152E2B8900579369 /* STSimpleImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleImage.h; sourceTree = "<group>"; };
+		63E5E6AA152E2B8900579369 /* STSimpleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleImage.m; sourceTree = "<group>"; };
+		63E5E6B2152E3D3D00579369 /* STInboxTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInboxTableViewCell.h; sourceTree = "<group>"; };
+		63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInboxTableViewCell.m; sourceTree = "<group>"; };
+		63E5E6BA152E432200579369 /* STInboxViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInboxViewController.h; sourceTree = "<group>"; };
+		63E5E6BB152E432200579369 /* STInboxViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInboxViewController.m; sourceTree = "<group>"; };
+		63E5E6BE152E48A300579369 /* STStampsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampsView.h; sourceTree = "<group>"; };
+		63E5E6BF152E48A300579369 /* STStampsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampsView.m; sourceTree = "<group>"; };
+		63E5E6C2152E496100579369 /* STStampCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampCell.h; sourceTree = "<group>"; };
+		63E5E6C3152E496100579369 /* STStampCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampCell.m; sourceTree = "<group>"; };
+		63F016BF152CC6420069B930 /* STLikeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLikeButton.h; sourceTree = "<group>"; };
+		63F016C0152CC6420069B930 /* STLikeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLikeButton.m; sourceTree = "<group>"; };
+		63F016C3152CC7570069B930 /* STToolbarButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToolbarButton.h; sourceTree = "<group>"; };
+		63F016C4152CC7570069B930 /* STToolbarButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToolbarButton.m; sourceTree = "<group>"; };
+		63F016C7152CDFFA0069B930 /* STToolbarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToolbarView.h; sourceTree = "<group>"; };
+		63F016C8152CDFFA0069B930 /* STToolbarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToolbarView.m; sourceTree = "<group>"; };
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAEntityDetailComponentFactory.m; sourceTree = "<group>"; };
@@ -3013,8 +3071,6 @@
 				6398B927152243CA0044BB0C /* STWeakProxy.m */,
 				635EAACF15238D5F00D0378D /* STConfirmationView.h */,
 				635EAAD015238D5F00D0378D /* STConfirmationView.m */,
-				6323F0FC1525030E00BE408C /* STActionContext.h */,
-				6323F0FD1525031100BE408C /* STActionContext.m */,
 				6323F10415250C7B00BE408C /* STMenuPopUp.h */,
 				6323F10515250C8000BE408C /* STMenuPopUp.m */,
 				6323F1151526261400BE408C /* STPlayerPopUp.h */,
@@ -3054,6 +3110,8 @@
 				638D772A152B5157006E4988 /* STComment.h */,
 				638D7743152BB4EC006E4988 /* STMention.h */,
 				638D7744152BB5B0006E4988 /* STCredit.h */,
+				63CC443F152DEE6D0026BB25 /* STTodo.h */,
+				63E5E6A8152E2B1F00579369 /* STImage.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3123,6 +3181,10 @@
 				638D774E152BBBB7006E4988 /* STSimpleMention.m */,
 				638D7751152BBBD6006E4988 /* STSimpleCredit.h */,
 				638D7752152BBBD7006E4988 /* STSimpleCredit.m */,
+				63CC4440152DEF500026BB25 /* STSimpleTodo.h */,
+				63CC4441152DEF500026BB25 /* STSimpleTodo.m */,
+				63E5E6A9152E2B8900579369 /* STSimpleImage.h */,
+				63E5E6AA152E2B8900579369 /* STSimpleImage.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -3166,64 +3228,17 @@
 		63865A85152A466500FE8A68 /* Globals */ = {
 			isa = PBXGroup;
 			children = (
+				63CC4436152CFBB80026BB25 /* Legacy */,
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
-				7E3909341401975C00910F98 /* Notifications.h */,
-				7E3909351401975C00910F98 /* Notifications.m */,
-				7E407E931450A55100D7847F /* SharedRequestDelegate.h */,
-				7E407E941450A55100D7847F /* SharedRequestDelegate.m */,
 				6386EF2A1511503B0019F1DC /* UIFont+Stamped.h */,
 				6386EF2B151150420019F1DC /* UIFont+Stamped.m */,
 				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E260F8914BB77BB00D9F7F0 /* UIButton+Stamped.h */,
 				7E260F8A14BB77BB00D9F7F0 /* UIButton+Stamped.m */,
-				CBC5C1E1146A4B7100DD305C /* Alerts.h */,
-				CBC5C1E2146A4B7200DD305C /* Alerts.m */,
-				CB6556251471C56600865AAE /* SocialManager.h */,
-				CB6556261471C56600865AAE /* SocialManager.m */,
-				7E0D4EE814662BEB00F81CEC /* STViewController.h */,
-				7E0D4EE914662BEC00F81CEC /* STViewController.m */,
-				7EDCD62614D1D26900FF1975 /* STMapToggleButton.h */,
-				7EDCD62714D1D26900FF1975 /* STMapToggleButton.m */,
-				7E5EB261140C0535007D164F /* STTextField.h */,
-				7E5EB262140C0535007D164F /* STTextField.m */,
-				7E7DDE12145A0AE50058ACA9 /* STToolbar.h */,
-				7E7DDE13145A0AE50058ACA9 /* STToolbar.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
-				7E43FECC14EB08E500C6AC9D /* STTooltipView.h */,
-				7E43FECD14EB08E500C6AC9D /* STTooltipView.m */,
-				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
-				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
-				7EE70C4B13FC61AE008CCC15 /* STSectionHeaderView.h */,
-				7EE70C4C13FC61AE008CCC15 /* STSectionHeaderView.m */,
-				7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */,
-				7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */,
-				7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */,
-				7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */,
-				7E146FEC13EF543B00B954C6 /* UserImageDownloadManager.h */,
-				7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */,
-				7E146FEF13F07A7400B954C6 /* MediumUserImageButton.h */,
-				7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */,
-				7EE482EA13FAA41400359EEA /* STSearchField.h */,
-				7EE482EB13FAA41400359EEA /* STSearchField.m */,
-				7E0A87B51416CBDB0013AC4D /* STImageView.h */,
-				7E0A87B61416CBDB0013AC4D /* STImageView.m */,
-				7EE482EF13FACFC300359EEA /* STPlaceAnnotation.h */,
-				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
-				7EBBDB541441F4BC00DDEAE9 /* STStampFilterBar.h */,
-				7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */,
-				7ED69D4414693BA100964B3A /* FriendshipManager.h */,
-				7ED69D4514693BA100964B3A /* FriendshipManager.m */,
-				7E5D9E9614B3C0DC00C340CA /* STScrollView.h */,
-				7E5D9E9714B3C0DD00C340CA /* STScrollView.m */,
-				7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */,
-				7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */,
-				7E6C257114D9F7FF00FE7419 /* STNoResultsTableViewCell.h */,
-				7E6C257214D9F7FF00FE7419 /* STNoResultsTableViewCell.m */,
-				7E33045A14F5795A00114494 /* STClosableOverlayView.h */,
-				7E33045B14F5795A00114494 /* STClosableOverlayView.m */,
 				6380A76015066EAD003087EF /* STPageControl.h */,
 				6380A76115066EAD003087EF /* STPageControl.m */,
 			);
@@ -3297,8 +3312,110 @@
 				635EAAC615234D5800D0378D /* STActionManager.m */,
 				6323F11015260FEB00BE408C /* STStampedActions.h */,
 				6323F11115260FEC00BE408C /* STStampedActions.m */,
+				6323F0FC1525030E00BE408C /* STActionContext.h */,
+				6323F0FD1525031100BE408C /* STActionContext.m */,
 			);
 			name = Actions;
+			sourceTree = "<group>";
+		};
+		63CC4436152CFBB80026BB25 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				7E3909341401975C00910F98 /* Notifications.h */,
+				7E3909351401975C00910F98 /* Notifications.m */,
+				7E407E931450A55100D7847F /* SharedRequestDelegate.h */,
+				7E407E941450A55100D7847F /* SharedRequestDelegate.m */,
+				CBC5C1E1146A4B7100DD305C /* Alerts.h */,
+				CBC5C1E2146A4B7200DD305C /* Alerts.m */,
+				CB6556251471C56600865AAE /* SocialManager.h */,
+				CB6556261471C56600865AAE /* SocialManager.m */,
+				7E0D4EE814662BEB00F81CEC /* STViewController.h */,
+				7E0D4EE914662BEC00F81CEC /* STViewController.m */,
+				7EDCD62614D1D26900FF1975 /* STMapToggleButton.h */,
+				7EDCD62714D1D26900FF1975 /* STMapToggleButton.m */,
+				7E5EB261140C0535007D164F /* STTextField.h */,
+				7E5EB262140C0535007D164F /* STTextField.m */,
+				7E7DDE12145A0AE50058ACA9 /* STToolbar.h */,
+				7E7DDE13145A0AE50058ACA9 /* STToolbar.m */,
+				7E43FECC14EB08E500C6AC9D /* STTooltipView.h */,
+				7E43FECD14EB08E500C6AC9D /* STTooltipView.m */,
+				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
+				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
+				7EE70C4B13FC61AE008CCC15 /* STSectionHeaderView.h */,
+				7EE70C4C13FC61AE008CCC15 /* STSectionHeaderView.m */,
+				7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */,
+				7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */,
+				7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */,
+				7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */,
+				7E146FEC13EF543B00B954C6 /* UserImageDownloadManager.h */,
+				7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */,
+				7E146FEF13F07A7400B954C6 /* MediumUserImageButton.h */,
+				7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */,
+				7EE482EA13FAA41400359EEA /* STSearchField.h */,
+				7EE482EB13FAA41400359EEA /* STSearchField.m */,
+				7E0A87B51416CBDB0013AC4D /* STImageView.h */,
+				7E0A87B61416CBDB0013AC4D /* STImageView.m */,
+				7EE482EF13FACFC300359EEA /* STPlaceAnnotation.h */,
+				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
+				7EBBDB541441F4BC00DDEAE9 /* STStampFilterBar.h */,
+				7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */,
+				7ED69D4414693BA100964B3A /* FriendshipManager.h */,
+				7ED69D4514693BA100964B3A /* FriendshipManager.m */,
+				7E5D9E9614B3C0DC00C340CA /* STScrollView.h */,
+				7E5D9E9714B3C0DD00C340CA /* STScrollView.m */,
+				7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */,
+				7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */,
+				7E6C257114D9F7FF00FE7419 /* STNoResultsTableViewCell.h */,
+				7E6C257214D9F7FF00FE7419 /* STNoResultsTableViewCell.m */,
+				7E33045A14F5795A00114494 /* STClosableOverlayView.h */,
+				7E33045B14F5795A00114494 /* STClosableOverlayView.m */,
+			);
+			name = Legacy;
+			sourceTree = "<group>";
+		};
+		63CC4444152DFF5C0026BB25 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */,
+				7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */,
+				7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */,
+			);
+			name = Legacy;
+			sourceTree = "<group>";
+		};
+		63E5E6AD152E3C8400579369 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				7EFE8F2713C39FA100324F34 /* InboxViewController.xib */,
+				7EFE8F2513C39FA100324F34 /* InboxViewController.h */,
+				7EFE8F2613C39FA100324F34 /* InboxViewController.m */,
+				7EE7E35813CCB2A800FA3B3A /* InboxTableViewCell.h */,
+				7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */,
+			);
+			name = Legacy;
+			sourceTree = "<group>";
+		};
+		63F016BE152CC6200069B930 /* View Components */ = {
+			isa = PBXGroup;
+			children = (
+				63F016BF152CC6420069B930 /* STLikeButton.h */,
+				63F016C0152CC6420069B930 /* STLikeButton.m */,
+				63F016C3152CC7570069B930 /* STToolbarButton.h */,
+				63F016C4152CC7570069B930 /* STToolbarButton.m */,
+				63F016C7152CDFFA0069B930 /* STToolbarView.h */,
+				63F016C8152CDFFA0069B930 /* STToolbarView.m */,
+				63CC4437152D12A90026BB25 /* STTodoButton.h */,
+				63CC4438152D12AA0026BB25 /* STTodoButton.m */,
+				63CC443B152D12FE0026BB25 /* STAStampButton.h */,
+				63CC443C152D12FE0026BB25 /* STAStampButton.m */,
+				63DC7B54152E1867001BA610 /* STStampButton.h */,
+				63DC7B55152E1867001BA610 /* STStampButton.m */,
+				63E5E6BE152E48A300579369 /* STStampsView.h */,
+				63E5E6BF152E48A300579369 /* STStampsView.m */,
+				63E5E6C2152E496100579369 /* STStampCell.h */,
+				63E5E6C3152E496100579369 /* STStampCell.m */,
+			);
+			name = "View Components";
 			sourceTree = "<group>";
 		};
 		63F27E6F151CF23700DA7001 /* New Entity Detail */ = {
@@ -3623,9 +3740,9 @@
 		7E42DCBE13DB64D100AF63BE /* Create Stamp */ = {
 			isa = PBXGroup;
 			children = (
-				7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */,
-				7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */,
-				7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */,
+				63CC4444152DFF5C0026BB25 /* Legacy */,
+				63CC4445152DFF940026BB25 /* STCreateStampViewController.h */,
+				63CC4446152DFF940026BB25 /* STCreateStampViewController.m */,
 			);
 			name = "Create Stamp";
 			sourceTree = "<group>";
@@ -3806,6 +3923,8 @@
 				7E0596411520E6B7009D691E /* STStampDetailViewController.m */,
 				638D7715152A55A9006E4988 /* STStampDetailHeaderView.h */,
 				638D7716152A55A9006E4988 /* STStampDetailHeaderView.m */,
+				638D7759152CA016006E4988 /* STStampDetailCommentsView.h */,
+				638D775A152CA017006E4988 /* STStampDetailCommentsView.m */,
 			);
 			name = "Stamp Detail";
 			sourceTree = "<group>";
@@ -4601,11 +4720,11 @@
 		7EE7E35C13CCB2D600FA3B3A /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
-				7EFE8F2713C39FA100324F34 /* InboxViewController.xib */,
-				7EFE8F2513C39FA100324F34 /* InboxViewController.h */,
-				7EFE8F2613C39FA100324F34 /* InboxViewController.m */,
-				7EE7E35813CCB2A800FA3B3A /* InboxTableViewCell.h */,
-				7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */,
+				63E5E6AD152E3C8400579369 /* Legacy */,
+				63E5E6B2152E3D3D00579369 /* STInboxTableViewCell.h */,
+				63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */,
+				63E5E6BA152E432200579369 /* STInboxViewController.h */,
+				63E5E6BB152E432200579369 /* STInboxViewController.m */,
 			);
 			name = Inbox;
 			sourceTree = "<group>";
@@ -4665,6 +4784,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				63F016BE152CC6200069B930 /* View Components */,
 				638D7725152B4F76006E4988 /* Stamped API */,
 				63865A85152A466500FE8A68 /* Globals */,
 				63865A84152A461D00FE8A68 /* View Factories */,
@@ -6380,6 +6500,20 @@
 				638D7750152BBBB8006E4988 /* STSimpleMention.m in Sources */,
 				638D7754152BBBD8006E4988 /* STSimpleCredit.m in Sources */,
 				638D7758152BBC93006E4988 /* STSimpleUser.m in Sources */,
+				638D775C152CA018006E4988 /* STStampDetailCommentsView.m in Sources */,
+				63F016C2152CC6420069B930 /* STLikeButton.m in Sources */,
+				63F016C6152CC7570069B930 /* STToolbarButton.m in Sources */,
+				63F016CA152CDFFA0069B930 /* STToolbarView.m in Sources */,
+				63CC443A152D12AA0026BB25 /* STTodoButton.m in Sources */,
+				63CC443E152D12FE0026BB25 /* STAStampButton.m in Sources */,
+				63CC4443152DEF500026BB25 /* STSimpleTodo.m in Sources */,
+				63CC4448152DFF940026BB25 /* STCreateStampViewController.m in Sources */,
+				63DC7B57152E1867001BA610 /* STStampButton.m in Sources */,
+				63E5E6AC152E2B8900579369 /* STSimpleImage.m in Sources */,
+				63E5E6B5152E3D3E00579369 /* STInboxTableViewCell.m in Sources */,
+				63E5E6BD152E432200579369 /* STInboxViewController.m in Sources */,
+				63E5E6C1152E48A300579369 /* STStampsView.m in Sources */,
+				63E5E6C5152E496100579369 /* STStampCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6577,6 +6711,20 @@
 				638D774F152BBBB8006E4988 /* STSimpleMention.m in Sources */,
 				638D7753152BBBD8006E4988 /* STSimpleCredit.m in Sources */,
 				638D7757152BBC93006E4988 /* STSimpleUser.m in Sources */,
+				638D775B152CA018006E4988 /* STStampDetailCommentsView.m in Sources */,
+				63F016C1152CC6420069B930 /* STLikeButton.m in Sources */,
+				63F016C5152CC7570069B930 /* STToolbarButton.m in Sources */,
+				63F016C9152CDFFA0069B930 /* STToolbarView.m in Sources */,
+				63CC4439152D12AA0026BB25 /* STTodoButton.m in Sources */,
+				63CC443D152D12FE0026BB25 /* STAStampButton.m in Sources */,
+				63CC4442152DEF500026BB25 /* STSimpleTodo.m in Sources */,
+				63CC4447152DFF940026BB25 /* STCreateStampViewController.m in Sources */,
+				63DC7B56152E1867001BA610 /* STStampButton.m in Sources */,
+				63E5E6AB152E2B8900579369 /* STSimpleImage.m in Sources */,
+				63E5E6B4152E3D3E00579369 /* STInboxTableViewCell.m in Sources */,
+				63E5E6BC152E432200579369 /* STInboxViewController.m in Sources */,
+				63E5E6C0152E48A300579369 /* STStampsView.m in Sources */,
+				63E5E6C4152E496100579369 /* STStampCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

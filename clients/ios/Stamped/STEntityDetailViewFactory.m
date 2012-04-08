@@ -101,11 +101,13 @@
       }
     }
   }
-  id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
-  UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
-                                                      entityDetail:self.entityDetail 
-                                                          andFrame:CGRectMake(0, 0, 320, 200)];
-  [view appendChildView:wrapper];
+  //if (self.entityDetail.gallery) {
+    id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
+    UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
+                                                        entityDetail:self.entityDetail 
+                                                            andFrame:CGRectMake(0, 0, 320, 200)];
+    [view appendChildView:wrapper];
+ // }
   return view;
 }
 

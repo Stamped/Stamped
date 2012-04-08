@@ -50,7 +50,12 @@
     CGFloat padding_h = 15;
     CGFloat maxWidth = 200;
     CGFloat maxImageWidth = 320 - (maxWidth + 3 * padding_h);
-    UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:entity.image] andFrame:CGRectNull];
+    NSString* imagePath = nil;
+    if (entity.images && [entity.images count] > 0) {
+      id<STImage> image = [entity.images objectAtIndex:0];
+      imagePath = image.image;
+    }
+    UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:imagePath] andFrame:CGRectNull];
     CGRect imageFrame = imageView.frame;
     if (imageFrame.size.width > maxImageWidth) {
       CGFloat factor = maxImageWidth / imageFrame.size.width;

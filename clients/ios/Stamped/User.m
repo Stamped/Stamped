@@ -9,6 +9,7 @@
 #import "User.h"
 
 #import "Util.h"
+#import "STUser.h"
 
 @implementation User
 @dynamic bio;
@@ -64,6 +65,23 @@
     return self.imageURL;
 
   return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", self.screenName.lowercaseString];
+}
+
+
+
++ (NSString*)profileImageURLForSize:(ProfileImageSize)size withUser:(id<STUser>)user {
+  CGFloat imageSize = size * [UIScreen mainScreen].scale;
+  if (user.imageURL) {
+    NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", user.screenName.lowercaseString];
+    NSString* replacement =
+    [NSString stringWithFormat:@"/users/%@-%.0fx%.0f.jpg",
+     user.screenName.lowercaseString, imageSize, imageSize];
+    NSString* URL = [user.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
+    return URL;
+  }
+  
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
+          user.screenName.lowercaseString];
 }
 
 @end

@@ -50,4 +50,16 @@
   return dict;
 }
 
+- (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset {
+  STGenericSlice* copy = [[[self class] alloc] init];
+  copy.limit = limit;
+  copy.offset = offset;
+  copy.sort = self.sort;
+  copy.reverse = self.reverse;
+  copy.coordinates = self.coordinates;
+  copy.since = self.since;
+  copy.before = self.before;
+  return copy;
+}
+
 @end

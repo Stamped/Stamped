@@ -13,7 +13,6 @@
 
 @interface STSimpleEntityDetail : STSimpleEntity <STEntityDetail>
 
-@property (nonatomic, readwrite, retain) NSString* image;
 @property (nonatomic, readwrite, retain) NSString* caption;
 
 @property (nonatomic, readwrite, retain) NSString* address;
@@ -24,6 +23,7 @@
 @property (nonatomic, readwrite, retain) NSString* addressCountry;
 @property (nonatomic, readwrite, retain) NSString* neighborhood;
 
+@property (nonatomic, readwrite, retain) NSArray<STImage>* images;
 @property (nonatomic, readwrite, retain) NSArray<STActionItem>* actions;
 @property (nonatomic, readwrite, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readwrite, retain) id<STGallery> gallery;

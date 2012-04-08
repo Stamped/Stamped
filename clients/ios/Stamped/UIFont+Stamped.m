@@ -10,6 +10,14 @@
 
 @implementation UIFont(Stamped)
 
++ (UIFont*)stampedTitleFont {
+  return [UIFont stampedTitleFontWithSize:30];
+}
+
++ (UIFont*)stampedSubtitleFont {
+  return [UIFont stampedFontWithSize:12];
+}
+
 + (UIFont*)stampedTitleFontWithSize:(CGFloat)size {
   return [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:size];
 }

@@ -93,6 +93,11 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   [self.loadingView startAnimating];
 }
 
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  self.scrollView.scrollsToTop = YES;
+}
+
 - (void)dealloc {
   if (self.synchronousWrapper) {
     self.synchronousWrapper.delegate = nil;

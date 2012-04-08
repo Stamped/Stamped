@@ -7,6 +7,7 @@
 //
 
 #import "STSimpleComment.h"
+#import "STSimpleUser.h"
 
 @implementation STSimpleComment
 
@@ -14,7 +15,7 @@
 @synthesize commentID = _commentID;
 @synthesize stampID = _stampID;
 @synthesize created = _created;
-@synthesize userID = _userID;
+@synthesize user = _user;
 
 - (void)dealloc
 {
@@ -22,7 +23,7 @@
   [_commentID release];
   [_stampID release];
   [_created release];
-  [_userID release];
+  [_user release];
   [super dealloc];
 }
 
@@ -32,13 +33,14 @@
   [mapping mapKeyPathsToAttributes:
    @"comment_id",@"commentID",
    @"stamp_id",@"stampID",
-   @"user_id",@"userID",
    nil];
   
   [mapping mapAttributes:
    @"blurb",
    @"created",
    nil];
+  
+  [mapping mapRelationship:@"user" withMapping:[STSimpleUser mapping]];
   
   return mapping;
 }

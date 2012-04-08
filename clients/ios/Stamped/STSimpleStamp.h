@@ -17,7 +17,7 @@
 @property (nonatomic, readwrite, copy) NSNumber* deleted;
 @property (nonatomic, readwrite, copy) NSString* imageDimensions;
 @property (nonatomic, readwrite, copy) NSString* imageURL;
-@property (nonatomic, readwrite, copy) NSNumber* isFavorited;
+@property (nonatomic, readwrite, copy) NSNumber* isTodod;
 @property (nonatomic, readwrite, copy) NSNumber* isLiked;
 @property (nonatomic, readwrite, copy) NSDate* modified;
 @property (nonatomic, readwrite, copy) NSNumber* numComments;
@@ -26,8 +26,8 @@
 @property (nonatomic, readwrite, copy) NSString* URL;
 @property (nonatomic, readwrite, copy) NSString* via;
 
-@property (nonatomic, readwrite, copy) id<STEntity> entity;
-@property (nonatomic, readwrite, copy) id<STUser> user;
+@property (nonatomic, readwrite, retain) id<STEntity> entity;
+@property (nonatomic, readwrite, retain) id<STUser> user;
 @property (nonatomic, readwrite, copy) NSArray<STComment>* commentsPreview;
 @property (nonatomic, readwrite, copy) NSArray<STMention>* mentions;
 @property (nonatomic, readwrite, copy) NSArray<STCredit>* credits;

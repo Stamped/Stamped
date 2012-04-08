@@ -12,10 +12,9 @@
 #import "STMetadataItem.h"
 #import "STPlaylist.h"
 #import "STEntity.h"
+#import "STImage.h"
 
 @protocol STEntityDetail <STEntity>
-
-@property (nonatomic, readonly, retain) NSString* image;
 
 @property (nonatomic, readonly, retain) NSString* address;
 @property (nonatomic, readonly, retain) NSString* addressStreet;
@@ -25,6 +24,7 @@
 @property (nonatomic, readonly, retain) NSString* addressCountry;
 @property (nonatomic, readonly, retain) NSString* neighborhood;
 
+@property (nonatomic, readonly, retain) NSArray<STImage>* images;
 @property (nonatomic, readonly, retain) NSArray<STActionItem>* actions;
 @property (nonatomic, readonly, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readonly, retain) id<STGallery> gallery;

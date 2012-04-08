@@ -12,8 +12,8 @@
 
 @property (nonatomic, readonly, copy) NSString* userID;
 @property (nonatomic, readonly, copy) NSString* screenName;
-@property (nonatomic, readonly, copy) NSString* colorPrimary;
-@property (nonatomic, readonly, copy) NSString* colorSecondary;
+@property (nonatomic, readonly, copy) NSString* primaryColor;
+@property (nonatomic, readonly, copy) NSString* secondaryColor;
 @property (nonatomic, readonly, copy) NSNumber* privacy;
 @property (nonatomic, readonly, copy) NSString* imageURL;
 

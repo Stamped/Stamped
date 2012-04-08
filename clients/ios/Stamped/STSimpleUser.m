@@ -12,8 +12,8 @@
 
 @synthesize userID = _userID;
 @synthesize screenName = _screenName;
-@synthesize colorPrimary = _colorPrimary;
-@synthesize colorSecondary = _colorSecondary;
+@synthesize primaryColor = _primaryColor;
+@synthesize secondaryColor = _secondaryColor;
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
 
@@ -21,8 +21,8 @@
 {
   [_userID release];
   [_screenName release];
-  [_colorPrimary release];
-  [_colorSecondary release];
+  [_primaryColor release];
+  [_secondaryColor release];
   [_privacy release];
   [_imageURL release];
   [super dealloc];
@@ -35,8 +35,8 @@
   [mapping mapKeyPathsToAttributes:
    @"user_id", @"userID",
    @"screen_name", @"screenName",
-   @"color_primary", @"colorPrimary",
-   @"color_secondary", @"colorSecondary",
+   @"color_primary", @"primaryColor",
+   @"color_secondary", @"secondaryColor",
    @"image_url", @"imageURL",
    nil];
   
@@ -45,6 +45,16 @@
    nil];
   
   return mapping;
+}
+
++ (STSimpleUser*)userFromLegacyUser:(User*)legacyUser {
+  STSimpleUser* user = [[STSimpleUser alloc] init];
+  user.userID = legacyUser.userID;
+  user.screenName = legacyUser.screenName;
+  user.primaryColor = legacyUser.primaryColor;
+  user.secondaryColor = legacyUser.secondaryColor;
+  user.imageURL = legacyUser.imageURL;
+  return user;
 }
 
 

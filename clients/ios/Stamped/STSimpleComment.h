@@ -16,7 +16,7 @@
 @property (nonatomic, readwrite, copy) NSString* commentID;
 @property (nonatomic, readwrite, copy) NSString* stampID;
 @property (nonatomic, readwrite, copy) NSDate* created;
-@property (nonatomic, readwrite, copy) NSString* userID;
+@property (nonatomic, readwrite, retain) id<STUser> user;
 
 + (RKObjectMapping*)mapping;
 

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "STUser.h"
 
 // All sizes are expressed in points.
 typedef enum {
@@ -62,6 +63,7 @@ typedef enum {
 - (UIImage*)invertedStampImageWithSize:(StampImageSize)size;
 - (UIImage*)stampImageWithSize:(StampImageSize)size;
 - (NSString*)profileImageURLForSize:(ProfileImageSize)size;
++ (NSString*)profileImageURLForSize:(ProfileImageSize)size withUser:(id<STUser>)user;
 @end
 
 @interface User (CoreDataGeneratedAccessors)
@@ -73,4 +75,5 @@ typedef enum {
 - (void)removeStampsObject:(NSManagedObject*)value;
 - (void)addStamps:(NSSet*)values;
 - (void)removeStamps:(NSSet*)values;
+
 @end

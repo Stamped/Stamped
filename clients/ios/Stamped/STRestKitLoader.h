@@ -12,9 +12,16 @@
 @interface STRestKitLoader : NSObject
 
 - (void)loadWithPath:(NSString*)path 
+                post:(BOOL)post
               params:(NSDictionary*)params 
              mapping:(RKObjectMapping*)mapping 
          andCallback:(void(^)(NSArray*,NSError*))block;
+
+- (void)loadOneWithPath:(NSString*)path
+                   post:(BOOL)post
+                 params:(NSDictionary*)params 
+                mapping:(RKObjectMapping*)mapping 
+            andCallback:(void(^)(id,NSError*))block;
 
 + (STRestKitLoader*)sharedInstance;
 

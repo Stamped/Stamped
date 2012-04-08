@@ -51,6 +51,12 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 @end
 
+@interface STConfirmationDelegate : NSObject <UIActionSheetDelegate>
+
+@property (nonatomic, readwrite, copy) void(^block)(BOOL);
+
+@end
+
 static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
@@ -510,6 +516,161 @@ static Rdio* _rdio;
   });
 }
 
++ (void)reframeView:(UIView*)view withDeltas:(CGRect)deltas {
+  CGRect frame = view.frame;
+  frame.origin.x += deltas.origin.x;
+  frame.origin.y += deltas.origin.y;
+  frame.size.width += deltas.size.width;
+  frame.size.height += deltas.size.height;
+  view.frame = frame;
+}
+
++ (CGSize)size:(CGSize)a unionedWith:(CGSize)b
+{
+  return CGSizeMake(MAX(a.width, b.width), MAX(a.height, b.height));
+}
+
++ (CGSize)packViews:(NSArray*)views padding:(CGFloat)padding vertical:(BOOL)vertical uniform:(BOOL)uniform
+{
+  if (uniform) {
+    CGSize max = CGSizeZero;
+    for (UIView* view in views)
+    {
+      max = [Util size:max unionedWith:view.frame.size];
+    }
+    CGRect frame = CGRectMake(0, 0, max.width, max.height);
+    CGRect lastFrame = CGRectNull;
+    for (UIView* view in views) 
+    {
+      view.frame = [Util centeredAndBounded:view.frame.size inFrame:frame];
+      CGFloat dx = 0;
+      CGFloat dy = 0;
+      if (vertical) {
+        dy = padding + max.height;
+      }
+      else {
+        dx = padding + max.width;
+      }
+      lastFrame = frame;
+      frame = CGRectOffset(frame, dx, dy);
+    }
+    return CGSizeMake(CGRectGetMaxX(lastFrame), CGRectGetMaxY(lastFrame));
+  }
+  else {
+    //TODO
+    return CGSizeZero;
+  }
+}
+
++ (void)offsetViews:(NSArray*)views byX:(CGFloat)dx andY:(CGFloat)dy
+{
+  for (UIView* view in views) 
+  {
+    view.frame = CGRectOffset(view.frame, dx, dy);
+  }
+}
+
++ (void)reloadStampedData {
+  if ([NSThread isMainThread]) {
+    UINavigationController* controller = [Util sharedNavigationController];
+    id viewController = controller.topViewController;
+    if ([viewController respondsToSelector:@selector(reloadStampedData)]) {
+      [viewController reloadStampedData];
+    }
+  }
+  else {
+    [Util executeOnMainThread:^{
+      [Util reloadStampedData];
+    }];
+  }
+}
+
++ (UIImage*)imageForCategory:(NSString*)category {
+  if (category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_sDetail_%@", category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_sDetail_other"];
+}
+
++ (UIImage*)stampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size {
+  return [Util gradientImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]
+            withPrimaryColor:user.primaryColor
+                   secondary:user.secondaryColor];
+}
+
+
++ (UIImage*)invertedStampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size {
+  return [Util whiteMaskedImageUsingImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]];
+}
+
+
++ (UIImage*)inboxTodoCategoryImage:(NSString*)category {
+  if (category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@", category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other"];
+}
+
++ (UIImage*)highlightedInboxTodoCategoryImage:(NSString*)category {
+  if (category)
+    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_inbox-todo_%@_white", category.lowercaseString]];
+  
+  return [UIImage imageNamed:@"cat_icon_inbox-todo_other_white"];
+}
+
++ (NSString*)profileImageURLForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
+  CGFloat imageSize = size * [UIScreen mainScreen].scale;
+  if (user.imageURL) {
+    NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", user.screenName.lowercaseString];
+    NSString* replacement =
+    [NSString stringWithFormat:@"/users/%@-%.0fx%.0f.jpg",
+     user.screenName.lowercaseString, imageSize, imageSize];
+    NSString* URL = [user.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
+    return URL;
+  }
+  
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
+          user.screenName.lowercaseString];
+}
+
++ (void)confirmWithMessage:(NSString*)message action:(NSString*)action destructive:(BOOL)destructive withBlock:(void(^)(BOOL))block {
+  STConfirmationDelegate* delegate = [[STConfirmationDelegate alloc] init];
+  delegate.block = block;
+  UIActionSheet* sheet;
+  if (destructive) {
+    sheet = [[[UIActionSheet alloc] initWithTitle:message
+                                         delegate:delegate
+                                cancelButtonTitle:@"Cancel"
+                           destructiveButtonTitle:action
+                                otherButtonTitles:nil] autorelease];
+  }
+  else {
+    sheet = [[[UIActionSheet alloc] initWithTitle:message
+                                         delegate:delegate
+                                cancelButtonTitle:@"Cancel"
+                           destructiveButtonTitle:nil
+                                otherButtonTitles:action, nil] autorelease];
+  }
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  [sheet showInView:[UIApplication sharedApplication].keyWindow];
+}
+
+
++ (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor {
+  UIView* cur = view.superview;
+  CGRect frame = view.frame;
+  while (cur != nil) {
+    if (cur == ancestor) {
+      break;
+    }
+    else {
+      frame = CGRectOffset(frame, cur.frame.origin.x, cur.frame.origin.y);
+    }
+    cur = cur.superview;
+  }
+  return frame;
+}
+
 @end
 
 @implementation STPopUpView
@@ -564,3 +725,31 @@ static Rdio* _rdio;
 }
 
 @end
+
+@implementation STConfirmationDelegate
+
+@synthesize block = _block;
+
+- (void)dealloc
+{
+  [_block release];
+  [super dealloc];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+  if (self.block) {
+    NSLog(@"button:%@",[actionSheet buttonTitleAtIndex:buttonIndex]);
+    self.block(![[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"]);
+  }
+  [self autorelease];
+}
+
+- (void)actionSheetCancel:(UIActionSheet *)actionSheet {
+  if (self.block) {
+    self.block(NO);
+  }
+  [self autorelease];
+}
+
+@end
+
