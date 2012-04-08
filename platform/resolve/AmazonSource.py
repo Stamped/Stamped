@@ -14,17 +14,17 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource    import GenericSource, multipleSource
-    import logs
-    import re
-    from Resolver           import *
-    from datetime       import datetime
-    from libs.LibUtils           import months, parseDateString, xp
-    from libs.AmazonAPI         import AmazonAPI
-    from libs.Amazon            import Amazon, globalAmazon
-    from utils          import lazyProperty
-    from json           import loads
-    from pprint         import pprint, pformat
+    import logs, re
+    from GenericSource              import GenericSource, multipleSource
+    from Resolver                   import *
+    from ResolverObject             import *
+    from datetime                   import datetime
+    from libs.LibUtils              import months, parseDateString, xp
+    from libs.AmazonAPI             import AmazonAPI
+    from libs.Amazon                import Amazon, globalAmazon
+    from utils                      import lazyProperty
+    from json                       import loads
+    from pprint                     import pprint, pformat
 except:
     report()
     raise
@@ -38,12 +38,13 @@ class _AmazonObject(object):
             params['ResponseGroup'] = 'Large'
         self.__params = params
         self.__amazon_id = amazon_id
-
+    
     @lazyProperty
     def data(self):
         raw = globalAmazon().item_lookup(**self.__params)
+        
         return xp(raw, 'ItemLookupResponse','Items','Item')
-
+    
     @lazyProperty
     def name(self):
         return xp(self.attributes, 'Title')['v']
@@ -68,22 +69,22 @@ class _AmazonObject(object):
         return self
 
 
-class AmazonAlbum(_AmazonObject, ResolverAlbum):
+class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     """
     """
     def __init__(self, amazon_id):
         _AmazonObject.__init__(self, amazon_id, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self, types=['album'])
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         try:
-            return {'name' : xp(self.attributes, 'Artist')['v'] }
+            return [ { 'name' : xp(self.attributes, 'Artist')['v'] } ]
         except Exception:
             try:
-                return {'name' : xp(self.attributes, 'Creator')['v'] }
+                return [ { 'name' : xp(self.attributes, 'Creator')['v'] } ]
             except Exception:
-                return {'name' :''}
+                return []
 
     @lazyProperty
     def tracks(self):
@@ -106,35 +107,35 @@ class AmazonAlbum(_AmazonObject, ResolverAlbum):
             return []
 
 
-class AmazonTrack(_AmazonObject, ResolverTrack):
+class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
     def __init__(self, amazon_id):
         _AmazonObject.__init__(self, amazon_id, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self, types=['track'])
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
         key = xp(album,'ASIN')['v']
         attributes = xp(album, 'ItemAttributes')
         try:
-            return {'name' : xp(attributes, 'Creator')['v'] }
+            return [ { 'name' : xp(attributes, 'Creator')['v'] } ]
         except Exception:
-            return {'name' : ''}
+            return []
 
     @lazyProperty
-    def album(self):
+    def albums(self):
         album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
         key = xp(album, 'ASIN')['v']
         attributes = xp(album, 'ItemAttributes')
         try:
-            return {
+            return [{
                 'name' : xp(attributes, 'Title')['v'],
                 'source' : 'amazon',
                 'key' : key,
-            }
+            }]
         except Exception:
-            return {'name' : ''}
+            return []
 
     @lazyProperty
     def length(self):
@@ -152,38 +153,38 @@ class AmazonTrack(_AmazonObject, ResolverTrack):
             return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             return parseDateString(xp(self.attributes, 'ReleaseDate')['v'])
         except Exception:
             return None
 
-class AmazonBook(_AmazonObject, ResolverBook):
+class AmazonBook(_AmazonObject, ResolverMediaItem):
 
     def __init__(self, amazon_id):
         _AmazonObject.__init__(self, amazon_id,  ResponseGroup='AlternateVersions,Large')
-        ResolverBook.__init__(self)
+        ResolverMediaItem.__init__(self, types=['book'])
 
     @lazyProperty
-    def author(self):
+    def authors(self):
         try:
-            return {
+            return [{
                 'name': xp(self.attributes, 'Author')['v']
-            }
+            }]
         except Exception:
-            return { 'name':'' }
+            return []
 
     @lazyProperty
-    def publisher(self):
+    def publishers(self):
         try:
-            return {
+            return [{
                 'name': xp(self.attributes, 'Publisher')['v']
-            }
+            }]
         except Exception:
-            return { 'name':'' }
+            return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             return parseDateString( xp(self.attributes, 'PublicationDate')['v'] )
         except Exception:
@@ -204,15 +205,11 @@ class AmazonBook(_AmazonObject, ResolverBook):
             return None
 
     @lazyProperty
-    def sku(self):
+    def sku_number(self):
         try:
             return xp(self.attributes, 'SKU')['v']
         except Exception:
             return None
-
-    @lazyProperty
-    def eisbn(self):
-        return None
 
     @lazyProperty
     def description(self):
@@ -255,15 +252,73 @@ class AmazonBook(_AmazonObject, ResolverBook):
             pass
         return self
 
+class AmazonVideoGame(_AmazonObject, ResolverSoftware):
+    
+    def __init__(self, amazon_id):
+        _AmazonObject.__init__(self, amazon_id,  ResponseGroup='Large')
+        ResolverSoftware.__init__(self, types=['video_game'])
+    
+    @lazyProperty
+    def authors(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Author')['v'] } ]
+        except Exception:
+            return []
+    
+    @lazyProperty
+    def publishers(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Publisher')['v'] } ]
+        except Exception:
+            return []
+    
+    @lazyProperty
+    def platform(self):
+        try:
+            return { 'name': xp(self.attributes, 'Platform')['v'] }
+        except Exception:
+            return { 'name':'' }
+    
+    @lazyProperty
+    def release_date(self):
+        try:
+            return parseDateString( xp(self.attributes, 'PublicationDate')['v'] )
+        except Exception:
+            return None
+    
+    @lazyProperty
+    def sku_number(self):
+        try:
+            return xp(self.attributes, 'SKU')['v']
+        except Exception:
+            return None
+    
+    @lazyProperty
+    def genres(self):
+        try:
+            return [ xp(self.attributes, 'Genre')['v'] ]
+        except Exception:
+            return []
+    
+    @lazyProperty
+    def description(self):
+        try:
+            review = xp(self.data, 'EditorialReview', 'Content')['v']
+        except Exception:
+            return ""
+    
+    @lazyProperty
+    def link(self):
+        try:
+            return xp(self.data, 'ItemLinks', 'ItemLink', 'URL')['v']
+        except Exception:
+            return None
+
 class AmazonSearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, target):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
-
-    @property
-    def subtype(self):
-        return self.target.type
 
 class AmazonSource(GenericSource):
     """
@@ -272,14 +327,13 @@ class AmazonSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'amazon',
             groups=[
-                'artist_display_name',
-                'genre',
-                'track_length',
-                'album_name',
+                'artists',
+                'genres',
+                'length',
+                'albums',
                 'release_date',
-                'author',
-                'publisher',
-                'num_pages',
+                'authors',
+                'publishers',
                 'isbn',
                 'desc',
                 'sku_number',
@@ -288,25 +342,35 @@ class AmazonSource(GenericSource):
                 'images',
                 #Consider for album_list, track_list
             ],
+            kinds=[
+                'media_collection',
+                'media_item',
+                'software',
+            ],
             types=[
                 'album',
                 'track',
                 'book',
+                'video_game',
             ]
         )
 
     def matchSource(self, query):
-        if query.type == 'album':
-            return self.albumSource(query)
-        elif query.type == 'track':
-            return self.trackSource(query)
-        elif query.type == 'book':
-            return self.bookSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
+
+        if query.isType('album'):
+            return self.albumSource(query)
+        if query.isType('track'):
+            return self.trackSource(query)
+        if query.isType('book'):
+            return self.bookSource(query)
+        if query.isType('video_game'):
+            return self.videoGameSource(query)
+
         return self.emptySource
 
-    def __searchGen(self, wrapper, *queries):
+    def __searchGen(self, proxy, *queries):
         def gen():
             try:
                 for params in queries:
@@ -330,33 +394,36 @@ class AmazonSource(GenericSource):
             except GeneratorExit:
                 pass
         
-        return self.generatorSource(gen(), constructor=lambda x: wrapper( x ), unique=True)
-
+        return self.generatorSource(gen(), constructor=lambda x: proxy( x ), unique=True)
+    
     def albumSource(self, query=None, query_string=None):
         if query_string is None:
             query_string = ' '.join([
                 query.name
             ])
+        
         return self.__searchGen(AmazonAlbum, {
             'test':lambda item:  xp(item, 'ItemAttributes', 'ProductTypeName')['v'] == "DOWNLOADABLE_MUSIC_ALBUM",
             'Keywords':query_string
         })
-
+    
     def trackSource(self, query=None, query_string=None):
         if query_string is None:
             query_string = ' '.join([
                 query.name
             ])
+        
         return self.__searchGen(AmazonTrack, {
             'test':lambda item:  xp(item, 'ItemAttributes', 'ProductTypeName')['v'] == "DOWNLOADABLE_MUSIC_TRACK",
             'Keywords':query_string
         })
-
+    
     def bookSource(self, query=None, query_string=None):
         if query_string is None:
             query_string = ' '.join([
                 query.name
             ])
+        
         return self.__searchGen(AmazonBook,
             {
                 'Keywords':query_string,
@@ -368,29 +435,73 @@ class AmazonSource(GenericSource):
                 'SearchIndex':'Books',
             }
         )
-
-    def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
-            return self.emptySource
+    
+    def videoGameSource(self, query=None, query_string=None):
+        if query_string is None:
+            query_string = ' '.join([
+                query.name
+            ])
+        
+        def _is_video_game(item):
+            try:
+                if xp(item, 'ItemAttributes', 'ProductGroup')['v'].lower() == "video games":
+                    return True
+            except Exception:
+                pass
             
+            try:
+               if xp(item, 'ItemAttributes', 'ProductTypeName')['v'].lower() == "console_video_game":
+                   return True
+            except Exception:
+                pass
+            
+            return False
+        
+        return self.__searchGen(AmazonVideoGame, {
+            'test'      : _is_video_game,
+            'Keywords'  : query_string, 
+        })
+    
+    def searchAllSource(self, query, timeout=None):
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
+            return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
+        
         q = query.query_string
+
+        sources = []
+
+        if query.types is None or query.isType('album'):
+            sources.append(lambda : self.albumSource(query_string=q))
+        if query.types is None or query.isType('book'):
+            sources.append(lambda : self.bookSource(query_string=q))
+        if query.types is None or query.isType('track'):
+            sources.append(lambda : self.trackSource(query_string=q))
+        if query.types is None or query.isType('video_game'):
+            sources.append(lambda : self.videoGameSource(query_string=q))
+
+        if len(sources) == 0:
+            return self.emptySource 
+
         return multipleSource(
-            [
-                lambda : self.albumSource(query_string=q),
-                lambda : self.trackSource(query_string=q),
-                lambda : self.bookSource(query_string=q),
-            ],
+            sources,
             constructor=AmazonSearchAll
         )
-
+    
     @lazyProperty
     def __amazon_api(self):
         return AmazonAPI()
-
+    
     @lazyProperty
     def __amazon(self):
         return self.__amazon_api.amazon
-
+    
     def __enrichSong(self, entity, asin):
         track = AmazonTrack(asin)
         if track.artist['name'] != '':
@@ -403,7 +514,7 @@ class AmazonSource(GenericSource):
             entity['release_date'] = track.date
         if track.length > 0:
             entity['track_length'] = track.length
-
+    
     def __enrichBook(self, entity, asin):
         book = AmazonBook(asin)
         if book.author['name'] != '':
@@ -426,14 +537,38 @@ class AmazonSource(GenericSource):
             entity['amazon_link'] = book.link
         entity['amazon_underlying'] = book.underlying.key
         try:
-            image_set =  xp(book.underlying.data, 'ImageSets','ImageSet')
+            image_set = xp(book.underlying.data, 'ImageSets','ImageSet')
             entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
             entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
-            entity['images']['tiny'] = xp(image_set,'SmallImage','URL')['v']
+            entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
         except Exception:
             logs.warning("no image set for %s" % book.underlying.key)
-
-    def wrapperFromKey(self, key, type=None):
+    
+    def __enrichVideoGame(self, entity, asin):
+        game = AmazonVideoGame(asin)
+        
+        if game.artist['name'] != '':
+            entity['artist_display_name'] = game.artist['name']
+        if len(game.genres) > 0:
+            entity['genre'] = game.genres[0]
+        if game.date != None:
+            entity['release_date'] = game.date
+        if game.description != '':
+            entity['desc'] = game.description
+        if game.sku != None:
+            entity['sku_number'] = game.sku
+        if game.platform != '':
+            entity['platform'] = game.platform
+        
+        try:
+            image_set = xp('.//ImageSets','ImageSet')
+            entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
+            entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
+            entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
+        except Exception:
+            logs.warning("no image set for %s" % asin)
+    
+    def entityProxyFromKey(self, key):
         try:
             item = _AmazonObject(amazon_id=key)
             kind = xp(item.attributes, 'ProductGroup')['v'].lower()
@@ -446,30 +581,16 @@ class AmazonSource(GenericSource):
             elif kind == 'digital music track':
                 return AmazonTrack(key)
             elif kind == 'video games':
-                raise NotImplementedError # TODO
+                return AmazonVideoGame(key)
             
             raise Exception("unsupported amazon product type")
         except KeyError:
             pass
         return None
     
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.amazon_id = wrapper.key
-        return True
-
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        # asin = entity['asin']
-        # if asin is not None and asin != '':
-        #     entity['amazon_id'] = asin
-        # else:
-        #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        if entity['amazon_id'] is not None:
-            asin = entity['amazon_id']
-            if entity['subcategory'] == 'song':
-                self.__enrichSong(entity, asin)
-            if entity['subcategory'] == 'book':
-                self.__enrichBook(entity, asin)
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.amazon_id = proxy.key
         return True
 
 if __name__ == '__main__':

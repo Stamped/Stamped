@@ -21,6 +21,7 @@ try:
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from Resolver                   import *
+    from ResolverObject             import *
     from pprint                     import pformat
 except:
     report()
@@ -35,13 +36,14 @@ class _SpotifyObject(object):
 
     Attributes:
 
-    spotify - an instance of Spotify (API wrapper)
+    spotify - an instance of Spotify (API proxy)
     """
 
     def __init__(self, spotify_id, spotify=None):
         if spotify is None:
             spotify = globalSpotify()
-        self.__spotify = spotify
+        
+        self.__spotify    = spotify
         self.__spotify_id = spotify_id
 
     @property
@@ -57,18 +59,20 @@ class _SpotifyObject(object):
         return "spotify"
 
     def __repr__(self):
+        # NOTE: availability generally includes *many* ISO country codes which 
+        # make sifting through debug printouts painful, so disable them here.
         data = copy(self.data)
         data.pop('availability', None)
-        return "<%s %s %s> %s" % (self.source, self.type, self.name, pformat(data))
+        return "<%s %s %s> %s" % (self.source, self.types, self.name, pformat(data))
 
 
-class SpotifyArtist(_SpotifyObject, ResolverArtist):
+class SpotifyArtist(_SpotifyObject, ResolverPerson):
     """
-    Spotify artist wrapper
+    Spotify artist proxy
     """
     def __init__(self, spotify_id):
         _SpotifyObject.__init__(self, spotify_id)  
-        ResolverArtist.__init__(self)
+        ResolverPerson.__init__(self, types=['artist'])
 
     @lazyProperty
     def data(self):
@@ -127,13 +131,13 @@ class SpotifyArtist(_SpotifyObject, ResolverArtist):
         return list(tracks.values())
 
 
-class SpotifyAlbum(_SpotifyObject, ResolverAlbum):
+class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
     """
-    Spotify album wrapper
+    Spotify album proxy
     """
     def __init__(self, spotify_id):
         _SpotifyObject.__init__(self, spotify_id)  
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self, types=['album'])
 
     @lazyProperty
     def data(self):
@@ -144,27 +148,26 @@ class SpotifyAlbum(_SpotifyObject, ResolverAlbum):
         return self.data['name']
 
     @lazyProperty
-    def artist(self):
-        return { 'name': self.data['artist'] }
+    def artists(self):
+        try:
+            return [ { 'name': self.data['artist'] } ]
+        except Exception:
+            return []
 
     @lazyProperty
     def tracks(self):
         track_list = self.data['tracks']
-        return [
-            {
-                'name':track['name'],
-            }
-                for track in track_list
-        ]
+        
+        return [ { 'name' : track['name'], } for track in track_list ]
 
 
-class SpotifyTrack(_SpotifyObject, ResolverTrack):
+class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
     """
-    Spotify track wrapper
+    Spotify track proxy
     """
     def __init__(self, spotify_id):
         _SpotifyObject.__init__(self, spotify_id)  
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self, types=['track'])
 
     @lazyProperty
     def data(self):
@@ -175,19 +178,25 @@ class SpotifyTrack(_SpotifyObject, ResolverTrack):
         return self.data['name']
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         try:
-            return {'name': self.data['artists'][0]['name'] }
+            return [ { 'name': self.data['artists'][0]['name'] } ]
         except Exception:
-            return {'name':''}
+            return []
 
     @lazyProperty
-    def album(self):
-        return {'name':self.data['album']['name']}
+    def albums(self):
+        try:
+            return [ { 'name': self.data['album']['name'] } ]
+        except Exception:
+            return []
 
     @lazyProperty
     def length(self):
-        return float(self.data['length'])
+        try:
+            return float(self.data['length'])
+        except Exception:
+            return -1
 
 
 class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
@@ -196,18 +205,19 @@ class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 class SpotifySource(GenericSource):
     """
     """
     def __init__(self):
         GenericSource.__init__(self, 'spotify',
             groups=[
-                'album_list',
-                'track_list',
+                'albums',
+                'tracks',
+            ],
+            kinds=[
+                'person',
+                'media_collection',
+                'media_item',
             ],
             types=[
                 'artist',
@@ -224,37 +234,40 @@ class SpotifySource(GenericSource):
     def urlField(self):
         return None
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key, type=None):
         try:
             item = self.__spotify.lookup(key)
+            
             if item['info']['type'] == 'artist':
                 return SpotifyArtist(key)
             if item['info']['type'] == 'album':
                 return SpotifyAlbum(key)
             if item['info']['type'] == 'track':
                 return SpotifyTrack(key)
+            
             raise KeyError
         except KeyError:
-            logs.warning('UNABLE TO FIND SPOTIFY ITEM FOR ID: %s' % key)
+            logs.warning('Unable to find Spotify item for key: %s' % key)
             raise
+        
         return None
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.spotify_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.spotify_id = proxy.key
         return True
 
     def matchSource(self, query):
-        if query.type == 'artist':
+        if query.kind == 'person' and query.isType('artist'):
             return self.artistSource(query)
-        elif query.type == 'album':
+        if query.kind == 'media_collection' and query.isType('album'):
             return self.albumSource(query)
-        elif query.type == 'track':
+        if query.kind == 'media_item' and query.isType('track'):
             return self.trackSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        
+        return self.emptySource
 
     def trackSource(self, query=None, query_string=None):
         if query is not None:
@@ -263,6 +276,7 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         tracks = self.__spotify.search('track',q=q)['tracks']
         return listSource(tracks, constructor=lambda x: SpotifyTrack( x['href'] ))
     
@@ -273,6 +287,7 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         albums = self.__spotify.search('album',q=q)['albums']
         albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
         return listSource(albums, constructor=lambda x: SpotifyAlbum( x['href'] ))
@@ -285,12 +300,20 @@ class SpotifySource(GenericSource):
             q = query_string
         else:
             raise ValueError("query and query_string cannot both be None")
+        
         artists = self.__spotify.search('artist',q=q)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
             
         q = query.query_string
         return multipleSource(

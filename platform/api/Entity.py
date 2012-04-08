@@ -8,12 +8,15 @@ __license__   = "TODO"
 import Globals, logs, re
 import unicodedata, utils
 
-from difflib        import SequenceMatcher
-from Schemas        import *
-from libs.LibUtils  import parseDateString
-from datetime       import datetime
-from bson .objectid import ObjectId 
-
+try:
+    from Schemas        import *
+    from difflib        import SequenceMatcher
+    from libs.LibUtils  import parseDateString
+    from datetime       import datetime
+    from bson.objectid  import ObjectId 
+except:
+    logs.report()
+    raise
 
 categories = set([
     'food', 
@@ -50,7 +53,6 @@ subcategories = {
     #           music
     # --------------------------
     'artist'            : 'music', 
-    'song'              : 'music', 
     'album'             : 'music', 
     'track'             : 'music', 
     
@@ -174,7 +176,6 @@ def deriveKindFromSubcategory(subcategory):
 
         'book'              : 'media_item', 
         'track'             : 'media_item', 
-        'song'              : 'media_item', 
         'movie'             : 'media_item', 
 
         'app'               : 'software', 
@@ -221,17 +222,18 @@ def deriveKindFromSubcategory(subcategory):
     }
     if subcategory in mapping:
         return mapping[subcategory]
+    if subcategory == 'song':
+        return 'media_item'
     return 'other'
 
 def deriveTypesFromSubcategories(subcategories):
     result = set()
 
+    if 'song' in subcategories:
+        result.add('track')
+
     for item in types.intersection(subcategories):
         result.add(item)
-
-    if 'song' in result:
-        result.remove('song')
-        result.add('track')
 
     return result 
 
@@ -247,25 +249,15 @@ def deriveCategoryFromTypes(types):
         return subcategories[subcategory]
     return 'other'
 
-def _getEntityObjectFromKind(kind):
-    if kind == 'place':
-        return PlaceEntity
-    if kind == 'person':
-        return PersonEntity
-    if kind == 'media_collection':
-        return MediaCollectionEntity
-    if kind == 'media_item':
-        return MediaItemEntity
-    if kind == 'software':
-        return SoftwareEntity
-    return BasicEntity
-
-def buildEntity(data=None, kind=None):
+def buildEntity(data=None, kind=None, mini=False):
     if data is not None:
         if 'schema_version' not in data:
             return upgradeEntityData(data)
         kind = data.pop('kind', kind)
-    new = _getEntityObjectFromKind(kind)
+    if mini:
+        new = getEntityMiniObjectFromKind(kind)
+    else:
+        new = getEntityObjectFromKind(kind)
     return new(data)
 
 def upgradeEntityData(entityData):
@@ -278,7 +270,7 @@ def upgradeEntityData(entityData):
     if kind == 'other' and ('coordinates' in old or 'address' in old):
         kind = PlaceEntity
     
-    new     = _getEntityObjectFromKind(kind)()
+    new     = getEntityObjectFromKind(kind)()
     
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time

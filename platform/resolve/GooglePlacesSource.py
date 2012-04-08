@@ -14,16 +14,17 @@ import Globals
 from logs import report
 
 try:
-    from GenericSource          import GenericSource
-    from GooglePlaces           import GooglePlaces
-    from Resolver               import *
-    from utils                  import lazyProperty
-    from gevent.pool            import Pool
-    from datetime               import datetime
-    from functools              import partial
-    from LibUtils               import states
-    from pprint                 import pformat
     import logs
+    from GenericSource              import GenericSource
+    from GooglePlaces               import GooglePlaces
+    from Resolver                   import *
+    from ResolverObject             import *
+    from utils                      import lazyProperty
+    from gevent.pool                import Pool
+    from datetime                   import datetime
+    from functools                  import partial
+    from LibUtils                   import states
+    from pprint                     import pformat
 except:
     report()
     raise
@@ -110,18 +111,20 @@ class GooglePlacesPlace(ResolverPlace):
             return None
     
     @lazyProperty
-    def address_string(self):
+    def formatted_address(self):
         if 'address_string' in self.data:
             return self.data['address_string']
+        return None
     
     @lazyProperty
     def address(self):
         if 'address_components' not in self.data:
             return {}
-        data = {
-        }
+        
+        data   = { }
         number = None
-        route = None
+        route  = None
+        
         for comp in self.data['address_components']:
             if 'types' in comp and 'long_name' in comp:
                 name = comp['long_name']
@@ -141,14 +144,17 @@ class GooglePlacesPlace(ResolverPlace):
                     number = name
                 elif 'route' in types:
                     route = name
+        
         for comp in self.data['address_components']:
             if 'types' in comp and 'long_name' in comp:
                 name = comp['long_name']
                 types = comp['types']
                 if 'sublocality' in types and 'locality' not in data:
                     data['locality'] = name
+        
         if route is not None and number is not None:
             data['street'] = "%s %s" % (number, route)
+        
         return data
 
     @lazyProperty
@@ -164,28 +170,29 @@ class GooglePlacesPlace(ResolverPlace):
                         locality = name
                     elif 'sublocality' in types:
                         sublocality = name
+        
         if locality is not None and sublocality is not None:
             return [sublocality]
         else:
             return []
-
+    
     @lazyProperty
     def phone(self):
         if 'formatted_phone_number' in self.data:
             return self.data['formatted_phone_number']
         else:
             return None
-
+    
     @lazyProperty
-    def subcategory(self):
-        if 'subcategory' in self.data:
-            return self.data['subcategory']
-        return 'other'
+    def types(self):
+        if 'type' in self.data:
+            return [ self.data['type'] ]
+        return []
 
     @property 
     def source(self):
         return 'googleplaces'
-
+    
     def __repr__(self):
         return pformat(self.data)
 
@@ -196,14 +203,10 @@ class GooglePlacesSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 
 class GooglePlacesSource(GenericSource):
     """
-    Data-Source wrapper for Google Places.
+    Data-Source proxy for Google Places.
     """
     def __init__(self):
         GenericSource.__init__(self, 'googleplaces',
@@ -213,11 +216,11 @@ class GooglePlacesSource(GenericSource):
                 'site',
                 'neighborhood',
             ],
-            types=[
+            kinds=[
                 'place',
             ]
         )
-
+    
     @lazyProperty
     def __places(self):
         return GooglePlaces()
@@ -227,8 +230,9 @@ class GooglePlacesSource(GenericSource):
             return self.placeSource(query)
         elif query.type == 'search_all':
             return self.searchAllSource(query)
+        
         return self.emptySource
-
+    
     def placeSource(self, query):
         def gen():
             try:
@@ -246,45 +250,50 @@ class GooglePlacesSource(GenericSource):
                             yield GooglePlacesPlace(details)
             except GeneratorExit:
                 pass
+        
         return self.generatorSource(gen())
 
-    def searchAllSource(self, query, timeout=None, types=None):
-        if types is not None and len(self.types.intersection(types)) == 0:
+    def searchAllSource(self, query, timeout=None):
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
-            
+
+        logs.info('Searching %s...' % self.sourceName)
+        
         def gen():
             try:
                 raw_results = []
-
+                
                 def getGooglePlacesSearch(q):
                     # Hacky conversion
                     params  = {'name': q.query_string, 'radius': 20000}
                     results = self.__places.getEntityResultsByLatLng(q.coordinates, params)
+                    
                     if results is None:
                         return self.emptySource
                     
                     for result in results:
                         data = {}
-                        data['reference'] = result.googleplaces_reference
-                        data['name'] = result.title
-                        data['latitude'] = result.lat
-                        data['longitude'] = result.lng
-                        data['address_string'] = result.neighborhood
+                        data['reference']       = result.googleplaces_reference
+                        data['name']            = result.title
+                        data['latitude']        = result.lat
+                        data['longitude']       = result.lng
+                        data['address_string']  = result.neighborhood
+                        data['type']            = result.subcategory
                         
-                        # TODO: TYPE
-                        data['subcategory'] = result.subcategory
                         raw_results.append(data)
-
+                
                 def getGoogleNationalSearch(q):
-                    # Hacky conversion
                     results = self.__places.getEntityAutocompleteResults(q.query_string, q.coordinates)
+                    
                     for result in results:
+                        # Hacky conversion
                         data = {}
-                        data['reference'] = result.googleplaces_reference
-                        data['name'] = result.title
-                        data['address_string'] = result.formatted_address
+                        data['reference']       = result.googleplaces_reference
+                        data['name']            = result.title
+                        data['address_string']  = result.formatted_address
                         raw_results.append(data)
-
+                
                 if query.coordinates is not None:
                     pool = Pool(2)
                     pool.spawn(getGooglePlacesSearch, query)
@@ -292,50 +301,52 @@ class GooglePlacesSource(GenericSource):
                     pool.join(timeout=timeout)
                 else:
                     getGoogleNationalSearch(query)
-
+                
                 for result in raw_results:
                     yield GooglePlacesSearchAll(GooglePlacesPlace(result))
-
             except GeneratorExit:
                 pass
+        
         return self.generatorSource(gen())
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             item = self.__places.getPlaceDetails(key)
             return GooglePlacesPlace(item)
         except KeyError:
             pass
+        
         return None
-
+    
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if not controller.shouldEnrich('googleplaces', self.sourceName, entity):
             return False
-    
+        
         details = self.__details(entity)
         if details is None:
             entity['googleplaces_id'] = None
             timestamps['googleplaces'] = controller.now
             return True
         else:
-            print(pformat(details))
+            logs.debug(pformat(details))
             entity['googleplaces_id'] = details['reference']
-
+        
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:
             self.writeFields(entity, None, reformatted)
-
+        
         neighborhood = self.__neighborhood(details)
         if neighborhood is not None:
             entity['neighborhood'] = neighborhood
-    
+        
         if 'formatted_phone_number' in details and details['formatted_phone_number'] != '':
             entity['phone'] = details['formatted_phone_number']
-    
+        
         if 'website' in details and details['website'] != '':
             entity['site'] = details['website']
+        
         return True
-
+    
     def __details(self, entity):
         try:
             details = None
@@ -350,10 +361,11 @@ class GooglePlacesSource(GenericSource):
             return details
         except:
             return None
-
+    
     def __neighborhood(self, details):
-        locality = None
+        locality    = None
         sublocality = None
+        
         if 'address_components' in details:
             for comp in details['address_components']:
                 if 'types' in comp and 'long_name' in comp:
@@ -363,14 +375,16 @@ class GooglePlacesSource(GenericSource):
                         locality = name
                     elif 'sublocality' in types:
                         sublocality = name
+        
         if locality is not None and sublocality is not None:
             return sublocality
         else:
             return None
-
+    
     def __reformatAddress(self, results):
         if 'address_components' not in results:
             return None
+        
         data = {
             'address_street':None,
             'address_street_ext':None,
@@ -380,11 +394,13 @@ class GooglePlacesSource(GenericSource):
             'address_country':None,
         }
         number = None
-        route = None
+        route  = None
+        
         for comp in results['address_components']:
             if 'types' in comp and 'long_name' in comp:
-                name = comp['long_name']
+                name  = comp['long_name']
                 types = comp['types']
+                
                 if 'administrative_area_level_1' in types:
                     #TODO consider country checking
                     if name in states:
@@ -400,19 +416,20 @@ class GooglePlacesSource(GenericSource):
                     number = name
                 elif 'route' in types:
                     route = name
-        for comp in results['address_components']:
-            if 'types' in comp and 'long_name' in comp:
-                name = comp['long_name']
-                types = comp['types']
+                
                 if 'sublocality' in types and data['address_locality'] is None:
                     data['address_locality'] = name
+        
         if route is not None and number is not None:
             data['address_street'] = "%s %s" % (number, route)
+        
         data2 = {}
         for k,v in data.items():
             if v is None and k != 'address_street_ext':
                 return None
+            
             data2[tuple(k.split('.'))] = _constant(v)
+        
         return data2
     
 if __name__ == '__main__':

@@ -59,7 +59,7 @@ class AmazonBookFeed(AExternalDumpEntitySource):
         utils.log("[%s] finished parsing %d feeds" % (self, num_feeds))
     
     def _parse_feed(self, pool, url):
-        #utils.log("[%s] parsing feed %s" % (self, url))
+        utils.log("[%s] parsing feed %s" % (self, url))
         data = feedparser.parse(url)
         
         for entry in data.entries:

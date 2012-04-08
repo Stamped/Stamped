@@ -8,7 +8,6 @@ __license__   = "TODO"
 import Globals, utils
 
 from StampedTestUtils       import *
-from api.Schemas            import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 
 class BookSearchTests(ASearchTestSuite):
@@ -76,6 +75,16 @@ class BookSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'the fault in our stars', }, [ 
                 SearchResultConstraint(title='the fault in our stars', types='book'), 
+            ]), 
+            ({ 'query' : 'lord of the flies', }, [ 
+                SearchResultConstraint(title='lord of the flies', types='book'), 
+                SearchResultConstraint(title='lord of the flies', types='movie'), 
+            ]), 
+            ({ 'query' : 'amrar', }, [ 
+                SearchResultConstraint(title='amrar va lukhar', types='book'), 
+            ]), 
+            ({ 'query' : 'freakonomics', }, [ 
+                SearchResultConstraint(title='freakonomics', types='book', match='prefix'), 
             ]), 
         ]
         

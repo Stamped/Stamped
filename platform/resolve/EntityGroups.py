@@ -9,55 +9,64 @@ import Globals
 from logs import report
 
 try:
-    from BasicFieldGroup    import BasicFieldGroup
+    from BasicFieldGroup        import BasicFieldGroup
+    from SeedSource             import SeedSource
+    from FactualSource          import FactualSource
+    from GooglePlacesSource     import GooglePlacesSource
+    from SinglePlatformSource   import SinglePlatformSource
+    from TMDBSource             import TMDBSource
+    from FormatSource           import FormatSource
+    from RdioSource             import RdioSource
+    from SpotifySource          import SpotifySource
+    from iTunesSource           import iTunesSource
+    from AmazonSource           import AmazonSource
+    from StampedSource          import StampedSource
 except:
     report()
     raise
 
-class ASubcategoryGroup(BasicFieldGroup):
+class AKindTypeGroup(BasicFieldGroup):
     def __init__(self, *args, **kwargs):
         BasicFieldGroup.__init__(self, *args, **kwargs)
-        self.__eligible = set( )
+        self.__kinds = set( )
+        self.__types = set( )
         
-    def addEligible(self, subcategory):
-        self.__eligible.add(subcategory)
+    def addKind(self, kind):
+        self.__kinds.add(kind)
 
-    def removeEligible(self, subcategory):
-        self.__eligible.remove(subcategory)
+    def removeKind(self, kind):
+        self.__kinds.remove(kind)
+        
+    def addType(self, t):
+        self.__types.add(t)
+
+    def removeType(self, t):
+        self.__types.remove(t)
     
     def eligible(self, entity):
-        if entity.subcategory in self.__eligible:
-            return True
-        else:
-            return False  
+        if len(self.__kinds) == 0 or entity.kind in self.__kinds:
+            if len(self.__types) == 0 or len(self.__types.intersection(entity.types)) > 0:
+                return True
+        return False
 
-class APlaceGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
-        eligible = set( [
-            'restaurant',
-            'bar', 
-            'bakery',
-            'cafe', 
-            'market',
-            'food',
-            'night_club',
-            'establishment',
-        ] )
-        for v in eligible:
-            self.addEligible(v)
-
-class ARestaurantGroup(APlaceGroup):
+class APlaceGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        APlaceGroup.__init__(self, *args, **kwargs)
-        self.removeEligible('establishment')
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('place')
 
-class AMediaGroup(ASubcategoryGroup):
+class APersonGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('person')
+
+class AMediaCollectionGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_collection')
+
         eligible = set( [
             'book',
             'movie',
@@ -69,24 +78,56 @@ class AMediaGroup(ASubcategoryGroup):
         for v in eligible:
             self.addEligible(v)
 
-class ABookGroup(ASubcategoryGroup):
+class AMediaItemGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
-        self.addEligible('book')
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_item')
 
-class AMovieGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
-        self.addEligible('movie')
-
-class AFilmGroup(ASubcategoryGroup):
+class ASoftwareGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
-        self.addEligible('movie')
-        self.addEligible('tv')
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('software')
+
+class ARestaurantGroup(APlaceGroup):
+
+    def __init__(self, *args, **kwargs):
+        APlaceGroup.__init__(self, *args, **kwargs)
+        eligible = set( [
+            'restaurant',
+            'bar', 
+            'bakery',
+            'cafe', 
+            'market',
+            'food',
+            'night_club',
+        ] )
+        for v in eligible:
+            self.addType(v)
+
+class ABookGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_item')
+        self.addType('book')
+
+class AMovieGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_item')
+        self.addType('movie')
+
+class AFilmGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_collection')
+        self.addKind('media_item')
+        self.addType('movie')
+        self.addType('tv')
 
 class FactualGroup(APlaceGroup):
 
@@ -134,37 +175,64 @@ class FandangoGroup(AMovieGroup):
         self.addField(['fandango_id'])
         self.addField(['fandango_url'])
 
-class RdioGroup(ASubcategoryGroup):
-
+class RdioGroup(AKindTypeGroup):
+    
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'rdio')
+        AKindTypeGroup.__init__(self, 'rdio')
+        self.addKind('person')
+        self.addType('artist')
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('song')
+
         self.addField(['rdio_id'])
         self.addField(['rdio_url'])
-        self.addEligible('song')
-        self.addEligible('artist')
-        self.addEligible('album')
 
-class SpotifyGroup(ASubcategoryGroup):
+class TheTVDBGroup(AKindTypeGroup):
+    
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'thetvdb')
+        self.addKind('media_item')
+        self.addType('album')
+        self.addKind('media_collection')
+        self.addType('tv')
+
+        self.addField(['thetvdb_id'])
+        self.addField(['imdb_id'])
+
+class SpotifyGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'spotify')
+        AKindTypeGroup.__init__(self, 'spotify')
+        self.addKind('person')
+        self.addType('artist')
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('song')
+
         self.addField(['spotify_id'])
         self.addField(['spotify_url'])
-        self.addEligible('song')
-        self.addEligible('artist')
-        self.addEligible('album')
 
-class iTunesGroup(ASubcategoryGroup):
+class iTunesGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'itunes')
+        AKindTypeGroup.__init__(self, 'itunes')
+        self.addKind('person')
+        self.addType('artist')
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addType('tv')
+        self.addKind('media_item')
+        self.addType('song')
+        self.addType('movie')
+        self.addType('book')
+        self.addKind('software')
+        self.addType('app')
+
         self.addField(['itunes_id'])
         self.addField(['itunes_url'])
-        self.addEligible('song')
-        self.addEligible('artist')
-        self.addEligible('album')
-        self.addEligible('movie')
-        self.addEligible('book')
 
 class AddressGroup(APlaceGroup):
 
@@ -224,94 +292,106 @@ class MenuGroup(ARestaurantGroup):
         self.addNameField()
         self.addDecoration(['menu'])
 
-class ReleaseDateGroup(AMediaGroup):
+class ReleaseDateGroup(AKindTypeGroup):
 
     def __init__(self):
-        AMediaGroup.__init__(self, 'release_date')
+        AKindTypeGroup.__init__(self, 'release_date')
+        self.addKind('media_collection')
+        self.addKind('media_item')
+        self.addKind('software')
         self.addNameField()
 
-class MPAARatingGroup(AMediaGroup):
+class MPAARatingGroup(AKindTypeGroup):
 
     def __init__(self):
-        AMediaGroup.__init__(self, 'mpaa_rating')
+        AKindTypeGroup.__init__(self, 'mpaa_rating')
+        self.addKind('media_collection')
+        self.addType('tv')
+        self.addKind('media_item')
+        self.addType('movie')
         self.addNameField()
 
-class GenreGroup(AMediaGroup):
+class GenresGroup(AKindTypeGroup):
 
     def __init__(self):
-        AMediaGroup.__init__(self, 'genre')
+        AKindTypeGroup.__init__(self, 'genres')
+        self.addKind('person')
+        self.addKind('media_collection')
+        self.addKind('media_item')
+        self.addKind('software')
         self.addNameField()
-        self.addEligible('artist')
 
-class ArtistDisplayNameGroup(AMediaGroup):
+class ArtistsGroup(AKindTypeGroup):
 
     def __init__(self):
-        AMediaGroup.__init__(self, 'artist_display_name')
+        AKindTypeGroup.__init__(self, 'artists')
+        self.addKind('media_collection')
+        self.addKind('media_item')
         self.addNameField()
 
-class TrackLengthGroup(ASubcategoryGroup):
+class LengthGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'track_length')
+        AKindTypeGroup.__init__(self, 'length')
+        self.addKind('media_collection')
+        self.addKind('media_item')
         self.addNameField()
-        self.addEligible('song')
-        self.addEligible('movie')
 
-class ShortDescriptionGroup(ASubcategoryGroup):
+class ShortDescriptionGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'short_description')
+        AKindTypeGroup.__init__(self, 'short_description')
+        self.addKind('media_collection')
+        self.addType('tv')
+        self.addKind('media_item')
+        self.addType('movie')
+
         self.addNameField()
-        self.addEligible('movie')
-        self.addEligible('tv')
-
-class AlbumListGroup(ASubcategoryGroup):
+        
+class AlbumsGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'album_list', source_path=['albums_source'], timestamp_path=['albums_timestamp'])
-        # self.addNameField()
-        self.addField(['albums'])
-        self.addEligible('artist')
-
-class TrackListGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'track_list', source_path=['tracks_source'], timestamp_path=['tracks_timestamp'])
-        # self.addNameField()
-        self.addField(['tracks'])
-        self.addEligible('artist')
-        self.addEligible('album')
-
-class SongsGroup(ASubcategoryGroup):
-
-    def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'songs')
+        AKindTypeGroup.__init__(self, 'albums')
+        self.addKind('person')
+        self.addType('artist')
         self.addNameField()
-        self.addEligible('artist')
 
-class AlbumNameGroup(ASubcategoryGroup):
+class TracksGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'album_name')
+        AKindTypeGroup.__init__(self, 'tracks')
+        self.addKind('person')
+        self.addType('artist')
+        self.addKind('media_collection')
+        self.addType('album')
+
         self.addNameField()
-        self.addEligible('song')
-
-
-class IMDBGroup(ASubcategoryGroup):
+        
+class CollectionsGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, 'imdb')
+        AKindTypeGroup.__init__(self, 'collections')
+        self.addKind('media_item')
+        self.addType('track')
+        self.addNameField()
+
+class IMDBGroup(AFilmGroup):
+
+    def __init__(self, *args, **kwargs):
+        AFilmGroup.__init__(self, 'imdb')
         self.addField(['imdb_id'])
-        self.addEligible('tv')
-        self.addEligible('movie')
 
-class AAmazonGroup(ASubcategoryGroup):
+class AAmazonGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        ASubcategoryGroup.__init__(self, *args, **kwargs)
-        self.addEligible('book')
-        self.addEligible('song')
-        self.addEligible('album')
+        AKindTypeGroup.__init__(self, *args, **kwargs)
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('book')
+        self.addType('track')
+        self.addKind('software')
+        self.addType('video_game')
 
 class AmazonGroup(AAmazonGroup):
 
@@ -319,7 +399,6 @@ class AmazonGroup(AAmazonGroup):
         AAmazonGroup.__init__(self, 'amazon')
         self.addField(['amazon_id'])
         self.addField(['amazon_url'])
-
 
 class AmazonLinkGroup(AAmazonGroup):
 
@@ -333,11 +412,10 @@ class AmazonUnderlyingGroup(AAmazonGroup):
         AAmazonGroup.__init__(self, 'amazon_underlying')
         self.addNameField()
  
- 
-class DirectorGroup(AFilmGroup):
+class DirectorsGroup(AFilmGroup):
 
     def __init__(self):
-        AFilmGroup.__init__(self, 'director')
+        AFilmGroup.__init__(self, 'directors')
         self.addNameField()
 
 class CastGroup(AFilmGroup):
@@ -346,39 +424,11 @@ class CastGroup(AFilmGroup):
         AFilmGroup.__init__(self, 'cast')
         self.addNameField()
 
-class SubtitleGroup(BasicFieldGroup):
-
-    def __init__(self):
-        BasicFieldGroup.__init__(self, 'subtitle')
-        self.addNameField()
-
-    def eligible(self, entity):
-        return True
-
 class DescGroup(BasicFieldGroup):
 
     def __init__(self):
         BasicFieldGroup.__init__(self, 'desc')
         self.addNameField()
-
-    def eligible(self, entity):
-        return True
-
-class MangledTitleGroup(BasicFieldGroup):
-
-    def __init__(self):
-        BasicFieldGroup.__init__(self, 'mangled_title')
-        self.addNameField()
-
-    def eligible(self, entity):
-        return True
-
-class SubcategoryGroup(BasicFieldGroup):
-
-    def __init__(self):
-        BasicFieldGroup.__init__(self, 'subcategory')
-        self.addNameField()
-        self.addField(['category'])
 
     def eligible(self, entity):
         return True
@@ -396,24 +446,20 @@ class ImagesGroup(BasicFieldGroup):
 
     def __init__(self):
         BasicFieldGroup.__init__(self, 'images')
-        self.addField(['images','large'])
-        self.addField(['images','small'])
-        self.addField(['images','tiny'])
 
     def eligible(self, entity):
         return True
 
-
-class AuthorGroup(ABookGroup):
+class AuthorsGroup(ABookGroup):
 
     def __init__(self):
-        ABookGroup.__init__(self, 'author')
+        ABookGroup.__init__(self, 'authors')
         self.addNameField()
 
-class PublisherGroup(ABookGroup):
+class PublishersGroup(ABookGroup):
 
     def __init__(self):
-        ABookGroup.__init__(self, 'publisher')
+        ABookGroup.__init__(self, 'publishers')
         self.addNameField()
 
 class ISBNGroup(ABookGroup):
@@ -422,16 +468,67 @@ class ISBNGroup(ABookGroup):
         ABookGroup.__init__(self, 'isbn')
         self.addNameField()
 
-class NumPagesGroup(ABookGroup):
-
-    def __init__(self):
-        ABookGroup.__init__(self, 'num_pages')
-        self.addNameField()
-
-
 class SKUNumberGroup(ABookGroup):
 
     def __init__(self):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
 
+allGroups = [
+    FactualGroup,
+    SinglePlatformGroup,
+    GooglePlacesGroup,
+    TMDBGroup,
+    RdioGroup,
+    SpotifyGroup,
+    iTunesGroup,
+    AmazonGroup,
+    FandangoGroup,
+    StampedTombstoneGroup,
+
+    AmazonLinkGroup,
+    AmazonUnderlyingGroup,
+    OpenTableGroup,
+    OpenTableNicknameGroup,
+
+    DescGroup,
+    ImagesGroup,
+
+    AddressGroup,
+    CoordinatesGroup,
+    PhoneGroup,
+    SiteGroup,
+    PriceRangeGroup,
+    CuisineGroup,
+    MenuGroup,
+    ReleaseDateGroup,
+    DirectorsGroup,
+    CastGroup,
+    LengthGroup,
+    CollectionsGroup,
+    AlbumsGroup,
+    TracksGroup,
+    MPAARatingGroup,
+    ArtistsGroup,
+    GenresGroup,
+    AuthorsGroup,
+    PublishersGroup,
+    ISBNGroup,
+    SKUNumberGroup,
+
+    ShortDescriptionGroup, # Deprecated?
+]
+
+allSources = [
+    SeedSource,
+    FormatSource,
+    FactualSource,
+    GooglePlacesSource,
+    SinglePlatformSource,
+    AmazonSource,
+    TMDBSource,
+    RdioSource,
+    SpotifySource,
+    iTunesSource,
+    StampedSource,
+]

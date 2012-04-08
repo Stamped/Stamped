@@ -21,6 +21,7 @@ try:
     import logs
     from pprint                     import pformat
     from Resolver                   import *
+    from ResolverObject             import *
     from libs.LibUtils              import parseDateString
     from StampedSource              import StampedSource
 except:
@@ -37,22 +38,22 @@ class _iTunesObject(object):
     Attributes:
 
     data - the type specific iTunes data for the object.
-    itunes - an instance of iTunes (API wrapper)
+    itunes - an instance of iTunes (API entity proxy)
     """
     
     def __init__(self, itunes_id=None, data=None, itunes=None):
         if itunes is None:
             itunes = globaliTunes()
-        self.__itunes = itunes
-        self.__data = data
-        self.__itunes_id = itunes_id
+        self.__itunes       = itunes
+        self.__data         = data
+        self.__itunes_id    = itunes_id
     
     @lazyProperty
     def data(self):
         if self.__data == None:
-            if self.type == 'album' or self.type == 'artist':
+            if self.isType('album') or self.isType('artist'):
                 entity_field = 'song'
-                if self.type == 'artist':
+                if self.isType('artist'):
                     entity_field = 'album,song'
                 results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field)['results']
                 m = {
@@ -72,7 +73,7 @@ class _iTunesObject(object):
                             k = 'artists'
                     if k is not None:
                         m[k].append(result)
-                if self.type == 'artist':
+                if self.isType('artist'):
                     data = m['artists'][0]
                     data['albums'] = m['albums']
                     data['tracks'] = m['tracks']
@@ -105,13 +106,13 @@ class _iTunesObject(object):
         return pformat( self.data )
 
 
-class iTunesArtist(_iTunesObject, ResolverArtist):
+class iTunesArtist(_iTunesObject, ResolverPerson):
     """
-    iTunes artist wrapper
+    iTunes artist proxy
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverArtist.__init__(self)
+        ResolverPerson.__init__(self, types=['artist'])
 
     @lazyProperty
     def name(self):
@@ -156,12 +157,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            results = self.itunes.method('lookup', id=self.key,entity='song')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='song')['results']
         return [
             {
-                'name':track['trackName'],
-                'key':track['trackId'],
-                'data':track,
+                'name':             track['trackName'],
+                'key':              track['trackId'],
+                'url':              track['trackViewUrl'],
+                'track_number':     track['trackNumber'],
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]
@@ -169,13 +171,13 @@ class iTunesArtist(_iTunesObject, ResolverArtist):
     #def __repr__(self):
     #    return "%s, %s" % (pformat(self.tracks), pformat(self.albums))
 
-class iTunesAlbum(_iTunesObject, ResolverAlbum):
+class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     """
-    iTunes album wrapper
+    iTunes album proxy
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverAlbum.__init__(self)
+        ResolverMediaCollection.__init__(self, types=['album'])
 
     @lazyProperty
     def name(self):
@@ -193,8 +195,15 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
         return self.data['collectionId']
 
     @lazyProperty
-    def artist(self):
-        return {'name' : self.data['artistName'] }
+    def artists(self):
+        try:
+            return [{
+                'name':     self.data['artistName'],
+                'key':      self.data['artistId'],
+                'url':      self.data['artistViewUrl'],
+            }]
+        except Exception:
+            return []
 
     @lazyProperty
     def genres(self):
@@ -212,19 +221,22 @@ class iTunesAlbum(_iTunesObject, ResolverAlbum):
             results = self.itunes.method('lookup', id=self.key, entity='song')['results']
         return [
             {
-                'name':track['trackName'],
+                'name':             track['trackName'],
+                'key':              track['trackId'],
+                'url':              track['trackViewUrl'],
+                'track_number':     track['trackNumber'],
             }
                 for track in results if track.pop('wrapperType',None) == 'track' 
         ]
 
 
-class iTunesTrack(_iTunesObject, ResolverTrack):
+class iTunesTrack(_iTunesObject, ResolverMediaItem):
     """
-    iTunes track wrapper
+    iTunes track proxy
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverTrack.__init__(self)
+        ResolverMediaItem.__init__(self, types=['track'])
 
     @lazyProperty
     def name(self):
@@ -242,18 +254,26 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
         return self.data['trackId']
 
     @lazyProperty
-    def artist(self):
+    def artists(self):
         try:
-            return {'name' : self.data['artistName'] }
+            return [{
+                'name':     self.data['artistName'],
+                'key':      self.data['artistId'],
+                'url':      self.data['artistViewUrl'],
+            }]
         except Exception:
-            return {'name' : ''}
+            return []
 
     @lazyProperty
-    def album(self):
+    def albums(self):
         try:
-            return {'name' : self.data['collectionName'] }
+            return [{
+                'name':     self.data['collectionName'],
+                'key':      self.data['collectionId'],
+                'url':      self.data['collectionViewUrl'],
+            }]
         except Exception:
-            return {'name' : ''}
+            return []
 
     @lazyProperty
     def genres(self):
@@ -267,13 +287,13 @@ class iTunesTrack(_iTunesObject, ResolverTrack):
         return float(self.data['trackTimeMillis']) / 1000
 
 
-class iTunesMovie(_iTunesObject, ResolverMovie):
+class iTunesMovie(_iTunesObject, ResolverMediaItem):
     """
-    iTunes movie wrapper
+    iTunes movie proxy
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverMovie.__init__(self)
+        ResolverMediaItem.__init__(self, types=['movie'])
 
     @lazyProperty
     def name(self):
@@ -296,16 +316,14 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
         return []
 
     @lazyProperty
-    def director(self):
+    def directors(self):
         try:
-            return {
-                'name':self.data['artistName'],
-            }
+            return [ { 'name' : self.data['artistName'] } ]
         except KeyError:
-            return { 'name':'' }
+            return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
         except KeyError:
@@ -319,7 +337,7 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
             return -1
 
     @lazyProperty
-    def rating(self):
+    def mpaa_rating(self):
         try:
             return self.data['contentAdvisoryRating']
         except KeyError:
@@ -340,14 +358,14 @@ class iTunesMovie(_iTunesObject, ResolverMovie):
             return ''
 
 
-class iTunesTVShow(_iTunesObject, ResolverTVShow):
+class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
     """
-    iTunes tv show wrapper
+    iTunes tv show proxy
     """
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverTVShow.__init__(self)
-
+        ResolverMediaCollection.__init__(self, types=['tv'])
+    
     @lazyProperty
     def name(self):
         return self.data['artistName']
@@ -369,23 +387,19 @@ class iTunesTVShow(_iTunesObject, ResolverTVShow):
         return []
 
     @lazyProperty
-    def director(self):
-        return { 'name':'' }
+    def directors(self):
+        try:
+            return [ { 'name' : self.data['artistName'] } ]
+        except KeyError:
+            return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         return None
 
     @lazyProperty
     def seasons(self):
         return -1
-
-    @lazyProperty
-    def rating(self):
-        try:
-            return self.data['contentAdvisoryRating']
-        except KeyError:
-            return None
 
     @lazyProperty 
     def genres(self):
@@ -401,15 +415,11 @@ class iTunesTVShow(_iTunesObject, ResolverTVShow):
         except KeyError:
             return ''
 
-    @property
-    def subcategory(self):
-        return 'tv'
-
-class iTunesBook(_iTunesObject, ResolverBook):
+class iTunesBook(_iTunesObject, ResolverMediaItem):
 
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverBook.__init__(self)
+        ResolverMediaItem.__init__(self, types=['book'])
 
     @lazyProperty
     def name(self):
@@ -427,20 +437,18 @@ class iTunesBook(_iTunesObject, ResolverBook):
         return self.data['trackId']
 
     @lazyProperty
-    def author(self):
+    def authors(self):
         try:
-            return {
-                'name':self.data['artistName']
-            }
-        except Exception:
-            return { 'name':'' }
+            return [ { 'name' : self.data['artistName'] } ]
+        except KeyError:
+            return []
 
     @lazyProperty
-    def publisher(self):
-        return {'name':''}
+    def publishers(self):
+        return []
 
     @property
-    def date(self):
+    def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
         except Exception:
@@ -455,18 +463,14 @@ class iTunesBook(_iTunesObject, ResolverBook):
         return None
 
     @property
-    def eisbn(self):
+    def sku_number(self):
         return None
 
-    @property
-    def sku(self):
-        return None
-
-class iTunesApp(_iTunesObject, ResolverApp):
+class iTunesApp(_iTunesObject, ResolverSoftware):
 
     def __init__(self, itunes_id=None, data=None, itunes=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
-        ResolverApp.__init__(self)
+        ResolverSoftware.__init__(self, types=['app'])
 
     @lazyProperty
     def name(self):
@@ -484,16 +488,14 @@ class iTunesApp(_iTunesObject, ResolverApp):
         return self.data['trackId']
 
     @lazyProperty
-    def publisher(self):
+    def publishers(self):
         try:
-            return {
-                'name':self.data['sellerName']
-            }
-        except Exception:
-            return { 'name':'' }
+            return [ { 'name' : self.data['sellerName'] } ]
+        except KeyError:
+            return []
 
     @property
-    def date(self):
+    def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
         except Exception:
@@ -535,10 +537,6 @@ class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 
 class iTunesSource(GenericSource):
     """
@@ -547,10 +545,15 @@ class iTunesSource(GenericSource):
         GenericSource.__init__(self, 'itunes',
             groups=[
                 'mpaa_rating',
-                'genre',
+                'genres',
                 'desc',
-                'album_list',
-                'track_list',
+                'albums',
+                'tracks',
+            ],
+            kinds=[
+                'person',
+                'media_collection',
+                'media_item',
             ],
             types=[
                 'artist',
@@ -575,10 +578,7 @@ class iTunesSource(GenericSource):
     def __resolver(self):
         return Resolver()
 
-    def wrapperFromKey(self, key, type=None):
-        return self.wrapperFromId(key)
-
-    def wrapperFromId(self, itunes_id):
+    def entityProxyFromKey(self, itunes_id):
         try:
             data = self.__itunes.method('lookup',id=itunes_id)['results'][0]
 
@@ -607,53 +607,37 @@ class iTunesSource(GenericSource):
             raise
         return None
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.itunes_id = wrapper.key
-        return True
-
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        itunes_id = entity['itunes_id']
-        if itunes_id != None:
-            obj = None
-            if entity.subcategory == 'movie':
-                obj = iTunesMovie(itunes_id)
-            elif entity.subcategory == 'artist':
-                obj = iTunesArtist(itunes_id)
-            elif entity.subcategory == 'album':
-                obj = iTunesAlbum(itunes_id)
-            elif entity.subcategory == 'song':
-                obj = iTunesTrack(itunes_id)
-            elif entity.subcategory == 'book':
-                obj = iTunesBook(itunes_id)
-            elif entity.subcategory == 'tv':
-                obj = iTunesTVShow(itunes_id)
-            elif entity.subcategory == 'app':
-                obj = iTunesApp(itunes_id)
-            if obj is not None:
-                self.enrichEntityWithWrapper(obj, entity, controller, decorations, timestamps)
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.itunes_id = proxy.key
         return True
 
     def matchSource(self, query):
-        if query.type == 'artist':
-            return self.artistSource(query)
-        elif query.type == 'album':
-            return self.albumSource(query)
-        elif query.type == 'track':
-            return self.trackSource(query)
-        elif query.type == 'movie':
-            return self.movieSource(query)
-        elif query.type == 'book':
-            return self.bookSource(query)
-        elif query.type == 'tv':
-            return self.tvSource(query)
-        elif query.type == 'app':
-            return self.appSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'person':
+            if query.isType('artist'):
+                return self.artistSource(query)
+
+        if query.kind == 'media_collection':
+            if query.isType('album'):
+                return self.albumSource(query)
+            if query.isType('tv'):
+                return self.tvSource(query)
+
+        if query.kind == 'media_item':
+            if query.isType('track'):
+                return self.trackSource(query)
+            if query.isType('movie'):
+                return self.movieSource(query)
+            if query.isType('book'):
+                return self.bookSource(query)
+
+        if query.kind == 'software':
+            if query.isType('app'):
+                return self.appSource(query)
+
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        return self.emptySource
 
     def trackSource(self, query):
         items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
@@ -683,20 +667,22 @@ class iTunesSource(GenericSource):
         items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
         return listSource(items, constructor=lambda x: iTunesApp(data=x))
 
-    def __createWrapper(self, value):
+    def __createEntityProxy(self, value):
         try:
             if 'wrapperType' in value:
-                if value['wrapperType'] == 'track' and value['kind'] == 'song':
+                w = value['wrapperType']
+                 
+                if w == 'track' and value['kind'] == 'song':
                     return iTunesTrack(data=value)
-                elif value['wrapperType'] == 'collection' and value['collectionType'] == 'Album':
+                elif w == 'collection' and value['collectionType'] == 'Album':
                     return iTunesAlbum(data=value)
-                elif value['wrapperType'] == 'artist' and value['artistType'] == 'Artist':
+                elif w == 'artist' and value['artistType'] == 'Artist':
                     return iTunesArtist(data=value)
-                elif value['wrapperType'] == 'track' and value['kind'] == 'feature-movie':
+                elif w == 'track' and value['kind'] == 'feature-movie':
                     return iTunesMovie(data=value)
-                elif value['wrapperType'] == 'artist' and value['artistType'] == 'TV Show':
+                elif w == 'artist' and value['artistType'] == 'TV Show':
                     return iTunesTVShow(data=value)
-                elif value['wrapperType'] == 'software':
+                elif w == 'software':
                     return iTunesApp(data=value)
             else:
                 if value['kind'] == 'ebook':
@@ -706,35 +692,44 @@ class iTunesSource(GenericSource):
             raise ValueError('Malformed iTunes output')
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
 
         def gen():
             try:
-                mapper = {
-                    'book'      : 'ebook',
-                    'track'     : 'song',
-                    'album'     : 'album',
-                    'artist'    : 'musicArtist',
-                    'movie'     : 'movie',
-                    'tv'        : 'tvShow',
-                    'app'       : 'software',
-                }
+                mapper = [
+                    ('track',   'song'), 
+                    ('album',   'album'), 
+                    ('artist',  'musicArtist'), 
+                    ('app',     'software'), 
+                    ('book',    'ebook'), 
+                    ('movie',   'movie'), 
+                    ('tv',      'tvShow'), 
+                ]
+                
                 if query.types is None:
-                    queries = mapper.values()
+                    queries = [v[1] for v in mapper]
                 else:
                     queries = []
                     for t in query.types:
-                        if t in mapper:
-                            queries.append(mapper[t])
+                        for t2 in mapper:
+                            if t == t2[0]:
+                                queries.append(t2[1])
                 
                 if len(queries) == 0:
-                    return 
+                    return
                 
                 raw_results = []
                 def helper(q):
                     raw_results.append(self.__itunes.method(
-                        'search',term=query.query_string,entity=q
+                        'search', term=query.query_string, entity=q
                     )['results'])
                 
                 pool = Pool(len(queries))
@@ -752,10 +747,11 @@ class iTunesSource(GenericSource):
                             value = results[0]
                             del results[0]
                             try:
-                                wrapper = self.__createWrapper(value)
-                                if wrapper is not None:
+                                proxy = self.__createEntityProxy(value)
+                                
+                                if proxy is not None:
                                     found = True
-                                    yield wrapper
+                                    yield proxy
                             except ValueError:
                                 logs.info('Malformed iTunes output:\n%s' % pformat(value))
             except GeneratorExit:

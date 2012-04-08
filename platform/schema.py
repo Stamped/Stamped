@@ -14,8 +14,8 @@ __license__   = "TODO"
 import copy, logs, pprint, weakref
 
 from datetime   import datetime
-from errors     import *
 from utils      import normalize
+from errors     import *
 
 
 # adding generic validation for email, username, etc. on a per-element basis

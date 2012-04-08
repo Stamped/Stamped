@@ -57,43 +57,50 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         for i in range(max_iterations):
             modified = False
             for source in self.__sources:
-                if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
-                    groups = source.groups
-                    targetGroups = set()
-                    for group in groups:
-                        if self.shouldEnrich(group, source.sourceName, entity, self.now):
-                            targetGroups.add(group)
-                    if len(targetGroups) > 0:
-                        copy = buildEntity(entity.value)
-                        timestamps = {}
-                        localDecorations = {}
-                        logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
-                        try:
-                            enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
-                            if enriched:
-                                for group in targetGroups:
-                                    localTimestamp = self.now
-                                    if group in timestamps:
-                                        localTimestamp = timestamps[group]
-                                    if self.shouldEnrich(group, source.sourceName, entity, localTimestamp):
-                                        groupObj = self.getGroup(group)
-                                        assert( groupObj is not None )
-                                        fieldsChanged = groupObj.syncFields(copy, entity)
-                                        decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
-                                        if fieldsChanged or group in timestamps or decorationsChanged:
-                                            groupObj.setTimestamp(entity, localTimestamp)
-                                            groupObj.setSource(entity, source.sourceName)
-                                            modified = True
-                            self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
-                        except Exception:
-                            logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
-                            failedSources.add(source)
-                            self.__failedValues[source] += self.failedIncrement
-                            if self.__failedValues[source] < self.failedCutoff:
-                                logs.warning("%s is still below failed cutoff; it won't be used for this enrichment" % (source,))
-                            else:
-                                logs.warning("%s is beyond the failed cutoff; placing on cooldown list" % (source,))
-                            self.__failedValues[source] += self.failedPunishment
+                if entity.kind == 'search' or entity.kind in source.kinds:
+                    if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types).intersection(source.types)) == 0:
+                        continue
+                    if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
+                        groups = source.groups
+                        targetGroups = set()
+                        for group in groups:
+                            if self.shouldEnrich(group, source.sourceName, entity, self.now):
+                                targetGroups.add(group)
+                        if len(targetGroups) > 0:
+                            copy = buildEntity(entity.value)
+                            timestamps = {}
+                            localDecorations = {}
+                            logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                            try:
+                                enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
+                                if enriched:
+                                    enrichedOutput = set()
+                                    for group in targetGroups:
+                                        localTimestamp = self.now
+                                        if group in timestamps:
+                                            localTimestamp = timestamps[group]
+                                        if self.shouldEnrich(group, source.sourceName, entity, localTimestamp):
+                                            groupObj = self.getGroup(group)
+                                            assert( groupObj is not None )
+                                            fieldsChanged = groupObj.syncFields(copy, entity)
+                                            decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
+                                            if fieldsChanged or group in timestamps or decorationsChanged:
+                                                groupObj.setTimestamp(entity, localTimestamp)
+                                                groupObj.setSource(entity, source.sourceName)
+                                                modified = True
+                                                enrichedOutput.add(groupObj.groupName)
+                                    if len(enrichedOutput) > 0:
+                                        logs.info("Output from enrich: %s" % enrichedOutput)
+                                self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
+                            except Exception:
+                                logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
+                                failedSources.add(source)
+                                self.__failedValues[source] += self.failedIncrement
+                                if self.__failedValues[source] < self.failedCutoff:
+                                    logs.warning("%s is still below failed cutoff; it won't be used for this enrichment" % (source,))
+                                else:
+                                    logs.warning("%s is beyond the failed cutoff; placing on cooldown list" % (source,))
+                                self.__failedValues[source] += self.failedPunishment
             if not modified:
                 break
             else:
@@ -105,7 +112,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
     def shouldEnrich(self, group, source, entity, timestamp=None):
         if timestamp is None:
             timestamp = self.now
-        print '\nGROUP: %s' % (group)
         if group in self.__groups:
             groupObj = self.__groups[group]
             if groupObj.eligible(entity):
@@ -126,10 +132,13 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         else:
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
-                            if self.now - currentTimestamp > currentMaxAge:
-                                return True
-                            else:
-                                return False
+                            try:
+                                if self.now - currentTimestamp > currentMaxAge:
+                                    return True
+                            except Exception:
+                                logs.warning('FAIL: self.now (%s) - currentTimestamp(%s) > currentMaxAge (%s)' % \
+                                    (self.now, currentTimestamp, currentMaxAge))
+                            return False
             else:
                 return False
         else:

@@ -14,17 +14,17 @@ import Globals
 from logs import report
 
 try:
+    import re, logs
+    from Resolver                   import *
+    from ResolverObject             import *
     from libs.TMDB                  import globalTMDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
-    import logs
     from urllib2                    import HTTPError
     from datetime                   import datetime
-    from Resolver                   import *
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
-    import re
 except:
     report()
     raise
@@ -38,7 +38,7 @@ class _TMDBObject(object):
 
     Attributes:
 
-    tmdb - an instance of TMDB (API wrapper)
+    tmdb - an instance of TMDB (API proxy)
     info (abstract) - the type-specific TMDB data for the object
     """
     def __init__(self, tmdb_id):
@@ -66,13 +66,13 @@ class _TMDBObject(object):
         return pformat( self.info )
 
 
-class TMDBMovie(_TMDBObject, ResolverMovie):
+class TMDBMovie(_TMDBObject, ResolverMediaItem):
     """
-    TMDB movie wrapper
+    TMDB movie proxy
     """
     def __init__(self, tmdb_id):
         _TMDBObject.__init__(self, tmdb_id)
-        ResolverMovie.__init__(self)        
+        ResolverMediaItem.__init__(self, types=['movie'])
 
     @property
     def valid(self):
@@ -87,7 +87,7 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
         return self.tmdb.movie_info(self.key)
 
     @lazyProperty
-    def castsRaw(self):
+    def _castsRaw(self):
         return self.tmdb.movie_casts(self.key)
 
     @lazyProperty
@@ -114,26 +114,26 @@ class TMDBMovie(_TMDBObject, ResolverMovie):
                 'source':self.source,
                 'key':entry['id'],
             }
-                for entry in self.castsRaw['cast']
+                for entry in self._castsRaw['cast']
         ]
 
     @lazyProperty
-    def director(self):
+    def directors(self):
         try:
-            crew = self.castsRaw['crew']
+            crew = self._castsRaw['crew']
             for entry in crew:
                 if entry['job'] == 'Director':
-                    return {
+                    return [{
                         'name': entry['name'],
                         'source': self.source,
                         'key': entry['id'],
-                    }
+                    }]
         except Exception:
             pass
-        return { 'name':'' }
+        return []
 
     @lazyProperty
-    def date(self):
+    def release_date(self):
         try:
             string = self.info['release_date']
             return parseDateString(string)
@@ -163,25 +163,24 @@ class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-    @property
-    def subtype(self):
-        return self.target.type
-
 class TMDBSource(GenericSource):
     """
     """
     def __init__(self):
         GenericSource.__init__(self, 'tmdb',
             groups=[
-                'director',
+                'directors',
                 'cast',
                 'desc',
                 'short_description',
-                'genre',
+                'genres',
                 'imdb',
             ],
+            kinds=[
+                'media_item',
+            ],
             types=[
-                'movie'
+                'movie',
             ]
         )
         self.__max_cast = 6
@@ -190,25 +189,25 @@ class TMDBSource(GenericSource):
     def __tmdb(self):
         return globalTMDB()
 
-    def wrapperFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key):
         try:
             return TMDBMovie(key)
         except KeyError:
-            logs.warning('UNABLE TO FIND TMDB ITEM FOR ID: %s' % key)
+            logs.warning('Unable to find TMDB item for key: %s' % key)
             raise
         return None
 
     def matchSource(self, query):
-        if query.type == 'movie':
+        if query.isType('movie'):
             return self.movieSource(query)
-        elif query.type == 'search_all':
+        if query.kind == 'search':
             return self.searchAllSource(query)
-        else:
-            return self.emptySource
+        
+        return self.emptySource
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.tmdb_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.tmdb_id = proxy.key
         return True
 
     def movieSource(self, query):
@@ -229,8 +228,15 @@ class TMDBSource(GenericSource):
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
     def searchAllSource(self, query, timeout=None):
-        if query.types is not None and len(self.types.intersection(query.types)) == 0:
+        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
+            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
+
+        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
+            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            return self.emptySource
+
+        logs.info('Searching %s...' % self.sourceName)
             
         def gen():
             try:    
@@ -263,57 +269,65 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-        title = entity['title']
-        if title is not None:
-            tmdb_id = entity['tmdb_id']
-            if tmdb_id is not None:
-                movie = TMDBMovie(tmdb_id)
-                try:
-                    casts = self.__tmdb.movie_casts(tmdb_id)
-                    if 'cast' in casts:
-                        cast = casts['cast']
-                        cast_order = {}
-                        for entry in cast:
-                            name = entry['name']
-                            order = int(entry['order'])
-                            cast_order[order] = name
-                        sorted_cast = [ cast_order[k] for k in sorted(cast_order.keys()) ]
-                        if len( sorted_cast ) > self.__max_cast:
-                            sorted_cast = sorted_cast[:self.__max_cast]
-                        cast_string = ', '.join(sorted_cast)
-                        if entity['cast'] == None:
-                            entity['cast'] = cast_string
-                    if 'crew' in casts:
-                        crew = casts['crew']
-                        director = None
-                        for entry in crew:
-                            name = entry['name']
-                            job = entry['job']
-                            if job == 'Director':
-                                director = name
-                        if director is not None:
-                            entity['director'] = director
-                        
-                except Exception:
-                    pass
-                info = movie.info
-                if 'tagline' in info:
-                    tagline = info['tagline']
-                    if tagline is not None and tagline != '':
-                        entity['short_description'] = tagline
-                if 'overview' in info:
-                    overview = info['overview']
-                    if overview is not None and overview != '':
-                        entity['desc'] = overview
+    def entityProxyFromKey(self, tmdb_id):
+        # Todo: Make sure we fail gracefully if id is invalid
+        try:
+            return TMDBMovie(tmdb_id)
+        except Exception as e:
+            logs.warning("Error: %s" % e)
+            raise
 
-                if movie.imdb is not None:
-                    entity['imdb_id'] = movie.imdb;
-                if len(movie.genres) > 0:
-                    entity['genres'] = list(movie.genres)
+    # def enrichEntity(self, entity, controller, decorations, timestamps):
+    #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
+    #     title = entity['title']
+    #     if title is not None:
+    #         tmdb_id = entity['tmdb_id']
+    #         if tmdb_id is not None:
+    #             movie = TMDBMovie(tmdb_id)
+    #             try:
+    #                 casts = self.__tmdb.movie_casts(tmdb_id)
+    #                 if 'cast' in casts:
+    #                     cast = casts['cast']
+    #                     cast_order = {}
+    #                     for entry in cast:
+    #                         name = entry['name']
+    #                         order = int(entry['order'])
+    #                         cast_order[order] = name
+    #                     sorted_cast = [ cast_order[k] for k in sorted(cast_order.keys()) ]
+    #                     if len( sorted_cast ) > self.__max_cast:
+    #                         sorted_cast = sorted_cast[:self.__max_cast]
+    #                     cast_string = ', '.join(sorted_cast)
+    #                     if entity['cast'] == None:
+    #                         entity['cast'] = cast_string
+    #                 if 'crew' in casts:
+    #                     crew = casts['crew']
+    #                     director = None
+    #                     for entry in crew:
+    #                         name = entry['name']
+    #                         job = entry['job']
+    #                         if job == 'Director':
+    #                             director = name
+    #                     if director is not None:
+    #                         entity['director'] = director
+                        
+    #             except Exception:
+    #                 pass
+    #             info = movie.info
+    #             if 'tagline' in info:
+    #                 tagline = info['tagline']
+    #                 if tagline is not None and tagline != '':
+    #                     entity['short_description'] = tagline
+    #             if 'overview' in info:
+    #                 overview = info['overview']
+    #                 if overview is not None and overview != '':
+    #                     entity['desc'] = overview
+
+    #             if movie.imdb is not None:
+    #                 entity['imdb_id'] = movie.imdb;
+    #             if len(movie.genres) > 0:
+    #                 entity['genres'] = list(movie.genres)
         
-        return True
+    #     return True
 
 if __name__ == '__main__':
     demo(TMDBSource(), 'Avatar')

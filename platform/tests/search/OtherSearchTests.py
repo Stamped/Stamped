@@ -28,11 +28,27 @@ class OtherSearchTests(ASearchTestSuite):
             'limit'  : 10, 
         }
         
-        # TODO: what is type for video game?
-        # TODO: add misc product support to amazon source
         tests = [
             ({ 'query' : 'gears of war 3', }, [ 
-                SearchResultConstraint(title='gears of war 3', types='other'), 
+                SearchResultConstraint(title='gears of war 3', types='video_game'), 
+            ]), 
+            ({ 'query' : 'super smash brothers', }, [ 
+                SearchResultConstraint(title='super smash bros.', types='video_game'), 
+                SearchResultConstraint(title='super smash bros melee', types='video_game'), 
+            ]), 
+            ({ 'query' : 'elder scrolls v: skyrim', }, [ 
+                SearchResultConstraint(title='elder scrolls v: skyrim', types='video_game', 
+                                       index=0), 
+            ]), 
+            ({ 'query' : 'skyrim', }, [ 
+                SearchResultConstraint(title='elder scrolls v: skyrim', types='video_game'), 
+            ]), 
+            ({ 'query' : 'mass effect 3', }, [ 
+                SearchResultConstraint(title='mass effect 3', types='video_game'), 
+                SearchResultConstraint(title='mass effect 3', types='book'), 
+            ]), 
+            ({ 'query' : 'halo reach', }, [ 
+                SearchResultConstraint(title='halo reach', types='video_game'), 
             ]), 
         ]
         
