@@ -187,8 +187,14 @@ class GooglePlacesPlace(ResolverPlace):
     
     @lazyProperty
     def types(self):
-        if 'type' in self.data:
-            return [ self.data['type'] ]
+        if 'types' in self.data:
+            __types = self.data['types']
+            if 'food' in self.data['types'] or 'restaurant' in self.data['types']:
+                return ['restaurant']
+            if 'grocery_or_supermarket' in self.data['types']:
+                return ['market']
+            if 'establishment' in self.data['types']:
+                return ['establishment']
         return []
 
     @property 
