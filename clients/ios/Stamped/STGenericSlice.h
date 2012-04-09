@@ -20,4 +20,6 @@
 
 - (NSMutableDictionary*)asDictionaryParams;
 
+- (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset;
+
 @end

@@ -34,6 +34,7 @@ static int _count = 0;
     dependents_ = [[NSMutableSet alloc] init];
     self.delegate = delegate;
     self.backgroundColor = [UIColor clearColor];
+    //self.backgroundColor = [UIColor colorWithRed:.1 green:0 blue:0 alpha:.1];
     if (delegate && [delegate respondsToSelector:@selector(registerDependent:)]) {
       [delegate registerDependent:self];
     }
@@ -53,6 +54,25 @@ static int _count = 0;
 }
 
 - (void)appendChildView:(UIView*)child {
+  if (self.superview) {
+    /*
+     TODO animation
+     
+    CGRect childFrame = child.frame;
+    CGFloat childHeight = childFrame.size.height;
+    BOOL childClipsToBounds = child.clipsToBounds;
+    frame.origin.y += self.frame.size.height;
+    childFrame.size.height = 0;
+    child.clipsToBounds = YES;
+    child.frame = frame;
+    frame = self.frame;
+    frame.size.height = CGRectGetMaxY(child.frame);
+    self.frame = frame;
+    [self.children addObject:child];
+    [self addSubview:child];
+    return;
+     */
+  }
   CGRect frame = child.frame;
   frame.origin.y += self.frame.size.height;
   child.frame = frame;
@@ -124,6 +144,15 @@ static int _count = 0;
 
 - (void)setDelegate:(id<STViewDelegate>)delegate {
   delegate_ = delegate;
+}
+
+- (void)reloadStampedData {
+  for (id view in self.subviews) {
+    if ([view respondsToSelector:@selector(reloadStampedData)]) {
+      NSLog(@"reloading data for %@",view);
+      [view reloadStampedData];
+    }
+  }
 }
 
 @end

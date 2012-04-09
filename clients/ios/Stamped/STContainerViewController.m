@@ -28,6 +28,7 @@ static const CGFloat kReloadHeight = 60.0;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
+@property (nonatomic, readwrite, retain) UIView* toolbarView;
 
 - (void)userPulledToReload;
 - (void)reloadData;
@@ -46,6 +47,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = _lastUpdatedLabel;
 @synthesize arrowImageView = _arrowImageView;
 @synthesize spinnerView = _spinnerView;
+@synthesize toolbarView = _toolbarView;
 
 - (id)init
 {
@@ -255,9 +257,87 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)reloadData {
+  [self reloadStampedData];
   [self performSelector:@selector(shouldFinishLoading) withObject:nil afterDelay:.5];
 }
 
+
+- (void)setToolbar:(UIView*)view withAnimation:(BOOL)animated {
+  self.toolbarView = view;
+  [Util reframeView:view withDeltas:CGRectMake(0, CGRectGetMaxY(self.scrollView.frame), 0, 0)];
+  [self.view addSubview:view];
+  void (^block)(void)  = ^{
+    [Util reframeView:view withDeltas:CGRectMake(0, -view.frame.size.height, 0, 0)];
+    [Util reframeView:self.scrollView withDeltas:CGRectMake(0, 0, 0, -view.frame.size.height)];
+  };
+  if (animated) {
+    [UIView animateWithDuration:.25 animations:block];
+  }
+  else {
+    block();
+  }
+}
+
+- (void)reloadStampedData {
+  for (id view in self.view.subviews) {
+    if ([view respondsToSelector:@selector(reloadStampedData)]) {
+      [view reloadStampedData];
+    }
+  }
+}
+
+
+#pragma mark - UITextFieldDelegate Methods.
+
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  CGFloat delta = -216;
+  if (self.toolbarView) {
+    delta += self.toolbarView.frame.size.height;
+  }
+  CGRect scrollFrame = self.scrollView.frame;
+  scrollFrame.size.height += delta;
+  
+  CGRect relativeFrame = [Util relativeFrameForView:textField inAncestorView:self.scrollView];
+  CGFloat contentY = self.scrollView.contentOffset.y;
+  if (relativeFrame.size.height < scrollFrame.size.height) {
+    contentY = CGRectGetMaxY(relativeFrame) - scrollFrame.size.height;
+  }
+  else {
+    contentY = relativeFrame.origin.y;
+  }
+  NSLog(@"scrolled to compensate by %f", contentY - self.scrollView.contentOffset.y);
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     self.scrollView.frame = scrollFrame;
+                     self.scrollView.contentOffset = CGPointMake(self.scrollView.contentOffset.x, contentY);
+                   }
+                   completion:nil];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  CGFloat delta = 216;
+  if (self.toolbarView) {
+    delta -= self.toolbarView.frame.size.height;
+  }
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     [Util reframeView:self.scrollView withDeltas:CGRectMake(0, 0, 0, delta)];
+                   }
+                   completion:nil];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  return YES;
+}
 
 
 @end

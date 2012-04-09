@@ -20,6 +20,7 @@
 #import "STNavigationBar.h"
 #import "STSearchField.h"
 #import "Util.h"
+#import "STInboxViewController.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -154,7 +155,8 @@
                                                                         UIRemoteNotificationTypeAlert];
   self.mapViewController = [[[STMapViewController alloc] init] autorelease];
 
-  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
+  //InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
+  STInboxViewController* inbox = [[STInboxViewController alloc] init];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
   PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];

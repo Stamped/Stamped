@@ -10,6 +10,8 @@
 
 @protocol STEntity <NSObject>
 
+@required
+
 @property (nonatomic, readonly, retain) NSString* entityID;
 @property (nonatomic, readonly, retain) NSString* title;
 @property (nonatomic, readonly, retain) NSString* subtitle;

@@ -222,6 +222,8 @@ def deriveKindFromSubcategory(subcategory):
     }
     if subcategory in mapping:
         return mapping[subcategory]
+    if subcategory == 'song':
+        return 'media_item'
     return 'other'
 
 def deriveTypesFromSubcategories(subcategories):
@@ -520,9 +522,9 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = albumId 
                 entityMini.sources.itunes_source = 'seed'
                 entityMini.sources.itunes_timestamp = seedTimestamp
-            new.collections.append(entityMini)
-            new.collections_source = song.pop('album_name_source', 'seed')
-            new.collections_timestamp = song.pop('album_name_timestamp', seedTimestamp)
+            new.albums.append(entityMini)
+            new.albums_source = song.pop('album_name_source', 'seed')
+            new.albums_timestamp = song.pop('album_name_timestamp', seedTimestamp)
     
     # Apps
     if 'app' in types:

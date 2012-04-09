@@ -13,6 +13,8 @@
 #import "STViewController.h"
 #import "StampDetailHeaderView.h"
 #import "ASIHTTPRequestDelegate.h"
+#import "STUser.h"
+#import "STEntity.h"
 
 @class Entity;
 @class UserImageView;

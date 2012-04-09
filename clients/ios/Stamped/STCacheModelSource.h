@@ -24,5 +24,6 @@
 - (id)initWithMainKey:(NSString*)key andDelegate:(id<STCacheModelSourceDelegate>)delegate;
 
 - (void)setObject:(id)object forKey:(NSString*)key;
+- (void)removeObjectForKey:(NSString*)key;
 
 @end

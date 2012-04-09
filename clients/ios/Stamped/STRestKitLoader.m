@@ -55,6 +55,7 @@ static STRestKitLoader* _sharedInstance;
 }
 
 - (void)loadWithPath:(NSString*)path 
+                post:(BOOL)post
               params:(NSDictionary*)params 
              mapping:(RKObjectMapping*)mapping 
          andCallback:(void(^)(NSArray*,NSError*))block {
@@ -73,12 +74,30 @@ static STRestKitLoader* _sharedInstance;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path
                                                                     delegate:helper];
+  if (post) {
+    objectLoader.method = RKRequestMethodPOST;
+  }
   
   objectLoader.objectMapping = mapping;
 
   objectLoader.params = [params copy];
 
   [objectLoader send];
+}
+
+
+- (void)loadOneWithPath:(NSString*)path 
+                   post:(BOOL)post
+                 params:(NSDictionary*)params 
+                mapping:(RKObjectMapping*)mapping 
+            andCallback:(void(^)(id,NSError*))block {
+  [self loadWithPath:path post:post params:params mapping:mapping andCallback:^(NSArray* array, NSError* error) {
+    id result = nil;
+    if (array && [array count] > 0) {
+      result = [array objectAtIndex:0];
+    }
+    block(result, error);
+  }];
 }
 
 @end

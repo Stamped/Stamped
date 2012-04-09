@@ -51,7 +51,7 @@ try:
     from SpotifySource          import SpotifySource
     from TMDBSource             import TMDBSource
     from StampedSource          import StampedSource
-except:
+except Exception:
     report()
     raise
 
@@ -1248,7 +1248,7 @@ class StampedAPI(AStampedAPI):
                     a = (coords['lat'], coords['lng'])
                     b = (entity.coordinates.lat, entity.coordinates.lng)
                     distance = abs(utils.get_spherical_distance(a, b) * 3959)
-            except:
+            except Exception:
                 pass
             results.append((entity, distance))
             
@@ -2951,7 +2951,7 @@ class StampedAPI(AStampedAPI):
     def mergeEntityAsync(self, entity_dict, update = False):
         entity = buildEntity(entity_dict)
         self._mergeEntity(entity, update)
-        self._enrichEntityTracks(entity)
+        self._enrichEntityLinks(entity)
     
     @lazyProperty
     def __full_resolve(self):
@@ -2982,86 +2982,206 @@ class StampedAPI(AStampedAPI):
         if modified:
             self._entityDB.update(entity)
 
-        self._enrichEntityTracks(entity)
+        self._enrichEntityLinks(entity)
 
-    def _enrichEntityTracks(self, entity):
-        if entity.isType('album') or entity.isType('artist'):
-            stamped   = StampedSource(stamped_api = self)
-            sources = {
-                'amazon':       AmazonSource,
-                'factual':      FactualSource,
-                'googleplaces': GooglePlacesSource,
-                'itunes':       iTunesSource,
-                'rdio':         RdioSource,
-                'spotify':      SpotifySource,
-                'tmdb':         TMDBSource,
-            }
-            track_list = []
-            # print '\n\n'
-            for stub in entity.tracks:
-                # print '%s\n%s\n\nBEGIN TRACK\n' % ('= '*40, ' ='*40)
-                source      = None
-                source_id   = None
-                entity_id   = None
-                proxy       = None
+    def _enrichEntityLinks(self, entity):
+        
+        def _enrichStub(stub, sources):
+            source      = None
+            source_id   = None
+            entity_id   = None
+            proxy       = None
 
-                # Enrich track
-                if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
-                    entity_id = stub.entity_id
-                else:
-                    for sourceName in sources:
-                        try:
-                            if stub.sources['%s_id' % sourceName] is not None:
-                                source = sources[sourceName]()
-                                source_id = stub.sources['%s_id' % sourceName]
-                                # Attempt to resolve against the Stamped DB (quick)
-                                entity_id = stamped.resolve_fast(source, source_id)
-                                if entity_id is None:
-                                    # Attempt to resolve against the Stamped DB (full)
-                                    proxy = source.entityProxyFromKey(source_id)
-                                    results = stamped.resolve(proxy)
-                                    if len(results) > 0 and results[0][0]['resolved']:
-                                        entity_id = results[0][1].key
-                                break
-                        except:
-                            pass
-                if entity_id is not None:
-                    track = self.getEntity({'entity_id': entity_id})
-                elif source_id is not None and proxy is not None:
-                    track = source.buildEntityFromEntityProxy(proxy)
-                else:
-                    print 'Unable to enrich track'
-                    track_list.append(stub)
-                    continue
-
-                # Update track's album with album entity_id
-                if entity.isType('album'):
-                    collectionUpdated = False
-                    for collection in track.collections:
-                        commonSources = set(entity.sources.value.keys()).intersection(set(collection.sources.value.keys()))
-                        for commonSource in commonSources:
-                            if commonSource[-3:] == '_id' and entity.sources[commonSource] == collection.sources[commonSource]:
-                                collection.entity_id = entity.entity_id
-                                collectionUpdated = True
-                                break
-                        if collectionUpdated:
+            if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+                entity_id = stub.entity_id
+            else:
+                for sourceName in sources:
+                    try:
+                        if stub.sources['%s_id' % sourceName] is not None:
+                            source = sources[sourceName]()
+                            source_id = stub.sources['%s_id' % sourceName]
+                            # Attempt to resolve against the Stamped DB (quick)
+                            entity_id = stampedSource.resolve_fast(source, source_id)
+                            if entity_id is None:
+                                # Attempt to resolve against the Stamped DB (full)
+                                proxy = source.entityProxyFromKey(source_id)
+                                results = stampedSource.resolve(proxy)
+                                if len(results) > 0 and results[0][0]['resolved']:
+                                    entity_id = results[0][1].key
                             break
-                    if not collectionUpdated:
-                        track.collections.append(entity.minimize())
+                    except Exception:
+                        pass
+            if entity_id is not None:
+                entity = self._entityDB.getEntity(entity_id)
+            elif source_id is not None and proxy is not None:
+                entity = source.buildEntityFromEntityProxy(proxy)
+            else:
+                logs.warning('Unable to enrich stub: %s' % stub)
+                raise KeyError
 
-                # TODO: Enrich artist
+            return entity
 
-                # Merge track
-                track = self._mergeEntity(track, True)
 
-                # Add track to album
+        ### TRACKS
+        def _enrichTrack(stub, artists=[], albums=[]):
+            try:
+                track = _enrichStub(stub, musicSources)
+            except KeyError:
+                logs.warning('Track enrichment failed')
+                return stub
+
+            # Update track with entity_ids from passed albums
+            for album in albums:
+                collectionUpdated = False
+                for collection in track.albums:
+                    commonSources = set(album.sources.value.keys()).intersection(set(collection.sources.value.keys()))
+                    for commonSource in commonSources:
+                        if commonSource[-3:] == '_id' and album.sources[commonSource] == collection.sources[commonSource]:
+                            collection.entity_id = album.entity_id
+                            collectionUpdated = True
+                            break
+                    if collectionUpdated:
+                        break
+                if not collectionUpdated:
+                    track.albums.append(album.minimize())
+
+            # Update track with entity_ids from passed artists
+            for artist in artists:
+                artistUpdated = False
+                i = 0
+                for item in track.artists:
+                    i = i + 1
+                    commonSources = set(artist.sources.value.keys()).intersection(set(item.sources.value.keys()))
+                    for commonSource in commonSources:
+                        if commonSource[-3:] == '_id' and artist.sources[commonSource] == item.sources[commonSource]:
+                            item.entity_id = artist.entity_id
+                            artistUpdated = True
+                            break
+                    if artistUpdated:
+                        break
+                if not artistUpdated:
+                    track.artists.append(artist.minimize())
+
+            # Verify all fields are populated
+            if len(track.albums) == 0 or len(track.artists) == 0:
+                modified = self._enrichEntity(track)
+
+            # Merge track
+            track = self._mergeEntity(track, True)
+
+            return track
+
+        def _enrichTracks(entity, artists=[], albums=[]):
+            track_list = []
+            for stub in entity.tracks:
+                track = _enrichTrack(stub, artists, albums)
                 track_list.append(track.minimize())
-
-                # print '\nEND TRACK\n'
 
             if len(track_list) > 0:
                 entity.tracks = track_list
-                entity = self._mergeEntity(entity, True)
+                return True
+
+            return False
+
+
+        ### ALBUMS
+        def _enrichAlbum(stub, artists=[]):
+            try:
+                album = _enrichStub(stub, musicSources)
+            except KeyError:
+                logs.warning('Album enrichment failed')
+                return stub
+
+            # Update album with entity_ids from passed artists
+            for artist in artists:
+                artistUpdated = False
+                for item in album.artists:
+                    commonSources = set(artist.sources.value.keys()).intersection(set(item.sources.value.keys()))
+                    for commonSource in commonSources:
+                        if commonSource[-3:] == '_id' and artist.sources[commonSource] == item.sources[commonSource]:
+                            item.entity_id = artist.entity_id
+                            artistUpdated = True
+                            break
+                    if artistUpdated:
+                        break
+                if not artistUpdated:
+                    album.artists.append(artist.minimize())
+
+            # Merge album
+            album = self._mergeEntity(album, True)
+
+            return album
+
+        def _enrichAlbums(entity, artists=[]):
+            album_list = []
+            for stub in entity.albums:
+                album = _enrichAlbum(stub, artists)
+                album_list.append(album.minimize())
+
+            if len(album_list) > 0:
+                entity.albums = album_list
+                return True
+
+            return False
+
+
+        ### ARTISTS
+        def _enrichArtist(stub):
+            try:
+                artist = _enrichStub(stub, musicSources)
+            except KeyError:
+                logs.warning('Artist enrichment failed')
+                return stub
+
+            # Merge artist
+            artist = self._mergeEntity(artist, True)
+
+            return artist
+
+        def _enrichArtists(entity):
+            artist_list = []
+            for stub in entity.artists:
+                artist = _enrichAlbum(stub)
+                artist_list.append(artist.minimize())
+
+            if len(artist_list) > 0:
+                entity.artists = artist_list
+                return True
+
+            return False
+
+        modified        = False
+
+        stampedSource   = StampedSource(stamped_api = self)
+        musicSources    = {
+            'itunes':       iTunesSource,
+            'rdio':         RdioSource,
+            'spotify':      SpotifySource,
+            'amazon':       AmazonSource,
+        }
+
+        if entity.isType('album'):
+            modified = _enrichArtists(entity)
+            modified = _enrichTracks(entity, artists=entity.artists, albums=[entity]) | modified
+
+        if entity.isType('artist'):
+            modified = _enrichAlbums(entity, artists=[entity])
+            modified = _enrichTracks(entity, artists=[entity]) | modified
+
+        if entity.isType('track'):
+            # Enrich album instead
+            for album in entity.albums:
+                album = _enrichAlbum(album)
+                albumModified = False
+                albumModified = _enrichArtists(album)
+                albumModified = _enrichTracks(album, artists=album.artists, albums=[album]) | albumModified
+                if albumModified:
+                    self._mergeEntity(album, True)
+            # Just to be explicit...
+            modified = False
+
+        if modified:
+            entity = self._mergeEntity(entity, True)
         
     def _saveTempEntityAsync(self, results):
         results = map(lambda r: (Entity(r[0]), r[1]), results)

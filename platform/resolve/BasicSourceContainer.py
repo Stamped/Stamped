@@ -20,7 +20,7 @@ try:
     from Entity                 import buildEntity
     import logs                 
     from libs.ec2_utils         import is_prod_stack
-except:
+except Exception:
     report()
     raise
 
@@ -40,7 +40,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
         else:
-            self.__global_max_age = timedelta(minutes=10)
+            self.__global_max_age = timedelta(minutes=100)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2
@@ -58,7 +58,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             modified = False
             for source in self.__sources:
                 if entity.kind == 'search' or entity.kind in source.kinds:
-                    if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types).intersection(source.types)) == 0:
+                    if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types.value).intersection(source.types)) == 0:
                         continue
                     if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
                         groups = source.groups

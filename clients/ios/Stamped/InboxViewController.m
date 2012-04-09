@@ -465,8 +465,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   } else {
     stamp = [entity.stamps anyObject];
   }
-  
-  STStampDetailViewController* vc = [[STStampDetailViewController alloc] initWithStamp:stamp];
+  //BROKEN
+  STStampDetailViewController* vc = [[STStampDetailViewController alloc] initWithStamp:nil];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:vc animated:YES];
   [vc release];

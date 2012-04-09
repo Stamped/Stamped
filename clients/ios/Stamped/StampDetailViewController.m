@@ -229,7 +229,7 @@ typedef enum {
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
 
   currentUserImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
-  
+  NSLog(@"header%f",headerView_.frame.size.height);
   [self setupAlsoStampedBy];
   [self setUpMainContentView];
   [self renderComments];

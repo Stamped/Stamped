@@ -19,9 +19,9 @@ typedef void (^STSynchronousWrapperCallback)();
               andFrame:(CGRect)frame;
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate
-            completion:(void(^)(STSynchronousWrapper*))completionBlock
+                 frame:(CGRect)frame
           factoryBlock:(STViewFactoryBlock)factoryBlock
-              andFrame:(CGRect)frame;
+         andCompletion:(void(^)(STSynchronousWrapper*))completionBlock;
 
 + (STSynchronousWrapper*)wrapperForEntityDetail:(id<STEntityDetail>)anEntityDetail 
                                       withFrame:(CGRect)frame 

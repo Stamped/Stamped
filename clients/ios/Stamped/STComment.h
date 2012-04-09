@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STUser.h"
 
 @protocol STComment <NSObject>
 
@@ -14,6 +15,6 @@
 @property (nonatomic, readonly, copy) NSString* commentID;
 @property (nonatomic, readonly, copy) NSString* stampID;
 @property (nonatomic, readonly, copy) NSDate* created;
-@property (nonatomic, readonly, copy) NSString* userID;
+@property (nonatomic, readonly, retain) id<STUser> user;
 
 @end

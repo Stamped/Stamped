@@ -28,7 +28,8 @@ class SinglePlatformSource(BasicSource):
     """
     def __init__(self):
         BasicSource.__init__(self, 'singleplatform',
-            groups=['menu']
+            groups=['menu'],
+            kinds=['place'],
         )
 
     @lazyProperty

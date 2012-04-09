@@ -11,6 +11,9 @@
 #import "STAction.h"
 #import <Rdio/Rdio.h>
 #import "STTypes.h"
+#import "STUser.h"
+#import "STStamp.h"
+#import "STEntity.h"
 
 @class User;
 @class Entity;
@@ -92,5 +95,33 @@ extern NSString* const kKeychainTwitterToken;
 + (void)executeAsync:(void(^)(void))block;
 
 + (void)executeOnMainThread:(void(^)(void))block;
+
++ (void)reframeView:(UIView*)view withDeltas:(CGRect)deltas;
+
++ (CGSize)size:(CGSize)a unionedWith:(CGSize)b;
+
++ (CGSize)packViews:(NSArray*)views padding:(CGFloat)padding vertical:(BOOL)vertical uniform:(BOOL)uniform;
+
++ (void)offsetViews:(NSArray*)views byX:(CGFloat)dx andY:(CGFloat)dy;
+
++ (void)reloadStampedData;
+
++ (UIImage*)imageForCategory:(NSString*)category;
+
++ (UIImage*)stampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size;
+
++ (UIImage*)invertedStampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size;
+
++ (UIImage*)inboxTodoCategoryImage:(NSString*)category;
+
++ (UIImage*)highlightedInboxTodoCategoryImage:(NSString*)category;
+
++ (NSString*)profileImageURLForUser:(id<STUser>)user withSize:(STProfileImageSize)size;
+
++ (void)confirmWithMessage:(NSString*)message action:(NSString*)action destructive:(BOOL)destructive withBlock:(void(^)(BOOL))block;
+
++ (void)warnWithMessage:(NSString*)message andBlock:(void(^)(void))block;
+
++ (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor;
 
 @end

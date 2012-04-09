@@ -15,12 +15,14 @@
 
 @protocol STStamp <NSObject>
 
+@required
+
 @property (nonatomic, readonly, copy) NSString* blurb;
 @property (nonatomic, readonly, copy) NSDate* created;
 @property (nonatomic, readonly, copy) NSNumber* deleted;
 @property (nonatomic, readonly, copy) NSString* imageDimensions;
 @property (nonatomic, readonly, copy) NSString* imageURL;
-@property (nonatomic, readonly, copy) NSNumber* isFavorited;
+@property (nonatomic, readonly, copy) NSNumber* isTodod;
 @property (nonatomic, readonly, copy) NSNumber* isLiked;
 @property (nonatomic, readonly, copy) NSDate* modified;
 @property (nonatomic, readonly, copy) NSNumber* numComments;
@@ -29,8 +31,8 @@
 @property (nonatomic, readonly, copy) NSString* URL;
 @property (nonatomic, readonly, copy) NSString* via;
 
-@property (nonatomic, readonly, copy) id<STEntity> entity;
-@property (nonatomic, readonly, copy) id<STUser> user;
+@property (nonatomic, readonly, retain) id<STEntity> entity;
+@property (nonatomic, readonly, retain) id<STUser> user;
 @property (nonatomic, readonly, copy) NSArray<STComment>* commentsPreview;
 @property (nonatomic, readonly, copy) NSArray<STMention>* mentions;
 @property (nonatomic, readonly, copy) NSArray<STCredit>* credits;

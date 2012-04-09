@@ -13,10 +13,8 @@
 #import "STStandardViewController.h"
 #import "STContainerViewController.h"
 
-@class Stamp;
-
 @interface STStampDetailViewController : STContainerViewController
 
-- (id)initWithStamp:(Stamp*)stamp;
+- (id)initWithStamp:(id<STStamp>)stamp;
 
 @end

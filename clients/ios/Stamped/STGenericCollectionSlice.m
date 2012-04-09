@@ -50,4 +50,17 @@
   return dict;
 }
 
+- (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset {
+  STGenericCollectionSlice* copy = [super resizedSliceWithLimit:limit andOffset:offset];
+  copy.query = self.query;
+  copy.category = self.category;
+  copy.subcategory = self.subcategory;
+  copy.viewport = self.viewport;
+  copy.quality = self.quality;
+  copy.deleted = self.deleted;
+  copy.comments = self.comments;
+  copy.unique = self.unique;
+  return copy;
+}
+  
 @end

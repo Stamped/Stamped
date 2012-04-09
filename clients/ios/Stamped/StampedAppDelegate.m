@@ -344,7 +344,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setMapping:stampMapping forKeyPath:@"Stamp"];
-  [objectManager.mappingProvider setMapping:detailedEntityMapping forKeyPath:@"DetailedEntity"];
+  //[objectManager.mappingProvider setMapping:detailedEntityMapping forKeyPath:@"DetailedEntity"];
   [objectManager.mappingProvider setMapping:entityMapping forKeyPath:@"Entity"];
   [objectManager.mappingProvider setMapping:commentMapping forKeyPath:@"Comment"];
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];

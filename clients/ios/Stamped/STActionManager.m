@@ -110,6 +110,9 @@ static STActionManager* _singleton;
 
 - (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   BOOL handled = FALSE;
+  //if (flag) {
+    NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
+  //}
   id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
   if (sourceObject != nil && 
       [sourceObject respondsToSelector:@selector(canHandleSource:forAction:withContext:)] &&
@@ -124,7 +127,7 @@ static STActionManager* _singleton;
     [Util globalLoadingLock];
     [[STStampedAPI sharedInstance] menuForEntityID:@"4e4c6fdd26f05a2b75000a75" andCallback:^(id<STMenu> menu) {
       [Util globalLoadingUnlock];
-      if (menu) {
+      if (menu && context.entityDetail) {
         UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
         [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
       }

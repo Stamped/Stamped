@@ -334,7 +334,7 @@ class MongoStampedAPI(StampedAPI):
 
 __globalMongoStampedAPI = None
 
-def globalMongoStampedAPI()
+def globalMongoStampedAPI():
     global __globalMongoStampedAPI
     
     if __globalMongoStampedAPI is None:

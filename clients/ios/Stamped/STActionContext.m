@@ -14,11 +14,15 @@
 @synthesize entityDetail = _entityDetail;
 @synthesize frame = _frame;
 @synthesize stamp = _stamp;
+@synthesize user = _user;
+@synthesize completionBlock = _completionBlock;
 
 - (void)dealloc
 {
   [_entityDetail release];
   [_stamp release];
+  [_user release];
+  [_completionBlock release];
   [super dealloc];
 }
 
@@ -29,6 +33,12 @@
 + (STActionContext*)contextInView:(UIView*)view {
   STActionContext* context = [STActionContext context];
   context.frame = [Util getAbsoluteFrame:view];
+  return context;
+}
+
++ (STActionContext*)contextWithCompletionBlock:(void(^)(id,NSError*))block {
+  STActionContext* context = [STActionContext context];
+  context.completionBlock = block;
   return context;
 }
 

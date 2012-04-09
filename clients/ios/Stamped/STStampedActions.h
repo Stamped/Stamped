@@ -17,5 +17,9 @@
 + (id<STAction>)actionViewStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionViewUser:(NSString*)userID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionLikeStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionUnlikeStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionTodoStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionUntodoStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionDeleteStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 
 @end

@@ -13,12 +13,12 @@
 #import "STSimplePlaylist.h"
 #import "STGalleryItem.h"
 #import <RestKit/RestKit.h>
+#import "STSimpleImage.h"
 
 #pragma mark - Attributes
 
 @implementation STSimpleEntityDetail
 
-@synthesize image = _image;
 @synthesize caption = _caption;
 
 @synthesize address = _address;
@@ -29,13 +29,13 @@
 @synthesize addressCountry = _addressCountry;
 @synthesize neighborhood = _neighborhood;
 
+@synthesize images = _images;
 @synthesize actions = _actions;
 @synthesize metadata = _metadata;
 @synthesize gallery = _gallery;
 @synthesize playlist = _playlist;
 
 - (void)dealloc {
-  [_image release];
   [_caption release];
   
   [_address release];
@@ -46,6 +46,7 @@
   [_addressCountry release];
   [_neighborhood release];
   
+  [_images release];
   [_actions release];
   [_metadata release];
   [_gallery release];
@@ -72,12 +73,12 @@
    @"category",
    @"subcategory",
    @"coordinates",
-   @"image",
    @"address",
    @"neighborhood",
    @"caption",
    nil];
   
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
   [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
   [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];

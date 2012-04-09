@@ -36,6 +36,10 @@
   [_cache setObject:object forKey:key];
 }
 
+- (void)removeObjectForKey:(NSString*)key {
+  [_cache removeObjectForKey:key];
+}
+
 - (void)cacheWithKey:(NSString*)key callback:(void(^)(id))block {
   [self fetchWithKey:key callback:block];
 }

@@ -42,10 +42,16 @@ class AKindTypeGroup(BasicFieldGroup):
 
     def removeType(self, t):
         self.__types.remove(t)
+
+    def getKinds(self):
+        return self.__kinds 
+
+    def getTypes(self):
+        return self.__types
     
     def eligible(self, entity):
         if len(self.__kinds) == 0 or entity.kind in self.__kinds:
-            if len(self.__types) == 0 or len(self.__types.intersection(entity.types)) > 0:
+            if len(self.__types) == 0 or len(self.__types.intersection(entity.types.value)) > 0:
                 return True
         return False
 
@@ -66,17 +72,6 @@ class AMediaCollectionGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, *args, **kwargs)
         self.addKind('media_collection')
-
-        eligible = set( [
-            'book',
-            'movie',
-            'tv',
-            'song',
-            'album',
-            'app',
-        ] )
-        for v in eligible:
-            self.addEligible(v)
 
 class AMediaItemGroup(AKindTypeGroup):
 
@@ -160,6 +155,7 @@ class GooglePlacesGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'googleplaces')
         self.addField(['googleplaces_id'])
+        # self.addField(['googleplaces_reference'])
 
 class TMDBGroup(AMovieGroup):
 
@@ -184,7 +180,7 @@ class RdioGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addType('album')
         self.addKind('media_item')
-        self.addType('song')
+        self.addType('track')
 
         self.addField(['rdio_id'])
         self.addField(['rdio_url'])
@@ -210,7 +206,7 @@ class SpotifyGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addType('album')
         self.addKind('media_item')
-        self.addType('song')
+        self.addType('track')
 
         self.addField(['spotify_id'])
         self.addField(['spotify_url'])
@@ -225,7 +221,7 @@ class iTunesGroup(AKindTypeGroup):
         self.addType('album')
         self.addType('tv')
         self.addKind('media_item')
-        self.addType('song')
+        self.addType('track')
         self.addType('movie')
         self.addType('book')
         self.addKind('software')
@@ -354,6 +350,8 @@ class AlbumsGroup(AKindTypeGroup):
         AKindTypeGroup.__init__(self, 'albums')
         self.addKind('person')
         self.addType('artist')
+        self.addKind('media_item')
+        self.addType('track')
         self.addNameField()
 
 class TracksGroup(AKindTypeGroup):
@@ -365,14 +363,6 @@ class TracksGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addType('album')
 
-        self.addNameField()
-        
-class CollectionsGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'collections')
-        self.addKind('media_item')
-        self.addType('track')
         self.addNameField()
 
 class IMDBGroup(AFilmGroup):
@@ -505,7 +495,6 @@ allGroups = [
     DirectorsGroup,
     CastGroup,
     LengthGroup,
-    CollectionsGroup,
     AlbumsGroup,
     TracksGroup,
     MPAARatingGroup,

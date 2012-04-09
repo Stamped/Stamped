@@ -10,7 +10,7 @@
 #import "STViewDelegate.h"
 #import "STViewContainer.h"
 
-@interface STContainerViewController : UIViewController <STViewDelegate, UIScrollViewDelegate>
+@interface STContainerViewController : UIViewController <STViewDelegate, UIScrollViewDelegate, UITextFieldDelegate>
 
 @property (nonatomic, readonly, retain) STScrollViewContainer* scrollView;
 
@@ -19,5 +19,9 @@
 - (void)userPulledToReload;
 
 - (void)reloadData;
+
+- (void)setToolbar:(UIView*)view withAnimation:(BOOL)animated;
+
+- (void)reloadStampedData;
 
 @end

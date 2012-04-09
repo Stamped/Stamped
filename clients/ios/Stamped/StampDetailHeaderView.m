@@ -173,7 +173,7 @@
 
   self.title = [entity valueForKey:@"title"];
   subtitleLabel_.text = [entity valueForKey:@"subtitle"];
-  categoryImageView_.image = [entity valueForKey:@"stampDetailCategoryImage"];
+  categoryImageView_.image = [Util imageForCategory:[entity valueForKey:@"category"]];
   categoryImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:categoryImageView_.image];
   [self setNeedsLayout];
 }

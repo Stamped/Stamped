@@ -12,4 +12,6 @@
 
 @property (nonatomic, readwrite, copy) NSString* stampID;
 
++ (STCommentSlice*)sliceForStampID:(NSString*)stampID offset:(NSInteger)offset limit:(NSInteger)limit;
+
 @end

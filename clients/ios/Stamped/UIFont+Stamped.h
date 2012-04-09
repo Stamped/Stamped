@@ -11,6 +11,10 @@
 @interface UIFont (Stamped)
 
 
+
++ (UIFont*)stampedTitleFont;
++ (UIFont*)stampedSubtitleFont;
+
 + (UIFont*)stampedTitleFontWithSize:(CGFloat)size;
 + (UIFont*)stampedBoldFontWithSize:(CGFloat)size;
 + (UIFont*)stampedFontWithSize:(CGFloat)size;

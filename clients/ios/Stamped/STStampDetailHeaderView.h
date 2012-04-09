@@ -9,9 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "STStamp.h"
 #import "STEntity.h"
+#import "STViewContainer.h"
 
-@interface STStampDetailHeaderView : UIView
+@interface STStampDetailHeaderView : STViewContainer
 
--(id)initWithStamp:(id<STStamp>)stamp andEntity:(id<STEntity>)entity;
+-(id)initWithStamp:(id<STStamp>)stamp;
 
 @end

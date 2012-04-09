@@ -32,7 +32,7 @@ def _coordinatesDictToFlat(coordinates):
             not isinstance(coordinates['lng'], float):
             raise
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except:
+    except Exception:
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -44,7 +44,7 @@ def _coordinatesFlatToDict(coordinates):
             'lat': lat,
             'lng': lng
         }
-    except:
+    except Exception:
         return None
 
 def _profileImageURL(screenName, cache=None):
@@ -61,7 +61,7 @@ def _profileImageURL(screenName, cache=None):
 def _formatURL(url):
     try:
         return url.split('://')[-1].split('/')[0].split('www.')[-1]
-    except:
+    except Exception:
         return url
 
 def encodeStampTitle(title):
@@ -116,7 +116,7 @@ def _encodeAmazonURL(raw_url):
                             parsed_url.fragment
                         ))
         return url
-    except:
+    except Exception:
         logs.warning('Unable to encode Amazon URL: %s' % raw_url)
         return raw_url
 
@@ -582,7 +582,7 @@ class HTTPEntity(Schema):
     def _formatReleaseDate(self, date):
         try:
             return date.strftime("%h %d, %Y")
-        except:
+        except Exception:
             return None
 
     def _formatFilmLength(self, seconds):
@@ -619,7 +619,7 @@ class HTTPEntity(Schema):
         # Restaurant / Bar
         if entity.kind == 'place' and entity.category == 'food':
             self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
             address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
@@ -627,7 +627,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_food', client=client))
-            self._addMetadata('Cuisine', ', '.join(str(i) for i in entity.cuisine))
+            self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
@@ -679,7 +679,7 @@ class HTTPEntity(Schema):
         # Generic Place
         elif entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
             address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
@@ -709,14 +709,14 @@ class HTTPEntity(Schema):
         elif entity.kind == 'media_item' and entity.isType('book'):
 
             if entity.authors is not None:
-                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)
+                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(str(i['title']) for i in entity.publishers))
+            self._addMetadata('Publisher', ', '.join(unicode(i['title']) for i in entity.publishers))
 
             # Actions: Buy
 
@@ -743,16 +743,16 @@ class HTTPEntity(Schema):
                     self.caption = length
 
             if entity.subcategory == 'tv' and len(entity.networks) > 0:
-                self.caption = ', '.join(str(i['title']) for i in entity.networks)
+                self.caption = ', '.join(unicode(i['title']) for i in entity.networks)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(str(i['title']) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(str(i['title']) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(str(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
@@ -822,25 +822,25 @@ class HTTPEntity(Schema):
                 self.caption = 'Artist'
 
             elif entity.subcategory == 'album' and entity.artists is not None:
-                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.artists)
+                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
             elif entity.subcategory == 'song' and entity.artists is not None:
-                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.artists)
+                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_music', client=client))
             if entity.subcategory == 'artist':
                 self._addMetadata('Biography', entity.desc, key='desc')
-                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres), optional=True)
+                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
 
             elif entity.subcategory == 'album':
-                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
+                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.subcategory == 'song':
-                self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
+                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
@@ -940,9 +940,9 @@ class HTTPEntity(Schema):
                     try:
                         song = entity.tracks[i]
                         item = HTTPEntityPlaylistItem()
-                        # item.length = song.length
-                        item.num = i + 1
-                        item.icon = None ### TODO
+                        item.name   = song.title 
+                        item.length = song.length
+                        # item.icon   = None ### TODO
 
                         sources = []
 
@@ -989,12 +989,12 @@ class HTTPEntity(Schema):
         elif entity.kind == 'software' and entity.isType('app'):
 
             if entity.authors is not None:
-                self.caption = 'by %s' % ', '.join(str(i.title) for i in entity.authors)
+                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=self._getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', ', '.join(str(i) for i in entity.genres))
+            self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download
@@ -1145,7 +1145,7 @@ class HTTPEntityMini(Schema):
             try:
                 if 'coordinates' in schema.value:
                     self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
-            except:
+            except Exception:
                 pass
         else:
             raise NotImplementedError
@@ -1183,7 +1183,7 @@ class HTTPEntityNew(Schema):
                     entity[field] = value
                     entity['%s_source' % field] = 'seed'
                     entity['%s_timestamp' % field] = timestamp
-                except:
+                except Exception:
                     pass
 
         def addListField(entity, field, value, entityMini=None, timestamp=None):
@@ -1197,7 +1197,7 @@ class HTTPEntityNew(Schema):
                     entity[field].append(item)
                     entity['%s_source' % field] = 'seed'
                     entity['%s_timestamp' % field] = timestamp
-                except:
+                except Exception:
                     pass
 
         now = datetime.utcnow()
@@ -1462,19 +1462,19 @@ class HTTPGenericSlice(Schema):
                     'lat' : float(lat), 
                     'lng' : float(lng)
                 }
-            except:
+            except Exception:
                 raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
         
         if 'since' in data:
             try: 
                 data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
-            except:
+            except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
         
         if 'before' in data:
             try: 
                 data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
-            except:
+            except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
         
         # TODO: validate since <= before
@@ -1528,7 +1528,7 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
                 }
                 
                 # TODO: validate viewport
-            except:
+            except Exception:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
         
         return data
@@ -1977,11 +1977,11 @@ class HTTPEntity_stampedtest(Schema):
 
         if schema.__class__.__name__ == 'PlaceEntity':
 
-            self.address            = schema.formatted_address
+            self.address            = schema.formatAddress()
             self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
 
             if len(schema.cuisine) > 0:
-                self.cuisine        = ', '.join(str(i) for i in schema.cuisine)
+                self.cuisine        = ', '.join(unicode(i) for i in schema.cuisine)
 
             if schema.price_range is not None:
                 self.price_scale    = '$' * schema.price_range
@@ -1989,7 +1989,7 @@ class HTTPEntity_stampedtest(Schema):
         if schema.__class__.__name__ == 'PersonEntity':
 
             if len(schema.genres) > 0:
-                self.genre          = ', '.join(str(i) for i in schema.genres)
+                self.genre          = ', '.join(unicode(i) for i in schema.genres)
 
             if len(schema.tracks) > 0:
                 tracks = schema.tracks[:10]
@@ -2008,26 +2008,26 @@ class HTTPEntity_stampedtest(Schema):
                 self.release_date   = schema.release_date.strftime("%h %d, %Y")
 
             if len(schema.genres) > 0:
-                self.genre          = ', '.join(str(i) for i in schema.genres)
+                self.genre          = ', '.join(unicode(i) for i in schema.genres)
 
 
             if len(schema.authors) > 0:
-                self.author         = ', '.join(str(i['title']) for i in schema.authors)
+                self.author         = ', '.join(unicode(i['title']) for i in schema.authors)
 
             if len(schema.artists) > 0:
-                self.artist_name    = ', '.join(str(i['title']) for i in schema.artists)
+                self.artist_name    = ', '.join(unicode(i['title']) for i in schema.artists)
 
             if len(schema.publishers) > 0:
-                self.publisher      = ', '.join(str(i['title']) for i in schema.publishers)
+                self.publisher      = ', '.join(unicode(i['title']) for i in schema.publishers)
 
             if len(schema.cast) > 0:
-                self.cast           = ', '.join(str(i['title']) for i in schema.cast)
+                self.cast           = ', '.join(unicode(i['title']) for i in schema.cast)
 
             if len(schema.directors) > 0:
-                self.director       = ', '.join(str(i['title']) for i in schema.directors)
+                self.director       = ', '.join(unicode(i['title']) for i in schema.directors)
 
             if len(schema.networks) > 0:
-                self.network        = ', '.join(str(i['title']) for i in schema.networks)
+                self.network        = ', '.join(unicode(i['title']) for i in schema.networks)
 
         if schema.__class__.__name__ == 'MediaItemEntity':
 

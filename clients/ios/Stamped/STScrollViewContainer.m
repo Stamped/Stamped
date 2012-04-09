@@ -139,4 +139,12 @@ static int _count = 0;
   [super setDelegate:scrollDelegate];
 }
 
+- (void)reloadStampedData {
+  for (id view in self.subviews) {
+    if ([view respondsToSelector:@selector(reloadStampedData)]) {
+      [view reloadStampedData];
+    }
+  }
+}
+
 @end

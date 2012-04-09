@@ -20,7 +20,7 @@
 @synthesize deleted = _deleted;
 @synthesize imageDimensions = _imageDimensions;
 @synthesize imageURL = _imageURL;
-@synthesize isFavorited = _isFavorited;
+@synthesize isTodod = _isTodod;
 @synthesize isLiked = _isLiked;
 @synthesize modified = _modified;
 @synthesize numComments = _numComments;
@@ -42,7 +42,7 @@
   [_deleted release];
   [_imageDimensions release];
   [_imageURL release];
-  [_isFavorited release];
+  [_isTodod release];
   [_isLiked release];
   [_modified release];
   [_numComments release];
@@ -66,7 +66,7 @@
    @"image_dimensions", @"imageDimensions",
    @"image_url", @"imageURL",
    @"is_liked", @"isLiked",
-   @"is_fav", @"isFav",
+   @"is_fav", @"isTodod",
    @"stamp_id", @"stampID",
    @"url", @"URL",
    nil];
@@ -81,7 +81,7 @@
   
   [mapping mapRelationship:@"entity" withMapping:[STSimpleEntity mapping]];
   [mapping mapRelationship:@"user" withMapping:[STSimpleUser mapping]];
-  [mapping mapKeyPath:@"comments_preview" 
+  [mapping mapKeyPath:@"comment_preview" 
        toRelationship:@"commentsPreview" 
           withMapping:[STSimpleComment mapping]];
   [mapping mapRelationship:@"mentions" withMapping:[STSimpleMention mapping]];

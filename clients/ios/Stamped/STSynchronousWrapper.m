@@ -31,16 +31,16 @@
       componentFactory:(id<STEntityDetailComponentFactory>)factory
           entityDetail:(id<STEntityDetail>)entityDetail
               andFrame:(CGRect)frame {
-  return [self initWithDelegate:delegate completion:nil factoryBlock:^(STViewCreatorCallback callback) {
+  return [self initWithDelegate:delegate frame:frame factoryBlock:^(STViewCreatorCallback callback) {
     NSOperation* operation = [factory createViewWithEntityDetail:entityDetail andCallbackBlock:callback];
     [Util runOperationAsynchronously:operation];
-  } andFrame:frame];
+  } andCompletion:nil];
 }
 
-- (id)initWithDelegate:(id<STViewDelegate>)delegate 
-            completion:(void(^)(STSynchronousWrapper*))completionBlock
+- (id)initWithDelegate:(id<STViewDelegate>)delegate
+                 frame:(CGRect)frame
           factoryBlock:(STViewFactoryBlock)factoryBlock
-              andFrame:(CGRect)frame {
+         andCompletion:(void(^)(STSynchronousWrapper*))completionBlock {
   self = [super initWithDelegate:delegate andFrame:frame];
   if (self) {
     _proxy = [[STWeakProxy alloc] initWithValue:self];
@@ -72,7 +72,10 @@
 
 
 - (void)handleCallback:(STViewCreator)creator {
-  UIView* child = creator(self);
+  UIView* child;
+  if (creator) {
+    child = creator(self);
+  }
   CGFloat delta;
   void (^completion_block)(BOOL) = nil;
   if (child) {

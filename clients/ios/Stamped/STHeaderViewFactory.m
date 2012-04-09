@@ -12,6 +12,10 @@
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
 #import "UIFont+Stamped.h"
+#import <CoreLocation/CoreLocation.h>
+#import <MapKit/MapKit.h>
+
+static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
 
 @interface STHeaderViewFactory ()
 
@@ -50,7 +54,12 @@
     CGFloat padding_h = 15;
     CGFloat maxWidth = 200;
     CGFloat maxImageWidth = 320 - (maxWidth + 3 * padding_h);
-    UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:entity.image] andFrame:CGRectNull];
+    NSString* imagePath = nil;
+    if (entity.images && [entity.images count] > 0) {
+      id<STImage> image = [entity.images objectAtIndex:0];
+      imagePath = image.image;
+    }
+    UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:imagePath] andFrame:CGRectNull];
     CGRect imageFrame = imageView.frame;
     if (imageFrame.size.width > maxImageWidth) {
       CGFloat factor = maxImageWidth / imageFrame.size.width;
@@ -107,6 +116,22 @@
     [view addSubview:titleView];
     [view addSubview:captionView];
     [view addSubview:imageView];
+    
+    //TODO
+    if (entity.coordinates && NO) {
+      NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","]; 
+      CLLocationDegrees latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+      CLLocationDegrees longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
+      CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude, longitude);
+      MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
+      MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
+      MKMapView* mapView = [[MKMapView alloc] initWithFrame:CGRectMake(0,CGRectGetMaxY(view.frame), 320, 100)];
+      [view addSubview:mapView];
+      frame = view.frame;
+      frame.size.height = CGRectGetMaxY(mapView.frame);
+      view.frame = frame;
+      [mapView setRegion:region animated:YES];
+    }
     
     [view autorelease];
   }
