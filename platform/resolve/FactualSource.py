@@ -285,13 +285,15 @@ class FactualSource(GenericSource):
                 singleplatform_id = self.__factual.singleplatform(factual_id)
                 entity['singleplatform_id'] = singleplatform_id
                 timestamps['singleplatform'] = controller.now
-            
+
             # all further enrichments require place/restaurant data so return if not present
             data = self.__factual.data(factual_id,entity=entity)
 
             if data is None:
                 return True
-            
+
+            factualPlace = FactualPlace(data=data)
+
             # set all simple mappings
             for k,v in self.__simple_fields.items():
                 if v in data:
@@ -299,6 +301,12 @@ class FactualSource(GenericSource):
 
             # set address group
             self.writeFields(entity, data, self.__address_fields)
+
+            # set type
+            types = factualPlace.types
+            if len(types) > 0:
+                entity.types = types
+                print 'TYPES: %s' % types
 
             if 'price' in data:
                 try:

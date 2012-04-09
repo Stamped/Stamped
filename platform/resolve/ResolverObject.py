@@ -354,7 +354,7 @@ class ResolverMediaItem(ResolverObject):
         return None
 
     @property
-    def collections(self):
+    def albums(self):
         return []
 
     @property
@@ -376,7 +376,7 @@ class ResolverMediaItem(ResolverObject):
         l.extend([ i['name'] for i in self.publishers ])
         l.extend([ i['name'] for i in self.studios ])
         l.extend([ i['name'] for i in self.networks ])
-        l.extend([ i['name'] for i in self.collections ])
+        l.extend([ i['name'] for i in self.albums ])
         return [
             v for v in l if v != ''
         ]

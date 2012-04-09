@@ -24,7 +24,7 @@ try:
     from ResolverObject             import *
     from ASourceController          import *
     from Schemas                    import *
-except:
+except Exception:
     report()
     raise
 
@@ -146,6 +146,7 @@ class GenericSource(BasicSource):
         if decorations is None:
             decorations = {}
 
+        albums = []
         for album in artist.albums:
             try:
                 entityMini  = MediaCollectionEntityMini()
@@ -155,15 +156,18 @@ class GenericSource(BasicSource):
                     entityMini.sources['%s_source' % artist.source] = artist.source
                 if 'url' in album:
                     entityMini.sources['%s_url' % artist.source] = album['url']
-                entity.albums.append(entityMini)
+                albums.append(entityMini)
             except Exception:
                 report()
                 logs.info('Album import failure: %s for artist %s' % (album, artist))
+        if len(albums) > 0:
+            entity.albums = albums
 
     def __repopulateTracks(self, entity, artist, controller, decorations=None):
         if decorations is None:
             decorations = {}
 
+        tracks = []
         for track in artist.tracks:
             try:
                 entityMini  = MediaItemEntityMini()
@@ -174,10 +178,12 @@ class GenericSource(BasicSource):
                     entityMini.sources['%s_source' % artist.source] = artist.source
                 if 'url' in track:
                     entityMini.sources['%s_url' % artist.source] = track['url']
-                entity.tracks.append(entityMini)
+                tracks.append(entityMini)
             except Exception:
                 report()
                 logs.info('Track import failure: %s for artist %s' % (track, artist))
+        if len(tracks) > 0:
+            entity.tracks = tracks
     
     def entityProxyFromKey(self, key, type=None):
         raise NotImplementedError
@@ -198,6 +204,22 @@ class GenericSource(BasicSource):
         
         self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
         
+        now = datetime.utcnow()
+        for group in self.groups:
+            try:
+                if len(entity[group]) > 0:
+                    entity['%s_timestamp' % group] = now
+                    entity['%s_source' % group] = self.sourceName 
+            except:
+                pass 
+
+        try:
+            entity['%s_id' % self.sourceName] = proxy.key
+            entity['%s_timestamp' % self.sourceName] = now
+            entity['%s_source' % self.sourceName] = self.sourceName
+        except:
+            pass
+
         return entity
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
@@ -215,24 +237,28 @@ class GenericSource(BasicSource):
         
         def setAttribute(source, target):
             try:
-                if proxy[source] is not None and proxy[source] != '':
-                    entity[target] = proxy[source]
-            except:
+                item = getattr(proxy, source)
+                if item is not None and item != '':
+                    entity[target] = item
+            except Exception as e:
                 pass
         
         ### General
         entity.title = proxy.name 
         entity.types = proxy.types
-
-        if proxy.image != '':
-            img = ImageSchema()
-            img.image = proxy.image
-            entity.images.append(img)
         
         setAttribute('description',     'desc')
         setAttribute('phone',           'phone')
         setAttribute('email',           'email')
         setAttribute('url',             'site')
+
+        images = []
+        if proxy.image is not None and proxy.image != '':
+            img = ImageSchema()
+            img.image = proxy.image
+            images.append(img)
+        if len(images) > 0:
+            entity.images = images
         
         ### Place
         if entity.kind == 'place' and proxy.kind == 'place':
@@ -255,7 +281,8 @@ class GenericSource(BasicSource):
                     v = None
                     if k in proxy.address:
                         v = proxy.address[k]
-                    entity['address_%s' % k] = v
+                    if v is not None:
+                        entity['address_%s' % k] = v
         
         ### Person
         if entity.kind == 'person' and proxy.kind == 'person':
@@ -279,26 +306,39 @@ class GenericSource(BasicSource):
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
 
+            cast = []
             for actor in proxy.cast:
                 entityMini = PersonEntityMini()
                 entityMini.title = actor['name']
-                entity.cast.append(entityMini)
+                cast.append(entityMini)
+            if len(cast) > 0:
+                entity.cast = cast
 
+            directors = []
             for director in proxy.directors:
                 entityMini = PersonEntityMini()
                 entityMini.title = director['name']
-                entity.directors.append(entityMini)
+                directors.append(entityMini)
+            if len(directors) > 0:
+                entity.directors = directors
 
+            publishers = []
             for publisher in proxy.publishers:
                 entityMini = PersonEntityMini()
                 entityMini.title = publisher['name']
-                entity.publishers.append(entityMini)
+                publishers.append(entityMini)
+            if len(publishers) > 0:
+                entity.publishers = publishers
 
+            authors = []
             for author in proxy.authors:
                 entityMini = PersonEntityMini()
                 entityMini.title = author['name']
-                entity.authors.append(entityMini)
+                authors.append(entityMini)
+            if len(authors) > 0:
+                entity.authors = authors
 
+            artists = []
             for artist in proxy.artists:
                 entityMini = PersonEntityMini()
                 entityMini.title = artist['name']
@@ -308,7 +348,9 @@ class GenericSource(BasicSource):
                     entityMini.sources['%s_source' % proxy.source] = proxy.source
                 if 'url' in artist:
                     entityMini.sources['%s_url' % proxy.source] = artist['url']
-                entity.artists.append(entityMini)
+                artists.append(entityMini)
+            if len(artists) > 0:
+                entity.artists = artists
         
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
@@ -318,16 +360,19 @@ class GenericSource(BasicSource):
         
         ### Media Item
         if entity.kind == 'media_item' and proxy.kind == 'media_item':
-            for collection in proxy.collections:
+            albums = []
+            for album in proxy.albums:
                 entityMini = MediaCollectionEntityMini()
-                entityMini.title = collection['name']
+                entityMini.title = album['name']
                 entityMini.types.append('album')
-                if 'key' in collection:
-                    entityMini.sources['%s_id' % proxy.source] = collection['key']
+                if 'key' in album:
+                    entityMini.sources['%s_id' % proxy.source] = album['key']
                     entityMini.sources['%s_source' % proxy.source] = proxy.source
-                if 'url' in collection:
-                    entityMini.sources['%s_url' % proxy.source] = collection['url']
-                entity.collections.append(entityMini)
+                if 'url' in album:
+                    entityMini.sources['%s_url' % proxy.source] = album['url']
+                albums.append(entityMini)
+            if len(albums) > 0:
+                entity.albums = albums
 
             if proxy.isbn is not None:
                 entity.isbn = proxy.isbn
@@ -342,15 +387,29 @@ class GenericSource(BasicSource):
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
 
+            publishers = []
             for publisher in proxy.publishers:
                 entityMini = PersonEntityMini()
                 entityMini.title = publisher['name']
-                entity.authors.append(entityMini)
+                publishers.append(entityMini)
+            if len(publishers) > 0:
+                entity.publishers = publishers
 
+            authors = []
+            for author in proxy.authors:
+                entityMini = PersonEntityMini()
+                entityMini.title = author['name']
+                authors.append(entityMini)
+            if len(authors) > 0:
+                entity.authors = authors
+
+            screnshots = []
             for screenshot in proxy.screenshots:
                 img = ImageSchema()
                 img.image = screenshot
-                entity.screenshots.append(img)
+                screenshots.append(img)
+            if len(screnshots) > 0:
+                entity.screnshots = screnshots
     
     @property
     def idField(self):

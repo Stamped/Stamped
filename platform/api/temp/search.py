@@ -42,7 +42,19 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # e = stampedAPI.getEntity({'entity_id': '4e4c6e76db6bbe2bcd01ce85'})
 
 # album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
-stampedAPI.getEntity({'search_id': 'T_ITUNES_64387566'}) # Katy Perry (Artist)
+# stampedAPI.getEntity({'search_id': 'T_ITUNES_64387566'}) # Katy Perry (Artist)
+
+# stampedAPI.getEntity({'search_id': 'T_ITUNES_474912080'}) # Song (That Power)
+# stampedAPI.getEntity({'search_id': 'T_ITUNES_474912071'}) # Song (Hold You Down)
+
+entity = stampedAPI.getEntity({'search_id': 'T_GOOGLEPLACES_ClRJAAAAaU4WvIwYeYUN93Pt1uQ11sO4xaGHk3Ksi-vXxsPy10gC6LJMuSoEJF1-CJQX4O30cG37mZZnR6ZcYBpVyOcfqZTmxohcy5R0GekwQTmfBoISEHAtNR9kCBd-49e1jEBHCjYaFG3DsuqJ0U4TiedEPtQAzU1UWJve'}) # Place (Cascabel)
+stampedAPI._enrichEntity(entity)
+
+# print 'SKIP\n\n\n'
+
+# stampedAPI._enrichEntityAsync('4f81e6a446ebe66a0d000000') # Artist (Katy Perry)
+# stampedAPI._enrichEntityAsync('4f81e7e646ebe66a2a00000f') # Track (Peacock)
+# stampedAPI._enrichEntityAsync('4f81e79246ebe66a27000000') # Album (Teenage Dream)
 
 """
 album = stampedAPI._mergeEntity(album, True)
@@ -106,7 +118,7 @@ for stub in album.tracks:
 
     # Update track's album with album entity_id
     collectionUpdated = False
-    for collection in track.collections:
+    for collection in track.albums:
         commonSources = set(album.sources.value.keys()).intersection(set(collection.sources.value.keys()))
         for commonSource in commonSources:
             if commonSource[-3:] == '_id' and album.sources[commonSource] == collection.sources[commonSource]:
@@ -116,7 +128,7 @@ for stub in album.tracks:
         if collectionUpdated:
             break
     if not collectionUpdated:
-        track.collections.append(album.minimize())
+        track.albums.append(album.minimize())
 
     track = stampedAPI._mergeEntity(track, True)
 

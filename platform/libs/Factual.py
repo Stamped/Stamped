@@ -85,6 +85,9 @@ _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 #_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
 _API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
 _API_V3_Secret = "pJ4OIbsi8l3V1sXNRngy3uCGe0DzCIpWfzwGtbkM"
+
+_API_V3_Key = 'wgf36HhnpPXQBu6qSkRPiqMK7te3jHpi0EJnYf9D'
+_API_V3_Secret = '9hIItS9RQAlinpyfD6FR9HjmI3tBidMCMxhtAjNd'
 _limit = 20
 
 
@@ -122,12 +125,15 @@ def _street(val):
     return None
 
 def _category(entity):
-    if entity['subcategory'] == 'restaurant':
+    if entity.isType('restaurant'):
         return 'Food & Beverage > Restaurants'
-    elif entity['category'] == 'food':
+    elif entity.category == 'food':
         return 'Food & Beverage'
     else:
         return None
+
+def _address(entity):
+    return entity.formatAddress()
 
 def _ppath(*args,**kwargs):
     return partial(_path,*args,**kwargs)
@@ -149,8 +155,9 @@ _relevant_fields = {
     'name':partial(_path,'title'),
     'longitude':partial(_path,'coordinates lng'),
     'latitude':partial(_path,'coordinates lat'),
-    'tel':partial(_path,'details contact phone'),
-    'address':partial(_path,'details place address',subfunc=_street),
+    'tel':partial(_path,'contact phone'),
+    # 'address':partial(_path,'details place address',subfunc=_street),
+    'address': _address,
     'category':_category,
 }
 
@@ -582,6 +589,9 @@ class Factual(object):
             return False
         if result['similarity'] < .70:
             if verbose: self.__log("Rejected for similarity\n")
+            return False
+        if 'country' not in result:
+            if verbose: self.__log("Missing country\n")
             return False
         return True
 
