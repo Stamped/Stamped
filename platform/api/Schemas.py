@@ -781,7 +781,7 @@ class PlaceEntity(BasicEntity):
         locality    = self.address_locality
         region      = self.address_region
         postcode    = self.address_postcode
-        country     = self.address_country
+        country     = self.address_country.upper()
         
         delimiter = '\n' if breakLines else ', '
         
