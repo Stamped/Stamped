@@ -140,7 +140,7 @@ class FactualPlace(ResolverPlace):
         return []
 
     @lazyProperty
-    def cuisines(self):
+    def cuisine(self):
         if 'cuisine' in self.data:
             return [ unicode(i.strip()) for i in self.data['cuisine'].split(',') ]
         return []
@@ -314,7 +314,7 @@ class FactualSource(GenericSource):
 
             # Cuisines
             if len(factualPlace.cuisines) > 0:
-                entity.cuisines = factualPlace.cuisines
+                entity.cuisine = factualPlace.cuisine
 
             if 'price' in data:
                 try:
