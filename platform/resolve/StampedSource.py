@@ -145,7 +145,7 @@ class EntityTrack(_EntityObject, ResolverMediaItem):
     @lazyProperty
     def albums(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['collections'] ]
+            return [ { 'name' : item['title'] } for item in self.entity['albums'] ]
         except Exception:
             return []
 
@@ -489,7 +489,7 @@ class StampedSource(GenericSource):
                 }
                 yield {
                     '$or': [
-                        { 'collections': {'$elemMatch':{ 'title': album['name'] } } }
+                        { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
                             for album in query.albums[20:]
                     ],
                     'types'         : 'track',

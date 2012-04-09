@@ -24,7 +24,7 @@ try:
     from ResolverObject             import *
     from libs.LibUtils              import parseDateString
     from StampedSource              import StampedSource
-except:
+except Exception:
     report()
     raise
 
@@ -99,7 +99,7 @@ class _iTunesObject(object):
     def image(self):
         try:
             return self.data['artworkUrl100']
-        except:
+        except Exception:
             return ''
     
     def __repr__(self):
@@ -181,7 +181,14 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
 
     @lazyProperty
     def name(self):
-        return self.data['collectionName']
+        suffix = ''
+        try:
+            if self.data['contentAdvisoryRating'] == 'Clean':
+                pass
+                # suffix = ' (Clean)'
+        except Exception:
+            pass
+        return '%s%s' % (self.data['collectionName'], suffix)
 
     @lazyProperty
     def url(self):
@@ -240,7 +247,14 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
 
     @lazyProperty
     def name(self):
-        return self.data['trackName']
+        suffix = ''
+        try:
+            if self.data['contentAdvisoryRating'] == 'Clean':
+                pass
+                # suffix = ' (Clean)'
+        except Exception:
+            pass
+        return '%s%s' % (self.data['trackName'], suffix)
 
     @lazyProperty
     def url(self):
@@ -521,14 +535,14 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
     def screenshots(self):
         try:
             return self.data['screenshotUrls']
-        except:
+        except Exception:
             return []
 
     @lazyProperty 
     def image(self):
         try:
             return self.data['artworkUrl512']
-        except:
+        except Exception:
             return ''
 
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
@@ -547,8 +561,12 @@ class iTunesSource(GenericSource):
                 'mpaa_rating',
                 'genres',
                 'desc',
+                'artists',
                 'albums',
                 'tracks',
+                'release_date',
+                'publishers',
+                'authors',
             ],
             kinds=[
                 'person',

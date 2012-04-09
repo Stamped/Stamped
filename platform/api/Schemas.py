@@ -1000,9 +1000,9 @@ class MediaItemEntity(BasicMediaEntity):
         self.kind                           = SchemaElement(basestring, required=True, default='media_item')
         
         # Tracks
-        self.collections                    = SchemaList(MediaCollectionEntityMini())
-        self.collections_source             = SchemaElement(basestring)
-        self.collections_timestamp          = SchemaElement(datetime)
+        self.albums                         = SchemaList(MediaCollectionEntityMini())
+        self.albums_source                  = SchemaElement(basestring)
+        self.albums_timestamp               = SchemaElement(datetime)
         
         # Books
         self.isbn                           = SchemaElement(basestring)

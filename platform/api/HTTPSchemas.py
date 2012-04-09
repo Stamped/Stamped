@@ -32,7 +32,7 @@ def _coordinatesDictToFlat(coordinates):
             not isinstance(coordinates['lng'], float):
             raise
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except:
+    except Exception:
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -44,7 +44,7 @@ def _coordinatesFlatToDict(coordinates):
             'lat': lat,
             'lng': lng
         }
-    except:
+    except Exception:
         return None
 
 def _profileImageURL(screenName, cache=None):
@@ -61,7 +61,7 @@ def _profileImageURL(screenName, cache=None):
 def _formatURL(url):
     try:
         return url.split('://')[-1].split('/')[0].split('www.')[-1]
-    except:
+    except Exception:
         return url
 
 def encodeStampTitle(title):
@@ -116,7 +116,7 @@ def _encodeAmazonURL(raw_url):
                             parsed_url.fragment
                         ))
         return url
-    except:
+    except Exception:
         logs.warning('Unable to encode Amazon URL: %s' % raw_url)
         return raw_url
 
@@ -582,7 +582,7 @@ class HTTPEntity(Schema):
     def _formatReleaseDate(self, date):
         try:
             return date.strftime("%h %d, %Y")
-        except:
+        except Exception:
             return None
 
     def _formatFilmLength(self, seconds):
@@ -619,7 +619,7 @@ class HTTPEntity(Schema):
         # Restaurant / Bar
         if entity.kind == 'place' and entity.category == 'food':
             self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
             address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
@@ -679,7 +679,7 @@ class HTTPEntity(Schema):
         # Generic Place
         elif entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(self.coordinates)
+            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
             address = entity.formatAddress(extendStreet=True, breakLines=True)
             if address is not None:
@@ -940,9 +940,9 @@ class HTTPEntity(Schema):
                     try:
                         song = entity.tracks[i]
                         item = HTTPEntityPlaylistItem()
-                        # item.length = song.length
-                        item.num = i + 1
-                        item.icon = None ### TODO
+                        item.name   = song.title 
+                        item.length = song.length
+                        # item.icon   = None ### TODO
 
                         sources = []
 
@@ -1145,7 +1145,7 @@ class HTTPEntityMini(Schema):
             try:
                 if 'coordinates' in schema.value:
                     self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
-            except:
+            except Exception:
                 pass
         else:
             raise NotImplementedError
@@ -1183,7 +1183,7 @@ class HTTPEntityNew(Schema):
                     entity[field] = value
                     entity['%s_source' % field] = 'seed'
                     entity['%s_timestamp' % field] = timestamp
-                except:
+                except Exception:
                     pass
 
         def addListField(entity, field, value, entityMini=None, timestamp=None):
@@ -1197,7 +1197,7 @@ class HTTPEntityNew(Schema):
                     entity[field].append(item)
                     entity['%s_source' % field] = 'seed'
                     entity['%s_timestamp' % field] = timestamp
-                except:
+                except Exception:
                     pass
 
         now = datetime.utcnow()
@@ -1462,19 +1462,19 @@ class HTTPGenericSlice(Schema):
                     'lat' : float(lat), 
                     'lng' : float(lng)
                 }
-            except:
+            except Exception:
                 raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
         
         if 'since' in data:
             try: 
                 data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
-            except:
+            except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
         
         if 'before' in data:
             try: 
                 data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
-            except:
+            except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
         
         # TODO: validate since <= before
@@ -1528,7 +1528,7 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
                 }
                 
                 # TODO: validate viewport
-            except:
+            except Exception:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
         
         return data
