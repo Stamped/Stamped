@@ -1013,6 +1013,11 @@ class MediaItemEntity(BasicMediaEntity):
         self.sku_number_source              = SchemaElement(basestring)
         self.sku_number_timestamp           = SchemaElement(datetime)
 
+    def minimize(self):
+        mini            = BasciMediaEnity.minimize(self)
+        mini.length     = self.length
+        return mini
+
     @property 
     def subtitle(self):
         if self.isType('movie'):

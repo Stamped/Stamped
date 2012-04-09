@@ -941,7 +941,8 @@ class HTTPEntity(Schema):
                         song = entity.tracks[i]
                         item = HTTPEntityPlaylistItem()
                         item.name   = song.title 
-                        item.length = song.length
+                        if song.length is not None:
+                            item.length = song.length
                         # item.icon   = None ### TODO
 
                         sources = []
