@@ -943,6 +943,8 @@ class HTTPEntity(Schema):
                         item.name   = song.title 
                         if song.length is not None:
                             item.length = song.length
+                        if song.entity_id is not None:
+                            item.entity_id = song.entity_id
                         # item.icon   = None ### TODO
 
                         sources = []
@@ -1107,6 +1109,7 @@ class HTTPEntityPlaylist(Schema):
 
 class HTTPEntityPlaylistItem(Schema):
     def setSchema(self):
+        self.entity_id          = SchemaElement(basestring)
         self.name               = SchemaElement(basestring, required=True)
         self.action             = HTTPAction()
         self.num                = SchemaElement(int)
