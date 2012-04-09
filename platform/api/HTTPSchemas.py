@@ -1977,7 +1977,7 @@ class HTTPEntity_stampedtest(Schema):
 
         if schema.__class__.__name__ == 'PlaceEntity':
 
-            self.address            = schema.formatted_address
+            self.address            = schema.formatAddress()
             self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
 
             if len(schema.cuisine) > 0:
