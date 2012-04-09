@@ -140,6 +140,9 @@ static STStampedActions* _sharedInstance;
             UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
             [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
           }
+          else {
+            [Util warnWithMessage:@"Menu loading failed." andBlock:nil];
+          }
         }];
       }
     }

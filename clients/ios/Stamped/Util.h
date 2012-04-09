@@ -120,6 +120,8 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)confirmWithMessage:(NSString*)message action:(NSString*)action destructive:(BOOL)destructive withBlock:(void(^)(BOOL))block;
 
++ (void)warnWithMessage:(NSString*)message andBlock:(void(^)(void))block;
+
 + (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor;
 
 @end

@@ -96,7 +96,7 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block {
-  [self entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> entityDetail) {
+  [self entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> entityDetail, NSError* error) {
     block(entityDetail);
   }];
 }
@@ -105,8 +105,15 @@ static STStampedAPI* _sharedInstance;
   //TODO implement
 }
 
-- (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail>))block {
-  NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:entityID andCallbackBlock:block];
+- (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block {
+  NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:entityID andCallbackBlock:^(id<STEntityDetail> detail) {
+    if (detail) {
+      block(detail,nil);
+    }
+    else {
+      block(nil, [NSError errorWithDomain:@"/entities/show.json" code:0 userInfo:[NSDictionary dictionary]]);
+    }
+  }];
   [Util runOperationAsynchronously:operation];
 }
 

@@ -27,7 +27,7 @@
 
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block;
 
-- (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail>))block;
+- (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 

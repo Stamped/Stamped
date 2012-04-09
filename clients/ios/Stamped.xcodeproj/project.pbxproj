@@ -165,6 +165,8 @@
 		6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
+		63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
+		63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
@@ -1980,6 +1982,8 @@
 		638D775A152CA017006E4988 /* STStampDetailCommentsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailCommentsView.m; sourceTree = "<group>"; };
 		6398B926152243C90044BB0C /* STWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STWeakProxy.h; sourceTree = "<group>"; };
 		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
+		63A649881532668E001D9314 /* STPlaylistViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistViewFactory.h; sourceTree = "<group>"; };
+		63A649891532668E001D9314 /* STPlaylistViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistViewFactory.m; sourceTree = "<group>"; };
 		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
@@ -3221,6 +3225,8 @@
 				6386EEE1150A581E0019F1DC /* STGalleryViewFactory.m */,
 				6386EF301513C3360019F1DC /* STActionMenuFactory.h */,
 				6386EF311513C3390019F1DC /* STActionMenuFactory.m */,
+				63A649881532668E001D9314 /* STPlaylistViewFactory.h */,
+				63A649891532668E001D9314 /* STPlaylistViewFactory.m */,
 			);
 			name = "View Factories";
 			sourceTree = "<group>";
@@ -6514,6 +6520,7 @@
 				63E5E6BD152E432200579369 /* STInboxViewController.m in Sources */,
 				63E5E6C1152E48A300579369 /* STStampsView.m in Sources */,
 				63E5E6C5152E496100579369 /* STStampCell.m in Sources */,
+				63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6725,6 +6732,7 @@
 				63E5E6BC152E432200579369 /* STInboxViewController.m in Sources */,
 				63E5E6C0152E48A300579369 /* STStampsView.m in Sources */,
 				63E5E6C4152E496100579369 /* STStampCell.m in Sources */,
+				63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

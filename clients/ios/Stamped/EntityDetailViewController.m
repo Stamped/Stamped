@@ -36,6 +36,9 @@
 #import "STSynchronousWrapper.h"
 #import "STRdio.h"
 #import "STScrollViewContainer.h"
+#import "STToolbarView.h"
+#import "STStampButton.h"
+#import "STTodoButton.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -81,7 +84,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (void)commonInitWithEntityID:(NSString*)entityID andSearchResult:(SearchResult*)searchResult {
   operationQueue_ = [[NSOperationQueue alloc] init];
   if (entityID) {
-    [[STStampedAPI sharedInstance] entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> detail) {
+    [[STStampedAPI sharedInstance] entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
       [self didLoadEntityDetail:detail];
     }];
   }
@@ -96,6 +99,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.scrollView.scrollsToTop = YES;
+  
 }
 
 - (void)dealloc {

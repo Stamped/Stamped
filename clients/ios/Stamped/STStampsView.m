@@ -22,6 +22,7 @@ static const NSInteger _batchSize = 20;
 @property (nonatomic, readwrite, assign) NSInteger maxRow;
 @property (nonatomic, readwrite, assign) BOOL noMoreStamps;
 @property (nonatomic, readwrite, assign) BOOL waiting;
+@property (nonatomic, readwrite, assign) NSInteger generation;
 
 - (void)populateStamps;
 - (BOOL)shouldLoadMore;
@@ -36,6 +37,7 @@ static const NSInteger _batchSize = 20;
 @synthesize maxRow = _maxRow;
 @synthesize noMoreStamps = _noMoreStamps;
 @synthesize waiting = _waiting;
+@synthesize generation = _generation;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -69,6 +71,7 @@ static const NSInteger _batchSize = 20;
   self.maxRow = 0;
   self.noMoreStamps = NO;
   self.waiting = NO;
+  self.generation += 1;
   [self populateStamps];
 }
 
@@ -79,16 +82,21 @@ static const NSInteger _batchSize = 20;
     STGenericCollectionSlice* curSlice = [self.slice resizedSliceWithLimit:[NSNumber numberWithInteger:curBatch] andOffset:[NSNumber numberWithInteger:self.offset]];
     self.offset += curBatch;
     self.waiting = YES;
+    NSInteger thisGeneration = self.generation;
     [[STStampedAPI sharedInstance] stampsForSlice:curSlice andCallback:^(NSArray<STStamp>* stamps, NSError* error) {
-      NSLog(@"stamps:%@",stamps);
-      [self.stamps addObjectsFromArray:stamps];
-      self.waiting = NO;
-      if ([stamps count] > 0) {
-        [self reloadData];
-        [self populateStamps];
+      if (thisGeneration == self.generation) {
+        [self.stamps addObjectsFromArray:stamps];
+        self.waiting = NO;
+        if ([stamps count] > 0) {
+          [self reloadData];
+          [self populateStamps];
+        }
+        else {
+          self.noMoreStamps = YES;
+        }
       }
       else {
-        self.noMoreStamps = YES;
+        NSLog(@"ignoring old request");
       }
     }];
   }
@@ -129,19 +137,19 @@ static const NSInteger _batchSize = 20;
   
   id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
   /*
-  if (entity.stamps.count > 0) {
-    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-    NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    User* currentUser = [AccountManager sharedManager].currentUser;
-    NSSet* following = currentUser.following;
-    if (!following)
-      following = [NSSet set];
-    
-    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
-    stamp = [sortedStamps lastObject];
-  } else {
-    stamp = [entity.stamps anyObject];
-  }
+   if (entity.stamps.count > 0) {
+   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+   NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+   User* currentUser = [AccountManager sharedManager].currentUser;
+   NSSet* following = currentUser.following;
+   if (!following)
+   following = [NSSet set];
+   
+   sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
+   stamp = [sortedStamps lastObject];
+   } else {
+   stamp = [entity.stamps anyObject];
+   }
    */
   STActionContext* context = [STActionContext context];
   context.stamp = stamp;

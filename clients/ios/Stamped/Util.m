@@ -57,6 +57,12 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 @end
 
+@interface STWarningDelegate : NSObject <UIActionSheetDelegate>
+
+@property (nonatomic, readwrite, copy) void(^block)(void);
+
+@end
+
 static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
@@ -655,6 +661,18 @@ static Rdio* _rdio;
   [sheet showInView:[UIApplication sharedApplication].keyWindow];
 }
 
++ (void)warnWithMessage:(NSString*)message andBlock:(void(^)(void))block {
+  STWarningDelegate* delegate = [[STWarningDelegate alloc] init];
+  delegate.block = block;
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:message
+                                                      delegate:delegate
+                                             cancelButtonTitle:nil
+                                        destructiveButtonTitle:nil
+                                             otherButtonTitles:@"Ok", nil] autorelease];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  [sheet showInView:[UIApplication sharedApplication].keyWindow];
+}
+
 
 + (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor {
   UIView* cur = view.superview;
@@ -738,7 +756,6 @@ static Rdio* _rdio;
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
   if (self.block) {
-    NSLog(@"button:%@",[actionSheet buttonTitleAtIndex:buttonIndex]);
     self.block(![[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Cancel"]);
   }
   [self autorelease];
@@ -747,6 +764,32 @@ static Rdio* _rdio;
 - (void)actionSheetCancel:(UIActionSheet *)actionSheet {
   if (self.block) {
     self.block(NO);
+  }
+  [self autorelease];
+}
+
+@end
+
+@implementation STWarningDelegate
+
+@synthesize block = _block;
+
+- (void)dealloc
+{
+  [_block release];
+  [super dealloc];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+  if (self.block) {
+    self.block();
+  }
+  [self autorelease];
+}
+
+- (void)actionSheetCancel:(UIActionSheet *)actionSheet {
+  if (self.block) {
+    self.block();
   }
   [self autorelease];
 }

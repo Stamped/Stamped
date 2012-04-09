@@ -93,6 +93,11 @@
   [toolbar packViews:views withPadding:10];
   [self setToolbar:toolbar withAnimation:YES];
   
+  [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
+    STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForEntityDetail:detail withFrame:CGRectMake(0, 0, 320, 200) andStyle:@"StampDetail" delegate:self.scrollView];
+    [self.scrollView appendChildView:wrapper];
+  }];
+  
 }
 
 - (void)dealloc {

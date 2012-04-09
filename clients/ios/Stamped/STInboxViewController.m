@@ -9,7 +9,7 @@
 #import "STInboxViewController.h"
 #import "STStampsView.h"
 
-@interface STInboxViewController ()
+@interface STInboxViewController () <UIPickerViewDelegate, UIPickerViewDataSource>
 
 @end
 
@@ -27,11 +27,16 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+ // UIPickerView* picker = [[[UIPickerView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)] autorelease];
+  //picker.delegate = self;
+  //picker.dataSource = self;
+  //[self.scrollView appendChildView:picker];
   STStampsView* view = [[[STStampsView alloc] initWithFrame:CGRectMake(0, 0, 320, 363)] autorelease];
   //view.backgroundColor = [UIColor redColor];
   STGenericCollectionSlice* slice = [[STGenericCollectionSlice alloc] init];
   slice.offset = [NSNumber numberWithInt:0];
   slice.limit = [NSNumber numberWithInt:NSIntegerMax];
+  slice.sort = @"created";
   view.slice = slice;
   self.scrollView.scrollsToTop = NO;
   [self.scrollView appendChildView:view];
@@ -42,10 +47,28 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView {
+  return 1;
+}
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component {
+  return 10;
+}
+
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
+  NSLog(@"selected:%d,%d",row,component);
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
+  return [NSString stringWithFormat:@"Row:%d",row];
+}
+
+- (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component {
+  return 50;
+}
+
+- (CGFloat)pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component {
+  return 100;
 }
 
 @end
