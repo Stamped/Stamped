@@ -337,7 +337,6 @@ class GooglePlacesSource(GenericSource):
             timestamps['googleplaces'] = controller.now
             return True
         else:
-            logs.debug(pformat(details))
             entity['googleplaces_id'] = details['reference']
         
         reformatted = self.__reformatAddress(details)

@@ -980,7 +980,9 @@ class HTTPEntity(Schema):
 
                         playlist.data.append(item)
 
-                    except Exception:
+                    except Exception as e:
+                        logs.info(e)
+                        logs.info('TRACK: %s' % song)
                         pass
 
                 if len(playlist.data) > 0:
