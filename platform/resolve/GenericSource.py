@@ -403,13 +403,13 @@ class GenericSource(BasicSource):
             if len(authors) > 0:
                 entity.authors = authors
 
-            screnshots = []
+            screenshots = []
             for screenshot in proxy.screenshots:
                 img = ImageSchema()
                 img.image = screenshot
                 screenshots.append(img)
-            if len(screnshots) > 0:
-                entity.screnshots = screnshots
+            if len(screenshots) > 0:
+                entity.screenshots = screenshots
     
     @property
     def idField(self):
