@@ -582,12 +582,23 @@ class BasicEntity(Schema):
             return self.user_generated_subtitle
         return unicode(self.subcategory).replace('_', ' ').title()
 
-    def minimize(self):
-        mini            = getEntityMiniObjectFromKind(self.kind)()
-        mini.entity_id  = self.entity_id 
-        mini.title      = self.title 
-        mini.types      = self.types 
-        mini.sources    = self.sources 
+    def minimize(self, *args):
+        mini = getEntityMiniObjectFromKind(self.kind)()
+        attributes = set([
+            'entity_id',
+            'title',
+            'types',
+            'sources',
+        ])
+        for arg in args:
+            attributes.add(arg)
+
+        for attribute in attributes:
+            try:
+                mini[attribute] = self[attribute]
+            except:
+                pass
+
         return mini
 
     def isType(self, t):
@@ -1014,9 +1025,7 @@ class MediaItemEntity(BasicMediaEntity):
         self.sku_number_timestamp           = SchemaElement(datetime)
 
     def minimize(self):
-        mini            = BasicMediaEntity.minimize(self)
-        mini.length     = self.length
-        return mini
+        return BasicEntity.minimize(self, 'length')
 
     @property 
     def subtitle(self):
