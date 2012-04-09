@@ -214,6 +214,7 @@ class GenericSource(BasicSource):
                 pass 
 
         try:
+            entity['%s_id' % self.sourceName] = proxy.key
             entity['%s_timestamp' % self.sourceName] = now
             entity['%s_source' % self.sourceName] = self.sourceName
         except:
@@ -236,9 +237,10 @@ class GenericSource(BasicSource):
         
         def setAttribute(source, target):
             try:
-                if proxy[source] is not None and proxy[source] != '':
-                    entity[target] = proxy[source]
-            except Exception:
+                item = getattr(proxy, source)
+                if item is not None and item != '':
+                    entity[target] = item
+            except Exception as e:
                 pass
         
         ### General
@@ -251,7 +253,7 @@ class GenericSource(BasicSource):
         setAttribute('url',             'site')
 
         images = []
-        if proxy.image != '':
+        if proxy.image is not None and proxy.image != '':
             img = ImageSchema()
             img.image = proxy.image
             images.append(img)
@@ -279,7 +281,8 @@ class GenericSource(BasicSource):
                     v = None
                     if k in proxy.address:
                         v = proxy.address[k]
-                    entity['address_%s' % k] = v
+                    if v is not None:
+                        entity['address_%s' % k] = v
         
         ### Person
         if entity.kind == 'person' and proxy.kind == 'person':

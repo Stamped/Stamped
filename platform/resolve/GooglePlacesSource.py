@@ -106,7 +106,7 @@ class GooglePlacesPlace(ResolverPlace):
     @lazyProperty
     def coordinates(self):
         try:
-            return (self.data['latitude'], self.data['longitude'])
+            return (self.data['geometry']['location']['lat'], self.data['geometry']['location']['lng'])
         except Exception:
             return None
     
@@ -178,10 +178,12 @@ class GooglePlacesPlace(ResolverPlace):
     
     @lazyProperty
     def phone(self):
-        if 'formatted_phone_number' in self.data:
-            return self.data['formatted_phone_number']
-        else:
-            return None
+        try:
+            if 'formatted_phone_number' in self.data:
+                return self.data['formatted_phone_number']
+        except:
+            pass
+        return None
     
     @lazyProperty
     def types(self):
@@ -215,6 +217,7 @@ class GooglePlacesSource(GenericSource):
                 'phone',
                 'site',
                 'neighborhood',
+                # 'coordinates',
             ],
             kinds=[
                 'place',

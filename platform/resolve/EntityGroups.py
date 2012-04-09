@@ -155,6 +155,7 @@ class GooglePlacesGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'googleplaces')
         self.addField(['googleplaces_id'])
+        # self.addField(['googleplaces_reference'])
 
 class TMDBGroup(AMovieGroup):
 

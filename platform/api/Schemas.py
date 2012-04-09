@@ -851,7 +851,7 @@ class PlaceEntity(BasicEntity):
     def subcategory(self):
         for t in self.types.value:
             return t
-        return 'place'
+        return 'other'
 
 
 class PersonEntity(BasicEntity):

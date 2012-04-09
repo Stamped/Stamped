@@ -41,11 +41,14 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
 # e = stampedAPI.getEntity({'entity_id': '4e4c6e76db6bbe2bcd01ce85'})
 
-album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
+# album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_64387566'}) # Katy Perry (Artist)
 
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_474912080'}) # Song (That Power)
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_474912071'}) # Song (Hold You Down)
+
+entity = stampedAPI.getEntity({'search_id': 'T_GOOGLEPLACES_ClRJAAAAaU4WvIwYeYUN93Pt1uQ11sO4xaGHk3Ksi-vXxsPy10gC6LJMuSoEJF1-CJQX4O30cG37mZZnR6ZcYBpVyOcfqZTmxohcy5R0GekwQTmfBoISEHAtNR9kCBd-49e1jEBHCjYaFG3DsuqJ0U4TiedEPtQAzU1UWJve'}) # Place (Cascabel)
+stampedAPI._enrichEntity(entity)
 
 # print 'SKIP\n\n\n'
 
