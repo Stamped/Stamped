@@ -1014,7 +1014,7 @@ class MediaItemEntity(BasicMediaEntity):
         self.sku_number_timestamp           = SchemaElement(datetime)
 
     def minimize(self):
-        mini            = BasicMediaEnity.minimize(self)
+        mini            = BasicMediaEntity.minimize(self)
         mini.length     = self.length
         return mini
 
