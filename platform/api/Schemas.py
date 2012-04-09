@@ -1150,6 +1150,7 @@ class MediaItemEntityMini(BasicEntityMini, MediaItemEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
         self.kind                           = SchemaElement(basestring, default='media_item')
+        self.length                         = SchemaElement(int)
 
 class SoftwareEntityMini(BasicEntityMini, SoftwareEntity):
     def setSchema(self):
