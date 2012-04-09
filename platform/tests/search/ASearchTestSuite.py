@@ -18,6 +18,9 @@ from abc                        import ABCMeta, abstractmethod
 
 """
 TODO:
+    * incorporate global web search signal into ranking via category or source_id hinting
+    * incorporate global web search related terms into ranking algorithm
+    * 
     * run these tests regularly on prod via cron job
     * verify:
         * movies

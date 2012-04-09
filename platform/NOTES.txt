@@ -7,8 +7,6 @@
 * Python Promises library
     * Integrated with Celery and gevent
 
-* Google Places and Google Autocomplete sources?
-* 
 * prune national outliers when location hinting is turned on
     * e.g., maybe just prune results more than N threshold miles away
 * create test html / js web client
