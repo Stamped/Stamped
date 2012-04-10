@@ -87,18 +87,18 @@ class AMongoCollectionView(AMongoCollection):
 
             kinds_and_types = []
             if len(kinds) > 0:
-                kinds_and_types.append({'kind': {'$in': list(kinds)}})
+                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
             if len(types) > 0:
-                kinds_and_types.append({'types': {'$in': list(types)}})
+                kinds_and_types.append({'entity.types': {'$in': list(types)}})
 
             if len(kinds_and_types) > 0:
-                add_or_query([ { "category" : str(genericCollectionSlice.category).lower() }, 
+                add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
                                { "$or"      : kinds_and_types } ])
             else:
-                query['category']    = str(genericCollectionSlice.category).lower()
+                query['entity.category']    = str(genericCollectionSlice.category).lower()
         
         if genericCollectionSlice.subcategory is not None:
-            query['subcategory'] = str(genericCollectionSlice.subcategory).lower()
+            query['entity.subcategory'] = str(genericCollectionSlice.subcategory).lower()
         
         # handle search query filter
         # --------------------------
