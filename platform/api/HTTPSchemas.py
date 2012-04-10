@@ -705,7 +705,7 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
 
-            if entity.authors is not None:
+            if len(entity.authors) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata
@@ -818,13 +818,13 @@ class HTTPEntity(Schema):
         # Music
         elif entity.category == 'music':
 
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 self.caption = 'Artist'
 
-            elif entity.subcategory == 'album' and entity.artists is not None:
+            elif entity.isType('album') and len(entity.artists) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
-            elif entity.subcategory == 'song' and entity.artists is not None:
+            elif entity.isType('track') and len(entity.artists) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
             # Metadata
@@ -1007,7 +1007,7 @@ class HTTPEntity(Schema):
 
         elif entity.kind == 'software' and entity.isType('app'):
 
-            if entity.authors is not None:
+            if len(entity.authors) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata

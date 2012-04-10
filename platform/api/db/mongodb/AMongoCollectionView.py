@@ -396,8 +396,15 @@ class AMongoCollectionView(AMongoCollection):
                 
                 return obj;
             }""")
-            
-            result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
+            try:
+                result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
+            except Exception as e:
+                logs.warning('Map/Reduce failed: %s' % e)
+                logs.debug('Query: %s' % query)
+                logs.debug('Scope: %s' % scope)
+                logs.debug('Map: %s' % _map)
+                logs.debug('Reduce: %s' % _reduce)
+                raise
             
             try:
                 value = result[-1]['value'] 
