@@ -70,7 +70,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             copy = buildEntity(entity.value)
                             timestamps = {}
                             localDecorations = {}
-                            logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                            logs.debug("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
                             try:
                                 enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
                                 if enriched:
@@ -90,7 +90,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                                 modified = True
                                                 enrichedOutput.add(groupObj.groupName)
                                     if len(enrichedOutput) > 0:
-                                        logs.info("Output from enrich: %s" % enrichedOutput)
+                                        logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception:
                                 logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )

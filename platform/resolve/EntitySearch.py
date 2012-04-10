@@ -196,13 +196,11 @@ class EntitySearch(object):
                     source_results.append(result)
                     total += 1
                 else:
-                    logs.info("Filtered out %s (types=%s)" % 
+                    logs.debug("Filtered out %s (types=%s)" % 
                               (result[1].name, result[1].target.types))
             else:
-                logs.info("Filtered out %s (kind=%s)" % 
+                logs.debug("Filtered out %s (kind=%s)" % 
                           (result[1].name, result[1].target.kind))
-        
-        logs.info("")
         
         for name, source_results in all_results.iteritems():
             all_results[name] = sortedResults(source_results)
