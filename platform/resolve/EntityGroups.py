@@ -379,6 +379,7 @@ class AmazonGroup(AAmazonGroup):
         AAmazonGroup.__init__(self, 'amazon')
         self.addField(['amazon_id'])
         self.addField(['amazon_url'])
+        self.addField(['amazon_underlying'])
 
 # class AmazonLinkGroup(AAmazonGroup):
 
@@ -386,11 +387,11 @@ class AmazonGroup(AAmazonGroup):
 #         AAmazonGroup.__init__(self, 'amazon_link')
 #         self.addNameField()
 
-class AmazonUnderlyingGroup(AAmazonGroup):
+# class AmazonUnderlyingGroup(AAmazonGroup):
 
-    def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon_underlying')
-        self.addNameField()
+#     def __init__(self):
+#         AAmazonGroup.__init__(self, 'amazon_underlying')
+#         self.addNameField()
  
 class DirectorsGroup(AFilmGroup):
 
@@ -468,7 +469,7 @@ allGroups = [
     StampedTombstoneGroup,
 
     # AmazonLinkGroup,
-    AmazonUnderlyingGroup,
+    # AmazonUnderlyingGroup,
     OpenTableGroup,
     OpenTableNicknameGroup,
 
