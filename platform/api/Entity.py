@@ -167,6 +167,13 @@ def getSimplifiedTitle(title):
     
     return title
 
+def deriveKindFromCategory(category):
+    result = set()
+    for k, v in subcategories:
+        if v == category:
+            result.add(deriveKindFromSubcategory(k))
+    return result
+
 def deriveKindFromSubcategory(subcategory):
     mapping = {
         'artist'            : 'person', 
@@ -225,6 +232,13 @@ def deriveKindFromSubcategory(subcategory):
     if subcategory == 'song':
         return 'media_item'
     return 'other'
+
+def deriveTypesFromCategory(category):
+    result = set()
+    for k, v in subcategories:
+        if v == category:
+            result = result.union(deriveTypesFromSubcategories([k]))
+    return result
 
 def deriveTypesFromSubcategories(subcategories):
     result = set()

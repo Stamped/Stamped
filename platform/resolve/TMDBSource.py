@@ -172,7 +172,7 @@ class TMDBSource(GenericSource):
                 'directors',
                 'cast',
                 'desc',
-                'short_description',
+                # 'short_description',
                 'genres',
                 'imdb',
             ],

@@ -13,6 +13,7 @@ import libs.worldcities, unicodedata
 from errors             import *
 from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
+from Entity             import *
 
 class AMongoCollectionView(AMongoCollection):
     
@@ -35,6 +36,15 @@ class AMongoCollectionView(AMongoCollection):
                 'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
                 'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
             }
+        
+        def add_or_query(args):
+            if "$or" not in query:
+                query["$or"] = args
+            else:
+                if "$and" not in query:
+                    query["$and"] = []
+                
+                query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
         # handle setup for sorting
         # ------------------------
@@ -72,19 +82,23 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         if genericCollectionSlice.category is not None:
-            query['category']    = str(genericCollectionSlice.category).lower()
+            kinds = deriveKindsFromCategory(genericCollectionSlice.category) 
+            types = deriveTypesFromCategory(genericCollectionSlice.category)
+
+            kinds_and_types = []
+            if len(kinds) > 0:
+                kinds_and_types.append({'kind': {'$in': list(kinds)}})
+            if len(types) > 0:
+                kinds_and_types.append({'types': {'$in': list(types)}})
+
+            if len(kinds_and_types) > 0:
+                add_or_query([ { "category" : str(genericCollectionSlice.category).lower() }, 
+                               { "$or"      : kinds_and_types } ])
+            else:
+                query['category']    = str(genericCollectionSlice.category).lower()
         
         if genericCollectionSlice.subcategory is not None:
             query['subcategory'] = str(genericCollectionSlice.subcategory).lower()
-        
-        def add_or_query(args):
-            if "$or" not in query:
-                query["$or"] = args
-            else:
-                if "$and" not in query:
-                    query["$and"] = []
-                
-                query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
         
         # handle search query filter
         # --------------------------

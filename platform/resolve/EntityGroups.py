@@ -323,16 +323,16 @@ class LengthGroup(AKindTypeGroup):
         self.addKind('media_item')
         self.addNameField()
 
-class ShortDescriptionGroup(AKindTypeGroup):
+# class ShortDescriptionGroup(AKindTypeGroup):
 
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'short_description')
-        self.addKind('media_collection')
-        self.addType('tv')
-        self.addKind('media_item')
-        self.addType('movie')
+#     def __init__(self, *args, **kwargs):
+#         AKindTypeGroup.__init__(self, 'short_description')
+#         self.addKind('media_collection')
+#         self.addType('tv')
+#         self.addKind('media_item')
+#         self.addType('movie')
 
-        self.addNameField()
+#         self.addNameField()
         
 class AlbumsGroup(AKindTypeGroup):
 
@@ -496,5 +496,5 @@ allGroups = [
     ISBNGroup,
     SKUNumberGroup,
 
-    ShortDescriptionGroup, # Deprecated?
+    # ShortDescriptionGroup, # Deprecated?
 ]
