@@ -85,8 +85,9 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         if genericCollectionSlice.category is not None:
-            kinds = deriveKindFromCategory(genericCollectionSlice.category) 
-            types = deriveTypesFromCategory(genericCollectionSlice.category)
+            kinds           = deriveKindFromCategory(genericCollectionSlice.category) 
+            types           = deriveTypesFromCategory(genericCollectionSlice.category)
+            subcategories   = deriveSubcategoriesFromCategory(genericCollectionSlice.category)
 
             kinds_and_types = []
             if len(kinds) > 0:
@@ -96,9 +97,11 @@ class AMongoCollectionView(AMongoCollection):
 
             if len(kinds_and_types) > 0:
                 add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} },
                                { "$and" : kinds_and_types } ])
             else:
-                query['entity.category']    = str(genericCollectionSlice.category).lower()
+                add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
         
         if genericCollectionSlice.subcategory is not None:
             query['entity.subcategory'] = str(genericCollectionSlice.subcategory).lower()
@@ -401,7 +404,7 @@ class AMongoCollectionView(AMongoCollection):
             }""")
             
             logs.debug('Query: %s' % query)
-                
+
             try:
                 result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             except Exception as e:

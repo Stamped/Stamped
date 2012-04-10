@@ -167,6 +167,13 @@ def getSimplifiedTitle(title):
     
     return title
 
+def deriveSubcategoriesFromCategory(category):
+    result = set()
+    for k, v in subcategories.iteritems():
+        if v == category:
+            result.add(k)
+    return result
+
 def deriveKindFromCategory(category):
     result = set()
     for k, v in subcategories.iteritems():
