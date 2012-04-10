@@ -24,6 +24,8 @@ try:
     from ResolverObject             import *
     from ASourceController          import *
     from Schemas                    import *
+    from EntityGroups               import *
+    from Entity                     import buildEntity
 except Exception:
     report()
     raise
@@ -189,36 +191,16 @@ class GenericSource(BasicSource):
         raise NotImplementedError
     
     def buildEntityFromEntityProxy(self, proxy, controller=None, decorations=None, timestamps=None):
-        if proxy.kind == 'place':
-            entity = PlaceEntity()
-        elif proxy.kind == 'person':
-            entity = PersonEntity()
-        elif proxy.kind == 'media_collection':
-            entity = MediaCollectionEntity()
-        elif proxy.kind == 'media_item':
-            entity = MediaItemEntity()
-        elif proxy.kind == 'software':
-            entity = SoftwareEntity()
-        else:
-            entity = BasicEntity()
+        entity = buildEntity(kind=proxy.kind)
         
         self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
-        
-        now = datetime.utcnow()
-        for group in self.groups:
-            try:
-                if len(entity[group]) > 0:
-                    entity['%s_timestamp' % group] = now
-                    entity['%s_source' % group] = self.sourceName 
-            except:
-                pass 
 
-        try:
-            entity['%s_id' % self.sourceName] = proxy.key
-            entity['%s_timestamp' % self.sourceName] = now
-            entity['%s_source' % self.sourceName] = self.sourceName
-        except:
-            pass
+        now = datetime.utcnow()
+        for group in allGroups:
+            group = group()
+            if group.groupName in self.groups:
+                group.setSource(entity, self.idName)
+                group.setTimestamp(entity, now)
 
         return entity
     
