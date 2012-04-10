@@ -3064,7 +3064,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if collectionUpdated:
                         break
-                if not collectionUpdated:
+                if not collectionUpdated and album.entity_id is not None:
                     track.albums.append(album.minimize())
 
             # Update track with entity_ids from passed artists
@@ -3081,7 +3081,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if artistUpdated:
                         break
-                if not artistUpdated:
+                if not artistUpdated and artist.entity_id is not None:
                     track.artists.append(artist.minimize())
 
             # Verify all fields are populated
@@ -3126,7 +3126,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if artistUpdated:
                         break
-                if not artistUpdated:
+                if not artistUpdated and artist.entity_id is not None:
                     album.artists.append(artist.minimize())
 
             # Merge album
