@@ -425,6 +425,7 @@ class ImagesGroup(BasicFieldGroup):
 
     def __init__(self):
         BasicFieldGroup.__init__(self, 'images')
+        self.addNameField()
 
     def eligible(self, entity):
         return True
