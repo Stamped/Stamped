@@ -93,7 +93,7 @@ class AMongoCollectionView(AMongoCollection):
 
             if len(kinds_and_types) > 0:
                 add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
-                               { "$or"      : kinds_and_types } ])
+                               { "$and" : kinds_and_types } ])
             else:
                 query['entity.category']    = str(genericCollectionSlice.category).lower()
         
