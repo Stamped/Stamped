@@ -61,7 +61,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                     if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types.value).intersection(source.types)) == 0:
                         continue
                     if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
-                        groups = source.groups
+                        groups = source.getGroups(entity)
                         targetGroups = set()
                         for group in groups:
                             if self.shouldEnrich(group, source.sourceName, entity, self.now):

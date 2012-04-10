@@ -96,11 +96,11 @@ class _iTunesObject(object):
         return "itunes"
     
     @lazyProperty
-    def image(self):
+    def images(self):
         try:
-            return self.data['artworkUrl100']
+            return [ self.data['artworkUrl100'] ]
         except Exception:
-            return ''
+            return []
     
     def __repr__(self):
         return pformat( self.data )
@@ -539,11 +539,11 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
             return []
 
     @lazyProperty 
-    def image(self):
+    def images(self):
         try:
-            return self.data['artworkUrl512']
+            return [ self.data['artworkUrl512'] ]
         except Exception:
-            return ''
+            return []
 
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
 
@@ -567,6 +567,7 @@ class iTunesSource(GenericSource):
                 'release_date',
                 'publishers',
                 'authors',
+                'images',
             ],
             kinds=[
                 'person',
@@ -595,6 +596,14 @@ class iTunesSource(GenericSource):
     @lazyProperty
     def __resolver(self):
         return Resolver()
+
+    def getGroups(self, entity=None):
+        groups = GenericSource.getGroups(self, entity)
+        if not entity.isType('app') and not entity.isType('movie') and not entity.isType('tv'):
+            groups.remove('desc')
+        if entity.isType('artist'):
+            groups.remove('images')
+        return groups
 
     def entityProxyFromKey(self, itunes_id):
         try:

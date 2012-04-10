@@ -273,7 +273,7 @@ def upgradeEntityData(entityData):
     new     = getEntityObjectFromKind(kind)()
     
     try:
-        seedTimestamp = ObjectId(old['entity_id']).generation_time
+        seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
     except:
         seedTimestamp = datetime.utcnow()
     

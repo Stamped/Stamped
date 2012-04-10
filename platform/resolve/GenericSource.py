@@ -236,9 +236,9 @@ class GenericSource(BasicSource):
         setAttribute('url',             'site')
 
         images = []
-        if proxy.image is not None and proxy.image != '':
+        for image in proxy.images:
             img = ImageSchema()
-            img.image = proxy.image
+            img.image = image
             images.append(img)
         if len(images) > 0:
             entity.images = images

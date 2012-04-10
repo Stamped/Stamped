@@ -80,6 +80,16 @@ class _RdioObject(object):
     def source(self):
         return "rdio"
 
+    @lazyProperty
+    def images(self):
+        try:
+            image = self.data['icon']
+            if 'no-artist-image' in image:
+                return []
+            return [ image ]
+        except Exception:
+            return []
+
     def __repr__(self):
         return pformat( self.data )
 
@@ -167,6 +177,7 @@ class RdioSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'rdio', 
             groups=[
+                'images',
                 'albums',
                 'tracks',
             ],
