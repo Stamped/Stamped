@@ -936,7 +936,7 @@ class HTTPEntity(Schema):
                 else:
                     playlist.name = 'Top songs'
 
-                for i in range(len(entity.tracks))[:50]:
+                for i in range(len(entity.tracks))[:20]:
                     try:
                         song = entity.tracks[i]
                         item = HTTPEntityPlaylistItem()

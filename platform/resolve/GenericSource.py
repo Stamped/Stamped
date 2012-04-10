@@ -199,8 +199,9 @@ class GenericSource(BasicSource):
         for group in allGroups:
             group = group()
             if group.groupName in self.groups:
-                group.setSource(entity, self.idName)
-                group.setTimestamp(entity, now)
+                if group.eligible(entity):
+                    group.setSource(entity, self.idName)
+                    group.setTimestamp(entity, now)
 
         return entity
     

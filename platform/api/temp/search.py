@@ -47,7 +47,9 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_474912080'}) # Song (That Power)
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_474912071'}) # Song (Hold You Down)
 
-entity = stampedAPI.getEntity({'search_id': 'T_GOOGLEPLACES_ClRJAAAAaU4WvIwYeYUN93Pt1uQ11sO4xaGHk3Ksi-vXxsPy10gC6LJMuSoEJF1-CJQX4O30cG37mZZnR6ZcYBpVyOcfqZTmxohcy5R0GekwQTmfBoISEHAtNR9kCBd-49e1jEBHCjYaFG3DsuqJ0U4TiedEPtQAzU1UWJve'}) # Place (Cascabel)
+# entity = stampedAPI.getEntity({'search_id': 'T_GOOGLEPLACES_ClRJAAAAaU4WvIwYeYUN93Pt1uQ11sO4xaGHk3Ksi-vXxsPy10gC6LJMuSoEJF1-CJQX4O30cG37mZZnR6ZcYBpVyOcfqZTmxohcy5R0GekwQTmfBoISEHAtNR9kCBd-49e1jEBHCjYaFG3DsuqJ0U4TiedEPtQAzU1UWJve'}) # Place (Cascabel)
+
+entity = stampedAPI.getEntity({'entity_id': '4e4c6838db6bbe2bcd000134'}) # Artist
 stampedAPI._enrichEntity(entity)
 
 # print 'SKIP\n\n\n'

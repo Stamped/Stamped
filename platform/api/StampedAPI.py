@@ -3022,7 +3022,7 @@ class StampedAPI(AStampedAPI):
                 entity = source.buildEntityFromEntityProxy(proxy)
             else:
                 logs.warning('Unable to enrich stub: %s' % stub)
-                raise KeyError
+                raise KeyError('Unable to enrich stub')
 
             return entity
 
@@ -3031,8 +3031,8 @@ class StampedAPI(AStampedAPI):
         def _enrichTrack(stub, artists=[], albums=[]):
             try:
                 track = _enrichStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Track enrichment failed')
+            except KeyError as e:
+                logs.warning('Track enrichment failed: %s' % e)
                 return stub
 
             # Update track with entity_ids from passed albums
