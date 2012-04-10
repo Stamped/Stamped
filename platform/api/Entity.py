@@ -235,7 +235,7 @@ def deriveKindFromSubcategory(subcategory):
 
 def deriveTypesFromCategory(category):
     result = set()
-    for k, v in subcategories:
+    for k, v in subcategories.iteritems():
         if v == category:
             result = result.union(deriveTypesFromSubcategories([k]))
     return result
