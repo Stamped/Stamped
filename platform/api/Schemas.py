@@ -341,7 +341,7 @@ class StampAttributesSchema(Schema):
 class DeletedStamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
-        self.timestamp          = ModifiedTimestampSchema()
+        self.timestamp          = TimestampSchema()
         self.deleted            = SchemaElement(bool)
 
 class ModifiedTimestampSchema(Schema):

@@ -87,6 +87,20 @@ class StampedAPI(AStampedAPI):
             logs.warning('is_prod_stack threw an exception; defaulting to True',exc_info=1)
             self.__is_prod = True
         self.__is_prod = True
+
+        self.__version = 0
+        if 'version' in kwargs:
+            self.setVersion(kwargs['version'])
+
+    def setVersion(self, version):
+        try:
+            self.__version = int(version)
+        except Exception:
+            logs.warning('Invalid API version: %s' % version) 
+            raise 
+
+    def getVersion(self):
+        return self.__version 
     
     @property
     def node_name(self):
@@ -2376,15 +2390,16 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
-            if len(stamps) >= genericCollectionSlice.limit:
-                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
+        if self.__version == 0:
+            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
+                if len(stamps) >= genericCollectionSlice.limit:
+                    genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
 
-            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
-            
-            if len(deleted) > 0:
-                stamps = stamps + deleted
-                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+                deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
+                
+                if len(deleted) > 0:
+                    stamps = stamps + deleted
+                    stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
 
