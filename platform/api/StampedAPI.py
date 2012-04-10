@@ -2959,10 +2959,14 @@ class StampedAPI(AStampedAPI):
     
     def __handleDecorations(self, entity, decorations):
         for k,v in decorations.items():
-            if k == 'menu' and isinstance(v,MenuSchema):
+            ### TODO: decorations returned as dict, not schema. Fix?
+            if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
                 try:
-                    self.__menuDB.update(v)
+                    menu = MenuSchema()
+                    menu.importData(v)
+                    self._menuDB.update(menu)
                 except Exception:
+                    logs.warning('Menu enrichment failed')
                     report()
     
     def _enrichEntity(self, entity):
