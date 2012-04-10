@@ -231,6 +231,26 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
             return self.underlying
         return None
 
+    @lazyProperty
+    def images(self):
+        try:
+            image_set = xp(self.underlying.data, 'ImageSets','ImageSet')
+            image = xp(image_set,'LargeImage','URL')['v']
+            if image is not None:
+                return [image]
+        except Exception:
+            pass
+        return []
+
+    @lazyProperty
+    def url(self):
+        try:
+            if self.ebookVersion is not None and self.ebookVersion.link is not None:
+                return self.ebookVersion.link
+        except Exception:
+            pass
+        return None
+
     @lazyProperty 
     def underlying(self):
         try:
@@ -590,6 +610,11 @@ class AmazonSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.amazon_id = proxy.key
+        try:
+            if entity.isType('book'):
+                entity.amazon_underlying = proxy.underlying.key
+        except Exception:
+            pass
         return True
 
 if __name__ == '__main__':

@@ -54,6 +54,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             max_iterations = self.__default_max_iterations
         modified_total = False
         failedSources = set()
+        logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
         for i in range(max_iterations):
             modified = False
             for source in self.__sources:
