@@ -595,7 +595,8 @@ class BasicEntity(Schema):
 
         for attribute in attributes:
             try:
-                mini[attribute] = self[attribute]
+                if self[attribute] is not None:
+                    mini[attribute] = self[attribute]
             except:
                 pass
 
