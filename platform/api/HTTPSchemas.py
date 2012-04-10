@@ -495,11 +495,8 @@ class HTTPEntity(Schema):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
-            for i in xrange(len(sources)):
-                if sources[i].link is None:
-                    del(sources[i].link)
-            action.sources  = sources
             action.name     = name
+            action.sources  = sources
 
             item            = HTTPEntityAction()
             item.action     = action
@@ -765,8 +762,9 @@ class HTTPEntity(Schema):
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
                 source.icon         = self._getIconURL('src_itunes', client=client)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_play_primary', client=client)
@@ -781,7 +779,8 @@ class HTTPEntity(Schema):
                 source.name         = 'Buy from Fandango'
                 source.source       = 'fandango'
                 source.source_id    = entity.sources.fandango_id
-                source.link         = entity.sources.fandango_url 
+                if entity.fandango_url is not None:
+                    source.link     = entity.sources.fandango_url 
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = self._getIconURL('src_fandango', client=client)
@@ -854,7 +853,8 @@ class HTTPEntity(Schema):
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.icon         = self._getIconURL('src_itunes', client=client)
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             if entity.sources.rdio_id is not None:
@@ -863,7 +863,8 @@ class HTTPEntity(Schema):
                 source.source       = 'rdio'
                 source.source_id    = entity.sources.rdio_id
                 source.icon         = self._getIconURL('src_rdio', client=client)
-                source.link         = entity.rdio_url
+                if entity.rdio_url is not None:
+                    source.link     = entity.rdio_url
                 sources.append(source)
 
             if entity.sources.spotify_id is not None:
@@ -872,6 +873,8 @@ class HTTPEntity(Schema):
                 source.source       = 'spotify'
                 source.source_id    = entity.sources.spotify_id
                 source.icon         = self._getIconURL('src_spotify', client=client)
+                if entity.spotify_url is not None:
+                    source.link     = entity.spotify_url
                 sources.append(source)
 
             actionTitle = 'Listen'
@@ -919,7 +922,8 @@ class HTTPEntity(Schema):
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionTitle = 'Download %s' % entity.subcategory
@@ -1010,7 +1014,8 @@ class HTTPEntity(Schema):
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.icon         = self._getIconURL('src_itunes', client=client)
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_download_primary', client=client)
