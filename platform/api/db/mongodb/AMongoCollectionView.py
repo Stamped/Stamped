@@ -42,7 +42,7 @@ class AMongoCollectionView(AMongoCollection):
                 query["$or"] = args
             else:
                 result = []
-                for item in query.pop("$and", []) + {"$or": query.pop("$or")} + {"$or": args}:
+                for item in query.pop("$and", []) + [{"$or": query.pop("$or")}] + [{"$or": args}]:
                     if item not in result:
                         result.append(item)
 
