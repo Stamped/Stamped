@@ -757,11 +757,12 @@ class HTTPEntity(Schema):
 
             sources = []
 
-            if entity.sources.itunes_id is not None:
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
+                source.source_data  = entity.sources.itunes_preview
                 source.icon         = self._getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -847,11 +848,12 @@ class HTTPEntity(Schema):
 
             sources = []
 
-            if entity.sources.itunes_id is not None:
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview:
                 source              = HTTPActionSource()
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
+                source.source_data  = entity.sources.itunes_preview
                 source.icon         = self._getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -953,13 +955,17 @@ class HTTPEntity(Schema):
 
                         sources = []
 
-                        if song.sources.itunes_id is not None:
+                        if song.sources.itunes_id is not None and song.sources.itunes_preview is not None:
                             source              = HTTPActionSource()
                             source.name         = 'Listen on iTunes'
                             source.source       = 'itunes'
                             source.source_id    = song.sources.itunes_id
+                            source.source_data  = song.sources.itunes_preview
                             source.icon         = self._getIconURL('src_itunes', client=client)
                             sources.append(source)
+
+                            if item.entity_id is None:
+                                item.entity_id = 'T_ITUNES_%s' % song.itunes_id
 
                         if song.sources.rdio_id is not None:
                             source              = HTTPActionSource()
@@ -969,6 +975,9 @@ class HTTPEntity(Schema):
                             source.icon         = self._getIconURL('src_rdio', client=client)
                             sources.append(source)
 
+                            if item.entity_id is None:
+                                item.entity_id = 'T_RDIO_%s' % song.rdio_id
+
                         if song.sources.spotify_id is not None:
                             source              = HTTPActionSource()
                             source.name         = 'Listen on Spotify'
@@ -976,6 +985,9 @@ class HTTPEntity(Schema):
                             source.source_id    = song.sources.spotify_id
                             source.icon         = self._getIconURL('src_spotify', client=client)
                             sources.append(source)
+
+                            if item.entity_id is None:
+                                item.entity_id = 'T_SPOTIFY_%s' % song.spotify_id
 
                         if len(sources) > 0:
                             action = HTTPAction()
@@ -1074,6 +1086,7 @@ class HTTPActionSource(Schema):
         self.name               = SchemaElement(basestring, required=True)
         self.source             = SchemaElement(basestring, required=True)
         self.source_id          = SchemaElement(basestring)
+        self.source_data        = SchemaElement(basestring)
         self.endpoint           = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
@@ -1117,7 +1130,6 @@ class HTTPEntityPlaylistItem(Schema):
         self.entity_id          = SchemaElement(basestring)
         self.name               = SchemaElement(basestring, required=True)
         self.action             = HTTPAction()
-        self.num                = SchemaElement(int)
         self.length             = SchemaElement(int)
         self.icon               = SchemaElement(basestring)
 

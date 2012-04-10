@@ -195,10 +195,12 @@ class GenericSource(BasicSource):
         
         self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
 
-        now = datetime.utcnow()
+        sourceGroups    = self.getGroups(entity)
+        now             = datetime.utcnow()
+
         for group in allGroups:
             group = group()
-            if group.groupName in self.groups:
+            if group.groupName in sourceGroups:
                 if group.eligible(entity):
                     group.setSource(entity, self.idName)
                     group.setTimestamp(entity, now)
@@ -419,7 +421,7 @@ class GenericSource(BasicSource):
                         entity[self.idField] = best[1].key
                         if self.urlField is not None and best[1].url is not None:
                             entity[self.urlField] = best[1].url
-                            proxy = best[1]
+                        proxy = best[1]
             except ValueError:
                 pass
         

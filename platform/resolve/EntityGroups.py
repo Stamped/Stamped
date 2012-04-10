@@ -218,6 +218,7 @@ class iTunesGroup(AKindTypeGroup):
 
         self.addField(['itunes_id'])
         self.addField(['itunes_url'])
+        self.addField(['itunes_data'])
 
 class AddressGroup(APlaceGroup):
 
@@ -379,11 +380,11 @@ class AmazonGroup(AAmazonGroup):
         self.addField(['amazon_id'])
         self.addField(['amazon_url'])
 
-class AmazonLinkGroup(AAmazonGroup):
+# class AmazonLinkGroup(AAmazonGroup):
 
-    def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon_link')
-        self.addNameField()
+#     def __init__(self):
+#         AAmazonGroup.__init__(self, 'amazon_link')
+#         self.addNameField()
 
 class AmazonUnderlyingGroup(AAmazonGroup):
 
@@ -466,7 +467,7 @@ allGroups = [
     FandangoGroup,
     StampedTombstoneGroup,
 
-    AmazonLinkGroup,
+    # AmazonLinkGroup,
     AmazonUnderlyingGroup,
     OpenTableGroup,
     OpenTableNicknameGroup,

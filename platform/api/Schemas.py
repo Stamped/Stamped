@@ -683,6 +683,7 @@ class EntitySourcesSchema(Schema):
         self.itunes_id                      = SchemaElement(basestring)
         self.itunes_url                     = SchemaElement(basestring)
         self.itunes_source                  = SchemaElement(basestring)
+        self.itunes_preview                 = SchemaElement(basestring)
         self.itunes_timestamp               = SchemaElement(datetime)
 
         self.rdio_id                        = SchemaElement(basestring)

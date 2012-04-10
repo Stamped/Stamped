@@ -300,6 +300,13 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def length(self):
         return float(self.data['trackTimeMillis']) / 1000
 
+    @lazyProperty
+    def preview(self):
+        try:
+            return self.data['previewUrl']
+        except Exception:
+            return None
+
 
 class iTunesMovie(_iTunesObject, ResolverMediaItem):
     """
@@ -370,6 +377,13 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
             return self.data['longDescription']
         except KeyError:
             return ''
+
+    @lazyProperty
+    def preview(self):
+        try:
+            return self.data['previewUrl']
+        except Exception:
+            return None
 
 
 class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
@@ -637,6 +651,11 @@ class iTunesSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.itunes_id = proxy.key
+        try:
+            if proxy.preview is not None:
+                entity.itunes_preview = proxy.preview
+        except:
+            pass
         return True
 
     def matchSource(self, query):

@@ -2952,7 +2952,9 @@ class StampedAPI(AStampedAPI):
     def mergeEntityAsync(self, entity_dict, update = False):
         entity = buildEntity(entity_dict)
         self._mergeEntity(entity, update)
-        self._enrichEntityLinks(entity)
+        modified = self._enrichEntityLinks(entity)
+        if modified:
+            self._entityDB.update(entity)
     
     @lazyProperty
     def __full_resolve(self):
@@ -2984,10 +2986,10 @@ class StampedAPI(AStampedAPI):
             raise Exception
 
         modified = self._enrichEntity(entity)
+        modified = self._enrichEntityLinks(entity) | modified 
         if modified:
             self._entityDB.update(entity)
 
-        self._enrichEntityLinks(entity)
 
     def _enrichEntityLinks(self, entity):
         
@@ -3185,8 +3187,7 @@ class StampedAPI(AStampedAPI):
             # Just to be explicit...
             modified = False
 
-        if modified:
-            entity = self._mergeEntity(entity, True)
+        return modified
         
     def _saveTempEntityAsync(self, results):
         results = map(lambda r: (Entity(r[0]), r[1]), results)
