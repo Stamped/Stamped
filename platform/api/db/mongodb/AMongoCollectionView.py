@@ -399,6 +399,9 @@ class AMongoCollectionView(AMongoCollection):
                 
                 return obj;
             }""")
+            
+            logs.debug('Query: %s' % query)
+                
             try:
                 result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             except Exception as e:
