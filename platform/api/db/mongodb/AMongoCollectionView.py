@@ -162,6 +162,8 @@ class AMongoCollectionView(AMongoCollection):
                     }, 
                 ])
         
+        logs.info('QUERY: %s' % query)
+
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         

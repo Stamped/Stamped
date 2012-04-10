@@ -3163,7 +3163,7 @@ class StampedAPI(AStampedAPI):
         def _enrichArtists(entity):
             artist_list = []
             for stub in entity.artists:
-                artist = _enrichAlbum(stub)
+                artist = _enrichArtist(stub)
                 artist_list.append(artist.minimize())
 
             if len(artist_list) > 0:
