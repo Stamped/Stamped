@@ -2562,9 +2562,10 @@ class StampedAPI(AStampedAPI):
     def addFavorite(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        favorite = Favorite(entity=entity, 
-                            user_id=authUserId)
-        favorite.timestamp.created = datetime.utcnow()
+        favorite                    = Favorite()
+        favorite.entity             = entity
+        favorite.user_id            = authUserId
+        favorite.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
             favorite.stamp = self._stampDB.getStamp(stampId)
