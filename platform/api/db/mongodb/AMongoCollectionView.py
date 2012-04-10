@@ -41,11 +41,14 @@ class AMongoCollectionView(AMongoCollection):
             if "$or" not in query:
                 query["$or"] = args
             else:
-                if "$and" not in query:
-                    query["$and"] = []
-                    
-                existing = query.pop("$or")
-                query["$and"].append([ { "$or" : existing }, { "$or" : args } ])
+                result = set()
+                for item in query.pop("$and", []):
+                    result.add(item)
+                result.add({"$or": query.pop("$or")})
+                result.add({"$or": args})
+
+                query["$and"] = list(result)
+                # query["$and"] = query["$and"] + [ { "$or" : existing }, { "$or" : args } ]
         
         # handle setup for sorting
         # ------------------------
