@@ -546,10 +546,10 @@ class HTTPEntity(Schema):
                 url = image.image
                 domain = urlparse.urlparse(url).netloc
 
-                if 'amzstatic.com' in domain:
+                if 'mzstatic.com' in domain:
                     # try to return the maximum-resolution apple photo possible if we have 
                     # a lower-resolution version stored in our db
-                    url = url.replace('100x100', '400x400').replace('170x170', '400x400')
+                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
                 
                 elif 'amazon.com' in domain:
                     # strip the 'look inside' image modifier
