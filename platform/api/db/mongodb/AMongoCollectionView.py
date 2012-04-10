@@ -82,7 +82,7 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         if genericCollectionSlice.category is not None:
-            kinds = deriveKindsFromCategory(genericCollectionSlice.category) 
+            kinds = deriveKindFromCategory(genericCollectionSlice.category) 
             types = deriveTypesFromCategory(genericCollectionSlice.category)
 
             kinds_and_types = []
