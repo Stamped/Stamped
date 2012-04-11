@@ -31,11 +31,14 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
         stamp = DeletedStamp()
         stamp.stamp_id = stampId
         stamp.timestamp.modified = d
+        documentId = self._getObjectIdFromString(stampId)
+        stamp.timestamp.created = documentId.generation_time.replace(tzinfo=None)
         return self._addObject(stamp)
     
     def getStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
         document = self._getMongoDocumentFromId(documentId)
+        document['timestamp']['created'] = documentId.generation_time.replace(tzinfo=None)
         return self._convertFromMongo(document)
     
     def removeStamp(self, stampId):
@@ -58,6 +61,7 @@ class MongoDeletedStampCollection(AMongoCollection, AStampDB):
         
         stamps = []
         for document in documents:
+            document['timestamp']['created'] = document['_id'].generation_time.replace(tzinfo=None)
             stamp = self._convertFromMongo(document)
             stamp.deleted = True
             stamps.append(stamp)

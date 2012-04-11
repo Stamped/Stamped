@@ -38,19 +38,18 @@ class BasicSource(AExternalSource):
         return self.__name
 
     @property
-    def groups(self):
-        try:
-            return set(self.__groups)
-        except:
-            return set()
-
-    @property
     def kinds(self):
         return set(self.__kinds)
 
     @property
     def types(self):
         return set(self.__types)
+
+    def getGroups(self, entity=None):
+        try:
+            return set(self.__groups)
+        except:
+            return set()
 
     def addGroup(self, group):
         self.__groups.add(group)

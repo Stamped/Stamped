@@ -87,6 +87,20 @@ class StampedAPI(AStampedAPI):
             logs.warning('is_prod_stack threw an exception; defaulting to True',exc_info=1)
             self.__is_prod = True
         self.__is_prod = True
+
+        self.__version = 0
+        if 'version' in kwargs:
+            self.setVersion(kwargs['version'])
+
+    def setVersion(self, version):
+        try:
+            self.__version = int(version)
+        except Exception:
+            logs.warning('Invalid API version: %s' % version) 
+            raise 
+
+    def getVersion(self):
+        return self.__version 
     
     @property
     def node_name(self):
@@ -2376,15 +2390,16 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
-        if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
-            if len(stamps) >= genericCollectionSlice.limit:
-                genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
+        if self.__version == 0:
+            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
+                if len(stamps) >= genericCollectionSlice.limit:
+                    genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
 
-            deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
-            
-            if len(deleted) > 0:
-                stamps = stamps + deleted
-                stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+                deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
+                
+                if len(deleted) > 0:
+                    stamps = stamps + deleted
+                    stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
 
@@ -2562,9 +2577,10 @@ class StampedAPI(AStampedAPI):
     def addFavorite(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        favorite = Favorite(entity=entity, 
-                            user_id=authUserId)
-        favorite.timestamp.created = datetime.utcnow()
+        favorite                    = Favorite()
+        favorite.entity             = entity
+        favorite.user_id            = authUserId
+        favorite.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
             favorite.stamp = self._stampDB.getStamp(stampId)
@@ -2951,7 +2967,9 @@ class StampedAPI(AStampedAPI):
     def mergeEntityAsync(self, entity_dict, update = False):
         entity = buildEntity(entity_dict)
         self._mergeEntity(entity, update)
-        self._enrichEntityLinks(entity)
+        modified = self._enrichEntityLinks(entity)
+        if modified:
+            self._entityDB.update(entity)
     
     @lazyProperty
     def __full_resolve(self):
@@ -2959,10 +2977,14 @@ class StampedAPI(AStampedAPI):
     
     def __handleDecorations(self, entity, decorations):
         for k,v in decorations.items():
-            if k == 'menu' and isinstance(v,MenuSchema):
+            ### TODO: decorations returned as dict, not schema. Fix?
+            if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
                 try:
-                    self.__menuDB.update(v)
+                    menu = MenuSchema()
+                    menu.importData(v)
+                    self._menuDB.update(menu)
                 except Exception:
+                    logs.warning('Menu enrichment failed')
                     report()
     
     def _enrichEntity(self, entity):
@@ -2979,10 +3001,10 @@ class StampedAPI(AStampedAPI):
             raise Exception
 
         modified = self._enrichEntity(entity)
+        modified = self._enrichEntityLinks(entity) | modified 
         if modified:
             self._entityDB.update(entity)
 
-        self._enrichEntityLinks(entity)
 
     def _enrichEntityLinks(self, entity):
         
@@ -3017,7 +3039,7 @@ class StampedAPI(AStampedAPI):
                 entity = source.buildEntityFromEntityProxy(proxy)
             else:
                 logs.warning('Unable to enrich stub: %s' % stub)
-                raise KeyError
+                raise KeyError('Unable to enrich stub')
 
             return entity
 
@@ -3026,8 +3048,8 @@ class StampedAPI(AStampedAPI):
         def _enrichTrack(stub, artists=[], albums=[]):
             try:
                 track = _enrichStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Track enrichment failed')
+            except KeyError as e:
+                logs.warning('Track enrichment failed: %s' % e)
                 return stub
 
             # Update track with entity_ids from passed albums
@@ -3042,7 +3064,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if collectionUpdated:
                         break
-                if not collectionUpdated:
+                if not collectionUpdated and album.entity_id is not None:
                     track.albums.append(album.minimize())
 
             # Update track with entity_ids from passed artists
@@ -3059,7 +3081,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if artistUpdated:
                         break
-                if not artistUpdated:
+                if not artistUpdated and artist.entity_id is not None:
                     track.artists.append(artist.minimize())
 
             # Verify all fields are populated
@@ -3104,7 +3126,7 @@ class StampedAPI(AStampedAPI):
                             break
                     if artistUpdated:
                         break
-                if not artistUpdated:
+                if not artistUpdated and artist.entity_id is not None:
                     album.artists.append(artist.minimize())
 
             # Merge album
@@ -3141,7 +3163,7 @@ class StampedAPI(AStampedAPI):
         def _enrichArtists(entity):
             artist_list = []
             for stub in entity.artists:
-                artist = _enrichAlbum(stub)
+                artist = _enrichArtist(stub)
                 artist_list.append(artist.minimize())
 
             if len(artist_list) > 0:
@@ -3150,8 +3172,6 @@ class StampedAPI(AStampedAPI):
 
             return False
 
-        modified        = False
-
         stampedSource   = StampedSource(stamped_api = self)
         musicSources    = {
             'itunes':       iTunesSource,
@@ -3159,6 +3179,8 @@ class StampedAPI(AStampedAPI):
             'spotify':      SpotifySource,
             'amazon':       AmazonSource,
         }
+
+        modified = False
 
         if entity.isType('album'):
             modified = _enrichArtists(entity)
@@ -3169,19 +3191,16 @@ class StampedAPI(AStampedAPI):
             modified = _enrichTracks(entity, artists=[entity]) | modified
 
         if entity.isType('track'):
-            # Enrich album instead
-            for album in entity.albums:
-                album = _enrichAlbum(album)
-                albumModified = False
-                albumModified = _enrichArtists(album)
-                albumModified = _enrichTracks(album, artists=album.artists, albums=[album]) | albumModified
-                if albumModified:
-                    self._mergeEntity(album, True)
+            # Enrich albums instead
+            for albumItem in entity.albums:
+                try:
+                    tasks.invoke(tasks.APITasks.mergeEntity, args=[albumItem.value, True])
+                except Exception as e:
+                    logs.warning('Failed to enrich album: %s' % e)
             # Just to be explicit...
             modified = False
 
-        if modified:
-            entity = self._mergeEntity(entity, True)
+        return modified
         
     def _saveTempEntityAsync(self, results):
         results = map(lambda r: (Entity(r[0]), r[1]), results)

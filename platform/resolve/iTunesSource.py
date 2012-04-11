@@ -96,11 +96,11 @@ class _iTunesObject(object):
         return "itunes"
     
     @lazyProperty
-    def image(self):
+    def images(self):
         try:
-            return self.data['artworkUrl100']
+            return [ self.data['artworkUrl100'] ]
         except Exception:
-            return ''
+            return []
     
     def __repr__(self):
         return pformat( self.data )
@@ -300,6 +300,13 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def length(self):
         return float(self.data['trackTimeMillis']) / 1000
 
+    @lazyProperty
+    def preview(self):
+        try:
+            return self.data['previewUrl']
+        except Exception:
+            return None
+
 
 class iTunesMovie(_iTunesObject, ResolverMediaItem):
     """
@@ -370,6 +377,13 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
             return self.data['longDescription']
         except KeyError:
             return ''
+
+    @lazyProperty
+    def preview(self):
+        try:
+            return self.data['previewUrl']
+        except Exception:
+            return None
 
 
 class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
@@ -539,11 +553,11 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
             return []
 
     @lazyProperty 
-    def image(self):
+    def images(self):
         try:
-            return self.data['artworkUrl512']
+            return [ self.data['artworkUrl512'] ]
         except Exception:
-            return ''
+            return []
 
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
 
@@ -567,6 +581,7 @@ class iTunesSource(GenericSource):
                 'release_date',
                 'publishers',
                 'authors',
+                'images',
             ],
             kinds=[
                 'person',
@@ -595,6 +610,14 @@ class iTunesSource(GenericSource):
     @lazyProperty
     def __resolver(self):
         return Resolver()
+
+    def getGroups(self, entity=None):
+        groups = GenericSource.getGroups(self, entity)
+        if not entity.isType('app') and not entity.isType('movie') and not entity.isType('tv'):
+            groups.remove('desc')
+        if entity.isType('artist'):
+            groups.remove('images')
+        return groups
 
     def entityProxyFromKey(self, itunes_id):
         try:
@@ -628,6 +651,11 @@ class iTunesSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.itunes_id = proxy.key
+        try:
+            if proxy.preview is not None:
+                entity.itunes_preview = proxy.preview
+        except:
+            pass
         return True
 
     def matchSource(self, query):
