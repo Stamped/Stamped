@@ -39,7 +39,7 @@ try:
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
     from Entity                 import buildEntity 
-
+    
     #resolve classes
     from resolve.EntitySource   import EntitySource
     from resolve                import FullResolveContainer

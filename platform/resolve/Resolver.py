@@ -538,8 +538,9 @@ def formatResults(results, reverse=True, verbose=True):
             scores = result[0]
             
             r = result[1]
+            t = r.target.types[0] if len(r.target.types) == 1 else r.target.types
             s = "\n%3d) %s (%s) from %s { score=%f, key=%s }" % \
-                (n - i, r.name, r.target.kind, r.source, scores['total'], r.key)
+                (n - i, r.name, t, r.source, scores['total'], r.key)
             
             l.append(s)
     

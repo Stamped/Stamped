@@ -15,12 +15,19 @@ from optparse   import OptionParser
 from LibUtils   import parseDateString
 from lxml       import objectify, etree
 from pprint     import pprint
+from LRUCache   import lru_cache
+from Memcache   import memcached_function
 
 class TheTVDB(object):
     
     def __init__(self, api_key='F1D337C9BF2357FB'):
         self.api_key = api_key
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @memcached_function(time=7*24*60*60)
     def search(self, query, transform=True, detailed=False):
         url = self._get_url(query)
         
@@ -54,6 +61,11 @@ class TheTVDB(object):
         
         return output
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @memcached_function(time=7*24*60*60)
     def lookup(self, thetvdb_id):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
@@ -145,14 +157,14 @@ class TheTVDB(object):
         
         return 'http://www.thetvdb.com/api/GetSeries.php?%s' % (urllib.urlencode(params))
 
-_globalTheTVDB = None
+__globalTheTVDB = None
 
 def globalTheTVDB():
-    global _globalTheTVDB
-    if _globalTheTVDB is None:
-        _globalTheTVDB = TheTVDB()
+    global __globalTheTVDB
+    if __globalTheTVDB is None:
+        __globalTheTVDB = TheTVDB()
     
-    return _globalTheTVDB
+    return __globalTheTVDB
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"

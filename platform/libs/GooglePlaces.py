@@ -13,6 +13,8 @@ from Geocoder       import Geocoder
 from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
 from Schemas        import PlaceEntity
+from LRUCache       import lru_cache
+from Memcache       import memcached_function
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -249,6 +251,11 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['predictions']
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @memcached_function(time=7*24*60*60)
     def getEntityAutocompleteResults(self, query, latLng=None, params=None):
         results = self.getAutocompleteResults(latLng, query, params)
         output  = []

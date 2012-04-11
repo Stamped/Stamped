@@ -52,9 +52,6 @@ class MongoStampedAPI(StampedAPI):
         
         if db:
             utils.init_db_config(db)
-        
-        self._entityDB       = MongoEntityCollection()
-        self._placesEntityDB = MongoPlacesEntityCollection()
     
     @property
     def _statsSink(self):
@@ -62,6 +59,14 @@ class MongoStampedAPI(StampedAPI):
             self.__statsSink = StatsDSink(self)
         
         return self.__statsSink
+    
+    @lazyProperty
+    def _entityDB(self):
+        return MongoEntityCollection()
+    
+    @lazyProperty
+    def _placesEntityDB(self):
+        return MongoPlacesEntityCollection()
     
     @lazyProperty
     def _accountDB(self):

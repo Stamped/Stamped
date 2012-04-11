@@ -9,9 +9,11 @@ import re
 import oauth as oauth
 import httplib
 import time
-from xml.dom.minidom import parseString
 import simplejson
-from urlparse import urlparse
+import json
+
+from urlparse           import urlparse
+from xml.dom.minidom    import parseString
 
 HOST              = 'api.netflix.com'
 PORT              = '80'
@@ -21,7 +23,7 @@ AUTHORIZATION_URL = 'https://api-user.netflix.com/oauth/login'
 
 class NetflixError(Exception): pass
 
-class NetflixUser():
+class NetflixUser(object):
     def __init__(self, user, client):
         self.requestTokenUrl = REQUEST_TOKEN_URL
         self.accessTokenUrl  = ACCESS_TOKEN_URL
@@ -50,7 +52,8 @@ class NetflixUser():
         client = self.client
         
         if not isinstance(requestToken, oauth.OAuthToken):
-                requestToken = oauth.OAuthToken( requestToken['key'], requestToken['secret'] )
+            requestToken = oauth.OAuthToken( requestToken['key'], requestToken['secret'] )
+        
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(  client.consumer,
                                     token=requestToken,
                                     http_url=self.accessTokenUrl)
@@ -156,7 +159,7 @@ class NetflixUser():
             
         return info
         
-class NetflixCatalog():
+class NetflixCatalog(object):
     def __init__(self,client):
         self.client = client
     
@@ -211,7 +214,7 @@ class NetflixCatalog():
             return {}
         return info       
 
-class NetflixUserQueue:
+class NetflixUserQueue(object):
     def __init__(self,user):
         self.user = user
         self.client = user.client
@@ -324,7 +327,7 @@ class NetflixUserQueue:
         response = self.client._deleteResource( entryID, token=accessToken )
         return response
 
-class NetflixDisc:
+class NetflixDisc(object):
     def __init__(self,discInfo,client):
         self.info = discInfo
         self.client = client
@@ -350,7 +353,8 @@ APP_NAME   = 'Stamped'
 API_KEY    = 'nr5nzej56j3smjra6vtybbvw'
 API_SECRET = 'H5A633JsYk'
 
-class NetflixClient:
+class NetflixClient(object):
+    
     def __init__(self, name=APP_NAME, key=API_KEY, secret=API_SECRET, callback='',verbose=False):
         self.connection = httplib.HTTPConnection("%s:%s" % (HOST, PORT))
         self.server = HOST
@@ -365,6 +369,11 @@ class NetflixClient:
         self.consumer = oauth.OAuthConsumer(self.CONSUMER_KEY, self.CONSUMER_SECRET)
         self.signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
     
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @memcached_function(time=7*24*60*60)
     def _getResource(self, url, token=None, parameters={}):
         if not re.match('http',url):
             url = "http://%s%s" % (HOST, url)
@@ -426,9 +435,8 @@ REQUEST_TOKEN_URL = 'http://api.netflix.com/oauth/request_token'
 ACCESS_TOKEN_URL  = 'http://api.netflix.com/oauth/access_token'
 AUTHORIZATION_URL = 'https://api-user.netflix.com/oauth/login'
 """
-import json
 
-class Netflix():
+class Netflix(object):
     def __init__(self, name=APP_NAME, key=API_KEY, secret=API_SECRET):
         self.__name=name
         self.__key=key
@@ -453,14 +461,13 @@ class Netflix():
         response = connection.getresponse()
         return json.loads(response.read())
 
-
-_globalNetflix = Netflix()
+__globalNetflix = None
 
 def globalNetflix():
+    global __globalNetflix
+    
+    if __globalNetflix is None:
+        __globalNetflix = Netflix()
+    
     return _globalNetflix
-
-
-
-
-
 

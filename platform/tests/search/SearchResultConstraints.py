@@ -74,6 +74,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                  index      = None, 
                  strict     = False, 
                  match      = None, 
+                 soft       = True, 
                  **extras):
         ASearchResultConstraint.__init__(self)
         
@@ -90,6 +91,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         self.index  = index
         self.strict = strict
         self.match  = match
+        self.soft   = True
         self.extras = extras
     
     def validate(self, results):
@@ -105,7 +107,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         
         for i in xrange(len(results)):
             result = results[i]
-            valid  = (self.index is None or self.index == i)
+            valid  = (self.index is None or self.index == i or (self.index != -1 and self.soft))
             
             if valid:
                 t0 = list(self.types)
@@ -177,7 +179,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         return (self.index == -1)
     
     def _eq(self, a, b):
-        return ASearchResultConstraint(a, b, strict = self.strict, match = self.match)
+        return ASearchResultConstraint._eq(self, a, b, strict = self.strict, match = self.match)
     
     def __str__(self):
         options = { }

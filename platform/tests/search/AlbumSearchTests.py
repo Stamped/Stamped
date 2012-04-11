@@ -125,7 +125,8 @@ class AlbumSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'Befehl von ganz unten album', }, [ 
                 SearchResultConstraint(title='befehl von ganz unten', 
-                                       types='album'), 
+                                       types='album', 
+                                       match='prefix'), 
             ]), 
             ({ 'query' : 'Tuskegee Lionel Richie', }, [ 
                 SearchResultConstraint(title='tuskegee', 
