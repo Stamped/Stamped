@@ -122,8 +122,12 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
 
     @lazyProperty
     def artists(self):
+        result = {}
         try:
-            return [ { 'name' : self.data['artist'] } ]
+            result['name']  = self.data['artist']
+            result['key']   = self.data['artistKey']
+            result['url']   = 'http://rdio.com%s' % self.data['artistUrl']
+            return [ result ]
         except Exception:
             return []
 
@@ -144,11 +148,25 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
 
     @lazyProperty
     def artists(self):
-        return [ { 'name':self.data['artist'] } ]
+        result = {}
+        try:
+            result['name']  = self.data['artist']
+            result['key']   = self.data['artistKey']
+            result['url']   = 'http://rdio.com%s' % self.data['artistUrl']
+            return [ result ]
+        except Exception:
+            return []
 
     @lazyProperty
     def albums(self):
-        return [ { 'name':self.data['album'] } ]
+        result = {}
+        try:
+            result['name']  = self.data['album']
+            result['key']   = self.data['key']
+            result['url']   = 'http://rdio.com%s' % self.data['albumUrl']
+            return [ result ]
+        except Exception:
+            return []
 
     @lazyProperty
     def length(self):
@@ -180,6 +198,8 @@ class RdioSource(GenericSource):
                 'images',
                 'albums',
                 'tracks',
+                'artists',
+                # 'genres',
             ],
             kinds=[
                 'person',

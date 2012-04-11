@@ -30,10 +30,10 @@ allSources = [
     FactualSource,
     GooglePlacesSource,
     SinglePlatformSource,
-    AmazonSource,
+    iTunesSource,
     TMDBSource,
     RdioSource,
     SpotifySource,
-    iTunesSource,
+    AmazonSource,
     StampedSource,
 ]

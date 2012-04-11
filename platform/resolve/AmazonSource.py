@@ -131,8 +131,8 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         try:
             return [{
                 'name' : xp(attributes, 'Title')['v'],
-                'source' : 'amazon',
-                'key' : key,
+                # 'source' : 'amazon',
+                # 'key' : key,
             }]
         except Exception:
             return []
@@ -147,10 +147,12 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
     @lazyProperty
     def genres(self):
-        try:
-            return [ xp(self.attributes, 'Genre')['v'] ]
-        except Exception:
-            return []
+        ### TODO: Convert these into readable English
+        # try:
+        #     return [ xp(self.attributes, 'Genre')['v'] ]
+        # except Exception:
+        #     return []
+        return []
 
     @lazyProperty
     def release_date(self):

@@ -3190,17 +3190,23 @@ class StampedAPI(AStampedAPI):
             modified = _enrichAlbums(entity, artists=[entity])
             modified = _enrichTracks(entity, artists=[entity]) | modified
 
-        if entity.isType('track'):
-            # Enrich album instead
-            for album in entity.albums:
-                album = _enrichAlbum(album)
-                albumModified = False
-                albumModified = _enrichArtists(album)
-                albumModified = _enrichTracks(album, artists=album.artists, albums=[album]) | albumModified
-                if albumModified:
-                    self._mergeEntity(album, True)
-            # Just to be explicit...
-            modified = False
+        # if entity.isType('track'):
+        #     # Enrich album instead
+        #     for albumItem in entity.albums:
+        #         try:
+        #             print '\nENRICH ALBUM: %s\n' % albumItem
+        #             albumItem = buildEntity(albumItem.value)
+        #             albumItem = _enrichAlbum(albumItem)
+        #             albumModified = False
+        #             albumModified = _enrichArtists(albumItem)
+        #             albumModified = _enrichTracks(albumItem, artists=albumItem.artists, albums=[albumItem]) | albumModified
+        #             if albumModified:
+        #                 self._mergeEntity(albumItem, True)
+        #         except Exception as e:
+        #             logs.warning('Failed to enrich album: %s' % e)
+        #             logs.info('Album: %s' % albumItem)
+        #     # Just to be explicit...
+        #     modified = False
 
         return modified
         
