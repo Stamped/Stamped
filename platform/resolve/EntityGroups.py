@@ -322,17 +322,6 @@ class LengthGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addKind('media_item')
         self.addNameField()
-
-# class ShortDescriptionGroup(AKindTypeGroup):
-
-#     def __init__(self, *args, **kwargs):
-#         AKindTypeGroup.__init__(self, 'short_description')
-#         self.addKind('media_collection')
-#         self.addType('tv')
-#         self.addKind('media_item')
-#         self.addType('movie')
-
-#         self.addNameField()
         
 class AlbumsGroup(AKindTypeGroup):
 
@@ -380,18 +369,6 @@ class AmazonGroup(AAmazonGroup):
         self.addField(['amazon_id'])
         self.addField(['amazon_url'])
         self.addField(['amazon_underlying'])
-
-# class AmazonLinkGroup(AAmazonGroup):
-
-#     def __init__(self):
-#         AAmazonGroup.__init__(self, 'amazon_link')
-#         self.addNameField()
-
-# class AmazonUnderlyingGroup(AAmazonGroup):
-
-#     def __init__(self):
-#         AAmazonGroup.__init__(self, 'amazon_underlying')
-#         self.addNameField()
  
 class DirectorsGroup(AFilmGroup):
 
