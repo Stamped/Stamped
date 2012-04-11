@@ -319,7 +319,6 @@ class LengthGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'length')
-        self.addKind('media_collection')
         self.addKind('media_item')
         self.addNameField()
         

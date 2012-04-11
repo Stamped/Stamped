@@ -37,3 +37,10 @@ allSources = [
     AmazonSource,
     StampedSource,
 ]
+
+def getSource(name):
+    for source in allSources:
+        source = source()
+        if source.sourceName == name:
+            return source
+    raise KeyError('Source not found: %s' % name)

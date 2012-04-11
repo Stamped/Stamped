@@ -190,23 +190,6 @@ class GenericSource(BasicSource):
     def entityProxyFromKey(self, key, type=None):
         raise NotImplementedError
     
-    def buildEntityFromEntityProxy(self, proxy, controller=None, decorations=None, timestamps=None):
-        entity = buildEntity(kind=proxy.kind)
-        
-        self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
-
-        sourceGroups    = self.getGroups(entity)
-        now             = datetime.utcnow()
-
-        for group in allGroups:
-            group = group()
-            if group.groupName in sourceGroups:
-                if group.eligible(entity):
-                    group.setSource(entity, self.idName)
-                    group.setTimestamp(entity, now)
-
-        return entity
-    
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
             controller = AlwaysSourceController()
@@ -225,6 +208,7 @@ class GenericSource(BasicSource):
                 item = getattr(proxy, source)
                 if item is not None and item != '':
                     entity[target] = item
+                    timestamps[target] = controller.now
             except Exception as e:
                 pass
         
@@ -287,6 +271,7 @@ class GenericSource(BasicSource):
 
             if proxy.length > 0:
                 entity.length = int(proxy.length)
+                timestamps['length'] = controller.now
 
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
@@ -371,6 +356,7 @@ class GenericSource(BasicSource):
 
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
+                timestamps['genres'] = controller.now
 
             publishers = []
             for publisher in proxy.publishers:

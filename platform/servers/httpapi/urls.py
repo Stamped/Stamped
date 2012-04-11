@@ -102,6 +102,7 @@ urlpatterns = patterns('',
     (r'v0/entities/nearby.json',        'v0.functions.entities.nearby'),
     (r'v0/entities/menu.json',          'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',    'v0.functions.entities.stampedBy'),
+    (r'v0/entities/suggested.json',     'v0.functions.entities.suggested'),
     
     ### STAMPS
     (r'v0/stamps/create.json',          'v0.functions.stamps.create'),

@@ -131,8 +131,8 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         try:
             return [{
                 'name' : xp(attributes, 'Title')['v'],
-                # 'source' : 'amazon',
-                # 'key' : key,
+                'source' : 'amazon',
+                'key' : key,
             }]
         except Exception:
             return []
@@ -374,6 +374,14 @@ class AmazonSource(GenericSource):
             ]
         )
 
+    def getGroups(self, entity=None):
+        groups = GenericSource.getGroups(self, entity)
+        if entity.isType('album') or entity.isType('track'):
+            groups.remove('desc')
+        if entity.isType('artist'):
+            groups.remove('images')
+        return groups
+
     def matchSource(self, query):
         if query.kind == 'search':
             return self.searchAllSource(query)
@@ -597,9 +605,11 @@ class AmazonSource(GenericSource):
             
             if kind == 'book':
                 return AmazonBook(key)
-            elif kind == 'digital music track':
+            if kind == 'digital music album':
+                return AmazonAlbum(key)
+            if kind == 'digital music track':
                 return AmazonTrack(key)
-            elif kind == 'video games':
+            if kind == 'video games':
                 return AmazonVideoGame(key)
             
             raise Exception("unsupported amazon product type")

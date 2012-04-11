@@ -26,6 +26,7 @@ try:
     
     from Resolver                   import *
     from ResolverObject             import *
+    from EntityProxyContainer       import EntityProxyContainer
     from GenericSource              import generatorSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
@@ -304,7 +305,9 @@ class EntitySearch(object):
             if source not in self._sources_map:
                 source = 'stamped'
             
-            entity = self._sources_map[source].buildEntityFromEntityProxy(item[1].target)
+            entityProxy = EntityProxyContainer(item[1].target)
+            entity = entityProxy.buildEntity()
+
             #entity.types = [ item[1].target.subtype ]
             results.append(entity)
         

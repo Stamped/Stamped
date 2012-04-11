@@ -219,6 +219,13 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
             return []
 
     @lazyProperty
+    def release_date(self):
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except KeyError:
+            return None
+
+    @lazyProperty
     def tracks(self):
         results = []
         if 'tracks' in self.data:
@@ -294,6 +301,13 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
             return [ self.data['primaryGenreName'] ]
         except Exception:
             return []
+
+    @lazyProperty
+    def release_date(self):
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except KeyError:
+            return None
 
     @lazyProperty
     def length(self):
@@ -581,6 +595,7 @@ class iTunesSource(GenericSource):
                 'publishers',
                 'authors',
                 'images',
+                'length',
             ],
             kinds=[
                 'person',

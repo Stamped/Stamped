@@ -42,7 +42,7 @@ try:
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
-    from resolve                import FullResolveContainer
+    from resolve                import FullResolveContainer, EntityProxyContainer
     from AmazonSource           import AmazonSource
     from FactualSource          import FactualSource
     from GooglePlacesSource     import GooglePlacesSource
@@ -2913,7 +2913,8 @@ class StampedAPI(AStampedAPI):
                 entity_id = results[0][1].key
                 
         if entity_id is None:
-            entity = source.buildEntityFromEntityProxy(proxy)
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
             
             entity = self._entityDB.addEntity(entity)
             entity_id = entity.entity_id
@@ -2959,8 +2960,11 @@ class StampedAPI(AStampedAPI):
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
             else:
+                if not modified:
+                    return entity 
+
                 self.__handleDecorations(entity, decorations)
-                
+
                 if update:
                     logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
                     return self._entityDB.updateEntity(entity)
@@ -3049,7 +3053,8 @@ class StampedAPI(AStampedAPI):
             if entity_id is not None:
                 entity = self._entityDB.getEntity(entity_id)
             elif source_id is not None and proxy is not None:
-                entity = source.buildEntityFromEntityProxy(proxy)
+                entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+                entity = entityProxy.buildEntity()
             else:
                 logs.warning('Unable to enrich stub: %s' % stub)
                 raise KeyError('Unable to enrich stub')

@@ -69,6 +69,12 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 targetGroups.add(group)
                         if len(targetGroups) > 0:
                             copy = buildEntity(entity.value)
+                            """
+                            timestamps - { GROUP - timestamp }
+                            empty, single-use timestamps map for specifying failed attempts, 
+                            assignment regardless of current value,
+                            and stale data (rare)
+                            """
                             timestamps = {}
                             localDecorations = {}
                             logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
