@@ -13,6 +13,7 @@ from logs import report
 try:
     from BasicSourceContainer   import BasicSourceContainer
     from EntityGroups           import *
+    from ResolverSources        import *
     from pprint                 import pformat
 except:
     report()

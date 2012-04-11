@@ -26,6 +26,7 @@
 #import "Util.h"
 #import "Stamp.h"
 #import "Alerts.h"
+#import "STRootMenuView.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
@@ -86,6 +87,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   [super viewDidLoad];
   [self loadFavoritesFromDataStore];
   [self loadFavoritesFromNetwork];
+  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:[STRootMenuView sharedInstance]
+                                                                           action:@selector(toggle)] autorelease];
 }
 
 - (void)viewDidUnload {

@@ -341,7 +341,7 @@ class StampAttributesSchema(Schema):
 class DeletedStamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
-        self.timestamp          = ModifiedTimestampSchema()
+        self.timestamp          = TimestampSchema()
         self.deleted            = SchemaElement(bool)
 
 class ModifiedTimestampSchema(Schema):
@@ -582,12 +582,24 @@ class BasicEntity(Schema):
             return self.user_generated_subtitle
         return unicode(self.subcategory).replace('_', ' ').title()
 
-    def minimize(self):
-        mini            = getEntityMiniObjectFromKind(self.kind)()
-        mini.entity_id  = self.entity_id 
-        mini.title      = self.title 
-        mini.types      = self.types 
-        mini.sources    = self.sources 
+    def minimize(self, *args):
+        mini = getEntityMiniObjectFromKind(self.kind)()
+        attributes = set([
+            'entity_id',
+            'title',
+            'types',
+            'sources',
+        ])
+        for arg in args:
+            attributes.add(arg)
+
+        for attribute in attributes:
+            try:
+                if self[attribute] is not None:
+                    mini[attribute] = self[attribute]
+            except:
+                pass
+
         return mini
 
     def isType(self, t):
@@ -671,6 +683,7 @@ class EntitySourcesSchema(Schema):
         self.itunes_id                      = SchemaElement(basestring)
         self.itunes_url                     = SchemaElement(basestring)
         self.itunes_source                  = SchemaElement(basestring)
+        self.itunes_preview                 = SchemaElement(basestring)
         self.itunes_timestamp               = SchemaElement(datetime)
 
         self.rdio_id                        = SchemaElement(basestring)
@@ -781,7 +794,10 @@ class PlaceEntity(BasicEntity):
         locality    = self.address_locality
         region      = self.address_region
         postcode    = self.address_postcode
-        country     = self.address_country.upper()
+        country     = self.address_country
+
+        if country is not None:
+            country = country.upper()
         
         delimiter = '\n' if breakLines else ', '
         
@@ -1013,6 +1029,9 @@ class MediaItemEntity(BasicMediaEntity):
         self.sku_number_source              = SchemaElement(basestring)
         self.sku_number_timestamp           = SchemaElement(datetime)
 
+    def minimize(self):
+        return BasicEntity.minimize(self, 'length')
+
     @property 
     def subtitle(self):
         if self.isType('movie'):
@@ -1150,6 +1169,7 @@ class MediaItemEntityMini(BasicEntityMini, MediaItemEntity):
     def setSchema(self):
         BasicEntityMini.setSchema(self)
         self.kind                           = SchemaElement(basestring, default='media_item')
+        self.length                         = SchemaElement(int)
 
 class SoftwareEntityMini(BasicEntityMini, SoftwareEntity):
     def setSchema(self):

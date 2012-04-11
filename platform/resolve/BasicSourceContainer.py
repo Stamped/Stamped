@@ -54,6 +54,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             max_iterations = self.__default_max_iterations
         modified_total = False
         failedSources = set()
+        logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
         for i in range(max_iterations):
             modified = False
             for source in self.__sources:
@@ -61,7 +62,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                     if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types.value).intersection(source.types)) == 0:
                         continue
                     if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
-                        groups = source.groups
+                        groups = source.getGroups(entity)
                         targetGroups = set()
                         for group in groups:
                             if self.shouldEnrich(group, source.sourceName, entity, self.now):
@@ -70,7 +71,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             copy = buildEntity(entity.value)
                             timestamps = {}
                             localDecorations = {}
-                            logs.info("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                            logs.debug("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
                             try:
                                 enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
                                 if enriched:
@@ -90,7 +91,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                                 modified = True
                                                 enrichedOutput.add(groupObj.groupName)
                                     if len(enrichedOutput) > 0:
-                                        logs.info("Output from enrich: %s" % enrichedOutput)
+                                        logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception:
                                 logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
@@ -133,11 +134,12 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
                             try:
+                                currentTimestamp = currentTimestamp.replace(tzinfo=None)
                                 if self.now - currentTimestamp > currentMaxAge:
                                     return True
-                            except Exception:
-                                logs.warning('FAIL: self.now (%s) - currentTimestamp(%s) > currentMaxAge (%s)' % \
-                                    (self.now, currentTimestamp, currentMaxAge))
+                            except Exception as e:
+                                logs.warning('FAIL: self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
+                                    (self.now, currentTimestamp, currentMaxAge, e))
                             return False
             else:
                 return False

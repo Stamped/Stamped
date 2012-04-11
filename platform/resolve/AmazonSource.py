@@ -131,8 +131,8 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         try:
             return [{
                 'name' : xp(attributes, 'Title')['v'],
-                'source' : 'amazon',
-                'key' : key,
+                # 'source' : 'amazon',
+                # 'key' : key,
             }]
         except Exception:
             return []
@@ -147,10 +147,12 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
     @lazyProperty
     def genres(self):
-        try:
-            return [ xp(self.attributes, 'Genre')['v'] ]
-        except Exception:
-            return []
+        ### TODO: Convert these into readable English
+        # try:
+        #     return [ xp(self.attributes, 'Genre')['v'] ]
+        # except Exception:
+        #     return []
+        return []
 
     @lazyProperty
     def release_date(self):
@@ -229,6 +231,26 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
     def ebookVersion(self):
         if xp(self.underlying.attributes, 'Binding')['v'] == 'Kindle Edition':
             return self.underlying
+        return None
+
+    @lazyProperty
+    def images(self):
+        try:
+            image_set = xp(self.underlying.data, 'ImageSets','ImageSet')
+            image = xp(image_set,'LargeImage','URL')['v']
+            if image is not None:
+                return [image]
+        except Exception:
+            pass
+        return []
+
+    @lazyProperty
+    def url(self):
+        try:
+            if self.ebookVersion is not None and self.ebookVersion.link is not None:
+                return self.ebookVersion.link
+        except Exception:
+            pass
         return None
 
     @lazyProperty 
@@ -337,10 +359,9 @@ class AmazonSource(GenericSource):
                 'isbn',
                 'desc',
                 'sku_number',
-                'amazon_link',
-                'amazon_underlying',
+                # 'amazon_link',
+                # 'amazon_underlying',
                 'images',
-                #Consider for album_list, track_list
             ],
             kinds=[
                 'media_collection',
@@ -464,14 +485,14 @@ class AmazonSource(GenericSource):
     
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
+            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
 
         if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
+            logs.debug('Skipping %s (types: %s)' % (self.sourceName, query.types))
             return self.emptySource
 
-        logs.info('Searching %s...' % self.sourceName)
+        logs.debug('Searching %s...' % self.sourceName)
         
         q = query.query_string
 
@@ -502,77 +523,77 @@ class AmazonSource(GenericSource):
     def __amazon(self):
         return self.__amazon_api.amazon
     
-    def __enrichSong(self, entity, asin):
-        track = AmazonTrack(asin)
-        if track.artist['name'] != '':
-            entity['artist_display_name'] = track.artist['name']
-        if track.album['name'] != '':
-            entity['album_name'] = track.album['name']
-        if len(track.genres) > 0:
-            entity['genre'] = track.genres[0]
-        if track.date != None:
-            entity['release_date'] = track.date
-        if track.length > 0:
-            entity['track_length'] = track.length
+    # def __enrichSong(self, entity, asin):
+    #     track = AmazonTrack(asin)
+    #     if track.artist['name'] != '':
+    #         entity['artist_display_name'] = track.artist['name']
+    #     if track.album['name'] != '':
+    #         entity['album_name'] = track.album['name']
+    #     if len(track.genres) > 0:
+    #         entity['genre'] = track.genres[0]
+    #     if track.date != None:
+    #         entity['release_date'] = track.date
+    #     if track.length > 0:
+    #         entity['track_length'] = track.length
     
-    def __enrichBook(self, entity, asin):
-        book = AmazonBook(asin)
-        if book.author['name'] != '':
-            entity['author'] = book.author['name']
-        if book.publisher['name'] != '':
-            entity['publisher'] = book.publisher['name']
-        if book.date != None:
-            entity['release_date'] = book.date
-        if book.description != '':
-            entity['desc'] = book.description
-        if book.length > 0:
-            entity['num_pages'] = int(book.length)
-        if book.isbn != None:
-            entity['isbn'] = book.isbn
-        if book.sku != None:
-            entity['sku_number'] = book.sku
-        if book.ebookVersion is not None and book.ebookVersion.link is not None:
-            entity['amazon_link'] = book.ebookVersion.link
-        elif book.link != None:
-            entity['amazon_link'] = book.link
-        entity['amazon_underlying'] = book.underlying.key
-        try:
-            image_set = xp(book.underlying.data, 'ImageSets','ImageSet')
-            entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
-            entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
-            entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
-        except Exception:
-            logs.warning("no image set for %s" % book.underlying.key)
+    # def __enrichBook(self, entity, asin):
+    #     book = AmazonBook(asin)
+    #     if book.author['name'] != '':
+    #         entity['author'] = book.author['name']
+    #     if book.publisher['name'] != '':
+    #         entity['publisher'] = book.publisher['name']
+    #     if book.date != None:
+    #         entity['release_date'] = book.date
+    #     if book.description != '':
+    #         entity['desc'] = book.description
+    #     if book.length > 0:
+    #         entity['num_pages'] = int(book.length)
+    #     if book.isbn != None:
+    #         entity['isbn'] = book.isbn
+    #     if book.sku != None:
+    #         entity['sku_number'] = book.sku
+    #     if book.ebookVersion is not None and book.ebookVersion.link is not None:
+    #         entity['amazon_link'] = book.ebookVersion.link
+    #     elif book.link != None:
+    #         entity['amazon_link'] = book.link
+    #     entity['amazon_underlying'] = book.underlying.key
+    #     try:
+    #         image_set = xp(book.underlying.data, 'ImageSets','ImageSet')
+    #         entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
+    #         entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
+    #         entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
+    #     except Exception:
+    #         logs.warning("no image set for %s" % book.underlying.key)
     
-    def __enrichVideoGame(self, entity, asin):
-        game = AmazonVideoGame(asin)
+    # def __enrichVideoGame(self, entity, asin):
+    #     game = AmazonVideoGame(asin)
         
-        if game.artist['name'] != '':
-            entity['artist_display_name'] = game.artist['name']
-        if len(game.genres) > 0:
-            entity['genre'] = game.genres[0]
-        if game.date != None:
-            entity['release_date'] = game.date
-        if game.description != '':
-            entity['desc'] = game.description
-        if game.sku != None:
-            entity['sku_number'] = game.sku
-        if game.platform != '':
-            entity['platform'] = game.platform
+    #     if game.artist['name'] != '':
+    #         entity['artist_display_name'] = game.artist['name']
+    #     if len(game.genres) > 0:
+    #         entity['genre'] = game.genres[0]
+    #     if game.date != None:
+    #         entity['release_date'] = game.date
+    #     if game.description != '':
+    #         entity['desc'] = game.description
+    #     if game.sku != None:
+    #         entity['sku_number'] = game.sku
+    #     if game.platform != '':
+    #         entity['platform'] = game.platform
         
-        try:
-            image_set = xp('.//ImageSets','ImageSet')
-            entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
-            entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
-            entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
-        except Exception:
-            logs.warning("no image set for %s" % asin)
+    #     try:
+    #         image_set = xp('.//ImageSets','ImageSet')
+    #         entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
+    #         entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
+    #         entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
+    #     except Exception:
+    #         logs.warning("no image set for %s" % asin)
     
     def entityProxyFromKey(self, key):
         try:
             item = _AmazonObject(amazon_id=key)
             kind = xp(item.attributes, 'ProductGroup')['v'].lower()
-            logs.info(kind)
+            logs.debug(kind)
             
             # TODO: Avoid additional API calls here?
             
@@ -591,6 +612,11 @@ class AmazonSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.amazon_id = proxy.key
+        try:
+            if entity.isType('book'):
+                entity.amazon_underlying = proxy.underlying.key
+        except Exception:
+            pass
         return True
 
 if __name__ == '__main__':

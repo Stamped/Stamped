@@ -63,6 +63,12 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 @end
 
+@interface STUtilMenuDelegate : NSObject <UIAlertViewDelegate>
+
+@property (nonatomic, readwrite, copy) void(^block)(NSString*);
+
+@end
+
 static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
@@ -322,7 +328,7 @@ static Rdio* _rdio;
   NSData* data = [[NSData alloc] initWithContentsOfURL:url];
   UIImage* image = [UIImage imageWithData:data];
   if (CGRectIsNull(frame)) {
-    frame = CGRectMake(0, 0, image.size.width, image.size.height);
+    frame = CGRectMake(0, 0, image.size.width * [Util imageScale], image.size.height * [Util imageScale]);
   }
   UIImageView* imageView = [[UIImageView alloc] initWithFrame:frame];
   imageView.image = image;
@@ -373,8 +379,8 @@ static Rdio* _rdio;
 }
 
 + (CGSize)size:(CGSize)size withScale:(CGFloat)scale {
-  size.width /= scale;
-  size.height /= scale;
+  size.width *= scale;
+  size.height *= scale;
   return size;
 }
 
@@ -398,14 +404,10 @@ static Rdio* _rdio;
 
 
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color {
-  UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+  UIView* window = [UIApplication sharedApplication].keyWindow.rootViewController.view;
   STPopUpView* cur = _currentPopUp;
-  if (cur) {
-    for (UIView* v in [window subviews]) {
-      if (v == cur && [v isKindOfClass:[STPopUpView class]]) {
-        [v removeFromSuperview];
-      }
-    }
+  if (cur && cur.superview) {
+    [cur removeFromSuperview];
   }
   if (view) {
     STPopUpView* popup = [[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color];
@@ -424,7 +426,7 @@ static Rdio* _rdio;
 }
 
 + (CGFloat)imageScale {
-  return 2.0;
+  return .5;
 }
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message {
@@ -673,6 +675,22 @@ static Rdio* _rdio;
   [sheet showInView:[UIApplication sharedApplication].keyWindow];
 }
 
++ (void)menuWithTitle:(NSString*)title 
+              message:(NSString*)message 
+              choices:(NSArray*)strings 
+             andBlock:(void(^)(NSString* string))block {
+  STUtilMenuDelegate* delegate = [[STUtilMenuDelegate alloc] init];
+  delegate.block = block;
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:title
+                                                  message:message 
+                                                 delegate:delegate 
+                                        cancelButtonTitle:@"Cancel" 
+                                        otherButtonTitles: nil] autorelease];
+  for (NSString* string in strings) {
+    [alert addButtonWithTitle:string];
+  }
+  [alert show];
+}
 
 + (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor {
   UIView* cur = view.superview;
@@ -687,6 +705,10 @@ static Rdio* _rdio;
     cur = cur.superview;
   }
   return frame;
+}
+
++ (NSString*)trackLengthString:(NSInteger)length {
+  return [NSString stringWithFormat:@"%d:%d", length / 60, length % 60];
 }
 
 @end
@@ -796,3 +818,26 @@ static Rdio* _rdio;
 
 @end
 
+@implementation STUtilMenuDelegate
+
+@synthesize block = _block;
+
+- (void)dealloc
+{
+  [_block release];
+  [super dealloc];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  [self autorelease];
+  if (self.block) {
+    if (buttonIndex == -1 || buttonIndex == alertView.cancelButtonIndex) {
+      self.block(nil);
+    }
+    else {
+      self.block([alertView buttonTitleAtIndex:buttonIndex]);
+    }
+  }
+}
+
+@end

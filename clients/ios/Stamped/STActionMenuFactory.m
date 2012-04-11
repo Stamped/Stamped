@@ -12,6 +12,7 @@
 #import "UIColor+Stamped.h"
 #import "STViewContainer.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STActionManager.h"
 
 @interface STSourceCell : UIView <STViewDelegateDependent>
 
@@ -20,6 +21,7 @@
 @property (nonatomic, retain) id<STSource> source;
 @property (nonatomic, retain) NSString* action;
 @property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
+@property (nonatomic, readwrite, retain) STActionContext* context;
 
 - (void)callback:(id)state;
 
@@ -27,7 +29,10 @@
 
 @implementation STActionMenuFactory
 
-- (NSOperation*)createViewWithAction:(id<STAction>)action andSource:(NSArray*)sources forBlock:(void (^)(STViewCreator))callback {
+- (NSOperation*)createViewWithAction:(id<STAction>)action 
+                             sources:(NSArray*)sources 
+                          andContext:(STActionContext*)context 
+                            forBlock:(void (^)(STViewCreator))callback {
   __block NSBlockOperation* operation = [[[NSBlockOperation alloc] init] autorelease];
   [operation addExecutionBlock:^{
     @try {
@@ -101,7 +106,7 @@
                   for (NSInteger i = 0; i < [array count]; i++) {
                     UIImage* iconImage = [array objectAtIndex:i];
                     STSourceCell* cell = [[[STSourceCell alloc] initWithDelegate:delegate] autorelease];
-                    
+                    cell.context = context;
                     cell.frame = CGRectMake(0, 0, width, cellHeight);
                     UIImageView* icon = [[UIImageView alloc] init];
                     icon.image = iconImage;
@@ -157,6 +162,7 @@
 @synthesize source = source_;
 @synthesize action = action_;
 @synthesize delegate = delegate_;
+@synthesize context = context_;
 
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate {
@@ -173,12 +179,17 @@
 - (void)dealloc {
   self.source = nil;
   self.action = nil;
+  self.context = nil;
   [super dealloc];
 }
 
 - (void)callback:(id)state {
+  NSLog(@"testing");
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseSource:forAction:)]) {
-    [self.delegate didChooseSource:self.source forAction:self.action withContext:[STActionContext contextInView:self]];
+    [self.delegate didChooseSource:self.source forAction:self.action withContext:self.context];
+  }
+  else {
+    [[STActionManager sharedActionManager] didChooseSource:self.source forAction:self.action withContext:self.context];
   }
 }
 

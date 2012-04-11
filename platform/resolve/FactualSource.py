@@ -139,6 +139,12 @@ class FactualPlace(ResolverPlace):
             pass
         return []
 
+    @lazyProperty
+    def cuisine(self):
+        if 'cuisine' in self.data:
+            return [ unicode(i.strip()) for i in self.data['cuisine'].split(',') ]
+        return []
+
     @property 
     def source(self):
         return 'factual'
@@ -187,7 +193,6 @@ class FactualSource(GenericSource):
         self.__simple_fields = {
             'phone':'tel',
             'site':'website',
-            'cuisine':'cuisine',
             'alcohol_flag':'alcohol',
         }
 
@@ -230,10 +235,10 @@ class FactualSource(GenericSource):
 
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
+            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
 
-        logs.info('Searching %s...' % self.sourceName)
+        logs.debug('Searching %s...' % self.sourceName)
             
         def gen():
             try:
@@ -306,7 +311,10 @@ class FactualSource(GenericSource):
             types = factualPlace.types
             if len(types) > 0:
                 entity.types = types
-                print 'TYPES: %s' % types
+
+            # Cuisines
+            if len(factualPlace.cuisines) > 0:
+                entity.cuisine = factualPlace.cuisine
 
             if 'price' in data:
                 try:

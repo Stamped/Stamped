@@ -15,6 +15,7 @@
 #import "STViewContainer.h"
 
 static const CGFloat _kReadMoreHeight = 74;
+static const CGFloat _kReadMoreHeightCutoff = 90;
 
 @interface MetadatumView : STViewContainer
 
@@ -75,7 +76,7 @@ static const CGFloat _kReadMoreHeight = 74;
     nameView.frame = CGRectOffset(nameView.frame, 14, 14);
     self.uncollapsedValueHeight = valueView.frame.size.height;
     if (nameView.frame.size.width + valueView.frame.size.width > maxWidth - minSpacing) {
-      if (valueView.frame.size.height > _kReadMoreHeight) {
+      if (valueView.frame.size.height > _kReadMoreHeightCutoff) {
         valueView.frame = CGRectMake(14, 0, valueView.frame.size.width, valueView.frame.size.height);
       }
       else {
@@ -91,7 +92,7 @@ static const CGFloat _kReadMoreHeight = 74;
     self.gradient = [CAGradientLayer layer];
     [self.layer addSublayer:self.gradient];
     [self addSubview:nameView];
-    if (self.uncollapsedValueHeight > _kReadMoreHeight) {
+    if (self.uncollapsedValueHeight > _kReadMoreHeightCutoff) {
       CGRect frame = CGRectMake(0, 0, 290, CGRectGetMaxY(nameView.frame)+14);
       CGRect valueFrame = CGRectMake(0, 0, 290, _kReadMoreHeight);
       self.valueViewContainer = [[[UIView alloc] initWithFrame:valueFrame] autorelease];

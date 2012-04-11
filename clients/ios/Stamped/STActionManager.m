@@ -61,9 +61,8 @@ static STActionManager* _singleton;
   [super dealloc];
 }
 
-- (BOOL)canHandleAction:(id<STAction>)action {
-  return YES;
-  //return [self didChooseAction:action shouldExecute:YES];
+- (BOOL)canHandleAction:(id<STAction>)action withContext:(STActionContext *)context{
+  return [self didChooseAction:action withContext:context shouldExecute:NO];
 }
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
@@ -86,7 +85,7 @@ static STActionManager* _singleton;
     if (flag) {
       if ([validSources count] > 1) {
         STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
-        NSOperation* operation = [factory createViewWithAction:action andSource:validSources forBlock:^(STViewCreator init) {
+        NSOperation* operation = [factory createViewWithAction:action sources:validSources andContext:context forBlock:^(STViewCreator init) {
           if (init) {
             UIView* view = init(self);
             view.frame = [Util centeredAndBounded:view.frame.size inFrame:[[UIApplication sharedApplication] keyWindow].frame];

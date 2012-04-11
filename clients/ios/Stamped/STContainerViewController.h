@@ -24,4 +24,6 @@
 
 - (void)reloadStampedData;
 
+@property (nonatomic, readwrite, retain) UIView* toolbar;
+
 @end

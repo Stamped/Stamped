@@ -198,7 +198,7 @@
       NSData* data = [NSData dataWithContentsOfURL:[NSURL URLWithString:menu.attributionImage]];
       UIImageView* attributionImage = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
       tempFrame = attributionImage.frame;
-      tempFrame.size = CGSizeMake(attributionImage.frame.size.width / [Util imageScale], attributionImage.frame.size.height / [Util imageScale]);
+      tempFrame.size = CGSizeMake(attributionImage.frame.size.width * [Util imageScale], attributionImage.frame.size.height * [Util imageScale]);
       tempFrame = CGRectMake(width-tempFrame.size.width-padding, 
                                           CGRectGetMaxY(bodyFrame), 
                                           tempFrame.size.width, 

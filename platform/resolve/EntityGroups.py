@@ -10,17 +10,6 @@ from logs import report
 
 try:
     from BasicFieldGroup        import BasicFieldGroup
-    from SeedSource             import SeedSource
-    from FactualSource          import FactualSource
-    from GooglePlacesSource     import GooglePlacesSource
-    from SinglePlatformSource   import SinglePlatformSource
-    from TMDBSource             import TMDBSource
-    from FormatSource           import FormatSource
-    from RdioSource             import RdioSource
-    from SpotifySource          import SpotifySource
-    from iTunesSource           import iTunesSource
-    from AmazonSource           import AmazonSource
-    from StampedSource          import StampedSource
 except:
     report()
     raise
@@ -229,6 +218,7 @@ class iTunesGroup(AKindTypeGroup):
 
         self.addField(['itunes_id'])
         self.addField(['itunes_url'])
+        self.addField(['itunes_data'])
 
 class AddressGroup(APlaceGroup):
 
@@ -332,17 +322,6 @@ class LengthGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addKind('media_item')
         self.addNameField()
-
-class ShortDescriptionGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'short_description')
-        self.addKind('media_collection')
-        self.addType('tv')
-        self.addKind('media_item')
-        self.addType('movie')
-
-        self.addNameField()
         
 class AlbumsGroup(AKindTypeGroup):
 
@@ -389,18 +368,7 @@ class AmazonGroup(AAmazonGroup):
         AAmazonGroup.__init__(self, 'amazon')
         self.addField(['amazon_id'])
         self.addField(['amazon_url'])
-
-class AmazonLinkGroup(AAmazonGroup):
-
-    def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon_link')
-        self.addNameField()
-
-class AmazonUnderlyingGroup(AAmazonGroup):
-
-    def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon_underlying')
-        self.addNameField()
+        self.addField(['amazon_underlying'])
  
 class DirectorsGroup(AFilmGroup):
 
@@ -436,6 +404,7 @@ class ImagesGroup(BasicFieldGroup):
 
     def __init__(self):
         BasicFieldGroup.__init__(self, 'images')
+        self.addNameField()
 
     def eligible(self, entity):
         return True
@@ -476,8 +445,8 @@ allGroups = [
     FandangoGroup,
     StampedTombstoneGroup,
 
-    AmazonLinkGroup,
-    AmazonUnderlyingGroup,
+    # AmazonLinkGroup,
+    # AmazonUnderlyingGroup,
     OpenTableGroup,
     OpenTableNicknameGroup,
 
@@ -505,19 +474,5 @@ allGroups = [
     ISBNGroup,
     SKUNumberGroup,
 
-    ShortDescriptionGroup, # Deprecated?
-]
-
-allSources = [
-    SeedSource,
-    FormatSource,
-    FactualSource,
-    GooglePlacesSource,
-    SinglePlatformSource,
-    AmazonSource,
-    TMDBSource,
-    RdioSource,
-    SpotifySource,
-    iTunesSource,
-    StampedSource,
+    # ShortDescriptionGroup, # Deprecated?
 ]

@@ -117,8 +117,8 @@ class ResolverObject(object):
         return None
 
     @property 
-    def image(self):
-        return None
+    def images(self):
+        return []
 
     def isType(self, t):
         if t in self.types:

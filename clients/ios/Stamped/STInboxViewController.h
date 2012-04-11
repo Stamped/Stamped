@@ -10,4 +10,6 @@
 
 @interface STInboxViewController : STContainerViewController
 
++ (STInboxViewController*)sharedInstance;
+
 @end

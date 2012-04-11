@@ -73,6 +73,7 @@ static const NSInteger _batchSize = 20;
   self.waiting = NO;
   self.generation += 1;
   [self populateStamps];
+  [self reloadData];
 }
 
 - (void)populateStamps {
@@ -93,6 +94,7 @@ static const NSInteger _batchSize = 20;
         }
         else {
           self.noMoreStamps = YES;
+          [self reloadData];
         }
       }
       else {
@@ -120,7 +122,12 @@ static const NSInteger _batchSize = 20;
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   if (indexPath.section == 1) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"lastCell"] autorelease];
-    cell.textLabel.text = @"Loading...";
+    if (self.shouldLoadMore || self.waiting) {
+      cell.textLabel.text = @"Loading...";
+    }
+    else {
+      cell.textLabel.text = @"No more stamps";
+    }
     return cell;
   }
   else {

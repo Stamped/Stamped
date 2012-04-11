@@ -156,7 +156,7 @@
   self.mapViewController = [[[STMapViewController alloc] init] autorelease];
 
   //InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
-  STInboxViewController* inbox = [[STInboxViewController alloc] init];
+  STInboxViewController* inbox = [STInboxViewController sharedInstance];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
   PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];

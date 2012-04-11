@@ -8,21 +8,21 @@
 
 #import "STSimplePlaylistItem.h"
 #import "STSimpleSource.h"
+#import "STSimpleAction.h"
 
 @implementation STSimplePlaylistItem
 
 @synthesize name = name_;
-@synthesize num = num_;
 @synthesize length = length_;
 @synthesize icon = icon_;
-@synthesize link = link_;
-@synthesize sources = sources_;
+@synthesize entityID = _entityID;
+@synthesize action = action_;
 
 - (void)dealloc {
   self.name = nil;
   self.icon = nil;
-  self.link = nil;
-  self.sources = nil;
+  self.action = nil;
+  self.entityID = nil;
   
   [super dealloc];
 }
@@ -32,12 +32,13 @@
   
   [mapping mapAttributes:
    @"name",
-   @"num",
    @"icon",
-   @"link",
+   @"length",
    nil];
   
-  [mapping mapRelationship:@"sources" withMapping:[STSimpleSource mapping]];
+  [mapping mapKeyPathsToAttributes:@"entity_id", @"entityID", nil];
+  
+  [mapping mapRelationship:@"action" withMapping:[STSimpleAction mapping]];
   
   return mapping;
 }

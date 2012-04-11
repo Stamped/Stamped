@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "STSource.h"
+#import "STAction.h"
 
 @protocol STPlaylistItem <NSObject>
 
 @property (nonatomic, readonly, retain) NSString* name;
-@property (nonatomic, readonly, assign) NSInteger num;
 @property (nonatomic, readonly, assign) NSInteger length;
 @property (nonatomic, readonly, retain) NSString* icon;
-@property (nonatomic, readonly, retain) NSString* link;
-@property (nonatomic, readonly, retain) NSArray<STSource>* sources;
+@property (nonatomic, readonly, retain) NSString* entityID;
+@property (nonatomic, readonly, retain) id<STAction> action;
 
 @end

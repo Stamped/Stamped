@@ -39,8 +39,8 @@ class AExternalSource(object):
         """
         pass
 
-    @abstractproperty
-    def groups(self):
+    @abstractmethod
+    def getGroups(self, entity=None):
         pass
 
     

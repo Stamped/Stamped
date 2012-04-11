@@ -26,4 +26,8 @@
   return [UIColor colorWithWhite:0.75 alpha:1.0];
 }
 
++ (UIColor*)stampedLinkColor {
+  return [UIColor colorWithRed:.2 green:.2 blue:.7 alpha:1];
+}
+
 @end

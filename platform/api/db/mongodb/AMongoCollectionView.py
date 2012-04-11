@@ -13,6 +13,7 @@ import libs.worldcities, unicodedata
 from errors             import *
 from utils              import AttributeDict
 from AMongoCollection   import AMongoCollection
+from Entity             import *
 
 class AMongoCollectionView(AMongoCollection):
     
@@ -35,6 +36,18 @@ class AMongoCollectionView(AMongoCollection):
                 'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
                 'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
             }
+        
+        def add_or_query(args):
+            if "$or" not in query:
+                query["$or"] = args
+            else:
+                result = []
+                for item in query.pop("$and", []) + [{"$or": query.pop("$or")}] + [{"$or": args}]:
+                    if item not in result:
+                        result.append(item)
+
+                query["$and"] = result
+                # query["$and"] = query["$and"] + [ { "$or" : existing }, { "$or" : args } ]
         
         # handle setup for sorting
         # ------------------------
@@ -72,19 +85,26 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         if genericCollectionSlice.category is not None:
-            query['category']    = str(genericCollectionSlice.category).lower()
+            kinds           = deriveKindFromCategory(genericCollectionSlice.category) 
+            types           = deriveTypesFromCategory(genericCollectionSlice.category)
+            subcategories   = deriveSubcategoriesFromCategory(genericCollectionSlice.category)
+
+            kinds_and_types = []
+            if len(kinds) > 0:
+                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
+            if len(types) > 0:
+                kinds_and_types.append({'entity.types': {'$in': list(types)}})
+
+            if len(kinds_and_types) > 0:
+                add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} },
+                               { "$and" : kinds_and_types } ])
+            else:
+                add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
         
         if genericCollectionSlice.subcategory is not None:
-            query['subcategory'] = str(genericCollectionSlice.subcategory).lower()
-        
-        def add_or_query(args):
-            if "$or" not in query:
-                query["$or"] = args
-            else:
-                if "$and" not in query:
-                    query["$and"] = []
-                
-                query["$and"].append([ { "$or" : query["$or"] }, { "$or" : args } ])
+            query['entity.subcategory'] = str(genericCollectionSlice.subcategory).lower()
         
         # handle search query filter
         # --------------------------
@@ -147,7 +167,7 @@ class AMongoCollectionView(AMongoCollection):
                         }, 
                     }, 
                 ])
-        
+
         #utils.log(pprint.pformat(query))
         #utils.log(pprint.pformat(genericCollectionSlice.value))
         
@@ -383,7 +403,17 @@ class AMongoCollectionView(AMongoCollection):
                 return obj;
             }""")
             
-            result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
+            logs.debug('Query: %s' % query)
+
+            try:
+                result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
+            except Exception as e:
+                logs.warning('Map/Reduce failed: %s' % e)
+                logs.debug('Query: %s' % query)
+                logs.debug('Scope: %s' % scope)
+                logs.debug('Map: %s' % _map)
+                logs.debug('Reduce: %s' % _reduce)
+                raise
             
             try:
                 value = result[-1]['value'] 

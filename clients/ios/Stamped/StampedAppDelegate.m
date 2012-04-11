@@ -26,6 +26,7 @@
 #import "UIColor+Stamped.h"
 #import "SocialManager.h"
 #import "EditEntityViewController.h"
+#import "STRootMenuView.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -39,6 +40,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
 - (void)userSwipedRightOnNavBar:(UISwipeGestureRecognizer*)recognizer;
+- (void)userSwipedLeftOnNavBar:(UISwipeGestureRecognizer*)recognizer;
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, retain) UIImageView* gridView;
@@ -50,7 +52,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @synthesize navigationController = navigationController_;
 @synthesize gridView = gridView_;
 
+
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  NSLog(@"testing");
 #if defined (CONFIGURATION_Beta)
 #warning QuincyKit Beta (Ad Hoc) is configured for this build
   [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"3999903c72892bb98e58f843990bba66"];
@@ -66,11 +70,19 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [BWQuincyManager sharedQuincyManager].autoSubmitCrashReport = YES;
   [self performRestKitMappings];
   [self customizeAppearance];
-  
+  UIView* testView = [[[STRootMenuView alloc] init] autorelease];
+  //testView.backgroundColor = [UIColor stampedDarkGrayColor];
+  [self.window addSubview:testView];
   UISwipeGestureRecognizer* swipeRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self
                                                                                         action:@selector(userSwipedRightOnNavBar:)];
   [self.navigationController.navigationBar addGestureRecognizer:swipeRecognizer];
   [swipeRecognizer release];
+  
+  UISwipeGestureRecognizer* swipeLeftRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self
+                                                                                        action:@selector(userSwipedLeftOnNavBar:)];
+  swipeLeftRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
+  [self.navigationController.navigationBar addGestureRecognizer:swipeLeftRecognizer];
+  [swipeLeftRecognizer release];
   self.window.rootViewController = self.navigationController;
   gridView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
   gridView_.alpha = 0;
@@ -111,6 +123,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)userSwipedLeftOnNavBar:(UISwipeGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+  
+  [self.navigationController popToRootViewControllerAnimated:YES];
+}
+
 - (void)handleGridTap:(UIGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
@@ -121,15 +140,18 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {
+  NSLog(@"testing");
   [[UserImageDownloadManager sharedManager] purgeCache];
   gridView_.alpha = 0;
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication*)application {
+  NSLog(@"testing");
   [[UserImageDownloadManager sharedManager] purgeCache];
 }
 
 - (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken {
+  NSLog(@"testing");
   if (!devToken || ![AccountManager sharedManager].authenticated)
     return;
 
@@ -143,6 +165,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
+  NSLog(@"testing");
   [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                       object:self
                                                     userInfo:[userInfo objectForKey:@"aps"]];
@@ -155,15 +178,19 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
+  NSLog(@"testing");
   gridView_.alpha = 0;
   [Entity.managedObjectContext save:NULL];
 }
 
-- (void)applicationWillEnterForeground:(UIApplication*)application {}
+- (void)applicationWillEnterForeground:(UIApplication*)application {
+  NSLog(@"testing");}
 
-- (void)applicationDidBecomeActive:(UIApplication*)application {}
+- (void)applicationDidBecomeActive:(UIApplication*)application {
+  NSLog(@"testing");}
 
 - (void)applicationWillTerminate:(UIApplication*)application {
+  NSLog(@"testing");
   gridView_.alpha = 0;
 }
 

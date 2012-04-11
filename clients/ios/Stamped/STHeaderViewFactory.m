@@ -78,7 +78,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
                                       mode:UILineBreakModeWordWrap
                                 andMaxSize:CGSizeMake(maxWidth, CGFLOAT_MAX)];
     
-    UIView* captionView = [Util viewWithText:entity.subtitle
+    UIView* captionView = [Util viewWithText:entity.caption ? entity.caption : entity.subtitle
                                         font:captionFont
                                        color:[UIColor stampedGrayColor]
                                         mode:UILineBreakModeWordWrap

@@ -495,11 +495,8 @@ class HTTPEntity(Schema):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
-            for i in xrange(len(sources)):
-                if sources[i].link is None:
-                    del(sources[i].link)
-            action.sources  = sources
             action.name     = name
+            action.sources  = sources
 
             item            = HTTPEntityAction()
             item.action     = action
@@ -549,10 +546,10 @@ class HTTPEntity(Schema):
                 url = image.image
                 domain = urlparse.urlparse(url).netloc
 
-                if 'amzstatic.com' in domain:
+                if 'mzstatic.com' in domain:
                     # try to return the maximum-resolution apple photo possible if we have 
                     # a lower-resolution version stored in our db
-                    url = url.replace('100x100', '400x400').replace('170x170', '400x400')
+                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
                 
                 elif 'amazon.com' in domain:
                     # strip the 'look inside' image modifier
@@ -708,7 +705,7 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
 
-            if entity.authors is not None:
+            if len(entity.authors) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata
@@ -760,13 +757,15 @@ class HTTPEntity(Schema):
 
             sources = []
 
-            if entity.sources.itunes_id is not None:
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                source.source_data  = entity.sources.itunes_preview
                 source.icon         = self._getIconURL('src_itunes', client=client)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_play_primary', client=client)
@@ -781,7 +780,8 @@ class HTTPEntity(Schema):
                 source.name         = 'Buy from Fandango'
                 source.source       = 'fandango'
                 source.source_id    = entity.sources.fandango_id
-                source.link         = entity.sources.fandango_url 
+                if entity.fandango_url is not None:
+                    source.link     = entity.sources.fandango_url 
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = self._getIconURL('src_fandango', client=client)
@@ -818,13 +818,13 @@ class HTTPEntity(Schema):
         # Music
         elif entity.category == 'music':
 
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 self.caption = 'Artist'
 
-            elif entity.subcategory == 'album' and entity.artists is not None:
+            elif entity.isType('album') and len(entity.artists) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
-            elif entity.subcategory == 'song' and entity.artists is not None:
+            elif entity.isType('track') and len(entity.artists) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
 
             # Metadata
@@ -848,13 +848,15 @@ class HTTPEntity(Schema):
 
             sources = []
 
-            if entity.sources.itunes_id is not None:
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview:
                 source              = HTTPActionSource()
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
+                source.source_data  = entity.sources.itunes_preview
                 source.icon         = self._getIconURL('src_itunes', client=client)
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             if entity.sources.rdio_id is not None:
@@ -863,7 +865,8 @@ class HTTPEntity(Schema):
                 source.source       = 'rdio'
                 source.source_id    = entity.sources.rdio_id
                 source.icon         = self._getIconURL('src_rdio', client=client)
-                source.link         = entity.rdio_url
+                if entity.rdio_url is not None:
+                    source.link     = entity.rdio_url
                 sources.append(source)
 
             if entity.sources.spotify_id is not None:
@@ -872,6 +875,8 @@ class HTTPEntity(Schema):
                 source.source       = 'spotify'
                 source.source_id    = entity.sources.spotify_id
                 source.icon         = self._getIconURL('src_spotify', client=client)
+                if entity.spotify_url is not None:
+                    source.link     = entity.spotify_url
                 sources.append(source)
 
             actionTitle = 'Listen'
@@ -919,7 +924,8 @@ class HTTPEntity(Schema):
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionTitle = 'Download %s' % entity.subcategory
@@ -936,23 +942,30 @@ class HTTPEntity(Schema):
                 else:
                     playlist.name = 'Top songs'
 
-                for i in range(len(entity.tracks))[:50]:
+                for i in range(len(entity.tracks))[:20]:
                     try:
                         song = entity.tracks[i]
                         item = HTTPEntityPlaylistItem()
                         item.name   = song.title 
-                        item.length = song.length
+                        if song.length is not None:
+                            item.length = song.length
+                        if song.entity_id is not None:
+                            item.entity_id = song.entity_id
                         # item.icon   = None ### TODO
 
                         sources = []
 
-                        if song.sources.itunes_id is not None:
+                        if song.sources.itunes_id is not None and song.sources.itunes_preview is not None:
                             source              = HTTPActionSource()
                             source.name         = 'Listen on iTunes'
                             source.source       = 'itunes'
                             source.source_id    = song.sources.itunes_id
+                            source.source_data  = song.sources.itunes_preview
                             source.icon         = self._getIconURL('src_itunes', client=client)
                             sources.append(source)
+
+                            if item.entity_id is None:
+                                item.entity_id = 'T_ITUNES_%s' % song.itunes_id
 
                         if song.sources.rdio_id is not None:
                             source              = HTTPActionSource()
@@ -962,6 +975,9 @@ class HTTPEntity(Schema):
                             source.icon         = self._getIconURL('src_rdio', client=client)
                             sources.append(source)
 
+                            if item.entity_id is None:
+                                item.entity_id = 'T_RDIO_%s' % song.rdio_id
+
                         if song.sources.spotify_id is not None:
                             source              = HTTPActionSource()
                             source.name         = 'Listen on Spotify'
@@ -969,6 +985,9 @@ class HTTPEntity(Schema):
                             source.source_id    = song.sources.spotify_id
                             source.icon         = self._getIconURL('src_spotify', client=client)
                             sources.append(source)
+
+                            if item.entity_id is None:
+                                item.entity_id = 'T_SPOTIFY_%s' % song.spotify_id
 
                         if len(sources) > 0:
                             action = HTTPAction()
@@ -980,7 +999,7 @@ class HTTPEntity(Schema):
 
                         playlist.data.append(item)
 
-                    except Exception:
+                    except Exception as e:
                         pass
 
                 if len(playlist.data) > 0:
@@ -988,7 +1007,7 @@ class HTTPEntity(Schema):
 
         elif entity.kind == 'software' and entity.isType('app'):
 
-            if entity.authors is not None:
+            if len(entity.authors) > 0:
                 self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
 
             # Metadata
@@ -1007,7 +1026,8 @@ class HTTPEntity(Schema):
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.icon         = self._getIconURL('src_itunes', client=client)
-                source.link         = _encodeiTunesShortURL(entity.itunes_url)
+                if entity.itunes_url is not None:
+                    source.link     = _encodeiTunesShortURL(entity.itunes_url)
                 sources.append(source)
 
             actionIcon = self._getIconURL('act_download_primary', client=client)
@@ -1066,6 +1086,7 @@ class HTTPActionSource(Schema):
         self.name               = SchemaElement(basestring, required=True)
         self.source             = SchemaElement(basestring, required=True)
         self.source_id          = SchemaElement(basestring)
+        self.source_data        = SchemaElement(basestring)
         self.endpoint           = SchemaElement(basestring)
         self.link               = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
@@ -1106,9 +1127,9 @@ class HTTPEntityPlaylist(Schema):
 
 class HTTPEntityPlaylistItem(Schema):
     def setSchema(self):
+        self.entity_id          = SchemaElement(basestring)
         self.name               = SchemaElement(basestring, required=True)
         self.action             = HTTPAction()
-        self.num                = SchemaElement(int)
         self.length             = SchemaElement(int)
         self.icon               = SchemaElement(basestring)
 

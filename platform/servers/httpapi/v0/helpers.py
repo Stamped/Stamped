@@ -151,6 +151,9 @@ def checkClient(request):
         logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
             raise
+
+        client = stampedAuth.getClientDetails(client_id)
+        stampedAPI.setVersion(client.api_version)
         
         return client_id
     except:
@@ -190,6 +193,10 @@ def checkOAuth(request):
         
         logs.user(authenticated_user_id)
         logs.client(client_id)
+
+        client = stampedAuth.getClientDetails(client_id)
+        stampedAPI.setVersion(client.api_version)
+
         return authenticated_user_id, client_id
     except StampedHTTPError:
         raise

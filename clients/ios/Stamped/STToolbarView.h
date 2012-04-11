@@ -12,5 +12,6 @@
 @interface STToolbarView : STViewContainer
 
 - (void)packViews:(NSArray*)views withPadding:(CGFloat)padding;
+- (void)packViews:(NSArray*)views;
 
 @end

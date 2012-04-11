@@ -264,10 +264,10 @@ class GooglePlacesSource(GenericSource):
 
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
+            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
             return self.emptySource
 
-        logs.info('Searching %s...' % self.sourceName)
+        logs.debug('Searching %s...' % self.sourceName)
         
         def gen():
             try:
@@ -337,7 +337,6 @@ class GooglePlacesSource(GenericSource):
             timestamps['googleplaces'] = controller.now
             return True
         else:
-            logs.debug(pformat(details))
             entity['googleplaces_id'] = details['reference']
         
         reformatted = self.__reformatAddress(details)

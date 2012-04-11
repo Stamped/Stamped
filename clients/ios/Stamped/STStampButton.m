@@ -49,17 +49,7 @@
   if (self.entity) {
     UINavigationController* controller = [Util sharedNavigationController];
     UIViewController* createStamp = [[[STCreateStampViewController alloc] initWithEntity:self.entity creditedTo:self.user] autorelease];
-    NSLog(@"here1");
-    @try {
-      [controller pushViewController:createStamp animated:YES];
-    }
-    @catch (NSException *exception) {
-      [Util logOperationException:exception withMessage:nil];
-    }
-    @finally {
-      
-    }
-    NSLog(@"here2");
+    [controller pushViewController:createStamp animated:YES];
   }
 }
 
