@@ -15,6 +15,7 @@
 #import "ActivityViewController.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
+#import "SettingsViewController.h"
 
 @interface STRootMenuView ()
 
@@ -45,25 +46,21 @@
 
 @end
 
-@interface STRootMenuViewCell : UIView
+@interface STARootMenuViewCell : UIView
 
-- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller;
+- (id)initWithTitle:(NSString*)title;
 
 - (void)clicked:(id)message;
 
-@property (nonatomic, readonly, retain) UIViewController* controller;
 @property (nonatomic, readonly, assign) BOOL selected;
 
 @end
 
-@implementation STRootMenuViewCell
+@implementation STARootMenuViewCell
 
-@synthesize controller = _controller;
-
-- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller {
-  self = [super initWithFrame:CGRectMake(0, 0, 320, 50)];
+- (id)initWithTitle:(NSString*)title {
+  self = [super initWithFrame:CGRectMake(0, 0, 250, 50)];
   if (self) {
-    _controller = [controller retain];
     UIView* titleView = [Util viewWithText:title 
                                       font:[UIFont stampedBoldFontWithSize:20] 
                                      color:[UIColor stampedLightGrayColor]
@@ -75,6 +72,36 @@
     [self addSubview:titleView];
     UIView* buttonView = [Util tapViewWithFrame:self.frame target:self selector:@selector(clicked:) andMessage:nil];
     [self addSubview:buttonView];
+  }
+  return self;
+}
+
+- (void)clicked:(id)message {
+}
+
+- (BOOL)selected {
+  return NO;
+}
+
+@end
+
+@interface STRootMenuViewCell : STARootMenuViewCell
+
+- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller;
+
+
+@property (nonatomic, readonly, retain) UIViewController* controller;
+
+@end
+
+@implementation STRootMenuViewCell
+
+@synthesize controller = _controller;
+
+- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller {
+  self = [super initWithTitle:title];
+  if (self) {
+    _controller = [controller retain];
   }
   return self;
 }
@@ -98,6 +125,20 @@
 - (BOOL)selected {
   UINavigationController* sharedController = [Util sharedNavigationController];
   return sharedController.topViewController == self.controller;
+}
+
+@end
+
+@interface STRootMenuViewSettingsCell : STRootMenuViewCell
+
+@end
+
+@implementation STRootMenuViewSettingsCell
+
+- (void)clicked:(id)message {
+  UINavigationController* controller = [Util sharedNavigationController];
+  [controller pushViewController:[[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease]
+                                animated:YES];
 }
 
 @end
@@ -131,16 +172,20 @@ static STRootMenuView* _sharedInstance;
                                 [[[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil] autorelease], @"News",
                                 [[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
                                 [[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
+                                [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
                                 nil];
-    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"To-Do", @"People", nil];
+    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"To-Do", @"People", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
       UIViewController* controller = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];
       [self appendChildView:[[[STRootMenuViewCell alloc] initWithTitle:key andController:controller] autorelease]];
     }
+    [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];
     CGRect frame = self.frame;
+    //TODO actual height
     frame.size.height = 500;
     self.frame = frame;
+    
   }
   return self;
 }
@@ -151,7 +196,11 @@ static STRootMenuView* _sharedInstance;
     UIView* view = [Util sharedNavigationController].view;
     CGFloat delta = 250;
     if (view.frame.origin.x > 0) {
+      view.userInteractionEnabled = YES;
       delta = -view.frame.origin.x;
+    }
+    else {
+      view.userInteractionEnabled = NO;
     }
     [Util reframeView:view withDeltas:CGRectMake(delta, 0, 0, 0)];
     //}

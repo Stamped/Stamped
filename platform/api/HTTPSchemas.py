@@ -1459,6 +1459,14 @@ class HTTPStampId(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring, required=True)
 
+
+#TODO
+        # self.limit              = SchemaElement(int)
+        # self.offset             = SchemaElement(int)
+        # self.coordinates        = SchemaElement(basestring) # "lat,lng"
+        # self.category           = SchemaElement(basestring)
+        
+
 class HTTPGenericSlice(Schema):
     def setSchema(self):
         # paging

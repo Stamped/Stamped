@@ -96,6 +96,9 @@ static int _count = 0;
       }];
     }
   }
+  if (self.contentSize.height + delta < self.frame.size.height) {
+    delta = self.frame.size.height - self.contentSize.height;
+  }
   [UIView animateWithDuration:seconds animations:^{
     CGSize size = self.contentSize;
     size.height = containerHeight;
@@ -144,6 +147,12 @@ static int _count = 0;
     if ([view respondsToSelector:@selector(reloadStampedData)]) {
       [view reloadStampedData];
     }
+  }
+}
+
+- (void)updateContentSize {
+  if (self.contentSize.height < self.frame.size.height) {
+    self.contentSize = CGSizeMake(self.contentSize.width, self.frame.size.height);
   }
 }
 

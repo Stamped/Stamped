@@ -268,7 +268,10 @@ static const CGFloat kReloadHeight = 60.0;
   [self.view addSubview:view];
   void (^block)(void)  = ^{
     [Util reframeView:view withDeltas:CGRectMake(0, -view.frame.size.height, 0, 0)];
+    CGSize size = self.scrollView.contentSize;
     [Util reframeView:self.scrollView withDeltas:CGRectMake(0, 0, 0, -view.frame.size.height)];
+    size.height -= view.frame.size.height;
+    self.scrollView.contentSize = size;
   };
   if (animated) {
     [UIView animateWithDuration:.25 animations:block];

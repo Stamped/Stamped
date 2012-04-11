@@ -176,7 +176,7 @@
   for (UIButton* b in trackButtons_)
     b.hidden = b.tag == granularity;
   
-  if ([(id)delegate_ respondsToSelector:@selector(mapScopeSlider:didChangeGranularity:)])
+  if ([(id)delegate_ respondsToSelector:@selector(scopeSlider:didChangeGranularity:)])
     [delegate_ scopeSlider:self didChangeGranularity:granularity];
   
   [self updateImage];

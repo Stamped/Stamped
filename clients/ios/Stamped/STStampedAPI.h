@@ -13,15 +13,33 @@
 #import "STUser.h"
 #import "STComment.h"
 #import "STGenericCollectionSlice.h"
+#import "STUserCollectionSlice.h"
+#import "STFriendsSlice.h"
 #import "STCommentSlice.h"
 #import "STMenu.h"
 #import "STTodo.h"
 
+
+typedef enum {
+  STStampedAPIScopeYou = 0,
+  STStampedAPIScopeFriends,
+  STStampedAPIScopeFriendsOfFriends,
+  STStampedAPIScopeEveryone
+} STStampedAPIScope;
+
 @interface STStampedAPI : NSObject
+
+- (id<STUser>)currentUser;
 
 - (void)stampForStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>))block;
 
-- (void)stampsForSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+- (void)stampsForInboxSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+
+- (void)stampsForUserSlice:(STUserCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+
+- (void)stampsForFriendsSlice:(STFriendsSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+
+- (void)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
 

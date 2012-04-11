@@ -14,15 +14,26 @@
 #import "Util.h"
 #import "STRootMenuView.h"
 #import "STMapViewController.h"
+#import "STInboxScopeSlider.h"
+#import "STToolbarView.h"
+#import "STStampsViewSource.h"
+#import "STFriendsOfFriendsSource.h"
+#import "STSuggestedSource.h"
+#import "STUserSource.h"
+#import "SearchEntitiesViewController.h"
 
-@interface STInboxViewController () <UIPickerViewDelegate, UIPickerViewDataSource>
+@interface STInboxViewController () <UIPickerViewDelegate, UIPickerViewDataSource, STScopeSliderDelegate>
 
 - (void)categoryChanged:(id)category;
+- (void)updateSource;
 
 @property (nonatomic, readonly, retain) STMultipleChoiceButton* categoryButton;
-@property (nonatomic, readonly, retain) STStampsView* stampsView;
+@property (nonatomic, readonly, retain) UITableView* stampsView;
 @property (nonatomic, readonly, retain) UITextField* queryField;
-
+@property (nonatomic, readonly, retain) NSDictionary* inboxSources;
+@property (nonatomic, readwrite, assign) STStampedAPIScope scope;
+@property (nonatomic, readwrite, copy) NSString* category;
+@property (nonatomic, readwrite, copy) NSString* query;
 
 @end
 
@@ -31,6 +42,10 @@
 @synthesize categoryButton = _categoryButton;
 @synthesize stampsView = _stampsView;
 @synthesize queryField = _queryField;
+@synthesize inboxSources = _inboxSources;
+@synthesize scope = _scope;
+@synthesize category = _category;
+@synthesize query = _query;
 
 static STInboxViewController* _sharedInstance;
 
@@ -76,13 +91,16 @@ static STInboxViewController* _sharedInstance;
   searchBar.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
   [self.scrollView appendChildView:searchBar];
   [_categoryButton setTarget:self withSelector:@selector(categoryChanged:)];
-  _stampsView = [[STStampsView alloc] initWithFrame:CGRectMake(0, 0, 320, 363)];
+  _stampsView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 323)];
   //view.backgroundColor = [UIColor redColor];
-  STGenericCollectionSlice* slice = [[STGenericCollectionSlice alloc] init];
-  slice.offset = [NSNumber numberWithInt:0];
-  slice.limit = [NSNumber numberWithInt:NSIntegerMax];
-  slice.sort = @"created";
-  _stampsView.slice = slice;
+  self.scope = STStampedAPIScopeFriends;
+  _inboxSources = [[NSDictionary dictionaryWithObjectsAndKeys:
+                   [[[STStampsViewSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriends],
+                   [[[STUserSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeYou],
+                   [[[STFriendsOfFriendsSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriendsOfFriends],
+                   [[[STSuggestedSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeEveryone],
+                   nil] retain];
+  
   self.scrollView.scrollsToTop = NO;
   [self.scrollView appendChildView:_stampsView];
   
@@ -90,10 +108,21 @@ static STInboxViewController* _sharedInstance;
                                                                             style:UIBarButtonItemStyleDone
                                                                            target:self 
                                                                            action:@selector(backButtonClicked:)] autorelease];
-  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Map"
+  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"+"
                                                                             style:UIBarButtonItemStyleDone
                                                                            target:self 
                                                                            action:@selector(rightButtonClicked:)] autorelease];
+  STInboxScopeSlider* slider = [[[STInboxScopeSlider alloc] initWithFrame:CGRectMake(25, 15, 230, 23)] autorelease];
+  slider.delegate = self;
+  STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
+  [toolbar addSubview:slider];
+  UIButton* mapButton = [[[UIButton alloc] initWithFrame:CGRectMake(275, 10, 34, 30)] autorelease];
+  //mapButton.titleLabel.text = @"Map";
+  [mapButton setImage:[UIImage imageNamed:@"nav_map_button"] forState:UIControlStateNormal];
+  [mapButton addTarget:self action:@selector(mapButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+  [toolbar addSubview:mapButton];
+  [self setToolbar:toolbar withAnimation:NO];
+  [self updateSource];
 }
 
 - (void)backButtonClicked:(id)button {
@@ -102,6 +131,12 @@ static STInboxViewController* _sharedInstance;
 
 
 - (void)rightButtonClicked:(id)button {
+  UINavigationController* controller = [Util sharedNavigationController];
+  [controller pushViewController:[[[SearchEntitiesViewController alloc] initWithNibName:@"SearchEntitiesViewController" bundle:nil] autorelease]
+                        animated:YES];
+}
+
+- (void)mapButtonClicked:(id)button {
   UINavigationController* controller = [Util sharedNavigationController];
   [controller pushViewController:[[[STMapViewController alloc] init] autorelease] animated:YES];
 }
@@ -142,33 +177,58 @@ static STInboxViewController* _sharedInstance;
 - (void)categoryChanged:(id)category {
   category = [category lowercaseString];
   category = [category isEqualToString:@"none"] ? nil : category;
-  STGenericCollectionSlice* slice = self.stampsView.slice;
-  if (slice.category != category && ![slice.category isEqualToString:category]) {
-    slice.category = category;
-    self.stampsView.slice = slice;
-  }
-  //UINavigationController* controller = [Util sharedNavigationController];
-  //self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"test" style:UIBarButtonItemStylePlain target:self action:@selector(backButtonClicked:)] autorelease];
-  
+  self.category = category;
+  [self updateSource];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
   [super textFieldDidEndEditing:textField];
-  NSString* query = textField.text;
-  STGenericCollectionSlice* slice = self.stampsView.slice;
-  if ([query isEqualToString:@""]) {
+  self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+  [self updateSource];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+  [Util executeOnMainThread:^{
+    self.query = textField.text;
+  }];
+  return YES;
+}
+
+- (void)scopeSlider:(STInboxScopeSlider*)slider didChangeGranularity:(STScopeSliderGranularity)granularity {
+  //TODO switch to new enum
+  self.scope = granularity;
+  [self updateSource];
+}
+
+- (void)reloadStampedData {
+  [self updateSource];
+}
+
+- (void)updateSource {
+  @try {
+    STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
+    [slice retain];
+    slice.offset = [NSNumber numberWithInt:0];
+    slice.limit = [NSNumber numberWithInt:NSIntegerMax];
+    slice.category = self.category;
+    slice.sort = @"created";
+    slice.query = self.query;
     if (slice.query) {
-      slice.query = nil;
-      slice.sort = @"created";
-      self.stampsView.slice = slice;
-    }
-  }
-  else {
-    if (![slice.query isEqualToString:query]) {
-      slice.query = query;
       slice.sort = @"relevance";
-      self.stampsView.slice = slice;
     }
+    for (STStampsViewSource* old in [self.inboxSources allValues]) {
+      old.table = nil;
+    }
+    STStampsViewSource* source = [self.inboxSources objectForKey:[NSNumber numberWithInt:self.scope]];
+    source.table = self.stampsView;
+    source.slice = slice;
+    
+  }
+  @catch (NSException *exception) {
+    [Util logOperationException:exception withMessage:nil];
+  }
+  @finally {
+    
   }
 }
 

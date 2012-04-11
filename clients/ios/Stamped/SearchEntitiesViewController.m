@@ -182,7 +182,7 @@ typedef enum {
 - (void)viewWillAppear:(BOOL)animated {
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow animated:animated];
 
-  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  //[self.navigationController setNavigationBarHidden:YES animated:animated];
 
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && client.isNetworkReachable) {

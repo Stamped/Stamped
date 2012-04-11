@@ -8,11 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "STGenericCollectionSlice.h"
+#import "STStampedAPI.h"
 
 @interface STStampsView : UITableView
 
 - (id)initWithFrame:(CGRect)frame;
 
-@property (nonatomic, readwrite, copy) STGenericCollectionSlice* slice;
+@property (nonatomic, readwrite, copy) STGenericSlice* slice;
 
 @end

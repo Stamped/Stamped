@@ -1,12 +1,12 @@
 //
-//  STStampsView.m
+//  STStampsViewSource.m
 //  Stamped
 //
-//  Created by Landon Judkins on 4/5/12.
+//  Created by Landon Judkins on 4/11/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STStampsView.h"
+#import "STStampsViewSource.h"
 #import "STStampCell.h"
 #import "STStampedAPI.h"
 #import "Util.h"
@@ -15,7 +15,7 @@
 
 static const NSInteger _batchSize = 20;
 
-@interface STStampsView () <UITableViewDataSource, UITableViewDelegate>
+@interface STStampsViewSource ()
 
 @property (nonatomic, readwrite, retain) NSMutableArray<STStamp>* stamps;
 @property (nonatomic, readwrite, assign) NSInteger offset;
@@ -29,7 +29,7 @@ static const NSInteger _batchSize = 20;
 
 @end
 
-@implementation STStampsView
+@implementation STStampsViewSource
 
 @synthesize slice = _slice;
 @synthesize stamps = _stamps;
@@ -38,14 +38,12 @@ static const NSInteger _batchSize = 20;
 @synthesize noMoreStamps = _noMoreStamps;
 @synthesize waiting = _waiting;
 @synthesize generation = _generation;
+@synthesize table = _table;
 
-- (id)initWithFrame:(CGRect)frame
+- (id)init
 {
-  self = [super initWithFrame:frame];
+  self = [super init];
   if (self) {
-    self.delegate = self;
-    self.dataSource = self;
-    self.rowHeight = 96;
   }
   return self;
 }
@@ -57,7 +55,7 @@ static const NSInteger _batchSize = 20;
   [super dealloc];
 }
 
-- (void)setSlice:(STGenericSlice *)slice {
+- (void)setSlice:(STGenericCollectionSlice *)slice {
   [_slice autorelease];
   _slice = [slice retain];
   if (slice.limit == nil) {
@@ -66,14 +64,14 @@ static const NSInteger _batchSize = 20;
   if (slice.offset == nil) {
     slice.offset = [NSNumber numberWithInteger:0];
   }
-  self.stamps = [NSMutableArray array];
+  self.stamps = [[NSMutableArray array] retain];
   self.offset = slice.offset.integerValue;
   self.maxRow = 0;
   self.noMoreStamps = NO;
   self.waiting = NO;
   self.generation += 1;
   [self populateStamps];
-  [self reloadData];
+  [self.table reloadData];
 }
 
 - (void)populateStamps {
@@ -89,20 +87,24 @@ static const NSInteger _batchSize = 20;
         [self.stamps addObjectsFromArray:stamps];
         self.waiting = NO;
         if ([stamps count] > 0) {
-          [self reloadData];
+          [self.table reloadData];
           [self populateStamps];
         }
         else {
           self.noMoreStamps = YES;
-          [self reloadData];
+          [self.table reloadData];
         }
       }
       else {
         NSLog(@"ignoring old request");
       }
     };
-    [[STStampedAPI sharedInstance] stampsForInboxSlice:curSlice andCallback:callback];
+    [self makeStampedAPICallWithSlice:curSlice andCallback:callback];
   }
+}
+
+- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block {
+  [[STStampedAPI sharedInstance] stampsForInboxSlice:slice andCallback:block];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -142,23 +144,7 @@ static const NSInteger _batchSize = 20;
 
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  
   id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
-  /*
-   if (entity.stamps.count > 0) {
-   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-   NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-   User* currentUser = [AccountManager sharedManager].currentUser;
-   NSSet* following = currentUser.following;
-   if (!following)
-   following = [NSSet set];
-   
-   sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(user IN %@ OR user.userID == %@) AND deleted == NO", following, currentUser.userID]];
-   stamp = [sortedStamps lastObject];
-   } else {
-   stamp = [entity.stamps anyObject];
-   }
-   */
   STActionContext* context = [STActionContext context];
   context.stamp = stamp;
   id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
@@ -167,7 +153,7 @@ static const NSInteger _batchSize = 20;
 
 - (void)reloadStampedData {
   self.slice = self.slice;
-  [self reloadData];
+  [self.table reloadData];
 }
 
 - (BOOL)shouldLoadMore {
@@ -178,6 +164,19 @@ static const NSInteger _batchSize = 20;
     }
   }
   return NO;
+}
+
+- (void)setTable:(UITableView *)table {
+  _table.delegate = nil;
+  _table.dataSource = nil;
+  [_table autorelease];
+  _table = [table retain];
+  if (_table) {
+    _table.delegate = self;
+    _table.dataSource = self;
+    _table.rowHeight = 96;
+    [_table reloadData];
+  }
 }
 
 @end

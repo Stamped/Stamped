@@ -30,6 +30,24 @@
   [super dealloc];
 }
 
+- (void)importDictionaryParams:(NSDictionary*)params {
+  NSArray* keys = [NSArray arrayWithObjects:
+                   @"limit",
+                   @"offset",
+                   @"sort",
+                   @"reverse",
+                   @"coordinates",
+                   @"since",
+                   @"before",
+                   nil];
+  for (NSString* key in keys) {
+    id value = [params objectForKey:key];
+    if (value) {
+      [self setValue:value forKey:key];
+    }
+  }
+}
+
 - (NSMutableDictionary*)asDictionaryParams {
   NSMutableDictionary* dict = [NSMutableDictionary dictionary];
   NSArray* keys = [NSArray arrayWithObjects:

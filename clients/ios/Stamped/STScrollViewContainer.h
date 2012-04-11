@@ -14,6 +14,7 @@
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
 - (void)appendChildView:(UIView*)child;
 - (void)reloadStampedData;
+- (void)updateContentSize;
 
 @property (nonatomic, readwrite, assign) id<UIScrollViewDelegate> scrollDelegate;
 

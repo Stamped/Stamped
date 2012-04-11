@@ -14,6 +14,7 @@
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
 #import "TOSViewController.h"
+#import "STRootMenuView.h"
 
 @implementation SettingsViewController
 
@@ -53,6 +54,10 @@
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
+  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:[STRootMenuView sharedInstance]
+                                                                           action:@selector(toggle)] autorelease];
 }
 
 - (void)viewDidUnload {
@@ -70,7 +75,8 @@
 #pragma mark - Custom methods.
 
 - (IBAction)doneButtonPressed:(id)sender {
-  [self.parentViewController dismissModalViewControllerAnimated:YES];
+  [[STRootMenuView sharedInstance] toggle];
+  //[self.presentingViewController dismissModalViewControllerAnimated:YES];
 }
 
 
@@ -111,6 +117,7 @@
 }
 
 - (IBAction)logoutButtonPressed:(id)sender {
+  NSLog(@"asdklfjafdjkl");
   UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure?"
                                                       delegate:self
                                              cancelButtonTitle:@"Cancel"

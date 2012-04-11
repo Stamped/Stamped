@@ -50,6 +50,26 @@
   return dict;
 }
 
+- (void)importDictionaryParams:(NSDictionary*)params {
+  [super importDictionaryParams:params];
+  NSArray* keys = [NSArray arrayWithObjects:
+                   @"query",
+                   @"category",
+                   @"subcategory",
+                   @"viewport",
+                   @"quality",
+                   @"deleted",
+                   @"comments",
+                   @"unique",
+                   nil];
+  for (NSString* key in keys) {
+    id value = [params objectForKey:key];
+    if (value) {
+      [self setValue:value forKey:key];
+    }
+  }
+}
+
 - (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset {
   STGenericCollectionSlice* copy = [super resizedSliceWithLimit:limit andOffset:offset];
   copy.query = self.query;

@@ -26,6 +26,13 @@
   return dict;
 }
 
+- (void)importDictionaryParams:(NSDictionary*)params {
+  [super importDictionaryParams:params];
+  if ([params objectForKey:@"stamp_id"]) {
+    self.stampID = [params objectForKey:@"stamp_id"];
+  }
+}
+
 + (STCommentSlice*)sliceForStampID:(NSString*)stampID offset:(NSInteger)offset limit:(NSInteger)limit {
   //TODO
   return nil;

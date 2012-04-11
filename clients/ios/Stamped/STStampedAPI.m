@@ -15,6 +15,8 @@
 #import "STSimpleStamp.h"
 #import "STSimpleTodo.h"
 #import "STSimpleComment.h"
+#import "STSimpleUser.h"
+#import "AccountManager.h"
 
 @interface STStampedAPI () <STCacheModelSourceDelegate>
 
@@ -22,6 +24,9 @@
 @property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
+- (void)stampsForSlice:(STGenericSlice*)slice 
+              withPath:(NSString*)path 
+           andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error))block;
 
 @end
 
@@ -50,13 +55,19 @@ static STStampedAPI* _sharedInstance;
   return self;
 }
 
+- (id<STUser>)currentUser {
+  return [STSimpleUser userFromLegacyUser:[AccountManager sharedManager].currentUser];
+}
+
 - (void)stampForStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>))block {
   NSAssert(stampID != nil,@"stampID must not be nil");
   [self.stampCache fetchWithKey:stampID callback:block];
 }
 
-- (void)stampsForSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block {
-  NSString* path = @"/collections/inbox.json";
+
+- (void)stampsForSlice:(STGenericSlice*)slice 
+              withPath:(NSString*)path 
+           andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error))block {
   NSDictionary* params = [slice asDictionaryParams];
   void(^outerBlock)(NSArray*,NSError*) = ^(NSArray* stamps, NSError* error) {
     NSMutableArray<STStamp>* array = [NSMutableArray array]; 
@@ -82,6 +93,23 @@ static STStampedAPI* _sharedInstance;
                                           params:params 
                                          mapping:[STSimpleStamp mapping] 
                                      andCallback:outerBlock];
+  
+}
+
+- (void)stampsForInboxSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block {
+  [self stampsForSlice:slice withPath:@"/collections/inbox.json" andCallback:block];
+}
+
+- (void)stampsForUserSlice:(STUserCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block {
+  [self stampsForSlice:slice withPath:@"/collections/user.json" andCallback:block];
+}
+
+- (void)stampsForFriendsSlice:(STFriendsSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block {
+  [self stampsForSlice:slice withPath:@"/collections/friends.json" andCallback:block];
+}
+
+- (void)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block {
+  [self stampsForSlice:slice withPath:@"/collections/suggested.json" andCallback:block];
 }
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block {
