@@ -71,7 +71,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             copy = buildEntity(entity.value)
                             timestamps = {}
                             localDecorations = {}
-                            logs.debug("Enriching with %s for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                            logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
                             try:
                                 enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
                                 if enriched:
@@ -94,13 +94,13 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                         logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception:
-                                logs.warning("Source %s threw an exception when enriching %s" % (source, pformat(entity) ) , exc_info=1 )
+                                logs.warning("Source '%s' threw an exception when enriching '%s'" % (source, pformat(entity) ) , exc_info=1 )
                                 failedSources.add(source)
                                 self.__failedValues[source] += self.failedIncrement
                                 if self.__failedValues[source] < self.failedCutoff:
-                                    logs.warning("%s is still below failed cutoff; it won't be used for this enrichment" % (source,))
+                                    logs.warning("'%s' is still below failed cutoff; it won't be used for this enrichment" % (source,))
                                 else:
-                                    logs.warning("%s is beyond the failed cutoff; placing on cooldown list" % (source,))
+                                    logs.warning("'%s' is beyond the failed cutoff; placing on cooldown list" % (source,))
                                 self.__failedValues[source] += self.failedPunishment
             if not modified:
                 break
@@ -120,8 +120,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 if currentSource is None:
                     return True
                 else:
-                    priority = self.getPriority(source)
-                    currentPriority = self.getPriority(currentSource)
+                    priority = self.getGroupPriority(group, source)
+                    currentPriority = self.getGroupPriority(group, currentSource)
                     if priority > currentPriority:
                         return True
                     elif priority < currentPriority:
@@ -166,17 +166,17 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         else:
             return 0
 
-    def setGroupPriority(self, source, value):
-        self.__group_priorities[source] = value
-    
-    def getGroupPriority(self, source):
+    def setGroupPriority(self, group, source, value):
         if source in self.__group_priorities:
-            return self.__group_priorities[source]
+            self.__group_priorities[source][group] = value 
         else:
-            return self.getGlobalPriority(source)
+            self.__group_priorities[source] = { group : value }
     
-    def getPriority(self, source):
-        return self.getGroupPriority(source)
+    def getGroupPriority(self, group, source):
+        try:
+            return self.__group_priorities[source][group]
+        except Exception:
+            return self.getGlobalPriority(source)
 
     def addSource(self, source):
         self.__sources.append(source)
