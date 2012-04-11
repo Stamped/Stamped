@@ -26,6 +26,7 @@
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
 #import "Util.h"
+#import "STRootMenuView.h"
 
 static NSString* const kFriendIDsPath = @"/friendships/friends.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
@@ -136,6 +137,10 @@ typedef enum PeopleSearchCorpus {
   [emptyPaneView_ addSubview:button];
   [self.view insertSubview:emptyPaneView_ belowSubview:self.tableView];
   [emptyPaneView_ release];
+  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:[STRootMenuView sharedInstance]
+                                                                           action:@selector(toggle)] autorelease];
 }
 
 - (void)viewDidUnload {

@@ -12,6 +12,9 @@
 
 @interface STActionMenuFactory : NSObject
 
-- (NSOperation*)createViewWithAction:(id<STAction>)action andSource:(NSArray*)sources forBlock:(void (^)(STViewCreator))callback;
+- (NSOperation*)createViewWithAction:(id<STAction>)action 
+                             sources:(NSArray*)sources 
+                          andContext:(STActionContext*)context 
+                            forBlock:(void (^)(STViewCreator))callback;
 
 @end

@@ -37,8 +37,9 @@
 #import "STRdio.h"
 #import "STScrollViewContainer.h"
 #import "STToolbarView.h"
-#import "STStampButton.h"
+#import "STLikeButton.h"
 #import "STTodoButton.h"
+#import "STStampButton.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -99,6 +100,8 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.scrollView.scrollsToTop = YES;
+  STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
+  [self setToolbar:toolbar withAnimation:YES];
   
 }
 
@@ -126,6 +129,13 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
                                                                   andStyle:@"EntityDetail" 
                                                                   delegate:self.scrollView];
     [self.scrollView appendChildView:self.synchronousWrapper];
+    NSMutableArray* views = [NSMutableArray arrayWithObjects:
+                             [[[STStampButton alloc] initWithEntity:anEntityDetail] autorelease],
+                             nil];
+    STToolbarView* toolbar = (STToolbarView*) self.toolbar;
+    [toolbar packViews:views];
+    //[toolbar addSubview:[views objectAtIndex:0]];
+    [toolbar setNeedsLayout];
   }
 }
 

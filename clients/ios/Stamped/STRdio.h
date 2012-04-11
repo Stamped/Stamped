@@ -15,6 +15,7 @@
 
 - (void)ensureLoginWithCompletionBlock:(void(^)(void))block;
 - (void)startPlayback:(NSString*)rdioID;
+- (void)stopPlayback;
 
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 @property (nonatomic, readonly, copy) NSString* accessToken;

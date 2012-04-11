@@ -9,15 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 #import "STPlaylistItem.h"
+#import "STAction.h"
 
 @interface STSimplePlaylistItem : NSObject<STPlaylistItem>
 
 @property (nonatomic, readwrite, retain) NSString* name;
-@property (nonatomic, readwrite, assign) NSInteger num;
 @property (nonatomic, readwrite, assign) NSInteger length;
 @property (nonatomic, readwrite, retain) NSString* icon;
-@property (nonatomic, readwrite, retain) NSString* link;
-@property (nonatomic, readwrite, retain) NSArray<STSource>* sources;
+@property (nonatomic, readwrite, retain) NSString* entityID;
+@property (nonatomic, readwrite, retain) id<STAction> action;
 
 + (RKObjectMapping*)mapping;
 

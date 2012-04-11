@@ -75,7 +75,7 @@
   _commentsView.addCommentView.delegate = self;
   [self.scrollView appendChildView:_commentsView];
   
-  STToolbarView* toolbar = [[STToolbarView alloc] initWithFrame:CGRectMake(0, 0, 320, 70)];
+  STToolbarView* toolbar = [[STToolbarView alloc] init];
   NSMutableArray* views = [NSMutableArray arrayWithObjects:
                            [[[STLikeButton alloc] initWithStamp:self.stamp] autorelease],
                            [[[STTodoButton alloc] initWithStamp:self.stamp] autorelease],
@@ -90,7 +90,7 @@
                                                                    action:@selector(_deleteStampButtonPressed:)];
     self.navigationItem.rightBarButtonItem = rightButton;
   }
-  [toolbar packViews:views withPadding:10];
+  [toolbar packViews:views];
   [self setToolbar:toolbar withAnimation:YES];
   
   [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {

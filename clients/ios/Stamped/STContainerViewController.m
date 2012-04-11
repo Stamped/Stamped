@@ -304,7 +304,12 @@ static const CGFloat kReloadHeight = 60.0;
   CGRect relativeFrame = [Util relativeFrameForView:textField inAncestorView:self.scrollView];
   CGFloat contentY = self.scrollView.contentOffset.y;
   if (relativeFrame.size.height < scrollFrame.size.height) {
-    contentY = CGRectGetMaxY(relativeFrame) - scrollFrame.size.height;
+    if (CGRectGetMaxY(relativeFrame) > contentY + self.scrollView.frame.size.height) {
+      contentY = CGRectGetMaxY(relativeFrame) - scrollFrame.size.height;
+    }
+    else if (relativeFrame.origin.y < contentY) {
+      contentY = relativeFrame.origin.y;
+    }
   }
   else {
     contentY = relativeFrame.origin.y;
@@ -337,6 +342,14 @@ static const CGFloat kReloadHeight = 60.0;
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
   return YES;
+}
+
+- (UIView*)toolbar {
+  return self.toolbarView;
+}
+
+- (void)setToolbar:(UIView *)toolbar {
+  [self setToolbar:toolbar withAnimation:NO];
 }
 
 

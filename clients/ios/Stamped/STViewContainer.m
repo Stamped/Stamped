@@ -53,34 +53,43 @@ static int _count = 0;
   [super dealloc];
 }
 
-- (void)appendChildView:(UIView*)child {
-  if (self.superview) {
-    /*
-     TODO animation
-     
+- (void)appendChildView:(UIView*)child withAnimation:(BOOL)animation {
+  if (self.superview && animation) {
+    //TODO improve or remove
     CGRect childFrame = child.frame;
     CGFloat childHeight = childFrame.size.height;
-    BOOL childClipsToBounds = child.clipsToBounds;
-    frame.origin.y += self.frame.size.height;
+    childFrame.origin.y += self.frame.size.height;
     childFrame.size.height = 0;
+    child.frame = childFrame;
+    BOOL childClipsToBounds = child.clipsToBounds;
+    CGFloat childAlpha = child.alpha;
     child.clipsToBounds = YES;
+    child.alpha = 0;
+    [self.children addObject:child];
+    [self addSubview:child];
+    //Child has been set to clip, has alpha 0, has height 0, and has been configured as a child
+    [self childView:child shouldChangeHeightBy:childHeight overDuration:.25];
+    [UIView animateWithDuration:.25 animations:^{
+      child.alpha = childAlpha;
+    } completion:^(BOOL finished) {
+      child.clipsToBounds = childClipsToBounds;
+    }];
+    return;
+  }
+  else {
+    CGRect frame = child.frame;
+    frame.origin.y += self.frame.size.height;
     child.frame = frame;
     frame = self.frame;
     frame.size.height = CGRectGetMaxY(child.frame);
     self.frame = frame;
     [self.children addObject:child];
     [self addSubview:child];
-    return;
-     */
   }
-  CGRect frame = child.frame;
-  frame.origin.y += self.frame.size.height;
-  child.frame = frame;
-  frame = self.frame;
-  frame.size.height = CGRectGetMaxY(child.frame);
-  self.frame = frame;
-  [self.children addObject:child];
-  [self addSubview:child];
+}
+
+- (void)appendChildView:(UIView*)child {
+  [self appendChildView:child withAnimation:NO];
 }
 
 - (void)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context {

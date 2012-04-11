@@ -10,6 +10,9 @@
 #import <Rdio/Rdio.h>
 #import "Util.h"
 #import "STConfirmationView.h"
+#import "STPlaylistPopUp.h"
+#import "STSimpleAction.h"
+#import "STRdioPlaylistPopUp.h"
 
 @interface STRdioPlaylistHelper : NSObject <RDAPIRequestDelegate>
 
@@ -96,6 +99,15 @@ static STRdio* _sharedInstance;
   }
 }
 
+- (void)stopPlayback {
+  if (self.loggedIn) {
+    [self.rdio.player stop];
+  }
+  else {
+    NSLog(@"tried to stop Rdio without being signed in");
+  }
+}
+
 - (void)addToPlaylist:(NSString*)rdioID {
   if (self.loggedIn) {
     [STRdioPlaylistHelper dispatchWithID:rdioID];
@@ -124,7 +136,11 @@ static STRdio* _sharedInstance;
     if ([action isEqualToString:@"listen"] && source.sourceID != nil) {
       handled = TRUE;
       if (flag) {
-        [self startPlayback:source.sourceID];
+        NSLog(@"playing song:%@",context.entityDetail);
+        [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
+                     dismissible:NO 
+                  withBackground:[UIColor colorWithWhite:0 alpha:.3]];
+        //[self startPlayback:source.sourceID];
       }
     }
     else if ([action isEqualToString:@"playlist"] && source.sourceID != nil) {

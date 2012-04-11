@@ -14,5 +14,6 @@
 + (UIColor*)stampedDarkGrayColor;
 + (UIColor*)stampedGrayColor;
 + (UIColor*)stampedLightGrayColor;
++ (UIColor*)stampedLinkColor;
 
 @end

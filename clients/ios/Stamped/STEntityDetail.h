@@ -16,6 +16,8 @@
 
 @protocol STEntityDetail <STEntity>
 
+@property (nonatomic, readonly, retain) NSString* caption;
+
 @property (nonatomic, readonly, retain) NSString* address;
 @property (nonatomic, readonly, retain) NSString* addressStreet;
 @property (nonatomic, readonly, retain) NSString* addressCity;

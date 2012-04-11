@@ -28,6 +28,7 @@
 #import "StampedAppDelegate.h"
 #import "WebViewController.h"
 #import "Util.h"
+#import "STRootMenuView.h"
 
 static NSString* const kActivityLookupPath = @"/activity/show.json";
 
@@ -79,6 +80,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [self loadEventsFromDataStore];
   [self.tableView reloadData];
   [self loadEventsFromNetwork];
+  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:[STRootMenuView sharedInstance]
+                                                                           action:@selector(toggle)] autorelease];
 }
 
 - (void)viewDidUnload {

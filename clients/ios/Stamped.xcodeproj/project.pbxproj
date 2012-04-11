@@ -167,6 +167,12 @@
 		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
 		63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
+		63B30DD5153361ED0065DB53 /* STRootMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B30DD4153361ED0065DB53 /* STRootMenuView.m */; };
+		63B30DD6153361ED0065DB53 /* STRootMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B30DD4153361ED0065DB53 /* STRootMenuView.m */; };
+		63B30DD815339ABD0065DB53 /* act_play_primary@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63B30DD715339ABD0065DB53 /* act_play_primary@2x.png */; };
+		63B30DD915339ABD0065DB53 /* act_play_primary@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63B30DD715339ABD0065DB53 /* act_play_primary@2x.png */; };
+		63B30DDB15339B950065DB53 /* act_play_primary.png in Resources */ = {isa = PBXBuildFile; fileRef = 63B30DDA15339B950065DB53 /* act_play_primary.png */; };
+		63B30DDC15339B950065DB53 /* act_play_primary.png in Resources */ = {isa = PBXBuildFile; fileRef = 63B30DDA15339B950065DB53 /* act_play_primary.png */; };
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
@@ -183,6 +189,24 @@
 		63CC4448152DFF940026BB25 /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4446152DFF940026BB25 /* STCreateStampViewController.m */; };
 		63DC7B56152E1867001BA610 /* STStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DC7B55152E1867001BA610 /* STStampButton.m */; };
 		63DC7B57152E1867001BA610 /* STStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DC7B55152E1867001BA610 /* STStampButton.m */; };
+		63DE12D31533223F00074FCD /* STMultipleChoiceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */; };
+		63DE12D41533223F00074FCD /* STMultipleChoiceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */; };
+		63E252FB15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
+		63E252FC15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
+		63E252FF153478DE007AD006 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
+		63E25300153478DE007AD006 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
+		63E253031534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */; };
+		63E253041534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */; };
+		63E2532D1534CD5A007AD006 /* STAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2532C1534CD5A007AD006 /* STAppDelegate.m */; };
+		63E2532E1534CD5A007AD006 /* STAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2532C1534CD5A007AD006 /* STAppDelegate.m */; };
+		63E253311534CFF0007AD006 /* STRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253301534CFEF007AD006 /* STRootViewController.m */; };
+		63E253321534CFF0007AD006 /* STRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253301534CFEF007AD006 /* STRootViewController.m */; };
+		63E253351534E98B007AD006 /* navigator_bar_plus_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 63E253341534E98B007AD006 /* navigator_bar_plus_button.png */; };
+		63E253361534E98B007AD006 /* navigator_bar_plus_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 63E253341534E98B007AD006 /* navigator_bar_plus_button.png */; };
+		63E253391535C67F007AD006 /* STConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253381535C67D007AD006 /* STConfiguration.m */; };
+		63E2533A1535C67F007AD006 /* STConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253381535C67D007AD006 /* STConfiguration.m */; };
+		63E2533D1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */; };
+		63E2533E1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */; };
 		63E5E6AB152E2B8900579369 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
 		63E5E6AC152E2B8900579369 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
 		63E5E6B4152E3D3E00579369 /* STInboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */; };
@@ -1984,6 +2008,10 @@
 		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
 		63A649881532668E001D9314 /* STPlaylistViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistViewFactory.h; sourceTree = "<group>"; };
 		63A649891532668E001D9314 /* STPlaylistViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistViewFactory.m; sourceTree = "<group>"; };
+		63B30DD3153361ED0065DB53 /* STRootMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootMenuView.h; sourceTree = "<group>"; };
+		63B30DD4153361ED0065DB53 /* STRootMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRootMenuView.m; sourceTree = "<group>"; };
+		63B30DD715339ABD0065DB53 /* act_play_primary@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "act_play_primary@2x.png"; sourceTree = "<group>"; };
+		63B30DDA15339B950065DB53 /* act_play_primary.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = act_play_primary.png; sourceTree = "<group>"; };
 		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
@@ -1999,6 +2027,23 @@
 		63CC4446152DFF940026BB25 /* STCreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreateStampViewController.m; sourceTree = "<group>"; };
 		63DC7B54152E1867001BA610 /* STStampButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampButton.h; sourceTree = "<group>"; };
 		63DC7B55152E1867001BA610 /* STStampButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampButton.m; sourceTree = "<group>"; };
+		63DE12D11533223F00074FCD /* STMultipleChoiceButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMultipleChoiceButton.h; sourceTree = "<group>"; };
+		63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMultipleChoiceButton.m; sourceTree = "<group>"; };
+		63E252F915347856007AD006 /* STPlaylistPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistPopUp.h; sourceTree = "<group>"; };
+		63E252FA15347856007AD006 /* STPlaylistPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistPopUp.m; sourceTree = "<group>"; };
+		63E252FD153478DE007AD006 /* STTablePopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTablePopUp.h; sourceTree = "<group>"; };
+		63E252FE153478DE007AD006 /* STTablePopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTablePopUp.m; sourceTree = "<group>"; };
+		63E253011534B8D2007AD006 /* STRdioPlaylistPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdioPlaylistPopUp.h; sourceTree = "<group>"; };
+		63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdioPlaylistPopUp.m; sourceTree = "<group>"; };
+		63E2532B1534CD59007AD006 /* STAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAppDelegate.h; sourceTree = "<group>"; };
+		63E2532C1534CD5A007AD006 /* STAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAppDelegate.m; sourceTree = "<group>"; };
+		63E2532F1534CFEF007AD006 /* STRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootViewController.h; sourceTree = "<group>"; };
+		63E253301534CFEF007AD006 /* STRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRootViewController.m; sourceTree = "<group>"; };
+		63E253341534E98B007AD006 /* navigator_bar_plus_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = navigator_bar_plus_button.png; sourceTree = "<group>"; };
+		63E253371535C67B007AD006 /* STConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfiguration.h; sourceTree = "<group>"; };
+		63E253381535C67D007AD006 /* STConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConfiguration.m; sourceTree = "<group>"; };
+		63E2533B1535CAE9007AD006 /* STInboxScopeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInboxScopeSlider.h; sourceTree = "<group>"; };
+		63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInboxScopeSlider.m; sourceTree = "<group>"; };
 		63E5E6A8152E2B1F00579369 /* STImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImage.h; sourceTree = "<group>"; };
 		63E5E6A9152E2B8900579369 /* STSimpleImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleImage.h; sourceTree = "<group>"; };
 		63E5E6AA152E2B8900579369 /* STSimpleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleImage.m; sourceTree = "<group>"; };
@@ -3134,6 +3179,8 @@
 				6323F11A152635FE00BE408C /* STScrollViewContainer.m */,
 				6386EF1D1511376F0019F1DC /* STViewContainer.h */,
 				6386EF1E151137710019F1DC /* STViewContainer.m */,
+				63DE12D11533223F00074FCD /* STMultipleChoiceButton.h */,
+				63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */,
 			);
 			name = "Base Classes";
 			sourceTree = "<group>";
@@ -3247,6 +3294,14 @@
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
 				6380A76015066EAD003087EF /* STPageControl.h */,
 				6380A76115066EAD003087EF /* STPageControl.m */,
+				63B30DD3153361ED0065DB53 /* STRootMenuView.h */,
+				63B30DD4153361ED0065DB53 /* STRootMenuView.m */,
+				63E2532B1534CD59007AD006 /* STAppDelegate.h */,
+				63E2532C1534CD5A007AD006 /* STAppDelegate.m */,
+				63E2532F1534CFEF007AD006 /* STRootViewController.h */,
+				63E253301534CFEF007AD006 /* STRootViewController.m */,
+				63E253371535C67B007AD006 /* STConfiguration.h */,
+				63E253381535C67D007AD006 /* STConfiguration.m */,
 			);
 			name = Globals;
 			sourceTree = "<group>";
@@ -3389,6 +3444,14 @@
 			name = Legacy;
 			sourceTree = "<group>";
 		};
+		63E253331534E97B007AD006 /* Version 2 */ = {
+			isa = PBXGroup;
+			children = (
+				63E253341534E98B007AD006 /* navigator_bar_plus_button.png */,
+			);
+			name = "Version 2";
+			sourceTree = "<group>";
+		};
 		63E5E6AD152E3C8400579369 /* Legacy */ = {
 			isa = PBXGroup;
 			children = (
@@ -3420,6 +3483,12 @@
 				63E5E6BF152E48A300579369 /* STStampsView.m */,
 				63E5E6C2152E496100579369 /* STStampCell.h */,
 				63E5E6C3152E496100579369 /* STStampCell.m */,
+				63E252F915347856007AD006 /* STPlaylistPopUp.h */,
+				63E252FA15347856007AD006 /* STPlaylistPopUp.m */,
+				63E252FD153478DE007AD006 /* STTablePopUp.h */,
+				63E252FE153478DE007AD006 /* STTablePopUp.m */,
+				63E253011534B8D2007AD006 /* STRdioPlaylistPopUp.h */,
+				63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */,
 			);
 			name = "View Components";
 			sourceTree = "<group>";
@@ -4020,6 +4089,8 @@
 		7E7612B413C95BBD0023CCC4 /* Entity Details */ = {
 			isa = PBXGroup;
 			children = (
+				63B30DDA15339B950065DB53 /* act_play_primary.png */,
+				63B30DD715339ABD0065DB53 /* act_play_primary@2x.png */,
 				CBCED273146A811D00D188CE /* eDetail_notConnected.png */,
 				CBCED274146A811D00D188CE /* eDetail_notConnected@2x.png */,
 				CBC85D1C14679D3D008FAE7B /* book_gradient.png */,
@@ -4379,6 +4450,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				63E253331534E97B007AD006 /* Version 2 */,
 				63F27E6F151CF23700DA7001 /* New Entity Detail */,
 				7E007BF614EEB68400FB557E /* Default.png */,
 				7E007BF414EEB67000FB557E /* Default@2x.png */,
@@ -4731,6 +4803,8 @@
 				63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */,
 				63E5E6BA152E432200579369 /* STInboxViewController.h */,
 				63E5E6BB152E432200579369 /* STInboxViewController.m */,
+				63E2533B1535CAE9007AD006 /* STInboxScopeSlider.h */,
+				63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */,
 			);
 			name = Inbox;
 			sourceTree = "<group>";
@@ -5653,6 +5727,9 @@
 				7E917398152381480098DC3C /* blurbView_keyline.png in Resources */,
 				7E91739A152381480098DC3C /* blurbView_keyline@2x.png in Resources */,
 				63865A7D1529F83B00FE8A68 /* STStandardViewController.xib in Resources */,
+				63B30DD915339ABD0065DB53 /* act_play_primary@2x.png in Resources */,
+				63B30DDC15339B950065DB53 /* act_play_primary.png in Resources */,
+				63E253361534E98B007AD006 /* navigator_bar_plus_button.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6277,6 +6354,9 @@
 				7E917397152381480098DC3C /* blurbView_keyline.png in Resources */,
 				7E917399152381480098DC3C /* blurbView_keyline@2x.png in Resources */,
 				63865A7C1529F83B00FE8A68 /* STStandardViewController.xib in Resources */,
+				63B30DD815339ABD0065DB53 /* act_play_primary@2x.png in Resources */,
+				63B30DDB15339B950065DB53 /* act_play_primary.png in Resources */,
+				63E253351534E98B007AD006 /* navigator_bar_plus_button.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6521,6 +6601,15 @@
 				63E5E6C1152E48A300579369 /* STStampsView.m in Sources */,
 				63E5E6C5152E496100579369 /* STStampCell.m in Sources */,
 				63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
+				63DE12D41533223F00074FCD /* STMultipleChoiceButton.m in Sources */,
+				63B30DD6153361ED0065DB53 /* STRootMenuView.m in Sources */,
+				63E252FC15347856007AD006 /* STPlaylistPopUp.m in Sources */,
+				63E25300153478DE007AD006 /* STTablePopUp.m in Sources */,
+				63E253041534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */,
+				63E2532E1534CD5A007AD006 /* STAppDelegate.m in Sources */,
+				63E253321534CFF0007AD006 /* STRootViewController.m in Sources */,
+				63E2533A1535C67F007AD006 /* STConfiguration.m in Sources */,
+				63E2533E1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6733,6 +6822,15 @@
 				63E5E6C0152E48A300579369 /* STStampsView.m in Sources */,
 				63E5E6C4152E496100579369 /* STStampCell.m in Sources */,
 				63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
+				63DE12D31533223F00074FCD /* STMultipleChoiceButton.m in Sources */,
+				63B30DD5153361ED0065DB53 /* STRootMenuView.m in Sources */,
+				63E252FB15347856007AD006 /* STPlaylistPopUp.m in Sources */,
+				63E252FF153478DE007AD006 /* STTablePopUp.m in Sources */,
+				63E253031534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */,
+				63E2532D1534CD5A007AD006 /* STAppDelegate.m in Sources */,
+				63E253311534CFF0007AD006 /* STRootViewController.m in Sources */,
+				63E253391535C67F007AD006 /* STConfiguration.m in Sources */,
+				63E2533D1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6841,8 +6939,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6870,8 +6968,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6892,8 +6990,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6916,8 +7014,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6939,8 +7037,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6963,8 +7061,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ACBB006F-1AF5-4E49-BFC3-C3E89CB2BA32";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6978,8 +7076,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -6997,8 +7095,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -7074,8 +7172,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -7095,8 +7193,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -7107,8 +7205,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -7126,8 +7224,8 @@
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;

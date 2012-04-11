@@ -24,6 +24,22 @@ static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
 static const CGFloat _imagePaddingY = _imagePaddingX;
 
+@interface STStampDetailBarView : UIView
+
+@end
+
+@implementation STStampDetailBarView
+
+- (id)init {
+  self = [super initWithFrame:CGRectMake(0, 0, _totalWidth, 1)];
+  if (self) {
+    self.backgroundColor = [UIColor colorWithWhite:.90 alpha:1];
+  }
+  return self;
+}
+
+@end
+
 @interface STAStampDetailCommentView : UIView
 
 - (id)initWithUser:(id<STUser>)user andProfileImageSize:(STProfileImageSize)size;
@@ -107,7 +123,7 @@ andProfileImageSize:(STProfileImageSize)size {
                                font:dateFont 
                               color:[UIColor stampedLightGrayColor] 
                                mode:UILineBreakModeClip 
-                         andMaxSize:CGSizeMake(25, 25)] retain];
+                         andMaxSize:CGSizeMake(30, 25)] retain];
     _dateView.frame = CGRectOffset(_dateView.frame, dateX, textBounds.origin.y);
     [self addSubview:_dateView];
     textBounds.origin.y = CGRectGetMaxY(_userNameView.frame) + 2;
@@ -247,9 +263,11 @@ andProfileImageSize:(STProfileImageSize)size {
     UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp];
     [self appendChildView:blurbView];
     for (id<STComment> comment in stamp.commentsPreview) {
+      [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
       STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
       [self appendChildView:commentView];
     }
+    [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
     STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
     [self appendChildView:addCommentView];
     _addCommentView = [addCommentView.textField retain];

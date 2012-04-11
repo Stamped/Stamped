@@ -122,6 +122,13 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)warnWithMessage:(NSString*)message andBlock:(void(^)(void))block;
 
++ (void)menuWithTitle:(NSString*)title 
+              message:(NSString*)message 
+              choices:(NSArray*)strings 
+             andBlock:(void(^)(NSString* string))block;
+
 + (CGRect)relativeFrameForView:(UIView*)view inAncestorView:(UIView*)ancestor;
+
++ (NSString*)trackLengthString:(NSInteger)length;
 
 @end

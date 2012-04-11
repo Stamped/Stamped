@@ -31,13 +31,21 @@
   return self;
 }
 
+- (id)init {
+  return [self initWithFrame:CGRectMake(0, 0, 320, 54)];
+}
+
 - (void)packViews:(NSArray*)views withPadding:(CGFloat)padding {
   CGSize totalSize = [Util packViews:views padding:padding vertical:NO uniform:YES];
-  CGRect totalFrame = [Util centeredAndBounded:totalSize inFrame:self.frame];
+  CGRect totalFrame = [Util centeredAndBounded:totalSize inFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
   [Util offsetViews:views byX:totalFrame.origin.x andY:totalFrame.origin.y];
   for (UIView* button in views) {
     [self addSubview:button];
   }
+}
+
+- (void)packViews:(NSArray*)views {
+  [self packViews:views withPadding:10];
 }
 
 @end
