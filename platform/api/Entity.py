@@ -504,7 +504,7 @@ def upgradeEntityData(entityData):
             new.albums_source = artist.pop('albums_source', sourceName)
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
 
-        setListGroup(media, new, 'genre', 'genres')
+        setListGroup(media, new, 'genre', 'genres', seed=False)
     
     # General Media
     if kind in ['media_collection', 'media_item']:

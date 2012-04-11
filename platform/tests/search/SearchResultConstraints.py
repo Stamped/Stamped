@@ -74,6 +74,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                  index      = None, 
                  strict     = False, 
                  match      = None, 
+                 soft       = True, 
                  **extras):
         ASearchResultConstraint.__init__(self)
         
@@ -90,6 +91,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         self.index  = index
         self.strict = strict
         self.match  = match
+        self.soft   = True
         self.extras = extras
     
     def validate(self, results):
@@ -105,7 +107,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         
         for i in xrange(len(results)):
             result = results[i]
-            valid  = (self.index is None or self.index == i)
+            valid  = (self.index is None or self.index == i or (self.index != -1 and self.soft))
             
             if valid:
                 t0 = list(self.types)
@@ -177,7 +179,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         return (self.index == -1)
     
     def _eq(self, a, b):
-        return ASearchResultConstraint(a, b, strict = self.strict, match = self.match)
+        return ASearchResultConstraint._eq(self, a, b, strict = self.strict, match = self.match)
     
     def __str__(self):
         options = { }
@@ -213,56 +215,54 @@ class UniqueSearchResultConstraint(ASearchResultConstraint):
             or False otherwise.
         """
         
-        try:
-            proxies = map(self.__stamped.proxyFromEntity, results)
+        proxies = map(self.__stamped.proxyFromEntity, results)
+        
+        # ensure that no result resolves definitively to any other result in the result set
+        for i in xrange(len(proxies)):
+            proxy = proxies[i]
             
-            # ensure that no result resolves to any other result in the result set
-            for i in xrange(len(proxies)):
-                proxy = proxies[i]
+            def dedup():
+                for j in xrange(len(proxies)):
+                    proxy2 = proxies[j]
+                    
+                    if i != j and proxy.kind == proxy2.kind:
+                        yield proxy2
+            
+            dups = self.__resolver.resolve(proxy, generatorSource(dedup()), count=1)
+            
+            if len(dups) > 0 and dups[0][0]['resolved']:
+                return False
+        
+        seen = defaultdict(set)
+        
+        # ensure that there are no obvious duplicate results without using the resolver
+        for i in xrange(len(results)):
+            result = results[i]
+            keys   = [ k for k in result.sources if k.endswith('_id') ]
+            
+            # ensure that the same source id doesn't appear twice in the result set
+            # (source ids are supposed to be unique)
+            for key in keys:
+                value = str(result[key])
                 
-                def dedup():
-                    for j in xrange(len(proxies)):
-                        proxy2 = proxies[j]
-                        
-                        if i != j and proxy.kind == proxy2.kind:
-                            yield proxy2
-                
-                dups = self.__resolver.resolve(proxy, generatorSource(dedup()), count=1)
-                
-                if len(dups) > 0 and dups[0][0]['resolved']:
+                if value in seen[key]:
                     return False
-            
-            seen = defaultdict(set)
-            
-            # ensure that there are no obvious duplicate results without using the resolver
-            for i in xrange(len(results)):
-                result = results[i]
-                keys   = [ k for k in result.sources if k.endswith('_id') ]
                 
-                for key in keys:
-                    value = str(result[key])
-                    
-                    if value in seen[key]:
-                        return False
-                    
-                    seen[key].add(value)
+                seen[key].add(value)
+            
+            for j in xrange(len(results)):
+                result2 = results[j]
                 
-                for j in xrange(len(results)):
-                    result2 = results[j]
-                    
-                    if i != j and self._eq(result.kind, result2.kind) and self._eq(result.title, result2.title):
-                        if len(result.types.intersection(result2.types)) > 0:
-                            utils.log("")
-                            utils.log("!" * 80)
-                            utils.log("dupe encountered: %s\n%s" % (result, result2))
-                            utils.log("!" * 80)
-                            utils.log("")
-                            
-                            # TODO: return False
-                            return True
-        except Exception:
-            utils.printException()
-            return False
+                if i != j and self._eq(result.kind, result2.kind) and self._eq(result.title, result2.title):
+                    if len(result.types.intersection(result2.types)) > 0:
+                        utils.log("")
+                        utils.log("!" * 80)
+                        utils.log("dupe encountered: %s\n%s" % (result, result2))
+                        utils.log("!" * 80)
+                        utils.log("")
+                        
+                        # TODO: return False
+                        return True
         
         return True
 

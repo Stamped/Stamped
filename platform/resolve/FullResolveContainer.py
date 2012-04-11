@@ -38,6 +38,10 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGlobalPriority('thetvdb',2)
         self.setGlobalPriority('itunes',1)
 
+        self.setGroupPriority('amazon', 'tracks', -1)
+        self.setGroupPriority('amazon', 'albums', -1)
+        self.setGroupPriority('amazon', 'artists', -1)
+
 def demo(default_title='Katy Perry'):
     import bson, sys
     

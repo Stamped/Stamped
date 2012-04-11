@@ -148,7 +148,7 @@ if __name__ == '__main__':
     if len(argv) > 4:
         max_wait = float(argv[4])
     
-    kwargs = {name:rate,'max_wait':max_wait}
+    kwargs  = {name:rate,'max_wait':max_wait}
     limiter = RateLimiter(**kwargs)
     
     def test(value):

@@ -173,32 +173,52 @@ class InvalidatingMemcache(Memcache):
         
         return dependencies
 
-def memcached_function(get_cache_client, time=0, min_compress_len=0):
+def __global_api():
+    from MongoStampedAPI import globalMongoStampedAPI
+    
+    return globalMongoStampedAPI()
+
+def __global_memcache():
+    return __global_api()._cache
+
+def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
-        kwd_mark   = object() # separate positional and keyword args
         key_prefix = user_function.func_name
         
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
             # note: treat args[0] specially (self)
+            self  = args[0].__class__.__name__
             args2 = args[1:]
-            cache = getattr(args[0], get_cache_client)()
+            cache = __global_memcache()
+            mark  = ';'
             
             # cache key records both positional and keyword args
-            key = "%s:%s" % (key_prefix, args2)
+            key   = "%s::%s(" % (self, key_prefix)
+            
+            if len(args2) > 0:
+                key += mark.join(map(str, args2))
             
             if kwds:
-                key += (kwd_mark,) + tuple(sorted(kwds.items()))
+                suffix = mark.join(('%s=%s' % kv for kv in sorted(kwds.items())))
+                
+                if len(args2) > 0 and not key.endswith(mark):
+                    key += "%s%s" % (mark, suffix)
+                else:
+                    key += suffix
+            
+            key += ')'
             
             # get cache entry or compute if not found
             store   = False
             compute = True
             
             try:
-                result = cache[key]
-                wrapper.hits += 1
+                result  = cache[key]
                 compute = False
+                
+                wrapper.hits += 1
             except KeyError:
                 store = True
             except:
@@ -210,6 +230,7 @@ def memcached_function(get_cache_client, time=0, min_compress_len=0):
             
             if store:
                 cache_set = cache.set
+                
                 if cache_set is not None:
                     cache_set(key, result, time=time, min_compress_len=min_compress_len)
             
@@ -224,7 +245,14 @@ def memcached_function(get_cache_client, time=0, min_compress_len=0):
         
         wrapper.hits  = wrapper.misses = 0
         wrapper.clear = clear
+        
         return wrapper
     
     return decorating_function
+
+# note: these decorators add tiered caching to this function, such that 
+# results will be cached locally with a very small LRU cache of 64 items 
+# and also cached remotely via memcached with a TTL of 7 days
+#@lru_cache(maxsize=64)
+#@memcached_function(time=7*24*60*60)
 

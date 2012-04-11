@@ -58,27 +58,30 @@ import json
 import urllib
 import oauth
 import urllib2
-from urlparse import urlparse, parse_qsl
 import sys
-from Schemas            import BasicEntity
-from SinglePlatform     import StampedSinglePlatform
-from pprint             import pprint
-from pymongo            import Connection
-from gevent.queue       import Queue
-from gevent.pool        import Pool
-from functools          import partial
-from urllib2            import HTTPError
-from gevent             import sleep
-from itertools          import combinations
-from re                 import match
-from threading          import Lock
 import time
 import random
-from datetime           import datetime
-from datetime           import timedelta
-from utils              import lazyProperty
-from RateLimiter        import RateLimiter
 import logs
+
+from urlparse               import urlparse, parse_qsl
+from LRUCache               import lru_cache
+from Memcache               import memcached_function
+from Schemas                import BasicEntity
+from SinglePlatform         import StampedSinglePlatform
+from pprint                 import pprint
+from pymongo                import Connection
+from gevent.queue           import Queue
+from gevent.pool            import Pool
+from functools              import partial
+from urllib2                import HTTPError
+from gevent                 import sleep
+from itertools              import combinations
+from re                     import match
+from threading              import Lock
+from datetime               import datetime
+from datetime               import timedelta
+from utils                  import lazyProperty
+from RateLimiter            import RateLimiter
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -259,7 +262,7 @@ class Factual(object):
         self.__limiter = RateLimiter(cpm=400,cpd=180000)  
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
-
+    
     def search(self, query, limit=_limit, coordinates=None):
         params = {}
         params['prefix']    = 't'
@@ -271,13 +274,14 @@ class Factual(object):
                     {"category":{"$bw":"Arts, Entertainment & Nightlife"}},
                 ]
             }))
+        
         if coordinates is not None:
             params['geo'] = urllib.quote(json.dumps({
                 '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':5000}
             }))
-            
+        
         return self.__factual('global', **params)
-
+    
     def resolve(self, data, limit=_limit):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
@@ -294,7 +298,7 @@ class Factual(object):
         if r != None and len(r) > limit:
             r = r[:limit]
         return r
-        
+    
     def places(self, data, limit=_limit):
         """
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
@@ -308,7 +312,7 @@ class Factual(object):
             return result[0]
         else:
             return None
-
+    
     def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
@@ -349,13 +353,13 @@ class Factual(object):
         if namespace != None:
             args['only'] = namespace
         return self.__factual('crosswalk',**args)
-        
+    
     def crossref_id(self, factual_id, limit=_limit):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
         return self.__factual('crossref',factual_id=factual_id,limit=limit)
-        
+    
     def crossref_url(self, url, limit=_limit):
         """
         User Crossref service to find the entities related/mentioned at the given url.
@@ -515,7 +519,12 @@ class Factual(object):
             return m
         else:
             return None
-
+    
+    # note: these decorators add tiered caching to this function, such that 
+    # results will be cached locally with a very small LRU cache of 64 items 
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @memcached_function(time=7*24*60*60)
     def __factual(self, service, prefix='places', **args):
         """
         Helper method for making OAuth Factual API calls.
@@ -833,10 +842,15 @@ def sourceAndTimestamp():
         entity.address_timestamp = datetime.utcnow()
         entityDB.update(entity)
 
-_globalFactual = Factual()
+__globalFactual = None
 
 def globalFactual():
-    return _globalFactual
+    global __globalFactual
+    
+    if __globalFactual is None:
+        __globalFactual = Factual()
+    
+    return __globalFactual
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -865,5 +879,4 @@ if __name__ == '__main__':
             print("bad usage")
     else:
         demo()
-    
-    
+

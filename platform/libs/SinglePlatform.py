@@ -11,21 +11,19 @@ __license__   = "TODO"
 import Globals
 import base64, hashlib, hmac
 import json, urllib, urllib2, utils
-import sys
-import logs
+import datetime, logs, sys, time
 
-
-from pprint import pprint
-from Schemas    import MenuSchema
-from Schemas    import SubmenuSchema
-from Schemas    import MenuSectionSchema
-from Schemas    import MenuItemSchema
-from Schemas    import MenuPriceSchema
-from urllib2            import HTTPError
-from threading          import Lock
-from gevent             import sleep
-import datetime
-import time
+from pprint         import pprint
+from LRUCache       import lru_cache
+from Memcache       import memcached_function
+from Schemas        import MenuSchema
+from Schemas        import SubmenuSchema
+from Schemas        import MenuSectionSchema
+from Schemas        import MenuItemSchema
+from Schemas        import MenuPriceSchema
+from urllib2        import HTTPError
+from threading      import Lock
+from gevent         import sleep
 
 _spicy_map = {
     'none':0,
@@ -148,7 +146,7 @@ class SinglePlatform(object):
     
     def get_short_menu(self, location_id):
         return self._get_uri('/restaurants/%s/shortmenu' % location_id)
-
+    
     def _get_uri(self, uri, params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))

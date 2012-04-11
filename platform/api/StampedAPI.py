@@ -39,7 +39,7 @@ try:
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
     from Entity                 import buildEntity 
-
+    
     #resolve classes
     from resolve.EntitySource   import EntitySource
     from resolve                import FullResolveContainer
@@ -2929,10 +2929,18 @@ class StampedAPI(AStampedAPI):
     
     def _mergeEntity(self, entity, update = False):
         try:
+            if entity.sources.tombstone_id is not None:
+                successor_id = entity['tombstone_id']
+                successor    = self._entityDB.getEntity(successor_id)
+                assert successor is not None
+
+                logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor_id))
+                return successor
+
             decorations = {}
             modified    = self.__full_resolve.enrichEntity(entity, decorations)
             
-            if 'tombstone_id' in entity and entity['tombstone_id'] is not None:
+            if entity.sources.tombstone_id is not None:
                 successor_id = entity['tombstone_id']
                 successor    = self._entityDB.getEntity(successor_id)
                 assert successor is not None
@@ -2944,7 +2952,9 @@ class StampedAPI(AStampedAPI):
                 self.__handleDecorations(successor, successor_decorations)
                 
                 if modified_successor:
-                    self._entityDB.update(successor)
+                    self._entityDB.updateEntity(successor)
+
+                self._entityDB.updateEntity(entity)
                 
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
@@ -2966,7 +2976,7 @@ class StampedAPI(AStampedAPI):
     
     def mergeEntityAsync(self, entity_dict, update = False):
         entity = buildEntity(entity_dict)
-        self._mergeEntity(entity, update)
+        entity = self._mergeEntity(entity, update)
         modified = self._enrichEntityLinks(entity)
         if modified:
             self._entityDB.update(entity)
@@ -3001,7 +3011,10 @@ class StampedAPI(AStampedAPI):
             raise Exception
 
         modified = self._enrichEntity(entity)
-        modified = self._enrichEntityLinks(entity) | modified 
+
+        if entity.sources.tombstone_id is None:
+            modified = self._enrichEntityLinks(entity) | modified 
+
         if modified:
             self._entityDB.update(entity)
 

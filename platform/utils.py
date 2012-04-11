@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+
 """
-Assorted utility commands and classes
+    Assorted utility commands and classes
 """
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -51,7 +53,7 @@ def shell3(cmd, customEnv=None):
     return status
 
 def is_running(cmd):
-    return 0 == shell("ps -ef | grep '%s' | grep -v grep")[1]
+    return 0 == shell("ps -ef | grep '%s' | grep -v grep" % cmd)[1]
 
 def lazyProperty(undecorated):
     name = '_' + undecorated.__name__
