@@ -52,13 +52,19 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # entity = stampedAPI.getEntity({'entity_id': '4e4c691ddb6bbe2bcd000401'}) # Artist
 # stampedAPI._enrichEntity(entity)
 
-stampedAPI._enrichEntityAsync('4e4c691ddb6bbe2bcd000401')
+# stampedAPI._enrichEntityAsync('4e4c691ddb6bbe2bcd000401')
 
 # print 'SKIP\n\n\n'
 
 # stampedAPI._enrichEntityAsync('4f81e6a446ebe66a0d000000') # Artist (Katy Perry)
 # stampedAPI._enrichEntityAsync('4f81e7e646ebe66a2a00000f') # Track (Peacock)
 # stampedAPI._enrichEntityAsync('4f81e79246ebe66a27000000') # Album (Teenage Dream)
+
+# e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
+# stampedAPI._enrichEntityAsync('4f7a111ca265375be500002b')
+
+e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
+stampedAPI.mergeEntityAsync(e.value, True)
 
 """
 album = stampedAPI._mergeEntity(album, True)

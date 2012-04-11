@@ -359,8 +359,6 @@ class AmazonSource(GenericSource):
                 'isbn',
                 'desc',
                 'sku_number',
-                # 'amazon_link',
-                # 'amazon_underlying',
                 'images',
             ],
             kinds=[

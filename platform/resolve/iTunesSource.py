@@ -163,7 +163,6 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
                 'name':             track['trackName'],
                 'key':              track['trackId'],
                 'url':              track['trackViewUrl'],
-                'track_number':     track['trackNumber'],
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]

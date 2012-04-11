@@ -329,7 +329,16 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 
 class StampedSource(GenericSource):
     def __init__(self, stamped_api = None):
-        GenericSource.__init__(self, 'stamped', groups=['tombstone'])
+        GenericSource.__init__(self, 'stamped', 
+            groups=['tombstone'],
+            kinds=[
+                'person',
+                'place',
+                'media_collection',
+                'media_item',
+                'software',
+            ]
+        )
         
         self._stamped_api = stamped_api
     
