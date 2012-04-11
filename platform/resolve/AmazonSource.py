@@ -350,7 +350,7 @@ class AmazonSource(GenericSource):
         GenericSource.__init__(self, 'amazon',
             groups=[
                 'artists',
-                'genres',
+                # 'genres',
                 'length',
                 'albums',
                 'release_date',
