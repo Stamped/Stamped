@@ -1189,7 +1189,6 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
         
         if self.__version > 0 and entity.isType('artist'):
-            albums = []
             albumIds = {}
             for album in entity.albums:
                 if album.entity_id is not None:
@@ -1197,16 +1196,19 @@ class StampedAPI(AStampedAPI):
             try:
                 albums = self._entityDB.getEntities(albumIds.keys())
             except:
-                pass
+                albums = []
 
             for album in albums:
                 albumIds[album.entity_id] = album 
 
             enrichedAlbums = []
             for album in entity.albums:
-                if album.entity_id is not None and album.entity_id in albumIds and albumIds[album.entity_id] is not None:
-                    enrichedAlbums.append(albumIds[album.entity_id])
-                else:
+                try:
+                    if album.entity_id is not None and album.entity_id in albumIds and albumIds[album.entity_id] is not None:
+                        enrichedAlbums.append(albumIds[album.entity_id])
+                    else:
+                        raise
+                except Exception:
                     enrichedAlbums.append(album)
 
             entity.albums = enrichedAlbums

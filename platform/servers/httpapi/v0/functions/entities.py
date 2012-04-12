@@ -134,7 +134,7 @@ def suggested(request):
     
     schema      = parseRequest(HTTPEntitySuggested(), request)
     schema      = schema.exportSchema(EntitySuggested())
-    result      = stampedAPI.getSuggestedEntities(authUserId=authUserId, schema)
+    result      = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
     
     raise NotImplementedError
     
