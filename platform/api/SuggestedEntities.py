@@ -125,8 +125,7 @@ class SuggestedEntities(object):
                 
                 suggested.append([ 'Box Office', movies ])
         elif category == 'book':
-            # TODO
-            pass
+            subcategory = 'book'
         elif subcategory == 'app':
             top_free_apps       = self._appleRSS.get_top_free_apps(limit=5)
             top_paid_apps       = self._appleRSS.get_top_paid_apps(limit=5)
@@ -151,7 +150,8 @@ class SuggestedEntities(object):
         else:
             return []
         
-        ids = self._stamp_collection._collection.find(spec={"entity.subcategory" : "tv"}, fields={ "entity.entity_id" : 1, "_id" : 0}, output=list)
+        ids = self._stamp_collection._collection.find(
+            spec=spec, fields={ "entity.entity_id" : 1, "_id" : 0}, output=list)
         
         entity_count = defaultdict(int)
         
