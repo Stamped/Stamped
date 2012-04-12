@@ -39,7 +39,7 @@ class BasicFieldGroup(AFieldGroup):
         return self.__name
 
     def isSet(self, entity):
-        for fields in self.__fields:
+        for field in self.__fields:
             v = self.getValue(entity, field)
             if isinstance(v, SchemaElement):
                 v = v.value 
