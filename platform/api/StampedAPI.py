@@ -2980,7 +2980,10 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
     
     def mergeEntityAsync(self, entity_dict, update = False):
-        entity = buildEntity(entity_dict)
+        try:
+            entity = self._entityDB.getEntity(entity_dict['entity_id'])
+        except Exception:
+            entity = buildEntity(entity_dict)
         entity = self._mergeEntity(entity, update)
         modified = self._enrichEntityLinks(entity)
         if modified:
