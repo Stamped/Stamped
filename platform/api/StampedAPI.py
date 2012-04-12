@@ -1203,12 +1203,9 @@ class StampedAPI(AStampedAPI):
 
             enrichedAlbums = []
             for album in entity.albums:
-                try:
-                    if album.entity_id is not None and album.entity_id in albumIds and albumIds[album.entity_id] is not None:
-                        enrichedAlbums.append(albumIds[album.entity_id])
-                    else:
-                        raise
-                except Exception:
+                if album.entity_id is not None and album.entity_id in albumIds and albumIds[album.entity_id] is not None:
+                    enrichedAlbums.append(albumIds[album.entity_id])
+                else:
                     enrichedAlbums.append(album)
 
             entity.albums = enrichedAlbums
