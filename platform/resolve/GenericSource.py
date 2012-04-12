@@ -198,11 +198,6 @@ class GenericSource(BasicSource):
         if timestamps is None:
             timestamps = {}
         
-        if proxy.source == 'stamped':
-            entity.entity_id = proxy.key 
-        else:
-            entity.entity_id = 'T_%s_%s' % (proxy.source.upper(), proxy.key)
-        
         def setAttribute(source, target):
             try:
                 item = getattr(proxy, source)
@@ -211,10 +206,6 @@ class GenericSource(BasicSource):
                     timestamps[target] = controller.now
             except Exception as e:
                 pass
-        
-        ### General
-        entity.title = proxy.name 
-        entity.types = proxy.types
         
         setAttribute('description',     'desc')
         setAttribute('phone',           'phone')
@@ -228,6 +219,7 @@ class GenericSource(BasicSource):
             images.append(img)
         if len(images) > 0:
             entity.images = images
+            timestamps['images'] = controller.now
         
         ### Place
         if entity.kind == 'place' and proxy.kind == 'place':
@@ -252,6 +244,7 @@ class GenericSource(BasicSource):
                         v = proxy.address[k]
                     if v is not None:
                         entity['address_%s' % k] = v
+                timestamps['address'] = controller.now
         
         ### Person
         if entity.kind == 'person' and proxy.kind == 'person':
@@ -260,9 +253,11 @@ class GenericSource(BasicSource):
 
             if controller.shouldEnrich('albums', self.sourceName, entity):
                 self.__repopulateAlbums(entity, proxy, controller, decorations) 
+                timestamps['albums'] = controller.now
 
             if controller.shouldEnrich('tracks', self.sourceName, entity):
                 self.__repopulateTracks(entity, proxy, controller, decorations)
+                timestamps['tracks'] = controller.now
         
         ### Media
         if entity.kind in set(['media_collection', 'media_item']) and entity.kind == proxy.kind:
@@ -275,6 +270,7 @@ class GenericSource(BasicSource):
 
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
+                timestamps['genres'] = controller.now
 
             cast = []
             for actor in proxy.cast:
@@ -283,6 +279,7 @@ class GenericSource(BasicSource):
                 cast.append(entityMini)
             if len(cast) > 0:
                 entity.cast = cast
+                timestamps['cast'] = controller.now
 
             directors = []
             for director in proxy.directors:
@@ -291,6 +288,7 @@ class GenericSource(BasicSource):
                 directors.append(entityMini)
             if len(directors) > 0:
                 entity.directors = directors
+                timestamps['directors'] = controller.now
 
             publishers = []
             for publisher in proxy.publishers:
@@ -299,6 +297,7 @@ class GenericSource(BasicSource):
                 publishers.append(entityMini)
             if len(publishers) > 0:
                 entity.publishers = publishers
+                timestamps['publishers'] = controller.now
 
             authors = []
             for author in proxy.authors:
@@ -307,6 +306,7 @@ class GenericSource(BasicSource):
                 authors.append(entityMini)
             if len(authors) > 0:
                 entity.authors = authors
+                timestamps['authors'] = controller.now
 
             artists = []
             for artist in proxy.artists:
@@ -321,12 +321,14 @@ class GenericSource(BasicSource):
                 artists.append(entityMini)
             if len(artists) > 0:
                 entity.artists = artists
+                timestamps['artists'] = controller.now
         
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
             if proxy.isType('album'):
                 if controller.shouldEnrich('tracks', self.sourceName, entity):
                     self.__repopulateTracks(entity, proxy, controller)
+                    timestamps['tracks'] = controller.now
         
         ### Media Item
         if entity.kind == 'media_item' and proxy.kind == 'media_item':
@@ -343,12 +345,15 @@ class GenericSource(BasicSource):
                 albums.append(entityMini)
             if len(albums) > 0:
                 entity.albums = albums
+                timestamps['albums'] = controller.now
 
             if proxy.isbn is not None:
                 entity.isbn = proxy.isbn
+                timestamps['isbn'] = controller.now
 
             if proxy.sku_number is not None:
                 entity.sku_number = proxy.sku_number
+                timestamps['sku_number'] = controller.now
         
         ### Software
         if entity.kind == 'software' and proxy.kind == 'software':
@@ -365,6 +370,7 @@ class GenericSource(BasicSource):
                 publishers.append(entityMini)
             if len(publishers) > 0:
                 entity.publishers = publishers
+                timestamps['publishers'] = controller.now
 
             authors = []
             for author in proxy.authors:
@@ -373,6 +379,7 @@ class GenericSource(BasicSource):
                 authors.append(entityMini)
             if len(authors) > 0:
                 entity.authors = authors
+                timestamps['authors'] = controller.now
 
             screenshots = []
             for screenshot in proxy.screenshots:
@@ -381,6 +388,7 @@ class GenericSource(BasicSource):
                 screenshots.append(img)
             if len(screenshots) > 0:
                 entity.screenshots = screenshots
+                timestamps['screenshots'] = controller.now
     
     @property
     def idField(self):
