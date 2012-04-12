@@ -3255,6 +3255,7 @@ class StampedAPI(AStampedAPI):
             # Enrich albums instead
             for albumItem in entity.albums:
                 try:
+                    albumItem, albumModified = _enrichStub(albumItem, musicSources)
                     if albumItem.entity_id is not None:
                         tasks.invoke(tasks.APITasks.mergeEntityId, args=[albumItem.entity_id])
                     else:
