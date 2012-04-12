@@ -1188,6 +1188,29 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
+        if self.__version > 0 and entity.isType('artist'):
+            albums = []
+            albumIds = {}
+            for album in entity.albums:
+                if album.entity_id is not None:
+                    albumIds[album.entity_id] = None
+            try:
+                albums = self._entityDB.getEntities(albumIds.keys())
+            except:
+                pass
+
+            for album in albums:
+                albumIds[album.entity_id] = album 
+
+            enrichedAlbums = []
+            for album in entity.albums:
+                if album.entity_id is not None and album.entity_id in albums and albums[album.entity_id] is not None:
+                    enrichedAlbums.append(albums[album.entity_id])
+                else:
+                    enrichedAlbums.append(album)
+
+            entity.albums = enrichedAlbums
+
         ### TODO: Check if user has access to this entity?
         return entity
     
