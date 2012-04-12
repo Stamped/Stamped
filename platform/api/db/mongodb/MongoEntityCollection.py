@@ -87,7 +87,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         
         result = []
         for item in data:
-            entity = append(self._convertFromMongo(item))
+            entity = self._convertFromMongo(item)
             if entity.tombstone_id is not None:
                 entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
