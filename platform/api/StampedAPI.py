@@ -2955,7 +2955,8 @@ class StampedAPI(AStampedAPI):
                 if modified_successor:
                     self._entityDB.updateEntity(successor)
 
-                self._entityDB.updateEntity(entity)
+                if entity.entity_id is not None:
+                    self._entityDB.updateEntity(entity)
                 
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
