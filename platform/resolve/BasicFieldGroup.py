@@ -38,6 +38,15 @@ class BasicFieldGroup(AFieldGroup):
     def groupName(self):
         return self.__name
 
+    def isSet(self, entity):
+        for fields in self.__fields:
+            v = self.getValue(entity, field)
+            if isinstance(v, SchemaElement):
+                v = v.value 
+            if v is not None:
+                return True
+        return False
+
     def getSource(self, entity):
         return self.getValue(entity, self.__source)
 
@@ -108,4 +117,3 @@ class BasicFieldGroup(AFieldGroup):
 
     def addNameField(self):
         self.addField([self.groupName])
-

@@ -124,7 +124,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             if groupObj.eligible(entity):
                 currentSource = groupObj.getSource(entity)
                 if currentSource is None:
-                    return True
+                    if groupObj.isSet(entity):
+                        return True
+                    return False
                 else:
                     priority = self.getGroupPriority(group, source)
                     currentPriority = self.getGroupPriority(group, currentSource)
