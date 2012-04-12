@@ -3173,7 +3173,7 @@ class StampedAPI(AStampedAPI):
                 return stub
 
             # Merge artist
-            artist = self._mergeEntity(artist, True, force=True)
+            # artist = self._mergeEntity(artist, True, force=True)
 
             return artist
 
@@ -3200,22 +3200,20 @@ class StampedAPI(AStampedAPI):
         modified = False
 
         if entity.isType('album'):
-            modified = _enrichArtists(entity)
+            modified = _enrichArtists(entity) | modified
             modified = _enrichTracks(entity, artists=entity.artists, albums=[entity]) | modified
 
         if entity.isType('artist'):
-            modified = _enrichAlbums(entity, artists=[entity])
+            # modified = _enrichAlbums(entity, artists=[entity]) | modified
             modified = _enrichTracks(entity, artists=[entity]) | modified
 
-        if entity.isType('track'):
+        if entity.isTYpe('artist') or entity.isType('track'):
             # Enrich albums instead
             for albumItem in entity.albums:
                 try:
                     tasks.invoke(tasks.APITasks.mergeEntity, args=[albumItem.value, True])
                 except Exception as e:
                     logs.warning('Failed to enrich album: %s' % e)
-            # Just to be explicit...
-            modified = False
 
         return modified
         
