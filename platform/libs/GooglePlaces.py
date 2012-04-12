@@ -169,7 +169,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         entity.googleplaces_reference   = result['reference']
         
         # TODO: TYPE
-        #entity.subcategory = subcategory
+        types = set(entity.types.value)
+        types.add(subcategory)
+        entity.types = list(types)
         
         """
         if result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' and \
