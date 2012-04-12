@@ -54,14 +54,9 @@ class SuggestedSearchTests(ASearchTestSuite):
         
         # if we set a limit on the number of results returned, ensure that 
         # that limit was satisfied.
-        try:
-            limit = test['limit']
-            
-            if limit is not None:
-                self.assertTrue(count <= limit)
-        except KeyError:
-            # no limit was specified
-            pass
+        limit = kwargs.get('limit', None)
+        if limit is not None:
+            self.assertTrue(count <= limit)
     
     def test_place(self):
         self._test_suggestions(category='place', coords=(40.144729, -74.053527)) # NYC
