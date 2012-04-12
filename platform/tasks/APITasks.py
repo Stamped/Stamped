@@ -129,6 +129,10 @@ def mergeEntity(*args, **kwargs):
     invoke(mergeEntity.request, *args, **kwargs)
 
 @task(ignore_result=True)
+def mergeEntityId(*args, **kwargs):
+    invoke(mergeEntityId.request, *args, **kwargs)
+
+@task(ignore_result=True)
 def _saveTempEntity(*args, **kwargs):
     invoke(_saveTempEntity.request, *args, **kwargs)
 

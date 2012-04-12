@@ -164,7 +164,7 @@ class AMongoCollection(object):
     
     def _getObjectIdFromString(self, string):
         try:
-            return bson.objectid.ObjectId(string)
+            return bson.objectid.ObjectId(str(string))
         except:
             raise StampedInputError("Invalid ObjectID (%s)" % string)
     
@@ -182,8 +182,11 @@ class AMongoCollection(object):
         
         if self._primary_key:
             if self._primary_key in document:
-                document['_id'] = self._getObjectIdFromString(document[self._primary_key])
-                del(document[self._primary_key])
+                if self._primary_key is None:
+                    del(document[self._primary_key])
+                else:
+                    document['_id'] = self._getObjectIdFromString(document[self._primary_key])
+                    del(document[self._primary_key])
         
         return document
     

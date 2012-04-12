@@ -485,7 +485,7 @@ class HTTPEntity(Schema):
         # Components
         self.playlist           = HTTPEntityPlaylist()
         self.actions            = SchemaList(HTTPEntityAction())
-        self.gallery            = HTTPEntityGallery()
+        self.galleries          = SchemaList(HTTPEntityGallery())
         self.metadata           = SchemaList(HTTPEntityMetadataItem())
         self.stamped_by         = HTTPEntityStampedBy()
         self.related            = HTTPEntityRelated()
@@ -1005,6 +1005,36 @@ class HTTPEntity(Schema):
                 if len(playlist.data) > 0:
                     self.playlist = playlist
 
+            # Albums
+
+            if entity.isType('artist') and len(entity.albums) > 0:
+                gallery = HTTPEntityGallery()
+                gallery.layout = 'list'
+                for album in entity.albums:
+                    try:
+                        item            = HTTPEntityGalleryItem()
+                        item.image      = album.images[0]['image']
+                        item.caption    = album.title 
+
+                        if album.entity_id is not None:
+                            source              = HTTPActionSource()
+                            source.name         = 'View Album'
+                            source.source       = 'stamped'
+                            source.source_id    = album.entity_id
+
+                            action              = HTTPAction()
+                            action.type         = 'stamped_view_entity'
+                            action.name         = 'View Album'
+                            action.sources      = [source]
+
+                            item.action         = action
+
+                        gallery.data.append(item)
+                    except:
+                        pass
+                if len(gallery.data) > 0:
+                    self.galleries.append(gallery)
+
         elif entity.kind == 'software' and entity.isType('app'):
 
             if len(entity.authors) > 0:
@@ -1033,14 +1063,15 @@ class HTTPEntity(Schema):
             actionIcon = self._getIconURL('act_download_primary', client=client)
             self._addAction('download', 'Download', sources, icon=actionIcon)
 
-            # Gallery
+            # Screenshots
 
-            if entity.screenshots is not None:
-
+            if entity.screenshots is not None and len(entity.screenshots) > 0:
+                gallery = HTTPEntityGallery()
                 for screenshot in entity.screenshots:
                     item = HTTPEntityGalleryItem()
                     item.image = screenshot.image
-                    self.gallery.data.append(item)
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
 
 
         # Generic item
@@ -1111,6 +1142,7 @@ class HTTPEntityGallery(Schema):
     def setSchema(self):
         self.data               = SchemaList(HTTPEntityGalleryItem(), required=True)
         self.name               = SchemaElement(basestring)
+        self.layout             = SchemaElement(basestring) # 'list' or None
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
