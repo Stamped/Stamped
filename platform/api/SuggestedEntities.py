@@ -84,9 +84,10 @@ class SuggestedEntities(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    #@lru_cache(maxsize=16)
-    #@memcached_function(time=2*24*60*60)
+    @lru_cache(maxsize=16)
+    @memcached_function(time=2*24*60*60)
     def _getSuggestedEntities(self, coords, category, subcategory):
+        popular   = True
         suggested = []
         
         if category == 'place' or category == 'food':
@@ -96,6 +97,7 @@ class SuggestedEntities(object):
             if results is None:
                 return []
             
+            popular = False
             suggested.append([ 'Nearby', results ])
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
@@ -135,7 +137,7 @@ class SuggestedEntities(object):
             suggested.append([ 'Top paid apps', top_paid_apps ])
             suggested.append([ 'Top grossing apps', top_grossing_apps ])
         
-        if len(suggested) == 0:
+        if len(suggested) == 0 or popular:
             suggested.append([ 'Popular', self._get_popular_entities(category, subcategory) ])
         
         return suggested
