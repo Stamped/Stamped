@@ -40,7 +40,15 @@ class SuggestedSearchTests(ASearchTestSuite):
             suggested = suggestedEntities.getSuggestedEntities(**test)
             utils.log()
             utils.log("-" * 80)
-            utils.log("%s\n%s" % (test, pformat(suggested)))
+            utils.log(test)
+            
+            for section in suggested:
+                utils.log("SECTION %s)" % section[0])
+                
+                for i in xrange(len(section[1])):
+                    entity = section[1][i]
+                    utils.log("   %d) %s (%s)" % (i, entity.title, entity.types))
+            
             utils.log("-" * 80)
             utils.log()
             self.assertTrue(len(suggested) > 0)

@@ -115,7 +115,7 @@ class SuggestedEntities(object):
                 # TODO
                 pass
             elif subcategory == 'movie':
-                movies = fandango.get_top_box_office_movies()
+                movies = self._fandango.get_top_box_office_movies()
                 
                 suggested.append([ 'Box Office', movies ])
         elif category == 'book':
