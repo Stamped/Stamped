@@ -3207,7 +3207,7 @@ class StampedAPI(AStampedAPI):
             # modified = _enrichAlbums(entity, artists=[entity]) | modified
             modified = _enrichTracks(entity, artists=[entity]) | modified
 
-        if entity.isTYpe('artist') or entity.isType('track'):
+        if entity.isType('artist') or entity.isType('track'):
             # Enrich albums instead
             for albumItem in entity.albums:
                 try:
