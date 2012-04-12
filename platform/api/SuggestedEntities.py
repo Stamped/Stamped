@@ -128,9 +128,9 @@ class SuggestedEntities(object):
             # TODO
             pass
         elif subcategory == 'app':
-            top_free_apps       = rss.get_top_free_apps(limit=5)
-            top_paid_apps       = rss.get_top_paid_apps(limit=5)
-            top_grossing_apps   = rss.get_top_grossing_apps(limit=5)
+            top_free_apps       = self._appleRSS.get_top_free_apps(limit=5)
+            top_paid_apps       = self._appleRSS.get_top_paid_apps(limit=5)
+            top_grossing_apps   = self._appleRSS.get_top_grossing_apps(limit=5)
             
             suggested.append([ 'Top free apps', top_free_apps ])
             suggested.append([ 'Top paid apps', top_paid_apps ])
