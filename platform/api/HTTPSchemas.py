@@ -138,6 +138,20 @@ def _buildOpenTableURL(opentable_id=None, opentable_nickname=None, client=None):
 
     return None
 
+def _cleanImageURL(url):
+    domain = urlparse.urlparse(url).netloc
+
+    if 'mzstatic.com' in domain:
+        # try to return the maximum-resolution apple photo possible if we have 
+        # a lower-resolution version stored in our db
+        url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+    
+    elif 'amazon.com' in domain:
+        # strip the 'look inside' image modifier
+        url = amazon_image_re.sub(r'\1.jpg', url)
+
+    return url
+
 # ######### #
 # OAuth 2.0 #
 # ######### #
@@ -543,20 +557,8 @@ class HTTPEntity(Schema):
     def _addImages(self, images):
         for image in images:
             if image.image is not None:
-                url = image.image
-                domain = urlparse.urlparse(url).netloc
-
-                if 'mzstatic.com' in domain:
-                    # try to return the maximum-resolution apple photo possible if we have 
-                    # a lower-resolution version stored in our db
-                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
-                
-                elif 'amazon.com' in domain:
-                    # strip the 'look inside' image modifier
-                    url = amazon_image_re.sub(r'\1.jpg', url)
-            
                 item = ImageSchema()
-                item.image = url 
+                item.image = _cleanImageURL(image.image)
                 self.images.append(item)
 
     def _getIconURL(self, filename, client=None):
@@ -1013,7 +1015,8 @@ class HTTPEntity(Schema):
                 for album in entity.albums:
                     try:
                         item            = HTTPEntityGalleryItem()
-                        item.image      = album.images[0]['image']
+                        ### TODO: Add placeholder if image doesn't exist
+                        item.image      = _cleanImageURL(album.images[0]['image'])
                         item.caption    = album.title 
 
                         if album.entity_id is not None:
