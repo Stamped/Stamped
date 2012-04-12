@@ -70,8 +70,14 @@ class SuggestedEntities(object):
             
             section_limit     = limit / num_sections if limit else None
             
+            out_suggested = []
             for section in suggested:
                 section[1] = filter(lambda e: e.entity_id not in entity_ids, section[1])[:section_limit]
+                
+                if len(section[1]) > 0:
+                    out_suggested.append(section)
+            
+            suggested = out_suggested
         
         return suggested
     
@@ -107,9 +113,9 @@ class SuggestedEntities(object):
                     seen.add(artist.itunes_id)
                     unique_artists.append(artist)
             
-            suggested.append([ 'Popular Artists', unique_artists ])
-            suggested.append([ 'Popular Songs',   songs ])
-            suggested.append([ 'Popular Albums',  albums ])
+            suggested.append([ 'Popular Artists', unique_artists[:10] ])
+            suggested.append([ 'Popular Songs',   songs[:5] ])
+            suggested.append([ 'Popular Albums',  albums[:5] ])
         elif category == 'film':
             if subcategory == 'tv':
                 # TODO
@@ -131,11 +137,20 @@ class SuggestedEntities(object):
             suggested.append([ 'Top grossing apps', top_grossing_apps ])
         
         if len(suggested) == 0:
-            suggested.append([ 'Popular', self._get_popular_entities(subcategory) ])
+            suggested.append([ 'Popular', self._get_popular_entities(category, subcategory) ])
         
         return suggested
     
-    def _get_popular_entities(self, subcategory, limit=10):
+    def _get_popular_entities(self, category, subcategory, limit=10):
+        spec = {}
+        
+        if subcategory is not None:
+            spec["entity.subcategory"] = subcategory
+        elif category is not None:
+            spec["entity.category"] = category
+        else:
+            return []
+        
         ids = self._stamp_collection._collection.find(spec={"entity.subcategory" : "tv"}, fields={ "entity.entity_id" : 1, "_id" : 0}, output=list)
         
         entity_count = defaultdict(int)
