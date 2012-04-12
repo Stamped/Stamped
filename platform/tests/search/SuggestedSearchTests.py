@@ -7,25 +7,26 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from Schemas                import *
-from StampedTestUtils       import *
-from ASearchTestSuite       import ASearchTestSuite
-from SuggestedEntities      import SuggestedEntities
-from pprint                 import pformat
+from Schemas                            import *
+from StampedTestUtils                   import *
+from ASearchTestSuite                   import ASearchTestSuite
+from db.mongodb.MongoSuggestedEntities  import MongoSuggestedEntities
+from pprint                             import pformat
 
 class SuggestedSearchTests(ASearchTestSuite):
     
     def _test_suggestions(self, **kwargs):
         """ Test basic suggested entity searches """
         
-        suggestedEntities = SuggestedEntities()
+        suggestedEntities = MongoSuggestedEntities()
         suggested = suggestedEntities.getSuggestedEntities(**kwargs)
         
         utils.log()
         utils.log("-" * 80)
-        utils.log(pformat(kwargs))
+        utils.log("TEST %s" % pformat(kwargs))
         
         for section in suggested:
+            utils.log()
             utils.log("SECTION %s:" % section[0])
             
             for i in xrange(len(section[1])):

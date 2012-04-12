@@ -40,6 +40,7 @@ from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsColle
 from db.mongodb.MongoDeletedEntityCollection    import MongoDeletedEntityCollection
 from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from db.mongodb.MongoFactualCollection          import MongoFactualCollection
+from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -155,6 +156,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _factualDB(self):
         return MongoFactualCollection()
+    
+    @lazyProperty
+    def _suggestedEntities(self):
+        return MongoSuggestedEntities()
     
     @lazyProperty
     def _elasticsearch(self):

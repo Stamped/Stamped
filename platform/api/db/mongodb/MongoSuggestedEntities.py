@@ -8,20 +8,21 @@ __license__   = "TODO"
 import Globals, utils
 import Entity
 
-from utils                                  import lazyProperty
-from collections                            import defaultdict
+from utils                      import lazyProperty
+from collections                import defaultdict
 
-from libs.GooglePlaces                      import GooglePlaces
-from libs.applerss                          import AppleRSS
-from libs.Fandango                          import Fandango
-from libs.LRUCache                          import lru_cache
-from libs.Memcache                          import memcached_function
+from libs.GooglePlaces          import GooglePlaces
+from libs.applerss              import AppleRSS
+from libs.Fandango              import Fandango
+from libs.LRUCache              import lru_cache
+from libs.Memcache              import memcached_function
 
-from db.mongodb.MongoCollectionCollection   import MongoCollectionCollection
-from db.mongodb.MongoEntityCollection       import MongoEntityCollection
-from db.mongodb.MongoStampCollection        import MongoStampCollection
+from ASuggestedEntities         import ASuggestedEntities
+from MongoCollectionCollection  import MongoCollectionCollection
+from MongoEntityCollection      import MongoEntityCollection
+from MongoStampCollection       import MongoStampCollection
 
-class SuggestedEntities(object):
+class MongoSuggestedEntities(ASuggestedEntities):
     
     def getSuggestedEntities(self, userId=None, coords=None, category=None, subcategory=None, limit=None):
         if category is not None:
@@ -115,9 +116,9 @@ class SuggestedEntities(object):
                     seen.add(artist.itunes_id)
                     unique_artists.append(artist)
             
-            suggested.append([ 'Popular Artists', unique_artists[:10] ])
-            suggested.append([ 'Popular Songs',   songs[:5] ])
-            suggested.append([ 'Popular Albums',  albums[:5] ])
+            suggested.append([ 'Artists', unique_artists ])
+            suggested.append([ 'Songs',   songs ])
+            suggested.append([ 'Albums',  albums ])
         elif category == 'film':
             if subcategory == 'tv':
                 # TODO

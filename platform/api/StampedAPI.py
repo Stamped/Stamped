@@ -1353,12 +1353,14 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
-        raise NotImplementedError
-        # TODO
+        coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
-        
-        return results
-
+        return self._suggestedEntities.getSuggestedEntities(authUserId, 
+                                                            coords=coords, 
+                                                            category=suggested.category, 
+                                                            subcategory=suggested.subcategory, 
+                                                            limit=suggested.limit)
+    
     """
      #####                                    
     #     # #####   ##   #    # #####   ####  

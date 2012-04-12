@@ -1140,6 +1140,7 @@ class EntitySuggested(Schema):
         self.coordinates                    = CoordinatesSchema()
         self.category                       = SchemaElement(basestring)
         self.subcategory                    = SchemaElement(basestring)
+        self.limit                          = SchemaElement(int, default=10)
  
 
 # ############# #
