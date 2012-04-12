@@ -19,11 +19,11 @@ class SuggestedSearchTests(ASearchTestSuite):
         """ Test basic suggested entity searches """
         
         suggestedEntities = SuggestedEntities()
-        suggested = suggestedEntities.getSuggestedEntities(**test)
+        suggested = suggestedEntities.getSuggestedEntities(**kwargs)
         
         utils.log()
         utils.log("-" * 80)
-        utils.log(test)
+        utils.log(pformat(kwargs))
         
         for section in suggested:
             utils.log("SECTION %s:" % section[0])
