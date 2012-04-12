@@ -47,7 +47,7 @@ class SuggestedSearchTests(ASearchTestSuite):
                 
                 for i in xrange(len(section[1])):
                     entity = section[1][i]
-                    utils.log("   %d) %s (%s)" % (i, entity.title, entity.types))
+                    utils.log("   %d) %s (%s)" % (i, entity.title, list(entity.types)[0] if len(entity.types) == 1 else entity.types))
             
             utils.log("-" * 80)
             utils.log()
