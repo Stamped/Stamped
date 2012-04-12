@@ -3002,7 +3002,7 @@ class StampedAPI(AStampedAPI):
 
                 self.__handleDecorations(entity, decorations)
 
-                if entity.entity_id is not None:
+                if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
                     logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
                     return self._entityDB.updateEntity(entity)
                 else:
