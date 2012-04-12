@@ -1264,6 +1264,7 @@ class StampedAPI(AStampedAPI):
                     distance = abs(utils.get_spherical_distance(a, b) * 3959)
             except Exception:
                 pass
+            
             results.append((entity, distance))
             
             process -= 1
@@ -1323,6 +1324,14 @@ class StampedAPI(AStampedAPI):
         
         return results
     
+    @API_CALL
+    def getSuggestedEntities(self, authUserId, suggested):
+        raise NotImplementedError
+        # TODO
+        
+        
+        return results
+
     """
      #####                                    
     #     # #####   ##   #    # #####   ####  
@@ -2911,7 +2920,7 @@ class StampedAPI(AStampedAPI):
             if len(results) > 0 and results[0][0]['resolved']:
                 # source key was found in the Stamped DB
                 entity_id = results[0][1].key
-                
+        
         if entity_id is None:
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()

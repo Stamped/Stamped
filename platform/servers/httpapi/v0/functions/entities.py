@@ -129,6 +129,25 @@ def nearby(request):
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
+def suggested(request):
+    authUserId, authClientId = checkOAuth(request)
+    
+    schema      = parseRequest(HTTPEntitySuggested(), request)
+    schema      = schema.exportSchema(EntitySuggested())
+    result      = stampedAPI.getSuggestedEntities(authUserId=authUserId, schema)
+    
+    raise NotImplementedError
+    
+    autosuggest = []
+    for item in result:
+        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+        autosuggest.append(item)
+    
+    return transformOutput(autosuggest)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
 def menu(request):
     authUserId, authClientId = checkOAuth(request)
     
@@ -145,9 +164,9 @@ def stampedBy(request):
     
     schema      = parseRequest(HTTPStampedBySlice(), request)
     showCount   = True if schema.group is None else False
-
+    
     result      = HTTPStampedBy()
-
+    
     if schema.group is None or schema.group == 'friends':
         requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 1
@@ -156,7 +175,7 @@ def stampedBy(request):
             result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.friends.count = count
-
+    
     if schema.group is None or schema.group == 'fof':
         requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
@@ -165,7 +184,7 @@ def stampedBy(request):
             result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.fof.count = count
-
+    
     if schema.group is None or schema.group == 'all':
         requestSlice = schema.exportSchema(GenericCollectionSlice())
         stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
@@ -173,7 +192,6 @@ def stampedBy(request):
             result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.all.count = count
-
+    
     return transformOutput(result.exportSparse())
-
 

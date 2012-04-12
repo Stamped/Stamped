@@ -21,6 +21,11 @@ from libs.TheTVDB           import TheTVDB
 
 class CachingSearchTests(ASearchTestSuite):
     
+    """
+        Test suite to ensure that local and global caching are both working properly 
+        for key caching priorities.
+    """
+    
     def __test_api_caching(self, api, cases):
         api_name = api.__class__.__name__
         delay = 0.5
