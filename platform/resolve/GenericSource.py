@@ -404,7 +404,7 @@ class GenericSource(BasicSource):
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
         proxy = None
-        if controller.shouldEnrich(self.idName, self.sourceName, entity):
+        if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
