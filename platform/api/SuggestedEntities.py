@@ -92,14 +92,15 @@ class SuggestedEntities(object):
             
             suggested.append([ 'Nearby', results ])
         elif category == 'music':
-            songs  = self._appleRSS.get_top_songs (limit=10)
-            albums = self._appleRSS.get_top_albums(limit=10)
+            songs   = self._appleRSS.get_top_songs (limit=10)
+            albums  = self._appleRSS.get_top_albums(limit=10)
             
-            artists = [ s.artists[0] for s in filter(lambda s: len(s.artists) > 0, songs) ]
+            artists = []
+            artists.extend([ s.artists[0] for s in filter(lambda s: len(s.artists) > 0, songs)  ])
             artists.extend([ a.artists[0] for a in filter(lambda a: len(a.artists) > 0, albums) ])
             
-            seen = set()
             unique_artists = []
+            seen = set()
             
             for artist in artists:
                 if artist.itunes_id not in seen:
@@ -112,29 +113,30 @@ class SuggestedEntities(object):
         elif category == 'film':
             if subcategory == 'tv':
                 # TODO
-                
-                raise NotImplementedError
+                pass
             elif subcategory == 'movie':
                 movies = fandango.get_top_box_office_movies()
                 
                 suggested.append([ 'Box Office', movies ])
         elif category == 'book':
-            # TODO: return top books
+            # TODO
             pass
         elif subcategory == 'app':
-            # TODO
-            pass
-        else:
-            # TODO
-            pass
+            top_free_apps       = rss.get_top_free_apps(limit=5)
+            top_paid_apps       = rss.get_top_paid_apps(limit=5)
+            top_grossing_apps   = rss.get_top_grossing_apps(limit=5)
+            
+            suggested.append([ 'Top free apps', top_free_apps ])
+            suggested.append([ 'Top paid apps', top_paid_apps ])
+            suggested.append([ 'Top grossing apps', top_grossing_apps ])
         
         if len(suggested) == 0:
-            suggested.append(self._get_popular_entities(subcategory))
+            suggested.append([ 'Popular', self._get_popular_entities(subcategory) ])
         
         return suggested
     
     def _get_popular_entities(self, subcategory, limit=10):
-        ids = self._stamp_collection._collection.find({"entity.subcategory" : "tv"}, { "entity.entity_id" : 1, "_id" : 0}, output=list)
+        ids = self._stamp_collection._collection.find(spec={"entity.subcategory" : "tv"}, fields={ "entity.entity_id" : 1, "_id" : 0}, output=list)
         
         entity_count = defaultdict(int)
         
