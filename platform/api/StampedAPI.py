@@ -3202,7 +3202,7 @@ class StampedAPI(AStampedAPI):
         ### ARTISTS
         def _enrichArtist(stub):
             try:
-                artist = _enrichStub(stub, musicSources)
+                artist, artistModified = _enrichStub(stub, musicSources)
             except KeyError:
                 logs.warning('Artist enrichment failed')
                 return stub
