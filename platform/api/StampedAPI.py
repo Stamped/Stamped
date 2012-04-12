@@ -2928,7 +2928,7 @@ class StampedAPI(AStampedAPI):
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
     
-    def _mergeEntity(self, entity, update = False):
+    def _mergeEntity(self, entity, update=False, force=False):
         try:
             if entity.sources.tombstone_id is not None:
                 successor_id = entity['tombstone_id']
@@ -2961,7 +2961,7 @@ class StampedAPI(AStampedAPI):
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
                 return successor
             else:
-                if not modified:
+                if not modified and not force:
                     return entity 
 
                 self.__handleDecorations(entity, decorations)
@@ -3089,9 +3089,7 @@ class StampedAPI(AStampedAPI):
             # Update track with entity_ids from passed artists
             for artist in artists:
                 artistUpdated = False
-                i = 0
                 for item in track.artists:
-                    i = i + 1
                     commonSources = set(artist.sources.value.keys()).intersection(set(item.sources.value.keys()))
                     for commonSource in commonSources:
                         if commonSource[-3:] == '_id' and artist.sources[commonSource] == item.sources[commonSource]:
@@ -3108,7 +3106,7 @@ class StampedAPI(AStampedAPI):
                 modified = self._enrichEntity(track)
 
             # Merge track
-            track = self._mergeEntity(track, True)
+            track = self._mergeEntity(track, True, force=True)
 
             return track
 
@@ -3149,7 +3147,7 @@ class StampedAPI(AStampedAPI):
                     album.artists.append(artist.minimize())
 
             # Merge album
-            album = self._mergeEntity(album, True)
+            album = self._mergeEntity(album, True, force=True)
 
             return album
 
@@ -3175,7 +3173,7 @@ class StampedAPI(AStampedAPI):
                 return stub
 
             # Merge artist
-            artist = self._mergeEntity(artist, True)
+            artist = self._mergeEntity(artist, True, force=True)
 
             return artist
 
