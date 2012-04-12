@@ -197,6 +197,8 @@ class GenericSource(BasicSource):
             decorations = {}
         if timestamps is None:
             timestamps = {}
+
+        timestamps[proxy.source] = controller.now
         
         def setAttribute(source, target):
             try:
