@@ -125,8 +125,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 currentSource = groupObj.getSource(entity)
                 if currentSource is None:
                     if groupObj.isSet(entity):
-                        return True
-                    return False
+                        return False
+                    return True
                 else:
                     priority = self.getGroupPriority(group, source)
                     currentPriority = self.getGroupPriority(group, currentSource)
@@ -141,6 +141,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         else:
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
+                            if currentTimestamp is None:
+                                return True
                             try:
                                 currentTimestamp = currentTimestamp.replace(tzinfo=None)
                                 if self.now - currentTimestamp > currentMaxAge:
