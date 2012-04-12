@@ -182,7 +182,7 @@ class AMongoCollection(object):
         
         if self._primary_key:
             if self._primary_key in document:
-                if self._primary_key is None:
+                if self._primary_key is None or self._primary_key.startswith('T_'):
                     del(document[self._primary_key])
                 else:
                     document['_id'] = self._getObjectIdFromString(document[self._primary_key])
