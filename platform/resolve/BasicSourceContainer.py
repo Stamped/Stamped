@@ -146,8 +146,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 if self.now - currentTimestamp > currentMaxAge:
                                     return True
                             except Exception as e:
-                                logs.warning('FAIL: self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
-                                    (self.now, currentTimestamp, currentMaxAge, e))
+                                logs.warning('FAIL (%s / %s): self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
+                                    (source, group, self.now, currentTimestamp, currentMaxAge, e))
                             return False
             else:
                 return False
