@@ -3006,6 +3006,7 @@ class StampedAPI(AStampedAPI):
                     logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
                     return self._entityDB.updateEntity(entity)
                 else:
+                    entity.entity_id = None
                     entity = self._entityDB.addEntity(entity)
                     logs.info("Inserted new entity on merge %s" % entity.entity_id)
                     return entity
@@ -3110,7 +3111,7 @@ class StampedAPI(AStampedAPI):
 
 
         ### TRACKS
-        def _enrichTrack(stub, artists=[], albums=[]):
+        def _enrichTrack(stub, artists=[], albums=[], merge=True):
             try:
                 track, trackModified = _enrichStub(stub, musicSources)
             except KeyError as e:
@@ -3166,14 +3167,15 @@ class StampedAPI(AStampedAPI):
                 trackModified = self._enrichEntity(track) | trackModified
 
             # Merge track
-            track = self._mergeEntity(track, update=trackModified)
+            if merge:
+                track = self._mergeEntity(track, update=trackModified)
 
             return track
 
-        def _enrichTracks(entity, artists=[], albums=[]):
+        def _enrichTracks(entity, artists=[], albums=[], merge=True):
             track_list = []
             for stub in entity.tracks:
-                track = _enrichTrack(stub, artists, albums)
+                track = _enrichTrack(stub, artists, albums, merge)
                 track_list.append(track.minimize())
 
             if len(track_list) > 0:
@@ -3184,7 +3186,7 @@ class StampedAPI(AStampedAPI):
 
 
         ### ALBUMS
-        def _enrichAlbum(stub, artists=[]):
+        def _enrichAlbum(stub, artists=[], merge=True):
             try:
                 album, albumModified = _enrichStub(stub, musicSources)
             except KeyError:
@@ -3214,14 +3216,15 @@ class StampedAPI(AStampedAPI):
                     albumModified = True
 
             # Merge album
-            album = self._mergeEntity(album, update=albumModified)
+            if merge:
+                album = self._mergeEntity(album, update=albumModified)
 
             return album
 
-        def _enrichAlbums(entity, artists=[]):
+        def _enrichAlbums(entity, artists=[], merge=True):
             album_list = []
             for stub in entity.albums:
-                album = _enrichAlbum(stub, artists)
+                album = _enrichAlbum(stub, artists, merge)
                 album_list.append(album.minimize())
 
             if len(album_list) > 0:
@@ -3232,7 +3235,7 @@ class StampedAPI(AStampedAPI):
 
 
         ### ARTISTS
-        def _enrichArtist(stub):
+        def _enrichArtist(stub, merge=True):
             try:
                 artist, artistModified = _enrichStub(stub, musicSources)
             except KeyError:
@@ -3244,10 +3247,10 @@ class StampedAPI(AStampedAPI):
 
             return artist
 
-        def _enrichArtists(entity):
+        def _enrichArtists(entity, merge=True):
             artist_list = []
             for stub in entity.artists:
-                artist = _enrichArtist(stub)
+                artist = _enrichArtist(stub, merge)
                 artist_list.append(artist.minimize())
 
             if len(artist_list) > 0:
@@ -3271,7 +3274,7 @@ class StampedAPI(AStampedAPI):
             modified = _enrichTracks(entity, artists=entity.artists, albums=[entity]) | modified
 
         if entity.isType('artist'):
-            # modified = _enrichAlbums(entity, artists=[entity]) | modified
+            modified = _enrichAlbums(entity, artists=[entity], merge=False) | modified
             modified = _enrichTracks(entity, artists=[entity]) | modified
 
         if entity.isType('artist') or entity.isType('track'):
