@@ -1212,6 +1212,11 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
+
+        # Assert that it's the same one (i.e. hasn't been tombstoned)
+        if entity.entity_id != data['entity_id']:
+            logs.warning('Cannot update entity %s - old entity has been tombstoned' % entity.entity_id)
+            raise Exception
         
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1651,8 +1656,12 @@ class StampedAPI(AStampedAPI):
         # If stamped entity is on the to do list, mark as complete
         try:
             self._favoriteDB.completeFavorite(entity.entity_id, authUserId)
+            if entity.entity_id != stamp.entity.entity_id:
+                self._favoriteDB.completeFavorite(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
+
+        ### TODO: Update stamp with new entity_id if old one is tombstoned
         
         creditedUserIds = []
         
@@ -2937,7 +2946,7 @@ class StampedAPI(AStampedAPI):
             if entity.sources.tombstone_id is not None:
                 successor_id = entity['tombstone_id']
                 successor    = self._entityDB.getEntity(successor_id)
-                assert successor is not None
+                assert successor is not None and successor.entity_id == successor_id
 
                 logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor_id))
                 return successor
@@ -2948,7 +2957,7 @@ class StampedAPI(AStampedAPI):
             if entity.sources.tombstone_id is not None:
                 successor_id = entity['tombstone_id']
                 successor    = self._entityDB.getEntity(successor_id)
-                assert successor is not None
+                assert successor is not None and successor.entity_id == successor_id
                 
                 merger = FullResolveContainer.FullResolveContainer()
                 merger.addSource(EntitySource(entity, merger.groups))
