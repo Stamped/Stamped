@@ -261,6 +261,12 @@ class UserStatsSchema(Schema):
         self.num_likes          = SchemaElement(int)
         self.num_likes_given    = SchemaElement(int)
         self.num_unread_news    = SchemaElement(int)
+        self.distribution       = SchemaList(CategoryDistributionSchema())
+
+class CategoryDistributionSchema(Schema):
+    def setSchema(self):
+        self.category           = SchemaElement(basestring)
+        self.count              = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):

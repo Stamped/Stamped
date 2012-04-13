@@ -38,7 +38,7 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
-    from Entity                 import buildEntity 
+    from Entity                 import buildEntity, deriveCategoryFromTypes
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -779,6 +779,22 @@ class StampedAPI(AStampedAPI):
             return self._userDB.getUser(userTiny.user_id)
         
         return self._userDB.getUserByScreenName(userTiny.screen_name)
+
+    def _getUserStampDistribution(self, userId):
+
+        stampIds    = self._collectionDB.getUserStampIds(userId)
+        stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        
+        categories  = {}
+        num_stamps  = len(stamps)
+        
+        for stamp in stamps:
+            category = deriveCategoryFromTypes(stamp.entity.types)
+            categories.setdefault(category, 0)
+            categories[category] += 1
+
+        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        
     
     ### PUBLIC
     
@@ -794,6 +810,9 @@ class StampedAPI(AStampedAPI):
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
+
+        if self.__version > 0 and len(user.distribution) == 0:
+            user.distribution = self._getUserStampDistribution(authUserId)
         
         return user
     
