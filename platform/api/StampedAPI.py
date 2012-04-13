@@ -2863,60 +2863,15 @@ class StampedAPI(AStampedAPI):
             return menu
 
     """
-    ######                                      
-    #     # #####  # #    #   ##   ##### ###### 
-    #     # #    # # #    #  #  #    #   #      
-    ######  #    # # #    # #    #   #   #####  
-    #       #####  # #    # ######   #   #      
-    #       #   #  #  #  #  #    #   #   #      
-    #       #    # #   ##   #    #   #   ###### 
+    ######                                            
+    #     # ######  ####   ####  #      #    # ###### 
+    #     # #      #      #    # #      #    # #      
+    ######  #####   ####  #    # #      #    # #####  
+    #   #   #           # #    # #      #    # #      
+    #    #  #      #    # #    # #       #  #  #      
+    #     # ######  ####   ####  ######   ##   ###### 
+                                                   
     """
-    
-    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
-        if not self._activity or len(recipient_ids) <= 0:
-            return
-        
-        sendAlert                   = kwargs.pop('sendAlert', True)
-        checkExists                 = kwargs.pop('checkExists', False)
-        
-        activity                    = Activity()
-        activity.genre              = genre
-        activity.user.user_id       = user_id
-        activity.linked_user_id     = user_id # TODO: should this always be set here? 
-        activity.timestamp.created  = datetime.utcnow()
-        
-        for k, v in kwargs.iteritems():
-            activity[k] = v
-        
-        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
-                                     checkExists=checkExists)
-        
-        # increment unread news for all recipients
-        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
-    
-    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
-        mentionedUserIds = set()
-        
-        if self._activity == True and mentions is not None and len(mentions) > 0:
-            # Note: No activity should be generated for the user initiating the mention
-            for mention in mentions:
-                if 'user_id' in mention and mention.user_id != authUserId and \
-                    (ignore is None or mention.user_id not in ignore):
-                    # Check if block exists between user and mentioned user
-                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
-                    
-                    if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.add(mention['user_id'])
-            
-            self._addActivity(genre='mention', 
-                              user_id=authUserId, 
-                              recipient_ids=mentionedUserIds, 
-                              **kwargs)
-            
-            # Increment mentions metric
-            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
-        
-        return mentionedUserIds
     
     @lazyProperty
     def __full_resolve(self):
@@ -3220,6 +3175,61 @@ class StampedAPI(AStampedAPI):
 
         return modified
 
+    """
+    ######                                      
+    #     # #####  # #    #   ##   ##### ###### 
+    #     # #    # # #    #  #  #    #   #      
+    ######  #    # # #    # #    #   #   #####  
+    #       #####  # #    # ######   #   #      
+    #       #   #  #  #  #  #    #   #   #      
+    #       #    # #   ##   #    #   #   ###### 
+    """
+    
+    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
+        if not self._activity or len(recipient_ids) <= 0:
+            return
+        
+        sendAlert                   = kwargs.pop('sendAlert', True)
+        checkExists                 = kwargs.pop('checkExists', False)
+        
+        activity                    = Activity()
+        activity.genre              = genre
+        activity.user.user_id       = user_id
+        activity.linked_user_id     = user_id # TODO: should this always be set here? 
+        activity.timestamp.created  = datetime.utcnow()
+        
+        for k, v in kwargs.iteritems():
+            activity[k] = v
+        
+        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
+                                     checkExists=checkExists)
+        
+        # increment unread news for all recipients
+        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
+    
+    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
+        mentionedUserIds = set()
+        
+        if self._activity == True and mentions is not None and len(mentions) > 0:
+            # Note: No activity should be generated for the user initiating the mention
+            for mention in mentions:
+                if 'user_id' in mention and mention.user_id != authUserId and \
+                    (ignore is None or mention.user_id not in ignore):
+                    # Check if block exists between user and mentioned user
+                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
+                    
+                    if self._friendshipDB.blockExists(friendship) == False:
+                        mentionedUserIds.add(mention['user_id'])
+            
+            self._addActivity(genre='mention', 
+                              user_id=authUserId, 
+                              recipient_ids=mentionedUserIds, 
+                              **kwargs)
+            
+            # Increment mentions metric
+            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
+        
+        return mentionedUserIds
     
     def _addEntity(self, entity):
         if entity is not None:
