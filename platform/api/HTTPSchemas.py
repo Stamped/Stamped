@@ -597,6 +597,9 @@ class HTTPEntity(Schema):
 
                 item.action = action
 
+            if 'action' in kwargs:
+                item.action = action 
+
             self.metadata.append(item)
     
     def _addImages(self, images):
@@ -868,6 +871,19 @@ class HTTPEntity(Schema):
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
+
+                if len(entity.artists) > 0:
+                    artist = entity.artists[0]
+                    if artist.entity_id is not None:
+                        source              = HTTPActionSource()
+                        source.name         = 'View Artist'
+                        source.source       = 'stamped'
+                        source.source_id    = artist.entity_id
+                        action              = HTTPAction()
+                        action.type         = 'stamped_view_entity'
+                        action.name         = 'View Artist'
+                        action.sources      = [source]
+                        self._addMetadata('Artist', entity.artists[0], action=action, optional=True)
 
             elif entity.subcategory == 'song':
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
