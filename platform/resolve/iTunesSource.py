@@ -651,7 +651,16 @@ class iTunesSource(GenericSource):
             rawData = self.__itunes.method('lookup',id=itunesId)
 
             if len(rawData['results']) == 0 or rawData['resultCount'] == 0:
-                # No results - try falling back in case id was deprecated by iTunes
+                """
+                Hacky method to try and 'enrich' the iTunes ID 
+
+                If the iTunes ID is deprecated, lookup will fail with 0 results. The only
+                way to convert to a new id is to attempt to connect to the human-readable 
+                endpoint, which then does a 301 redirect to a url that contains the new
+                valid id. This section grabs and parses that new id. It's not pretty, but it works.
+
+                Note that iTunes can overwrite the seed priority for itunes_id as a result.
+                """
                 try:
                     entity = kwargs.pop('entity', None)
                     if entity is not None: 

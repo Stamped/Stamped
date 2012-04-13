@@ -36,18 +36,12 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
         
-        entity = {'entity_id': document['entity']['entity_id']}
-        if 'title' in document['entity']:
-            entity['title'] = document['entity']['title']
-        if 'types' in document['entity']:
-            entity['types'] = document['entity']['types']
-        if 'kind' in document['entity']:
-            entity['kind'] = document['entity']['kind']
-        document['entity'] = entity
-        if 'stamp' in document:
-            document['stamp']['entity'] = entity
+        entityData = document.pop('entity')
+        entity = buildEntity(entityData, mini=True)
+        document['entity'] = {'entity_id': entity.entity_id}
         
-        favorite = self._obj(document, overflow=self._overflow)        
+        favorite = self._obj(document, overflow=self._overflow)
+        favorite.entity = entity       
         
         return favorite 
     
