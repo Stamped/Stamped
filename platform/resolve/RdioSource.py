@@ -149,7 +149,6 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
     def tracks(self):
         keys = ','.join(self.data['trackKeys'])
         track_dict = self.rdio.method('get',keys=keys)['result']
-        logs.info('\n\nALBUM - TRACK LIST\n%s\n\n' % track_dict)
         return [ 
             {
                 'name'  : entry['name'],
