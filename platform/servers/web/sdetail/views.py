@@ -37,7 +37,7 @@ def show(request, **kwargs):
     stampNum    = kwargs.pop('stamp_num', None)
     stampTitle  = kwargs.pop('stamp_title', None)
     mobile      = kwargs.pop('mobile', False)
-
+    
     try:
         logs.info('%s/%s/%s' % (screenName, stampNum, stampTitle))
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
@@ -55,7 +55,8 @@ def show(request, **kwargs):
                 encodedStampTitle = encodedStampTitle[:i]
             
             if encodedStampTitle != stampTitle:
-                raise Exception("Invalid stamp title: '%s' (received) vs '%s' (stored)" % (stampTitle, encodedStampTitle))
+                raise Exception("Invalid stamp title: '%s' (received) vs '%s' (stored)" % 
+                                (stampTitle, encodedStampTitle))
 
         entity = stampedAPI.getEntity({'entity_id': stamp.entity_id})
         opentable_url = None
@@ -71,6 +72,7 @@ def show(request, **kwargs):
         
         if entity.genre == 'film' and entity.length:
             params['entity']['duration'] = formatDuration(entity.length)
+        
         params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
         
         response = render_to_response(template, params)
@@ -78,7 +80,7 @@ def show(request, **kwargs):
         response['Cache-Control'] = 'max-age=600'
         
         return response
-
+    
     except Exception as e:
         logs.warning("Error: %s" % e)
         try:
@@ -93,3 +95,4 @@ def show(request, **kwargs):
 def mobile(request, **kwargs):
     kwargs['mobile'] = True
     return show(request, **kwargs)
+

@@ -24,7 +24,17 @@ from MongoStampCollection       import MongoStampCollection
 
 class MongoSuggestedEntities(ASuggestedEntities):
     
+    """
+        Responsible for suggesting relevant / popular entities.
+    """
+    
     def getSuggestedEntities(self, userId=None, coords=None, category=None, subcategory=None, limit=None):
+        """
+            Returns a list of suggested entities (separated into sections), restricted 
+            to the given category / subcategory, and possibly personalized with respect 
+            to the given userId.
+        """
+        
         if category is not None:
             category    = category.lower().strip()
         if subcategory is not None:
@@ -43,29 +53,26 @@ class MongoSuggestedEntities(ASuggestedEntities):
         if category != 'place' and category != 'food':
             coords = None
         
-        suggested    = self._getSuggestedEntities(coords, category, subcategory)
+        suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)
         num_sections = len(suggested)
         
         if num_sections > 0:
+            out_suggested     = []
+            seen              = defaultdict(set)
+            
             # filter suggested entities already stamped by this user
             if userId is not None:
                 stampIds      = self._collection_collection.getUserStampIds(user_id)
                 stamps        = self._stamp_collection.getStamps(stampIds, limit=1000, sort='modified')
-                entity_ids    = frozenset(s.entity_id for s in stamps)
-            else:
-                entity_ids    = frozenset()
-            
-            out_suggested     = []
-            seen              = defaultdict(set)
+                
+                for stamp in stamps:
+                    seen['entity_id'].add(stamp.entity_id)
             
             def _get_section_limit(i):
                 if limit:
                     return (limit / num_sections) + (1 if i + 1 <= (limit % num_sections) else 0)
                 
                 return None
-            
-            for entity_id in entity_ids:
-                seen['entity_id'].add(entity_id)
             
             # process each section, removing obvious duplicates and enforcing per section limits
             for i in xrange(num_sections):
@@ -86,7 +93,15 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # and also cached remotely via memcached with a TTL of 2 days
     @lru_cache(maxsize=8)
     @memcached_function(time=2*24*60*60)
-    def _getSuggestedEntities(self, coords, category, subcategory):
+    def _getGlobalSuggestedEntities(self, coords, category, subcategory):
+        """
+            Returns a list of suggested entities (separated into sections), restricted 
+            to the given category / subcategory.
+            
+            Note that this method is global and not personalized to a particular user's 
+            preferences.
+        """
+        
         popular   = True
         suggested = []
         
@@ -144,9 +159,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
     
     def _get_popular_entities(self, category, subcategory, limit=10):
         """ 
-            Returns the most popular entities on Stamped restricted to the 
-            category / subcategory given, with popularity defined simply 
-            by the number of stamps an entity has received.
+            Returns the most popular entities on Stamped restricted to the category / 
+            subcategory given, with popularity defined simply by the number of stamps 
+            an entity has received.
         """
         
         spec = {}
@@ -158,14 +173,17 @@ class MongoSuggestedEntities(ASuggestedEntities):
         else:
             return []
         
+        # fetch all entity_ids for stamps in the given category / subcategory
         ids = self._stamp_collection._collection.find(
             spec=spec, fields={ "entity.entity_id" : 1, "_id" : 0}, output=list)
         
         entity_count = defaultdict(int)
         
+        # calculate the total number of times each entity was stamped
         for result in ids:
             entity_count[result['entity']['entity_id']] += 1
         
+        # sort the resulting entities by stamp count and return the top slice
         entity_ids = list(sorted(entity_count, key=entity_count.__getitem__, reverse=True))
         entity_ids = entity_ids[:limit]
         
