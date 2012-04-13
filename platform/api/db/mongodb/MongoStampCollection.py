@@ -11,6 +11,7 @@ import bson, logs, pprint, pymongo, re
 from datetime                       import datetime
 from utils                          import lazyProperty
 from Schemas                        import *
+from Entity                         import buildEntity
 
 from api.AStampDB                   import AStampDB
 from AMongoCollection               import AMongoCollection
@@ -45,16 +46,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
 
-        entity = {'entity_id': document['entity']['entity_id']}
-        if 'title' in document['entity']:
-            entity['title'] = document['entity']['title']
-        if 'types' in document['entity']:
-            entity['types'] = document['entity']['types']
-        if 'kind' in document['entity']:
-            entity['kind'] = document['entity']['kind']
-        document['entity'] = entity
+        entityData = document.pop('entity')
+        entity = buildEntity(entityData, mini=True)
+        document['entity'] = entity.entity_id
         
-        stamp = self._obj(document, overflow=self._overflow)        
+        stamp = self._obj(document, overflow=self._overflow)
+        stamp.entity = entity 
         
         return stamp 
     

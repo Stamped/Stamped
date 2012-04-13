@@ -3034,7 +3034,7 @@ class StampedAPI(AStampedAPI):
                             entity_id = stampedSource.resolve_fast(source, source_id)
                             if entity_id is None:
                                 # Attempt to resolve against the Stamped DB (full)
-                                proxy = source.entityProxyFromKey(source_id)
+                                proxy = source.entityProxyFromKey(source_id, entity=stub)
                                 results = stampedSource.resolve(proxy)
                                 if len(results) > 0 and results[0][0]['resolved']:
                                     entity_id = results[0][1].key

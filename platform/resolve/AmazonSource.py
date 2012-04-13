@@ -595,7 +595,7 @@ class AmazonSource(GenericSource):
     #     except Exception:
     #         logs.warning("no image set for %s" % asin)
     
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             item = _AmazonObject(amazon_id=key)
             kind = xp(item.attributes, 'ProductGroup')['v'].lower()

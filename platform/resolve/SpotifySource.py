@@ -234,7 +234,7 @@ class SpotifySource(GenericSource):
     def urlField(self):
         return None
 
-    def entityProxyFromKey(self, key, type=None):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             item = self.__spotify.lookup(key)
             

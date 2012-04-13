@@ -217,7 +217,7 @@ class RdioSource(GenericSource):
     def __rdio(self):
         return globalRdio()
 
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             if key.startswith('t'):
                 return RdioTrack(rdio_id=key)
