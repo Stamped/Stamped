@@ -26,7 +26,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
     
     def getSuggestedEntities(self, userId=None, coords=None, category=None, subcategory=None, limit=None):
         if category is not None:
-            category = category.lower().strip()
+            category    = category.lower().strip()
         if subcategory is not None:
             subcategory = subcategory.lower().strip()
         
