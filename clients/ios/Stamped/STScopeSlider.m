@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STInboxScopeSlider.h"
+#import "STScopeSlider.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -15,7 +15,7 @@
 #import "STTooltipView.h"
 #import "STImageView.h"
 
-@interface STInboxScopeSlider ()
+@interface STScopeSlider ()
 - (void)commonInit;
 - (void)valueChanged:(id)sender;
 - (void)dragEnded:(id)sender;
@@ -29,7 +29,7 @@
 @property (nonatomic, retain) NSMutableArray* trackButtons;
 @end
 
-@implementation STInboxScopeSlider
+@implementation STScopeSlider
 
 @synthesize userImageView = userImageView_;
 @synthesize trackButtons = trackButtons_;
@@ -83,7 +83,7 @@
   [self addSubview:tooltipView_];
   [tooltipView_ release];
   self.trackButtons = [NSMutableArray array];
-  for (NSUInteger i = 0; i <= STScopeSliderGranularityEveryone; ++i) {
+  for (NSUInteger i = 0; i <= STStampedAPIScopeEveryone; ++i) {
     UIButton* b = [UIButton buttonWithType:UIButtonTypeCustom];
     b.tag = i;
     b.frame = CGRectMake((i / 4.0) * (CGRectGetWidth(self.bounds) + 30) - 2, -10, 40, 40);
@@ -91,7 +91,7 @@
     [self addSubview:b];
     [trackButtons_ addObject:b];
   }
-  [self setGranularity:STScopeSliderGranularityFriends animated:NO];
+  [self setGranularity:STStampedAPIScopeFriends animated:NO];
 }
 
 - (void)flashTooltip {
@@ -131,16 +131,16 @@
 - (void)updateTooltipString {
   NSString* string = nil;
   switch (granularity_) {
-    case STScopeSliderGranularityYou:
+    case STStampedAPIScopeYou:
       string = NSLocalizedString(@"you", nil);
       break;
-    case STScopeSliderGranularityFriends:
+    case STStampedAPIScopeFriends:
       string = NSLocalizedString(@"you + friends", nil);
       break;
-    case STScopeSliderGranularityFriendsOfFriends:
+    case STStampedAPIScopeFriendsOfFriends:
       string = NSLocalizedString(@"friends of friends", nil);
       break;
-    case STScopeSliderGranularityEveryone:
+    case STStampedAPIScopeEveryone:
       string = NSLocalizedString(@"popular", nil);
       break;
     default:
@@ -168,7 +168,7 @@
   [self setGranularity:[sender tag] animated:YES];
 }
 
-- (void)setGranularity:(STScopeSliderGranularity)granularity animated:(BOOL)animated {
+- (void)setGranularity:(STStampedAPIScope)granularity animated:(BOOL)animated {
   if (granularity != granularity_) {
     granularity_ = granularity;
   }
@@ -210,16 +210,16 @@
   [background drawInRect:CGRectMake(0, 0, background.size.width, background.size.height)];
   UIImage* inner = nil;
   switch (granularity_) {
-    case STScopeSliderGranularityYou:
+    case STStampedAPIScopeYou:
       inner = [UIImage imageNamed:@"scope_drag_inner_you"];
       break;
-    case STScopeSliderGranularityFriends:
+    case STStampedAPIScopeFriends:
       inner = [UIImage imageNamed:@"scope_drag_inner_friends"];
       break;
-    case STScopeSliderGranularityFriendsOfFriends:
+    case STStampedAPIScopeFriendsOfFriends:
       inner = [UIImage imageNamed:@"scope_drag_inner_fof"];
       break;
-    case STScopeSliderGranularityEveryone:
+    case STStampedAPIScopeEveryone:
       inner = [UIImage imageNamed:@"scope_drag_inner_all"];
       break;
     default:
@@ -227,7 +227,7 @@
   }
   CGFloat xPos = (background.size.width - inner.size.width) / 2;
   CGFloat yPos = ((background.size.height - inner.size.height) / 2) - 2;  // Account for shadow.
-  if (granularity_ == STScopeSliderGranularityYou &&
+  if (granularity_ == STStampedAPIScopeYou &&
       ![[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"] &&
       userImageView_.image) {
     CGPathRef maskPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(xPos, yPos, 26, 26)].CGPath;

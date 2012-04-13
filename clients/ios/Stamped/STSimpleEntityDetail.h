@@ -26,7 +26,7 @@
 @property (nonatomic, readwrite, retain) NSArray<STImage>* images;
 @property (nonatomic, readwrite, retain) NSArray<STActionItem>* actions;
 @property (nonatomic, readwrite, retain) NSArray<STMetadataItem>* metadata;
-@property (nonatomic, readwrite, retain) id<STGallery> gallery;
+@property (nonatomic, readwrite, retain) NSArray<STGallery>* galleries;
 @property (nonatomic, readwrite, retain) id<STPlaylist> playlist;
 
 + (RKObjectMapping*)mapping;

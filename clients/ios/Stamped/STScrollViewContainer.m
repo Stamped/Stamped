@@ -104,7 +104,45 @@ static int _count = 0;
     size.height = containerHeight;
     self.contentSize = size;
   }];
-  NSLog(@"height %f",self.contentSize.height);
+}
+
+
+- (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation {
+  CGFloat seconds = 0;
+  if (animation) {
+    seconds = .25;
+  }
+  CGFloat delta = -view.frame.size.height;
+  CGFloat containerHeight = self.frame.size.height+1;
+  for (UIView* view2 in self.children) {
+    CGFloat childHeight = CGRectGetMaxY(view2.frame) + delta;
+    containerHeight = MAX(containerHeight, childHeight);
+    if (view2 == view || CGRectGetMinY(view2.frame) > CGRectGetMinY(view.frame)) {
+      [UIView animateWithDuration:seconds animations:^{
+        if (view2 == view) {
+          CGRect frame = view2.frame;
+          frame.size.height += delta;
+          view2.frame = frame;
+        }
+        else {
+          view2.frame = CGRectOffset(view2.frame, 0, delta);
+        }
+      } completion:^(BOOL finished) {
+        if (view == view2) {
+          [children_ removeObject:view];
+          [view removeFromSuperview];
+        }
+      }];
+    }
+  }
+  if (self.contentSize.height + delta < self.frame.size.height) {
+    delta = self.frame.size.height - self.contentSize.height;
+  }
+  [UIView animateWithDuration:seconds animations:^{
+    CGSize size = self.contentSize;
+    size.height = containerHeight;
+    self.contentSize = size;
+  }];
 }
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {

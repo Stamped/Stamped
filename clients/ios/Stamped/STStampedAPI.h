@@ -29,6 +29,11 @@ typedef enum {
 
 @interface STStampedAPI : NSObject
 
+//TODO modifify calls to returns cancellable NSOperations that have already been disbatched and autoreleased
+// This strategy should be reverse compatible with existing usage.
+
+//TODO upgrade all deprecated error-less methods
+
 - (id<STUser>)currentUser;
 
 - (void)stampForStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>))block;

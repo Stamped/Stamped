@@ -211,8 +211,8 @@
 		63E253361534E98B007AD006 /* navigator_bar_plus_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 63E253341534E98B007AD006 /* navigator_bar_plus_button.png */; };
 		63E253391535C67F007AD006 /* STConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253381535C67D007AD006 /* STConfiguration.m */; };
 		63E2533A1535C67F007AD006 /* STConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253381535C67D007AD006 /* STConfiguration.m */; };
-		63E2533D1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */; };
-		63E2533E1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */; };
+		63E2533D1535CAE9007AD006 /* STScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STScopeSlider.m */; };
+		63E2533E1535CAE9007AD006 /* STScopeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2533C1535CAE9007AD006 /* STScopeSlider.m */; };
 		63E253411535D34B007AD006 /* STFriendsSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253401535D34A007AD006 /* STFriendsSlice.m */; };
 		63E253421535D34B007AD006 /* STFriendsSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253401535D34A007AD006 /* STFriendsSlice.m */; };
 		63E253451535D470007AD006 /* STUserCollectionSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253441535D46F007AD006 /* STUserCollectionSlice.m */; };
@@ -2060,8 +2060,8 @@
 		63E253341534E98B007AD006 /* navigator_bar_plus_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = navigator_bar_plus_button.png; sourceTree = "<group>"; };
 		63E253371535C67B007AD006 /* STConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfiguration.h; sourceTree = "<group>"; };
 		63E253381535C67D007AD006 /* STConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConfiguration.m; sourceTree = "<group>"; };
-		63E2533B1535CAE9007AD006 /* STInboxScopeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInboxScopeSlider.h; sourceTree = "<group>"; };
-		63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInboxScopeSlider.m; sourceTree = "<group>"; };
+		63E2533B1535CAE9007AD006 /* STScopeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScopeSlider.h; sourceTree = "<group>"; };
+		63E2533C1535CAE9007AD006 /* STScopeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScopeSlider.m; sourceTree = "<group>"; };
 		63E2533F1535D34A007AD006 /* STFriendsSlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFriendsSlice.h; sourceTree = "<group>"; };
 		63E253401535D34A007AD006 /* STFriendsSlice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STFriendsSlice.m; sourceTree = "<group>"; };
 		63E253431535D46E007AD006 /* STUserCollectionSlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserCollectionSlice.h; sourceTree = "<group>"; };
@@ -3532,6 +3532,8 @@
 				63E252FE153478DE007AD006 /* STTablePopUp.m */,
 				63E253011534B8D2007AD006 /* STRdioPlaylistPopUp.h */,
 				63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */,
+				63E2533B1535CAE9007AD006 /* STScopeSlider.h */,
+				63E2533C1535CAE9007AD006 /* STScopeSlider.m */,
 			);
 			name = "View Components";
 			sourceTree = "<group>";
@@ -4842,12 +4844,10 @@
 			isa = PBXGroup;
 			children = (
 				63E5E6AD152E3C8400579369 /* Legacy */,
-				63E5E6B2152E3D3D00579369 /* STInboxTableViewCell.h */,
-				63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */,
 				63E5E6BA152E432200579369 /* STInboxViewController.h */,
 				63E5E6BB152E432200579369 /* STInboxViewController.m */,
-				63E2533B1535CAE9007AD006 /* STInboxScopeSlider.h */,
-				63E2533C1535CAE9007AD006 /* STInboxScopeSlider.m */,
+				63E5E6B2152E3D3D00579369 /* STInboxTableViewCell.h */,
+				63E5E6B3152E3D3D00579369 /* STInboxTableViewCell.m */,
 			);
 			name = Inbox;
 			sourceTree = "<group>";
@@ -6653,7 +6653,7 @@
 				63E2532E1534CD5A007AD006 /* STAppDelegate.m in Sources */,
 				63E253321534CFF0007AD006 /* STRootViewController.m in Sources */,
 				63E2533A1535C67F007AD006 /* STConfiguration.m in Sources */,
-				63E2533E1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */,
+				63E2533E1535CAE9007AD006 /* STScopeSlider.m in Sources */,
 				63E253421535D34B007AD006 /* STFriendsSlice.m in Sources */,
 				63E253461535D470007AD006 /* STUserCollectionSlice.m in Sources */,
 				63E2534A1535DD0D007AD006 /* STStampsViewSource.m in Sources */,
@@ -6880,7 +6880,7 @@
 				63E2532D1534CD5A007AD006 /* STAppDelegate.m in Sources */,
 				63E253311534CFF0007AD006 /* STRootViewController.m in Sources */,
 				63E253391535C67F007AD006 /* STConfiguration.m in Sources */,
-				63E2533D1535CAE9007AD006 /* STInboxScopeSlider.m in Sources */,
+				63E2533D1535CAE9007AD006 /* STScopeSlider.m in Sources */,
 				63E253411535D34B007AD006 /* STFriendsSlice.m in Sources */,
 				63E253451535D470007AD006 /* STUserCollectionSlice.m in Sources */,
 				63E253491535DD0D007AD006 /* STStampsViewSource.m in Sources */,

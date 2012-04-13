@@ -21,6 +21,7 @@
 #import "Event.h"
 #import "AccountManager.h"
 #import "SearchResult.h"
+#import "STNavigationBar.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -72,17 +73,18 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   RKLogConfigureByName("RestKit*", RKLogLevelError);
   RKLogSetAppLoggingLevel(RKLogLevelError);
   NSLog(@"testing");
+  [self customizeAppearance];
   [self performRestKitMappings];
   self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
   // Override point for customization after application launch.
   self.window.backgroundColor = [UIColor whiteColor];
-  [self.window makeKeyAndVisible];
   _navigationController = [[STRootViewController alloc] init];
   [self.window setRootViewController:_navigationController];
   UIView* testView = [[[STRootMenuView alloc] init] autorelease];
   [self.window insertSubview:testView atIndex:0];
   [[AccountManager sharedManager] authenticate];
   [_navigationController pushViewController:[STInboxViewController sharedInstance] animated:NO];
+  [self.window makeKeyAndVisible];
   return YES;
 }
 
@@ -273,5 +275,62 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
   [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
 }
+
+
+- (void)customizeAppearance {
+  if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])
+    return;
+  
+  UIImage* buttonImage = [[UIImage imageNamed:@"default_nav_button_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 5, 0, 5)];
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackgroundImage:buttonImage
+                                                                                      forState:UIControlStateNormal 
+                                                                                    barMetrics:UIBarMetricsDefault];
+  
+  UIImage* backButtonImage = [[UIImage imageNamed:@"default_back_button_bg"]
+                              resizableImageWithCapInsets:UIEdgeInsetsMake(0, 13, 0, 5)];
+  
+  
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackButtonBackgroundImage:backButtonImage
+                                                                                                forState:UIControlStateNormal
+                                                                                              barMetrics:UIBarMetricsDefault];
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackButtonTitlePositionAdjustment:UIOffsetMake(1, 0)
+                                                                                                   forBarMetrics:UIBarMetricsDefault];
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setTitleTextAttributes:
+   [NSDictionary dictionaryWithObjectsAndKeys:
+    [UIColor colorWithWhite:0.7 alpha:1.0], UITextAttributeTextColor, 
+    [UIColor whiteColor], UITextAttributeTextShadowColor, 
+    [NSValue valueWithUIOffset:UIOffsetMake(0, 1)], UITextAttributeTextShadowOffset, nil] 
+                                                                                          forState:UIControlStateNormal];
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setTitleTextAttributes:
+   [NSDictionary dictionaryWithObjectsAndKeys:
+    [UIColor whiteColor], UITextAttributeTextColor,
+    [NSValue valueWithUIOffset:UIOffsetMake(0, 0)], UITextAttributeTextShadowOffset, nil] 
+                                                                                          forState:UIControlStateHighlighted];
+  
+  [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageNamed:@"clear_image"]];
+  
+  
+  UIImage* segmentSelected = [[UIImage imageNamed:@"segmentedControl_sel"] resizableImageWithCapInsets:UIEdgeInsetsMake(4, 5, 5, 5)];
+  UIImage* segmentUnselected = [[UIImage imageNamed:@"segmentedControl_uns"] resizableImageWithCapInsets:UIEdgeInsetsMake(4, 5, 5, 5)];
+  UIImage* segmentDivUnselectedUnselected = [UIImage imageNamed:@"segmentedControl_div_uns_uns"];
+  UIImage* segmentDivSelectedUnselected = [UIImage imageNamed:@"segmentedControl_div_sel_uns"];
+  UIImage* segmentDivUnselectedSelected = [UIImage imageNamed:@"segmentedControl_div_uns_sel"];
+  
+  [[UISegmentedControl appearance] setBackgroundImage:segmentUnselected forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setBackgroundImage:segmentSelected forState:UIControlStateSelected barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivUnselectedUnselected
+                               forLeftSegmentState:UIControlStateNormal
+                                 rightSegmentState:UIControlStateNormal
+                                        barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivSelectedUnselected
+                               forLeftSegmentState:UIControlStateSelected
+                                 rightSegmentState:UIControlStateNormal
+                                        barMetrics:UIBarMetricsDefault];
+  [[UISegmentedControl appearance] setDividerImage:segmentDivUnselectedSelected
+                               forLeftSegmentState:UIControlStateNormal
+                                 rightSegmentState:UIControlStateSelected
+                                        barMetrics:UIBarMetricsDefault];
+}
+
 
 @end

@@ -13,4 +13,6 @@
 
 @interface STHeaderViewFactory : STAEntityDetailComponentFactory
 
+- (id)initWithStyle:(NSString*)style;
+
 @end

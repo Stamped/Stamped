@@ -18,6 +18,7 @@
 @property (nonatomic, retain) UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) STWeakProxy* proxy;
 @property (nonatomic, copy) void(^completion)(STSynchronousWrapper*);
+@property (nonatomic, readwrite, retain) UIView* failureView;
 
 @end
 
@@ -26,6 +27,7 @@
 @synthesize loadingView = _loadingView;
 @synthesize proxy = _proxy;
 @synthesize completion = _completion;
+@synthesize failureView = _failureView;
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate
       componentFactory:(id<STEntityDetailComponentFactory>)factory
@@ -67,6 +69,7 @@
   [_proxy release];
   [_loadingView release];
   [_completion release];
+  [_failureView release];
   [super dealloc];
 }
 
@@ -75,6 +78,9 @@
   UIView* child;
   if (creator) {
     child = creator(self);
+  }
+  if (!child) {
+    child = self.failureView;
   }
   CGFloat delta;
   void (^completion_block)(BOOL) = nil;
@@ -124,7 +130,11 @@
                                        andStyle:(NSString*)style
                                        delegate:(id<STViewDelegate>)delegate {
   id<STEntityDetailComponentFactory> factory = [[[STEntityDetailViewFactory alloc] initWithStyle:style] autorelease];
-  return [[[STSynchronousWrapper alloc] initWithDelegate:delegate componentFactory:factory entityDetail:anEntityDetail andFrame:frame] autorelease];
+  STSynchronousWrapper* wrapper = [[[STSynchronousWrapper alloc] initWithDelegate:delegate
+                                                                 componentFactory:factory 
+                                                                     entityDetail:anEntityDetail 
+                                                                         andFrame:frame] autorelease];
+  return wrapper;
 }
 
 @end

@@ -92,6 +92,40 @@ static int _count = 0;
   [self appendChildView:child withAnimation:NO];
 }
 
+- (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation {
+  CGFloat seconds = .25;
+  CGFloat delta = -view.frame.size.height;
+  for (UIView* view2 in self.children) {
+    if (view2 == view || CGRectGetMinY(view2.frame) > CGRectGetMinY(view.frame)) {
+      [UIView animateWithDuration:seconds animations:^{
+        if (view2 == view) {
+          CGRect frame = view2.frame;
+          frame.size.height += delta;
+          view2.frame = frame;
+        }
+        else {
+          view2.frame = CGRectOffset(view2.frame, 0, delta);
+        }
+      } completion:^(BOOL finished) {
+        if (view2 == view) {
+          [self.children removeObject:view];
+          [view removeFromSuperview];
+        }
+      }];
+    }
+  }
+  if (self.delegate && [self.delegate respondsToSelector:@selector(childView:shouldChangeHeightBy:overDuration:)]) {
+    [self.delegate childView:self shouldChangeHeightBy:delta overDuration:seconds];
+  }
+  else {
+    [UIView animateWithDuration:seconds animations:^{
+      CGRect frame = self.frame;
+      frame.size.height += delta;
+      self.frame = frame;
+    }];
+  }
+}
+
 - (void)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context {
   if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:)]) {
     [self.delegate didChooseAction:action withContext:context];

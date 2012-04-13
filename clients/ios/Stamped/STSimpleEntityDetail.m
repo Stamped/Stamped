@@ -32,7 +32,7 @@
 @synthesize images = _images;
 @synthesize actions = _actions;
 @synthesize metadata = _metadata;
-@synthesize gallery = _gallery;
+@synthesize galleries = _galleries;
 @synthesize playlist = _playlist;
 
 - (void)dealloc {
@@ -49,7 +49,7 @@
   [_images release];
   [_actions release];
   [_metadata release];
-  [_gallery release];
+  [_galleries release];
   [_playlist release];
   
   [super dealloc];
@@ -81,7 +81,7 @@
   [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
   [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
-  [mapping mapRelationship:@"gallery" withMapping:[STSimpleGallery mapping]];
+  [mapping mapRelationship:@"galleries" withMapping:[STSimpleGallery mapping]];
   [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];
   return mapping;
 }

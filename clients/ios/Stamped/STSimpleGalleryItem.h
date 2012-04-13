@@ -14,8 +14,7 @@
 
 @property (nonatomic, readwrite, retain) NSString* image;
 @property (nonatomic, readwrite, retain) NSString* caption;
-@property (nonatomic, readwrite, retain) NSString* link;
-@property (nonatomic, readwrite, retain) NSString* linkType;
+@property (nonatomic, readwrite, retain) id<STAction> action;
 @property (nonatomic, readwrite, assign) NSInteger height;
 @property (nonatomic, readwrite, assign) NSInteger width;
 

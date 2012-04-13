@@ -13,6 +13,7 @@
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
 - (void)appendChildView:(UIView*)child;
+- (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation;
 - (void)reloadStampedData;
 - (void)updateContentSize;
 

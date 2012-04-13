@@ -11,13 +11,15 @@
 
 @implementation STSimpleGallery
 
-@synthesize name = name_;
-@synthesize data = data_;
+@synthesize layout = _layout;
+@synthesize name = _name;
+@synthesize data = _data;
 
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGallery class]];
   
   [mapping mapAttributes:
+   @"layout",
    @"name",
    nil];
   
@@ -27,9 +29,9 @@
 }
 
 - (void)dealloc {
-  self.name = nil;
-  self.data = nil;
-  NSLog(@"simple gallery dealloc");
+  [_layout release];
+  [_name release];
+  [_data release];
   [super dealloc];
 }
 

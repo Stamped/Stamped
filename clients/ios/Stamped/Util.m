@@ -35,7 +35,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 @property (nonatomic, assign) id target;
 @property (nonatomic, assign) SEL selector; 
 @property (nonatomic, retain) id state;
-@property (nonatomic, readwrite, retain) STCallback callback;
+@property (nonatomic, readwrite, copy) STCallback callback;
 
 - (void)callbackMethod:(id)view;
 
@@ -708,7 +708,26 @@ static Rdio* _rdio;
 }
 
 + (NSString*)trackLengthString:(NSInteger)length {
-  return [NSString stringWithFormat:@"%d:%d", length / 60, length % 60];
+  NSInteger seconds = length % 60;
+  NSString* secondsString = seconds > 9 ? [NSString stringWithFormat:@"%d", seconds] : [NSString stringWithFormat:@"0%d", seconds]; 
+  return [NSString stringWithFormat:@"%d:%@", length / 60, secondsString];
+}
+
++ (void)addGradientToLayer:(CALayer*)layer withColors:(NSArray*)colors vertical:(BOOL)vertical {
+  CAGradientLayer* gradient = [CAGradientLayer layer];
+  if (vertical) {
+    gradient.anchorPoint = CGPointMake(0, 0);
+    gradient.position = CGPointMake(0, 0);
+  }
+  else {
+    //TODO
+    gradient.anchorPoint = CGPointMake(.5, 0);
+    gradient.position = CGPointMake(-.5, 0);
+  }
+  gradient.bounds = layer.bounds;
+  gradient.cornerRadius = layer.cornerRadius;
+  gradient.colors = colors;
+  [layer addSublayer:gradient];
 }
 
 @end

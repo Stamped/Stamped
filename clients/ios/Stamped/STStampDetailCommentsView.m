@@ -262,10 +262,20 @@ andProfileImageSize:(STProfileImageSize)size {
   if (self) {
     UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp];
     [self appendChildView:blurbView];
-    for (id<STComment> comment in stamp.commentsPreview) {
-      [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-      STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-      [self appendChildView:commentView];
+    if ([stamp.commentsPreview count] > 3 || [stamp numComments].integerValue > 3) {
+      for (NSInteger i = 0; i < 3 && i < stamp.commentsPreview.count; i++) {
+        id<STComment> comment = [stamp.commentsPreview objectAtIndex:i];
+        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
+        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
+        [self appendChildView:commentView];
+      }
+    }
+    else {
+      for (id<STComment> comment in stamp.commentsPreview) {
+        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
+        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
+        [self appendChildView:commentView];
+      }
     }
     [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
     STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];

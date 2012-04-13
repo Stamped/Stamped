@@ -12,6 +12,8 @@
 #import "Util.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
+#import "UIColor+Stamped.h"
+#import "UIFont+Stamped.h"
 
 static const NSInteger _batchSize = 20;
 
@@ -39,11 +41,17 @@ static const NSInteger _batchSize = 20;
 @synthesize waiting = _waiting;
 @synthesize generation = _generation;
 @synthesize table = _table;
+@synthesize loadingText = _loadingText;
+@synthesize lastCellText = _lastCellText;
+@synthesize noStampsText = _noStampsText;
 
 - (id)init
 {
   self = [super init];
   if (self) {
+    self.loadingText = @"Loading...";
+    self.lastCellText = @"No more stamps";
+    self.noStampsText = @"No stamps available";
   }
   return self;
 }
@@ -52,6 +60,9 @@ static const NSInteger _batchSize = 20;
 {
   [_slice release];
   [_stamps release];
+  [_loadingText release];
+  [_lastCellText release];
+  [_noStampsText release];
   [super dealloc];
 }
 
@@ -124,13 +135,17 @@ static const NSInteger _batchSize = 20;
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   if (indexPath.section == 1) {
-    UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"lastCell"] autorelease];
+    UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"lastCell"] autorelease];
     if (self.shouldLoadMore || self.waiting) {
-      cell.textLabel.text = @"Loading...";
+      cell.textLabel.text = self.loadingText;
     }
     else {
-      cell.textLabel.text = @"No more stamps";
+      cell.textLabel.text = [tableView.dataSource tableView:tableView numberOfRowsInSection:0] > 0 ? self.lastCellText : self.noStampsText ;
     }
+    cell.textLabel.textAlignment = UITextAlignmentCenter;
+    cell.textLabel.textColor = [UIColor stampedGrayColor];
+    cell.textLabel.font = [UIFont stampedFontWithSize:20];
+    [cell setNeedsLayout];
     return cell;
   }
   else {
@@ -144,11 +159,23 @@ static const NSInteger _batchSize = 20;
 
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
-  STActionContext* context = [STActionContext context];
-  context.stamp = stamp;
-  id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
-  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+  if (indexPath.section == 0) {
+    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+    STActionContext* context = [STActionContext context];
+    context.stamp = stamp;
+    id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+  }
+  else if (indexPath.section == 1) {
+    if (!self.shouldLoadMore && !self.waiting) { 
+      if ([tableView.dataSource tableView:tableView numberOfRowsInSection:0] > 0) {
+        [self selectedLastCell];
+      }
+      else {
+        [self selectedNoStampsCell];
+      }
+    }
+  }
 }
 
 - (void)reloadStampedData {
@@ -177,6 +204,14 @@ static const NSInteger _batchSize = 20;
     _table.rowHeight = 96;
     [_table reloadData];
   }
+}
+
+- (void)selectedNoStampsCell {
+  
+}
+
+- (void)selectedLastCell {
+  
 }
 
 @end

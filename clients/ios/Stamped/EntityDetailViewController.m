@@ -45,7 +45,11 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 
 @interface EntityDetailViewController ()
 
-- (void)commonInitWithEntityID:(NSString*)entityID andSearchResult:(SearchResult*)searchResult;
+- (void)commonInitWithEntityID:(NSString*)entityID andSearchID:(NSString*)searchID;
+
+@property (nonatomic, readonly, retain) NSString* entityID;
+@property (nonatomic, readonly, retain) NSString* searchID;
+@property (nonatomic, readwrite, retain) id<STEntityDetail> entityDetail;
 
 @end
 
@@ -55,13 +59,14 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 @synthesize loadingView = loadingView_;
 @synthesize referringStamp = referringStamp_;
 @synthesize entityDetail = entityDetail_;
-@synthesize operationQueue = operationQueue_;
+@synthesize searchID = _searchID;
+@synthesize entityID = _entityID;
 
 
 - (id)initWithEntityID:(NSString*)entityID {
   self = [super init];
   if (self) {
-    [self commonInitWithEntityID:entityID andSearchResult:nil];
+    [self commonInitWithEntityID:entityID andSearchID:nil];
   }
   return self;
 }
@@ -69,7 +74,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (id)initWithEntityObject:(Entity*)entity {
   self = [super init];
   if (self) {
-    [self commonInitWithEntityID:entity.entityID andSearchResult:nil];
+    [self commonInitWithEntityID:entity.entityID andSearchID:nil];
   }
   return self;
 }
@@ -77,24 +82,14 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 - (id)initWithSearchResult:(SearchResult*)searchResult {
   self = [super init];
   if (self) {
-    [self commonInitWithEntityID:nil andSearchResult:searchResult];
+    [self commonInitWithEntityID:nil andSearchID:searchResult.searchID];
   }
   return self;
 }
 
-- (void)commonInitWithEntityID:(NSString*)entityID andSearchResult:(SearchResult*)searchResult {
-  operationQueue_ = [[NSOperationQueue alloc] init];
-  if (entityID) {
-    [[STStampedAPI sharedInstance] entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
-      [self didLoadEntityDetail:detail];
-    }];
-  }
-  else if (searchResult) {
-    [[STStampedAPI sharedInstance] entityDetailForSearchID:searchResult.searchID andCallback:^(id<STEntityDetail> detail) {
-      [self didLoadEntityDetail:detail];
-    }];
-  }
-  [self.loadingView startAnimating];
+- (void)commonInitWithEntityID:(NSString*)entityID andSearchID:(NSString*)searchID {
+  _entityID = [entityID retain];
+  _searchID = [searchID retain];
 }
 
 - (void)viewDidLoad {
@@ -102,6 +97,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   self.scrollView.scrollsToTop = YES;
   STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
   [self setToolbar:toolbar withAnimation:YES];
+  [self reloadStampedData];
   
 }
 
@@ -109,21 +105,22 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   if (self.synchronousWrapper) {
     self.synchronousWrapper.delegate = nil;
   }
-  [self.operationQueue cancelAllOperations];
-  [operationQueue_ release];
   [entityDetail_ release];
+  [_searchID release];
+  [_entityID release];
   self.loadingView = nil;
   self.referringStamp = nil;
   self.synchronousWrapper = nil;
   [super dealloc];
 }
 
-- (void)didLoadEntityDetail:(id<STEntityDetail>)anEntityDetail {
+- (void)setEntityDetail:(id<STEntityDetail>)anEntityDetail {
+  [entityDetail_ autorelease];
   entityDetail_ = [anEntityDetail retain];
   if (self.entityDetail) {
     
     [self.loadingView stopAnimating];
-    [self.loadingView removeFromSuperview];
+    //[self.loadingView removeFromSuperview];
     self.synchronousWrapper = [STSynchronousWrapper wrapperForEntityDetail:self.entityDetail 
                                                                  withFrame:CGRectMake(0, 0, 320, self.scrollView.frame.size.height) 
                                                                   andStyle:@"EntityDetail" 
@@ -139,10 +136,23 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   }
 }
 
-/*
-- (void)reloadData {
-  [self performSelector:@selector(shouldFinishLoading) withObject:nil afterDelay:.5];
+- (void)reloadStampedData {
+  if (self.synchronousWrapper) {
+    [self.scrollView removeChildView:self.synchronousWrapper withAnimation:YES];
+    self.synchronousWrapper = nil;
+  }
+  if (self.entityID) {
+    [self.loadingView startAnimating];
+    [[STStampedAPI sharedInstance] entityDetailForEntityID:self.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
+      self.entityDetail = detail;
+    }];
+  }
+  else if (self.searchID) {
+    [self.loadingView startAnimating];
+    [[STStampedAPI sharedInstance] entityDetailForSearchID:self.searchID andCallback:^(id<STEntityDetail> detail) {
+      self.entityDetail = detail;
+    }];
+  }
 }
-*/
 
 @end
