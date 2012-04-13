@@ -55,15 +55,23 @@ class MongoSuggestedEntities(ASuggestedEntities):
             else:
                 entity_ids    = frozenset()
             
-            section_limit     = limit / num_sections if limit else None
             out_suggested     = []
             seen              = defaultdict(set)
+            
+            def _get_section_limit(i):
+                if limit:
+                    return (limit / num_sections) + (1 if i + 1 <= (limit % num_sections) else 0)
+                
+                return None
             
             for entity_id in entity_ids:
                 seen['entity_id'].add(entity_id)
             
             # process each section, removing obvious duplicates and enforcing per section limits
-            for section in suggested:
+            for i in xrange(suggested):
+                section_limit = _get_section_limit(i)
+                
+                section  = suggested[i]
                 entities = Entity.fast_id_dedupe(section[1], seen)[:section_limit]
                 
                 if len(entities) > 0:
