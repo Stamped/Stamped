@@ -287,8 +287,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.removeGiver(creditedUserId, \
-                                                    stamp.user.user_id)
+        self.credit_givers_collection.removeGiver(creditedUserId, stamp.user.user_id)
     
     def countCredits(self, userId):
         return self.credit_received_collection.numCredit(userId)   
