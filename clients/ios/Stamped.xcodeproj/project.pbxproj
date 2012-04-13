@@ -48,6 +48,12 @@
 		633CEF281535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */; };
 		633CEF2B1535E5DC009E1C06 /* STUserSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF2A1535E5DC009E1C06 /* STUserSource.m */; };
 		633CEF2C1535E5DC009E1C06 /* STUserSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF2A1535E5DC009E1C06 /* STUserSource.m */; };
+		633CEF4415386C53009E1C06 /* STStampedBySlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF4315386C4F009E1C06 /* STStampedBySlice.m */; };
+		633CEF4515386C53009E1C06 /* STStampedBySlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF4315386C4F009E1C06 /* STStampedBySlice.m */; };
+		633CEF4D15387111009E1C06 /* STSimpleStampedBy.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF4C15387101009E1C06 /* STSimpleStampedBy.m */; };
+		633CEF4E15387111009E1C06 /* STSimpleStampedBy.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF4C15387101009E1C06 /* STSimpleStampedBy.m */; };
+		633CEF51153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */; };
+		633CEF52153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */; };
 		633E056315263DC100A643FF /* STStandardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633E056215263DC100A643FF /* STStandardViewController.m */; };
 		633E056415263DC100A643FF /* STStandardViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633E056215263DC100A643FF /* STStandardViewController.m */; };
 		635EAAC715234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
@@ -1916,6 +1922,14 @@
 		633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STFriendsOfFriendsSource.m; sourceTree = "<group>"; };
 		633CEF291535E5DB009E1C06 /* STUserSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserSource.h; sourceTree = "<group>"; };
 		633CEF2A1535E5DC009E1C06 /* STUserSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserSource.m; sourceTree = "<group>"; };
+		633CEF4215386C4C009E1C06 /* STStampedBySlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedBySlice.h; sourceTree = "<group>"; };
+		633CEF4315386C4F009E1C06 /* STStampedBySlice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedBySlice.m; sourceTree = "<group>"; };
+		633CEF4615386F92009E1C06 /* STStampedBy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedBy.h; sourceTree = "<group>"; };
+		633CEF4715386FFB009E1C06 /* STStampedByGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedByGroup.h; sourceTree = "<group>"; };
+		633CEF4B153870FB009E1C06 /* STSimpleStampedBy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStampedBy.h; sourceTree = "<group>"; };
+		633CEF4C15387101009E1C06 /* STSimpleStampedBy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStampedBy.m; sourceTree = "<group>"; };
+		633CEF4F153871B0009E1C06 /* STSimpleStampedByGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStampedByGroup.h; sourceTree = "<group>"; };
+		633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStampedByGroup.m; sourceTree = "<group>"; };
 		633E056115263DC100A643FF /* STStandardViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStandardViewController.h; sourceTree = "<group>"; };
 		633E056215263DC100A643FF /* STStandardViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStandardViewController.m; sourceTree = "<group>"; };
 		633E056515266C6B00A643FF /* STTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTypes.h; sourceTree = "<group>"; };
@@ -3200,6 +3214,8 @@
 				638D7744152BB5B0006E4988 /* STCredit.h */,
 				63CC443F152DEE6D0026BB25 /* STTodo.h */,
 				63E5E6A8152E2B1F00579369 /* STImage.h */,
+				633CEF4615386F92009E1C06 /* STStampedBy.h */,
+				633CEF4715386FFB009E1C06 /* STStampedByGroup.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3275,6 +3291,10 @@
 				63CC4441152DEF500026BB25 /* STSimpleTodo.m */,
 				63E5E6A9152E2B8900579369 /* STSimpleImage.h */,
 				63E5E6AA152E2B8900579369 /* STSimpleImage.m */,
+				633CEF4B153870FB009E1C06 /* STSimpleStampedBy.h */,
+				633CEF4C15387101009E1C06 /* STSimpleStampedBy.m */,
+				633CEF4F153871B0009E1C06 /* STSimpleStampedByGroup.h */,
+				633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -3403,6 +3423,8 @@
 				63E253441535D46F007AD006 /* STUserCollectionSlice.m */,
 				638D7733152B5C2D006E4988 /* STCommentSlice.h */,
 				638D7734152B5C2D006E4988 /* STCommentSlice.m */,
+				633CEF4215386C4C009E1C06 /* STStampedBySlice.h */,
+				633CEF4315386C4F009E1C06 /* STStampedBySlice.m */,
 			);
 			name = "Stamped API";
 			sourceTree = "<group>";
@@ -6660,6 +6682,9 @@
 				633CEF241535E2FB009E1C06 /* STSuggestedSource.m in Sources */,
 				633CEF281535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */,
 				633CEF2C1535E5DC009E1C06 /* STUserSource.m in Sources */,
+				633CEF4515386C53009E1C06 /* STStampedBySlice.m in Sources */,
+				633CEF4E15387111009E1C06 /* STSimpleStampedBy.m in Sources */,
+				633CEF52153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6887,6 +6912,9 @@
 				633CEF231535E2FB009E1C06 /* STSuggestedSource.m in Sources */,
 				633CEF271535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */,
 				633CEF2B1535E5DC009E1C06 /* STUserSource.m in Sources */,
+				633CEF4415386C53009E1C06 /* STStampedBySlice.m in Sources */,
+				633CEF4D15387111009E1C06 /* STSimpleStampedBy.m in Sources */,
+				633CEF51153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
