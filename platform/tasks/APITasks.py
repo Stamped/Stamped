@@ -121,20 +121,12 @@ def getComments(*args, **kwargs):
     invoke(getComments.request, *args, **kwargs)
 
 @task(ignore_result=True)
-def _enrichEntity(*args, **kwargs):
-    invoke(_enrichEntity.request, *args, **kwargs)
-
-@task(ignore_result=True)
 def mergeEntity(*args, **kwargs):
     invoke(mergeEntity.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def mergeEntityId(*args, **kwargs):
     invoke(mergeEntityId.request, *args, **kwargs)
-
-@task(ignore_result=True)
-def _saveTempEntity(*args, **kwargs):
-    invoke(_saveTempEntity.request, *args, **kwargs)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
