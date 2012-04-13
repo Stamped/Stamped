@@ -1440,7 +1440,7 @@ class HTTPStamp(Schema):
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
         self.via                = SchemaElement(basestring)
-        self.badges             = SchemaElement(HTTPBadge())
+        self.badges             = SchemaList(HTTPBadge())
         self.url                = SchemaElement(basestring)
     
     def importSchema(self, schema):
