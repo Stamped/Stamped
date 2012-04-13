@@ -360,7 +360,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         user_id = stamp.user_id
         badges  = []
         
-        if stamp.stamp_num == 0:
+        if stamp.stamp_num == 1:
             badges.append(Badge(dict(
                 user_id = user_id, 
                 genre   = "user_first_stamp", 

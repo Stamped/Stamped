@@ -56,7 +56,6 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 entity_ids    = frozenset()
             
             section_limit     = limit / num_sections if limit else None
-            
             out_suggested     = []
             seen              = defaultdict(set)
             

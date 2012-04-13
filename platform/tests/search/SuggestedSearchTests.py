@@ -6,12 +6,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
+import Entity
 
 from Schemas                            import *
 from StampedTestUtils                   import *
 from ASearchTestSuite                   import ASearchTestSuite
 from db.mongodb.MongoSuggestedEntities  import MongoSuggestedEntities
 from pprint                             import pformat
+from collections                        import defaultdict
 
 # TODO: ensure unique results
 
@@ -42,11 +44,12 @@ class SuggestedSearchTests(ASearchTestSuite):
         self.assertTrue(len(suggested) > 0)
         
         count = 0
-        seen  = set()
+        seen  = defaultdict(set)
         
         for section in suggested:
             title, entities = section
             
+            # ensure the entities and title are valid for this section
             self.assertIsInstance(title, basestring)
             self.assertTrue(len(title) > 0)
             self.assertTrue(len(entities) > 0)
@@ -54,6 +57,10 @@ class SuggestedSearchTests(ASearchTestSuite):
             
             for entity in entities:
                 self.assertIsInstance(entity, BasicEntity)
+            
+            # ensure the sections contain no obvious duplicates
+            entities2 = Entity.fast_id_dedupe(entities, seen)
+            self.assertEqual(len(entities), len(entities2))
         
         # if we set a limit on the number of results returned, ensure that 
         # that limit was satisfied.
