@@ -279,16 +279,28 @@ class RdioSource(GenericSource):
         return self.emptySource
 
     def trackSource(self, query):
+        search = query.name
+        try:
+            if len(query.artists) > 0:
+                search = '%s %s' % (search, query.artists[0]['name'])
+        except:
+            pass
         return self.generatorSource(self.__queryGen(
-                query=query.name,
+                query=search,
                 types='Track',
                 extras='',
             ),
             constructor=RdioTrack)
     
     def albumSource(self, query):
+        search = query.name
+        try:
+            if len(query.artists) > 0:
+                search = '%s %s' % (search, query.artists[0]['name'])
+        except:
+            pass
         return self.generatorSource(self.__queryGen(
-                query=query.name,
+                query=search,
                 types='Album',
                 extras='label,isCompilation',
             ),
