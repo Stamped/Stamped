@@ -20,6 +20,7 @@ try:
     from iTunesSource           import iTunesSource
     from AmazonSource           import AmazonSource
     from StampedSource          import StampedSource
+    from TheTVDBSource          import TheTVDBSource
 except:
     report()
     raise
@@ -35,6 +36,7 @@ allSources = [
     RdioSource,
     SpotifySource,
     AmazonSource,
+    TheTVDBSource,
     StampedSource,
 ]
 

@@ -1641,12 +1641,7 @@ def demo(generic_source, default_title):
         raise NotImplementedError
         query['subcategory'] = subcategory
     else:
-        query = {
-            '$or': [
-                { 'mangled_title' : simplify(title) },
-                { 'titlel' : title.lower() },
-            ]
-        }
+        query = { 'titlel' : title.lower() }
     pprint(query)
     cursor = db._collection.find(query)
     if cursor.count() <= index:

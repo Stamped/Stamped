@@ -88,8 +88,8 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         album_list = self.data['albums']
         return [
             {
-                'name':entry['album']['name'],
-                'key':entry['album']['href'],
+                'name'  : entry['album']['name'],
+                'key'   : entry['album']['href'],
             }
                 for entry in album_list
                     if entry['album']['artist'] == self.name and entry['album']['availability']['territories'].find('US') != -1
@@ -150,15 +150,23 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
     @lazyProperty
     def artists(self):
         try:
-            return [ { 'name': self.data['artist'] } ]
+            return [ { 
+                'name'  : self.data['artist'],
+                'key'   : self.data['artist-id'],
+            } ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         track_list = self.data['tracks']
-        
-        return [ { 'name' : track['name'], } for track in track_list ]
+        return [ 
+            { 
+                'name'  : track['name'], 
+                'key'   : track['href'],
+            } 
+                for track in track_list 
+        ]
 
 
 class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
@@ -180,14 +188,20 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
     @lazyProperty
     def artists(self):
         try:
-            return [ { 'name': self.data['artists'][0]['name'] } ]
+            return [ { 
+                'name'  : self.data['artists'][0]['name'],
+                'key'   : self.data['artists'][0]['href'],
+            } ]
         except Exception:
             return []
 
     @lazyProperty
     def albums(self):
         try:
-            return [ { 'name': self.data['album']['name'] } ]
+            return [ { 
+                'name'  : self.data['album']['name'],
+                'key'   : self.data['album']['href'],
+            } ]
         except Exception:
             return []
 
