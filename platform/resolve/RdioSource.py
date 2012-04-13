@@ -105,12 +105,26 @@ class RdioArtist(_RdioObject, ResolverPerson):
     @lazyProperty
     def albums(self):
         album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
-        return [ {'name':entry['name']} for entry in album_list ]
+        return [ 
+            {
+                'name'  : entry['name'],
+                'key'   : entry['key'],
+                'url'   : 'http://rdio.com%s' % entry['url'],
+            } 
+                for entry in album_list 
+        ]
 
     @lazyProperty
     def tracks(self):
         track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
-        return [ {'name':entry['name']} for entry in track_list ]
+        return [ 
+            {
+                'name'  : entry['name'],
+                'key'   : entry['key'],
+                'url'   : 'http://rdio.com%s' % entry['url'],
+            } 
+                for entry in track_list 
+        ]
 
 class RdioAlbum(_RdioObject, ResolverMediaCollection):
     """
@@ -135,7 +149,15 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
     def tracks(self):
         keys = ','.join(self.data['trackKeys'])
         track_dict = self.rdio.method('get',keys=keys)['result']
-        return [ {'name':entry['name']} for k, entry in track_dict.items() ]
+        logs.info('\n\nALBUM - TRACK LIST\n%s\n\n' % track_dict)
+        return [ 
+            {
+                'name'  : entry['name'],
+                'key'   : k,
+                'url'   : 'http://rdio.com%s' % entry['url']
+            } 
+                for k, entry in track_dict.items() 
+        ]
 
 
 class RdioTrack(_RdioObject, ResolverMediaItem):
@@ -199,7 +221,6 @@ class RdioSource(GenericSource):
                 'albums',
                 'tracks',
                 'artists',
-                # 'genres',
             ],
             kinds=[
                 'person',
