@@ -373,7 +373,7 @@ class HTTPUser(Schema):
                         'music'     : 4,
                         'other'     : 5,
                     }
-                    distribution = sorted(distribution, lambda x: _rank[x.category] if x.category in _rank else 10)
+                    distribution = sorted(distribution, key=lambda x: _rank[x.category] if x.category in _rank else 10)
             self.distribution = distribution
         else:
             raise NotImplementedError
