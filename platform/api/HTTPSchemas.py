@@ -356,11 +356,11 @@ class HTTPUser(Schema):
 
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
 
-            for item in stats.distribution:
+            for item in stats['distribution']:
                 d           = HTTPCategoryDistribution()
-                d.category  = item.category 
-                d.name      = item.category.title()
-                d.count     = item.count
+                d.category  = item['category'] 
+                d.name      = item['category'].title()
+                d.count     = item['count']
                 self.distribution.append(d)
 
         else:
