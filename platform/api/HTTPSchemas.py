@@ -868,10 +868,6 @@ class HTTPEntity(Schema):
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
 
             elif entity.subcategory == 'album':
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
-                self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-                self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
-
                 if len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
@@ -884,8 +880,23 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
+                self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.subcategory == 'song':
+                if len(entity.artists) > 0:
+                    artist = entity.artists[0]
+                    if artist.entity_id is not None:
+                        source              = HTTPActionSource()
+                        source.name         = 'View Artist'
+                        source.source       = 'stamped'
+                        source.source_id    = artist.entity_id
+                        action              = HTTPAction()
+                        action.type         = 'stamped_view_entity'
+                        action.name         = 'View Artist'
+                        action.sources      = [source]
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
