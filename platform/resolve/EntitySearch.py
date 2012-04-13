@@ -308,6 +308,8 @@ class EntitySearch(object):
             
             entityProxy = EntityProxyContainer(item[1].target)
             entity = entityProxy.buildEntity()
+            if entity.entity_id is None:
+                entity.entity_id = 'T_%s_%s' % (source.upper(), item[1].target.key)
             
             results.append(entity)
         
