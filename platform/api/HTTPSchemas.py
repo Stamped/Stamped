@@ -883,7 +883,7 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0], action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
 
             elif entity.subcategory == 'song':
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
