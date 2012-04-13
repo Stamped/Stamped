@@ -48,7 +48,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         entityData = document.pop('entity')
         entity = buildEntity(entityData, mini=True)
-        document['entity'] = entity.entity_id
+        document['entity'] = {'entity_id': entity.entity_id}
         
         stamp = self._obj(document, overflow=self._overflow)
         stamp.entity = entity 
