@@ -598,7 +598,7 @@ class HTTPEntity(Schema):
                 item.action = action
 
             if 'action' in kwargs:
-                item.action = action 
+                item.action = kwargs['action']
 
             self.metadata.append(item)
     
