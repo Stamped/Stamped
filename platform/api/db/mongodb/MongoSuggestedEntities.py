@@ -68,7 +68,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 seen['entity_id'].add(entity_id)
             
             # process each section, removing obvious duplicates and enforcing per section limits
-            for i in xrange(suggested):
+            for i in xrange(num_sections):
                 section_limit = _get_section_limit(i)
                 
                 section  = suggested[i]
