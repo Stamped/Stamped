@@ -238,7 +238,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if limit is not None:
                 docs = docs.limit(limit)
             
-            return (self._convertFromMongo(doc) for doc in docs)
+            return list(self._convertFromMongo(doc) for doc in docs)
         except:
             return []
     
