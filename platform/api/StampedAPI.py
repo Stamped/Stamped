@@ -2438,9 +2438,9 @@ class StampedAPI(AStampedAPI):
             return cap
     
     def _getStampCollection(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
-        if genericCollectionSlice.offset >= len(stampIds):
+        if stampIds is not None and genericCollectionSlice.offset >= len(stampIds):
             return []
-
+        
         quality         = genericCollectionSlice.quality
         
         # Set quality
