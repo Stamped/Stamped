@@ -13,6 +13,8 @@ from ASearchTestSuite                   import ASearchTestSuite
 from db.mongodb.MongoSuggestedEntities  import MongoSuggestedEntities
 from pprint                             import pformat
 
+# TODO: ensure unique results
+
 class SuggestedSearchTests(ASearchTestSuite):
     
     def _test_suggestions(self, **kwargs):

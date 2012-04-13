@@ -1425,6 +1425,7 @@ class HTTPStamp(Schema):
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
         self.via                = SchemaElement(basestring)
+        self.badges             = SchemaElement(HTTPBadge())
         self.url                = SchemaElement(basestring)
     
     def importSchema(self, schema):
@@ -1449,7 +1450,7 @@ class HTTPStamp(Schema):
                 data['credit'] = credit
 
             data['entity'] = HTTPEntityMini().importSchema(schema.entity).exportSparse()
-
+            
             self.importData(data, overflow=True)
             self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
             self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
@@ -1475,16 +1476,20 @@ class HTTPStamp(Schema):
 
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
-
+            
             stamp_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
-        
         else:
             logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
         
         return self
+
+class HTTPBadge(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
 
 class HTTPImageUpload(Schema):
     def setSchema(self):

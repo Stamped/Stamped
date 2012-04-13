@@ -395,6 +395,7 @@ class AMongoCollection(object):
             ids = doc['ref_ids']
             if limit is not None and len(ids) > limit:
                 return ids[:limit]
+            
             if 'overflow' in doc:
                 # Check other buckets
                 buckets = []

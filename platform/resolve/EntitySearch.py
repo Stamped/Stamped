@@ -23,6 +23,7 @@ from logs import report
 try:
     import logs, sys, utils
     import libs.worldcities
+    import Entity
     
     from Resolver                   import *
     from ResolverObject             import *
@@ -307,11 +308,10 @@ class EntitySearch(object):
             
             entityProxy = EntityProxyContainer(item[1].target)
             entity = entityProxy.buildEntity()
-
-            #entity.types = [ item[1].target.subtype ]
+            
             results.append(entity)
         
-        return results
+        return Entity.fast_id_dedupe(results)
 
 def _convertCategorySubcategory(category, subcategory):
     kinds   = None

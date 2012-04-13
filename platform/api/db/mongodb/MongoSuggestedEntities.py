@@ -31,22 +31,8 @@ class MongoSuggestedEntities(ASuggestedEntities):
             subcategory = subcategory.lower().strip()
         
         if category is None and subcategory is None:
+            # TODO: what is the expected behavior here?
             raise NotImplementedError
-            categories = [
-                ('place', 'Nearby places'), 
-                ('music', 'Music'), 
-                ('book', 'Books'),
-            ]
-            
-            subcategories = [
-                ('tv', 'TV Shows'), 
-                ('movie', 'Movies'), 
-                ('app', 'Apps'), 
-            ]
-            suggested = [ ]
-            
-            for c in categories:
-                self.getSuggestedEntities(userId, coords, c, None, limit)
         else:
             if category is None:
                 try:
@@ -71,21 +57,27 @@ class MongoSuggestedEntities(ASuggestedEntities):
             
             section_limit     = limit / num_sections if limit else None
             
-            out_suggested = []
+            out_suggested     = []
+            seen              = defaultdict(set)
+            
+            for entity_id in entity_ids:
+                seen['entity_id'].add(entity_id)
+            
+            # process each section, removing obvious duplicates and enforcing per section limits
             for section in suggested:
-                section[1] = filter(lambda e: e.entity_id not in entity_ids, section[1])[:section_limit]
+                entities = Entity.fast_id_dedupe(section[1], seen)[:section_limit]
                 
-                if len(section[1]) > 0:
-                    out_suggested.append(section)
+                if len(entities) > 0:
+                    out_suggested.append([ section[0], entities ])
             
             suggested = out_suggested
         
         return suggested
     
     # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    @lru_cache(maxsize=16)
+    @lru_cache(maxsize=8)
     @memcached_function(time=2*24*60*60)
     def _getSuggestedEntities(self, coords, category, subcategory):
         popular   = True
@@ -144,6 +136,12 @@ class MongoSuggestedEntities(ASuggestedEntities):
         return suggested
     
     def _get_popular_entities(self, category, subcategory, limit=10):
+        """ 
+            Returns the most popular entities on Stamped restricted to the 
+            category / subcategory given, with popularity defined simply 
+            by the number of stamps an entity has received.
+        """
+        
         spec = {}
         
         if subcategory is not None:

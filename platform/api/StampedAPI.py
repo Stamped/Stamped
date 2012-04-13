@@ -1611,6 +1611,9 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
         self._statsSink.increment('stamped.api.stamps.subcategory.%s' % entity.subcategory)
         
+        # Add badges
+        stamp.badges = self._stampDB.extractBadges(stamp)
+        
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
         ### TODO: Rollback adds stamp to "deleted stamps" table. Fix that.
@@ -2429,14 +2432,14 @@ class StampedAPI(AStampedAPI):
             genericCollectionSlice.limit = stampCap
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
-
+        
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
         if self.__version == 0:
             if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
                 if len(stamps) >= genericCollectionSlice.limit:
                     genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
-
+                
                 deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
                 
                 if len(deleted) > 0:

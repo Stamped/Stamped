@@ -43,10 +43,10 @@ class EntityProxyContainer(BasicSourceContainer):
         entity.title        = self.__proxy.name
         entity.kind         = self.__proxy.kind 
         entity.types        = self.__proxy.types
-
+        
         decorations = {}
-
+        
         modified = self.enrichEntity(entity, decorations, max_iterations=None, timestamp=None)
-
+        
         return entity
 

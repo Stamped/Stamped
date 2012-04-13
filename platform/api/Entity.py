@@ -14,6 +14,7 @@ try:
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
     from bson.objectid  import ObjectId 
+    from collections    import defaultdict
 except:
     logs.report()
     raise
@@ -576,4 +577,38 @@ def upgradeEntityData(entityData):
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
     
     return new 
+
+def fast_id_dedupe(entities, seen=None):
+    """
+        Returns a new list of entities with all obvious, id-based duplicates 
+        removed (with lower indexed entities taking precedence over ones 
+        appearing later in the input list).
+        
+        entities        - iterable of entities to dedupe
+        seen (optional) - defaultdict(set) is a mapping of id keys to a set 
+                          containing unique values seen so far for a given id.
+    """
+    
+    if seen is None:
+        seen = defaultdict(set)
+    
+    output = []
+    for entity in entities:
+        keys = [ k for k in entity.sources if k.endswith('_id') ]
+        keep = True
+        
+        # ensure that the same source id doesn't appear twice in the result set
+        # (source ids are supposed to be unique)
+        for key in keys:
+            value = str(entity[key])
+            
+            if value in seen[key]:
+                keep = False
+            else:
+                seen[key].add(value)
+        
+        if keep:
+            output.append(entity)
+    
+    return output
 

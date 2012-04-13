@@ -250,7 +250,7 @@ class UniqueSearchResultConstraint(ASearchResultConstraint):
                 
                 seen[key].add(value)
             
-            for j in xrange(len(results)):
+            for j in xrange(i + 1, len(results)):
                 result2 = results[j]
                 
                 if i != j and self._eq(result.kind, result2.kind) and self._eq(result.title, result2.title):
@@ -261,8 +261,7 @@ class UniqueSearchResultConstraint(ASearchResultConstraint):
                         utils.log("!" * 80)
                         utils.log("")
                         
-                        # TODO: return False
-                        return True
+                        return False
         
         return True
 

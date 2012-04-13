@@ -316,6 +316,7 @@ class Stamp(Schema):
         self.stats              = StampStatsSchema()
         self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
+        self.badges             = SchemaList(Badge())
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -347,6 +348,11 @@ class DeletedStamp(Schema):
 class ModifiedTimestampSchema(Schema):
     def setSchema(self):
         self.modified           = SchemaElement(datetime)
+
+class Badge(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
 
 
 # ######## #
