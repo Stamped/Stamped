@@ -357,23 +357,24 @@ class HTTPUser(Schema):
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
 
             distribution = []
-            for item in stats['distribution']:
-                d           = HTTPCategoryDistribution()
-                d.category  = item['category'] 
-                d.name      = item['category'].title()
-                d.count     = item['count']
-                distribution.append(d)
+            if 'distribution' in stats:
+                for item in stats['distribution']:
+                    d           = HTTPCategoryDistribution()
+                    d.category  = item['category'] 
+                    d.name      = item['category'].title()
+                    d.count     = item['count']
+                    distribution.append(d)
 
-            if len(distribution) > 0:
-                _rank = {
-                    'food'      : 1,
-                    'book'      : 2,
-                    'film'      : 3,
-                    'music'     : 4,
-                    'other'     : 5,
-                }
-                self.distribution = sorted(distribution, lambda x: _rank[x.category] if x.category in _rank else 10)
-
+                if len(distribution) > 0:
+                    _rank = {
+                        'food'      : 1,
+                        'book'      : 2,
+                        'film'      : 3,
+                        'music'     : 4,
+                        'other'     : 5,
+                    }
+                    distribution = sorted(distribution, lambda x: _rank[x.category] if x.category in _rank else 10)
+            self.distribution = distribution
         else:
             raise NotImplementedError
         return self
