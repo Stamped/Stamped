@@ -9,6 +9,7 @@ import Globals
 import Entity
 import copy, json, re, urllib, utils
 
+from resolve                import EntityProxyContainer
 from gevent.pool            import Pool
 from resolve.iTunesSource   import iTunesSource
 from pprint                 import pprint
@@ -129,8 +130,10 @@ class AppleRSS(object):
     def _parse_entity(self, entry):
         aid = entry['id']['attributes']['im:id']
         
-        wrapper = self._source.entityProxyFromKey(aid)
-        return self._source.buildEntityFromEntityProxy(wrapper)
+        proxy = self._source.entityProxyFromKey(aid)
+        proxy = EntityProxyContainer.EntityProxyContainer(proxy)
+        
+        return proxy.buildEntity()
     
     def _get_id(self, s):
         match = self._id_re.match(s)

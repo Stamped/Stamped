@@ -26,7 +26,8 @@ class AExternalSource(object):
     @abstractmethod
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
-        Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity fields if necessary.
+        Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity 
+        fields if necessary.
 
         Returns True if the entity was modified.
         """

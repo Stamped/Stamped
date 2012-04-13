@@ -539,7 +539,7 @@ class MongoEntitySearcher(EntitySearcher):
                     del entity.search_id
                 
                 # if local search and result is too far away, discard it
-                if local and abs(result[1]) > 30 :
+                if local and abs(result[1]) > 30:
                     return
                 
                 # filter any custom entities

@@ -138,6 +138,20 @@ def _buildOpenTableURL(opentable_id=None, opentable_nickname=None, client=None):
 
     return None
 
+def _cleanImageURL(url):
+    domain = urlparse.urlparse(url).netloc
+
+    if 'mzstatic.com' in domain:
+        # try to return the maximum-resolution apple photo possible if we have 
+        # a lower-resolution version stored in our db
+        url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+    
+    elif 'amazon.com' in domain:
+        # strip the 'look inside' image modifier
+        url = amazon_image_re.sub(r'\1.jpg', url)
+
+    return url
+
 # ######### #
 # OAuth 2.0 #
 # ######### #
@@ -485,7 +499,7 @@ class HTTPEntity(Schema):
         # Components
         self.playlist           = HTTPEntityPlaylist()
         self.actions            = SchemaList(HTTPEntityAction())
-        self.gallery            = HTTPEntityGallery()
+        self.galleries          = SchemaList(HTTPEntityGallery())
         self.metadata           = SchemaList(HTTPEntityMetadataItem())
         self.stamped_by         = HTTPEntityStampedBy()
         self.related            = HTTPEntityRelated()
@@ -543,20 +557,8 @@ class HTTPEntity(Schema):
     def _addImages(self, images):
         for image in images:
             if image.image is not None:
-                url = image.image
-                domain = urlparse.urlparse(url).netloc
-
-                if 'mzstatic.com' in domain:
-                    # try to return the maximum-resolution apple photo possible if we have 
-                    # a lower-resolution version stored in our db
-                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
-                
-                elif 'amazon.com' in domain:
-                    # strip the 'look inside' image modifier
-                    url = amazon_image_re.sub(r'\1.jpg', url)
-            
                 item = ImageSchema()
-                item.image = url 
+                item.image = _cleanImageURL(image.image)
                 self.images.append(item)
 
     def _getIconURL(self, filename, client=None):
@@ -1005,6 +1007,37 @@ class HTTPEntity(Schema):
                 if len(playlist.data) > 0:
                     self.playlist = playlist
 
+            # Albums
+
+            if entity.isType('artist') and len(entity.albums) > 0:
+                gallery = HTTPEntityGallery()
+                gallery.layout = 'list'
+                for album in entity.albums:
+                    try:
+                        item            = HTTPEntityGalleryItem()
+                        ### TODO: Add placeholder if image doesn't exist
+                        item.image      = _cleanImageURL(album.images[0]['image'])
+                        item.caption    = album.title 
+
+                        if album.entity_id is not None:
+                            source              = HTTPActionSource()
+                            source.name         = 'View Album'
+                            source.source       = 'stamped'
+                            source.source_id    = album.entity_id
+
+                            action              = HTTPAction()
+                            action.type         = 'stamped_view_entity'
+                            action.name         = 'View Album'
+                            action.sources      = [source]
+
+                            item.action         = action
+
+                        gallery.data.append(item)
+                    except:
+                        pass
+                if len(gallery.data) > 0:
+                    self.galleries.append(gallery)
+
         elif entity.kind == 'software' and entity.isType('app'):
 
             if len(entity.authors) > 0:
@@ -1033,14 +1066,15 @@ class HTTPEntity(Schema):
             actionIcon = self._getIconURL('act_download_primary', client=client)
             self._addAction('download', 'Download', sources, icon=actionIcon)
 
-            # Gallery
+            # Screenshots
 
-            if entity.screenshots is not None:
-
+            if entity.screenshots is not None and len(entity.screenshots) > 0:
+                gallery = HTTPEntityGallery()
                 for screenshot in entity.screenshots:
                     item = HTTPEntityGalleryItem()
                     item.image = screenshot.image
-                    self.gallery.data.append(item)
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
 
 
         # Generic item
@@ -1111,6 +1145,7 @@ class HTTPEntityGallery(Schema):
     def setSchema(self):
         self.data               = SchemaList(HTTPEntityGalleryItem(), required=True)
         self.name               = SchemaElement(basestring)
+        self.layout             = SchemaElement(basestring) # 'list' or None
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
@@ -1339,6 +1374,26 @@ class HTTPEntityNearby(Schema):
         else:
             raise NotImplementedError
         return schema
+
+class HTTPEntitySuggested(Schema):
+    def setSchema(self):
+        self.coordinates        = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.limit              = SchemaElement(int)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntitySuggested':
+            if self.coordinates:
+                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
+        else:
+            raise NotImplementedError
+        
+        return schema
+
 
 class HTTPEntityActionEndpoint(Schema):
     def setSchema(self):

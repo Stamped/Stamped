@@ -917,23 +917,23 @@ class PersonEntity(BasicEntity):
 class BasicMediaEntity(BasicEntity):
     def setSchema(self):
         BasicEntity.setSchema(self)
-
+        
         self.release_date                   = SchemaElement(datetime)
         self.release_date_source            = SchemaElement(basestring)
         self.release_date_timestamp         = SchemaElement(datetime)
-
+        
         self.length                         = SchemaElement(int)
         self.length_source                  = SchemaElement(basestring)
         self.length_timestamp               = SchemaElement(datetime)
-
+        
         self.genres                         = SchemaList(SchemaElement(basestring))
         self.genres_source                  = SchemaElement(basestring)
         self.genres_timestamp               = SchemaElement(datetime)
-
+        
         self.artists                        = SchemaList(PersonEntityMini())
         self.artists_source                 = SchemaElement(basestring)
         self.artists_timestamp              = SchemaElement(datetime)
-
+        
         self.authors                        = SchemaList(PersonEntityMini())
         self.authors_source                 = SchemaElement(basestring)
         self.authors_timestamp              = SchemaElement(datetime)
@@ -941,7 +941,7 @@ class BasicMediaEntity(BasicEntity):
         self.directors                      = SchemaList(PersonEntityMini())
         self.directors_source               = SchemaElement(basestring)
         self.directors_timestamp            = SchemaElement(datetime)
-
+        
         self.cast                           = SchemaList(PersonEntityMini())
         self.cast_source                    = SchemaElement(basestring)
         self.cast_timestamp                 = SchemaElement(datetime)
@@ -949,19 +949,19 @@ class BasicMediaEntity(BasicEntity):
         self.publishers                     = SchemaList(BasicEntityMini())
         self.publishers_source              = SchemaElement(basestring)
         self.publishers_timestamp           = SchemaElement(datetime)
-
+        
         self.studios                        = SchemaList(BasicEntityMini())
         self.studios_source                 = SchemaElement(basestring)
         self.studios_timestamp              = SchemaElement(datetime)
-
+        
         self.networks                       = SchemaList(BasicEntityMini())
         self.networks_source                = SchemaElement(basestring)
         self.networks_timestamp             = SchemaElement(datetime)
-
+        
         self.mpaa_rating                    = SchemaElement(basestring)
         self.mpaa_rating_source             = SchemaElement(basestring)
         self.mpaa_rating_timestamp          = SchemaElement(datetime)
-
+        
         self.parental_advisory              = SchemaElement(basestring)
         self.parental_advisory_source       = SchemaElement(basestring)
         self.parental_advisory_timestamp    = SchemaElement(datetime)
@@ -1031,7 +1031,7 @@ class MediaItemEntity(BasicMediaEntity):
 
     def minimize(self):
         return BasicEntity.minimize(self, 'length')
-
+    
     @property 
     def subtitle(self):
         if self.isType('movie'):
@@ -1135,6 +1135,13 @@ class SoftwareEntity(BasicEntity):
         
         return 'other'
 
+class EntitySuggested(Schema):
+    def setSchema(self):
+        self.coordinates                    = CoordinatesSchema()
+        self.category                       = SchemaElement(basestring)
+        self.subcategory                    = SchemaElement(basestring)
+        self.limit                          = SchemaElement(int, default=10)
+ 
 
 # ############# #
 # Mini Entities #

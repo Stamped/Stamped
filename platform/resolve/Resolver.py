@@ -35,6 +35,7 @@ try:
     import utils, re, string
     import logs, sys, math
     import unicodedata
+    # from EntityProxyContainer import EntityProxyContainer
     
     from BasicSource                import BasicSource
     from utils                      import lazyProperty
@@ -1676,8 +1677,11 @@ def demo(generic_source, default_title):
                     print("Inverted to different entity! (dup or false positive)")
             else:
                 print("Inversion failed! (low asymetric comparison?)")
-            blank = generic_source.buildEntityFromEntityProxy(new_query)
-            pprint(blank.value)
+
+            # entityProxy = EntityProxyContainer(new_query)
+            # blank = entityProxy.buildEntity()
+
+            # pprint(blank.value)
 
     else:
         print("No results")

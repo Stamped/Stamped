@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Interface for Spotify Metadata API
-
+    Interface for Spotify Metadata API
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -83,18 +82,22 @@ def demo(service, method, **params):
 
 if __name__ == '__main__':
     import sys
+    
     service = 'search'
-    method = 'artist'
-    params = {'q':'Katy Perry'}
+    method  = 'artist'
+    params  = { 'q' : 'Katy Perry' }
+    
     if len(sys.argv) > 1:
         service = sys.argv[1]
+    
     if len(sys.argv) > 2:
         method = sys.argv[2]
+    
     if len(sys.argv) > 3:
         params = {}
         for arg in sys.argv[3:]:
             pair = arg.split('=')
             params[pair[0]] = pair[1]
+    
     demo(service, method, **params)
-
 

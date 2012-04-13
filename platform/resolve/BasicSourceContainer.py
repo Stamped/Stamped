@@ -69,6 +69,12 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 targetGroups.add(group)
                         if len(targetGroups) > 0:
                             copy = buildEntity(entity.value)
+                            """
+                            timestamps - { GROUP - timestamp }
+                            empty, single-use timestamps map for specifying failed attempts, 
+                            assignment regardless of current value,
+                            and stale data (rare)
+                            """
                             timestamps = {}
                             localDecorations = {}
                             logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
@@ -118,6 +124,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             if groupObj.eligible(entity):
                 currentSource = groupObj.getSource(entity)
                 if currentSource is None:
+                    if groupObj.isSet(entity):
+                        return False
                     return True
                 else:
                     priority = self.getGroupPriority(group, source)
@@ -133,13 +141,15 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                         else:
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
+                            if currentTimestamp is None:
+                                return True
                             try:
                                 currentTimestamp = currentTimestamp.replace(tzinfo=None)
                                 if self.now - currentTimestamp > currentMaxAge:
                                     return True
                             except Exception as e:
-                                logs.warning('FAIL: self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
-                                    (self.now, currentTimestamp, currentMaxAge, e))
+                                logs.warning('FAIL (%s / %s): self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
+                                    (source, group, self.now, currentTimestamp, currentMaxAge, e))
                             return False
             else:
                 return False

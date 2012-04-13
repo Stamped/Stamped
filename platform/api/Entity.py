@@ -184,16 +184,16 @@ def deriveKindFromCategory(category):
 def deriveKindFromSubcategory(subcategory):
     mapping = {
         'artist'            : 'person', 
-
+        
         'album'             : 'media_collection', 
         'tv'                : 'media_collection', 
-
+        
         'book'              : 'media_item', 
         'track'             : 'media_item', 
         'movie'             : 'media_item', 
-
+        
         'app'               : 'software', 
-
+        
         'restaurant'        : 'place', 
         'bar'               : 'place', 
         'bakery'            : 'place', 

@@ -59,13 +59,6 @@ class _EntityObject(object):
         except Exception:
             return ''
 
-    # @lazyProperty
-    # def types(self):
-    #     try:
-    #         return [ str(i) for i in self.entity.types ]
-    #     except:
-    #         return []
-
     @property 
     def source(self):
         return "stamped"
@@ -316,8 +309,20 @@ class EntityApp(_EntityObject, ResolverSoftware):
     def __init__(self, entity):
         _EntityObject.__init__(self, entity)
         ResolverSoftware.__init__(self, types=entity.types)
-    
-    ### TODO: Finish creating this
+
+    @lazyProperty
+    def release_date(self):
+        try:
+            return self.entity['release_date']
+        except Exception:
+            return None
+
+    @lazyProperty 
+    def authors(self):
+        try:
+            return [ { 'name' : item['title'] } for item in self.entity['authors'] ]
+        except Exception:
+            return []
 
 
 class EntitySearchAll(ResolverProxy, ResolverSearchAll):
@@ -471,7 +476,7 @@ class StampedSource(GenericSource):
             if query.isType('album'):
                 return self.albumSource(query)
             if query.isType('tv'):
-                raise NotImplementedError
+                return self.tvSource(query)
         if query.kind == 'media_item':
             if query.isType('track'):
                 return self.trackSource(query)
@@ -481,7 +486,7 @@ class StampedSource(GenericSource):
                 return self.bookSource(query)
         if query.kind == 'software':
             if query.isType('app'):
-                raise NotImplementedError
+                return self.appSource(query)
 
         return self.emptySource
 
@@ -656,6 +661,21 @@ class StampedSource(GenericSource):
                 yield {
                     'details.book.author' : query.author['name'],
                     'subcategory'   : 'book',
+                }
+            except GeneratorExit:
+                pass
+        return self.__querySource(query_gen(), query)
+
+    def appSource(self, query):
+        def query_gen():
+            try:
+                yield {
+                    'titlel'        : query.name.lower(),
+                    'types'         : 'app',
+                }
+                yield {
+                    'titlel'        : query.name.lower(),
+                    'subcategory'   : 'app',
                 }
             except GeneratorExit:
                 pass

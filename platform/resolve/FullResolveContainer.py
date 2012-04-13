@@ -33,10 +33,10 @@ class FullResolveContainer(BasicSourceContainer):
         for source in allSources:
             self.addSource(source())
         
-        self.setGlobalPriority('seed',seedPriority)
-        self.setGlobalPriority('entity',-1)
-        self.setGlobalPriority('thetvdb',2)
-        self.setGlobalPriority('itunes',1)
+        self.setGlobalPriority('seed', seedPriority)
+        self.setGlobalPriority('entity', -1)
+        self.setGlobalPriority('thetvdb', 2)
+        self.setGlobalPriority('itunes', 1)
 
         self.setGroupPriority('amazon', 'tracks', -1)
         self.setGroupPriority('amazon', 'albums', -1)
@@ -95,4 +95,3 @@ def demo(default_title='Katy Perry'):
 
 if __name__ == "__main__":
     demo()
-

@@ -68,10 +68,16 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return self._addObject(entity)
     
     def getEntity(self, entityId):
-        documentId = self._getObjectIdFromString(entityId)
-        document   = self._getMongoDocumentFromId(documentId)
+        documentId  = self._getObjectIdFromString(entityId)
+        document    = self._getMongoDocumentFromId(documentId)
+        entity      = self._convertFromMongo(document)
         
-        return self._convertFromMongo(document)
+        if entity.tombstone_id is not None:
+            documentId  = self._getObjectIdFromString(entity.tombstone_id)
+            document    = self._getMongoDocumentFromId(documentId)
+            entity      = self._convertFromMongo(document)
+
+        return entity
     
     def getEntities(self, entityIds):
         documentIds = []
@@ -81,7 +87,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         
         result = []
         for item in data:
-            result.append(self._convertFromMongo(item))
+            entity = self._convertFromMongo(item)
+            if entity.tombstone_id is not None:
+                entity = self.getEntity(entity.tombstone_id)
+            result.append(entity)
         return result
     
     def updateEntity(self, entity):

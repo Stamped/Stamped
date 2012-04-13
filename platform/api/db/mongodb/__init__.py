@@ -25,4 +25,5 @@ import MongoUserStampsCollection
 import MongoPlacesEntityCollection
 import MongoCollectionProxy
 import MongoSearchCacheCollection
+import MongoSuggestedEntities
 

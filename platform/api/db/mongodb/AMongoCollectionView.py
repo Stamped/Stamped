@@ -201,6 +201,7 @@ class AMongoCollectionView(AMongoCollection):
                     ll0         = (_viewport.upperLeft.lat,  _viewport.upperLeft.lng)
                     ll1         = (_viewport.lowerRight.lat, _viewport.lowerRight.lng)
                     
+                    # expand viewport filter by 5%
                     lat_diff    = (ll0[0] - ll1[0]) * 0.05
                     lng_diff    = (ll0[1] - ll1[1]) * 0.05
                     
@@ -404,7 +405,7 @@ class AMongoCollectionView(AMongoCollection):
             }""")
             
             logs.debug('Query: %s' % query)
-
+            
             try:
                 result = self._collection.inline_map_reduce(_map, _reduce, query=query, scope=scope, limit=1000)
             except Exception as e:
