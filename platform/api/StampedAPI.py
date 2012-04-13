@@ -1691,6 +1691,8 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
+        distribution = self._getUserStampDistribution(authUserId)
+        self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
         
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
@@ -2001,6 +2003,8 @@ class StampedAPI(AStampedAPI):
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps',      increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', increment=1)
+        distribution = self._getUserStampDistribution(authUserId)
+        self._userDB.updateUserStats(authUserId, 'distribution', value=distribution)
         
         # Update credit stats if credit given
         if stamp.credit is not None and len(stamp.credit) > 0:
