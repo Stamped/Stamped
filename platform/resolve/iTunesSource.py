@@ -14,11 +14,11 @@ import Globals
 from logs import report
 
 try:
+    import logs, urllib2
     from libs.iTunes                import globaliTunes
     from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
-    import logs
     from pprint                     import pformat
     from Resolver                   import *
     from ResolverObject             import *
@@ -135,7 +135,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'albums' in self.data:
             results = self.data['albums']
         else:
-            results = self.itunes.method('lookup', id=self.key,entity='album')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='album')['results']
         return [
             {
                 'name'  : album['collectionName'], 
@@ -239,7 +239,7 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
                 'url':              track['trackViewUrl'],
                 'track_number':     track['trackNumber'],
             }
-                for track in results if track.pop('wrapperType',None) == 'track' 
+                for track in results if track.pop('wrapperType', None) == 'track' 
         ]
 
 
@@ -613,6 +613,19 @@ class iTunesSource(GenericSource):
             ]
         )
 
+    @property 
+    def __mapper(self):
+        mapper = [
+            ('track',   'song'), 
+            ('album',   'album'), 
+            ('artist',  'musicArtist'), 
+            ('app',     'software'), 
+            ('book',    'ebook'), 
+            ('movie',   'movie'), 
+            ('tv',      'tvShow'), 
+        ]
+        return mapper
+
     @lazyProperty
     def __itunes(self):
         return globaliTunes()
@@ -633,9 +646,32 @@ class iTunesSource(GenericSource):
             groups.remove('images')
         return groups
 
-    def entityProxyFromKey(self, itunes_id):
+    def entityProxyFromKey(self, itunesId, **kwargs):
         try:
-            data = self.__itunes.method('lookup',id=itunes_id)['results'][0]
+            rawData = self.__itunes.method('lookup',id=itunesId)
+
+            if len(rawData['results']) == 0 or rawData['resultCount'] == 0:
+                # No results - try falling back in case id was deprecated by iTunes
+                try:
+                    entity = kwargs.pop('entity', None)
+                    if entity is not None: 
+                        url = None
+                        if entity.itunes_url is not None:
+                            url = entity.itunes_url
+                        else:
+                            for t in self.__mapper:
+                                if entity.isType(t[0]):
+                                    url = 'http://itunes.apple.com/us/%s/id%s' % (t[1], itunesId)
+                        assert url is not None
+                        source = urllib2.urlopen(url)
+                        if source.code == 200 and source.url != url:
+                            newId = source.url.split('?')[0].split('/')[-1].replace('id','')
+                            if newId != itunesId:
+                                rawData = self.__itunes.method('lookup', id=newId)
+                except Exception:
+                    pass
+
+            data = rawData['results'][0]
 
             dataWrapperType     = data['wrapperType'] if 'wrapperType' in data else None
             dataKind            = data['kind'] if 'kind' in data else None
@@ -659,6 +695,7 @@ class iTunesSource(GenericSource):
                 return iTunesBook(data=data)
             raise KeyError('Unrecognized data: %s' % data)
         except KeyError:
+            logs.warning('iTunes lookup failed (%s)' % itunesId)
             raise
         return None
 
@@ -764,22 +801,12 @@ class iTunesSource(GenericSource):
 
         def gen():
             try:
-                mapper = [
-                    ('track',   'song'), 
-                    ('album',   'album'), 
-                    ('artist',  'musicArtist'), 
-                    ('app',     'software'), 
-                    ('book',    'ebook'), 
-                    ('movie',   'movie'), 
-                    ('tv',      'tvShow'), 
-                ]
-                
                 if query.types is None:
-                    queries = [v[1] for v in mapper]
+                    queries = [v[1] for v in self.__mapper]
                 else:
                     queries = []
                     for t in query.types:
-                        for t2 in mapper:
+                        for t2 in self.__mapper:
                             if t == t2[0]:
                                 queries.append(t2[1])
                 

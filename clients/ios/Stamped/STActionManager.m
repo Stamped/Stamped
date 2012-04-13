@@ -14,6 +14,7 @@
 #import "STMenuFactory.h"
 #import "STMenuPopUp.h"
 #import "STStampedActions.h"
+#import "STSimpleAction.h"
 #import "STStampedAPI.h"
 
 @interface STActionManager () <STViewDelegate>

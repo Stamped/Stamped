@@ -42,6 +42,9 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGroupPriority('amazon', 'albums', -1)
         self.setGroupPriority('amazon', 'artists', -1)
 
+        # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
+        self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
+
 def demo(default_title='Katy Perry'):
     import bson, sys
     

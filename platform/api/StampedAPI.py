@@ -38,7 +38,7 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
-    from Entity                 import buildEntity 
+    from Entity                 import buildEntity, deriveCategoryFromTypes
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -779,6 +779,22 @@ class StampedAPI(AStampedAPI):
             return self._userDB.getUser(userTiny.user_id)
         
         return self._userDB.getUserByScreenName(userTiny.screen_name)
+
+    def _getUserStampDistribution(self, userId):
+
+        stampIds    = self._collectionDB.getUserStampIds(userId)
+        stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        
+        categories  = {}
+        num_stamps  = len(stamps)
+        
+        for stamp in stamps:
+            category = deriveCategoryFromTypes(stamp.entity.types)
+            categories.setdefault(category, 0)
+            categories[category] += 1
+
+        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        
     
     ### PUBLIC
     
@@ -794,6 +810,9 @@ class StampedAPI(AStampedAPI):
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
+
+        if self.__version > 0 and len(user.distribution) == 0:
+            user.distribution = self._getUserStampDistribution(authUserId)
         
         return user
     
@@ -1174,7 +1193,7 @@ class StampedAPI(AStampedAPI):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
         else:
-            tasks.invoke(tasks.APITasks._enrichEntity, args=[entityId])
+            self.mergeEntityId(entityId)
         
         return self._entityDB.getEntity(entityId)
     
@@ -2856,16 +2875,327 @@ class StampedAPI(AStampedAPI):
         menu = self._menuDB.getMenu(entityId)
         if menu is None:
             try:
-                entity = self._entityDB.getEntity(entity_id)
-                if entity is not None:
-                    self._enrichEntity(entity)
-                    menu = self._menuDB.getMenu(entityId)
+                self.mergeEntityId(entityId)
+                menu = self._menuDB.getMenu(entityId)
             except Exception:
                 pass
         if menu is None:
             raise StampedUnavailableError()
         else:
             return menu
+
+    """
+    ######                                            
+    #     # ######  ####   ####  #      #    # ###### 
+    #     # #      #      #    # #      #    # #      
+    ######  #####   ####  #    # #      #    # #####  
+    #   #   #           # #    # #      #    # #      
+    #    #  #      #    # #    # #       #  #  #      
+    #     # ######  ####   ####  ######   ##   ###### 
+                                                   
+    """
+    
+    @lazyProperty
+    def __full_resolve(self):
+        return FullResolveContainer.FullResolveContainer()
+    
+    def __handleDecorations(self, entity, decorations):
+        for k,v in decorations.items():
+            ### TODO: decorations returned as dict, not schema. Fix?
+            if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
+                try:
+                    menu = MenuSchema()
+                    menu.importData(v)
+                    self._menuDB.update(menu)
+                except Exception:
+                    logs.warning('Menu enrichment failed')
+                    report()
+    
+    def _convertSearchId(self, search_id):
+        if not search_id.startswith('T_'):
+            # already a valid entity id
+            return search_id
+        
+        source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
+        
+        sources = {
+            'amazon':       AmazonSource,
+            'factual':      FactualSource,
+            'googleplaces': GooglePlacesSource,
+            'itunes':       iTunesSource,
+            'rdio':         RdioSource,
+            'spotify':      SpotifySource,
+            'tmdb':         TMDBSource,
+        }
+
+        if source_name.lower() not in sources:
+            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
+            raise StampedUnavailableError
+        
+        # Attempt to resolve against the Stamped DB
+        source    = sources[source_name.lower()]()
+        stamped   = StampedSource(stamped_api=self)
+        entity_id = stamped.resolve_fast(source, source_id)
+        
+        if entity_id is None:
+            proxy = source.entityProxyFromKey(source_id)
+            results = stamped.resolve(proxy)
+            
+            if len(results) > 0 and results[0][0]['resolved']:
+                # Source key found in the Stamped DB
+                entity_id = results[0][1].key
+        
+        if entity_id is None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            
+            entity = self._entityDB.addEntity(entity)
+            entity_id = entity.entity_id
+            
+        # Enrich and merge entity asynchronously
+        self.mergeEntityId(entity_id)
+        
+        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
+        return entity_id
+    
+
+    def mergeEntity(self, entity, link=True):
+        logs.info('Merge Entity: "%s"' % entity.title)
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, link])
+    
+    def mergeEntityAsync(self, entityDict, link=True):
+        self._mergeEntity(buildEntity(entityDict), link)
+
+    def mergeEntityId(self, entityId, link=True):
+        logs.info('Merge EntityId: %s' % entityId)
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId, link])
+    
+    def mergeEntityIdAsync(self, entityId, link=True):
+        self._mergeEntity(self._entityDB.getEntity(entityId), link)
+    
+    def _mergeEntity(self, entity, link=True):
+        logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
+        modified = self._resolveEntity(entity)
+
+        if link:
+            modified = self._resolveEntityLinks(entity) | modified
+
+        if modified:
+            if entity.entity_id is None:
+                self._entityDB.addEntity(entity)
+            else:
+                self._entityDB.updateEntity(entity)
+
+
+    def _resolveEntity(self, entity):
+
+        def _getSuccessor(tombstoneId):
+            successor_id = tombstoneId
+            successor    = self._entityDB.getEntity(successor_id)
+            assert successor is not None and successor.entity_id == successor_id
+            
+            merger = FullResolveContainer.FullResolveContainer()
+            merger.addSource(EntitySource(entity, merger.groups))
+            successor_decorations = {}
+            modified_successor = merger.enrichEntity(successor, successor_decorations)
+            self.__handleDecorations(successor, successor_decorations)
+
+            return successor, modified_successor
+
+        try:
+            # Short circuit if entity is already tombstoned
+            if entity.sources.tombstone_id is not None:
+                successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
+                logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor.entity_id))
+                entity = successor
+                return modified_successor
+
+            # Enrich entity
+            decorations = {}
+            modified    = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=4)
+            
+            # Return successor if entity is tombstoned
+            if entity.sources.tombstone_id is not None:
+                successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
+
+                if entity.entity_id is not None:
+                    self._entityDB.updateEntity(entity)
+                
+                logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor.entity_id))
+                entity = successor
+                return modified_successor
+
+            self.__handleDecorations(entity, decorations)
+
+            return modified 
+
+        except Exception:
+            report()
+            raise
+
+
+    def _resolveEntityLinks(self, entity):
+        
+        def _resolveStub(stub, sources):
+            source          = None
+            source_id       = None
+            entity_id       = None
+            proxy           = None
+
+            stubModified    = False
+
+            if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+                entity_id = stub.entity_id
+            else:
+                for sourceName in sources:
+                    try:
+                        if stub.sources['%s_id' % sourceName] is not None:
+                            source = sources[sourceName]()
+                            source_id = stub.sources['%s_id' % sourceName]
+                            # Attempt to resolve against the Stamped DB (quick)
+                            entity_id = stampedSource.resolve_fast(source, source_id)
+                            if entity_id is None:
+                                # Attempt to resolve against the Stamped DB (full)
+                                proxy = source.entityProxyFromKey(source_id, entity=stub)
+                                results = stampedSource.resolve(proxy)
+                                if len(results) > 0 and results[0][0]['resolved']:
+                                    entity_id = results[0][1].key
+                            break
+                    except Exception:
+                        pass
+            if entity_id is not None:
+                entity = self._entityDB.getEntity(entity_id)
+            elif source_id is not None and proxy is not None:
+                entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+                entity = entityProxy.buildEntity()
+                stubModified = True 
+            else:
+                logs.warning('Unable to resolve stub: %s' % stub)
+                raise KeyError('Unable to resolve stub')
+
+            return entity, stubModified
+
+
+        ### TRACKS
+        def _resolveTrack(stub):
+            try:
+                track, trackModified = _resolveStub(stub, musicSources)
+            except KeyError as e:
+                logs.warning('Track resolution failed: %s' % e)
+                return stub
+
+            # Merge track if it wasn't resolved
+            if track.entity_id is None:
+                self.mergeEntity(track, link=False)
+
+            return track
+
+        def _resolveTracks(entity):
+            trackList = []
+            tracksModified = False
+            for stub in entity.tracks:
+                trackId = stub.entity_id
+                track = _resolveTrack(stub)
+                trackList.append(track.minimize())
+
+                # Compare entity id before and after
+                if trackId != track.entity_id:
+                    tracksModified = True
+
+            entity.tracks = trackList
+            return tracksModified
+
+
+        ### ALBUMS
+        def _resolveAlbum(stub):
+            try:
+                album, albumModified = _resolveStub(stub, musicSources)
+            except KeyError:
+                logs.warning('Album resolution failed')
+                return stub
+
+            # Merge album if it wasn't resolved
+            if album.entity_id is None:
+                self.mergeEntity(album)
+
+            return album
+
+        def _resolveAlbums(entity):
+            albumList = []
+            albumsModified = False
+            for stub in entity.albums:
+                albumId = stub.entity_id
+                album = _resolveAlbum(stub)
+                albumList.append(album.minimize())
+
+                # Compare entity id before and after
+                if albumId != album.entity_id:
+                    albumsModified = True
+
+            entity.albums = albumList
+            return albumsModified
+
+
+        ### ARTISTS
+        def _resolveArtist(stub):
+            try:
+                artist, artistModified = _resolveStub(stub, musicSources)
+            except KeyError:
+                logs.warning('Artist resolution failed')
+                return stub
+
+            # Merge artist if it wasn't resolved
+            # if artist.entity_id is None:
+            #     self.mergeEntity(artist)
+
+            return artist
+
+        def _resolveArtists(entity):
+            artistList = []
+            artistsModified = False
+            for stub in entity.artists:
+                artistId = stub.entity_id
+                artist = _resolveArtist(stub)
+                artistList.append(artist.minimize())
+
+                # Compare entity id before and after
+                if artistId != artist.entity_id:
+                    artistsModified = True
+
+            entity.artists = artistList
+            return artistsModified
+
+        stampedSource   = StampedSource(stamped_api = self)
+        musicSources    = {
+            'itunes':       iTunesSource,
+            'rdio':         RdioSource,
+            'spotify':      SpotifySource,
+            'amazon':       AmazonSource,
+        }
+
+        modified = False
+
+        if entity.isType('album'):
+            modified = _resolveArtists(entity) | modified
+            modified = _resolveTracks(entity) | modified
+
+        if entity.isType('artist'):
+            modified = _resolveAlbums(entity) | modified
+            modified = _resolveTracks(entity) | modified
+
+        if entity.isType('artist') or entity.isType('track'):
+            # Enrich albums instead
+            for albumItem in entity.albums:
+                try:
+                    albumItem, albumModified = _resolveStub(albumItem, musicSources)
+                    if albumItem.entity_id is not None:
+                        self.mergeEntityId(albumItem.entity_id)
+                    else:
+                        self.mergeEntity(albumItem)
+                except Exception as e:
+                    logs.warning('Failed to enrich album: %s' % e)
+
+        return modified
 
     """
     ######                                      
@@ -2923,391 +3253,6 @@ class StampedAPI(AStampedAPI):
         
         return mentionedUserIds
     
-    @lazyProperty
-    def __full_resolve(self):
-        return FullResolveContainer.FullResolveContainer()
-    
-    def _convertSearchId(self, search_id):
-        if not search_id.startswith('T_'):
-            # already a valid entity id
-            return search_id
-        
-        source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
-        
-        sources = {
-            'AMAZON':       AmazonSource,
-            'FACTUAL':      FactualSource,
-            'GOOGLEPLACES': GooglePlacesSource,
-            'ITUNES':       iTunesSource,
-            'RDIO':         RdioSource,
-            'SPOTIFY':      SpotifySource,
-            'TMDB':         TMDBSource,
-        }
-        
-        if source_name not in sources:
-            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
-            raise StampedUnavailableError
-        
-        # attempt to resolve against the Stamped DB
-        source    = sources[source_name]()
-        stamped   = StampedSource(stamped_api = self)
-        entity_id = stamped.resolve_fast(source, source_id)
-        
-        if entity_id is None:
-            proxy = source.entityProxyFromKey(source_id)
-            results = stamped.resolve(proxy)
-            
-            if len(results) > 0 and results[0][0]['resolved']:
-                # source key was found in the Stamped DB
-                entity_id = results[0][1].key
-        
-        if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-            entity = entityProxy.buildEntity()
-            
-            entity = self._entityDB.addEntity(entity)
-            entity_id = entity.entity_id
-            
-            # Enrich and merge entity asynchronously
-            self.mergeEntityId(entity_id)
-        else:
-            # Enrich entity asynchronously
-            tasks.invoke(tasks.APITasks._enrichEntity, args=[entity_id])
-        
-        logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
-        return entity_id
-    
-    def _mergeEntity(self, entity, update=False):
-        try:
-            if entity.sources.tombstone_id is not None:
-                successor_id = entity['tombstone_id']
-                successor    = self._entityDB.getEntity(successor_id)
-                assert successor is not None and successor.entity_id == successor_id
-
-                logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor_id))
-                return successor
-
-            decorations = {}
-            modified    = self.__full_resolve.enrichEntity(entity, decorations)
-            
-            if entity.sources.tombstone_id is not None:
-                successor_id = entity['tombstone_id']
-                successor    = self._entityDB.getEntity(successor_id)
-                assert successor is not None and successor.entity_id == successor_id
-                
-                merger = FullResolveContainer.FullResolveContainer()
-                merger.addSource(EntitySource(entity, merger.groups))
-                successor_decorations = {}
-                modified_successor = merger.enrichEntity(successor, successor_decorations)
-                self.__handleDecorations(successor, successor_decorations)
-                
-                if modified_successor:
-                    self._entityDB.updateEntity(successor)
-
-                if entity.entity_id is not None:
-                    self._entityDB.updateEntity(entity)
-                
-                logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor_id))
-                return successor
-            else:
-                if not modified and not update:
-                    return entity 
-
-                self.__handleDecorations(entity, decorations)
-
-                if entity.entity_id is not None and not entity.entity_id.startswith('T_'):
-                    logs.info("Updated / enriched entity on merge %s" % entity.entity_id)
-                    return self._entityDB.updateEntity(entity)
-                else:
-                    entity.entity_id = None
-                    entity = self._entityDB.addEntity(entity)
-                    logs.info("Inserted new entity on merge %s" % entity.entity_id)
-                    return entity
-        except Exception:
-            report()
-            raise
-    
-    def mergeEntity(self, entity, update=False):
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
-    
-    def mergeEntityAsync(self, entity_dict, update=False):
-        entity = buildEntity(entity_dict)
-        entity = self._mergeEntity(entity, update)
-        modified = self._enrichEntityLinks(entity)
-        if modified:
-            self._entityDB.update(entity)
-    
-    def mergeEntityId(self, entityId, update=False):
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, update])
-    
-    def mergeEntityIdAsync(self, entityId, update=False):
-        entity = self._entityDB.getEntity(entityId)
-        entity = self._mergeEntity(entity, update)
-        modified = self._enrichEntityLinks(entity)
-        if modified:
-            self._entityDB.update(entity)
-    
-    def __handleDecorations(self, entity, decorations):
-        for k,v in decorations.items():
-            ### TODO: decorations returned as dict, not schema. Fix?
-            if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
-                try:
-                    menu = MenuSchema()
-                    menu.importData(v)
-                    self._menuDB.update(menu)
-                except Exception:
-                    logs.warning('Menu enrichment failed')
-                    report()
-    
-    def _enrichEntity(self, entity):
-        decorations = {}
-        modified = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=5)
-        self.__handleDecorations(entity, decorations)
-        return modified
-    
-    def _enrichEntityAsync(self, entity_id):
-        entity = self._entityDB.getEntity(entity_id)
-        
-        if entity is None:
-            logs.warning("ERROR: could not find entity for enrichment: %s" % entity_id)
-            raise Exception
-
-        modified = self._enrichEntity(entity)
-
-        if entity.sources.tombstone_id is None:
-            modified = self._enrichEntityLinks(entity) | modified 
-
-        if modified:
-            self._entityDB.update(entity)
-
-
-    def _enrichEntityLinks(self, entity):
-        
-        def _enrichStub(stub, sources):
-            source          = None
-            source_id       = None
-            entity_id       = None
-            proxy           = None
-
-            stubModified    = False
-
-            if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
-                entity_id = stub.entity_id
-            else:
-                for sourceName in sources:
-                    try:
-                        if stub.sources['%s_id' % sourceName] is not None:
-                            source = sources[sourceName]()
-                            source_id = stub.sources['%s_id' % sourceName]
-                            # Attempt to resolve against the Stamped DB (quick)
-                            entity_id = stampedSource.resolve_fast(source, source_id)
-                            if entity_id is None:
-                                # Attempt to resolve against the Stamped DB (full)
-                                proxy = source.entityProxyFromKey(source_id)
-                                results = stampedSource.resolve(proxy)
-                                if len(results) > 0 and results[0][0]['resolved']:
-                                    entity_id = results[0][1].key
-                            break
-                    except Exception:
-                        pass
-            if entity_id is not None:
-                entity = self._entityDB.getEntity(entity_id)
-            elif source_id is not None and proxy is not None:
-                entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-                entity = entityProxy.buildEntity()
-                stubModified = True 
-            else:
-                logs.warning('Unable to enrich stub: %s' % stub)
-                raise KeyError('Unable to enrich stub')
-
-            return entity, stubModified
-
-
-        ### TRACKS
-        def _enrichTrack(stub, artists=[], albums=[], merge=True):
-            try:
-                track, trackModified = _enrichStub(stub, musicSources)
-            except KeyError as e:
-                logs.warning('Track enrichment failed: %s' % e)
-                return stub
-
-            # Update track with entity_ids from passed albums
-            for album in albums:
-                albumUpdated = False
-                for item in track.albums:
-                    # Check if album is already pointing to entity
-                    if item.entity_id == album.entity_id:
-                        albumUpdated = True
-                        break
-                    # Check each source to see if it matches
-                    commonSources = set(album.sources.value.keys()).intersection(set(item.sources.value.keys()))
-                    for commonSource in commonSources:
-                        if commonSource[-3:] == '_id' and album.sources[commonSource] == item.sources[commonSource]:
-                            item.entity_id = album.entity_id
-                            albumUpdated = True
-                            trackModified = True
-                            break
-                    if albumUpdated:
-                        break
-                if not albumUpdated and album.entity_id is not None:
-                    track.albums.append(album.minimize())
-                    trackModified = True
-
-            # Update track with entity_ids from passed artists
-            for artist in artists:
-                artistUpdated = False
-                for item in track.artists:
-                    # Check if artist is already pointing to entity
-                    if item.entity_id == artist.entity_id:
-                        artistUpdated = True
-                        break
-                    # Check each source to see if it matches
-                    commonSources = set(artist.sources.value.keys()).intersection(set(item.sources.value.keys()))
-                    for commonSource in commonSources:
-                        if commonSource[-3:] == '_id' and artist.sources[commonSource] == item.sources[commonSource]:
-                            item.entity_id = artist.entity_id
-                            artistUpdated = True
-                            trackModified = True
-                            break
-                    if artistUpdated:
-                        break
-                if not artistUpdated and artist.entity_id is not None:
-                    track.artists.append(artist.minimize())
-                    trackModified = True
-
-            # Verify all fields are populated
-            if len(track.albums) == 0 or len(track.artists) == 0:
-                trackModified = self._enrichEntity(track) | trackModified
-
-            # Merge track
-            if merge:
-                track = self._mergeEntity(track, update=trackModified)
-
-            return track
-
-        def _enrichTracks(entity, artists=[], albums=[], merge=True):
-            track_list = []
-            for stub in entity.tracks:
-                track = _enrichTrack(stub, artists, albums, merge)
-                track_list.append(track.minimize())
-
-            if len(track_list) > 0:
-                entity.tracks = track_list
-                return True
-
-            return False
-
-
-        ### ALBUMS
-        def _enrichAlbum(stub, artists=[], merge=True):
-            try:
-                album, albumModified = _enrichStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Album enrichment failed')
-                return stub
-
-            # Update album with entity_ids from passed artists
-            for artist in artists:
-                artistUpdated = False
-                for item in album.artists:
-                    # Check if artist is already pointing to entity
-                    if item.entity_id == artist.entity_id:
-                        artistUpdated = True
-                        break
-                    # Check each source to see if it matches
-                    commonSources = set(artist.sources.value.keys()).intersection(set(item.sources.value.keys()))
-                    for commonSource in commonSources:
-                        if commonSource[-3:] == '_id' and artist.sources[commonSource] == item.sources[commonSource]:
-                            item.entity_id = artist.entity_id
-                            artistUpdated = True
-                            albumModified = True
-                            break
-                    if artistUpdated:
-                        break
-                if not artistUpdated and artist.entity_id is not None:
-                    album.artists.append(artist.minimize())
-                    albumModified = True
-
-            # Merge album
-            if merge:
-                album = self._mergeEntity(album, update=albumModified)
-
-            return album
-
-        def _enrichAlbums(entity, artists=[], merge=True):
-            album_list = []
-            for stub in entity.albums:
-                album = _enrichAlbum(stub, artists, merge)
-                album_list.append(album.minimize())
-
-            if len(album_list) > 0:
-                entity.albums = album_list
-                return True
-
-            return False
-
-
-        ### ARTISTS
-        def _enrichArtist(stub, merge=True):
-            try:
-                artist, artistModified = _enrichStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Artist enrichment failed')
-                return stub
-
-            # Merge artist
-            # artist = self._mergeEntity(artist, True)
-
-            return artist
-
-        def _enrichArtists(entity, merge=True):
-            artist_list = []
-            for stub in entity.artists:
-                artist = _enrichArtist(stub, merge)
-                artist_list.append(artist.minimize())
-
-            if len(artist_list) > 0:
-                entity.artists = artist_list
-                return True
-
-            return False
-
-        stampedSource   = StampedSource(stamped_api = self)
-        musicSources    = {
-            'itunes':       iTunesSource,
-            'rdio':         RdioSource,
-            'spotify':      SpotifySource,
-            'amazon':       AmazonSource,
-        }
-
-        modified = False
-
-        if entity.isType('album'):
-            modified = _enrichArtists(entity) | modified
-            modified = _enrichTracks(entity, artists=entity.artists, albums=[entity]) | modified
-
-        if entity.isType('artist'):
-            modified = _enrichAlbums(entity, artists=[entity], merge=False) | modified
-            modified = _enrichTracks(entity, artists=[entity]) | modified
-
-        if entity.isType('artist') or entity.isType('track'):
-            # Enrich albums instead
-            for albumItem in entity.albums:
-                try:
-                    albumItem, albumModified = _enrichStub(albumItem, musicSources)
-                    if albumItem.entity_id is not None and not albumItem.entity_id.startswith('T_'):
-                        tasks.invoke(tasks.APITasks.mergeEntityId, args=[albumItem.entity_id])
-                    else:
-                        tasks.invoke(tasks.APITasks.mergeEntity, args=[albumItem.value])
-                except Exception as e:
-                    logs.warning('Failed to enrich album: %s' % e)
-
-        return modified
-        
-    def _saveTempEntityAsync(self, results):
-        results = map(lambda r: (Entity(r[0]), r[1]), results)
-        self._entitySearcher._add_temp(results)
-    
     def _addEntity(self, entity):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
@@ -3352,10 +3297,6 @@ class StampedAPI(AStampedAPI):
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()
             # don't let error propagate
-    
-    # NOTE: deprecated in terms of integrity checker in bin/checkdb.py
-    def _updateUserStats(self):
-        raise NotImplementedError
     
     def addClientLogsEntry(self, authUserId, entry):
         entry.user_id = authUserId

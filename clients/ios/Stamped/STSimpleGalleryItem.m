@@ -8,38 +8,34 @@
 
 #import "STSimpleGalleryItem.h"
 #import "STGalleryItem.h"
+#import "STSimpleAction.h"
 
 @implementation STSimpleGalleryItem
 
-@synthesize image = image_;
-@synthesize caption = caption_;
-@synthesize link = link_;
-@synthesize linkType = linkType_;
-@synthesize height = height_;
-@synthesize width = width_;
+@synthesize image = _image;
+@synthesize caption = _caption;
+@synthesize action = _action;
+@synthesize height = _height;
+@synthesize width = _width;
 
 - (void)dealloc {
-  self.image = nil;
-  self.caption = nil;
-  self.link = nil;
-  self.linkType = nil;
+  [_image release];
+  [_caption release];
+  [_action release];
   [super dealloc];
 }
 
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGalleryItem class]];
   
-  [mapping mapKeyPathsToAttributes:
-   @"link_type", @"linkType",
-   nil];
-  
   [mapping mapAttributes:
    @"image",
    @"caption",
-   @"link",
    @"height",
    @"width",
    nil];
+  
+  [mapping mapRelationship:@"action" withMapping:[STSimpleAction mapping]];
   
   return mapping;
 }

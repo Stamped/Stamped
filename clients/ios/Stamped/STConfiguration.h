@@ -14,6 +14,4 @@
 
 - (NSInteger)internalVersion;
 
-
-
 @end

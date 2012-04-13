@@ -131,4 +131,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (NSString*)trackLengthString:(NSInteger)length;
 
++ (void)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
+
 @end

@@ -28,6 +28,7 @@
 
 - (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
 
+@property (nonatomic, readonly, retain) NSString* style;
 @property (nonatomic, readonly) NSMutableDictionary* operations;
 @property (nonatomic, readonly) NSMutableDictionary* components;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;
@@ -41,11 +42,13 @@
 @synthesize components = components_;
 @synthesize entityDetail = entityDetail_;
 @synthesize callback = callback_;
+@synthesize style = _style;
 
 - (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
 {
   self = [super init];
   if (self) {
+    _style = [style retain];
     entityDetail_ = [anEntityDetail retain];
     self.callback = aBlock;
     operations_ = [[NSMutableDictionary alloc] init];
@@ -53,8 +56,9 @@
     NSArray* components;
     if ([style isEqualToString:@"StampDetail"]) {
       components = [NSArray arrayWithObjects:
+                    @"header",
                     @"actions",
-                    @"playlist",
+                    //@"playlist",
                     nil];
     }
     else {
@@ -77,6 +81,7 @@
   [operations_ release];
   [components_ release];
   [entityDetail_ release];
+  [_style release];
   self.callback = nil;
   [super dealloc];
 }
@@ -89,6 +94,7 @@
 }
 
 - (UIView*)createViewWithDelegate:(id<STViewDelegate>)delegate {
+  BOOL loadedSomething = NO;
   STViewContainer* view = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 0)] autorelease];
   NSArray* keys = [NSArray arrayWithObjects:@"header", @"actions", @"metadata", @"playlist", nil];
   for (NSString* key in keys) {
@@ -100,19 +106,25 @@
         if (child)
         {
           [view appendChildView:child];
+          loadedSomething = YES;
         }
       }
     }
   }
-  //TODO fix synchronousWrapper collapse bug
-  if (self.entityDetail.gallery) {
-    id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
-    UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
-                                                        entityDetail:self.entityDetail 
-                                                            andFrame:CGRectMake(0, 0, 320, 200)];
-    [view appendChildView:wrapper];
+  if (loadedSomething) {
+    //TODO fix synchronousWrapper collapse bug
+    if (self.entityDetail.galleries.count && ![self.style isEqualToString:@"StampDetail"]) {
+      id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
+      UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
+                                                          entityDetail:self.entityDetail 
+                                                              andFrame:CGRectMake(0, 0, 320, 200)];
+      [view appendChildView:wrapper];
+    }
+    return view;
   }
-  return view;
+  else {
+    return nil;
+  }
 }
 
 - (void)main {
@@ -121,7 +133,7 @@
     NSOperation* operation = [self.operations objectForKey:key];
     id<STEntityDetailComponentFactory> factory = nil;
     if ([key isEqualToString:@"header"]) {
-      factory = [[[STHeaderViewFactory alloc] init] autorelease];
+      factory = [[[STHeaderViewFactory alloc] initWithStyle:self.style] autorelease];
     }
     else if ([key isEqualToString:@"actions"]) {
       factory = [[[STActionsViewFactory alloc] init] autorelease];
@@ -146,10 +158,17 @@
   }
   dispatch_async(dispatch_get_main_queue(), ^{
     @autoreleasepool {
-      STViewCreator creator = ^(id<STViewDelegate> delegate) {
-        return [self createViewWithDelegate:delegate];
-      };
-      self.callback(creator);
+      @try {
+        STViewCreator creator = ^(id<STViewDelegate> delegate) {
+          return [self createViewWithDelegate:delegate];
+        };
+        self.callback(creator);
+      }
+      @catch (NSException *exception) {
+        [Util logOperationException:exception withMessage:nil];
+      }
+      @finally {
+      }
     }
   });
 }

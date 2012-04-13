@@ -27,11 +27,9 @@
 - (id)initWithSearchResult:(SearchResult*)searchResult;
 
 @property (nonatomic, retain) Stamp* referringStamp;
-@property (nonatomic, readonly) id<STEntityDetail> entityDetail;
-@property (nonatomic, readonly) NSOperationQueue* operationQueue;
 @property (nonatomic, retain) STSynchronousWrapper* synchronousWrapper;
 
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
+@property (nonatomic, retain) UIActivityIndicatorView* loadingView;
 
 
 @end

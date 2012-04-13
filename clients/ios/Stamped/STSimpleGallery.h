@@ -12,6 +12,7 @@
 
 @interface STSimpleGallery : NSObject
 
+@property (nonatomic, readwrite, copy) NSString* layout;
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, retain) NSArray<STGalleryItem>* data;
 

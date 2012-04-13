@@ -14,6 +14,8 @@
 #import "STSimpleAction.h"
 #import "STRdioPlaylistPopUp.h"
 
+static NSString* _rdioTokenKey = @"STRdio.token";
+
 @interface STRdioPlaylistHelper : NSObject <RDAPIRequestDelegate>
 
 - (id)initWithID:(NSString*)rdioID;
@@ -83,7 +85,13 @@ static STRdio* _sharedInstance;
 - (void)ensureLoginWithCompletionBlock:(void(^)(void))block {
   self.callback = block;
   UIWindow* window = [[UIApplication sharedApplication] keyWindow];
-  [self.rdio authorizeFromController:window.rootViewController];
+  NSString* token = [[NSUserDefaults standardUserDefaults] stringForKey:_rdioTokenKey];
+  if (token) {
+    [self.rdio authorizeUsingAccessToken:token fromController:window.rootViewController];
+  }
+  else {
+    [self.rdio authorizeFromController:window.rootViewController];
+  }
 }
 
 - (void)startPlayback:(NSString*)rdioID {
@@ -121,7 +129,6 @@ static STRdio* _sharedInstance;
   }
 }
 
-
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
   return [self didChooseSource:source forAction:action withContext:context shouldExecute:NO];
 }
@@ -156,6 +163,8 @@ static STRdio* _sharedInstance;
 - (void) rdioDidAuthorizeUser:(NSDictionary *)user withAccessToken:(NSString *)accessToken {
   self.loggedIn = YES;
   self.accessToken = accessToken;
+  [[NSUserDefaults standardUserDefaults] setValue:accessToken forKey:_rdioTokenKey];
+  NSLog(@"Storing:%@",accessToken);
   if (self.callback) {
     self.callback();
   }

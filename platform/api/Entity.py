@@ -260,12 +260,16 @@ def deriveTypesFromSubcategories(subcategories):
     return result 
 
 def deriveSubcategoryFromTypes(types):
+    if isinstance(types, SchemaElement):
+        types = types.value
     for t in types:
         if t in subcategories.keys():
             return t 
     return 'other'
 
 def deriveCategoryFromTypes(types):
+    if isinstance(types, SchemaElement):
+        types = types.value
     subcategory = deriveSubcategoryFromTypes(types)
     if subcategory in subcategories:
         return subcategories[subcategory]
@@ -280,7 +284,7 @@ def buildEntity(data=None, kind=None, mini=False):
         new = getEntityMiniObjectFromKind(kind)
     else:
         new = getEntityObjectFromKind(kind)
-    return new(data)
+    return new(data, overflow=True)
 
 def upgradeEntityData(entityData):
     # Just to be explicit..

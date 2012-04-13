@@ -17,17 +17,18 @@
   NSString* itemID = [self getItemId:item];
   if (itemID) {
     [[STRdio sharedRdio] startPlayback:itemID];
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
   }
   else {
     NSAssert(NO, @"rdio id was null");
   }
-  NSLog(@"selected item:%@", item.name);
 }
 
 - (void)didMoveToSuperview {
   [super didMoveToSuperview];
   if (self.superview == nil) {
     [[STRdio sharedRdio] stopPlayback];
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
   }
 }
 

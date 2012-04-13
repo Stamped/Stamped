@@ -39,6 +39,12 @@
   return  action;
 }
 
++ (STSimpleAction*)actionWithURLString:(NSString*)url {
+  STSimpleSource* source = [[[STSimpleSource alloc] init] autorelease];
+  source.link = url;
+  return [STSimpleAction actionWithType:@"view" andSource:source];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleAction class]];
   

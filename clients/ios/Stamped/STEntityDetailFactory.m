@@ -132,6 +132,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
         }
         else {
           id<STEntityDetail> cachedDetail = [self.entityCache objectForKey:anEntityID];
+          cachedDetail = nil;
           if (cachedDetail) {
             dispatch_async(dispatch_get_main_queue(), ^{
               @autoreleasepool {

@@ -158,7 +158,7 @@ class TheTVDBSource(GenericSource):
     def __thetvdb(self):
         return globalTheTVDB()
     
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             if key.startswith('t'):
                 return TheTVDBTrack(rdio_id=key)

@@ -318,7 +318,7 @@ class GooglePlacesSource(GenericSource):
         
         return self.generatorSource(gen())
 
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             item = self.__places.getPlaceDetails(key)
             return GooglePlacesPlace(item)

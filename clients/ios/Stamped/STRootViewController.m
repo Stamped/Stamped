@@ -8,6 +8,7 @@
 
 #import "STRootViewController.h"
 #import "Util.h"
+#import "STNavigationBar.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -27,14 +28,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:.5];
-  [UIView animateWithDuration:1 animations:^{
-    //[Util reframeView:self.view withDeltas:CGRectMake(100, 0, 0, 0)];
-  } completion:^(BOOL finished) {
-    [UIView animateWithDuration:1 animations:^{
-      //[Util reframeView:self.view withDeltas:CGRectMake(100, 0, 0, 0)];
-    }];
-  }];
+  
+  self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+  [self setValue:[[[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease] forKey:@"navigationBar"];
 }
 
 - (void)viewDidUnload
