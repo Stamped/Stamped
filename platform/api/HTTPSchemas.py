@@ -337,6 +337,7 @@ class HTTPUser(Schema):
         self.num_credits_given  = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.num_likes_given    = SchemaElement(int)
+        self.distribution       = SchemaList(HTTPCategoryDistribution())
 
     def importSchema(self, schema):
         if schema.__class__.__name__ in ('Account', 'User'):
@@ -355,9 +356,23 @@ class HTTPUser(Schema):
 
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
 
+            for item in stats.distribution:
+                d           = HTTPCategoryDistribution()
+                d.category  = item.category 
+                d.name      = item.category.title()
+                d.count     = item.count
+                self.distribution.append(d)
+
         else:
             raise NotImplementedError
         return self
+
+class HTTPCategoryDistribution(Schema):
+    def setSchema(self):
+        self.category           = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+        self.count              = SchemaElement(int)
 
 class HTTPSuggestedUser(HTTPUser):
     def setSchema(self):
