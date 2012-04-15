@@ -183,7 +183,7 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
         result = {}
         try:
             result['name']  = self.data['album']
-            result['key']   = self.data['key']
+            result['key']   = self.data['albumKey']
             result['url']   = 'http://rdio.com%s' % self.data['albumUrl']
             return [ result ]
         except Exception:

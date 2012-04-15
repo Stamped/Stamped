@@ -3196,7 +3196,8 @@ class StampedAPI(AStampedAPI):
                 try:
                     albumItem, albumModified = _resolveStub(albumItem, musicSources)
                     if albumItem.entity_id is not None:
-                        self.mergeEntityId(albumItem.entity_id)
+                        if albumItem.isType('album'):
+                            self.mergeEntityId(albumItem.entity_id)
                     else:
                         self.mergeEntity(albumItem)
                 except Exception as e:
