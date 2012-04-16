@@ -2606,7 +2606,7 @@ class StampedAPI(AStampedAPI):
         count = None
 
         # Use relationships
-        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+        if authUserId is not None and genericCollectionSlice.__class__.__name__ == 'FriendsSlice':
             distance = genericCollectionSlice.distance
             userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
             if showCount == True:
