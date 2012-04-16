@@ -20,15 +20,19 @@ def main():
     
     parser.add_argument("-s", "--source", default=None, type=str, help="db to import from")
     
+    parser.add_argument("-t", "--target", default=None, type=str, help="db to import to")
+    
     args = parser.parse_args()
     host, port = utils.get_db_config(args.source)
     old_host        = host
-    
     old_connection  = pymongo.Connection(host, port)
     old_database    = old_connection['stamped']
     collections     = old_database.collection_names()
-    dest            = MongoDBConfig.getInstance()
-    new_host        = dest.host
+    
+    new_host        = args.target
+    if new_host is None:
+        dest            = MongoDBConfig.getInstance()
+        new_host        = dest.host
     
     if not os.path.isdir('/stamped/tmp/stamped/'):
        os.makedirs('/stamped/tmp/stamped')
