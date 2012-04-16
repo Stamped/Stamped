@@ -382,11 +382,12 @@ def upgradeEntityData(entityData):
     new.title               = old.pop('title', None)
     
     # Images
+    netflixImages = netflix.pop('images', {})
     oldImages = [
         old.pop('image', None),
         media.pop('artwork_url', None),
-        netflix.pop('hd', None),
-        netflix.pop('large', None),
+        netflixImages.pop('hd', None),
+        netflixImages.pop('large', None),
     ]
     for oldImage in oldImages:
         if oldImage is not None:
