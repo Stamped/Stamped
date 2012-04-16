@@ -17,6 +17,7 @@ try:
 
     from AMongoCollection               import AMongoCollection
     from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
+    from MongoEntitySeedCollection      import MongoEntitySeedCollection
     from MongoMenuCollection            import MongoMenuCollection
     from AEntityDB                      import AEntityDB
     from difflib                        import SequenceMatcher
@@ -37,6 +38,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def places_collection(self):
         return MongoPlacesEntityCollection()
+    
+    @lazyProperty
+    def seed_collection(self):
+        return MongoEntitySeedCollection()
     
     def _convertFromMongo(self, document):
         if document is None:
@@ -65,7 +70,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
     
     def addEntity(self, entity):
-        return self._addObject(entity)
+        entity = self._addObject(entity)
+        self.seed_collection.addEntity(entity)
+        return entity
     
     def getEntity(self, entityId):
         documentId  = self._getObjectIdFromString(entityId)
