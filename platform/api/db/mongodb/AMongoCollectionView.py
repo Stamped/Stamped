@@ -24,7 +24,7 @@ class AMongoCollectionView(AMongoCollection):
         sort        = None
         reverse     = genericCollectionSlice.reverse
         user_query  = genericCollectionSlice.query
-        viewport    = (genericCollectionSlice.viewport.lowerRight.lat is not None)
+        viewport    = (genericCollectionSlice.viewport and genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         orig_coords = True
 

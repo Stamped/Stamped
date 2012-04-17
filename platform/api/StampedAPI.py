@@ -2606,7 +2606,7 @@ class StampedAPI(AStampedAPI):
         count = None
 
         # Use relationships
-        if authUserId is not None and isinstance(genericCollectionSlice, FriendsSlice):
+        if authUserId is not None and genericCollectionSlice.__class__.__name__ == 'FriendsSlice':
             distance = genericCollectionSlice.distance
             userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
             if showCount == True:
@@ -3196,7 +3196,8 @@ class StampedAPI(AStampedAPI):
                 try:
                     albumItem, albumModified = _resolveStub(albumItem, musicSources)
                     if albumItem.entity_id is not None:
-                        self.mergeEntityId(albumItem.entity_id)
+                        if albumItem.isType('album'):
+                            self.mergeEntityId(albumItem.entity_id)
                     else:
                         self.mergeEntity(albumItem)
                 except Exception as e:
