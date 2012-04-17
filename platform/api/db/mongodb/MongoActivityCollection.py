@@ -7,16 +7,16 @@ __license__   = "TODO"
 
 import Globals, logs, copy, pymongo
 
-from datetime import datetime
-from utils import lazyProperty
+from datetime                           import datetime
+from utils                              import lazyProperty
+from Schemas                            import *
 
-from Schemas import *
+from AActivityDB                        import AActivityDB
+from MongoAlertQueueCollection          import MongoAlertQueueCollection
+from MongoActivityObjectCollection      import MongoActivityObjectCollection
+from MongoActivityLinkCollection        import MongoActivityLinkCollection
 
-from AMongoCollection import AMongoCollection
-from MongoAlertQueueCollection import MongoAlertQueueCollection
-from AActivityDB import AActivityDB
-
-class MongoActivityCollection(AMongoCollection, AActivityDB):
+class MongoActivityCollection(AActivityDB):
     
     """
     Activity Types:
@@ -32,99 +32,87 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     """
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='activity', primary_key='activity_id', obj=Activity)
         AActivityDB.__init__(self)
-
-        self._collection.ensure_index([('recipient_id', pymongo.ASCENDING), \
-                                        ('timestamp.created', pymongo.DESCENDING)])
-        self._collection.ensure_index('user.user_id', unique=False)
-        self._collection.ensure_index('link.linked_stamp_id', unique=False)
-        self._collection.ensure_index('link.linked_comment_id', unique=False)
-        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
-                                        ('recipient_id', pymongo.ASCENDING), \
-                                        ('genre', pymongo.ASCENDING)])
 
     ### PUBLIC
     
     @lazyProperty
     def alerts_collection(self):
         return MongoAlertQueueCollection()
+
+    @lazyProperty
+    def activity_objects_collection(self):
+        return MongoActivityObjectCollection()
+
+    @lazyProperty
+    def activity_links_collection(self):
+        return MongoActivityLinkCollection()
+
+
     
     def getActivity(self, userId, **kwargs):
-        since       = kwargs.pop('since', None)
-        before      = kwargs.pop('before', None)
-        limit       = kwargs.pop('limit', 20)
-        
-        params = {'recipient_id': userId}
-        
-        if since != None and before != None:
-            params['timestamp.created'] = {'$gte': since, '$lte': before}
-        elif since != None:
-            params['timestamp.created'] = {'$gte': since}
-        elif before != None:
-            params['timestamp.created'] = {'$lte': before}
-        
-        documents = self._collection.find(params).sort('timestamp.created', \
-            pymongo.DESCENDING).limit(limit)
-        
-        activity = []
-        for document in documents:
-            activity.append(self._convertFromMongo(document))
-        
-        return activity
+        params = {
+            'since'     : kwargs.pop('since', None),
+            'before'    : kwargs.pop('before', None),
+            'limit'     : kwargs.pop('limit', 20),
+            'sort'      : 'timestamp.created',
+            'sortOrder' : pymongo.DESCENDING,
+        }
+
+        sort = {
+            'sort'      : 'timestamp.created',
+            'sortOrder' : pymongo.DESCENDING,
+        }
+
+        activityIds = self.activity_links_collection.getActivityIdsForUser(userId, **params)
+        activity    = self.activity_objects_collection.getActivityObjects(activityIds, **sort)
+
+        return activity 
+
+
     
-    def getActivityItem(self, activityId):
-        documentId = self._getObjectIdFromString(activityId)
-        document = self._getMongoDocumentFromId(documentId)
-        return self._convertFromMongo(document)
-    
-    def addActivity(self, recipientIds, activityItem, **kwargs):
+    def addActivity(self, recipientIds, activityObject, **kwargs):
         sendAlert   = kwargs.pop('sendAlert', True)
         checkExists = kwargs.pop('checkExists', False)
         
         alerts = []
         sentTo = set()
+
+        if activityObject.activity_id is None:
+            try:
+                activityObject = self.activity_objects_collection.matchActivityObject(activityObject)
+            except Exception:
+                activityObject = self.activity_objects_collection.addActivityObject(activityObject)
         
         for recipientId in recipientIds:
             if recipientId in sentTo:
                 continue
             
+            self.activity_links_collection.addActivityLink(activityObject.activity_id, recipientId)
+
             sentTo.add(recipientId)
-            
-            activityId = None
-            activity = activityItem.value
-            activity['recipient_id'] = recipientId
-            
-            if checkExists:
-                try:
-                    document = self._collection.find_one({
-                        'user.user_id': activity['user']['user_id'],
-                        'recipient_id': activity['recipient_id'],
-                        'genre': activity['genre'],
-                    })
-                    if not document:
-                        activityId = self._collection.insert_one(activity)
-                except:
-                    pass
-            else:
-                activityId = self._collection.insert_one(activity)
-            
+
             if sendAlert:
-                if not activityId:
+                if not activityObject.activity_id:
                     continue
                 
-                alert = Alert()
-                alert.activity_id   = activityId
+                alert               = Alert()
                 alert.recipient_id  = recipientId
-                alert.user_id       = activity['user']['user_id']
-                alert.genre         = activity['genre']
-                alert.created       = activity['timestamp']['created']
+                alert.activity_id   = activityObject.activity_id
+                alert.user_id       = activityObject.user_id
+                alert.genre         = activityObject.genre
+                alert.created       = activityObject.created
                 alerts.append(alert)
-        
+
         if len(alerts):        
             self.alerts_collection.addAlerts(alerts)
+
+
     
+
+
     def removeActivity(self, genre, userId, **kwargs):
+        return False
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
         recipientId = kwargs.pop('recipientId', None)
@@ -151,8 +139,10 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             })
     
     def removeActivityForStamp(self, stampId):
+        return False
         self._collection.remove({'link.linked_stamp_id': stampId})
     
     def removeUserActivity(self, userId):
+        return False
         self._collection.remove({'user.user_id': userId})
 

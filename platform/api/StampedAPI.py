@@ -1776,7 +1776,7 @@ class StampedAPI(AStampedAPI):
                           recipient_ids=creditedUserIds, 
                           subject=entity.title, 
                           blurb=stamp.blurb, 
-                          linked_stamp_id=stamp.stamp_id, 
+                          stamp_id=stamp.stamp_id, 
                           benefit=CREDIT_BENEFIT)
         
         # Add activity for mentioned users
@@ -1785,7 +1785,7 @@ class StampedAPI(AStampedAPI):
                                  ignore=creditedUserIds, 
                                  subject=entity.title, 
                                  blurb=stamp.blurb, 
-                                 linked_stamp_id=stamp.stamp_id)
+                                 stamp_id=stamp.stamp_id)
     
     @API_CALL
     def addResizedStampImagesAsync(self, stamp_id, image_url):
@@ -1933,7 +1933,7 @@ class StampedAPI(AStampedAPI):
                           recipient_ids=creditedUserIds, 
                           subject=stamp.entity.title, 
                           blurb=stamp.blurb, 
-                          linked_stamp_id=stamp.stamp_id, 
+                          stamp_id=stamp.stamp_id, 
                           benefit=CREDIT_BENEFIT)
         
         # Add activity for mentioned users
@@ -1956,7 +1956,7 @@ class StampedAPI(AStampedAPI):
                               recipient_ids=mentionedUserIds, 
                               subject=stamp.entity.title, 
                               blurb=stamp.blurb, 
-                              linked_stamp_id=stamp.stamp_id)
+                              stamp_id=stamp.stamp_id)
         
         return stamp
     
@@ -2148,8 +2148,8 @@ class StampedAPI(AStampedAPI):
                           recipient_ids=commentedUserIds, 
                           subject=stamp.entity.title, 
                           blurb=comment.blurb, 
-                          linked_stamp_id=stamp.stamp_id, 
-                          linked_comment_id=comment.comment_id)
+                          stamp_id=stamp.stamp_id, 
+                          comment_id=comment.comment_id)
         
         # Increment comment metric
         self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
@@ -2182,8 +2182,8 @@ class StampedAPI(AStampedAPI):
                           recipient_ids=repliedUserIds, 
                           subject=stamp.entity.title, 
                           blurb=comment.blurb, 
-                          linked_stamp_id=stamp.stamp_id, 
-                          linked_comment_id=comment.comment_id)
+                          stamp_id=stamp.stamp_id, 
+                          comment_id=comment.comment_id)
         
         # Increment comment count on stamp
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
@@ -2332,7 +2332,7 @@ class StampedAPI(AStampedAPI):
                               user_id=authUserId, 
                               recipient_ids=[ stamp.user_id ], 
                               subject=stamp.entity.title, 
-                              linked_stamp_id=stamp.stamp_id,
+                              stamp_id=stamp.stamp_id,
                               benefit=benefit)
         
         return stamp
@@ -2693,7 +2693,7 @@ class StampedAPI(AStampedAPI):
                               user_id=authUserId, 
                               recipient_ids=[ favorite.stamp.user_id ], 
                               subject=favorite.stamp.entity.title, 
-                              linked_stamp_id=favorite.stamp.stamp_id)
+                              stamp_id=favorite.stamp.stamp_id)
         
         return favorite
     
@@ -2799,6 +2799,51 @@ class StampedAPI(AStampedAPI):
     #     #  ####    #   #   ##   #   #     #   
     """
     
+    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
+        if not self._activity or len(recipient_ids) <= 0:
+            return
+        
+        sendAlert                   = kwargs.pop('sendAlert', True)
+        checkExists                 = kwargs.pop('checkExists', False)
+        
+        activity                    = ActivityObject()
+        activity.genre              = genre
+        activity.user_id            = user_id
+        activity.timestamp.created  = datetime.utcnow()
+        
+        for k, v in kwargs.iteritems():
+            activity[k] = v
+        
+        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
+                                     checkExists=checkExists)
+        
+        # increment unread news for all recipients
+        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
+    
+    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
+        mentionedUserIds = set()
+        
+        if self._activity == True and mentions is not None and len(mentions) > 0:
+            # Note: No activity should be generated for the user initiating the mention
+            for mention in mentions:
+                if 'user_id' in mention and mention.user_id != authUserId and \
+                    (ignore is None or mention.user_id not in ignore):
+                    # Check if block exists between user and mentioned user
+                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
+                    
+                    if self._friendshipDB.blockExists(friendship) == False:
+                        mentionedUserIds.add(mention['user_id'])
+            
+            self._addActivity(genre='mention', 
+                              user_id=authUserId, 
+                              recipient_ids=mentionedUserIds, 
+                              **kwargs)
+            
+            # Increment mentions metric
+            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
+        
+        return mentionedUserIds
+    
     @API_CALL
     def getActivity(self, authUserId, **kwargs):
         quality = kwargs.pop('quality', 3)
@@ -2822,15 +2867,16 @@ class StampedAPI(AStampedAPI):
         activityData = self._activityDB.getActivity(authUserId, **params)
         
         # Append user objects
-        userIds = {}
-        stampIds = {}
+        userIds     = {}
+        stampIds    = {}
+        entityIds   = {}
         for item in activityData:
-            if item.user.user_id is not None:
-                userIds[item.user.user_id] = 1
-            if item.linked_user_id is not None:
-                userIds[item.linked_user_id] = 1
-            if item.linked_stamp_id is not None:
-                stampIds[item.linked_stamp_id] = 1
+            if item.user_id is not None:
+                userIds[item.user_id] = None
+            if item.stamp_id is not None:
+                stampIds[item.stamp_id] = None 
+            if item.entity_id is not None:
+                stampIds[item.entity_id] = None
         
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -2845,23 +2891,37 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
+        # Enrich entities
+        entities = self._entityDB.getEntities(entityIds.keys())
+        for entity in entities:
+            entityIds[str(entity.entity_id)] = entity 
+
         activity = []
         for item in activityData:
             try:
                 if item.genre in ['invite_received', 'invite_sent']:
                     continue
                 
-                if item.user.user_id is not None:
-                    item.user = userIds[item.user.user_id]
-                if item.link.linked_user_id is not None:
-                    item.link.linked_user = userIds[item.linked_user_id]
-                if item.linked_stamp_id is not None:
-                    item.link.linked_stamp = stampIds[item.linked_stamp_id]
+                enriched = EnrichedActivityObject(item, overflow=True)
+
+                if item.user_id is not None:
+                    enriched.user = userIds[item.user_id]
+                    assert enriched.user.user_id is not None
+
+                if item.stamp_id is not None:
+                    enriched.stamp = stampIds[item.stamp_id]
+                    assert enriched.stamp.stamp_id is not None
+
+                if item.entity_id is not None:
+                    enriched.entity = entityIds[item.entity_id]
+                    assert enriched.entity.entity_id is not None
+
+                activity.append(enriched)
+
             except Exception:
                 utils.printException()
                 continue
             
-            activity.append(item)
         
         # Reset activity count
         self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
@@ -3010,6 +3070,10 @@ class StampedAPI(AStampedAPI):
             return successor, modified_successor
 
         try:
+            # TEMP: Short circuit if user-generated
+            if entity.sources.user_generated_id is not None:
+                return False 
+
             # Short circuit if entity is already tombstoned
             if entity.sources.tombstone_id is not None:
                 successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
@@ -3214,52 +3278,6 @@ class StampedAPI(AStampedAPI):
     #       #   #  #  #  #  #    #   #   #      
     #       #    # #   ##   #    #   #   ###### 
     """
-    
-    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
-        if not self._activity or len(recipient_ids) <= 0:
-            return
-        
-        sendAlert                   = kwargs.pop('sendAlert', True)
-        checkExists                 = kwargs.pop('checkExists', False)
-        
-        activity                    = Activity()
-        activity.genre              = genre
-        activity.user.user_id       = user_id
-        activity.linked_user_id     = user_id # TODO: should this always be set here? 
-        activity.timestamp.created  = datetime.utcnow()
-        
-        for k, v in kwargs.iteritems():
-            activity[k] = v
-        
-        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
-                                     checkExists=checkExists)
-        
-        # increment unread news for all recipients
-        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
-    
-    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
-        mentionedUserIds = set()
-        
-        if self._activity == True and mentions is not None and len(mentions) > 0:
-            # Note: No activity should be generated for the user initiating the mention
-            for mention in mentions:
-                if 'user_id' in mention and mention.user_id != authUserId and \
-                    (ignore is None or mention.user_id not in ignore):
-                    # Check if block exists between user and mentioned user
-                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
-                    
-                    if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.add(mention['user_id'])
-            
-            self._addActivity(genre='mention', 
-                              user_id=authUserId, 
-                              recipient_ids=mentionedUserIds, 
-                              **kwargs)
-            
-            # Increment mentions metric
-            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
-        
-        return mentionedUserIds
     
     def _addEntity(self, entity):
         if entity is not None:
