@@ -9,6 +9,7 @@ import copy, re
 from datetime   import datetime
 from schema     import *
 from utils      import lazyProperty
+from pprint     import pformat
 ### TEMP
 # from Entity import *
 import libs.CountryData
@@ -684,7 +685,8 @@ class BasicEntity(Schema):
             if _is_valid_id(id):
                 return "%s%s" % (prefix, id)
         
-        raise SchemaKeyError("invalid search_id (no unique ids exist)")
+        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" % 
+                             pformat(self.exportSparse()))
     
     def _genericSubtitle(self):
         if self.user_generated_subtitle is not None:
@@ -726,7 +728,6 @@ class BasicEntity(Schema):
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(unicode(i) for i in t))
     
     def __repr__(self):
-        from pprint import pformat
         return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
 
 class EntityStatsSchema(Schema):

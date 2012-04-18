@@ -133,83 +133,11 @@ def safe_insert(coll, documents, retries = 5, delay = 0.25):
             time.sleep(delay)
             delay *= 2
 
-def export_config(coll, ns, drop = True):
-    """
-        Exports ElasticMongo mapping and index metadata to configure ElasticSearch.
-    """
-    
-    indices  = [
-        {
-            'name' : 'plays', 
-            #'settings'
-        }, 
-    ]
-    
-    mappings = [
-        {
-            'ns'        : ns, 
-            'type'      : 'line', 
-            'indices'   : [ 'plays', ], 
-            'mapping'   : {
-                'title' : {
-                    'boost' : 1.0, 
-                    'index' : 'analyzed', 
-                    'store' : 'yes', 
-                    'type'  : 'string', 
-                    'term_vector' : 'with_position_offsets', 
-                }, 
-                'genre' : {
-                    'index' : 'analyzed', 
-                    'store' : 'yes', 
-                    'type'  : 'string', 
-                    'term_vector' : 'with_position_offsets', 
-                }, 
-                'speaker' : {
-                    'index' : 'analyzed', 
-                    'store' : 'yes', 
-                    'type'  : 'string', 
-                    'term_vector' : 'with_position_offsets', 
-                }, 
-                'lines' : {
-                    'properties' : {
-                        'ref'   : {
-                            'index' : 'analyzed', 
-                            'store' : 'yes', 
-                            'type'  : 'string', 
-                        }, 
-                        'line'  : {
-                            'boost' : 2.0, 
-                            'index' : 'analyzed', 
-                            'store' : 'yes', 
-                            'type'  : 'string', 
-                            'term_vector' : 'with_position_offsets', 
-                        }, 
-                    }, 
-                }, 
-            }, 
-        }, 
-    ]
-    
-    if drop:
-        coll.indices.drop()
-        coll.mappings.drop()
-        coll.state.drop()
-    
-    m = "indices"  if len(indices)  != 1 else "index"
-    i = "mappings" if len(mappings) != 1 else "mapping"
-    
-    utils.log("exporting %d %s and %d %s" % (len(indices), i, len(mappings), m))
-    safe_insert(coll.indices,  indices)
-    safe_insert(coll.mappings, mappings)
-
 def export(*args):
-    parser  = argparse.ArgumentParser(description="exports structured works of shakespeare to mongo, optionally including elasticmongo configuration for searching via elasticsearch")
+    parser  = argparse.ArgumentParser(description="exports structured works of shakespeare to mongodb")
     
     parser.add_argument('-n', '--noshakespeare', action="store_true", default=False,
                         help=("disable exporting complete works of shakespeare"))
-    parser.add_argument('-c', '--config', action="store_true", default=False,
-                        help="export elasticmongo mapping and index metadata to "
-                             "configure elasticsearch")
     parser.add_argument('-d', '--drop', action="store_true", default=False,
                         help="drop existing collections before performing any insertions")
     parser.add_argument('-H', '--mongo_host', type=str, default="localhost",
@@ -219,9 +147,6 @@ def export(*args):
     parser.add_argument('-o', '--output_namespace', type=str, default="test.lines",
                         help=("mongo db and collection namespace to store output to "
                               "in dot-notation (e.g., defaults to test.lines)"))
-    parser.add_argument('-s', '--state_namespace', type=str, default="local.elasticmongo", 
-                        help=("mongo db and collection namespace to store elasticmongo "
-                              "mapping and index metadata"))
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     if args:
@@ -231,10 +156,6 @@ def export(*args):
     
     conn        = pymongo.Connection(args.mongo_host, args.mongo_port)
     output      = None
-    
-    if args.config:
-        coll    = __get_collection(conn, args.state_namespace)
-        export_config(coll, args.output_namespace, args.drop)
     
     if not args.noshakespeare:
         output  = process_shakespeare_works()
