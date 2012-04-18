@@ -1932,7 +1932,7 @@ class HTTPActivityObjects(Schema):
         self.users              = SchemaList(HTTPUserMini())
         self.stamps             = SchemaList(HTTPStamp())
         self.entities           = SchemaList(HTTPEntity())
-        self.comments           = SchemaList(HTTPComments())
+        # self.comments           = SchemaList(HTTPComments())
 
 class HTTPActivity(Schema):
     def setSchema(self):
