@@ -14,10 +14,6 @@ from gevent         import Greenlet
 from collections    import defaultdict
 from pymongo.errors import AutoReconnect
 
-class AMongoMonitorError    (Exception):          pass
-class InvalidMappingError   (AMongoMonitorError): pass
-class InvalidIndexError     (AMongoMonitorError): pass
-
 class AMongoMonitorObject(object):
     
     @staticmethod
@@ -104,45 +100,6 @@ class AMongoMonitor(Greenlet, AMongoCollectionSink):
     @abstractmethod
     def remove(self, ns, id):
         pass
-
-class BasicMongoMonitor(AMongoMonitor):
-    
-    def __init__(self, 
-                 ns, 
-                 state_ns         = 'local.mongomonitor', 
-                 inclusive        = False, 
-                 mongo_host       = 'localhost', 
-                 mongo_port       = 27017, 
-                 mongo_conn       = None, 
-                 poll_interval_ms = 1000, 
-                 force            = False, 
-                 **kwargs):
-        
-        AMongoMonitor.__init__(self, 
-                               mongo_host = mongo_host, 
-                               mongo_port = mongo_port, 
-                               mongo_conn = mongo_conn, 
-                               poll_interval_ms = poll_interval_ms, 
-                               force = force, 
-                               **kwargs)
-        
-        self.ns = ns
-        self._source = MongoCollectionMonitor(monitor   = self, 
-                                              ns        = ns, 
-                                              state_ns  = state_ns, 
-                                              inclusive = inclusive, 
-                                              force     = force, 
-                                              noop      = self.kwargs.get('noop', False))
-    
-    def _run(self):
-        self._source.start()
-        self._source.join()
-    
-    def add(self, ns, documents, count = None, noop = False):
-        utils.log("[%s] ADD: ns=%s, count=%d, noop=%s" % (self, ns, count, noop))
-    
-    def remove(self, ns, id):
-        utils.log("[%s] REMOVE: ns=%s, id=%s" % (self, ns, id))
 
 class MongoCollectionMonitor(Greenlet, AMongoMonitorObject):
     
@@ -328,6 +285,37 @@ class MongoCollectionMonitor(Greenlet, AMongoMonitorObject):
                 elif not noop:
                     utils.log("[%s] skipping initial sync of empty collection %s" % (self, ns))
 
+class BasicMongoMonitor(AMongoMonitor):
+    
+    def __init__(self, ns, state_ns='local.mongomonitor', **kwargs):
+        AMongoMonitor.__init__(self, **kwargs)
+        
+        if isinstance(ns, basestring):
+            self.ns = [ ns ]
+        else:
+            self.ns = ns
+        
+        for ns in self.ns:
+            self._sources = MongoCollectionMonitor(monitor   = self, 
+                                                   ns        = ns, 
+                                                   state_ns  = state_ns, 
+                                                   inclusive = inclusive, 
+                                                   force     = force, 
+                                                   noop      = self.kwargs.get('noop', False))
+    
+    def _run(self):
+        for source in self._sources:
+            source.start()
+        
+        for source in self._sources:
+            source.join()
+    
+    def add(self, ns, documents, count = None, noop = False):
+        utils.log("[%s] ADD: ns=%s, count=%d, noop=%s" % (self, ns, count, noop))
+    
+    def remove(self, ns, id):
+        utils.log("[%s] REMOVE: ns=%s, id=%s" % (self, ns, id))
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -348,12 +336,12 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     args   = parser.parse_args()
-    mm     = MongoMonitor(ns                = args.ns, 
-                          state_ns          = args.state_ns, 
-                          mongo_host        = args.mongo_host, 
-                          mongo_port        = args.mongo_port, 
-                          poll_interval_ms  = args.poll_interval, 
-                          force             = args.force)
+    mm     = BasicMongoMonitor(ns                = args.ns, 
+                               state_ns          = args.state_ns, 
+                               mongo_host        = args.mongo_host, 
+                               mongo_port        = args.mongo_port, 
+                               poll_interval_ms  = args.poll_interval, 
+                               force             = args.force)
     
     mm.run()
 
