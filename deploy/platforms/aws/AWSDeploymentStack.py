@@ -499,6 +499,18 @@ class AWSDeploymentStack(ADeploymentStack):
         if force:
             db_node.terminate()
     
+    def clear_cache(self, *args):
+        force = (len(args) >= 1 and args[0] == 'force')
+        cmd   = "sudo /bin/bash -c 'restart memcached'"
+        pp    = []
+        
+        # restart memcached across all memcached servers
+        for instance in self.mem_server_instances:
+            pp.append((instance, utils.runbg(instance.public_dns_name, env.user, cmd)))
+        
+        for instance, p in pp:
+            ret = p.wait()
+    
     def repair(self, *args):
         force = (len(args) >= 1 and args[0] == 'force')
         
