@@ -101,7 +101,7 @@ class MongoFriendshipCollection(AFriendshipDB):
             logs.warning('Invalid distance for friends of friends: %s' % distance)
             raise Exception
 
-        friends = {0: set(userId)}
+        friends = {0: set([userId])}
         maxDistance = distance
 
         def visitUser(userId, distance):
