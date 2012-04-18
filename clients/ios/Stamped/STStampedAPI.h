@@ -18,6 +18,9 @@
 #import "STCommentSlice.h"
 #import "STMenu.h"
 #import "STTodo.h"
+#import "STStampedBySlice.h"
+#import "STUserDetail.h"
+#import "STStampedBy.h"
 
 
 typedef enum {
@@ -46,6 +49,8 @@ typedef enum {
 
 - (void)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
 
+- (void)stampedByForStampedBySlice:(STStampedBySlice*)slice andCallback:(void(^)(id<STStampedBy>, NSError*))block;
+
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
 
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block;
@@ -54,7 +59,7 @@ typedef enum {
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
-- (void)userForUserID:(NSString*)userID andCallback:(void(^)(id<STUser>))block;
+- (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
 - (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block;
 

@@ -11,7 +11,6 @@
 #import <Twitter/Twitter.h>
 
 #import "AccountManager.h"
-#import "CreateStampViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
 #import "Stamp.h"
@@ -22,7 +21,6 @@
 #import "STScrollViewContainer.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
-#import "StampDetailHeaderView.h"
 #import "STStampDetailHeaderView.h"
 #import "STActionManager.h"
 #import "STStampedActions.h"
@@ -32,9 +30,10 @@
 #import "STLikeButton.h"
 #import "STTodoButton.h"
 #import "STStampButton.h"
+#import "STStampedAPI.h"
 
 
-@interface STStampDetailViewController () <StampDetailHeaderViewDelegate, UIActionSheetDelegate, UITextFieldDelegate>
+@interface STStampDetailViewController () <UIActionSheetDelegate, UITextFieldDelegate>
 
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
@@ -51,6 +50,7 @@
 @synthesize headerView = _headerView;
 @synthesize commentsView = _commentsView;
 @synthesize stamp = _stamp;
+@synthesize toolbar = _toolbar;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
   self = [super init];
@@ -60,9 +60,10 @@
   return self;
 }
 
-- (void)loadView {
-  [super loadView];
-  
+- (void)viewDidLoad {
+  STToolbarView* toolbar = [[STToolbarView alloc] init];
+  _toolbar = toolbar;
+  [super viewDidLoad];
   UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:self.stamp.entity.title]
                                                                   style:UIBarButtonItemStyleBordered
                                                                  target:nil
@@ -75,7 +76,6 @@
   _commentsView.addCommentView.delegate = self;
   [self.scrollView appendChildView:_commentsView];
   
-  STToolbarView* toolbar = [[STToolbarView alloc] init];
   NSMutableArray* views = [NSMutableArray arrayWithObjects:
                            [[[STLikeButton alloc] initWithStamp:self.stamp] autorelease],
                            [[[STTodoButton alloc] initWithStamp:self.stamp] autorelease],
@@ -91,18 +91,20 @@
     self.navigationItem.rightBarButtonItem = rightButton;
   }
   [toolbar packViews:views];
-  [self setToolbar:toolbar withAnimation:YES];
   
   [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
-    STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForEntityDetail:detail withFrame:CGRectMake(0, 0, 320, 200) andStyle:@"StampDetail" delegate:self.scrollView];
+    STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
     [self.scrollView appendChildView:wrapper];
   }];
-  
+}
+
+- (void)viewDidUnload {
+  [_toolbar release];
+  [_headerView release];
 }
 
 - (void)dealloc {
   [_stamp release];
-  [_headerView release];
   [super dealloc];
 }
 
@@ -155,6 +157,10 @@
   STActionContext* context = [STActionContext context];
   id<STAction> action = [STStampedActions actionViewEntity:self.stamp.entity.entityID withOutputContext:context];
   [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
+- (UIView *)toolbar {
+  return _toolbar;
 }
 
 @end

@@ -12,10 +12,9 @@
 
 #import "AccountManager.h"
 #import "Util.h"
-#import "FindFriendsViewController.h"
 #import "Notifications.h"
 #import "SocialManager.h"
-#import "StampedAppDelegate.h"
+#import "STAppDelegate.h"
 #import "UserImageView.h"
 
 static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
@@ -298,30 +297,29 @@ NSString* const kStampColors[7][2] = {
 }
 
 - (IBAction)findfromContacts:(id)sender {
-  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
-  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromContacts:sender];
+  //[self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+  //[((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromContacts:sender];
 }
 
 - (IBAction)findFromTwitter:(id)sender {
-  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
-  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromTwitter:sender];
+  //[self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+  //[((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromTwitter:sender];
 }
 
 - (IBAction)findFromFacebook:(id)sender {
-  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
-  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromFacebook:sender];
+  //[self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+  //[((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromFacebook:sender];
 }
 
 - (IBAction)findFromStamped:(id)sender {
-  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
-  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromStamped:sender];
+  //[self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+  //[((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromStamped:sender];
 }
 
 - (IBAction)dismissWelcomeView:(id)sender {
   [[User managedObjectContext] save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes object:nil];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
-  [delegate.navigationController dismissModalViewControllerAnimated:YES];
+  [[Util sharedNavigationController] dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - UIScrollViewDelegate methods.

@@ -17,6 +17,7 @@
 #import "STPlaceAnnotation.h"
 #import "STActionManager.h"
 #import "STSimpleAction.h"
+#import "ShowImageViewController.h"
 
 static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
 
@@ -75,6 +76,9 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
     CGFloat padding_h = 15;
     CGFloat maxWidth = 200;
     CGFloat maxImageWidth = 320 - (maxWidth + 3 * padding_h);
+    if ([self.style isEqualToString:@"StampDetail"]) {
+      maxImageWidth = 200;
+    }
     NSString* imagePath = nil;
     if (entity.images && [entity.images count] > 0) {
       id<STImage> image = [entity.images objectAtIndex:0];
@@ -153,6 +157,12 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
     }
     if (imageView) {
       [view addSubview:imageView];
+      UIView* imageButtom = [Util tapViewWithFrame:imageView.frame andCallback:^{
+        ShowImageViewController* controller = [[[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil] autorelease];
+        controller.imageURL = imagePath;
+        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+      }];
+      [view addSubview:imageButtom];
     }
     //TODO
     if (entity.coordinates) {

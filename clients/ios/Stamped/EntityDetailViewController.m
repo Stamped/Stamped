@@ -12,17 +12,14 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
-#import "CreateStampViewController.h"
 #import "DetailedEntity.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "SearchResult.h"
 #import "UIColor+Stamped.h"
-#import "StampDetailViewController.h"
 #import "Notifications.h"
 #import "Favorite.h"
 #import "User.h"
-#import "StampedAppDelegate.h"
 #import "Alerts.h"
 #import "STToolbar.h"
 #import "STSimpleEntityDetail.h"
@@ -61,6 +58,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 @synthesize entityDetail = entityDetail_;
 @synthesize searchID = _searchID;
 @synthesize entityID = _entityID;
+@synthesize toolbar = _toolbar;
 
 
 - (id)initWithEntityID:(NSString*)entityID {
@@ -93,10 +91,9 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 }
 
 - (void)viewDidLoad {
-  [super viewDidLoad];
-  self.scrollView.scrollsToTop = YES;
   STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
-  [self setToolbar:toolbar withAnimation:YES];
+  _toolbar = toolbar;
+  [super viewDidLoad];
   [self reloadStampedData];
   
 }
@@ -114,6 +111,8 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   [super dealloc];
 }
 
+static BOOL _addedStampButton = NO;
+
 - (void)setEntityDetail:(id<STEntityDetail>)anEntityDetail {
   [entityDetail_ autorelease];
   entityDetail_ = [anEntityDetail retain];
@@ -129,10 +128,12 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     NSMutableArray* views = [NSMutableArray arrayWithObjects:
                              [[[STStampButton alloc] initWithEntity:anEntityDetail] autorelease],
                              nil];
-    STToolbarView* toolbar = (STToolbarView*) self.toolbar;
-    [toolbar packViews:views];
-    //[toolbar addSubview:[views objectAtIndex:0]];
-    [toolbar setNeedsLayout];
+    if (!_addedStampButton) {
+      STToolbarView* toolbar = (STToolbarView*) self.toolbar;
+      [toolbar packViews:views];
+      [toolbar addSubview:[views objectAtIndex:0]];
+      [toolbar setNeedsLayout];
+    }
   }
 }
 
@@ -153,6 +154,10 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
       self.entityDetail = detail;
     }];
   }
+}
+
+- (UIView *)toolbar {
+  return _toolbar;
 }
 
 @end

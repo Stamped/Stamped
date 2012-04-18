@@ -8,6 +8,7 @@
 
 #import "STRestKitLoader.h"
 #import "Util.h"
+#import "AccountManager.h"
 
 @interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate>
 
@@ -27,6 +28,8 @@
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  if ([objectLoader.response isUnauthorized])
+    [[AccountManager sharedManager] refreshToken];
   [Util executeOnMainThread:^{
     self.callback(nil, error);
     [self autorelease];

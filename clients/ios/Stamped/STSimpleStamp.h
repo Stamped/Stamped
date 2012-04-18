@@ -31,6 +31,7 @@
 @property (nonatomic, readwrite, copy) NSArray<STComment>* commentsPreview;
 @property (nonatomic, readwrite, copy) NSArray<STMention>* mentions;
 @property (nonatomic, readwrite, copy) NSArray<STCredit>* credits;
+@property (nonatomic, readwrite, copy) NSArray<STBadge>* badges;
 
 + (RKObjectMapping*)mapping;
 

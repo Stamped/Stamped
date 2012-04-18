@@ -28,4 +28,10 @@ typedef void (^STSynchronousWrapperCallback)();
                                        andStyle:(NSString*)style
                                        delegate:(id<STViewDelegate>)delegate;
 
++ (STSynchronousWrapper*)wrapperForStampDetail:(id<STEntityDetail>)anEntityDetail 
+                                     withFrame:(CGRect)frame 
+                                         stamp:(id<STStamp>)stamp
+                                      delegate:(id<STViewDelegate>)delegate;
+
+
 @end

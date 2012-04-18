@@ -129,7 +129,22 @@
                                       withFrame:(CGRect)frame 
                                        andStyle:(NSString*)style
                                        delegate:(id<STViewDelegate>)delegate {
-  id<STEntityDetailComponentFactory> factory = [[[STEntityDetailViewFactory alloc] initWithStyle:style] autorelease];
+  id<STEntityDetailComponentFactory> factory = [[[STEntityDetailViewFactory alloc] initWithContext:[STActionContext context]] autorelease];
+  STSynchronousWrapper* wrapper = [[[STSynchronousWrapper alloc] initWithDelegate:delegate
+                                                                 componentFactory:factory 
+                                                                     entityDetail:anEntityDetail 
+                                                                         andFrame:frame] autorelease];
+  return wrapper;
+}
+
+
++ (STSynchronousWrapper*)wrapperForStampDetail:(id<STEntityDetail>)anEntityDetail 
+                                     withFrame:(CGRect)frame 
+                                         stamp:(id<STStamp>)stamp
+                                      delegate:(id<STViewDelegate>)delegate {
+  STActionContext* context = [STActionContext context];
+  context.stamp = stamp;
+  id<STEntityDetailComponentFactory> factory = [[[STEntityDetailViewFactory alloc] initWithContext:context] autorelease];
   STSynchronousWrapper* wrapper = [[[STSynchronousWrapper alloc] initWithDelegate:delegate
                                                                  componentFactory:factory 
                                                                      entityDetail:anEntityDetail 

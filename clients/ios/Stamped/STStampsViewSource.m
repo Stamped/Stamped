@@ -14,6 +14,7 @@
 #import "STActionManager.h"
 #import "UIColor+Stamped.h"
 #import "UIFont+Stamped.h"
+#import "STRippleBar.h"
 
 static const NSInteger _batchSize = 20;
 
@@ -44,14 +45,16 @@ static const NSInteger _batchSize = 20;
 @synthesize loadingText = _loadingText;
 @synthesize lastCellText = _lastCellText;
 @synthesize noStampsText = _noStampsText;
+@synthesize flareSet = _flareSet;
+@synthesize delegate = _delegate;
 
 - (id)init
 {
   self = [super init];
   if (self) {
-    self.loadingText = @"Loading...";
-    self.lastCellText = @"No more stamps";
-    self.noStampsText = @"No stamps available";
+    _loadingText = @"Loading...";
+    _lastCellText = @"No more stamps";
+    _noStampsText = @"No stamps available";
   }
   return self;
 }
@@ -63,6 +66,7 @@ static const NSInteger _batchSize = 20;
   [_loadingText release];
   [_lastCellText release];
   [_noStampsText release];
+  [_flareSet release];
   [super dealloc];
 }
 
@@ -151,6 +155,29 @@ static const NSInteger _batchSize = 20;
   else {
     STStampCell* cell = [[[STStampCell alloc] initWithReuseIdentifier:@"testing"] autorelease];
     cell.stamp = [self.stamps objectAtIndex:indexPath.row];
+    if ([self.flareSet containsObject:cell.stamp.stampID]) {
+      STRippleBar* top = [[[STRippleBar alloc] initWithFrame:CGRectMake(0, 2, 320, 3.5)
+                                             andPrimaryColor:cell.stamp.user.primaryColor 
+                                           andSecondaryColor:cell.stamp.user.secondaryColor 
+                                                       isTop:YES] autorelease];
+      STRippleBar* bottom = [[[STRippleBar alloc] initWithFrame:CGRectMake(0, tableView.rowHeight-(top.frame.size.height+2), 320, 3.5)
+                                                andPrimaryColor:cell.stamp.user.primaryColor 
+                                              andSecondaryColor:cell.stamp.user.secondaryColor 
+                                                          isTop:NO] autorelease];
+      [cell addSubview:top];
+      [cell addSubview:bottom];
+      if (cell.stamp.badges.count) {
+        id<STBadge> badge = [cell.stamp.badges objectAtIndex:0];
+        UIView* badgeView = [Util badgeViewForGenre:badge.genre];
+        if (badgeView) {
+          badgeView.frame = [Util centeredAndBounded:badgeView.frame.size inFrame:CGRectMake(15, 50, 40, 40)];
+          [cell addSubview:badgeView];
+        }
+        else {
+          NSLog(@"Unsupported badge genre:%@",badge.genre);
+        }
+      }
+    }
     self.maxRow = MAX(self.maxRow, indexPath.row);
     [self populateStamps];
     return cell;
@@ -213,5 +240,6 @@ static const NSInteger _batchSize = 20;
 - (void)selectedLastCell {
   
 }
+
 
 @end

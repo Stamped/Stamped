@@ -17,6 +17,8 @@
 #import "STSimpleComment.h"
 #import "STSimpleUser.h"
 #import "AccountManager.h"
+#import "STSimpleUserDetail.h"
+#import "STSimpleStampedBy.h"
 
 @interface STStampedAPI () <STCacheModelSourceDelegate>
 
@@ -112,6 +114,17 @@ static STStampedAPI* _sharedInstance;
   [self stampsForSlice:slice withPath:@"/collections/suggested.json" andCallback:block];
 }
 
+- (void)stampedByForStampedBySlice:(STStampedBySlice*)slice andCallback:(void(^)(id<STStampedBy>, NSError*))block {
+  NSString* path = @"/entities/stamped_by.json";
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path 
+                                               post:NO 
+                                             params:[slice asDictionaryParams] 
+                                            mapping:[STSimpleStampedBy mapping]
+                                        andCallback:^(id stampedBy, NSError* error) {
+                                          block(stampedBy, block);
+                                        }];
+}
+
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block {
   NSString* path = @"/stamps/remove.json";
   NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
@@ -129,8 +142,12 @@ static STStampedAPI* _sharedInstance;
   }];
 }
 
-- (void)userForUserID:(NSString*)userID andCallback:(void(^)(id<STUser>))block {
-  //TODO implement
+- (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block {
+  NSString* path = @"/users/show.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path post:NO params:params mapping:[STSimpleUserDetail mapping] andCallback:^(id user, NSError* error) {
+    block(user, error);
+  }];
 }
 
 - (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block {

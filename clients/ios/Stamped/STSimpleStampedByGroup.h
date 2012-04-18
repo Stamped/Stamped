@@ -7,7 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STStampedByGroup.h"
+#import <RestKit/RestKit.h>
 
-@interface STSimpleStampedByGroup : NSObject
+@interface STSimpleStampedByGroup : NSObject <STStampedByGroup>
+
+@property (nonatomic, readwrite, copy) NSNumber* count;
+@property (nonatomic, readwrite, retain) NSArray<STStamp>* stamps;
+
++ (RKObjectMapping*)mapping;
 
 @end

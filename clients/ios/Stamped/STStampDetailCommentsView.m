@@ -19,6 +19,7 @@
 #import "STSimpleUser.h"
 #import "AccountManager.h"
 #import "STStampedAPI.h"
+#import "STRippleBar.h"
 
 static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
@@ -258,8 +259,10 @@ andProfileImageSize:(STProfileImageSize)size {
 {
   CGFloat width = _totalWidth;
   CGFloat padding_x = 5;
-  self = [super initWithDelegate:delegate andFrame:CGRectMake(padding_x, 5, width, 0)];
+  self = [super initWithDelegate:delegate andFrame:CGRectMake(padding_x, 5, width, 2)];
   if (self) {
+    STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
+    [self appendChildView:topBar];
     UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp];
     [self appendChildView:blurbView];
     if ([stamp.commentsPreview count] > 3 || [stamp numComments].integerValue > 3) {
@@ -281,6 +284,10 @@ andProfileImageSize:(STProfileImageSize)size {
     STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
     [self appendChildView:addCommentView];
     _addCommentView = [addCommentView.textField retain];
+    
+    STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:NO] autorelease];
+    [self appendChildView:bottomBar];
+    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
     
     self.backgroundColor = [UIColor whiteColor];
     

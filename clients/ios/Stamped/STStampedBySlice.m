@@ -20,4 +20,40 @@
   [super dealloc];
 }
 
+- (NSMutableDictionary*)asDictionaryParams {
+  NSMutableDictionary* dict = [super asDictionaryParams];
+  if (self.entityID) {
+    [dict setObject:self.entityID forKey:@"entity_id"];
+  }
+  if (self.group) {
+    [dict setObject:self.group forKey:@"group"];
+  }
+  return dict;
+}
+
+- (void)importDictionaryParams:(NSDictionary*)params {
+  [super importDictionaryParams:params];
+  if ([params objectForKey:@"entity_id"]) {
+    self.entityID = [params objectForKey:@"entity_id"];
+  }
+  if ([params objectForKey:@"group"]) {
+    self.group = [params objectForKey:@"group"];
+  }
+}
+
+- (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset {
+  STStampedBySlice* copy = [super resizedSliceWithLimit:limit andOffset:offset];
+  copy.entityID = self.entityID;
+  copy.group = self.group;
+  return copy;
+}
+
++ (STStampedBySlice*)standardSliceWithEntityID:(NSString*)entityID {
+  STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
+  slice.limit = [NSNumber numberWithInteger:20];
+  slice.entityID = entityID;
+  return slice;
+}
+
+
 @end

@@ -12,6 +12,7 @@
 #import "STComment.h"
 #import "STMention.h"
 #import "STCredit.h"
+#import "STBadge.h"
 
 @protocol STStamp <NSObject>
 
@@ -36,5 +37,6 @@
 @property (nonatomic, readonly, copy) NSArray<STComment>* commentsPreview;
 @property (nonatomic, readonly, copy) NSArray<STMention>* mentions;
 @property (nonatomic, readonly, copy) NSArray<STCredit>* credits;
+@property (nonatomic, readonly, copy) NSArray<STBadge>* badges;
 
 @end

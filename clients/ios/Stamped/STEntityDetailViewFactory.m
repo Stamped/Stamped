@@ -17,18 +17,20 @@
 #import "STSynchronousWrapper.h"
 #import "STGalleryViewFactory.h"
 #import "STPlaylistViewFactory.h"
+#import "STStampedAPI.h"
+#import "STStampedByView.h"
 
 @interface STEntityDetailViewFactory()
 
-@property (nonatomic, retain) NSString* style;
+@property (nonatomic, readonly, retain) STActionContext* context;
 
 @end
 
 @interface STEntityDetailViewFactoryOperation : NSOperation
 
-- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
+- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail context:(STActionContext*)context andCallbackBlock:(STViewCreatorCallback)aBlock;
 
-@property (nonatomic, readonly, retain) NSString* style;
+@property (nonatomic, readonly, retain) STActionContext* context;
 @property (nonatomic, readonly) NSMutableDictionary* operations;
 @property (nonatomic, readonly) NSMutableDictionary* components;
 @property (nonatomic, readonly) id<STEntityDetail> entityDetail;
@@ -42,19 +44,20 @@
 @synthesize components = components_;
 @synthesize entityDetail = entityDetail_;
 @synthesize callback = callback_;
-@synthesize style = _style;
+@synthesize context = _context;
 
-- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail style:(NSString*)style andCallbackBlock:(STViewCreatorCallback)aBlock;
+
+- (id)initWithEntityDetail:(id<STEntityDetail>)anEntityDetail context:(STActionContext*)context andCallbackBlock:(STViewCreatorCallback)aBlock
 {
   self = [super init];
   if (self) {
-    _style = [style retain];
+    _context = [context retain];
     entityDetail_ = [anEntityDetail retain];
     self.callback = aBlock;
     operations_ = [[NSMutableDictionary alloc] init];
     components_ = [[NSMutableDictionary alloc] init];
     NSArray* components;
-    if ([style isEqualToString:@"StampDetail"]) {
+    if (context.stamp) {
       components = [NSArray arrayWithObjects:
                     @"header",
                     @"actions",
@@ -81,7 +84,7 @@
   [operations_ release];
   [components_ release];
   [entityDetail_ release];
-  [_style release];
+  [_context release];
   self.callback = nil;
   [super dealloc];
 }
@@ -113,13 +116,29 @@
   }
   if (loadedSomething) {
     //TODO fix synchronousWrapper collapse bug
-    if (self.entityDetail.galleries.count && ![self.style isEqualToString:@"StampDetail"]) {
+    if (self.entityDetail.galleries.count && !self.context.stamp) {
       id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
       UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
                                                           entityDetail:self.entityDetail 
                                                               andFrame:CGRectMake(0, 0, 320, 200)];
       [view appendChildView:wrapper];
     }
+    STStampedBySlice* slice = [STStampedBySlice standardSliceWithEntityID:self.entityDetail.entityID];
+    [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error) {
+      if (stampedBy) {
+        NSSet* blacklist = [NSSet set];
+        if (self.context.stamp) {
+          blacklist = [NSSet setWithObject:self.context.stamp.user.userID];
+        }
+        STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy 
+                                                                           blacklist:blacklist
+                                                                         andDelegate:view] autorelease];
+        CGFloat height = stampedByView.frame.size.height;
+        [Util reframeView:stampedByView withDeltas:CGRectMake(0, 0, 0, -height)];
+        [view appendChildView:stampedByView];
+        [view childView:stampedByView shouldChangeHeightBy:height overDuration:.25];
+      }
+    }];
     return view;
   }
   else {
@@ -133,7 +152,7 @@
     NSOperation* operation = [self.operations objectForKey:key];
     id<STEntityDetailComponentFactory> factory = nil;
     if ([key isEqualToString:@"header"]) {
-      factory = [[[STHeaderViewFactory alloc] initWithStyle:self.style] autorelease];
+      factory = [[[STHeaderViewFactory alloc] initWithStyle:self.context.stamp ? @"StampDetail" : @"EntityDetail"] autorelease];
     }
     else if ([key isEqualToString:@"actions"]) {
       factory = [[[STActionsViewFactory alloc] init] autorelease];
@@ -178,26 +197,22 @@
 
 @implementation STEntityDetailViewFactory
 
-@synthesize style = style_;
+@synthesize context = _context;
 
-- (id)initWithStyle:(NSString*)style {
+- (id)initWithContext:(STActionContext*)context {
   self = [super init];
   if (self) {
-    self.style = style;
+    _context = [context retain];
   }
   return self;
 }
 
 - (id)init {
-  self = [super init];
-  if (self) {
-    self.style = @"EntityDetail";
-  }
-  return self;
+  return [self initWithContext:[STActionContext context]];
 }
 
 - (NSOperation*)createViewWithEntityDetail:(id<STEntityDetail>)anEntityDetail andCallbackBlock:(STViewCreatorCallback)aBlock {
-  STEntityDetailViewFactoryOperation* operation = [[[STEntityDetailViewFactoryOperation alloc] initWithEntityDetail:anEntityDetail style:self.style andCallbackBlock:aBlock] autorelease];
+  STEntityDetailViewFactoryOperation* operation = [[[STEntityDetailViewFactoryOperation alloc] initWithEntityDetail:anEntityDetail context:self.context andCallbackBlock:aBlock] autorelease];
   return operation;
 }
 

@@ -10,7 +10,6 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STStandardViewController.h"
 #import "STContainerViewController.h"
 
 @interface STStampDetailViewController : STContainerViewController
