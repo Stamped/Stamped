@@ -31,10 +31,10 @@ class SuggestedSearchTests(ASearchTestSuite):
         
         for section in suggested:
             utils.log()
-            utils.log("SECTION %s:" % section[0])
+            utils.log("SECTION %s:" % section['name'])
             
-            for i in xrange(len(section[1])):
-                entity = section[1][i]
+            for i in xrange(len(section['entities'])):
+                entity = section['entities'][i]
                 types  = list(entity.types)[0] if len(entity.types) == 1 else entity.types
                 
                 utils.log("   %d) %s (%s) (id=%s)" % (i + 1, entity.title, types, entity.search_id))
@@ -47,7 +47,8 @@ class SuggestedSearchTests(ASearchTestSuite):
         seen  = defaultdict(set)
         
         for section in suggested:
-            title, entities = section
+            title = section['name']
+            entities = section['entities']
             
             # ensure the entities and title are valid for this section
             self.assertIsInstance(title, basestring)

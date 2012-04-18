@@ -109,7 +109,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
         suggested = []
         
         def _add_suggested_section(title, entities):
-            suggested.append({ 'title' : title, 'entities' : entities })
+            suggested.append({ 'name' : title, 'entities' : entities })
         
         if category == 'place' or category == 'food':
             params  = { 'radius' : 100 }

@@ -137,6 +137,7 @@ def suggested(request):
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
     convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse()
     
+    logs.info(len(results))
     for section in results:
         section['entities'] = map(convert, section['entities'])
     
