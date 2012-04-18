@@ -17,6 +17,36 @@
 #import "STStampedAPI.h"
 #import "EntityDetailViewController.h"
 
+@interface STEntitySearchTableViewCell : UITableViewCell
+
++ (NSString*)reuseIdentifier;
+
+- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)searchResult;
+
+@end
+
+@implementation STEntitySearchTableViewCell
+
++ (NSString*)reuseIdentifier {
+  return @"searchCell";
+}
+
+- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)result {
+  self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
+  if (self) {
+    self.textLabel.text = result.title;
+    self.textLabel.font = [UIFont stampedTitleFont];
+    self.textLabel.textColor = [UIColor stampedDarkGrayColor];
+    self.detailTextLabel.text = result.subtitle;
+    self.detailTextLabel.font = [UIFont stampedSubtitleFont];
+    self.detailTextLabel.textColor = [UIColor stampedGrayColor];
+    self.imageView.image = [Util imageForCategory:result.category];
+  }
+  return self;
+}
+
+@end
+
 @interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
 
 @property (nonatomic, readonly, retain) NSString* category;
@@ -46,6 +76,7 @@
     STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
     suggested.category = category;
     [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
+      NSLog(@"here:%@,%@",error,results);
       for (id<STEntitySearchResult> result in results) {
         NSLog(@"%@", result.title);
       }
@@ -119,11 +150,12 @@
   
   
   tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
-                                                                     CGRectGetMaxY(header.frame), 
-                                                                     self.view.frame.size.width, 
-                                                                     self.view.frame.size.height - CGRectGetMaxY(header.frame))];
+                                                             CGRectGetMaxY(header.frame), 
+                                                             self.view.frame.size.width, 
+                                                             self.view.frame.size.height - CGRectGetMaxY(header.frame))];
   tableView_.delegate = self;
   tableView_.dataSource = self;
+  tableView_.rowHeight = 68;
   //tableView.backgroundColor = [UIColor grayColor];
   [self.view addSubview:tableView_];
   [self.view addSubview:header];
@@ -142,10 +174,8 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"test"] autorelease];
   id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
-  cell.textLabel.text = result.title;
-  return cell;
+  return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {

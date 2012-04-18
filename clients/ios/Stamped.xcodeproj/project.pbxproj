@@ -1895,6 +1895,9 @@
 		6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntitySearchSection.m; sourceTree = "<group>"; };
 		6360B5C8153F604900BB8C82 /* STUniversalNewsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUniversalNewsController.h; sourceTree = "<group>"; };
 		6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUniversalNewsController.m; sourceTree = "<group>"; };
+		6360B5CC153F7A4F00BB8C82 /* STActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivity.h; sourceTree = "<group>"; };
+		6360B5CD153F7A9600BB8C82 /* STActivityRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityRange.h; sourceTree = "<group>"; };
+		6360B5CF153F7E2300BB8C82 /* STActivityObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityObjects.h; sourceTree = "<group>"; };
 		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
 		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
@@ -3100,6 +3103,9 @@
 				633F26D71538DBE400391F15 /* STDistributionItem.h */,
 				6360B5A0153F1B2B00BB8C82 /* STEntitySearchResult.h */,
 				6360B5AD153F4EEA00BB8C82 /* STEntitySearchSection.h */,
+				6360B5CC153F7A4F00BB8C82 /* STActivity.h */,
+				6360B5CD153F7A9600BB8C82 /* STActivityRange.h */,
+				6360B5CF153F7E2300BB8C82 /* STActivityObjects.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6643,8 +6649,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6672,8 +6678,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6694,8 +6700,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6718,8 +6724,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -6741,8 +6747,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6765,8 +6771,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
