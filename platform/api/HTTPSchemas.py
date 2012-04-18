@@ -1847,7 +1847,7 @@ class HTTPFavoriteNew(Schema):
 # Activity #
 # ######## #
 
-class HTTPActivity(Schema):
+class HTTPActivityOld(Schema):
     def setSchema(self):
         # Metadata
         self.activity_id        = SchemaElement(basestring, required=True)
@@ -1921,6 +1921,77 @@ class HTTPActivity(Schema):
                 self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(url)).value
 
             self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        return self
+
+
+
+class HTTPActivityObjects(Schema):
+    def setSchema(self):
+        self.users              = SchemaList(HTTPUserMini())
+        self.stamps             = SchemaList(HTTPStamp())
+        self.entities           = SchemaList(HTTPEntity())
+        # self.comments           = SchemaList(HTTPComments())
+
+class HTTPActivity(Schema):
+    def setSchema(self):
+        # Metadata
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.created            = SchemaElement(basestring)
+        self.benefit            = SchemaElement(int)
+        self.action             = HTTPAction()
+
+        # Structure
+        self.verb               = SchemaElement(basestring)
+        self.subjects           = SchemaList(HTTPUserMini())
+        self.objects            = HTTPActivityObjects()
+
+        # Image
+        self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
+        # Text
+        self.header             = SchemaElement(basestring)
+        self.header_references  = SchemaList(ActivityReference())
+        self.body               = SchemaElement(basestring)
+        self.body_references    = SchemaList(ActivityReference())
+        self.footer             = SchemaElement(basestring)
+        self.footer_references  = SchemaList(ActivityReference())
+
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'EnrichedActivityObject':
+            data         = schema.value
+            user         = data.pop('user', None)
+            entity       = data.pop('entity', None)
+            stamp        = data.pop('stamp', None)
+            url          = data.pop('url', None)
+
+            self.importData(data, overflow=True)
+
+            self.created = schema.timestamp.created
+
+            if user is not None:
+                self.subjects = [ HTTPUserMini().importSchema(UserMini(user)).value ]
+
+            if schema.genre is not None:
+                self.verb = schema.genre
+            
+            if stamp is not None:
+                self.objects.stamps = [ HTTPStamp().importSchema(schema.stamp).value ]
+            if user is not None:
+                self.objects.users = [ HTTPUserMini().importSchema(schema.user).value ]
+            if entity is not None:
+                self.objects.entities = [ HTTPEntity().importSchema(schema.entity).value ]
+
+            if schema.subject is not None:
+                self.header = schema.subject
+            if schema.subject_references is not None:
+                self.header_references = schema.subject_references
+            if schema.blurb is not None:
+                self.body = schema.blurb
+
         else:
             raise NotImplementedError
         return self

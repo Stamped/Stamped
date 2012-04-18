@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import Entity
+import logs, Entity
 
 from utils                      import lazyProperty
 from collections                import defaultdict
@@ -80,8 +80,16 @@ class MongoSuggestedEntities(ASuggestedEntities):
             for i in xrange(num_sections):
                 section_limit = _get_section_limit(i)
                 
-                section  = suggested[i]
-                entities = Entity.fast_id_dedupe(section['entities'], seen)[:section_limit]
+                section = suggested[i]
+                
+                logs.info(type(section))
+                logs.info(type(section_limit))
+                
+                utils.log(type(section))
+                utils.log(type(section_limit))
+                
+                entities = Entity.fast_id_dedupe(section['entities'], seen)
+                entities = entities[:section_limit]
                 
                 if len(entities) > 0:
                     section['entities'] = entities
@@ -94,8 +102,8 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    @lru_cache(maxsize=8)
-    @memcached_function(time=2*24*60*60)
+    #@lru_cache(maxsize=8)
+    #@memcached_function(time=2*24*60*60)
     def _getGlobalSuggestedEntities(self, coords, category, subcategory):
         """
             Returns a list of suggested entities (separated into sections), restricted 
@@ -112,14 +120,13 @@ class MongoSuggestedEntities(ASuggestedEntities):
             suggested.append({ 'name' : title, 'entities' : entities })
         
         if category == 'place' or category == 'food':
-            params  = { 'radius' : 100 }
-            results = self._google_places.getEntityResultsByLatLng(coords, params)
-            
-            if results is None:
-                return []
-            
-            popular = False
-            _add_suggested_section('Nearby', results)
+            if coords is not None:
+                params  = { 'radius' : 100 }
+                results = self._google_places.getEntityResultsByLatLng(coords, params)
+                
+                if results is not None:
+                    _add_suggested_section('Nearby', results)
+                    popular = False
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
             albums  = self._appleRSS.get_top_albums(limit=10)

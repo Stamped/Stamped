@@ -36,6 +36,10 @@ class ADeploymentStack(object):
         pass
     
     @abstract
+    def clear_cache(self, *args):
+        pass
+    
+    @abstract
     def crawl(self, *args):
         pass
     

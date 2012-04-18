@@ -24,6 +24,7 @@ available_commands = set([
     'repair', 
     'force_db_primary_change', 
     'remove_db_node', 
+    'clear_cache', 
     
     # utilities
     'bootstrap', 

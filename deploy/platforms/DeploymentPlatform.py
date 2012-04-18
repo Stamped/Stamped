@@ -72,6 +72,10 @@ class DeploymentPlatform(ADeploymentPlatform):
         stack = self._get_matching_stack(stackName)
         stack.force_db_primary_change(*args[1:])
     
+    def clear_cache(self, *args):
+        stack = self._get_matching_stack(args[0])
+        stack.clear_cache(*args[1:])
+    
     def remove_db_node(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
