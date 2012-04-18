@@ -140,9 +140,9 @@ def suggested(request):
     for section in results:
         title, entities = section
         
-        output.append((title, map(lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse(), entities))
+        output.append((title, map(lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse(), entities)))
     
-    return transformOutput(autosuggest)
+    return transformOutput(output)
 
 
 @handleHTTPRequest

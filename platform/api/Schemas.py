@@ -451,6 +451,7 @@ class ActivityObject(Schema):
 
         # Links
         self.user_id            = SchemaElement(basestring)
+        self.friend_id          = SchemaElement(basestring)
         self.entity_id          = SchemaElement(basestring)
         self.stamp_id           = SchemaElement(basestring)
         self.comment_id         = SchemaElement(basestring)
@@ -476,6 +477,7 @@ class EnrichedActivityObject(Schema):
 
         # Links
         self.user               = UserMini()
+        self.friend             = UserMini()
         self.entity             = BasicEntity()
         self.stamp              = Stamp()
         self.comment            = Comment()

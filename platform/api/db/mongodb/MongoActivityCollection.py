@@ -47,8 +47,6 @@ class MongoActivityCollection(AActivityDB):
     @lazyProperty
     def activity_links_collection(self):
         return MongoActivityLinkCollection()
-
-
     
     def getActivity(self, userId, **kwargs):
         params = {
@@ -68,8 +66,6 @@ class MongoActivityCollection(AActivityDB):
         activity    = self.activity_objects_collection.getActivityObjects(activityIds, **sort)
 
         return activity 
-
-
     
     def addActivity(self, recipientIds, activityObject, **kwargs):
         sendAlert   = kwargs.pop('sendAlert', True)
@@ -107,42 +103,32 @@ class MongoActivityCollection(AActivityDB):
         if len(alerts):        
             self.alerts_collection.addAlerts(alerts)
 
-
-    
-
+    def _removeActivityIds(self, activityIds):
+        self.activity_links_collection.removeActivityLinks(activityIds)
+        self.activity_objects_collection.removeActivityObjects(activityIds)
 
     def removeActivity(self, genre, userId, **kwargs):
-        return False
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
-        recipientId = kwargs.pop('recipientId', None)
+        friendId    = kwargs.pop('friendId', None)
 
-        if genre in ['like', 'favorite'] and stampId:
-            self._collection.remove({
-                'user.user_id': userId,
-                'link.linked_stamp_id': stampId,
-                'genre': genre
-            })
+        if genre in ['like', 'favorite'] and stampId is not None:
+            activityIds = self.activity_objects_collection.getActivityIds(userId=userId, stampId=stampId, genre=genre)
+            self._removeActivityIds(activityIds)
 
-        if genre in ['follower', 'friend'] and recipientId:
-            self._collection.remove({
-                'user.user_id': userId,
-                'recipient_id': recipientId,
-                'genre': genre
-            })
+        if genre in ['follower', 'friend'] and friendId is not None:
+            activityIds = self.activity_objects_collection.getActivityIds(userId=userId, friendId=friendId, genre=genre)
+            self._removeActivityIds(activityIds)
 
-        if genre in ['comment'] and commentId:
-            self._collection.remove({
-                'user.user_id': userId,
-                'link.linked_comment_id': commentId,
-                'genre': genre
-            })
+        if genre in ['comment'] and commentId is not None:
+            activityIds = self.activity_objects_collection.getActivityIds(userId=userId, commentId=commentId, genre=genre)
+            self._removeActivityIds(activityIds)
     
     def removeActivityForStamp(self, stampId):
-        return False
-        self._collection.remove({'link.linked_stamp_id': stampId})
+        activityIds = self.activity_objects_collection.getActivityIds(stampId=stampId)
+        self._removeActivityIds(activityIds)
     
     def removeUserActivity(self, userId):
-        return False
-        self._collection.remove({'user.user_id': userId})
+        activityIds = self.activity_objects_collection.getActivityIds(userId=userId)
+        self._removeActivityIds(activityIds)
 

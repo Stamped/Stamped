@@ -27,6 +27,11 @@ class MongoActivityObjectCollection(AMongoCollection):
         documentId = self._getObjectIdFromString(activityId)
         result = self._removeMongoDocument(documentId)
         return result
+    
+    def removeActivityObjects(self, activityIds):
+        documentIds = map(self._getObjectIdFromString, activityIds)
+        result = self._removeMongoDocuments(documentIds)
+        return result
 
     def getActivityObject(self, activityId):
         documentId = self._getObjectIdFromString(activityId)
@@ -39,6 +44,41 @@ class MongoActivityObjectCollection(AMongoCollection):
         documents = self._getMongoDocumentsFromIds(ids, **kwargs)
 
         return map(self._convertFromMongo, documents)
+
+    def getActivityIds(self, **kwargs):
+
+        query = {}
+
+        userId = kwargs.pop('userId', None)
+        if userId is not None:
+            query['user_id'] = userId 
+
+        friendId = kwargs.pop('friendId', None)
+        if friendId is not None:
+            query['friend_id'] = friendId 
+
+        stampId = kwargs.pop('stampId', None)
+        if stampId is not None:
+            query['stamp_id'] = stampId 
+
+        entityId = kwargs.pop('entityId', None)
+        if entityId is not None:
+            query['entity_id'] = entityId 
+
+        commentId = kwargs.pop('commentId', None)
+        if commentId is not None:
+            query['comment_id'] = commentId
+
+        genre = kwargs.pop('genre', None)
+        if genre is not None:
+            query['genre'] = genre 
+
+        documents = self._collection.find(query, fields={'_id' : 1})
+
+        result = []
+        for document in documents:
+            result.append(self._getStringFromObjectId(document['_id']))
+        return result
 
     def matchActivityObject(self, activityObject):
 
@@ -58,5 +98,5 @@ class MongoActivityObjectCollection(AMongoCollection):
 
         activity = self._collection.find_one(query)
         assert activity is not None
-
-        return activity
+        
+        return self._convertFromMongo(activity)
