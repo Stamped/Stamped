@@ -24,6 +24,8 @@ class ASuggestedEntities(object):
             Returns a list of suggested entities (separated into sections), restricted 
             to the given category / subcategory, and possibly personalized with respect 
             to the given userId.
+            
+            Each section is a dict, with at least two required attributes, name, and entities.
         """
         raise NotImplementedError
 

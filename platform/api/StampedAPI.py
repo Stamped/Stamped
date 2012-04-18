@@ -2996,7 +2996,7 @@ class StampedAPI(AStampedAPI):
             'tmdb':         TMDBSource,
             'thetvdb':      TheTVDBSource,
         }
-
+        
         if source_name.lower() not in sources:
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError

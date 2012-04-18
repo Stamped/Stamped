@@ -135,18 +135,12 @@ def suggested(request):
     schema      = parseRequest(HTTPEntitySuggested(), request)
     schema      = schema.exportSchema(EntitySuggested())
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
-    output      = []
+    convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse()
     
     for section in results:
-        title, entities = section
-        
-        entities2 = []
-        for entity in entities:
-            entities2.append(HTTPEntityAutosuggest().importSchema(entity).exportSparse())
-        
-        output.append((title, entities2))
+        section['entities'] = map(convert, section['entities'])
     
-    return transformOutput(output)
+    return transformOutput(results)
 
 
 @handleHTTPRequest

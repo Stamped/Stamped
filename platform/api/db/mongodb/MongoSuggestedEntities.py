@@ -33,6 +33,8 @@ class MongoSuggestedEntities(ASuggestedEntities):
             Returns a list of suggested entities (separated into sections), restricted 
             to the given category / subcategory, and possibly personalized with respect 
             to the given userId.
+            
+            Each section is a dict, with at least two required attributes, name, and entities.
         """
         
         if category is not None:
@@ -79,10 +81,11 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 section_limit = _get_section_limit(i)
                 
                 section  = suggested[i]
-                entities = Entity.fast_id_dedupe(section[1], seen)[:section_limit]
+                entities = Entity.fast_id_dedupe(section['entities'], seen)[:section_limit]
                 
                 if len(entities) > 0:
-                    out_suggested.append([ section[0], entities ])
+                    section['entities'] = entities
+                    out_suggested.append(section)
             
             suggested = out_suggested
         
@@ -105,6 +108,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
         popular   = True
         suggested = []
         
+        def _add_suggested_section(title, entities):
+            suggested.append({ 'title' : title, 'entities' : entities })
+        
         if category == 'place' or category == 'food':
             params  = { 'radius' : 100 }
             results = self._google_places.getEntityResultsByLatLng(coords, params)
@@ -113,7 +119,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 return []
             
             popular = False
-            suggested.append([ 'Nearby', results ])
+            _add_suggested_section('Nearby', results)
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
             albums  = self._appleRSS.get_top_albums(limit=10)
@@ -130,9 +136,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
                     seen.add(artist.itunes_id)
                     unique_artists.append(artist)
             
-            suggested.append([ 'Artists', unique_artists ])
-            suggested.append([ 'Songs',   songs ])
-            suggested.append([ 'Albums',  albums ])
+            _add_suggested_section('Artists', unique_artists)
+            _add_suggested_section('Songs',   songs)
+            _add_suggested_section('Albums',  albums)
         elif category == 'film':
             if subcategory == 'tv':
                 # TODO
@@ -140,7 +146,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             elif subcategory == 'movie':
                 movies = self._fandango.get_top_box_office_movies()
                 
-                suggested.append([ 'Box Office', movies ])
+                _add_suggested_section('Box Office', movies)
         elif category == 'book':
             subcategory = 'book'
         elif subcategory == 'app':
@@ -148,12 +154,12 @@ class MongoSuggestedEntities(ASuggestedEntities):
             top_paid_apps       = self._appleRSS.get_top_paid_apps(limit=5)
             top_grossing_apps   = self._appleRSS.get_top_grossing_apps(limit=5)
             
-            suggested.append([ 'Top free apps', top_free_apps ])
-            suggested.append([ 'Top paid apps', top_paid_apps ])
-            suggested.append([ 'Top grossing apps', top_grossing_apps ])
+                _add_suggested_section('Top free apps', top_free_apps)
+                _add_suggested_section('Top paid apps', top_paid_apps)
+                _add_suggested_section('Top grossing apps', top_grossing_apps)
         
         if len(suggested) == 0 or popular:
-            suggested.append([ 'Popular', self._get_popular_entities(category, subcategory) ])
+            _add_suggested_section('Popular', self._get_popular_entities(category, subcategory))
         
         return suggested
     
