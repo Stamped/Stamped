@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, logs, utils
 import pyes, pymongo, re, time
 
 from abc            import ABCMeta, abstractmethod

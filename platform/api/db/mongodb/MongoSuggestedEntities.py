@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import Entity
+import logs, Entity
 
 from utils                      import lazyProperty
 from collections                import defaultdict
