@@ -85,6 +85,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 logs.info(type(section))
                 logs.info(type(section_limit))
                 
+                utils.log(type(section))
+                utils.log(type(section_limit))
+                
                 entities = Entity.fast_id_dedupe(section['entities'], seen)
                 entities = entities[:section_limit]
                 
