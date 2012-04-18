@@ -62,7 +62,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             
             # filter suggested entities already stamped by this user
             if userId is not None:
-                stampIds      = self._collection_collection.getUserStampIds(user_id)
+                stampIds      = self._collection_collection.getUserStampIds(userId)
                 stamps        = self._stamp_collection.getStamps(stampIds, limit=1000, sort='modified')
                 
                 for stamp in stamps:
