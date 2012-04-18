@@ -2865,8 +2865,8 @@ class StampedAPI(AStampedAPI):
         # Limit slice of data returned
         params = self._setSliceParams(kwargs, stampCap)
         
-        distance = kwargs.pop('distance', 1)
-        if distance > 1:
+        distance = kwargs.pop('distance', 0)
+        if distance > 0:
             friends = self._friendshipDB.getFriends(user['user_id'])
             activityData = self._activityDB.getActivityForUsers(friends, **params)
         else:
