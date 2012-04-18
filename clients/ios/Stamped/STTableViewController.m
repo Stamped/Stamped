@@ -36,7 +36,11 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, _headerHeight, 320, 363 - _headerHeight)];
+  CGFloat deltaHeight = -_headerHeight;
+  if (self.toolbar) {
+    deltaHeight -= self.toolbar.frame.size.height;
+  }
+  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, _headerHeight, 320, 416 + deltaHeight)];
   self.scrollView.scrollsToTop = NO;
   [self.scrollView appendChildView:_tableView];
 }

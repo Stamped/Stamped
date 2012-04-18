@@ -797,6 +797,17 @@ static Rdio* _rdio;
   return frame;
 }
 
++ (NSMutableDictionary*)sparseDictionaryForObject:(id)object andKeyPaths:(NSArray*)keyPaths {
+  NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
+  for (NSString* keyPath in keyPaths) {
+    id value = [object valueForKeyPath:keyPath];
+    if (value) {
+      [dictionary setObject:value forKey:keyPath];
+    }
+  }
+  return dictionary;
+}
+
 @end
 
 @implementation STPopUpView

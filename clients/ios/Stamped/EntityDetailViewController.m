@@ -69,6 +69,15 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   return self;
 }
 
+- (id)initWithSearchID:(NSString*)searchID {
+  self = [super init];
+  if (self) {
+    [self commonInitWithEntityID:nil andSearchID:searchID];
+  }
+  return self;
+}
+
+
 - (id)initWithEntityObject:(Entity*)entity {
   self = [super init];
   if (self) {

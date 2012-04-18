@@ -21,7 +21,9 @@
 #import "STStampedBySlice.h"
 #import "STUserDetail.h"
 #import "STStampedBy.h"
-
+#import "STEntitySuggested.h"
+#import "STSimpleEntitySearchResult.h"
+#import "STEntitySearch.h"
 
 typedef enum {
   STStampedAPIScopeYou = 0,
@@ -56,6 +58,12 @@ typedef enum {
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block;
 
 - (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block;
+
+- (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
+                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+
+- (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
+                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 

@@ -13,6 +13,7 @@
 #import "UIColor+Stamped.h"
 #import "STInboxViewController.h"
 #import "SettingsViewController.h"
+#import "STUniversalNewsController.h"
 
 @interface STRootMenuView ()
 
@@ -166,12 +167,12 @@ static STRootMenuView* _sharedInstance;
     [self appendChildView:stampedLabel];
     NSDictionary* navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [STInboxViewController sharedInstance], @"Stamps",
-                                //[[[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil] autorelease], @"News",
+                                [[[STUniversalNewsController alloc] init] autorelease], @"News",
                                 //[[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
                                 //[[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
                                 [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
                                 nil];
-    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"Settings", nil];
+    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
       UIViewController* controller = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];

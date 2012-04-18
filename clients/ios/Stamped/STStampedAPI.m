@@ -136,6 +136,30 @@ static STStampedAPI* _sharedInstance;
   }];
 }
 
+- (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
+                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block {
+  NSString* path = @"/entities/suggested.json";
+  [[STRestKitLoader sharedInstance] loadWithPath:path 
+                                            post:NO 
+                                          params:entitySuggested.asDictionaryParams 
+                                         mapping:[STSimpleEntitySearchResult mapping] 
+                                     andCallback:^(NSArray* array, NSError* error) {
+                                       block((NSArray<STEntitySearchResult>*)array, error);
+                                     }];
+}
+
+- (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
+                         andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block {
+  NSString* path = @"/entities/search.json";
+  [[STRestKitLoader sharedInstance] loadWithPath:path
+                                            post:NO
+                                          params:entitySearch.asDictionaryParams
+                                         mapping:[STSimpleEntitySearchResult mapping]
+                                     andCallback:^(NSArray *array, NSError *error) {
+                                       block((NSArray<STEntitySearchResult>*)array, error);
+                                     }];
+}
+
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block {
   [self entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> entityDetail, NSError* error) {
     block(entityDetail);
