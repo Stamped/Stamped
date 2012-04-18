@@ -54,7 +54,11 @@ class Memcache(object):
     
     def set(self, key, value, *args, **kwargs):
         value = self._import_value(value)
-        self._client.set(key, value, *args, **kwargs)
+        
+        try:
+            self._client.set(key, value, *args, **kwargs)
+        except MemcachedError, e:
+            logs.warn(str(e))
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
@@ -221,7 +225,7 @@ def memcached_function(time=0, min_compress_len=0):
                 wrapper.hits += 1
             except KeyError:
                 store = True
-            except:
+            except Exception:
                 store = False
             
             if compute:
@@ -232,7 +236,10 @@ def memcached_function(time=0, min_compress_len=0):
                 cache_set = cache.set
                 
                 if cache_set is not None:
-                    cache_set(key, result, time=time, min_compress_len=min_compress_len)
+                    try:
+                        cache_set(key, result, time=time, min_compress_len=min_compress_len)
+                    except MemcachedError, e:
+                        logs.warn(str(e))
             
             return result
         
