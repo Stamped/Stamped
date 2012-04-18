@@ -5,7 +5,7 @@ __version__   = '1.0'
 __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
-import Globals
+import Globals, utils, logs, pymongo
 
 from AMongoCollection import AMongoCollection
 from Schemas import *
@@ -79,3 +79,23 @@ class MongoActivityObjectCollection(AMongoCollection):
         for document in documents:
             result.append(self._getStringFromObjectId(document['_id']))
         return result
+
+    def getActivityForUsers(self, userIds, **kwargs):
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+        limit       = kwargs.pop('limit', 20)
+
+        query = { 'user_id' : {'$in' : userIds } }
+
+        if since is not None and before is not None:
+            query['timestamp.created'] = { '$gte' : since, '$lte' : before }
+        elif since is not None:
+            query['timestamp.created'] = { '$gte' : since }
+        elif before is not None:
+            query['timestamp.created'] = { '$lte' : before }
+
+        documents = self._collection.find(query).sort('timestamp.created', pymongo.DESCENDING).limit(limit)
+
+        return map(self._convertFromMongo, documents)
+
+

@@ -67,6 +67,19 @@ class MongoActivityCollection(AActivityDB):
 
         return activity 
     
+    def getActivityForUsers(self, userIds, **kwargs):
+        params = {
+            'since'     : kwargs.pop('since', None),
+            'before'    : kwargs.pop('before', None),
+            'limit'     : kwargs.pop('limit', 200),
+            'sort'      : 'timestamp.created',
+            'sortOrder' : pymongo.DESCENDING,
+        }
+
+        activity = self.activity_objects_collection.getActivityForUsers(userIds, **params)
+
+        return activity 
+    
     def addActivity(self, recipientIds, activityObject, **kwargs):
         sendAlert   = kwargs.pop('sendAlert', True)
         checkExists = kwargs.pop('checkExists', False)
