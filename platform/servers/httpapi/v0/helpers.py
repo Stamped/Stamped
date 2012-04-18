@@ -177,10 +177,10 @@ def checkOAuth(request):
         elif request.method == 'POST':
             oauth_token = request.POST['oauth_token']
         else:
-            raise
+            raise Exception
         
         logs.token(oauth_token)
-    except:
+    except Exception:
         msg = "Access token not found"
         logs.warning(msg)
         raise StampedHTTPError("invalid_request", 401, msg)
