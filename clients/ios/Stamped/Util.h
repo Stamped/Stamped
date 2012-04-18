@@ -146,4 +146,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (CGRect)standardFrameWithNavigationBar:(BOOL)navigationBar;
 
++ (NSMutableDictionary*)sparseDictionaryForObject:(id)object andKeyPaths:(NSArray*)keyPaths;
+
 @end

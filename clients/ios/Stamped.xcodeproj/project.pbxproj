@@ -91,6 +91,18 @@
 		6360B597153F078D00BB8C82 /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
 		6360B59A153F099E00BB8C82 /* STButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B599153F099E00BB8C82 /* STButton.m */; };
 		6360B59B153F099E00BB8C82 /* STButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B599153F099E00BB8C82 /* STButton.m */; };
+		6360B59E153F172E00BB8C82 /* STEntitySuggested.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B59D153F172D00BB8C82 /* STEntitySuggested.m */; };
+		6360B59F153F172E00BB8C82 /* STEntitySuggested.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B59D153F172D00BB8C82 /* STEntitySuggested.m */; };
+		6360B5A3153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */; };
+		6360B5A4153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */; };
+		6360B5A7153F417900BB8C82 /* STProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A6153F417900BB8C82 /* STProfileViewController.m */; };
+		6360B5A8153F417900BB8C82 /* STProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A6153F417900BB8C82 /* STProfileViewController.m */; };
+		6360B5AB153F478F00BB8C82 /* STEntitySearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AA153F478F00BB8C82 /* STEntitySearch.m */; };
+		6360B5AC153F478F00BB8C82 /* STEntitySearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AA153F478F00BB8C82 /* STEntitySearch.m */; };
+		6360B5B0153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */; };
+		6360B5B1153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */; };
+		6360B5CA153F604900BB8C82 /* STUniversalNewsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */; };
+		6360B5CB153F604900BB8C82 /* STUniversalNewsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */; };
 		63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
@@ -1869,6 +1881,20 @@
 		6360B595153F078D00BB8C82 /* CALayer+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+Stamped.m"; sourceTree = "<group>"; };
 		6360B598153F099E00BB8C82 /* STButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STButton.h; sourceTree = "<group>"; };
 		6360B599153F099E00BB8C82 /* STButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STButton.m; sourceTree = "<group>"; };
+		6360B59C153F172D00BB8C82 /* STEntitySuggested.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySuggested.h; sourceTree = "<group>"; };
+		6360B59D153F172D00BB8C82 /* STEntitySuggested.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntitySuggested.m; sourceTree = "<group>"; };
+		6360B5A0153F1B2B00BB8C82 /* STEntitySearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearchResult.h; sourceTree = "<group>"; };
+		6360B5A1153F1B7B00BB8C82 /* STSimpleEntitySearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntitySearchResult.h; sourceTree = "<group>"; };
+		6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntitySearchResult.m; sourceTree = "<group>"; };
+		6360B5A5153F417900BB8C82 /* STProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STProfileViewController.h; sourceTree = "<group>"; };
+		6360B5A6153F417900BB8C82 /* STProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STProfileViewController.m; sourceTree = "<group>"; };
+		6360B5A9153F478E00BB8C82 /* STEntitySearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearch.h; sourceTree = "<group>"; };
+		6360B5AA153F478F00BB8C82 /* STEntitySearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntitySearch.m; sourceTree = "<group>"; };
+		6360B5AD153F4EEA00BB8C82 /* STEntitySearchSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearchSection.h; sourceTree = "<group>"; };
+		6360B5AE153F502A00BB8C82 /* STSimpleEntitySearchSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntitySearchSection.h; sourceTree = "<group>"; };
+		6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntitySearchSection.m; sourceTree = "<group>"; };
+		6360B5C8153F604900BB8C82 /* STUniversalNewsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUniversalNewsController.h; sourceTree = "<group>"; };
+		6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUniversalNewsController.m; sourceTree = "<group>"; };
 		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
 		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
@@ -2994,6 +3020,15 @@
 			name = "Post Stamp";
 			sourceTree = "<group>";
 		};
+		6360B5C7153F5FB600BB8C82 /* Universal News */ = {
+			isa = PBXGroup;
+			children = (
+				6360B5C8153F604900BB8C82 /* STUniversalNewsController.h */,
+				6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */,
+			);
+			name = "Universal News";
+			sourceTree = "<group>";
+		};
 		6380A77915067776003087EF /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -3063,6 +3098,8 @@
 				633F26AF153883DF00391F15 /* STUserDetail.h */,
 				633F26C61538D04000391F15 /* STBadge.h */,
 				633F26D71538DBE400391F15 /* STDistributionItem.h */,
+				6360B5A0153F1B2B00BB8C82 /* STEntitySearchResult.h */,
+				6360B5AD153F4EEA00BB8C82 /* STEntitySearchSection.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3143,6 +3180,10 @@
 				633F26C81538D08900391F15 /* STSimpleBadge.m */,
 				633F26D81538DCCF00391F15 /* STSimpleDistributionItem.h */,
 				633F26D91538DCD100391F15 /* STSimpleDistributionItem.m */,
+				6360B5A1153F1B7B00BB8C82 /* STSimpleEntitySearchResult.h */,
+				6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */,
+				6360B5AE153F502A00BB8C82 /* STSimpleEntitySearchSection.h */,
+				6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -3258,6 +3299,10 @@
 				638D7734152B5C2D006E4988 /* STCommentSlice.m */,
 				633CEF4215386C4C009E1C06 /* STStampedBySlice.h */,
 				633CEF4315386C4F009E1C06 /* STStampedBySlice.m */,
+				6360B59C153F172D00BB8C82 /* STEntitySuggested.h */,
+				6360B59D153F172D00BB8C82 /* STEntitySuggested.m */,
+				6360B5A9153F478E00BB8C82 /* STEntitySearch.h */,
+				6360B5AA153F478F00BB8C82 /* STEntitySearch.m */,
 			);
 			name = "Stamped API";
 			sourceTree = "<group>";
@@ -3265,6 +3310,8 @@
 		63A6E287153DDFB200D84915 /* Profile View */ = {
 			isa = PBXGroup;
 			children = (
+				6360B5A5153F417900BB8C82 /* STProfileViewController.h */,
+				6360B5A6153F417900BB8C82 /* STProfileViewController.m */,
 			);
 			name = "Profile View";
 			sourceTree = "<group>";
@@ -4591,6 +4638,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				6360B5C7153F5FB600BB8C82 /* Universal News */,
 				63A6E288153DDFD900D84915 /* Entities Search */,
 				63A6E287153DDFB200D84915 /* Profile View */,
 				633F26B51538AA5800391F15 /* Post Stamp */,
@@ -6278,6 +6326,12 @@
 				63A6E293153DE43600D84915 /* STTableViewController.m in Sources */,
 				6360B597153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
 				6360B59B153F099E00BB8C82 /* STButton.m in Sources */,
+				6360B59F153F172E00BB8C82 /* STEntitySuggested.m in Sources */,
+				6360B5A4153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */,
+				6360B5A8153F417900BB8C82 /* STProfileViewController.m in Sources */,
+				6360B5AC153F478F00BB8C82 /* STEntitySearch.m in Sources */,
+				6360B5B1153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
+				6360B5CB153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6475,6 +6529,12 @@
 				63A6E292153DE43600D84915 /* STTableViewController.m in Sources */,
 				6360B596153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
 				6360B59A153F099E00BB8C82 /* STButton.m in Sources */,
+				6360B59E153F172E00BB8C82 /* STEntitySuggested.m in Sources */,
+				6360B5A3153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */,
+				6360B5A7153F417900BB8C82 /* STProfileViewController.m in Sources */,
+				6360B5AB153F478F00BB8C82 /* STEntitySearch.m in Sources */,
+				6360B5B0153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
+				6360B5CA153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

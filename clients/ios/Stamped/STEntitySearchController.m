@@ -15,11 +15,15 @@
 #import "CALayer+Stamped.h"
 #import "STButton.h"
 #import "STStampedAPI.h"
+#import "EntityDetailViewController.h"
 
-@interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource>
+@interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
 
 @property (nonatomic, readonly, retain) NSString* category;
 @property (nonatomic, readonly, retain) NSString* initialQuery;
+@property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* suggestedResults;
+@property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* searchResults;
+@property (nonatomic, readwrite, retain) UITableView* tableView;
 
 @end
 
@@ -27,13 +31,25 @@
 
 @synthesize category = category_;
 @synthesize initialQuery = initialQuery_;
+@synthesize suggestedResults = suggestedResults_;
+@synthesize searchResults = searchResults_;
+@synthesize tableView = tableView_;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
   self = [super init];
   if (self) {
+    if (!category) {
+      category = @"music";
+    }
     category_ = [category retain];
     initialQuery_ = [query retain];
-    [[STStampedAPI sharedInstance] en
+    STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
+    suggested.category = category;
+    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
+      for (id<STEntitySearchResult> result in results) {
+        NSLog(@"%@", result.title);
+      }
+    }];
   }
   return self;
 }
@@ -50,8 +66,15 @@
 }
 
 - (void)loadView {
-  self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:NO]] autorelease];
-  UIView* header = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40)] autorelease];
+  CGFloat borderSize = 1;
+  self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:YES]] autorelease];
+  UIView* header = [[[UIView alloc] initWithFrame:CGRectMake(-borderSize, -borderSize, self.view.frame.size.width + 2*borderSize, 40+borderSize)] autorelease];
+  header.layer.borderWidth = borderSize;
+  header.layer.borderColor = [UIColor whiteColor].CGColor;
+  header.layer.shadowRadius = 2;
+  header.layer.shadowOffset = CGSizeMake(0, 1);
+  header.layer.shadowColor = [UIColor blackColor].CGColor;
+  header.layer.shadowOpacity = .1;
   [Util addGradientToLayer:header.layer 
                 withColors:[NSArray arrayWithObjects:[UIColor colorWithWhite:.95 alpha:1], [UIColor colorWithWhite:.9 alpha:1], nil] 
                   vertical:YES];
@@ -61,6 +84,7 @@
   }
   searchField.enablesReturnKeyAutomatically = NO;
   searchField.frame = [Util centeredAndBounded:searchField.frame.size inFrame:header.frame];
+  searchField.delegate = self;
   CGFloat xPadding = 5;
   CGFloat buttonWidth = 60;
   [Util reframeView:searchField withDeltas:CGRectMake(xPadding, 0, -(xPadding * 3 + buttonWidth), 0)];
@@ -94,25 +118,22 @@
   [header addSubview:cancelButton];
   
   
-  UIView* tableView = [[[UITableView alloc] initWithFrame:CGRectMake(0, 
+  tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
                                                                      CGRectGetMaxY(header.frame), 
                                                                      self.view.frame.size.width, 
-                                                                     self.view.frame.size.height - CGRectGetMaxY(header.frame))] autorelease];
+                                                                     self.view.frame.size.height - CGRectGetMaxY(header.frame))];
+  tableView_.delegate = self;
+  tableView_.dataSource = self;
   //tableView.backgroundColor = [UIColor grayColor];
-  [self.view addSubview:tableView];
+  [self.view addSubview:tableView_];
   [self.view addSubview:header];
 }
 
-- (void)willMoveToParentViewController:(UIViewController *)parent {
-  if (parent) {
-    [Util sharedNavigationController].navigationBarHidden = YES;
-  }
-  else {
-    [Util sharedNavigationController].navigationBarHidden = NO;
-  }
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+  NSLog(@"numberOfRows");
+  if (self.searchResults) {
+    return self.searchResults.count;
+  }
   return 0;
 }
 
@@ -121,11 +142,44 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  return nil;
+  UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"test"] autorelease];
+  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
+  cell.textLabel.text = result.title;
+  return cell;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
+  EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
+  NSLog(@"Chose %@, %@", result.title, result.searchID);
+}
 
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+  if (textField.text && ![textField.text isEqualToString:@""]) {
+    STEntitySearch* search = [[[STEntitySearch alloc] init] autorelease];
+    search.category = self.category;
+    search.query = textField.text;
+    [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
+      NSLog(@"searchResult:%@",error);
+      if (results) {
+        for (id<STEntitySearchResult> result in results) {
+          NSLog(@"%@", result.title);
+        }
+        self.searchResults = results;
+        [self.tableView reloadData];
+      }
+    }];
+  }
+}
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  //Override collapsing behavior
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  return YES;
 }
 
 @end

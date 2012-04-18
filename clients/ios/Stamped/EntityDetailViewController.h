@@ -22,6 +22,7 @@
 @interface EntityDetailViewController : STContainerViewController
 
 - (id)initWithEntityID:(NSString*)entityID;
+- (id)initWithSearchID:(NSString*)searchID;
 - (id)initWithEntityObject:(Entity*)entity;
 - (id)initWithSearchResult:(SearchResult*)searchResult;
 
