@@ -142,13 +142,6 @@ def suggested(request):
         
         entities2 = []
         for entity in entities:
-            entity = entity.exportSparse()
-            try:
-                entity['search_id'] = entity['entity_id']
-                del entity['entity_id']
-            except KeyError:
-                pass
-            
             entities2.append(HTTPEntityAutosuggest().importSchema(entity).exportSparse())
         
         output.append((title, entities2))

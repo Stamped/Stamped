@@ -37,7 +37,7 @@ class SuggestedSearchTests(ASearchTestSuite):
                 entity = section[1][i]
                 types  = list(entity.types)[0] if len(entity.types) == 1 else entity.types
                 
-                utils.log("   %d) %s (%s)" % (i + 1, entity.title, types))
+                utils.log("   %d) %s (%s) (id=%s)" % (i + 1, entity.title, types, entity.search_id))
         
         utils.log("-" * 80)
         utils.log()
@@ -57,6 +57,10 @@ class SuggestedSearchTests(ASearchTestSuite):
             
             for entity in entities:
                 self.assertIsInstance(entity, BasicEntity)
+                self.assertTrue(entity.search_id is not None)
+                self.assertTrue(len(entity.search_id) > 0)
+                self.assertTrue(entity.title is not None)
+                self.assertTrue(len(entity.title) > 0)
             
             # ensure the sections contain no obvious duplicates
             entities2 = Entity.fast_id_dedupe(entities, seen)

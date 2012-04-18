@@ -50,6 +50,7 @@ try:
     from RdioSource             import RdioSource
     from SpotifySource          import SpotifySource
     from TMDBSource             import TMDBSource
+    from TheTVDBSource          import TheTVDBSource
     from StampedSource          import StampedSource
 except Exception:
     report()
@@ -2993,6 +2994,7 @@ class StampedAPI(AStampedAPI):
             'rdio':         RdioSource,
             'spotify':      SpotifySource,
             'tmdb':         TMDBSource,
+            'thetvdb':      TheTVDBSource,
         }
 
         if source_name.lower() not in sources:

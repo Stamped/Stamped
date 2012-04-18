@@ -1369,7 +1369,7 @@ class HTTPEntityAutosuggest(Schema):
     
     def importSchema(self, schema, distance=None):
         if isinstance(schema, BasicEntity):
-            self.search_id = schema.entity_id
+            self.search_id = schema.search_id
             assert self.search_id is not None
             
             self.title          = schema.title 
