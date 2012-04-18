@@ -81,6 +81,10 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 section_limit = _get_section_limit(i)
                 
                 section  = suggested[i]
+                
+                logs.info(type(section))
+                logs.info(type(section_limit))
+                
                 entities = Entity.fast_id_dedupe(section['entities'], seen)
                 entities = entities[:section_limit]
                 
@@ -113,14 +117,13 @@ class MongoSuggestedEntities(ASuggestedEntities):
             suggested.append({ 'name' : title, 'entities' : entities })
         
         if category == 'place' or category == 'food':
-            params  = { 'radius' : 100 }
-            results = self._google_places.getEntityResultsByLatLng(coords, params)
-            
-            if results is None:
-                return []
-            
-            popular = False
-            _add_suggested_section('Nearby', results)
+            if coords is not None:
+                params  = { 'radius' : 100 }
+                results = self._google_places.getEntityResultsByLatLng(coords, params)
+                
+                if results is not None:
+                    _add_suggested_section('Nearby', results)
+                    popular = False
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
             albums  = self._appleRSS.get_top_albums(limit=10)
