@@ -2867,7 +2867,7 @@ class StampedAPI(AStampedAPI):
         
         distance = kwargs.pop('distance', 0)
         if distance > 0:
-            friends = self._friendshipDB.getFriends(user['user_id'])
+            friends = self._friendshipDB.getFriends(authUserId)
             activityData = self._activityDB.getActivityForUsers(friends, **params)
         else:
             activityData = self._activityDB.getActivity(authUserId, **params)
