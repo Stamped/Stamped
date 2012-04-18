@@ -308,6 +308,10 @@ class EntitySearch(object):
             
             entityProxy = EntityProxyContainer(item[1].target)
             entity = entityProxy.buildEntity()
+
+            # Hack to make sure entity_id is set (since it's not a part of a group)
+            if source == 'stamped':
+                entity.entity_id = item[1].target.key
             
             results.append(entity)
         
