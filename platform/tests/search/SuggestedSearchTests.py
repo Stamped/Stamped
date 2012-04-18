@@ -31,13 +31,13 @@ class SuggestedSearchTests(ASearchTestSuite):
         
         for section in suggested:
             utils.log()
-            utils.log("SECTION %s:" % section[0])
+            utils.log("SECTION %s:" % section['name'])
             
-            for i in xrange(len(section[1])):
-                entity = section[1][i]
+            for i in xrange(len(section['entities'])):
+                entity = section['entities'][i]
                 types  = list(entity.types)[0] if len(entity.types) == 1 else entity.types
                 
-                utils.log("   %d) %s (%s)" % (i + 1, entity.title, types))
+                utils.log("   %d) %s (%s) (id=%s)" % (i + 1, entity.title, types, entity.search_id))
         
         utils.log("-" * 80)
         utils.log()
@@ -47,7 +47,8 @@ class SuggestedSearchTests(ASearchTestSuite):
         seen  = defaultdict(set)
         
         for section in suggested:
-            title, entities = section
+            title = section['name']
+            entities = section['entities']
             
             # ensure the entities and title are valid for this section
             self.assertIsInstance(title, basestring)
@@ -57,6 +58,10 @@ class SuggestedSearchTests(ASearchTestSuite):
             
             for entity in entities:
                 self.assertIsInstance(entity, BasicEntity)
+                self.assertTrue(entity.search_id is not None)
+                self.assertTrue(len(entity.search_id) > 0)
+                self.assertTrue(entity.title is not None)
+                self.assertTrue(len(entity.title) > 0)
             
             # ensure the sections contain no obvious duplicates
             entities2 = Entity.fast_id_dedupe(entities, seen)
@@ -69,7 +74,7 @@ class SuggestedSearchTests(ASearchTestSuite):
             self.assertTrue(count <= limit)
     
     def test_place(self):
-        self._test_suggestions(category='place', coords=(40.7360067,-73.98884296)) # NYC
+        self._test_suggestions(category='place', coords=(40.7360067, -73.98884296)) # NYC
     
     def test_food(self):
         self._test_suggestions(category='food', coords=(37.7622, -122.42)) # SF

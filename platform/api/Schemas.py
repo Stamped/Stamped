@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import copy, re
-from datetime import datetime
-from schema import *
+from datetime   import datetime
+from schema     import *
+from utils      import lazyProperty
 ### TEMP
 # from Entity import *
 import libs.CountryData
@@ -451,6 +452,7 @@ class ActivityObject(Schema):
 
         # Links
         self.user_id            = SchemaElement(basestring)
+        self.friend_id          = SchemaElement(basestring)
         self.entity_id          = SchemaElement(basestring)
         self.stamp_id           = SchemaElement(basestring)
         self.comment_id         = SchemaElement(basestring)
@@ -476,6 +478,7 @@ class EnrichedActivityObject(Schema):
 
         # Links
         self.user               = UserMini()
+        self.friend             = UserMini()
         self.entity             = BasicEntity()
         self.stamp              = Stamp()
         self.comment            = Comment()
@@ -653,11 +656,36 @@ class BasicEntity(Schema):
     @property 
     def category(self):
         return 'other'
-
+    
     @property 
     def subcategory(self):
         return 'other'
-
+    
+    @lazyProperty
+    def search_id(self):
+        _is_valid_id = lambda x: x is not None and len(x) > 0
+        
+        ids = [
+            (self.sources.tombstone_id, ''), 
+            (self.entity_id,            ''), 
+            (self.itunes_id,            'T_ITUNES_'), 
+            (self.rdio_id,              'T_RDIO_'), 
+            (self.spotify_id,           'T_SPOTIFY_'), 
+            (self.opentable_id,         'T_OPENTABLE_'), 
+            (self.googleplaces_id,      'T_GOOGLEPLACES_'), 
+            (self.factual_id,           'T_FACTUAL_'), 
+            (self.tmdb_id,              'T_TMDB_'), 
+            (self.thetvdb_id,           'T_THETVDB_'), 
+            (self.amazon_id,            'T_AMAZON_'), 
+            (self.fandango_id,          'T_FANDANGO_'), 
+        ]
+        
+        for (id, prefix) in ids:
+            if _is_valid_id(id):
+                return "%s%s" % (prefix, id)
+        
+        raise SchemaKeyError("invalid search_id (no unique ids exist)")
+    
     def _genericSubtitle(self):
         if self.user_generated_subtitle is not None:
             return self.user_generated_subtitle

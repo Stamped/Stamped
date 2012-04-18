@@ -50,6 +50,7 @@ try:
     from RdioSource             import RdioSource
     from SpotifySource          import SpotifySource
     from TMDBSource             import TMDBSource
+    from TheTVDBSource          import TheTVDBSource
     from StampedSource          import StampedSource
 except Exception:
     report()
@@ -989,23 +990,23 @@ class StampedAPI(AStampedAPI):
         return user
     
     @API_CALL
-    def addFriendshipAsync(self, authUserId, user_id):
+    def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
             self._addActivity(genre='follower', 
                               user_id=authUserId, 
-                              recipient_ids=[ user_id ])
+                              recipient_ids=[ userId ])
             
             # Remove 'friend' activity item
-            self._activityDB.removeActivity('friend', authUserId, recipientId=user_id)
+            self._activityDB.removeActivity('friend', authUserId, friendId=userId)
         
         # Add stamps to Inbox
-        stampIds = self._collectionDB.getUserStampIds(user_id)
+        stampIds = self._collectionDB.getUserStampIds(userId)
         self._stampDB.addInboxStampReferencesForUser(authUserId, stampIds)
         
         # Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends',   increment=1)
-        self._userDB.updateUserStats(user_id,    'num_followers', increment=1)
+        self._userDB.updateUserStats(userId,     'num_followers', increment=1)
     
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -1025,17 +1026,17 @@ class StampedAPI(AStampedAPI):
         return user
     
     @API_CALL
-    def removeFriendshipAsync(self, authUserId, user_id):
+    def removeFriendshipAsync(self, authUserId, userId):
         # Decrement stats for both users
-        self._userDB.updateUserStats(authUserId, 'num_friends', increment=-1)
-        self._userDB.updateUserStats(user_id,  'num_followers', increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_friends',   increment=-1)
+        self._userDB.updateUserStats(userId,     'num_followers', increment=-1)
         
         # Remove stamps from Inbox
-        stampIds = self._collectionDB.getUserStampIds(user_id)
+        stampIds = self._collectionDB.getUserStampIds(userId)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
         
         # Remove activity
-        self._activityDB.removeActivity(genre='follower', userId=authUserId, recipientId=user_id)
+        self._activityDB.removeActivity(genre='follower', userId=authUserId, friendId=userId)
     
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -2864,7 +2865,12 @@ class StampedAPI(AStampedAPI):
         # Limit slice of data returned
         params = self._setSliceParams(kwargs, stampCap)
         
-        activityData = self._activityDB.getActivity(authUserId, **params)
+        distance = kwargs.pop('distance', 0)
+        if distance > 0:
+            friends = self._friendshipDB.getFriends(authUserId)
+            activityData = self._activityDB.getActivityForUsers(friends, **params)
+        else:
+            activityData = self._activityDB.getActivity(authUserId, **params)
         
         # Append user objects
         userIds     = {}
@@ -2873,6 +2879,8 @@ class StampedAPI(AStampedAPI):
         for item in activityData:
             if item.user_id is not None:
                 userIds[item.user_id] = None
+            if item.friend_id is not None:
+                userIds[item.friend_id] = None
             if item.stamp_id is not None:
                 stampIds[item.stamp_id] = None 
             if item.entity_id is not None:
@@ -2907,6 +2915,10 @@ class StampedAPI(AStampedAPI):
                 if item.user_id is not None:
                     enriched.user = userIds[item.user_id]
                     assert enriched.user.user_id is not None
+
+                if item.friend_id is not None:
+                    enriched.friend = userIds[item.friend_id]
+                    assert enriched.friend.user_id is not None
 
                 if item.stamp_id is not None:
                     enriched.stamp = stampIds[item.stamp_id]
@@ -2993,8 +3005,9 @@ class StampedAPI(AStampedAPI):
             'rdio':         RdioSource,
             'spotify':      SpotifySource,
             'tmdb':         TMDBSource,
+            'thetvdb':      TheTVDBSource,
         }
-
+        
         if source_name.lower() not in sources:
             logs.warning('Source not found: %s (%s)' % (source_name, search_id))
             raise StampedUnavailableError

@@ -354,6 +354,11 @@ class GooglePlacesSource(GenericSource):
             entity['site'] = details['website']
         
         return True
+
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.googleplaces_id = proxy.key
+        return True
     
     def __details(self, entity):
         try:

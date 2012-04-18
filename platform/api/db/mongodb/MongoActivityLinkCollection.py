@@ -39,6 +39,16 @@ class MongoActivityLinkCollection(AMongoCollection):
             logs.warning("Cannot remove document: %s" % e)
             raise Exception
 
+    def removeActivityLinks(self, activityIds):
+        try:
+            self._collection.remove(
+                { 'activity_id' : {'$in': activityIds }},
+            )
+            return True
+        except Exception as e:
+            logs.warning("Cannot remove documents: %s" % e)
+            raise Exception
+
     def removeActivityLinkForUser(self, activityId, userId):
         try:
             self._collection.remove(

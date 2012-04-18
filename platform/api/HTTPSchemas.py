@@ -203,7 +203,7 @@ class HTTPAccount(Schema):
         if schema.__class__.__name__ == 'Account':
             self.importData(schema.exportSparse(), overflow=True)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 class HTTPAccountNew(Schema):
@@ -224,7 +224,7 @@ class HTTPAccountNew(Schema):
         if schema.__class__.__name__ == 'Account':
             schema.importData(self.exportSparse(), overflow=True)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return schema
 
 class HTTPAccountSettings(Schema):
@@ -285,7 +285,7 @@ class HTTPLinkedAccounts(Schema):
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return schema
 
 class HTTPAvailableLinkedAccounts(Schema):
@@ -320,7 +320,7 @@ class HTTPAccountAlerts(Schema):
             data = schema.alerts.value
             self.importData(data, overflow=True)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 class HTTPAPNSToken(Schema):
@@ -394,7 +394,7 @@ class HTTPUser(Schema):
                     d.icon      = _getIconURL('cat_%s' % i, client=client)
                     self.distribution.append(d)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 class HTTPCategoryDistribution(Schema):
@@ -423,7 +423,7 @@ class HTTPUserMini(Schema):
             self.importData(schema.exportSparse(), overflow=True)
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 class HTTPUserId(Schema):
@@ -467,7 +467,7 @@ class HTTPSuggestedUsers(Schema):
             if coordinates:
                 schema.coordinates    = _coordinatesFlatToDict(coordinates)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         
         return schema
 
@@ -1159,7 +1159,7 @@ class HTTPEntity(Schema):
             self.importData(data, overflow=True)
             self.coordinates    = _coordinatesDictToFlat(coordinates)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 # HTTPEntity Components
@@ -1259,7 +1259,7 @@ class HTTPEntityMini(Schema):
             except Exception:
                 pass
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return self
 
 
@@ -1356,7 +1356,7 @@ class HTTPEntityEdit(Schema):
             schema.details.place.address = self.address 
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return schema
 
 class HTTPEntityAutosuggest(Schema):
@@ -1367,20 +1367,20 @@ class HTTPEntityAutosuggest(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.distance           = SchemaElement(float)
     
-    def importSchema(self, schema, distance):
+    def importSchema(self, schema, distance=None):
         if isinstance(schema, BasicEntity):
-
-            self.search_id = schema.entity_id
+            self.search_id = schema.search_id
             assert self.search_id is not None
-
+            
             self.title          = schema.title 
             self.subtitle       = schema.subtitle
             self.category       = schema.category 
-
+            
             if isinstance(distance, float) and distance >= 0:
                 self.distance   = distance
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
+        
         return self
 
 class HTTPEntityId(Schema):
@@ -1410,7 +1410,7 @@ class HTTPEntitySearch(Schema):
             schema.importData({'local': self.local})
             schema.importData({'page': self.page})
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return schema
 
 class HTTPEntityNearby(Schema):
@@ -1427,7 +1427,7 @@ class HTTPEntityNearby(Schema):
             schema.importData({'subcategory': self.subcategory})
             schema.importData({'page': self.page})
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         return schema
 
 class HTTPEntitySuggested(Schema):
@@ -1445,7 +1445,7 @@ class HTTPEntitySuggested(Schema):
             schema.importData({'category': self.category})
             schema.importData({'subcategory': self.subcategory})
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
         
         return schema
 
@@ -1928,6 +1928,7 @@ class HTTPActivity(Schema):
 class HTTPActivitySlice(HTTPGenericSlice):
     def setSchema(self):
         HTTPGenericSlice.setSchema(self)
+        self.distance           = SchemaElement(int)
 
 class HTTPLinkedURL(Schema):
     def setSchema(self):
@@ -2093,7 +2094,7 @@ class HTTPEntity_stampedtest(Schema):
     def importSchema(self, schema):
 
         if 'ntity' not in schema.__class__.__name__:
-            raise NotImplementedError
+            raise NotImplementedError(type(schema))
 
         validEntities = set([
             'BasicEntity',
@@ -2226,3 +2227,4 @@ class HTTPEntity_stampedtest(Schema):
                 url = amazon_image_re.sub(r'\1.jpg', url)
             
         return url
+

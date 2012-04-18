@@ -99,8 +99,11 @@ def search(request):
     
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
-        autosuggest.append(item)
+        try:
+            item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+            autosuggest.append(item)
+        except Exception as e:
+            logs.warning('Error: %s\n%s' % (e, item[1]))
     
     return transformOutput(autosuggest)
 
@@ -134,16 +137,14 @@ def suggested(request):
     
     schema      = parseRequest(HTTPEntitySuggested(), request)
     schema      = schema.exportSchema(EntitySuggested())
-    result      = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+    results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+    convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse()
     
-    raise NotImplementedError
+    logs.info(len(results))
+    for section in results:
+        section['entities'] = map(convert, section['entities'])
     
-    autosuggest = []
-    for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
-        autosuggest.append(item)
-    
-    return transformOutput(autosuggest)
+    return transformOutput(results)
 
 
 @handleHTTPRequest
