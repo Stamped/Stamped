@@ -99,8 +99,11 @@ def search(request):
     
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
-        autosuggest.append(item)
+        try:
+            item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+            autosuggest.append(item)
+        except Exception as e:
+            logs.warning('Error: %s\n%s' % (e, item[1]))
     
     return transformOutput(autosuggest)
 
