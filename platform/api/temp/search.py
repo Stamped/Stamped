@@ -41,7 +41,7 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # e = stampedAPI.getEntity({'entity_id': '4eb3001b41ad855d53000ac8'})
 # e = stampedAPI.getEntity({'entity_id': '4e4c6e76db6bbe2bcd01ce85'})
 
-# album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
+album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish Gambino - Camp (Album)
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_64387566'}) # Katy Perry (Artist)
 
 # stampedAPI.getEntity({'search_id': 'T_ITUNES_474912080'}) # Song (That Power)
@@ -63,8 +63,8 @@ coords = CoordinatesSchema({'lat': 40.742273, 'lng':-74.007549})   # NYC
 # e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
 # stampedAPI._enrichEntityAsync('4f7a111ca265375be500002b')
 
-e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
-stampedAPI.mergeEntityAsync(e.value, True)
+# e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
+# stampedAPI.mergeEntityAsync(e.value, True)
 
 """
 album = stampedAPI._mergeEntity(album, True)

@@ -224,7 +224,7 @@ class FactualSource(GenericSource):
                 pass
         return generatorSource(gen())
 
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             data = self.__factual.data(key)
             return FactualPlace(factual_id=key, data=data)

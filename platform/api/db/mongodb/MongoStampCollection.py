@@ -11,6 +11,7 @@ import bson, logs, pprint, pymongo, re
 from datetime                       import datetime
 from utils                          import lazyProperty
 from Schemas                        import *
+from Entity                         import buildEntity
 
 from api.AStampDB                   import AStampDB
 from AMongoCollection               import AMongoCollection
@@ -40,21 +41,17 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def _convertFromMongo(self, document):
         if document is None:
             return None
-
+        
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-
-        entity = {'entity_id': document['entity']['entity_id']}
-        if 'title' in document['entity']:
-            entity['title'] = document['entity']['title']
-        if 'types' in document['entity']:
-            entity['types'] = document['entity']['types']
-        if 'kind' in document['entity']:
-            entity['kind'] = document['entity']['kind']
-        document['entity'] = entity
         
-        stamp = self._obj(document, overflow=self._overflow)        
+        entityData = document.pop('entity')
+        entity = buildEntity(entityData, mini=True)
+        document['entity'] = {'entity_id': entity.entity_id}
+        
+        stamp = self._obj(document, overflow=self._overflow)
+        stamp.entity = entity 
         
         return stamp 
     
@@ -241,7 +238,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if limit is not None:
                 docs = docs.limit(limit)
             
-            return (self._convertFromMongo(doc) for doc in docs)
+            return list(self._convertFromMongo(doc) for doc in docs)
         except:
             return []
     
@@ -290,8 +287,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.removeGiver(creditedUserId, \
-                                                    stamp.user.user_id)
+        self.credit_givers_collection.removeGiver(creditedUserId, stamp.user.user_id)
     
     def countCredits(self, userId):
         return self.credit_received_collection.numCredit(userId)   
@@ -358,4 +354,35 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         result = self._removeMongoDocuments(documentIds)
         
         return result     
+    
+    def extractBadges(self, stamp):
+        user_id = stamp.user_id
+        badges  = []
+        
+        if stamp.stamp_num == 1:
+            badges.append(Badge(dict(
+                user_id = user_id, 
+                genre   = "user_first_stamp", 
+            )))
+        
+        entity_stamp_ids = self.getStampsForEntity(stamp.entity.entity_id)
+        
+        if len(entity_stamp_ids) == 0:
+            badges.append(Badge(dict(
+                user_id = user_id, 
+                genre   = "entity_first_stamp", 
+            )))
+        else:
+            friend_stamp_ids = self.getStamps(self.inbox_stamps_collection.getInboxStampIds(user_id))
+            
+            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamp_ids))
+            friend_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, friend_stamp_ids))
+            
+            if len(entity_stamp_ids & friend_stamp_ids) == 0:
+                badges.append(Badge(dict(
+                    user_id = user_id, 
+                    genre   = "friends_first_stamp", 
+                )))
+        
+        return badges
 

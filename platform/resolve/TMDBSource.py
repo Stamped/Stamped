@@ -189,7 +189,7 @@ class TMDBSource(GenericSource):
     def __tmdb(self):
         return globalTMDB()
 
-    def entityProxyFromKey(self, key):
+    def entityProxyFromKey(self, key, **kwargs):
         try:
             return TMDBMovie(key)
         except KeyError:

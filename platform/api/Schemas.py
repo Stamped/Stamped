@@ -261,6 +261,12 @@ class UserStatsSchema(Schema):
         self.num_likes          = SchemaElement(int)
         self.num_likes_given    = SchemaElement(int)
         self.num_unread_news    = SchemaElement(int)
+        self.distribution       = SchemaList(CategoryDistributionSchema())
+
+class CategoryDistributionSchema(Schema):
+    def setSchema(self):
+        self.category           = SchemaElement(basestring)
+        self.count              = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):
@@ -316,6 +322,7 @@ class Stamp(Schema):
         self.stats              = StampStatsSchema()
         self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
+        self.badges             = SchemaList(Badge())
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -347,6 +354,11 @@ class DeletedStamp(Schema):
 class ModifiedTimestampSchema(Schema):
     def setSchema(self):
         self.modified           = SchemaElement(datetime)
+
+class Badge(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
 
 
 # ######## #
@@ -390,9 +402,9 @@ class Activity(Schema):
         self.blurb_objects      = SchemaList(ActivityObjectSchema())
 
         # Links
-        self.link               = ActivityLink()
+        self.link               = ActivityLinkSchema()
 
-class ActivityLink(Schema):
+class ActivityLinkSchema(Schema):
     def setSchema(self):
         self.linked_user        = UserMini()
         self.linked_user_id     = SchemaElement(basestring)
@@ -415,6 +427,78 @@ class ActivityFormatSchema(Schema):
     def setSchema(self):
         self.title              = SchemaElement(bool)
 
+class LinkedURL(Schema):
+    def setSchema(self):
+        self.url                = SchemaElement(basestring, required=True)
+        self.chrome             = SchemaElement(bool)
+
+
+
+
+class ActivityObject(Schema):
+    def setSchema(self):
+        # Metadata
+        self.activity_id        = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.benefit            = SchemaElement(int)
+        self.timestamp          = TimestampSchema()
+
+        # Text
+        self.subject            = SchemaElement(basestring)
+        self.subject_references = SchemaList(ActivityReference())
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_references   = SchemaList(ActivityReference())
+
+        # Links
+        self.user_id            = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+        self.comment_id         = SchemaElement(basestring)
+        self.url                = SchemaElement(basestring)
+
+class EnrichedActivityObject(Schema):
+    def setSchema(self):
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.benefit            = SchemaElement(int)
+        self.timestamp          = TimestampSchema()
+
+        # Image
+        self.image              = SchemaElement(basestring)
+        self.icon               = SchemaElement(basestring)
+
+        # Text
+        self.subject            = SchemaElement(basestring)
+        self.subject_references = SchemaList(ActivityReference())
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_format       = ActivityFormat()
+        self.blurb_references   = SchemaList(ActivityReference())
+
+        # Links
+        self.user               = UserMini()
+        self.entity             = BasicEntity()
+        self.stamp              = Stamp()
+        self.comment            = Comment()
+        self.url                = SchemaElement(basestring)
+
+class ActivityLink(Schema):
+    def setSchema(self):
+        self.link_id            = SchemaElement(basestring)
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.timestamp          = TimestampSchema()
+
+class ActivityReference(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.indices            = SchemaList(SchemaElement(int))
+
+class ActivityFormat(Schema):
+    def setSchema(self):
+        self.title              = SchemaElement(bool)
+
 class Alert(Schema):
     def setSchema(self):
         self.alert_id           = SchemaElement(basestring)
@@ -424,10 +508,7 @@ class Alert(Schema):
         self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
 
-class LinkedURL(Schema):
-    def setSchema(self):
-        self.url                = SchemaElement(basestring, required=True)
-        self.chrome             = SchemaElement(bool)
+
 
 
 # ########## #

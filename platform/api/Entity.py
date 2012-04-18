@@ -14,6 +14,7 @@ try:
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
     from bson.objectid  import ObjectId 
+    from collections    import defaultdict
 except:
     logs.report()
     raise
@@ -259,12 +260,16 @@ def deriveTypesFromSubcategories(subcategories):
     return result 
 
 def deriveSubcategoryFromTypes(types):
+    if isinstance(types, SchemaElement):
+        types = types.value
     for t in types:
         if t in subcategories.keys():
             return t 
     return 'other'
 
 def deriveCategoryFromTypes(types):
+    if isinstance(types, SchemaElement):
+        types = types.value
     subcategory = deriveSubcategoryFromTypes(types)
     if subcategory in subcategories:
         return subcategories[subcategory]
@@ -279,7 +284,7 @@ def buildEntity(data=None, kind=None, mini=False):
         new = getEntityMiniObjectFromKind(kind)
     else:
         new = getEntityObjectFromKind(kind)
-    return new(data)
+    return new(data, overflow=True)
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
@@ -377,11 +382,12 @@ def upgradeEntityData(entityData):
     new.title               = old.pop('title', None)
     
     # Images
+    netflixImages = netflix.pop('images', {})
     oldImages = [
         old.pop('image', None),
         media.pop('artwork_url', None),
-        netflix.pop('hd', None),
-        netflix.pop('large', None),
+        netflixImages.pop('hd', None),
+        netflixImages.pop('large', None),
     ]
     for oldImage in oldImages:
         if oldImage is not None:
@@ -576,4 +582,38 @@ def upgradeEntityData(entityData):
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
     
     return new 
+
+def fast_id_dedupe(entities, seen=None):
+    """
+        Returns a new list of entities with all obvious, id-based duplicates 
+        removed (with lower indexed entities taking precedence over ones 
+        appearing later in the input list).
+        
+        entities        - iterable of entities to dedupe
+        seen (optional) - defaultdict(set) is a mapping of id keys to a set 
+                          containing unique values seen so far for a given id.
+    """
+    
+    if seen is None:
+        seen = defaultdict(set)
+    
+    output = []
+    for entity in entities:
+        keys = [ k for k in entity.sources if k.endswith('_id') ]
+        keep = True
+        
+        # ensure that the same source id doesn't appear twice in the result set
+        # (source ids are supposed to be unique)
+        for key in keys:
+            value = str(entity[key])
+            
+            if value in seen[key]:
+                keep = False
+            else:
+                seen[key].add(value)
+        
+        if keep:
+            output.append(entity)
+    
+    return output
 

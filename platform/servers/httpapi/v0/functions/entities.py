@@ -179,6 +179,7 @@ def stampedBy(request):
     if schema.group is None or schema.group == 'fof':
         requestSlice = schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
+        requestSlice.inclusive = False
         stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
         for stamp in stamps:
             result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
