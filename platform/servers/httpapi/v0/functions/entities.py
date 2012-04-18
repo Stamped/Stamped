@@ -140,7 +140,18 @@ def suggested(request):
     for section in results:
         title, entities = section
         
-        output.append((title, map(lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse(), entities)))
+        entities2 = []
+        for entity in entities:
+            entity = entity.exportSparse()
+            try:
+                entity['search_id'] = entity['entity_id']
+                del entity['entity_id']
+            except KeyError:
+                pass
+            
+            entities2.append(HTTPEntityAutosuggest().importSchema(entity).exportSparse())
+        
+        output.append((title, entities2))
     
     return transformOutput(output)
 
