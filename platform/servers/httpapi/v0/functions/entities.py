@@ -134,14 +134,13 @@ def suggested(request):
     
     schema      = parseRequest(HTTPEntitySuggested(), request)
     schema      = schema.exportSchema(EntitySuggested())
-    result      = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+    results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+    output      = []
     
-    raise NotImplementedError
-    
-    autosuggest = []
-    for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
-        autosuggest.append(item)
+    for section in results:
+        title, entities = section
+        
+        output.append((title, map(lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse(), entities))
     
     return transformOutput(autosuggest)
 

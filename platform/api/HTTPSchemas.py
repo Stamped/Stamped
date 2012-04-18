@@ -1367,7 +1367,7 @@ class HTTPEntityAutosuggest(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.distance           = SchemaElement(float)
     
-    def importSchema(self, schema, distance):
+    def importSchema(self, schema, distance=None):
         if isinstance(schema, BasicEntity):
 
             self.search_id = schema.entity_id
