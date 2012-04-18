@@ -12,9 +12,6 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STInboxViewController.h"
-#import "ActivityViewController.h"
-#import "TodoViewController.h"
-#import "PeopleViewController.h"
 #import "SettingsViewController.h"
 
 @interface STRootMenuView ()
@@ -169,12 +166,12 @@ static STRootMenuView* _sharedInstance;
     [self appendChildView:stampedLabel];
     NSDictionary* navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [STInboxViewController sharedInstance], @"Stamps",
-                                [[[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil] autorelease], @"News",
-                                [[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
-                                [[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
+                                //[[[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil] autorelease], @"News",
+                                //[[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
+                                //[[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
                                 [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
                                 nil];
-    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"To-Do", @"People", @"Settings", nil];
+    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
       UIViewController* controller = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];

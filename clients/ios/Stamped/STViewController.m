@@ -7,8 +7,7 @@
 //
 
 #import "STViewController.h"
-
-#import "StampedAppDelegate.h"
+#import "Util.h"
 
 @implementation STViewController
 
@@ -29,8 +28,7 @@
   if ([super navigationController])
     return [super navigationController];
   
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  return delegate.navigationController;
+  return [Util sharedNavigationController];
 }
 
 #pragma mark - UIScrollView delegate methods

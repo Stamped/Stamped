@@ -15,7 +15,6 @@
 #import "STEntityDetail.h"
 #import "STViewDelegate.h"
 #import "STSynchronousWrapper.h"
-#import "STStandardViewController.h"
 #import "STContainerViewController.h"
 
 @class Stamp;

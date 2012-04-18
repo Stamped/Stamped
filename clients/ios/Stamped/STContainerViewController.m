@@ -28,7 +28,6 @@ static const CGFloat kReloadHeight = 60.0;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
-@property (nonatomic, readwrite, retain) UIView* toolbarView;
 
 - (void)userPulledToReload;
 - (void)reloadData;
@@ -47,7 +46,6 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = _lastUpdatedLabel;
 @synthesize arrowImageView = _arrowImageView;
 @synthesize spinnerView = _spinnerView;
-@synthesize toolbarView = _toolbarView;
 
 - (id)init
 {
@@ -58,7 +56,14 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)loadView {
-  STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, 420)] autorelease];
+  self.view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 420)] autorelease];
+}
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  UIView* toolbar = self.toolbar;
+  CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height : 0;
+  STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, 420 - toolbarHeight)] autorelease];
   CGFloat bottomPadding = 0;
   UIImageView* shelfBackground = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_background"]] autorelease];
   _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, 320, 360)];
@@ -98,11 +103,13 @@ static const CGFloat kReloadHeight = 60.0;
   container.delegate = self;
   [container appendChildView:_shelfView];
   [container setScrollDelegate:self];
-  UIView* mainView = [[[UIView alloc] initWithFrame:container.frame] autorelease];
   UIImageView* backgroundImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"gradient_background"]] autorelease];
-  [mainView addSubview:backgroundImage];
-  [mainView addSubview:container];
-  self.view = mainView;
+  [self.view addSubview:backgroundImage];
+  [self.view addSubview:container];
+  if (toolbar) {
+    [Util reframeView:toolbar withDeltas:CGRectMake(0, CGRectGetMaxY(container.frame), 0, 0)];
+    [self.view addSubview:toolbar];
+  }
 }
 
 - (void)viewWillUnload {
@@ -116,22 +123,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 #pragma mark - UIScrollViewDelegate methods
 
-//TODO investigate value
-- (CGFloat)minimumShelfYPosition {
-  return -356;
-}
-
-//TODO investigate value
-- (CGFloat)maximumShelfYPosition {
-  return -356;
-}
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  //CGRect shelfFrame = self.shelfView.frame;
-  //shelfFrame.origin.y = MAX([self minimumShelfYPosition], [self maximumShelfYPosition] - scrollView.contentOffset.y);
-  //self.shelfView.frame = shelfFrame;
-  //CGFloat yInset = CGRectGetMaxY(shelfFrame) - 9.0;
-  
-  //scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(yInset, 0, 0, 0);
   
   self.shouldReload = scrollView.contentOffset.y < -kReloadHeight;
   if (NO)
@@ -172,10 +164,8 @@ static const CGFloat kReloadHeight = 60.0;
 
 
 - (void)setLoading:(BOOL)loading {
-  
   if (_loading == loading)
     return;  
-  
   _loading = loading;
   _shouldReload = NO;
   
@@ -183,9 +173,7 @@ static const CGFloat kReloadHeight = 60.0;
     [_spinnerView startAnimating];
   else
     [_spinnerView stopAnimating];
-  
   CGFloat bottomPadding = 0;
-  
   if (!loading) {
     [UIView animateWithDuration:0.2
                           delay:0
@@ -206,7 +194,6 @@ static const CGFloat kReloadHeight = 60.0;
                        self.scrollView.contentInset = UIEdgeInsetsZero;
                      }
                      completion:nil];
-    
   }
   else {
     if (self.scrollView.contentOffset.y < 0) {
@@ -261,26 +248,6 @@ static const CGFloat kReloadHeight = 60.0;
   [self performSelector:@selector(shouldFinishLoading) withObject:nil afterDelay:.5];
 }
 
-
-- (void)setToolbar:(UIView*)view withAnimation:(BOOL)animated {
-  self.toolbarView = view;
-  [Util reframeView:view withDeltas:CGRectMake(0, CGRectGetMaxY(self.scrollView.frame), 0, 0)];
-  [self.view addSubview:view];
-  void (^block)(void)  = ^{
-    [Util reframeView:view withDeltas:CGRectMake(0, -view.frame.size.height, 0, 0)];
-    CGSize size = self.scrollView.contentSize;
-    [Util reframeView:self.scrollView withDeltas:CGRectMake(0, 0, 0, -view.frame.size.height)];
-    size.height -= view.frame.size.height;
-    self.scrollView.contentSize = size;
-  };
-  if (animated) {
-    [UIView animateWithDuration:.25 animations:block];
-  }
-  else {
-    block();
-  }
-}
-
 - (void)reloadStampedData {
   for (id view in self.view.subviews) {
     if ([view respondsToSelector:@selector(reloadStampedData)]) {
@@ -298,8 +265,8 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   CGFloat delta = -216;
-  if (self.toolbarView) {
-    delta += self.toolbarView.frame.size.height;
+  if (self.toolbar) {
+    delta += self.toolbar.frame.size.height;
   }
   CGRect scrollFrame = self.scrollView.frame;
   scrollFrame.size.height += delta;
@@ -317,7 +284,6 @@ static const CGFloat kReloadHeight = 60.0;
   else {
     contentY = relativeFrame.origin.y;
   }
-  NSLog(@"scrolled to compensate by %f", contentY - self.scrollView.contentOffset.y);
   [UIView animateWithDuration:0.3
                         delay:0.0
                       options:UIViewAnimationOptionBeginFromCurrentState
@@ -330,8 +296,8 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   CGFloat delta = 216;
-  if (self.toolbarView) {
-    delta -= self.toolbarView.frame.size.height;
+  if (self.toolbar) {
+    delta -= self.toolbar.frame.size.height;
   }
   [UIView animateWithDuration:0.3
                         delay:0.0
@@ -348,12 +314,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (UIView*)toolbar {
-  return self.toolbarView;
+  return nil;
 }
-
-- (void)setToolbar:(UIView *)toolbar {
-  [self setToolbar:toolbar withAnimation:NO];
-}
-
 
 @end

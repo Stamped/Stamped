@@ -1898,6 +1898,29 @@ class HTTPActivity(Schema):
                 self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
 
             self.created = schema.timestamp.created
+
+        elif schema.__class__.__name__ == 'EnrichedActivityObject':
+            data         = schema.value
+            user         = data.pop('user', None)
+            entity       = data.pop('entity', None)
+            stamp        = data.pop('stamp', None)
+            url          = data.pop('url', None)
+
+            self.importData(data, overflow=True)
+
+            if user is not None:
+                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
+            
+            if stamp is not None:
+                self.linked_stamp = HTTPStamp().importSchema(schema.stamp).value
+            elif user is not None:
+                self.linked_user = HTTPUserMini().importSchema(schema.user).value
+            elif entity is not None:
+                self.linked_entity = HTTPEntity().importSchema(schema.entity).value
+            elif url is not None:
+                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(url)).value
+
+            self.created = schema.timestamp.created
         else:
             raise NotImplementedError
         return self

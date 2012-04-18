@@ -7,8 +7,11 @@
 //
 
 #import "STContainerViewController.h"
+#import "STTableViewController.h"
 
-@interface STInboxViewController : STContainerViewController
+@interface STInboxViewController : STTableViewController
+
+- (void)newStampCreated:(id<STStamp>)stamp;
 
 + (STInboxViewController*)sharedInstance;
 

@@ -11,7 +11,6 @@
 #import "STSimpleSource.h"
 #import "EntityDetailViewController.h"
 #import "STStampDetailViewController.h"
-#import "ProfileViewController.h"
 #import "STStampedAPI.h"
 #import "STMenuPopUp.h"
 

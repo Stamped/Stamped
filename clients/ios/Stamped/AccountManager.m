@@ -9,7 +9,7 @@
 #import "AccountManager.h"
 
 #import "GTMOAuthViewControllerTouch.h"
-#import "StampedAppDelegate.h"
+#import "STAppDelegate.h"
 #import "FirstRunViewController.h"
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
@@ -119,8 +119,7 @@ static AccountManager* sharedAccountManager_ = nil;
   self.navController = [[UINavigationController alloc] initWithRootViewController:self.firstRunViewController];
   self.navController.navigationBarHidden = YES;
 
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:self.navController animated:NO];
+  [[Util sharedNavigationController] presentModalViewController:self.navController animated:NO];
 
   [self.navController release];
   [self.firstRunViewController release];
@@ -209,8 +208,7 @@ static AccountManager* sharedAccountManager_ = nil;
   } else if ([objectLoader.resourcePath rangeOfString:kLoginPath].location != NSNotFound) {
     // Simple log in: store the OAuth token.
     self.firstRunViewController.delegate = nil;
-    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-    [delegate.navigationController dismissModalViewControllerAnimated:YES];
+    [[Util sharedNavigationController] dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
     [self storeOAuthToken:[object objectForKey:@"token"]];
     User* user = [object objectForKey:@"user"];

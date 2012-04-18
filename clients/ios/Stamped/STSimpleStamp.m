@@ -12,6 +12,7 @@
 #import "STSimpleComment.h"
 #import "STSimpleCredit.h"
 #import "STSimpleMention.h"
+#import "STSimpleBadge.h"
 
 @implementation STSimpleStamp
 
@@ -34,6 +35,7 @@
 @synthesize commentsPreview = _commentsPreview;
 @synthesize mentions = _mentions;
 @synthesize credits = _credits;
+@synthesize badges = _badges;
 
 - (void)dealloc
 {
@@ -56,6 +58,7 @@
   [_commentsPreview release];
   [_mentions release];
   [_credits release];
+  [_badges release];
   [super dealloc];
 }
 
@@ -86,6 +89,7 @@
           withMapping:[STSimpleComment mapping]];
   [mapping mapRelationship:@"mentions" withMapping:[STSimpleMention mapping]];
   [mapping mapKeyPath:@"credit" toRelationship:@"credits" withMapping:[STSimpleCredit mapping]];
+  [mapping mapRelationship:@"badges" withMapping:[STSimpleBadge mapping]];
   return mapping;
 }
 

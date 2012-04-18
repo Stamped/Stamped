@@ -12,7 +12,6 @@
 #import "Comment.h"
 #import "Entity.h"
 #import "Stamp.h"
-#import "StampDetailViewController.h"
 
 static SharedRequestDelegate* sharedDelegate_ = nil;
 
@@ -53,11 +52,11 @@ static SharedRequestDelegate* sharedDelegate_ = nil;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	if ([objectLoader.resourcePath isEqualToString:kRemoveCommentPath]) {
+	if ([objectLoader.resourcePath isEqualToString:@"/comments/remove.json"]) {
     Comment* comment = [objects lastObject];
     [Comment.managedObjectContext deleteObject:comment];
     [Comment.managedObjectContext save:NULL];
-  } if ([objectLoader.resourcePath isEqualToString:kRemoveStampPath]) {
+  } if ([objectLoader.resourcePath isEqualToString:@"/stamps/remove.json"]) {
     Stamp* stamp = [objects lastObject];
     Entity* e = stamp.entityObject;
     [Stamp.managedObjectContext deleteObject:stamp];

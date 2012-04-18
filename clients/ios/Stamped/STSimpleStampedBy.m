@@ -7,6 +7,7 @@
 //
 
 #import "STSimpleStampedBy.h"
+#import "STSimpleStampedByGroup.h"
 
 @implementation STSimpleStampedBy
 
@@ -20,6 +21,16 @@
   [_friendsOfFriends release];
   [_everyone release];
   [super dealloc];
+}
+
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleStampedBy class]];
+  
+  [mapping mapRelationship:@"friends" withMapping:[STSimpleStampedByGroup mapping]];
+  [mapping mapKeyPath:@"fof" toRelationship:@"friendsOfFriends" withMapping:[STSimpleStampedByGroup mapping]];
+  [mapping mapKeyPath:@"all" toRelationship:@"everyone" withMapping:[STSimpleStampedByGroup mapping]];
+  
+  return mapping;
 }
 
 @end

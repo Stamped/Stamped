@@ -15,5 +15,8 @@
 + (UIColor*)stampedGrayColor;
 + (UIColor*)stampedLightGrayColor;
 + (UIColor*)stampedLinkColor;
++ (NSArray*)stampedLightGradient;
++ (NSArray*)stampedGradient;
++ (NSArray*)stampedDarkGradient;
 
 @end

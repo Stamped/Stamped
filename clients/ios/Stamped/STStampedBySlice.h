@@ -13,4 +13,6 @@
 @property (nonatomic, readwrite, copy) NSString* entityID;
 @property (nonatomic, readwrite, copy) NSString* group;
 
++ (STStampedBySlice*)standardSliceWithEntityID:(NSString*)entityID;
+
 @end

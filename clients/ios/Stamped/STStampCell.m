@@ -20,7 +20,6 @@
 #import "Util.h"
 #import "MediumUserImageView.h"
 #import "MediumUserImageButton.h"
-#import "StampedAppDelegate.h"
 #import "Notifications.h"
 #import "UIColor+Stamped.h"
 #import "STStampedActions.h"

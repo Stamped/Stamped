@@ -13,7 +13,6 @@
 #import "SocialManager.h"
 #import "GTMOAuthAuthentication.h"
 #import "STOAuthViewController.h"
-#import "StampedAppDelegate.h"
 #import "Util.h"
 #import "Stamp.h"
 #import "Entity.h"
@@ -289,7 +288,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
   sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
-  UIWindow* win = [(StampedAppDelegate*)[[UIApplication sharedApplication] delegate] window];
+  UIWindow* win = [UIApplication sharedApplication].keyWindow;
   [sheet showInView:win];
 }
 

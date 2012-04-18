@@ -8,11 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "STStampedBy.h"
+#import <RestKit/RestKit.h>
 
 @interface STSimpleStampedBy : NSObject <STStampedBy>
 
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> friends;
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> friendsOfFriends;
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> everyone;
+
++ (RKObjectMapping*)mapping;
 
 @end

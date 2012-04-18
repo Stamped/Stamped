@@ -14,7 +14,7 @@
 #import "EntityDetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STActionMenuFactory.h"
-#import "StampedAppDelegate.h"
+#import "STAppDelegate.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -77,6 +77,11 @@ static Rdio* _rdio;
 
 +(void)initialize {
   _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47" andSecret:@"xJSZwBZxFp" delegate:nil];
+}
+
+
++ (void)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb {
+  [Util splitHexString:hexString toRed:rgb green:rgb+1 blue:rgb+2];
 }
 
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {
@@ -457,7 +462,7 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
-  StampedAppDelegate* delegate = (StampedAppDelegate*) [UIApplication sharedApplication].delegate;
+  STAppDelegate* delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
   return delegate.navigationController;
 }
 
@@ -715,19 +720,81 @@ static Rdio* _rdio;
 
 + (void)addGradientToLayer:(CALayer*)layer withColors:(NSArray*)colors vertical:(BOOL)vertical {
   CAGradientLayer* gradient = [CAGradientLayer layer];
-  if (vertical) {
-    gradient.anchorPoint = CGPointMake(0, 0);
-    gradient.position = CGPointMake(0, 0);
+  gradient.anchorPoint = CGPointMake(0, 0);
+  gradient.position = CGPointMake(0, 0);
+  if (!vertical) {
+    gradient.startPoint = CGPointMake(0,.5);
+    gradient.endPoint = CGPointMake(1,.5);
   }
-  else {
-    //TODO
-    gradient.anchorPoint = CGPointMake(.5, 0);
-    gradient.position = CGPointMake(-.5, 0);
+  NSMutableArray* cgColors = [NSMutableArray array];
+  for (UIColor* color in colors) {
+    [cgColors addObject:(id)color.CGColor];
   }
   gradient.bounds = layer.bounds;
   gradient.cornerRadius = layer.cornerRadius;
-  gradient.colors = colors;
-  [layer addSublayer:gradient];
+  gradient.colors = cgColors;
+  [layer insertSublayer:gradient atIndex:0];
+}
+
++ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
+  STImageView* imageView = [[[STImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+  imageView.imageURL = [Util profileImageURLForUser:user withSize:STProfileImageSize31];
+  imageView.layer.borderWidth = 1;
+  imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+  imageView.layer.shadowOffset = CGSizeMake(0,1);
+  imageView.layer.shadowOpacity = .1;
+  imageView.layer.shadowRadius = 2;
+  return imageView;
+}
+
++ (UIView*)badgeViewForGenre:(NSString*)genre {
+  UIView* result = nil;
+  NSString* imagePath = nil;
+  if ([genre isEqualToString:@"entity_first_stamp"]) {
+    imagePath = @"badge_1stStamped";
+  }
+  else if ([genre isEqualToString:@"friends_first_stamp"]) {
+    imagePath = @"badge_1stFriends";
+  }
+  else if ([genre isEqualToString:@"user_first_stamp"]) {
+    imagePath = @"badge_1stYou";
+  }
+  if (imagePath) {
+    result = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imagePath]] autorelease];
+  }
+  return result;
+}
+
++ (CGRect)fullscreenFrame {
+  return [UIApplication sharedApplication].keyWindow.frame;
+}
+
++ (CGRect)fullscreenFrameAdjustedForStatusBar {
+  CGRect fullscreen = [Util fullscreenFrame];
+  fullscreen.size.height -= [UIApplication sharedApplication].statusBarFrame.size.height;
+  fullscreen.origin.y += [UIApplication sharedApplication].statusBarFrame.size.height;
+  return fullscreen;
+}
+
++ (CGRect)navigatedViewFrame {
+  CGRect almostFullscreen = [Util fullscreenFrameAdjustedForStatusBar];
+  CGFloat height = [Util sharedNavigationController].navigationBar.frame.size.height;
+  almostFullscreen.size.height -= height;
+  almostFullscreen.origin.y += height;
+  return almostFullscreen;
+}
+
++ (CGRect)standardFrameWithNavigationBar:(BOOL)navigationBar {
+  CGRect frame;
+  if (navigationBar) {
+    frame = [Util navigatedViewFrame];
+  }
+  else {
+    frame = [Util fullscreenFrameAdjustedForStatusBar];
+  }
+  frame.origin.x = 0;
+  frame.origin.y = 0;
+  return frame;
 }
 
 @end

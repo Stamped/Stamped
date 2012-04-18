@@ -322,6 +322,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   imagePicker.mediaTypes = [NSArray arrayWithObject:(NSString*)kUTTypeImage];
   
   if (buttonIndex == 0) {
+    //TODO fix for simulator
     imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
     imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
   }

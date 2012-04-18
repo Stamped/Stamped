@@ -38,6 +38,7 @@ extern NSString* const kKeychainTwitterToken;
 
 @interface Util : NSObject
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
++ (void)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb;
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
 + (UIImage*)gradientImage:(UIImage*)img
            withPrimaryRed:(CGFloat)pRed
@@ -132,5 +133,17 @@ extern NSString* const kKeychainTwitterToken;
 + (NSString*)trackLengthString:(NSInteger)length;
 
 + (void)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
+
++ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size;
+
++ (UIView*)badgeViewForGenre:(NSString*)genre;
+
++ (CGRect)fullscreenFrame;
+
++ (CGRect)fullscreenFrameAdjustedForStatusBar;
+
++ (CGRect)navigatedViewFrame;
+
++ (CGRect)standardFrameWithNavigationBar:(BOOL)navigationBar;
 
 @end

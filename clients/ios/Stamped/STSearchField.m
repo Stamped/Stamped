@@ -58,4 +58,8 @@
   return self;
 }
 
+- (id)init {
+  return [self initWithFrame:CGRectMake(0, 0, 320, 30)];
+}
+
 @end

@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STStandardViewController.h"
 #import "STViewDelegate.h"
 #import "STViewContainer.h"
+#import "STScrollViewContainer.h"
 
 @interface STContainerViewController : UIViewController <STViewDelegate, UIScrollViewDelegate, UITextFieldDelegate>
 
@@ -20,10 +20,8 @@
 
 - (void)reloadData;
 
-- (void)setToolbar:(UIView*)view withAnimation:(BOOL)animated;
-
 - (void)reloadStampedData;
 
-@property (nonatomic, readwrite, retain) UIView* toolbar;
+@property (nonatomic, readonly, retain) UIView* toolbar;
 
 @end

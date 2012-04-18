@@ -20,9 +20,10 @@
 #import "STFriendsOfFriendsSource.h"
 #import "STSuggestedSource.h"
 #import "STUserSource.h"
-#import "SearchEntitiesViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STSearchField.h"
+#import "STFriendsSource.h"
+#import "STEntitySearchController.h"
 
 @interface STInboxCategoryFilterView : UIView
 
@@ -39,7 +40,7 @@
 @end
 
 
-@interface STInboxViewController () <STScopeSliderDelegate>
+@interface STInboxViewController () <STScopeSliderDelegate, STStampsViewSourceDelegate>
 
 - (void)categoryChanged:(NSString*)category;
 - (void)updateSource;
@@ -47,12 +48,12 @@
 - (void)configureQueryField;
 
 @property (nonatomic, readonly, retain) STInboxCategoryButton* categoryButton;
-@property (nonatomic, readonly, retain) UITableView* stampsView;
 @property (nonatomic, readonly, retain) UITextField* queryField;
 @property (nonatomic, readonly, retain) NSDictionary* inboxSources;
 @property (nonatomic, readwrite, assign) STStampedAPIScope scope;
 @property (nonatomic, readwrite, copy) NSString* category;
 @property (nonatomic, readwrite, copy) NSString* query;
+@property (nonatomic, readonly, retain) STScopeSlider* slider;
 
 @end
 
@@ -97,16 +98,16 @@
         layer.shadowRadius = 2.0;
         layer.shadowOffset = CGSizeMake(0, 1);
         
-         CAGradientLayer* gradient = [CAGradientLayer layer];
-         gradient.anchorPoint = CGPointMake(0, 0);
-         gradient.position = CGPointMake(0, 0);
-         gradient.bounds = layer.bounds;
-         gradient.cornerRadius = 5.0;
-         gradient.colors = [NSMutableArray arrayWithObjects:
-         (id)[UIColor colorWithWhite:.95 alpha:1].CGColor,
-         (id)[UIColor colorWithWhite:.85 alpha:1].CGColor,
-         nil];
-         [layer addSublayer:gradient];
+        CAGradientLayer* gradient = [CAGradientLayer layer];
+        gradient.anchorPoint = CGPointMake(0, 0);
+        gradient.position = CGPointMake(0, 0);
+        gradient.bounds = layer.bounds;
+        gradient.cornerRadius = 5.0;
+        gradient.colors = [NSMutableArray arrayWithObjects:
+                           (id)[UIColor colorWithWhite:.95 alpha:1].CGColor,
+                           (id)[UIColor colorWithWhite:.85 alpha:1].CGColor,
+                           nil];
+        [layer addSublayer:gradient];
         button.tag = r*3+c;
         [button addTarget:self action:@selector(choseCategory:) forControlEvents:UIControlEventTouchUpInside];
         //[button setTitle:category forState:UIControlStateNormal];
@@ -167,19 +168,6 @@
     self.layer.shadowOpacity = .05;
     self.layer.shadowRadius = 2.0;
     self.layer.shadowOffset = CGSizeMake(0, 1);
-    
-    /*
-    CAGradientLayer* gradient = [CAGradientLayer layer];
-    gradient.anchorPoint = CGPointMake(0, 0);
-    gradient.position = CGPointMake(0, 0);
-    gradient.bounds = self.layer.bounds;
-    gradient.cornerRadius = 2.0;
-    gradient.colors = [NSMutableArray arrayWithObjects:
-                       (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.8].CGColor,
-                       (id)[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:.6].CGColor,
-                       nil];
-    [self.layer addSublayer:gradient];
-     */
   }
   return self;
 }
@@ -197,12 +185,13 @@
 @implementation STInboxViewController
 
 @synthesize categoryButton = _categoryButton;
-@synthesize stampsView = _stampsView;
 @synthesize queryField = _queryField;
 @synthesize inboxSources = _inboxSources;
 @synthesize scope = _scope;
 @synthesize category = _category;
 @synthesize query = _query;
+@synthesize slider = _slider;
+@synthesize toolbar = _toolbar;
 
 static STInboxViewController* _sharedInstance;
 
@@ -216,7 +205,7 @@ static STInboxViewController* _sharedInstance;
 
 - (id)init
 {
-  self = [super init];
+  self = [super initWithHeaderHeight:40];
   if (self) {
     //pass
   }
@@ -225,44 +214,32 @@ static STInboxViewController* _sharedInstance;
 
 - (void)viewDidLoad
 {
+  _toolbar = [[STToolbarView alloc] init];
   [super viewDidLoad];
-  // UIPickerView* picker = [[[UIPickerView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)] autorelease];
-  //picker.delegate = self;
-  //picker.dataSource = self;
-  //[self.scrollView appendChildView:picker];
-  UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
-  //_categoryButton.titleLabel.textColor = [UIColor stampedDarkGrayColor];
-  //_categoryButton.backgroundColor = [UIColor colorWithWhite:.7 alpha:.8];
-  //[searchBar addSubview:_categoryButton];
+  UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 4, 320, 40)] autorelease];
   _queryField = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
   _queryField.placeholder = @"Search for stamps";
   _queryField.enablesReturnKeyAutomatically = NO;
-  //_queryField.backgroundColor = [UIColor whiteColor];
   _queryField.delegate = self;
   [self configureQueryField];
-  //_queryField.se
   [searchBar addSubview:_queryField];
   searchBar.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
   searchBar.layer.shadowRadius = 4;
   searchBar.layer.shadowOpacity = .2;
   searchBar.layer.shadowOffset = CGSizeMake(0, 2);
   searchBar.layer.shadowColor = [UIColor blackColor].CGColor;
-  [self.scrollView appendChildView:searchBar];
-  _stampsView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 323)];
+  [self.scrollView addSubview:searchBar];
   //view.backgroundColor = [UIColor redColor];
   self.scope = STStampedAPIScopeFriends;
   _inboxSources = [[NSDictionary dictionaryWithObjectsAndKeys:
-                    [[[STStampsViewSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriends],
+                    [[[STFriendsSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriends],
                     [[[STUserSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeYou],
                     [[[STFriendsOfFriendsSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriendsOfFriends],
                     [[[STSuggestedSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeEveryone],
                     nil] retain];
-  
-  self.scrollView.scrollsToTop = NO;
-  [self.scrollView appendChildView:_stampsView];
-  //TODO improve shadow hack
-  [searchBar removeFromSuperview];
-  [self.scrollView addSubview:searchBar];
+  for (STStampsViewSource* source in _inboxSources.allValues) {
+    source.delegate = self;
+  }
   
   self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
                                                                             style:UIBarButtonItemStyleDone
@@ -272,22 +249,18 @@ static STInboxViewController* _sharedInstance;
                                                                              style:UIBarButtonItemStyleDone
                                                                             target:self 
                                                                             action:@selector(rightButtonClicked:)] autorelease];
-  STScopeSlider* slider = [[[STScopeSlider alloc] initWithFrame:CGRectMake(45, 15, 230, 23)] autorelease];
-  slider.delegate = self;
-  STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
-  [toolbar addSubview:slider];
+  _slider = [[STScopeSlider alloc] initWithFrame:CGRectMake(45, 15, 230, 23)];
+  _slider.delegate = self;
+  [_toolbar addSubview:_slider];
   UIButton* mapButton = [[[UIButton alloc] initWithFrame:CGRectMake(275, 10, 34, 30)] autorelease];
-  //mapButton.titleLabel.text = @"Map";
   [mapButton setImage:[UIImage imageNamed:@"nav_map_button"] forState:UIControlStateNormal];
   [mapButton addTarget:self action:@selector(mapButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-  [toolbar addSubview:mapButton];
+  [_toolbar addSubview:mapButton];
   _categoryButton = [[STInboxCategoryButton alloc] initWithFrame:CGRectMake(9, 10, 34, 30)];
   [self updateCategoryImage];
   _categoryButton.categoryView = [[[STInboxCategoryFilterView alloc] initWithInboxController:self] autorelease];
-  //_categoryButton.backgroundColor = [UIColor redColor];
   [_categoryButton addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-  [toolbar addSubview:_categoryButton];
-  [self setToolbar:toolbar withAnimation:NO];
+  [_toolbar addSubview:_categoryButton];
   [self updateSource];
 }
 
@@ -310,9 +283,14 @@ static STInboxViewController* _sharedInstance;
 }
 
 - (void)rightButtonClicked:(id)button {
+  STEntitySearchController* controller = [[[STEntitySearchController alloc] initWithCategory:self.category andQuery:self.query] autorelease];
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
+  /*
+   TODO repair
   UINavigationController* controller = [Util sharedNavigationController];
   [controller pushViewController:[[[SearchEntitiesViewController alloc] initWithNibName:@"SearchEntitiesViewController" bundle:nil] autorelease]
                         animated:YES];
+   */
 }
 
 - (void)mapButtonClicked:(id)button {
@@ -325,8 +303,11 @@ static STInboxViewController* _sharedInstance;
 {
   [super viewDidUnload];
   [_categoryButton release];
-  [_stampsView release];
   [_queryField release];
+  _slider.delegate = nil;
+  [_slider release];
+  [_toolbar release];
+  _toolbar = nil;
 }
 
 - (void)categoryChanged:(id)category {
@@ -361,7 +342,7 @@ static STInboxViewController* _sharedInstance;
     old.table = nil;
   }
   STStampsViewSource* source = [self.inboxSources objectForKey:[NSNumber numberWithInt:self.scope]];
-  source.table = self.stampsView;
+  source.table = self.tableView;
   source.slice = slice;
 }
 
@@ -369,7 +350,7 @@ static STInboxViewController* _sharedInstance;
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
   [Util executeOnMainThread:^{
-    self.query = textField.text;
+    self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
   }];
   return YES;
 }
@@ -387,6 +368,25 @@ static STInboxViewController* _sharedInstance;
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
   return YES;
+}
+
+- (void)newStampCreated:(id<STStamp>)stamp {
+  self.category = nil;
+  [self updateCategoryImage];
+  self.query = nil;
+  [_slider setGranularity:STStampedAPIScopeFriends animated:NO];
+  self.scope = STStampedAPIScopeFriends;
+  [[self.inboxSources objectForKey:[NSNumber numberWithInteger:self.scope]] setFlareSet:[NSSet setWithObject:stamp.stampID]];
+  [self updateSource];
+  [self reloadStampedData];
+}
+
+- (void)shouldSetScopeTo:(STStampedAPIScope)scope {
+  [_slider setGranularity:scope animated:YES];
+}
+
+- (UIView *)toolbar {
+  return _toolbar;
 }
 
 @end

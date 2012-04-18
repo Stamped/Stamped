@@ -11,6 +11,14 @@
 #import "STStamp.h"
 #import "STScopeSlider.h"
 
+@class STStampsViewSource;
+
+@protocol STStampsViewSourceDelegate <NSObject>
+
+- (void)shouldSetScopeTo:(STStampedAPIScope)scope;
+
+@end
+
 @interface STStampsViewSource : NSObject <UITableViewDataSource, UITableViewDelegate>
 
 - (void)reloadStampedData;
@@ -20,8 +28,10 @@
 
 @property (nonatomic, readwrite, retain) STGenericCollectionSlice* slice;
 @property (nonatomic, readwrite, retain) UITableView* table;
-@property (nonatomic, readwrite, retain) NSString* noStampsText;
-@property (nonatomic, readwrite, retain) NSString* lastCellText;
-@property (nonatomic, readwrite, retain) NSString* loadingText;
+@property (nonatomic, readonly, retain) NSString* noStampsText;
+@property (nonatomic, readonly, retain) NSString* lastCellText;
+@property (nonatomic, readonly, retain) NSString* loadingText;
+@property (nonatomic, readwrite, copy) NSSet* flareSet;
+@property (nonatomic, readwrite, assign) id<STStampsViewSourceDelegate> delegate;
 
 @end
