@@ -1928,6 +1928,7 @@ class HTTPActivity(Schema):
 class HTTPActivitySlice(HTTPGenericSlice):
     def setSchema(self):
         HTTPGenericSlice.setSchema(self)
+        self.distance           = SchemaElement(int)
 
 class HTTPLinkedURL(Schema):
     def setSchema(self):
