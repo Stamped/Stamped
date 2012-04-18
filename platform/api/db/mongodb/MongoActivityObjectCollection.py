@@ -79,24 +79,3 @@ class MongoActivityObjectCollection(AMongoCollection):
         for document in documents:
             result.append(self._getStringFromObjectId(document['_id']))
         return result
-
-    def matchActivityObject(self, activityObject):
-
-        query = { 'genre' : activityObject.genre }
-
-        if activityObject.user_id is not None:
-            query['user_id'] = activityObject.user_id
-
-        if activityObject.entity_id is not None:
-            query['entity_id'] = activityObject.entity_id
-
-        if activityObject.stamp_id is not None:
-            query['stamp_id'] = activityObject.stamp_id 
-
-        if activityObject.comment_id is not None:
-            query['comment_id'] = activityObject.comment_id  
-
-        activity = self._collection.find_one(query)
-        assert activity is not None
-        
-        return self._convertFromMongo(activity)
