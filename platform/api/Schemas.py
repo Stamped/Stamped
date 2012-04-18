@@ -382,6 +382,7 @@ class Comment(Schema):
 # Activity #
 # ######## #
 
+"""
 class Activity(Schema):
     def setSchema(self):
         # Metadata
@@ -433,7 +434,7 @@ class LinkedURL(Schema):
     def setSchema(self):
         self.url                = SchemaElement(basestring, required=True)
         self.chrome             = SchemaElement(bool)
-
+"""
 
 
 
