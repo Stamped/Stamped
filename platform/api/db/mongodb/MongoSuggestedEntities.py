@@ -81,6 +81,14 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 section_limit = _get_section_limit(i)
                 
                 section  = suggested[i]
+                logs.debug("")
+                logs.debug("")
+                logs.debug("")
+                logs.debug(type(section))
+                logs.debug(type(section_limit))
+                logs.debug("")
+                logs.debug("")
+                logs.debug("")
                 entities = Entity.fast_id_dedupe(section['entities'], seen)[:section_limit]
                 
                 if len(entities) > 0:
