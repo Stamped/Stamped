@@ -76,7 +76,23 @@ class MongoActivityCollection(AActivityDB):
 
         if activityObject.activity_id is None:
             try:
-                activityObject = self.activity_objects_collection.matchActivityObject(activityObject)
+                params = {
+                    'genre'     : activityObject.genre,
+                    'stampId'   : activityObject.stamp_id,
+                    'entityId'  : activityObject.entity_id,
+                    'userId'    : activityObject.user_id,
+                    'friendId'  : activityObject.friend_id,
+                    'commentId' : activityObject.comment_id
+                }
+                activityIds = self.activity_objects_collection.getActivityIds(**params)
+                if len(activityIds) == 0:
+                    raise Exception
+
+                if len(activityIds) > 1:
+                    logs.warning('WARNING: matched multiple activityIds: \n%s' % activityObject)
+
+                activityObject.activity_id = activityIds[0]
+
             except Exception:
                 activityObject = self.activity_objects_collection.addActivityObject(activityObject)
         
