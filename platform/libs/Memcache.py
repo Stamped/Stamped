@@ -57,7 +57,7 @@ class Memcache(object):
         
         try:
             self._client.set(key, value, *args, **kwargs)
-        except MemcachedError, e:
+        except Exception, e:
             logs.warn(str(e))
     
     def __getattr__(self, key):
@@ -238,7 +238,7 @@ def memcached_function(time=0, min_compress_len=0):
                 if cache_set is not None:
                     try:
                         cache_set(key, result, time=time, min_compress_len=min_compress_len)
-                    except MemcachedError, e:
+                    except Exception, e:
                         logs.warn(str(e))
             
             return result
