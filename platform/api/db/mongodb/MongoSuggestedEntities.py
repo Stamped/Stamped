@@ -154,9 +154,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
             top_paid_apps       = self._appleRSS.get_top_paid_apps(limit=5)
             top_grossing_apps   = self._appleRSS.get_top_grossing_apps(limit=5)
             
-                _add_suggested_section('Top free apps', top_free_apps)
-                _add_suggested_section('Top paid apps', top_paid_apps)
-                _add_suggested_section('Top grossing apps', top_grossing_apps)
+            _add_suggested_section('Top free apps', top_free_apps)
+            _add_suggested_section('Top paid apps', top_paid_apps)
+            _add_suggested_section('Top grossing apps', top_grossing_apps)
         
         if len(suggested) == 0 or popular:
             _add_suggested_section('Popular', self._get_popular_entities(category, subcategory))
