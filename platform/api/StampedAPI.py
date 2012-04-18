@@ -2865,7 +2865,12 @@ class StampedAPI(AStampedAPI):
         # Limit slice of data returned
         params = self._setSliceParams(kwargs, stampCap)
         
-        activityData = self._activityDB.getActivity(authUserId, **params)
+        distance = kwargs.pop('distance', 1)
+        if distance > 1:
+            friends = self._friendshipDB.getFriends(user['user_id'])
+            activityData = self._activityDB.getActivityForUsers(friends, **params)
+        else:
+            activityData = self._activityDB.getActivity(authUserId, **params)
         
         # Append user objects
         userIds     = {}
@@ -2874,6 +2879,8 @@ class StampedAPI(AStampedAPI):
         for item in activityData:
             if item.user_id is not None:
                 userIds[item.user_id] = None
+            if item.friend_id is not None:
+                userIds[item.friend_id] = None
             if item.stamp_id is not None:
                 stampIds[item.stamp_id] = None 
             if item.entity_id is not None:
@@ -2908,6 +2915,10 @@ class StampedAPI(AStampedAPI):
                 if item.user_id is not None:
                     enriched.user = userIds[item.user_id]
                     assert enriched.user.user_id is not None
+
+                if item.friend_id is not None:
+                    enriched.friend = userIds[item.friend_id]
+                    assert enriched.friend.user_id is not None
 
                 if item.stamp_id is not None:
                     enriched.stamp = stampIds[item.stamp_id]

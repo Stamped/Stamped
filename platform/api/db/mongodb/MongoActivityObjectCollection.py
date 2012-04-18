@@ -81,6 +81,9 @@ class MongoActivityObjectCollection(AMongoCollection):
         return result
 
     def getActivityForUsers(self, userIds, **kwargs):
+        if len(userIds) == 0:
+            return []
+        
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
         limit       = kwargs.pop('limit', 20)

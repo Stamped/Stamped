@@ -14,6 +14,23 @@ def show(request):
     authUserId, apiVersion = checkOAuth(request)
     
     schema      = parseRequest(HTTPActivitySlice(), request)
+    schema.distance = 0
+
+    activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
+    
+    result = []
+    for item in activity:
+        result.append(HTTPActivity().importSchema(item).exportSparse())
+
+    return transformOutput(result)
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def friends(request):
+    authUserId, apiVersion = checkOAuth(request)
+    
+    schema      = parseRequest(HTTPActivitySlice(), request)
+    schema.distance = 1
 
     activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
     
