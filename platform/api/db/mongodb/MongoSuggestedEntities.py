@@ -81,6 +81,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 section_limit = _get_section_limit(i)
                 
                 section  = suggested[i]
+                import logs
                 logs.debug("")
                 logs.debug("")
                 logs.debug("")
