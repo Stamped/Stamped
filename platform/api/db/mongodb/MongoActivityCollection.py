@@ -152,6 +152,7 @@ class MongoActivityCollection(AActivityDB):
             self.alerts_collection.addAlerts(alerts)
 
     def _removeActivityIds(self, activityIds):
+        logs.info('Remove activity ids: %s' % activityIds)
         self.activity_links_collection.removeActivityLinks(activityIds)
         self.activity_items_collection.removeActivityItems(activityIds)
 
