@@ -3010,7 +3010,9 @@ class StampedAPI(AStampedAPI):
 
                 activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds, comments=commentIds))
 
-            except Exception:
+            except Exception as e:
+                logs.warning('Activity enrichment failed: %s' % e)
+                logs.info('Activity item: %s' % item)
                 utils.printException()
                 continue
             

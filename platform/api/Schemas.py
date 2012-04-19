@@ -492,7 +492,7 @@ class Activity(Schema):
         def _formatUserObjects(users, required=True):
             # Return string and references
             if len(users) == 0 and required:
-                raise Exception
+                raise Exception("No user objects!")
 
             if len(users) == 1:
                 return unicode(users[0].screen_name), []
@@ -505,7 +505,7 @@ class Activity(Schema):
         def _formatStampObjects(stamps, required=True):
             # Return string and references
             if len(stamps) == 0 and required:
-                raise Exception
+                raise Exception("No stamp objects!")
 
             if len(stamps) == 1:
                 return unicode(stamps[0].entity.title), []
@@ -518,7 +518,7 @@ class Activity(Schema):
         def _formatCommentObjects(comments, required=True):
             # Return string and references
             if len(comments) == 0 and required:
-                raise Exception
+                raise Exception("No comment objects!")
 
             if len(comments) == 1:
                 return unicode('%s: %s' % (comments[0].user.screen_name, comments[0].blurb)), []
