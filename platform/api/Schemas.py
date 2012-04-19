@@ -438,53 +438,93 @@ class LinkedURL(Schema):
 
 
 
-class ActivityObject(Schema):
+class Activity(Schema):
     def setSchema(self):
         # Metadata
         self.activity_id        = SchemaElement(basestring)
-        self.genre              = SchemaElement(basestring, required=True)
         self.benefit            = SchemaElement(int)
         self.timestamp          = TimestampSchema()
+
+        # Structure
+        self.subjects           = SchemaList(SchemaElement(basestring))
+        self.verb               = SchemaElement(basestring, required=True)
+        self.objects            = ActivityObjectIds()
 
         # Text
-        self.subject            = SchemaElement(basestring)
-        self.subject_references = SchemaList(ActivityReference())
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_references   = SchemaList(ActivityReference())
+        self.header             = SchemaElement(basestring)
+        self.body               = SchemaElement(basestring)
+        self.footer             = SchemaElement(basestring)
 
-        # Links
-        self.user_id            = SchemaElement(basestring)
-        self.friend_id          = SchemaElement(basestring)
-        self.entity_id          = SchemaElement(basestring)
-        self.stamp_id           = SchemaElement(basestring)
-        self.comment_id         = SchemaElement(basestring)
-        self.url                = SchemaElement(basestring)
+    def enrich(self, **kwargs):
+        users       = kwargs.pop('users', {})
+        stamps      = kwargs.pop('stamps', {})
+        entities    = kwargs.pop('entities', {})
 
-class EnrichedActivityObject(Schema):
+        result              = EnrichedActivity()
+        result.activity_id  = self.activity_id
+        result.verb         = self.verb 
+        result.benefit      = self.benefit
+        result.timestmp     = self.timestamp 
+
+        ### TODO: Image, icon, references, header, body, footer
+        result.header       = 'TEST HEADER' 
+        result.body         = 'TEST BODY'
+        result.footer       = self.footer 
+
+        for userId in self.subjects:
+            result.subjects.append(users[str(userId)])
+
+        for userId in self.objects.user_ids:
+            result.objects.users.append(users[str(userId)])
+
+        for stampId in self.objects.stamp_ids:
+            result.objects.stamps.append(stamps[str(stampId)])
+
+        for entityId in self.objects.entity_ids:
+            result.objects.entities.append(entities[str(entityId)])
+
+        return result
+
+
+class EnrichedActivity(Schema):
     def setSchema(self):
         self.activity_id        = SchemaElement(basestring, required=True)
-        self.genre              = SchemaElement(basestring, required=True)
         self.benefit            = SchemaElement(int)
         self.timestamp          = TimestampSchema()
+
+        # Structure
+        self.subjects           = SchemaList(UserMini())
+        self.verb               = SchemaElement(basestring, required=True)
+        self.objects            = ActivityObjects()
 
         # Image
         self.image              = SchemaElement(basestring)
         self.icon               = SchemaElement(basestring)
 
         # Text
-        self.subject            = SchemaElement(basestring)
-        self.subject_references = SchemaList(ActivityReference())
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = ActivityFormat()
-        self.blurb_references   = SchemaList(ActivityReference())
+        self.header             = SchemaElement(basestring)
+        self.body               = SchemaElement(basestring)
+        self.footer             = SchemaElement(basestring)
+        self.header_references  = SchemaList(ActivityReference())
+        self.body_references    = SchemaList(ActivityReference())
+        self.footer_references  = SchemaList(ActivityReference())
 
-        # Links
-        self.user               = UserMini()
-        self.friend             = UserMini()
-        self.entity             = BasicEntity()
-        self.stamp              = Stamp()
-        self.comment            = Comment()
-        self.url                = SchemaElement(basestring)
+
+
+
+class ActivityObjects(Schema):
+    def setSchema(self):
+        self.users              = SchemaList(UserMini())
+        self.stamps             = SchemaList(Stamp())
+        self.entities           = SchemaList(BasicEntityMini())
+        self.comments           = SchemaList(Comment())
+
+class ActivityObjectIds(Schema):
+    def setSchema(self):
+        self.user_ids           = SchemaList(SchemaElement(basestring))
+        self.stamp_ids          = SchemaList(SchemaElement(basestring))
+        self.entity_ids         = SchemaList(SchemaElement(basestring))
+        self.comment_ids        = SchemaList(SchemaElement(basestring))
 
 class ActivityLink(Schema):
     def setSchema(self):
