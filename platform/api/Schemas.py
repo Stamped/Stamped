@@ -491,8 +491,10 @@ class Activity(Schema):
 
         def _formatUserObjects(users, required=True):
             # Return string and references
-            if len(users) == 0 and required:
-                raise Exception("No user objects!")
+            if len(users) == 0:
+                if required:
+                    raise Exception("No user objects!")
+                return None
 
             if len(users) == 1:
                 return unicode(users[0].screen_name), []
@@ -515,6 +517,21 @@ class Activity(Schema):
 
             return unicode('%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)), []
 
+        def _formatEntityObjects(entities, required=True):
+            # Return string and references
+            if len(entities) == 0:
+                if required:
+                    raise Exception("No entity objects!")
+                return None
+
+            if len(entities) == 1:
+                return unicode(entities[0].title), []
+
+            if len(entities) == 2:
+                return unicode('%s and %s' % (entities[0].title, entities[1].title)), []
+
+            return unicode('%s and %s others' % (entities[0].title, len(entities) - 1)), []
+
         def _formatCommentObjects(comments, required=True):
             # Return string and references
             if len(comments) == 0 and required:
@@ -535,12 +552,39 @@ class Activity(Schema):
             stampObjects, stampObjectReferences = _formatStampObjects(result.objects.stamps)
             result.body = '%s liked %s.' % (subjects, stampObjects)
 
-        elif self.verb == 'reply':
+        elif self.verb == 'restamp':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            result.body = '%s gave you credit.' % subjects
+
+        elif self.verb == 'todo':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            entityObjects, entityObjectReferences = _formatEntityObjects(result.objects.entities)
+            result.body = '%s added %s as a to-do.' % (subjects, entityObjects)
+
+        elif self.verb == 'comment':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
             result.header = 'Comment on %s' % self.objects.stamps[0].entity.title 
             result.body = '%s.' % commentObjects
 
+        elif self.verb == 'reply':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
+            result.header = 'Reply on %s' % self.objects.stamps[0].entity.title 
+            result.body = '%s.' % commentObjects
+
+        elif self.verb == 'mention':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments, required=False)
+            stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(result.objects.stamps, required=False)
+            result.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
+            if commentObjects is not None:
+                result.body = '%s.' % commentObjects
+            else:
+                result.body = '%s.' % stampBlurbObjects
+
+        else:
+            raise Exception("Uncrecognized verb: %s" % self.verb)
 
         return result
 
