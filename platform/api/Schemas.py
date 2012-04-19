@@ -459,17 +459,13 @@ class Activity(Schema):
         users       = kwargs.pop('users', {})
         stamps      = kwargs.pop('stamps', {})
         entities    = kwargs.pop('entities', {})
+        comments    = kwargs.pop('comments', {})
 
         result              = EnrichedActivity()
         result.activity_id  = self.activity_id
         result.verb         = self.verb 
         result.benefit      = self.benefit
-        result.timestmp     = self.timestamp 
-
-        ### TODO: Image, icon, references, header, body, footer
-        result.header       = 'TEST HEADER' 
-        result.body         = 'TEST BODY'
-        result.footer       = self.footer 
+        result.timestamp    = self.timestamp 
 
         for userId in self.subjects:
             result.subjects.append(users[str(userId)])
@@ -482,6 +478,52 @@ class Activity(Schema):
 
         for entityId in self.objects.entity_ids:
             result.objects.entities.append(entities[str(entityId)])
+
+        for commentId in self.objects.comment_ids:
+            result.objects.comments.append(comments[str(commentId)])
+
+
+        ### TODO: Image, icon, references, header, body, footer
+
+        # result.header       = 'TEST HEADER' 
+        result.body         = 'TEST BODY'
+        # result.footer       = self.footer 
+
+        def _formatUserObjects(users, required=True):
+            # Return string and references
+            if len(users) == 0 and required:
+                raise Exception
+
+            if len(users) == 1:
+                return unicode(users[0].screen_name), []
+
+            if len(users) == 2:
+                return unicode('%s and %s' % (users[0].screen_name, users[1].screen_name)), []
+
+            return unicode('%s and %s others' % (users[0].screen_name, len(users) - 1)), []
+
+        def _formatStampObjects(stamps, required=True):
+            # Return string and references
+            if len(stamps) == 0 and required:
+                raise Exception
+
+            if len(stamps) == 1:
+                return unicode(stamps[0].entity.title), []
+
+            if len(stamps) == 2:
+                return unicode('%s and %s' % (stamps[0].entity.title, stamps[1].entity.title)), []
+
+            return unicode('%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)), []
+
+        if self.verb == 'follow':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
+            result.body = '%s is now following %s.' % (subjects, userObjects)
+
+        elif self.verb == 'like':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            stampObjects, stampObjectReferences = _formatStampObjects(result.objects.stamps)
+            result.body = '%s liked %s.' % (subjects, stampObjects)
 
         return result
 

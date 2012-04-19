@@ -1989,7 +1989,7 @@ class StampedAPI(AStampedAPI):
         
         # Remove comments
         ### TODO: Make this more efficient?
-        comments = self._commentDB.getComments(stampId)
+        comments = self._commentDB.getCommentsForStamp(stampId)
         for comment in comments:
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
@@ -2170,7 +2170,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for previous commenters
         ### TODO: Limit this to the last 20 comments or so
-        for prevComment in self._commentDB.getComments(stamp.stamp_id):
+        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
             # Skip if it was generated from a restamp
             if prevComment.restamp_id:
                 continue
@@ -2240,7 +2240,7 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
               
-        commentData = self._commentDB.getComments(stamp.stamp_id)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id)
         
         # Get user objects
         userIds = {}
@@ -2341,6 +2341,7 @@ class StampedAPI(AStampedAPI):
             self._addActivity(verb          = 'like', 
                               userId        = authUserId, 
                               stampId       = stamp.stamp_id,
+                              friendId      = stamp.user_id,
                               benefit       = benefit)
         
         return stamp
@@ -2814,19 +2815,18 @@ class StampedAPI(AStampedAPI):
         if not self._activity:
             return
 
+        logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
+
         objects = ActivityObjectIds()
-        # activity.verb                   = verb
-        # activity.subjects               = [ userId ]
-        # activity.timestamp.modified     = datetime.utcnow()
 
         if verb == 'follow':
-            objects.user_ids        = [ kwargs['friendId'] ] # Or use recipientIds?
+            objects.user_ids        = [ kwargs['friendId'] ] 
 
         elif verb == 'like':
             objects.stamp_ids       = [ kwargs['stampId'] ] 
 
         elif verb == 'restamp':
-            objects.user_ids        = [ kwargs['friendId'] ]
+            objects.user_ids        = kwargs['recipientIds']
             objects.stamp_ids       = [ kwargs['stampId'] ] 
 
         elif verb == 'todo':
@@ -2853,7 +2853,9 @@ class StampedAPI(AStampedAPI):
         else:
             raise Exception("Unrecognized activity verb: %s" % verb)
 
+
         sendAlert       = kwargs.pop('sendAlert', True)
+        benefit         = kwargs.pop('benefit', None)
 
         recipientIds    = kwargs.pop('recipientIds', []) 
         friendId        = kwargs.pop('friendId', None)
@@ -2866,6 +2868,7 @@ class StampedAPI(AStampedAPI):
                                      subject        = userId, 
                                      objects        = objects, 
                                      recipientIds   = recipientIds, 
+                                     benefit        = benefit,
                                      sendAlert      = sendAlert)
 
         # Increment unread news for all recipients
@@ -2955,15 +2958,18 @@ class StampedAPI(AStampedAPI):
         userIds     = {}
         stampIds    = {}
         entityIds   = {}
+        commentIds  = {}
         for item in activityData:
             for userId in item.subjects:
                 userIds[str(userId)] = None 
             for userId in item.objects.user_ids:
                 userIds[str(userId)] = None 
             for stampId in item.objects.stamp_ids:
-                userIds[str(stampId)] = None 
+                stampIds[str(stampId)] = None 
             for entityId in item.objects.entity_ids:
-                userIds[str(entityId)] = None 
+                entityIds[str(entityId)] = None 
+            for commentId in item.objects.comment_ids:
+                commentIds[str(commentId)] = None 
         
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -2983,13 +2989,26 @@ class StampedAPI(AStampedAPI):
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity 
 
+        # Enrich comments
+        comments = self._commentDB.getComments(commentIds.keys())
+        commentUserIds = {}
+        for comment in comments:
+            if comment.user.user_id not in userIds:
+                commentUserIds[comment.user.user_id] = None
+        users = self._userDB.lookupUsers(commentUserIds.keys(), None)
+        for user in users:
+            userIds[str(user.user_id)] = user.exportSchema(UserMini())
+        for comment in comments:
+            comment.user = userIds[str(comment.user.user_id)]
+            commentIds[str(comment.comment_id)] = comment
+
         activity = []
         for item in activityData:
             try:
                 if item.verb in ['invite_received', 'invite_sent']:
                     continue
 
-                activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds))
+                activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds, comments=commentIds))
 
             except Exception:
                 utils.printException()

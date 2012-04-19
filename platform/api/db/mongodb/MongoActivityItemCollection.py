@@ -27,6 +27,11 @@ class MongoActivityItemCollection(AMongoCollection):
         documentId = self._getObjectIdFromString(activityId)
         result = self._collection.update({'_id': documentId}, {'$addToSet': {'subjects': subjectId}})
         return result
+
+    def setBenefitForActivityItem(self, activityId, benefit):
+        documentId = self._getObjectIdFromString(activityId)
+        result = self._collection.update({'_id': documentId}, {'$set': {'benefit': benefit}})
+        return result
     
     def removeActivityItem(self, activityId):
         documentId = self._getObjectIdFromString(activityId)

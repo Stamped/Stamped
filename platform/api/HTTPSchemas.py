@@ -1536,7 +1536,7 @@ class HTTPStamp(Schema):
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
         else:
-            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
+            logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
         
         return self
@@ -1932,7 +1932,7 @@ class HTTPActivityObjects(Schema):
         self.users              = SchemaList(HTTPUserMini())
         self.stamps             = SchemaList(HTTPStamp())
         self.entities           = SchemaList(HTTPEntity())
-        # self.comments           = SchemaList(HTTPComments())
+        self.comments           = SchemaList(HTTPComment())
 
 class HTTPActivity(Schema):
     def setSchema(self):
@@ -1963,27 +1963,27 @@ class HTTPActivity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'EnrichedActivity':
             data        = schema.value
-            subjects    = data.pop('subjects', [])
-            objects     = data.pop('objects', {})
+            data.pop('subjects')
+            data.pop('objects')
 
             self.importData(data, overflow=True)
 
             self.created = schema.timestamp.created
 
-            for user in subjects:
+            for user in schema.subjects:
                 self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if 'users' in objects:
-                for user in objects['users']:
-                    self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
+            for user in schema.objects.users:
+                self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if 'stamps' in objects:
-                for stamp in objects['stamps']:
-                    self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
+            for stamp in schema.objects.stamps:
+                self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
 
-            if 'entities' in objects:
-                for entity in objects['entities']:
-                    self.objects.entities.append(HTTPEntity().importSchema(entity).value)
+            for entity in schema.objects.entities:
+                self.objects.entities.append(HTTPEntity().importSchema(entity).value)
+
+            for comment in schema.objects.comments:
+                self.objects.comments.append(HTTPComment().importSchema(comment).value)
 
         else:
             raise NotImplementedError

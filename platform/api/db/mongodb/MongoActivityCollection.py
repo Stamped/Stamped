@@ -83,6 +83,7 @@ class MongoActivityCollection(AActivityDB):
     def addActivity(self, verb, **kwargs):
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
+        benefit         = kwargs.pop('benefit', None)
         sendAlert       = kwargs.pop('sendAlert', True)
         recipientIds    = kwargs.pop('recipientIds', [])
         now             = datetime.utcnow()
@@ -109,6 +110,8 @@ class MongoActivityCollection(AActivityDB):
             activityId = activityIds[0]
 
             self.activity_items_collection.addSubjectToActivityItem(activityId, subject)
+            if benefit is not None:
+                self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
 
         except Exception:
             activity        = Activity()
@@ -117,6 +120,8 @@ class MongoActivityCollection(AActivityDB):
                 activity.subjects = [ subject ]
             if len(objects) > 0:
                 activity.objects = ActivityObjectIds(objects)
+            if benefit is not None:
+                activity.benefit = benefit
             activity.timestamp.created  = now
             activity.timestamp.modified = now
 
@@ -150,21 +155,21 @@ class MongoActivityCollection(AActivityDB):
         self.activity_links_collection.removeActivityLinks(activityIds)
         self.activity_items_collection.removeActivityItems(activityIds)
 
-    def removeActivity(self, genre, userId, **kwargs):
+    def removeActivity(self, verb, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
         friendId    = kwargs.pop('friendId', None)
 
-        if genre in ['like', 'favorite'] and stampId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, stampId=stampId, genre=genre)
+        if verb in ['like', 'favorite'] and stampId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(userId=userId, stampId=stampId, verb=verb)
             self._removeActivityIds(activityIds)
 
-        if genre in ['follower', 'friend'] and friendId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, friendId=friendId, genre=genre)
+        if verb in ['follower', 'friend'] and friendId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(userId=userId, friendId=friendId, verb=verb)
             self._removeActivityIds(activityIds)
 
-        if genre in ['comment'] and commentId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, commentId=commentId, genre=genre)
+        if verb in ['comment'] and commentId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(userId=userId, commentId=commentId, verb=verb)
             self._removeActivityIds(activityIds)
     
     def removeActivityForStamp(self, stampId):
