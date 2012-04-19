@@ -515,6 +515,16 @@ class Activity(Schema):
 
             return unicode('%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)), []
 
+        def _formatCommentObjects(comments, required=True):
+            # Return string and references
+            if len(comments) == 0 and required:
+                raise Exception
+
+            if len(comments) == 1:
+                return unicode('%s: %s' % (comments[0].user.screen_name, comments[0].blurb)), []
+
+            raise Exception("Too many comments! \n%s" % comments)
+
         if self.verb == 'follow':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
@@ -524,6 +534,13 @@ class Activity(Schema):
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             stampObjects, stampObjectReferences = _formatStampObjects(result.objects.stamps)
             result.body = '%s liked %s.' % (subjects, stampObjects)
+
+        elif self.verb == 'reply':
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
+            result.header = 'Comment on %s' % self.objects.stamps[0].entity.title 
+            result.body = '%s.' % commentObjects
+
 
         return result
 
