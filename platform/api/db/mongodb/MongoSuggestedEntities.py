@@ -96,7 +96,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
     @lru_cache(maxsize=8)
-    @memcached_function(time=2*24*60*60)
+    #@memcached_function(time=2*24*60*60)
     def _getGlobalSuggestedEntities(self, coords, category, subcategory):
         """
             Returns a list of suggested entities (separated into sections), restricted 
@@ -106,7 +106,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             preferences.
         """
         
-        popular   = True
+        popular   = False
         suggested = []
         
         def _add_suggested_section(title, entities):
