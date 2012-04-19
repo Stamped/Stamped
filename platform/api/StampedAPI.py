@@ -257,6 +257,9 @@ class StampedAPI(AStampedAPI):
         for invite in invites:
             invitedBy[invite['user_id']] = 1
             
+        """
+        # Skip this activity item for now 
+
             ### TODO: What genre are we picking for this activity item?
             self._addActivity(genre='invite_sent', 
                               user_id=invite['user_id'], 
@@ -267,6 +270,7 @@ class StampedAPI(AStampedAPI):
             self._addActivity(genre='invite_received', 
                               user_id=account.user_id, 
                               recipient_ids=invitedBy.keys())
+        """
         
         self._inviteDB.join(account.email)
         
@@ -696,11 +700,9 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(genre='friend', 
-                          user_id=authUserId, 
-                          recipient_ids=userIds, 
-                          subject='Your Twitter friend %s' % account.twitter_screen_name,
-                          checkExists=True)
+        self._addActivity(verb          = 'twitter_friend', 
+                          userId        = authUserId, 
+                          recipientIds  = userIds)
         
         twitter = TwitterAccountSchema(twitter_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
@@ -747,11 +749,9 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(genre='friend', 
-                          user_id=authUserId, 
-                          recipient_ids=userIds, 
-                          subject='Your Facebook friend %s' % account.facebook_name, 
-                          checkExists=True)
+        self._addActivity(verb          = 'facebook_friend', 
+                          userId        = authUserId, 
+                          recipientIds  = userIds)
         
         facebook = FacebookAccountSchema(facebook_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
@@ -993,9 +993,9 @@ class StampedAPI(AStampedAPI):
     def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
-            self._addActivity(genre='follower', 
-                              user_id=authUserId, 
-                              recipient_ids=[ userId ])
+            self._addActivity(verb          = 'follow', 
+                              userId        = authUserId, 
+                              friendId      = userId)
             
             # Remove 'friend' activity item
             self._activityDB.removeActivity('friend', authUserId, friendId=userId)
@@ -1721,7 +1721,7 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Update stamp with new entity_id if old one is tombstoned
         
-        creditedUserIds = []
+        creditedUserIds = set()
         
         # Give credit
         if stamp.credit is not None and len(stamp.credit) > 0:
@@ -1744,7 +1744,7 @@ class StampedAPI(AStampedAPI):
                 
                 # Assign credit
                 self._stampDB.giveCredit(item.user_id, stamp)
-                creditedUserIds.append(item.user_id)
+                creditedUserIds.add(item.user_id)
                 
                 # # Add restamp as comment (if prior stamp exists)
                 # if 'stamp_id' in item and item['stamp_id'] is not None:
@@ -1772,21 +1772,23 @@ class StampedAPI(AStampedAPI):
         # Note: No activity should be generated for the user creating the stamp
         
         # Add activity for credited users
-        self._addActivity(genre='restamp', 
-                          user_id=authUserId, 
-                          recipient_ids=creditedUserIds, 
-                          subject=entity.title, 
-                          blurb=stamp.blurb, 
-                          stamp_id=stamp.stamp_id, 
-                          benefit=CREDIT_BENEFIT)
+        if len(creditedUserIds) > 0:
+            self._addActivity(verb          = 'restamp', 
+                              userId        = authUserId, 
+                              recipientIds  = list(creditedUserIds), 
+                              stampId       = stamp.stamp_id, 
+                              benefit       = CREDIT_BENEFIT)
         
         # Add activity for mentioned users
-        self._addMentionActivity(authUserId=authUserId, 
-                                 mentions=stamp.mentions, 
-                                 ignore=creditedUserIds, 
-                                 subject=entity.title, 
-                                 blurb=stamp.blurb, 
-                                 stamp_id=stamp.stamp_id)
+        mentionedUserIds = set()
+        for item in stamp.mentions:
+            if item.user_id is not None and item.user_id != authUserId and item.user_id not in creditedUserIds:
+                mentionedUserIds.add(item.user_id)
+        if len(mentionedUserIds) > 0:
+            self._addActivity(verb          = 'mention', 
+                              userId        = authUserId, 
+                              recipientIds  = list(mentionedUserIds), 
+                              stampId       = stamp.stamp_id)
     
     @API_CALL
     def addResizedStampImagesAsync(self, stamp_id, image_url):
@@ -1795,7 +1797,9 @@ class StampedAPI(AStampedAPI):
         self._imageDB.addResizedStampImages(image_url, stamp_id)
     
     @API_CALL
-    def updateStamp(self, authUserId, stampId, data):        
+    def updateStamp(self, authUserId, stampId, data):
+        raise NotImplementedError
+        """
         stamp       = self._stampDB.getStamp(stampId)
         user        = self._userDB.getUser(authUserId)
         
@@ -1960,6 +1964,7 @@ class StampedAPI(AStampedAPI):
                               stamp_id=stamp.stamp_id)
         
         return stamp
+        """
     
     @API_CALL
     def removeStamp(self, authUserId, stampId):
@@ -2132,25 +2137,31 @@ class StampedAPI(AStampedAPI):
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Add activity for mentioned users
-        mentionedUserIds = self._addMentionActivity(authUserId=authUserId, 
-                                                    mentions=comment.mentions, 
-                                                    subject=stamp.entity.title, 
-                                                    blurb=comment.blurb, 
-                                                    linked_stamp_id=stamp.stamp_id, 
-                                                    linked_comment_id=comment.comment_id)
+
+
+
+        # Add activity for mentioned users
+        mentionedUserIds = set()
+        for item in comment.mentions:
+            if item.user_id is not None and item.user_id != authUserId:
+                mentionedUserIds.add(item.user_id)
+        if len(mentionedUserIds) > 0:
+            self._addActivity(verb          = 'mention', 
+                              userId        = authUserId, 
+                              recipientIds  = list(mentionedUserIds), 
+                              stampId       = stamp.stamp_id,
+                              commentId     = comment.comment_id)
         
         # Add activity for stamp owner
         commentedUserIds = set()
         if stamp.user.user_id not in mentionedUserIds and stamp.user.user_id != authUserId:
             commentedUserIds.add(stamp.user.user_id)
         
-        self._addActivity(genre='comment', 
-                          user_id=authUserId, 
-                          recipient_ids=commentedUserIds, 
-                          subject=stamp.entity.title, 
-                          blurb=comment.blurb, 
-                          stamp_id=stamp.stamp_id, 
-                          comment_id=comment.comment_id)
+        self._addActivity(verb          = 'comment', 
+                          userId        = authUserId, 
+                          recipientIds  = list(commentedUserIds), 
+                          stampId       = stamp.stamp_id,
+                          commentId     = comment.comment_id)
         
         # Increment comment metric
         self._statsSink.increment('stamped.api.stamps.comments', len(commentedUserIds))
@@ -2178,13 +2189,11 @@ class StampedAPI(AStampedAPI):
                 if self._friendshipDB.blockExists(friendship) == False:
                     repliedUserIds.add(replied_user_id)
         
-        self._addActivity(genre='reply', 
-                          user_id=authUserId, 
-                          recipient_ids=repliedUserIds, 
-                          subject=stamp.entity.title, 
-                          blurb=comment.blurb, 
-                          stamp_id=stamp.stamp_id, 
-                          comment_id=comment.comment_id)
+        self._addActivity(verb          = 'reply', 
+                          userId        = authUserId, 
+                          recipientIds  = list(repliedUserIds), 
+                          stampId       = stamp.stamp_id,
+                          commentId     = comment.comment_id)
         
         # Increment comment count on stamp
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
@@ -2329,12 +2338,10 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for stamp owner (if not self)
         if stamp.user_id != authUserId:
-            self._addActivity(genre='like', 
-                              user_id=authUserId, 
-                              recipient_ids=[ stamp.user_id ], 
-                              subject=stamp.entity.title, 
-                              stamp_id=stamp.stamp_id,
-                              benefit=benefit)
+            self._addActivity(verb          = 'like', 
+                              userId        = authUserId, 
+                              stampId       = stamp.stamp_id,
+                              benefit       = benefit)
         
         return stamp
     
@@ -2689,12 +2696,14 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
+        ### TODO: Make async
         if stampId is not None and favorite.stamp.user_id != authUserId:
-            self._addActivity(genre='favorite', 
-                              user_id=authUserId, 
-                              recipient_ids=[ favorite.stamp.user_id ], 
-                              subject=favorite.stamp.entity.title, 
-                              stamp_id=favorite.stamp.stamp_id)
+
+            self._addActivity(verb          = 'favorite', 
+                              userId        = authUserId, 
+                              entityId      = entity.entity_id,
+                              friendId      = favorite.stamp.user_id, 
+                              stampId       = stamp.stamp_id)
         
         return favorite
     
@@ -2800,7 +2809,71 @@ class StampedAPI(AStampedAPI):
     #     #  ####    #   #   ##   #   #     #   
     """
     
-    def _addActivity(self, genre, user_id, recipient_ids, **kwargs):
+    def _addActivity(self, verb, userId, **kwargs):
+        # Verify that activity is enabled
+        if not self._activity:
+            return
+
+        objects = ActivityObjectIds()
+        # activity.verb                   = verb
+        # activity.subjects               = [ userId ]
+        # activity.timestamp.modified     = datetime.utcnow()
+
+        if verb == 'follow':
+            objects.user_ids        = [ kwargs['friendId'] ] # Or use recipientIds?
+
+        elif verb == 'like':
+            objects.stamp_ids       = [ kwargs['stampId'] ] 
+
+        elif verb == 'restamp':
+            objects.user_ids        = [ kwargs['friendId'] ]
+            objects.stamp_ids       = [ kwargs['stampId'] ] 
+
+        elif verb == 'todo':
+            objects.user_ids        = [ kwargs['friendId'] ]
+            objects.stamp_ids       = [ kwargs['stampId'] ]
+            objects.entity_ids      = [ kwargs['entityId'] ] # Is this necessary? Do we require stamps?
+
+        elif verb == 'comment' or verb == 'reply':
+            objects.stamp_ids       = [ kwargs['stampId'] ]
+            objects.comment_ids     = [ kwargs['commentId'] ]
+
+        elif verb == 'mention':
+            ### TODO: Add check if block exists
+            objects.stamp_ids       = [ kwargs['stampId'] ]
+            if commentId in kwargs and kwargs['commentId'] is not None:
+                objects.comment_ids     = [ kwargs['commentId'] ]
+
+        elif verb == 'invite':
+            objects.user_ids        = [ kwargs['friendId'] ]
+
+        elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+            pass
+
+        else:
+            raise Exception("Unrecognized activity verb: %s" % verb)
+
+        sendAlert       = kwargs.pop('sendAlert', True)
+
+        recipientIds    = kwargs.pop('recipientIds', []) 
+        friendId        = kwargs.pop('friendId', None)
+
+        if len(recipientIds) == 0 and friendId is not None:
+            recipientIds = [ friendId ]
+
+        # Save activity
+        self._activityDB.addActivity(verb           = verb, 
+                                     subject        = userId, 
+                                     objects        = objects, 
+                                     recipientIds   = recipientIds, 
+                                     sendAlert      = sendAlert)
+
+        # Increment unread news for all recipients
+        if len(recipientIds) > 0:
+            self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
+
+    """
+    def _addActivityOld(self, genre, user_id, recipient_ids, **kwargs):
         if not self._activity or len(recipient_ids) <= 0:
             return
         
@@ -2822,6 +2895,7 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
     
     def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
+        raise NotImplementedError
         mentionedUserIds = set()
         
         if self._activity == True and mentions is not None and len(mentions) > 0:
@@ -2844,6 +2918,7 @@ class StampedAPI(AStampedAPI):
             self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
         
         return mentionedUserIds
+    """
     
     @API_CALL
     def getActivity(self, authUserId, **kwargs):
@@ -2868,7 +2943,11 @@ class StampedAPI(AStampedAPI):
         distance = kwargs.pop('distance', 0)
         if distance > 0:
             friends = self._friendshipDB.getFriends(authUserId)
-            activityData = self._activityDB.getActivityForUsers(friends, **params)
+            activityData = []
+            dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
+            for item in dirtyActivityData:
+                item.subjects = list(set(item.subjects).intersection(set(friends)))
+                activityData.append(item)
         else:
             activityData = self._activityDB.getActivity(authUserId, **params)
         
@@ -2877,14 +2956,14 @@ class StampedAPI(AStampedAPI):
         stampIds    = {}
         entityIds   = {}
         for item in activityData:
-            if item.user_id is not None:
-                userIds[item.user_id] = None
-            if item.friend_id is not None:
-                userIds[item.friend_id] = None
-            if item.stamp_id is not None:
-                stampIds[item.stamp_id] = None 
-            if item.entity_id is not None:
-                stampIds[item.entity_id] = None
+            for userId in item.subjects:
+                userIds[str(userId)] = None 
+            for userId in item.objects.user_ids:
+                userIds[str(userId)] = None 
+            for stampId in item.objects.stamp_ids:
+                userIds[str(stampId)] = None 
+            for entityId in item.objects.entity_ids:
+                userIds[str(entityId)] = None 
         
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -2907,28 +2986,10 @@ class StampedAPI(AStampedAPI):
         activity = []
         for item in activityData:
             try:
-                if item.genre in ['invite_received', 'invite_sent']:
+                if item.verb in ['invite_received', 'invite_sent']:
                     continue
-                
-                enriched = EnrichedActivityObject(item, overflow=True)
 
-                if item.user_id is not None:
-                    enriched.user = userIds[item.user_id]
-                    assert enriched.user.user_id is not None
-
-                if item.friend_id is not None:
-                    enriched.friend = userIds[item.friend_id]
-                    assert enriched.friend.user_id is not None
-
-                if item.stamp_id is not None:
-                    enriched.stamp = stampIds[item.stamp_id]
-                    assert enriched.stamp.stamp_id is not None
-
-                if item.entity_id is not None:
-                    enriched.entity = entityIds[item.entity_id]
-                    assert enriched.entity.entity_id is not None
-
-                activity.append(enriched)
+                activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds))
 
             except Exception:
                 utils.printException()

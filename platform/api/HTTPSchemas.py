@@ -1961,36 +1961,29 @@ class HTTPActivity(Schema):
 
 
     def importSchema(self, schema):
-        if schema.__class__.__name__ == 'EnrichedActivityObject':
-            data         = schema.value
-            user         = data.pop('user', None)
-            entity       = data.pop('entity', None)
-            stamp        = data.pop('stamp', None)
-            url          = data.pop('url', None)
+        if schema.__class__.__name__ == 'EnrichedActivity':
+            data        = schema.value
+            subjects    = data.pop('subjects', [])
+            objects     = data.pop('objects', {})
 
             self.importData(data, overflow=True)
 
             self.created = schema.timestamp.created
 
-            if user is not None:
-                self.subjects = [ HTTPUserMini().importSchema(UserMini(user)).value ]
+            for user in subjects:
+                self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if schema.genre is not None:
-                self.verb = schema.genre
-            
-            if stamp is not None:
-                self.objects.stamps = [ HTTPStamp().importSchema(schema.stamp).value ]
-            if user is not None:
-                self.objects.users = [ HTTPUserMini().importSchema(schema.user).value ]
-            if entity is not None:
-                self.objects.entities = [ HTTPEntity().importSchema(schema.entity).value ]
+            if 'users' in objects:
+                for user in objects['users']:
+                    self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if schema.subject is not None:
-                self.header = schema.subject
-            if schema.subject_references is not None:
-                self.header_references = schema.subject_references
-            if schema.blurb is not None:
-                self.body = schema.blurb
+            if 'stamps' in objects:
+                for stamp in objects['stamps']:
+                    self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
+
+            if 'entities' in objects:
+                for entity in objects['entities']:
+                    self.objects.entities.append(HTTPEntity().importSchema(entity).value)
 
         else:
             raise NotImplementedError
