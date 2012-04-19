@@ -2704,7 +2704,7 @@ class StampedAPI(AStampedAPI):
                               userId        = authUserId, 
                               entityId      = entity.entity_id,
                               friendId      = favorite.stamp.user_id, 
-                              stampId       = stamp.stamp_id)
+                              stampId       = stampId)
         
         return favorite
     
