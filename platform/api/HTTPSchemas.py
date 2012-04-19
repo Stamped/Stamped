@@ -1980,7 +1980,7 @@ class HTTPActivity(Schema):
                 self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
 
             for entity in schema.objects.entities:
-                self.objects.entities.append(HTTPEntity().importSchema(entity).value)
+                self.objects.entities.append(HTTPEntityMini().importSchema(entity).value)
 
             for comment in schema.objects.comments:
                 self.objects.comments.append(HTTPComment().importSchema(comment).value)
