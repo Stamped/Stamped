@@ -2700,7 +2700,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Make async
         if stampId is not None and favorite.stamp.user_id != authUserId:
 
-            self._addActivity(verb          = 'favorite', 
+            self._addActivity(verb          = 'todo', 
                               userId        = authUserId, 
                               entityId      = entity.entity_id,
                               friendId      = favorite.stamp.user_id, 
