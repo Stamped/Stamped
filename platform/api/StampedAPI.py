@@ -2949,7 +2949,7 @@ class StampedAPI(AStampedAPI):
             activityData = []
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
             for item in dirtyActivityData:
-                item.subjects = list(set(item.subjects).intersection(set(friends)))
+                item.subjects = list(set(item.subjects.value).intersection(set(friends)))
                 activityData.append(item)
         else:
             activityData = self._activityDB.getActivity(authUserId, **params)
@@ -3012,7 +3012,7 @@ class StampedAPI(AStampedAPI):
 
             except Exception as e:
                 logs.warning('Activity enrichment failed: %s' % e)
-                logs.info('Activity item: %s' % item)
+                logs.info('Activity item: \n%s\n' % item)
                 utils.printException()
                 continue
             
