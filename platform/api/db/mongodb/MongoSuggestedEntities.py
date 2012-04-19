@@ -106,7 +106,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             preferences.
         """
         
-        popular   = False
+        popular   = True
         suggested = []
         
         def _add_suggested_section(title, entities):
