@@ -21,10 +21,11 @@ class MongoTestMonitor(BasicMongoMonitor):
     
     def add(self, ns, documents, count = None, noop = False):
         BasicMongoMonitor.add(self, ns, documents, count, noop)
-        assert ns == self.ns
+        assert ns in self.ns
         
         total = 0
         for document in documents:
+            #utils.log("add: %s" % self._extract_id(document))
             self.documents[self._extract_id(document)] = document
             total += 1
         
@@ -35,7 +36,8 @@ class MongoTestMonitor(BasicMongoMonitor):
         BasicMongoMonitor.remove(self, ns, id)
         id = self._extract_id(id)
         
-        assert ns == self.ns
+        #utils.log("remove: %s" % id)
+        assert ns in self.ns
         assert id in self.documents
         
         del self.documents[id]
