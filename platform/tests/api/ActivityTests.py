@@ -148,7 +148,7 @@ class StampedAPIActivityLikes(StampedAPIActivityTest):
         }
         
         self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertTrue(len(x) == 3),
+                   lambda x: self.assertTrue(len(x) == 1),
                    lambda x: self._assertBenefit(x),
         ])
         
@@ -173,7 +173,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self.assertTrue(x[0]['genre'] == 'restamp'), 
+                   lambda x: self.assertTrue(x[0]['verb'] == 'restamp'), 
         ])
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])

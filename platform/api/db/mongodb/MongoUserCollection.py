@@ -283,6 +283,9 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         raise NotImplementedError
     
     def updateUserStats(self, userIdOrIds, stat, value=None, increment=1):
+        if userIdOrIds is None or len(userIdOrIds) == 0:
+            raise Exception("Invalid ids")
+            
         key = 'stats.%s' % stat
         
         if isinstance(userIdOrIds, (list, tuple, set)):

@@ -80,14 +80,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             for i in xrange(num_sections):
                 section_limit = _get_section_limit(i)
                 
-                section = suggested[i]
-                
-                logs.info(type(section))
-                logs.info(type(section_limit))
-                
-                utils.log(type(section))
-                utils.log(type(section_limit))
-                
+                section  = suggested[i]
                 entities = Entity.fast_id_dedupe(section['entities'], seen)
                 entities = entities[:section_limit]
                 
@@ -102,7 +95,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    #@lru_cache(maxsize=8)
+    @lru_cache(maxsize=8)
     #@memcached_function(time=2*24*60*60)
     def _getGlobalSuggestedEntities(self, coords, category, subcategory):
         """
