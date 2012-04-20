@@ -18,7 +18,7 @@ try:
     import libs.Memcache
     import tasks.APITasks
     
-    from datetime               import datetime
+    from datetime               import datetime, timedelta
     from auth                   import convertPasswordForStorage
     from utils                  import lazyProperty
     from functools              import wraps
@@ -2543,7 +2543,6 @@ class StampedAPI(AStampedAPI):
         if len(result) >= 10 and userSlice.before is not None:
             try:
                 before = datetime.utcfromtimestamp(int(userSlice.before))
-                from datetime import timedelta
                 import calendar
                 modified = result[-1].timestamp.modified
                 if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
@@ -2813,37 +2812,52 @@ class StampedAPI(AStampedAPI):
 
         # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
 
+        group                   = False
+        groupRange              = None
+        requireReceipient       = False
+
         objects = ActivityObjectIds()
 
         if verb == 'follow':
             objects.user_ids        = [ kwargs['friendId'] ] 
-
-        elif verb == 'like':
-            objects.stamp_ids       = [ kwargs['stampId'] ] 
+            group                   = True
+            groupRange              = timedelta(days=1)
 
         elif verb == 'restamp':
             objects.user_ids        = kwargs['recipientIds']
             objects.stamp_ids       = [ kwargs['stampId'] ] 
 
+        elif verb == 'like':
+            objects.stamp_ids       = [ kwargs['stampId'] ] 
+            group                   = True
+
         elif verb == 'todo':
             objects.user_ids        = [ kwargs['friendId'] ]
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.entity_ids      = [ kwargs['entityId'] ] # Is this necessary? Do we require stamps?
+            group                   = True
 
-        elif verb == 'comment' or verb == 'reply':
+        elif verb == 'comment':
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.comment_ids     = [ kwargs['commentId'] ]
 
-        elif verb == 'mention':
-            ### TODO: Add check if block exists
+        elif verb == 'reply':
             objects.stamp_ids       = [ kwargs['stampId'] ]
+            objects.comment_ids     = [ kwargs['commentId'] ]
+            requireReceipient       = True
+
+        elif verb == 'mention':
+            objects.stamp_ids       = [ kwargs['stampId'] ] # TODO: Add check if block exists
             if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
+            requireReceipient       = True
 
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
+            requireReceipient       = True
 
         elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+            requireReceipient       = True
             pass
 
         else:
@@ -2859,65 +2873,22 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
+        if requireReceipient and len(recipientIds) == 0:
+            raise Exception("Missing recipient")
+
         # Save activity
         self._activityDB.addActivity(verb           = verb, 
                                      subject        = userId, 
                                      objects        = objects, 
                                      recipientIds   = recipientIds, 
                                      benefit        = benefit,
+                                     group          = group,
+                                     groupRange     = groupRange,
                                      sendAlert      = sendAlert)
 
         # Increment unread news for all recipients
         if len(recipientIds) > 0:
             self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
-
-    """
-    def _addActivityOld(self, genre, user_id, recipient_ids, **kwargs):
-        if not self._activity or len(recipient_ids) <= 0:
-            return
-        
-        sendAlert                   = kwargs.pop('sendAlert', True)
-        checkExists                 = kwargs.pop('checkExists', False)
-        
-        activity                    = ActivityObject()
-        activity.genre              = genre
-        activity.user_id            = user_id
-        activity.timestamp.created  = datetime.utcnow()
-        
-        for k, v in kwargs.iteritems():
-            activity[k] = v
-        
-        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
-                                     checkExists=checkExists)
-        
-        # increment unread news for all recipients
-        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
-    
-    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
-        raise NotImplementedError
-        mentionedUserIds = set()
-        
-        if self._activity == True and mentions is not None and len(mentions) > 0:
-            # Note: No activity should be generated for the user initiating the mention
-            for mention in mentions:
-                if 'user_id' in mention and mention.user_id != authUserId and \
-                    (ignore is None or mention.user_id not in ignore):
-                    # Check if block exists between user and mentioned user
-                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
-                    
-                    if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.add(mention['user_id'])
-            
-            self._addActivity(genre='mention', 
-                              user_id=authUserId, 
-                              recipient_ids=mentionedUserIds, 
-                              **kwargs)
-            
-            # Increment mentions metric
-            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
-        
-        return mentionedUserIds
-    """
     
     @API_CALL
     def getActivity(self, authUserId, **kwargs):

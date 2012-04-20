@@ -9,6 +9,7 @@ import Globals, utils, logs, pymongo
 
 from AMongoCollection import AMongoCollection
 from Schemas import *
+from datetime import datetime
 
 class MongoActivityItemCollection(AMongoCollection):
     
@@ -23,9 +24,15 @@ class MongoActivityItemCollection(AMongoCollection):
     def addActivityItem(self, activity):
         return self._addObject(activity)
 
-    def addSubjectToActivityItem(self, activityId, subjectId):
+    def addSubjectToActivityItem(self, activityId, subjectId, modified=None):
+        if modified is None:
+            modified = datetime.utcnow()
         documentId = self._getObjectIdFromString(activityId)
-        result = self._collection.update({'_id': documentId}, {'$addToSet': {'subjects': subjectId}})
+        update = { 
+            '$addToSet' : { 'subjects' : subjectId }, 
+            '$set'      : { 'timestamp.modified': modified } 
+        }
+        result = self._collection.update({'_id': documentId}, update)
         return result
 
     def setBenefitForActivityItem(self, activityId, benefit):
@@ -84,6 +91,11 @@ class MongoActivityItemCollection(AMongoCollection):
         for k, v in objects.iteritems():
             if len(v) > 0:
                 query['objects.%s' % k] = { '$in' : v }
+
+        # Timestamp
+        since = kwargs.pop('since', None)
+        if since is not None:
+            query['timestamp.created'] = { '$gte' : since }
 
         documents = self._collection.find(query, fields={'_id' : 1})
 

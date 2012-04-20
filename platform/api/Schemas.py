@@ -495,7 +495,7 @@ class Activity(Schema):
             userList = []
             for user in users:
                 if authUserId == user.user_id:
-                    user = User(user.value)
+                    user = UserMini(user.value)
                     user.screen_name = 'you'
                     userList.insert(0, user)
                 else:
@@ -507,7 +507,12 @@ class Activity(Schema):
                 return None, []
 
             if len(userList) == 1:
-                return unicode(userList[0].screen_name), []
+                text = unicode(userList[0].screen_name)
+                # refs = [{ 
+                #     'indices'   : [0, len(text)],
+                #     'action'    : 'stamped_view_user',
+                # }]
+                return text, []
 
             if len(userList) == 2:
                 return unicode('%s and %s' % (userList[0].screen_name, userList[1].screen_name)), []
@@ -557,38 +562,45 @@ class Activity(Schema):
             raise Exception("Too many comments! \n%s" % comments)
 
         if self.verb == 'follow':
+            result.icon = 'news_follow'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
             result.body = '%s is now following %s.' % (subjects, userObjects)
 
         elif self.verb == 'like':
+            result.icon = 'news_like'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             stampObjects, stampObjectReferences = _formatStampObjects(result.objects.stamps)
             result.body = '%s liked %s.' % (subjects, stampObjects)
 
         elif self.verb == 'restamp':
+            result.icon = 'news_credit'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
             result.body = '%s gave %s credit.' % (subjects, userObjects)
 
         elif self.verb == 'todo':
+            result.icon = 'news_todo'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             entityObjects, entityObjectReferences = _formatEntityObjects(result.objects.entities)
             result.body = '%s added %s as a to-do.' % (subjects, entityObjects)
 
         elif self.verb == 'comment':
+            result.icon = 'news_comment'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
             result.header = 'Comment on %s' % result.objects.stamps[0].entity.title 
             result.body = '%s.' % commentObjects
 
         elif self.verb == 'reply':
+            result.icon = 'news_reply'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
             result.header = 'Reply on %s' % result.objects.stamps[0].entity.title 
             result.body = '%s.' % commentObjects
 
         elif self.verb == 'mention':
+            result.icon = 'news_mention'
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments, required=False)
             stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(result.objects.stamps, required=False)

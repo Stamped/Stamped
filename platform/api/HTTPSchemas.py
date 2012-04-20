@@ -1970,6 +1970,9 @@ class HTTPActivity(Schema):
 
             self.created = schema.timestamp.created
 
+            if self.icon is not None:
+                self.icon = _getIconURL(self.icon)
+
             for user in schema.subjects:
                 self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
 

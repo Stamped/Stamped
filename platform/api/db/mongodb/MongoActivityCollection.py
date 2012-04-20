@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, logs, copy, pymongo
 
-from datetime                           import datetime
+from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from Schemas                            import *
 
@@ -84,8 +84,12 @@ class MongoActivityCollection(AActivityDB):
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)
+
         sendAlert       = kwargs.pop('sendAlert', True)
         recipientIds    = kwargs.pop('recipientIds', [])
+        group           = kwargs.pop('group', False)
+        groupRange      = kwargs.pop('groupRange', None)
+
         now             = datetime.utcnow()
         alerts          = []
         sentTo          = set()
@@ -95,25 +99,9 @@ class MongoActivityCollection(AActivityDB):
         except Exception:
             pass
 
-        try:
-            params = {
-                'verb'      : verb,
-                'objects'   : objects,
-            }
-            activityIds = self.activity_items_collection.getActivityIds(**params)
-            if len(activityIds) == 0:
-                raise Exception
+        activityId      = None
 
-            if len(activityIds) > 1:
-                logs.warning('WARNING: matched multiple activityIds for verb (%s) and objects (%s)' % (verb, objects))
-
-            activityId = activityIds[0]
-
-            self.activity_items_collection.addSubjectToActivityItem(activityId, subject)
-            if benefit is not None:
-                self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
-
-        except Exception:
+        def _buildActivity():
             activity        = Activity()
             activity.verb   = verb
             if subject is not None:
@@ -124,9 +112,42 @@ class MongoActivityCollection(AActivityDB):
                 activity.benefit = benefit
             activity.timestamp.created  = now
             activity.timestamp.modified = now
+            return activity
 
-            activity = self.activity_items_collection.addActivityItem(activity)
-            activityId = activity.activity_id
+        # Insert the activity item individually
+        if not group:
+            activity    = _buildActivity()
+            activity    = self.activity_items_collection.addActivityItem(activity)
+            activityId  = activity.activity_id
+
+        # Insert the activity item as a group
+        else:
+            params = {
+                'verb'      : verb,
+                'objects'   : objects,
+            }
+
+            if groupRange is not None:
+                # Add time constraint
+                params['since'] = datetime.utcnow() - groupRange
+
+            activityIds = self.activity_items_collection.getActivityIds(**params)
+
+            # Look for activity items
+            if len(activityIds) > 0:
+                if len(activityIds) > 1:
+                    logs.warning('WARNING: matched multiple activityIds for verb (%s) & objects (%s)' % (verb, objects))
+                
+                activityId = activityIds[0]
+                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=now)
+                if benefit is not None:
+                    self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
+
+            # Insert new item
+            else:
+                activity    = _buildActivity()
+                activity    = self.activity_items_collection.addActivityItem(activity)
+                activityId  = activity.activity_id
         
         for recipientId in recipientIds:
             if recipientId in sentTo:
