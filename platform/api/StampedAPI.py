@@ -2912,6 +2912,7 @@ class StampedAPI(AStampedAPI):
         
         distance = kwargs.pop('distance', 0)
         if distance > 0:
+            personal = False
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
@@ -2919,6 +2920,7 @@ class StampedAPI(AStampedAPI):
                 item.subjects = list(set(item.subjects.value).intersection(set(friends)))
                 activityData.append(item)
         else:
+            personal = True
             activityData = self._activityDB.getActivity(authUserId, **params)
         
         # Append user objects
@@ -2979,7 +2981,8 @@ class StampedAPI(AStampedAPI):
                                             users       = userIds, 
                                             stamps      = stampIds, 
                                             entities    = entityIds, 
-                                            comments    = commentIds))
+                                            comments    = commentIds,
+                                            personal    = personal))
 
             except Exception as e:
                 logs.warning('Activity enrichment failed: %s' % e)
