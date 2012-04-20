@@ -460,6 +460,7 @@ class Activity(Schema):
         stamps      = kwargs.pop('stamps', {})
         entities    = kwargs.pop('entities', {})
         comments    = kwargs.pop('comments', {})
+        authUserId  = kwargs.pop('authUserId', None)
 
         result              = EnrichedActivity()
         result.activity_id  = self.activity_id
@@ -486,23 +487,31 @@ class Activity(Schema):
         ### TODO: Image, icon, references, header, body, footer
 
         # result.header       = 'TEST HEADER' 
-        result.body         = 'TEST BODY'
+        # result.body         = 'TEST BODY'
         # result.footer       = self.footer 
 
         def _formatUserObjects(users, required=True):
             # Return string and references
-            if len(users) == 0:
+            userList = []
+            for user in users:
+                if authUserId == user.user_id:
+                    user.screen_name = 'you'
+                    userList.insert(0, user)
+                else:
+                    userList.append(user)
+
+            if len(userList) == 0:
                 if required:
                     raise Exception("No user objects!")
                 return None, []
 
-            if len(users) == 1:
-                return unicode(users[0].screen_name), []
+            if len(userList) == 1:
+                return unicode(userList[0].screen_name), []
 
-            if len(users) == 2:
-                return unicode('%s and %s' % (users[0].screen_name, users[1].screen_name)), []
+            if len(userList) == 2:
+                return unicode('%s and %s' % (userList[0].screen_name, userList[1].screen_name)), []
 
-            return unicode('%s and %s others' % (users[0].screen_name, len(users) - 1)), []
+            return unicode('%s and %s others' % (userList[0].screen_name, len(userList) - 1)), []
 
         def _formatStampObjects(stamps, required=True):
             # Return string and references

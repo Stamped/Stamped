@@ -3004,7 +3004,11 @@ class StampedAPI(AStampedAPI):
                 if item.verb in ['invite_received', 'invite_sent']:
                     continue
 
-                activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds, comments=commentIds))
+                activity.append(item.enrich(authUserId  = authUserId,
+                                            users       = userIds, 
+                                            stamps      = stampIds, 
+                                            entities    = entityIds, 
+                                            comments    = commentIds))
 
             except Exception as e:
                 logs.warning('Activity enrichment failed: %s' % e)
