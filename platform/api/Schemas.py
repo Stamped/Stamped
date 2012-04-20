@@ -568,7 +568,8 @@ class Activity(Schema):
 
         elif self.verb == 'restamp':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
-            result.body = '%s gave you credit.' % subjects
+            userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
+            result.body = '%s gave %s credit.' % (subjects, userObjects)
 
         elif self.verb == 'todo':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
