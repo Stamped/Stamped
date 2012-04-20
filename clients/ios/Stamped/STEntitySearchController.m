@@ -16,6 +16,7 @@
 #import "STButton.h"
 #import "STStampedAPI.h"
 #import "EntityDetailViewController.h"
+#import "STEntitySearchSection.h"
 
 @interface STEntitySearchTableViewCell : UITableViewCell
 
@@ -51,7 +52,7 @@
 
 @property (nonatomic, readonly, retain) NSString* category;
 @property (nonatomic, readonly, retain) NSString* initialQuery;
-@property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* suggestedResults;
+@property (nonatomic, readwrite, retain) NSArray<STEntitySearchSection>* suggestedSections;
 @property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* searchResults;
 @property (nonatomic, readwrite, retain) UITableView* tableView;
 
@@ -61,7 +62,7 @@
 
 @synthesize category = category_;
 @synthesize initialQuery = initialQuery_;
-@synthesize suggestedResults = suggestedResults_;
+@synthesize suggestedSections = suggestedSections_;
 @synthesize searchResults = searchResults_;
 @synthesize tableView = tableView_;
 
@@ -75,10 +76,17 @@
     initialQuery_ = [query retain];
     STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
     suggested.category = category;
-    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
+    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error) {
       NSLog(@"here:%@,%@",error,results);
-      for (id<STEntitySearchResult> result in results) {
-        NSLog(@"%@", result.title);
+      if (results) {
+        for (id<STEntitySearchSection> section in results) {
+          NSLog(@"%@", section.name);
+          for (id<STEntitySearchResult> result in section.entities) {
+            NSLog(@"result:%@", result.title);
+          }
+        }
+        self.suggestedSections = results;
+        [self.tableView reloadData];
       }
     }];
   }
@@ -166,23 +174,56 @@
   if (self.searchResults) {
     return self.searchResults.count;
   }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+    return sectionObject.entities.count;
+  }
   return 0;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  return 1;
+  if (self.searchResults) {
+    return 1;
+  }
+  else if (self.suggestedSections) {
+    return self.suggestedSections.count;
+  }
+  else {
+    return 1;
+  }
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
-  return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+  id<STEntitySearchResult> result;
+  if (self.searchResults) {
+    result = [self.searchResults objectAtIndex:indexPath.row];
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+    result = [section.entities objectAtIndex:indexPath.row];
+  }
+  if (result) {
+    return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+  }
+  else {
+    return nil;
+  }
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
-  EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
-  [[Util sharedNavigationController] pushViewController:controller animated:YES];
-  NSLog(@"Chose %@, %@", result.title, result.searchID);
+  id<STEntitySearchResult> result;
+  if (self.searchResults) {
+    result = [self.searchResults objectAtIndex:indexPath.row];
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+    result = [section.entities objectAtIndex:indexPath.row];
+  }
+  if (result) {
+    EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    NSLog(@"Chose %@, %@", result.title, result.searchID);
+  }
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
@@ -201,6 +242,16 @@
       }
     }];
   }
+}
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+  if (self.searchResults) {
+    return nil;
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+    return sectionObject.name;
+  }
+  return nil;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {

@@ -22,6 +22,7 @@
 #import "AccountManager.h"
 #import "SearchResult.h"
 #import "STNavigationBar.h"
+#import "STDebug.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -72,7 +73,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #endif
   RKLogConfigureByName("RestKit*", RKLogLevelError);
   RKLogSetAppLoggingLevel(RKLogLevelError);
-  NSLog(@"testing");
   [self customizeAppearance];
   [self performRestKitMappings];
   self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
@@ -85,6 +85,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[AccountManager sharedManager] authenticate];
   [_navigationController pushViewController:[STInboxViewController sharedInstance] animated:NO];
   [self.window makeKeyAndVisible];
+  STLog(@"Finished Loading application");
   return YES;
 }
 

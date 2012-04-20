@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STStampedParameter.h"
 
-@interface STEntitySearch : NSObject
+@interface STEntitySearch : STStampedParameter
 
 @property (nonatomic, readwrite, copy) NSString* query;
 @property (nonatomic, readwrite, copy) NSString* coordinates;
@@ -16,9 +17,5 @@
 @property (nonatomic, readwrite, copy) NSString* subcategory;
 @property (nonatomic, readwrite, copy) NSNumber* local;
 @property (nonatomic, readwrite, copy) NSNumber* page;
-
-- (NSMutableDictionary*)asDictionaryParams;
-
-- (void)importDictionaryParams:(NSDictionary*)params;
 
 @end

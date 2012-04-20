@@ -24,6 +24,7 @@
 #import "STSearchField.h"
 #import "STFriendsSource.h"
 #import "STEntitySearchController.h"
+#import "STYouSource.h"
 
 @interface STInboxCategoryFilterView : UIView
 
@@ -233,7 +234,7 @@ static STInboxViewController* _sharedInstance;
   self.scope = STStampedAPIScopeFriends;
   _inboxSources = [[NSDictionary dictionaryWithObjectsAndKeys:
                     [[[STFriendsSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriends],
-                    [[[STUserSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeYou],
+                    [[[STYouSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeYou],
                     [[[STFriendsOfFriendsSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeFriendsOfFriends],
                     [[[STSuggestedSource alloc] init] autorelease], [NSNumber numberWithInt:STStampedAPIScopeEveryone],
                     nil] retain];

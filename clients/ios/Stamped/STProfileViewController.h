@@ -6,8 +6,10 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STContainerViewController.h"
+#import "STTableViewController.h"
 
-@interface STProfileViewController : STContainerViewController
+@interface STProfileViewController : STTableViewController
+
+- (id)initWithUserID:(NSString*)userID;
 
 @end

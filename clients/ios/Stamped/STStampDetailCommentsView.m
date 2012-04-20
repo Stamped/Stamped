@@ -20,6 +20,7 @@
 #import "AccountManager.h"
 #import "STStampedAPI.h"
 #import "STRippleBar.h"
+#import "STProfileViewController.h"
 
 static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
@@ -59,9 +60,16 @@ static const CGFloat _imagePaddingY = _imagePaddingX;
     STImageView* imageView = [[[STImageView alloc] initWithFrame:CGRectMake(_imagePaddingX, _imagePaddingY, size, size)] autorelease];
     imageView.imageURL = [Util profileImageURLForUser:user withSize:STProfileImageSize31];
     [self addSubview:imageView];
+    UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:user];
+    [self addSubview:imageButton];
     _userImage = [imageView retain];
   }
   return self;
+}
+
+- (void)userImageClicked:(id<STUser>)user {
+  STProfileViewController* controller = [[[STProfileViewController alloc] initWithUserID:user.userID] autorelease];
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
 - (void)dealloc

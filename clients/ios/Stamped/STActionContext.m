@@ -12,6 +12,7 @@
 @implementation STActionContext
 
 @synthesize entityDetail = _entityDetail;
+@synthesize entity = _entity;
 @synthesize frame = _frame;
 @synthesize stamp = _stamp;
 @synthesize user = _user;

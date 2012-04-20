@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "STAction.h"
 
-@protocol STActivityRange <NSObject>
+@protocol STActivityReference <NSObject>
 
 @property (nonatomic, readonly, copy) NSArray* indices;
 @property (nonatomic, readonly, copy) id<STAction> action;

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STActivityRange.h"
+#import "STActivityReference.h"
 #import "STActivityObjects.h"
 
 @protocol STActivity <NSObject>
@@ -24,9 +24,10 @@
 @property (nonatomic, readonly, copy) NSArray<STUser>* subjects;
 @property (nonatomic, readonly, copy) NSString* verb;
 @property (nonatomic, readonly, retain) id<STActivityObjects> objects;
+@property (nonatomic, readonly, retain) id<STAction> action;
 
-@property (nonatomic, readonly, retain) id<STActivityRange> headerReferences;
-@property (nonatomic, readonly, retain) id<STActivityRange> bodyReferences;
-@property (nonatomic, readonly, retain) id<STActivityRange> footnoteReferences;
+@property (nonatomic, readonly, retain) id<STActivityReference> headerReferences;
+@property (nonatomic, readonly, retain) id<STActivityReference> bodyReferences;
+@property (nonatomic, readonly, retain) id<STActivityReference> footerReferences;
 
 @end

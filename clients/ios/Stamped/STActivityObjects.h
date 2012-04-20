@@ -14,9 +14,9 @@
 
 @protocol STActivityObjects <NSObject>
 
-@property (nonatomic, readonly, copy) NSArray<STStamp> stamps;
-@property (nonatomic, readonly, copy) NSArray<STEntity> entities;
-@property (nonatomic, readonly, copy) NSArray<STUser> users;
-@property (nonatomic, readonly, copy) NSArray<STComment> comments;
+@property (nonatomic, readonly, copy) NSArray<STStamp>* stamps;
+@property (nonatomic, readonly, copy) NSArray<STEntity>* entities;
+@property (nonatomic, readonly, copy) NSArray<STUser>* users;
+@property (nonatomic, readonly, copy) NSArray<STComment>* comments;
 
 @end

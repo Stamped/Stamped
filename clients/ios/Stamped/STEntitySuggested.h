@@ -7,16 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STStampedParameter.h"
 
-@interface STEntitySuggested : NSObject
+@interface STEntitySuggested : STStampedParameter
 
 @property (nonatomic, readwrite, copy) NSString* coordinates;
 @property (nonatomic, readwrite, copy) NSString* category;
 @property (nonatomic, readwrite, copy) NSString* subcategory;
 @property (nonatomic, readwrite, copy) NSNumber* limit;
-
-- (NSMutableDictionary*)asDictionaryParams;
-
-- (void)importDictionaryParams:(NSDictionary*)params;
 
 @end

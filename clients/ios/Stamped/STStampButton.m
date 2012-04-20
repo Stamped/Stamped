@@ -8,6 +8,7 @@
 
 #import "STStampButton.h"
 #import "Util.h"
+#import "STCreateStampViewController.h"
 
 @interface STStampButton ()
 
@@ -46,11 +47,9 @@
 
 - (void)defaultHandler:(id)myself {
   if (self.entity) {
-    /*
     UINavigationController* controller = [Util sharedNavigationController];
-    UIViewController* createStamp = [[[STCreateStampViewController alloc] initWithEntity:self.entity creditedTo:self.user] autorelease];
+    UIViewController* createStamp = [[[STCreateStampViewController alloc] initWithEntity:self.entity] autorelease];
     [controller pushViewController:createStamp animated:YES];
-     */
   }
 }
 

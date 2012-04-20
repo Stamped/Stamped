@@ -14,6 +14,8 @@
 #import "STInboxViewController.h"
 #import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
+#import "STTodoViewController.h"
+#import "STDebugViewController.h"
 
 @interface STRootMenuView ()
 
@@ -168,11 +170,13 @@ static STRootMenuView* _sharedInstance;
     NSDictionary* navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [STInboxViewController sharedInstance], @"Stamps",
                                 [[[STUniversalNewsController alloc] init] autorelease], @"News",
+                                [STTodoViewController sharedInstance], @"To-Do",
+                                [[[STDebugViewController alloc] init] autorelease], @"Debug",
                                 //[[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
                                 //[[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
                                 [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
                                 nil];
-    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"Settings", nil];
+    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"To-Do", @"Debug", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
       UIViewController* controller = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];

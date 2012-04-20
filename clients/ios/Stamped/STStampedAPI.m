@@ -19,6 +19,9 @@
 #import "AccountManager.h"
 #import "STSimpleUserDetail.h"
 #import "STSimpleStampedBy.h"
+#import "STSimpleEntitySearchResult.h"
+#import "STSimpleEntitySearchSection.h"
+#import "STSimpleActivity.h"
 
 @interface STStampedAPI () <STCacheModelSourceDelegate>
 
@@ -125,6 +128,17 @@ static STStampedAPI* _sharedInstance;
                                         }];
 }
 
+- (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block {
+  NSString* path = @"/stamps/create.json";
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                               post:YES
+                                             params:stampNew.asDictionaryParams
+                                            mapping:[STSimpleStamp mapping]
+                                        andCallback:^(id stamp, NSError* error) {
+                                          block(stamp, error);
+                                        }];
+}
+
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block {
   NSString* path = @"/stamps/remove.json";
   NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
@@ -137,14 +151,14 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
-                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block {
+                            andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error))block {
   NSString* path = @"/entities/suggested.json";
   [[STRestKitLoader sharedInstance] loadWithPath:path 
                                             post:NO 
                                           params:entitySuggested.asDictionaryParams 
-                                         mapping:[STSimpleEntitySearchResult mapping] 
+                                         mapping:[STSimpleEntitySearchSection mapping] 
                                      andCallback:^(NSArray* array, NSError* error) {
-                                       block((NSArray<STEntitySearchResult>*)array, error);
+                                       block((NSArray<STEntitySearchSection>*)array, error);
                                      }];
 }
 
@@ -174,6 +188,14 @@ static STStampedAPI* _sharedInstance;
   }];
 }
 
+- (void)userDetailsForUserIDs:(NSArray*)userIDs andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error))block {
+  NSString* path = @"/users/lookup.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userIDs forKey:@"user_ids"];
+  [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleUserDetail mapping] andCallback:^(NSArray* array, NSError* error) {
+    block((NSArray<STUserDetail>*)array, error);
+  }];
+}
+
 - (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block {
   NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithEntityId:entityID andCallbackBlock:^(id<STEntityDetail> detail) {
     if (detail) {
@@ -189,6 +211,19 @@ static STStampedAPI* _sharedInstance;
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block{
   NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithSearchId:searchID andCallbackBlock:block];
   [Util runOperationAsynchronously:operation];
+}
+
+- (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
+                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
+  NSString* path = @"/activity/friends.json";
+
+  [[STRestKitLoader sharedInstance] loadWithPath:path 
+                                            post:NO
+                                          params:slice.asDictionaryParams
+                                         mapping:[STSimpleActivity mapping]
+                                     andCallback:^(NSArray* array, NSError* error) {
+                                       block((NSArray<STActivity>*)array, error);
+                                     }];
 }
 
 - (void)menuForEntityID:(NSString*)entityID andCallback:(void(^)(id<STMenu>))block {
@@ -250,6 +285,19 @@ static STStampedAPI* _sharedInstance;
                                         }];
 }
 
+
+- (void)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
+                            andCallback:(void(^)(NSArray<STTodo>*,NSError*))block {
+  NSString* path = @"/favorites/show.json";
+  [[STRestKitLoader sharedInstance] loadWithPath:path
+                                            post:NO
+                                          params:slice.asDictionaryParams
+                                         mapping:[STSimpleTodo mapping]
+                                     andCallback:^(NSArray* results, NSError* error) {
+                                       block((NSArray<STTodo>*)results,error);
+                                     }];
+}
+
 - (void)isTododWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block {
   
 }
@@ -274,7 +322,6 @@ static STStampedAPI* _sharedInstance;
     block(stamp, error);
   }];
 }
-
 
 - (void)objectForCache:(STCacheModelSource*)cache withKey:(NSString*)key andCurrentObject:(id)object withCallback:(void(^)(id))block {
   if (cache == self.menuCache) {
