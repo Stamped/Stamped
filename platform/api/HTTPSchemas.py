@@ -1985,6 +1985,68 @@ class HTTPActivity(Schema):
             for comment in schema.objects.comments:
                 self.objects.comments.append(HTTPComment().importSchema(comment).value)
 
+            def _buildStampAction(stamp):
+                source              = HTTPActionSource()
+                source.name         = 'View %s' % stamp.entity.title
+                source.source       = 'stamped'
+                source.source_id    = stamp.stamp_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_stamp'
+                action.name         = 'View %s' % stamp.entity.title
+                action.sources      = [ source ]
+
+                return action
+
+            def _buildEntityAction(entity):
+                source              = HTTPActionSource()
+                source.name         = 'View %s' % entity.title
+                source.source       = 'stamped'
+                source.source_id    = entity.entity_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_entity'
+                action.name         = 'View %s' % entity.title
+                action.sources      = [ source ]
+
+                return action
+
+            def _buildUserAction(user):
+                source              = HTTPActionSource()
+                source.name         = 'View profile'
+                source.source       = 'stamped'
+                source.source_id    = user.user_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_user'
+                action.name         = 'View profile'
+                action.sources      = [ source ]
+
+                return action
+
+            if self.verb in set(['comment', 'reply', 'mention', 'restamp', 'like']):
+                try:
+                    self.action = _buildStampAction(self.objects.stamps[0])
+                except Exception as e:
+                    logs.warning('Unable to build action for stamp: %s' % e)
+
+            elif self.verb == 'todo':
+                try:
+                    if len(self.objects.stamps) > 0:
+                        self.action = _buildStampAction(self.objects.stamps[0])
+                    else:
+                        self.action = _buildEntityAction(self.objects.entities[0])
+                except Exception as e:
+                    logs.warning('Unable to build action: %s' % e)
+
+            elif self.verb in set(['follow', 'suggest_friend', 'twitter_friend', 'facebook_friend']):
+                try:
+                    self.action = _buildUserAction(self.objects.users[0])
+                except Exception as e:
+                    logs.warning('Unable to build action for user: %s' % e)
+
+
+
         else:
             raise NotImplementedError
         return self
