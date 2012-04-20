@@ -48,6 +48,12 @@ class MongoActivityItemCollection(AMongoCollection):
         result = self._collection.update({'_id': documentId}, {'$pullAll': {'subjects': subjectId}})
         return result
 
+    def removeSubjectFromActivityItems(self, activityIds, subjectId):
+        documentIds = map(self._getObjectIdFromString, activityIds)
+        self._collection.update({'_id': {'$in': documentIds}}, {'$pullAll': {'subjects': subjectId}})
+        emptyIds = self._collection.find({'_id': {'$in': documentIds}, 'subjects': []}, fields={'_id' : 1})
+        return map(self._convertFromMongo, emptyIds)
+
     def getActivityItem(self, activityId):
         documentId = self._getObjectIdFromString(activityId)
         document = self._getMongoDocumentFromId(documentId)

@@ -1698,7 +1698,7 @@ class StampedAPI(AStampedAPI):
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
         tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
-        
+
         return stamp
     
     @API_CALL
@@ -2136,10 +2136,6 @@ class StampedAPI(AStampedAPI):
         stamp   = self._stampDB.getStamp(stampId)
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
         
-        # Add activity for mentioned users
-
-
-
         # Add activity for mentioned users
         mentionedUserIds = set()
         for item in comment.mentions:
@@ -2730,7 +2726,7 @@ class StampedAPI(AStampedAPI):
             favorite.stamp.is_fav = False
             
             # Remove activity
-            self._activityDB.removeActivity('favorite', authUserId, stampId=stamp.stamp_id)
+            self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
         
         return favorite
     
@@ -2815,7 +2811,7 @@ class StampedAPI(AStampedAPI):
         if not self._activity:
             return
 
-        logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
+        # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
 
         objects = ActivityObjectIds()
 
@@ -2841,7 +2837,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'mention':
             ### TODO: Add check if block exists
             objects.stamp_ids       = [ kwargs['stampId'] ]
-            if commentId in kwargs and kwargs['commentId'] is not None:
+            if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
 
         elif verb == 'invite':

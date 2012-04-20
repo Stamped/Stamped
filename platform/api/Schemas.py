@@ -494,7 +494,7 @@ class Activity(Schema):
             if len(users) == 0:
                 if required:
                     raise Exception("No user objects!")
-                return None
+                return None, []
 
             if len(users) == 1:
                 return unicode(users[0].screen_name), []
@@ -506,8 +506,10 @@ class Activity(Schema):
 
         def _formatStampObjects(stamps, required=True):
             # Return string and references
-            if len(stamps) == 0 and required:
-                raise Exception("No stamp objects!")
+            if len(stamps) == 0:
+                if required:
+                    raise Exception("No stamp objects!")
+                return None, []
 
             if len(stamps) == 1:
                 return unicode(stamps[0].entity.title), []
@@ -522,7 +524,7 @@ class Activity(Schema):
             if len(entities) == 0:
                 if required:
                     raise Exception("No entity objects!")
-                return None
+                return None, []
 
             if len(entities) == 1:
                 return unicode(entities[0].title), []
@@ -534,8 +536,10 @@ class Activity(Schema):
 
         def _formatCommentObjects(comments, required=True):
             # Return string and references
-            if len(comments) == 0 and required:
-                raise Exception("No comment objects!")
+            if len(comments) == 0:
+                if required:
+                    raise Exception("No comment objects!")
+                return None, []
 
             if len(comments) == 1:
                 return unicode('%s: %s' % (comments[0].user.screen_name, comments[0].blurb)), []
@@ -564,20 +568,20 @@ class Activity(Schema):
         elif self.verb == 'comment':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
-            result.header = 'Comment on %s' % self.objects.stamps[0].entity.title 
+            result.header = 'Comment on %s' % result.objects.stamps[0].entity.title 
             result.body = '%s.' % commentObjects
 
         elif self.verb == 'reply':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
-            result.header = 'Reply on %s' % self.objects.stamps[0].entity.title 
+            result.header = 'Reply on %s' % result.objects.stamps[0].entity.title 
             result.body = '%s.' % commentObjects
 
         elif self.verb == 'mention':
             subjects, subjectReferences = _formatUserObjects(result.subjects)
             commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments, required=False)
             stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(result.objects.stamps, required=False)
-            result.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
+            result.header = 'Mention on %s' % result.objects.stamps[0].entity.title 
             if commentObjects is not None:
                 result.body = '%s.' % commentObjects
             else:

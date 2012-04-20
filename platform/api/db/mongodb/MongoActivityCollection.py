@@ -152,26 +152,29 @@ class MongoActivityCollection(AActivityDB):
             self.alerts_collection.addAlerts(alerts)
 
     def _removeActivityIds(self, activityIds):
-        logs.info('Remove activity ids: %s' % activityIds)
         self.activity_links_collection.removeActivityLinks(activityIds)
         self.activity_items_collection.removeActivityItems(activityIds)
+
+    def _removeSubject(self, activityIds, subjectId):
+        toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
+        self._removeActivityIds(toRemove)
 
     def removeActivity(self, verb, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
         friendId    = kwargs.pop('friendId', None)
 
-        if verb in ['like', 'favorite'] and stampId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, stampId=stampId, verb=verb)
-            self._removeActivityIds(activityIds)
+        if verb in ['like', 'todo'] and stampId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, stampId=stampId)
+            self._removeSubject(activityIds, userId)
 
         if verb in ['follower', 'friend'] and friendId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, friendId=friendId, verb=verb)
-            self._removeActivityIds(activityIds)
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, friendId=friendId)
+            self._removeSubject(activityIds, userId)
 
         if verb in ['comment'] and commentId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, commentId=commentId, verb=verb)
-            self._removeActivityIds(activityIds)
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, commentId=commentId)
+            self._removeSubject(activityIds, userId)
     
     def removeActivityForStamp(self, stampId):
         activityIds = self.activity_items_collection.getActivityIds(stampId=stampId)
@@ -179,5 +182,5 @@ class MongoActivityCollection(AActivityDB):
     
     def removeUserActivity(self, userId):
         activityIds = self.activity_items_collection.getActivityIds(userId=userId)
-        self._removeActivityIds(activityIds)
+        self._removeSubject(activityIds, userId)
 
