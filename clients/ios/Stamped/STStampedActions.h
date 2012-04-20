@@ -13,6 +13,9 @@
 
 + (STStampedActions*)sharedInstance;
 
+- (void)viewStampWithStampID:(NSString*)stampID;
+- (void)viewUserWithUserID:(NSString*)userID;
+
 + (id<STAction>)actionViewEntity:(NSString*)entityID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionViewStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionViewUser:(NSString*)userID withOutputContext:(STActionContext*)context;

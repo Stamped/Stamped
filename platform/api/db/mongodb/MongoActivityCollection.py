@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, logs, copy, pymongo
 
-from datetime                           import datetime
+from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from Schemas                            import *
 
@@ -83,8 +83,13 @@ class MongoActivityCollection(AActivityDB):
     def addActivity(self, verb, **kwargs):
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
+        benefit         = kwargs.pop('benefit', None)
+
         sendAlert       = kwargs.pop('sendAlert', True)
         recipientIds    = kwargs.pop('recipientIds', [])
+        group           = kwargs.pop('group', False)
+        groupRange      = kwargs.pop('groupRange', None)
+
         now             = datetime.utcnow()
         alerts          = []
         sentTo          = set()
@@ -94,34 +99,55 @@ class MongoActivityCollection(AActivityDB):
         except Exception:
             pass
 
-        try:
-            params = {
-                'verb'      : verb,
-                'objects'   : objects,
-            }
-            activityIds = self.activity_items_collection.getActivityIds(**params)
-            if len(activityIds) == 0:
-                raise Exception
+        activityId      = None
 
-            if len(activityIds) > 1:
-                logs.warning('WARNING: matched multiple activityIds for verb (%s) and objects (%s)' % (verb, objects))
-
-            activityId = activityIds[0]
-
-            self.activity_items_collection.addSubjectToActivityItem(activityId, subject)
-
-        except Exception:
+        def _buildActivity():
             activity        = Activity()
             activity.verb   = verb
             if subject is not None:
                 activity.subjects = [ subject ]
             if len(objects) > 0:
                 activity.objects = ActivityObjectIds(objects)
+            if benefit is not None:
+                activity.benefit = benefit
             activity.timestamp.created  = now
             activity.timestamp.modified = now
+            return activity
 
-            activity = self.activity_items_collection.addActivityItem(activity)
-            activityId = activity.activity_id
+        # Insert the activity item individually
+        if not group:
+            activity    = _buildActivity()
+            activity    = self.activity_items_collection.addActivityItem(activity)
+            activityId  = activity.activity_id
+
+        # Insert the activity item as a group
+        else:
+            params = {
+                'verb'      : verb,
+                'objects'   : objects,
+            }
+
+            if groupRange is not None:
+                # Add time constraint
+                params['since'] = datetime.utcnow() - groupRange
+
+            activityIds = self.activity_items_collection.getActivityIds(**params)
+
+            # Look for activity items
+            if len(activityIds) > 0:
+                if len(activityIds) > 1:
+                    logs.warning('WARNING: matched multiple activityIds for verb (%s) & objects (%s)' % (verb, objects))
+                
+                activityId = activityIds[0]
+                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=now)
+                if benefit is not None:
+                    self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
+
+            # Insert new item
+            else:
+                activity    = _buildActivity()
+                activity    = self.activity_items_collection.addActivityItem(activity)
+                activityId  = activity.activity_id
         
         for recipientId in recipientIds:
             if recipientId in sentTo:
@@ -150,22 +176,26 @@ class MongoActivityCollection(AActivityDB):
         self.activity_links_collection.removeActivityLinks(activityIds)
         self.activity_items_collection.removeActivityItems(activityIds)
 
-    def removeActivity(self, genre, userId, **kwargs):
+    def _removeSubject(self, activityIds, subjectId):
+        toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
+        self._removeActivityIds(toRemove)
+
+    def removeActivity(self, verb, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
         friendId    = kwargs.pop('friendId', None)
 
-        if genre in ['like', 'favorite'] and stampId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, stampId=stampId, genre=genre)
-            self._removeActivityIds(activityIds)
+        if verb in ['like', 'todo'] and stampId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, stampId=stampId)
+            self._removeSubject(activityIds, userId)
 
-        if genre in ['follower', 'friend'] and friendId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, friendId=friendId, genre=genre)
-            self._removeActivityIds(activityIds)
+        if verb in ['follower', 'friend'] and friendId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, friendId=friendId)
+            self._removeSubject(activityIds, userId)
 
-        if genre in ['comment'] and commentId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(userId=userId, commentId=commentId, genre=genre)
-            self._removeActivityIds(activityIds)
+        if verb in ['comment'] and commentId is not None:
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, commentId=commentId)
+            self._removeSubject(activityIds, userId)
     
     def removeActivityForStamp(self, stampId):
         activityIds = self.activity_items_collection.getActivityIds(stampId=stampId)
@@ -173,5 +203,5 @@ class MongoActivityCollection(AActivityDB):
     
     def removeUserActivity(self, userId):
         activityIds = self.activity_items_collection.getActivityIds(userId=userId)
-        self._removeActivityIds(activityIds)
+        self._removeSubject(activityIds, userId)
 

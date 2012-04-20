@@ -40,6 +40,12 @@
 		6323F1181526262300BE408C /* STPlayerPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F1161526261A00BE408C /* STPlayerPopUp.m */; };
 		6323F11B1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
 		6323F11C1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
+		63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
+		63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
+		63323C691540CFE400C8F7D3 /* STPeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C681540CFE400C8F7D3 /* STPeopleViewController.m */; };
+		63323C6A1540CFE400C8F7D3 /* STPeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C681540CFE400C8F7D3 /* STPeopleViewController.m */; };
+		63323C6E1540D1CF00C8F7D3 /* UserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C6D1540D1CF00C8F7D3 /* UserCell.m */; };
+		63323C6F1540D1CF00C8F7D3 /* UserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C6D1540D1CF00C8F7D3 /* UserCell.m */; };
 		633CEF231535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF241535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF271535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */; };
@@ -103,12 +109,30 @@
 		6360B5B1153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */; };
 		6360B5CA153F604900BB8C82 /* STUniversalNewsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */; };
 		6360B5CB153F604900BB8C82 /* STUniversalNewsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */; };
+		6360B5D2153F9E2800BB8C82 /* STSimpleActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D1153F9E2800BB8C82 /* STSimpleActivity.m */; };
+		6360B5D3153F9E2800BB8C82 /* STSimpleActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D1153F9E2800BB8C82 /* STSimpleActivity.m */; };
+		6360B5D6153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */; };
+		6360B5D7153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */; };
+		6360B5DA153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */; };
+		6360B5DB153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */; };
 		63733FE01521049A00EEFAB3 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FF01521108700EEFAB3 /* Rdio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FED1521108700EEFAB3 /* Rdio.framework */; };
 		63733FF2152112D700EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
 		63733FF3152112DF00EEFAB3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
+		6380679D1541A72300423E98 /* STYouSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380679C1541A72300423E98 /* STYouSource.m */; };
+		6380679E1541A72300423E98 /* STYouSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380679C1541A72300423E98 /* STYouSource.m */; };
+		638067A21541B5A600423E98 /* STDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A11541B5A600423E98 /* STDebugViewController.m */; };
+		638067A31541B5A600423E98 /* STDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A11541B5A600423E98 /* STDebugViewController.m */; };
+		638067A61541B61800423E98 /* STDebug.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A51541B61800423E98 /* STDebug.m */; };
+		638067A71541B61800423E98 /* STDebug.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A51541B61800423E98 /* STDebug.m */; };
+		638067AA1541C25500423E98 /* STDebugDatumViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A91541C25500423E98 /* STDebugDatumViewController.m */; };
+		638067AB1541C25500423E98 /* STDebugDatumViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A91541C25500423E98 /* STDebugDatumViewController.m */; };
+		638067AE1541CDF000423E98 /* STDebugDatum.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067AD1541CDF000423E98 /* STDebugDatum.m */; };
+		638067AF1541CDF000423E98 /* STDebugDatum.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067AD1541CDF000423E98 /* STDebugDatum.m */; };
+		638067B71541F3B000423E98 /* STUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067B61541F3B000423E98 /* STUsersViewController.m */; };
+		638067B81541F3B000423E98 /* STUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067B61541F3B000423E98 /* STUsersViewController.m */; };
 		6380A76215066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76315066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
 		6380A76415066EAE003087EF /* STPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A76115066EAD003087EF /* STPageControl.m */; };
@@ -226,6 +250,16 @@
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
+		63BFCC7D1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
+		63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
+		63CA461D1540515500CCDD2A /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA461C1540515500CCDD2A /* STCreateStampViewController.m */; };
+		63CA461E1540515500CCDD2A /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA461C1540515500CCDD2A /* STCreateStampViewController.m */; };
+		63CA46361540699E00CCDD2A /* STImageUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA46351540699E00CCDD2A /* STImageUpload.m */; };
+		63CA46371540699E00CCDD2A /* STImageUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA46351540699E00CCDD2A /* STImageUpload.m */; };
+		63CA463A15406A3E00CCDD2A /* STStampedParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463915406A3D00CCDD2A /* STStampedParameter.m */; };
+		63CA463B15406A3E00CCDD2A /* STStampedParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463915406A3D00CCDD2A /* STStampedParameter.m */; };
+		63CA463E15406B6800CCDD2A /* STStampNew.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463D15406B6700CCDD2A /* STStampNew.m */; };
+		63CA463F15406B6800CCDD2A /* STStampNew.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463D15406B6700CCDD2A /* STStampNew.m */; };
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAF151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
@@ -1833,6 +1867,12 @@
 		6323F1161526261A00BE408C /* STPlayerPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlayerPopUp.m; sourceTree = "<group>"; };
 		6323F119152635F900BE408C /* STScrollViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollViewContainer.h; sourceTree = "<group>"; };
 		6323F11A152635FE00BE408C /* STScrollViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollViewContainer.m; sourceTree = "<group>"; };
+		63323C621540C1A400C8F7D3 /* STTodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoViewController.h; sourceTree = "<group>"; };
+		63323C631540C1A400C8F7D3 /* STTodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoViewController.m; sourceTree = "<group>"; };
+		63323C671540CFE400C8F7D3 /* STPeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPeopleViewController.h; sourceTree = "<group>"; };
+		63323C681540CFE400C8F7D3 /* STPeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPeopleViewController.m; sourceTree = "<group>"; };
+		63323C6C1540D1CF00C8F7D3 /* UserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCell.h; sourceTree = "<group>"; };
+		63323C6D1540D1CF00C8F7D3 /* UserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserCell.m; sourceTree = "<group>"; };
 		633CEF211535E2FB009E1C06 /* STSuggestedSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSuggestedSource.h; sourceTree = "<group>"; };
 		633CEF221535E2FB009E1C06 /* STSuggestedSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSuggestedSource.m; sourceTree = "<group>"; };
 		633CEF251535E371009E1C06 /* STFriendsOfFriendsSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFriendsOfFriendsSource.h; sourceTree = "<group>"; };
@@ -1895,9 +1935,30 @@
 		6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntitySearchSection.m; sourceTree = "<group>"; };
 		6360B5C8153F604900BB8C82 /* STUniversalNewsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUniversalNewsController.h; sourceTree = "<group>"; };
 		6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUniversalNewsController.m; sourceTree = "<group>"; };
+		6360B5CC153F7A4F00BB8C82 /* STActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivity.h; sourceTree = "<group>"; };
+		6360B5CD153F7A9600BB8C82 /* STActivityReference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityReference.h; sourceTree = "<group>"; };
+		6360B5CF153F7E2300BB8C82 /* STActivityObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityObjects.h; sourceTree = "<group>"; };
+		6360B5D0153F9E2800BB8C82 /* STSimpleActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActivity.h; sourceTree = "<group>"; };
+		6360B5D1153F9E2800BB8C82 /* STSimpleActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivity.m; sourceTree = "<group>"; };
+		6360B5D4153FA69B00BB8C82 /* STSimpleActivityObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActivityObjects.h; sourceTree = "<group>"; };
+		6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivityObjects.m; sourceTree = "<group>"; };
+		6360B5D8153FA80900BB8C82 /* STSimpleActivityReference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActivityReference.h; sourceTree = "<group>"; };
+		6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivityReference.m; sourceTree = "<group>"; };
 		63733FED1521108700EEFAB3 /* Rdio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Rdio.framework; sourceTree = "<group>"; };
 		63733FF1152112D600EEFAB3 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewDelegateDependent.h; sourceTree = "<group>"; };
+		6380679B1541A72300423E98 /* STYouSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STYouSource.h; sourceTree = "<group>"; };
+		6380679C1541A72300423E98 /* STYouSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STYouSource.m; sourceTree = "<group>"; };
+		638067A01541B5A600423E98 /* STDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDebugViewController.h; sourceTree = "<group>"; };
+		638067A11541B5A600423E98 /* STDebugViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDebugViewController.m; sourceTree = "<group>"; };
+		638067A41541B61800423E98 /* STDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDebug.h; sourceTree = "<group>"; };
+		638067A51541B61800423E98 /* STDebug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDebug.m; sourceTree = "<group>"; };
+		638067A81541C25500423E98 /* STDebugDatumViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDebugDatumViewController.h; sourceTree = "<group>"; };
+		638067A91541C25500423E98 /* STDebugDatumViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDebugDatumViewController.m; sourceTree = "<group>"; };
+		638067AC1541CDF000423E98 /* STDebugDatum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDebugDatum.h; sourceTree = "<group>"; };
+		638067AD1541CDF000423E98 /* STDebugDatum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDebugDatum.m; sourceTree = "<group>"; };
+		638067B51541F3B000423E98 /* STUsersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUsersViewController.h; sourceTree = "<group>"; };
+		638067B61541F3B000423E98 /* STUsersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUsersViewController.m; sourceTree = "<group>"; };
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
 		6380A77815067776003087EF /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = "Vendor/gtm-oauth/Source/../../../RestKit/RestKit.xcodeproj"; sourceTree = "<group>"; };
@@ -2006,6 +2067,16 @@
 		63B30DDA15339B950065DB53 /* act_play_primary.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = act_play_primary.png; sourceTree = "<group>"; };
 		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
+		63BFCC7B1541F7AE00817EC5 /* STUserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserCell.h; sourceTree = "<group>"; };
+		63BFCC7C1541F7AE00817EC5 /* STUserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserCell.m; sourceTree = "<group>"; };
+		63CA461B1540515500CCDD2A /* STCreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreateStampViewController.h; sourceTree = "<group>"; };
+		63CA461C1540515500CCDD2A /* STCreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreateStampViewController.m; sourceTree = "<group>"; };
+		63CA46341540699E00CCDD2A /* STImageUpload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageUpload.h; sourceTree = "<group>"; };
+		63CA46351540699E00CCDD2A /* STImageUpload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageUpload.m; sourceTree = "<group>"; };
+		63CA463815406A3D00CCDD2A /* STStampedParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedParameter.h; sourceTree = "<group>"; };
+		63CA463915406A3D00CCDD2A /* STStampedParameter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedParameter.m; sourceTree = "<group>"; };
+		63CA463C15406B6700CCDD2A /* STStampNew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampNew.h; sourceTree = "<group>"; };
+		63CA463D15406B6700CCDD2A /* STStampNew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampNew.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
 		63CC4437152D12A90026BB25 /* STTodoButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoButton.h; sourceTree = "<group>"; };
@@ -2992,6 +3063,24 @@
 			name = Vendor;
 			sourceTree = "<group>";
 		};
+		63323C611540C15B00C8F7D3 /* Todo */ = {
+			isa = PBXGroup;
+			children = (
+				63323C621540C1A400C8F7D3 /* STTodoViewController.h */,
+				63323C631540C1A400C8F7D3 /* STTodoViewController.m */,
+			);
+			name = Todo;
+			sourceTree = "<group>";
+		};
+		63323C661540CFC900C8F7D3 /* People */ = {
+			isa = PBXGroup;
+			children = (
+				63323C671540CFE400C8F7D3 /* STPeopleViewController.h */,
+				63323C681540CFE400C8F7D3 /* STPeopleViewController.m */,
+			);
+			name = People;
+			sourceTree = "<group>";
+		};
 		633CEF201535E2BD009E1C06 /* Table Delegates */ = {
 			isa = PBXGroup;
 			children = (
@@ -3005,6 +3094,8 @@
 				633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */,
 				633CEF291535E5DB009E1C06 /* STUserSource.h */,
 				633CEF2A1535E5DC009E1C06 /* STUserSource.m */,
+				6380679B1541A72300423E98 /* STYouSource.h */,
+				6380679C1541A72300423E98 /* STYouSource.m */,
 				63A6E27E153DBACC00D84915 /* STStampedBySource.h */,
 				63A6E27F153DBACC00D84915 /* STStampedBySource.m */,
 			);
@@ -3027,6 +3118,32 @@
 				6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */,
 			);
 			name = "Universal News";
+			sourceTree = "<group>";
+		};
+		6380679F1541B58A00423E98 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				638067A01541B5A600423E98 /* STDebugViewController.h */,
+				638067A11541B5A600423E98 /* STDebugViewController.m */,
+				638067A81541C25500423E98 /* STDebugDatumViewController.h */,
+				638067A91541C25500423E98 /* STDebugDatumViewController.m */,
+				638067A41541B61800423E98 /* STDebug.h */,
+				638067A51541B61800423E98 /* STDebug.m */,
+				638067AC1541CDF000423E98 /* STDebugDatum.h */,
+				638067AD1541CDF000423E98 /* STDebugDatum.m */,
+			);
+			name = Debug;
+			sourceTree = "<group>";
+		};
+		638067B41541F39A00423E98 /* Users View */ = {
+			isa = PBXGroup;
+			children = (
+				638067B51541F3B000423E98 /* STUsersViewController.h */,
+				638067B61541F3B000423E98 /* STUsersViewController.m */,
+				63BFCC7B1541F7AE00817EC5 /* STUserCell.h */,
+				63BFCC7C1541F7AE00817EC5 /* STUserCell.m */,
+			);
+			name = "Users View";
 			sourceTree = "<group>";
 		};
 		6380A77915067776003087EF /* Products */ = {
@@ -3100,6 +3217,9 @@
 				633F26D71538DBE400391F15 /* STDistributionItem.h */,
 				6360B5A0153F1B2B00BB8C82 /* STEntitySearchResult.h */,
 				6360B5AD153F4EEA00BB8C82 /* STEntitySearchSection.h */,
+				6360B5CC153F7A4F00BB8C82 /* STActivity.h */,
+				6360B5CD153F7A9600BB8C82 /* STActivityReference.h */,
+				6360B5CF153F7E2300BB8C82 /* STActivityObjects.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -3184,6 +3304,12 @@
 				6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */,
 				6360B5AE153F502A00BB8C82 /* STSimpleEntitySearchSection.h */,
 				6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */,
+				6360B5D0153F9E2800BB8C82 /* STSimpleActivity.h */,
+				6360B5D1153F9E2800BB8C82 /* STSimpleActivity.m */,
+				6360B5D4153FA69B00BB8C82 /* STSimpleActivityObjects.h */,
+				6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */,
+				6360B5D8153FA80900BB8C82 /* STSimpleActivityReference.h */,
+				6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -3287,6 +3413,8 @@
 			children = (
 				638D7726152B4F89006E4988 /* STStampedAPI.h */,
 				638D7727152B4F89006E4988 /* STStampedAPI.m */,
+				63CA463815406A3D00CCDD2A /* STStampedParameter.h */,
+				63CA463915406A3D00CCDD2A /* STStampedParameter.m */,
 				638D772B152B58A8006E4988 /* STGenericSlice.h */,
 				638D772C152B58A9006E4988 /* STGenericSlice.m */,
 				638D772F152B5AB3006E4988 /* STGenericCollectionSlice.h */,
@@ -3303,6 +3431,10 @@
 				6360B59D153F172D00BB8C82 /* STEntitySuggested.m */,
 				6360B5A9153F478E00BB8C82 /* STEntitySearch.h */,
 				6360B5AA153F478F00BB8C82 /* STEntitySearch.m */,
+				63CA46341540699E00CCDD2A /* STImageUpload.h */,
+				63CA46351540699E00CCDD2A /* STImageUpload.m */,
+				63CA463C15406B6700CCDD2A /* STStampNew.h */,
+				63CA463D15406B6700CCDD2A /* STStampNew.m */,
 			);
 			name = "Stamped API";
 			sourceTree = "<group>";
@@ -3312,6 +3444,8 @@
 			children = (
 				6360B5A5153F417900BB8C82 /* STProfileViewController.h */,
 				6360B5A6153F417900BB8C82 /* STProfileViewController.m */,
+				63323C6C1540D1CF00C8F7D3 /* UserCell.h */,
+				63323C6D1540D1CF00C8F7D3 /* UserCell.m */,
 			);
 			name = "Profile View";
 			sourceTree = "<group>";
@@ -3338,6 +3472,15 @@
 				6323F0FD1525031100BE408C /* STActionContext.m */,
 			);
 			name = Actions;
+			sourceTree = "<group>";
+		};
+		63CA461A154050B900CCDD2A /* Create Stamp */ = {
+			isa = PBXGroup;
+			children = (
+				63CA461B1540515500CCDD2A /* STCreateStampViewController.h */,
+				63CA461C1540515500CCDD2A /* STCreateStampViewController.m */,
+			);
+			name = "Create Stamp";
 			sourceTree = "<group>";
 		};
 		63CC4436152CFBB80026BB25 /* Legacy */ = {
@@ -4638,6 +4781,11 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				638067B41541F39A00423E98 /* Users View */,
+				6380679F1541B58A00423E98 /* Debug */,
+				63323C661540CFC900C8F7D3 /* People */,
+				63323C611540C15B00C8F7D3 /* Todo */,
+				63CA461A154050B900CCDD2A /* Create Stamp */,
 				6360B5C7153F5FB600BB8C82 /* Universal News */,
 				63A6E288153DDFD900D84915 /* Entities Search */,
 				63A6E287153DDFB200D84915 /* Profile View */,
@@ -6332,6 +6480,23 @@
 				6360B5AC153F478F00BB8C82 /* STEntitySearch.m in Sources */,
 				6360B5B1153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
 				6360B5CB153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
+				6360B5D3153F9E2800BB8C82 /* STSimpleActivity.m in Sources */,
+				6360B5D7153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */,
+				6360B5DB153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */,
+				63CA461E1540515500CCDD2A /* STCreateStampViewController.m in Sources */,
+				63CA46371540699E00CCDD2A /* STImageUpload.m in Sources */,
+				63CA463B15406A3E00CCDD2A /* STStampedParameter.m in Sources */,
+				63CA463F15406B6800CCDD2A /* STStampNew.m in Sources */,
+				63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */,
+				63323C6A1540CFE400C8F7D3 /* STPeopleViewController.m in Sources */,
+				63323C6F1540D1CF00C8F7D3 /* UserCell.m in Sources */,
+				6380679E1541A72300423E98 /* STYouSource.m in Sources */,
+				638067A31541B5A600423E98 /* STDebugViewController.m in Sources */,
+				638067A71541B61800423E98 /* STDebug.m in Sources */,
+				638067AB1541C25500423E98 /* STDebugDatumViewController.m in Sources */,
+				638067AF1541CDF000423E98 /* STDebugDatum.m in Sources */,
+				638067B81541F3B000423E98 /* STUsersViewController.m in Sources */,
+				63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6535,6 +6700,23 @@
 				6360B5AB153F478F00BB8C82 /* STEntitySearch.m in Sources */,
 				6360B5B0153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
 				6360B5CA153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
+				6360B5D2153F9E2800BB8C82 /* STSimpleActivity.m in Sources */,
+				6360B5D6153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */,
+				6360B5DA153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */,
+				63CA461D1540515500CCDD2A /* STCreateStampViewController.m in Sources */,
+				63CA46361540699E00CCDD2A /* STImageUpload.m in Sources */,
+				63CA463A15406A3E00CCDD2A /* STStampedParameter.m in Sources */,
+				63CA463E15406B6800CCDD2A /* STStampNew.m in Sources */,
+				63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */,
+				63323C691540CFE400C8F7D3 /* STPeopleViewController.m in Sources */,
+				63323C6E1540D1CF00C8F7D3 /* UserCell.m in Sources */,
+				6380679D1541A72300423E98 /* STYouSource.m in Sources */,
+				638067A21541B5A600423E98 /* STDebugViewController.m in Sources */,
+				638067A61541B61800423E98 /* STDebug.m in Sources */,
+				638067AA1541C25500423E98 /* STDebugDatumViewController.m in Sources */,
+				638067AE1541CDF000423E98 /* STDebugDatum.m in Sources */,
+				638067B71541F3B000423E98 /* STUsersViewController.m in Sources */,
+				63BFCC7D1541F7AE00817EC5 /* STUserCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

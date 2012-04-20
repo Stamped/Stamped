@@ -18,7 +18,7 @@ try:
     import libs.Memcache
     import tasks.APITasks
     
-    from datetime               import datetime
+    from datetime               import datetime, timedelta
     from auth                   import convertPasswordForStorage
     from utils                  import lazyProperty
     from functools              import wraps
@@ -1698,7 +1698,7 @@ class StampedAPI(AStampedAPI):
         # Asynchronously add references to the stamp in follower's inboxes and 
         # add activity for credit and mentions
         tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
-        
+
         return stamp
     
     @API_CALL
@@ -1989,7 +1989,7 @@ class StampedAPI(AStampedAPI):
         
         # Remove comments
         ### TODO: Make this more efficient?
-        comments = self._commentDB.getComments(stampId)
+        comments = self._commentDB.getCommentsForStamp(stampId)
         for comment in comments:
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
@@ -2137,10 +2137,6 @@ class StampedAPI(AStampedAPI):
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Add activity for mentioned users
-
-
-
-        # Add activity for mentioned users
         mentionedUserIds = set()
         for item in comment.mentions:
             if item.user_id is not None and item.user_id != authUserId:
@@ -2170,7 +2166,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for previous commenters
         ### TODO: Limit this to the last 20 comments or so
-        for prevComment in self._commentDB.getComments(stamp.stamp_id):
+        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
             # Skip if it was generated from a restamp
             if prevComment.restamp_id:
                 continue
@@ -2240,7 +2236,7 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
               
-        commentData = self._commentDB.getComments(stamp.stamp_id)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id)
         
         # Get user objects
         userIds = {}
@@ -2341,6 +2337,7 @@ class StampedAPI(AStampedAPI):
             self._addActivity(verb          = 'like', 
                               userId        = authUserId, 
                               stampId       = stamp.stamp_id,
+                              friendId      = stamp.user_id,
                               benefit       = benefit)
         
         return stamp
@@ -2546,7 +2543,6 @@ class StampedAPI(AStampedAPI):
         if len(result) >= 10 and userSlice.before is not None:
             try:
                 before = datetime.utcfromtimestamp(int(userSlice.before))
-                from datetime import timedelta
                 import calendar
                 modified = result[-1].timestamp.modified
                 if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
@@ -2699,11 +2695,11 @@ class StampedAPI(AStampedAPI):
         ### TODO: Make async
         if stampId is not None and favorite.stamp.user_id != authUserId:
 
-            self._addActivity(verb          = 'favorite', 
+            self._addActivity(verb          = 'todo', 
                               userId        = authUserId, 
                               entityId      = entity.entity_id,
                               friendId      = favorite.stamp.user_id, 
-                              stampId       = stamp.stamp_id)
+                              stampId       = stampId)
         
         return favorite
     
@@ -2729,7 +2725,7 @@ class StampedAPI(AStampedAPI):
             favorite.stamp.is_fav = False
             
             # Remove activity
-            self._activityDB.removeActivity('favorite', authUserId, stampId=stamp.stamp_id)
+            self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
         
         return favorite
     
@@ -2814,46 +2810,62 @@ class StampedAPI(AStampedAPI):
         if not self._activity:
             return
 
+        # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
+
+        group                   = False
+        groupRange              = None
+        requireReceipient       = False
+
         objects = ActivityObjectIds()
-        # activity.verb                   = verb
-        # activity.subjects               = [ userId ]
-        # activity.timestamp.modified     = datetime.utcnow()
 
         if verb == 'follow':
-            objects.user_ids        = [ kwargs['friendId'] ] # Or use recipientIds?
+            objects.user_ids        = [ kwargs['friendId'] ] 
+            group                   = True
+            groupRange              = timedelta(days=1)
+
+        elif verb == 'restamp':
+            objects.user_ids        = kwargs['recipientIds']
+            objects.stamp_ids       = [ kwargs['stampId'] ] 
 
         elif verb == 'like':
             objects.stamp_ids       = [ kwargs['stampId'] ] 
-
-        elif verb == 'restamp':
-            objects.user_ids        = [ kwargs['friendId'] ]
-            objects.stamp_ids       = [ kwargs['stampId'] ] 
+            group                   = True
 
         elif verb == 'todo':
             objects.user_ids        = [ kwargs['friendId'] ]
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.entity_ids      = [ kwargs['entityId'] ] # Is this necessary? Do we require stamps?
+            group                   = True
 
-        elif verb == 'comment' or verb == 'reply':
+        elif verb == 'comment':
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.comment_ids     = [ kwargs['commentId'] ]
 
-        elif verb == 'mention':
-            ### TODO: Add check if block exists
+        elif verb == 'reply':
             objects.stamp_ids       = [ kwargs['stampId'] ]
-            if commentId in kwargs and kwargs['commentId'] is not None:
+            objects.comment_ids     = [ kwargs['commentId'] ]
+            requireReceipient       = True
+
+        elif verb == 'mention':
+            objects.stamp_ids       = [ kwargs['stampId'] ] # TODO: Add check if block exists
+            if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
+            requireReceipient       = True
 
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
+            requireReceipient       = True
 
         elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+            requireReceipient       = True
             pass
 
         else:
             raise Exception("Unrecognized activity verb: %s" % verb)
 
+
         sendAlert       = kwargs.pop('sendAlert', True)
+        benefit         = kwargs.pop('benefit', None)
 
         recipientIds    = kwargs.pop('recipientIds', []) 
         friendId        = kwargs.pop('friendId', None)
@@ -2861,64 +2873,22 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
+        if requireReceipient and len(recipientIds) == 0:
+            raise Exception("Missing recipient")
+
         # Save activity
         self._activityDB.addActivity(verb           = verb, 
                                      subject        = userId, 
                                      objects        = objects, 
                                      recipientIds   = recipientIds, 
+                                     benefit        = benefit,
+                                     group          = group,
+                                     groupRange     = groupRange,
                                      sendAlert      = sendAlert)
 
         # Increment unread news for all recipients
         if len(recipientIds) > 0:
             self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
-
-    """
-    def _addActivityOld(self, genre, user_id, recipient_ids, **kwargs):
-        if not self._activity or len(recipient_ids) <= 0:
-            return
-        
-        sendAlert                   = kwargs.pop('sendAlert', True)
-        checkExists                 = kwargs.pop('checkExists', False)
-        
-        activity                    = ActivityObject()
-        activity.genre              = genre
-        activity.user_id            = user_id
-        activity.timestamp.created  = datetime.utcnow()
-        
-        for k, v in kwargs.iteritems():
-            activity[k] = v
-        
-        self._activityDB.addActivity(recipient_ids, activity, sendAlert=sendAlert, 
-                                     checkExists=checkExists)
-        
-        # increment unread news for all recipients
-        self._userDB.updateUserStats(recipient_ids, 'num_unread_news', increment=1)
-    
-    def _addMentionActivity(self, authUserId, mentions, ignore=None, **kwargs):
-        raise NotImplementedError
-        mentionedUserIds = set()
-        
-        if self._activity == True and mentions is not None and len(mentions) > 0:
-            # Note: No activity should be generated for the user initiating the mention
-            for mention in mentions:
-                if 'user_id' in mention and mention.user_id != authUserId and \
-                    (ignore is None or mention.user_id not in ignore):
-                    # Check if block exists between user and mentioned user
-                    friendship = Friendship(user_id=authUserId, friend_id=mention.user_id)
-                    
-                    if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.add(mention['user_id'])
-            
-            self._addActivity(genre='mention', 
-                              user_id=authUserId, 
-                              recipient_ids=mentionedUserIds, 
-                              **kwargs)
-            
-            # Increment mentions metric
-            self._statsSink.increment('stamped.api.stamps.mentions', len(mentionedUserIds))
-        
-        return mentionedUserIds
-    """
     
     @API_CALL
     def getActivity(self, authUserId, **kwargs):
@@ -2946,7 +2916,7 @@ class StampedAPI(AStampedAPI):
             activityData = []
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
             for item in dirtyActivityData:
-                item.subjects = list(set(item.subjects).intersection(set(friends)))
+                item.subjects = list(set(item.subjects.value).intersection(set(friends)))
                 activityData.append(item)
         else:
             activityData = self._activityDB.getActivity(authUserId, **params)
@@ -2955,15 +2925,18 @@ class StampedAPI(AStampedAPI):
         userIds     = {}
         stampIds    = {}
         entityIds   = {}
+        commentIds  = {}
         for item in activityData:
             for userId in item.subjects:
                 userIds[str(userId)] = None 
             for userId in item.objects.user_ids:
                 userIds[str(userId)] = None 
             for stampId in item.objects.stamp_ids:
-                userIds[str(stampId)] = None 
+                stampIds[str(stampId)] = None 
             for entityId in item.objects.entity_ids:
-                userIds[str(entityId)] = None 
+                entityIds[str(entityId)] = None 
+            for commentId in item.objects.comment_ids:
+                commentIds[str(commentId)] = None 
         
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -2983,15 +2956,34 @@ class StampedAPI(AStampedAPI):
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity 
 
+        # Enrich comments
+        comments = self._commentDB.getComments(commentIds.keys())
+        commentUserIds = {}
+        for comment in comments:
+            if comment.user.user_id not in userIds:
+                commentUserIds[comment.user.user_id] = None
+        users = self._userDB.lookupUsers(commentUserIds.keys(), None)
+        for user in users:
+            userIds[str(user.user_id)] = user.exportSchema(UserMini())
+        for comment in comments:
+            comment.user = userIds[str(comment.user.user_id)]
+            commentIds[str(comment.comment_id)] = comment
+
         activity = []
         for item in activityData:
             try:
                 if item.verb in ['invite_received', 'invite_sent']:
                     continue
 
-                activity.append(item.enrich(users=userIds, stamps=stampIds, entities=entityIds))
+                activity.append(item.enrich(authUserId  = authUserId,
+                                            users       = userIds, 
+                                            stamps      = stampIds, 
+                                            entities    = entityIds, 
+                                            comments    = commentIds))
 
-            except Exception:
+            except Exception as e:
+                logs.warning('Activity enrichment failed: %s' % e)
+                logs.info('Activity item: \n%s\n' % item)
                 utils.printException()
                 continue
             

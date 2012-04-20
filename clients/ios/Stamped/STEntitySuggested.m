@@ -30,12 +30,14 @@
 }
 
 - (NSMutableDictionary *)asDictionaryParams {
+  //Ignore superclass
   NSMutableDictionary* dictionary = [Util sparseDictionaryForObject:self 
                                                         andKeyPaths:[STEntitySuggested allKeys]];
   return dictionary;
 }
 
 - (void)importDictionaryParams:(NSDictionary*)params {
+  [super importDictionaryParams:params];
   for (NSString* keyPath in [STEntitySuggested allKeys]) {
     if ([params objectForKey:keyPath]) {
       [self setValue:[params objectForKey:keyPath] forKeyPath:keyPath];

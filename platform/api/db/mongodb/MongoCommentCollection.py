@@ -49,10 +49,15 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
     
+    def getComments(self, commentIds):
+        documentIds = map(self._getObjectIdFromString, commentIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
+        return map(self._convertFromMongo, documents)
+    
     def getCommentIds(self, stampId):
         return self.stamp_comments_collection.getStampCommentIds(stampId)
     
-    def getComments(self, stampId):
+    def getCommentsForStamp(self, stampId):
         documentIds = []
         for documentId in self.getCommentIds(stampId):
             documentIds.append(self._getObjectIdFromString(documentId))

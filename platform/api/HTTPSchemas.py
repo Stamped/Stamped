@@ -1536,7 +1536,7 @@ class HTTPStamp(Schema):
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
         else:
-            logs.error("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
+            logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
         
         return self
@@ -1932,7 +1932,7 @@ class HTTPActivityObjects(Schema):
         self.users              = SchemaList(HTTPUserMini())
         self.stamps             = SchemaList(HTTPStamp())
         self.entities           = SchemaList(HTTPEntity())
-        # self.comments           = SchemaList(HTTPComments())
+        self.comments           = SchemaList(HTTPComment())
 
 class HTTPActivity(Schema):
     def setSchema(self):
@@ -1963,27 +1963,92 @@ class HTTPActivity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'EnrichedActivity':
             data        = schema.value
-            subjects    = data.pop('subjects', [])
-            objects     = data.pop('objects', {})
+            data.pop('subjects')
+            data.pop('objects')
 
             self.importData(data, overflow=True)
 
             self.created = schema.timestamp.created
 
-            for user in subjects:
+            if self.icon is not None:
+                self.icon = _getIconURL(self.icon)
+
+            for user in schema.subjects:
                 self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if 'users' in objects:
-                for user in objects['users']:
-                    self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
+            for user in schema.objects.users:
+                self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
 
-            if 'stamps' in objects:
-                for stamp in objects['stamps']:
-                    self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
+            for stamp in schema.objects.stamps:
+                self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
 
-            if 'entities' in objects:
-                for entity in objects['entities']:
-                    self.objects.entities.append(HTTPEntity().importSchema(entity).value)
+            for entity in schema.objects.entities:
+                self.objects.entities.append(HTTPEntityMini().importSchema(entity).value)
+
+            for comment in schema.objects.comments:
+                self.objects.comments.append(HTTPComment().importSchema(comment).value)
+
+            def _buildStampAction(stamp):
+                source              = HTTPActionSource()
+                source.name         = 'View %s' % stamp.entity.title
+                source.source       = 'stamped'
+                source.source_id    = stamp.stamp_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_stamp'
+                action.name         = 'View %s' % stamp.entity.title
+                action.sources      = [ source ]
+
+                return action
+
+            def _buildEntityAction(entity):
+                source              = HTTPActionSource()
+                source.name         = 'View %s' % entity.title
+                source.source       = 'stamped'
+                source.source_id    = entity.entity_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_entity'
+                action.name         = 'View %s' % entity.title
+                action.sources      = [ source ]
+
+                return action
+
+            def _buildUserAction(user):
+                source              = HTTPActionSource()
+                source.name         = 'View profile'
+                source.source       = 'stamped'
+                source.source_id    = user.user_id
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_user'
+                action.name         = 'View profile'
+                action.sources      = [ source ]
+
+                return action
+
+            if self.verb in set(['comment', 'reply', 'mention', 'restamp', 'like']):
+                try:
+                    self.action = _buildStampAction(self.objects.stamps[0])
+                except Exception as e:
+                    logs.warning('Unable to build action for stamp: %s' % e)
+
+            elif self.verb == 'todo':
+                try:
+                    if len(self.objects.stamps) > 0:
+                        self.action = _buildStampAction(self.objects.stamps[0])
+                    else:
+                        self.action = _buildEntityAction(self.objects.entities[0])
+                except Exception as e:
+                    logs.warning('Unable to build action: %s' % e)
+
+            elif self.verb in set(['follow', 'suggest_friend', 'twitter_friend', 'facebook_friend']):
+                try:
+                    self.action = _buildUserAction(self.objects.users[0])
+                except Exception as e:
+                    logs.warning('Unable to build action for user: %s' % e)
+
+
 
         else:
             raise NotImplementedError

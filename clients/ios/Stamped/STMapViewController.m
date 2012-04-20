@@ -21,6 +21,7 @@
 #import "UserImageView.h"
 #import "User.h"
 #import "Util.h"
+#import "STStampedActions.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
 static const CGFloat kMapSpanHysteresisPercentage = 0.3;
@@ -324,14 +325,8 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   if (!view)
     return;
   
-  //TODO repair
-  /*
    STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-   ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
-   profileViewController.legacyUser = annotation.stamp.user;
-   [self.navigationController pushViewController:profileViewController animated:YES];
-   [profileViewController release];
-   */
+  [[STStampedActions sharedInstance] viewUserWithUserID:annotation.stamp.user.userID];
 }
 
 - (void)mapDisclosureTapped:(id)sender {
@@ -343,12 +338,10 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
   if (!view)
     return;
   
-  /*
-   TODO repair
   STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
   UIViewController* vc = nil;
   if (annotation.stamp) {
-    vc = [[[StampDetailViewController alloc] initWithStamp:annotation.stamp] autorelease];
+    [[STStampedActions sharedInstance] viewStampWithStampID:annotation.stamp.stampID];
   } else if (annotation.entityObject) {
     vc = [Util detailViewControllerForEntity:annotation.entityObject];
   }
@@ -356,7 +349,6 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
     return;
   
   [self.navigationController pushViewController:vc animated:YES];
-   */
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.

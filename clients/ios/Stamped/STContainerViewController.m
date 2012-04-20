@@ -28,6 +28,7 @@ static const CGFloat kReloadHeight = 60.0;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
+@property (nonatomic, readwrite, assign) BOOL loadedToolbar;
 
 - (void)userPulledToReload;
 - (void)reloadData;
@@ -46,6 +47,9 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = _lastUpdatedLabel;
 @synthesize arrowImageView = _arrowImageView;
 @synthesize spinnerView = _spinnerView;
+@synthesize toolbar = toolbar_;
+@synthesize loadedToolbar = loadedToolbar_;
+@dynamic headerOffset;
 
 - (id)init
 {
@@ -62,6 +66,7 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)viewDidLoad {
   [super viewDidLoad];
   UIView* toolbar = self.toolbar;
+  NSLog(@"loaded:%@",toolbar);
   CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height : 0;
   STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, 420 - toolbarHeight)] autorelease];
   CGFloat bottomPadding = 0;
@@ -256,7 +261,6 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
-
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
@@ -313,8 +317,23 @@ static const CGFloat kReloadHeight = 60.0;
   return YES;
 }
 
-- (UIView*)toolbar {
+- (UIView*)loadToolbar {
   return nil;
+}
+
+- (void)unloadToolbar {
+}
+
+- (UIView*)toolbar {
+  if (!self.loadedToolbar) {
+    toolbar_ = [[self loadToolbar] retain];
+    self.loadedToolbar = YES;
+  }
+  return toolbar_;
+}
+
+- (CGFloat)headerOffset {
+  return 4;
 }
 
 @end

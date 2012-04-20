@@ -14,5 +14,6 @@
 @interface STStampDetailHeaderView : STViewContainer
 
 -(id)initWithStamp:(id<STStamp>)stamp;
+-(id)initWithEntity:(id<STEntity>)entity;
 
 @end

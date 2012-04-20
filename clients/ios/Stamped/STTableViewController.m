@@ -51,9 +51,11 @@
   [_tableView release];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewDidAppear:(BOOL)animated {
+  NSIndexPath* path = [self.tableView indexPathForSelectedRow];
+  if (path) {
+    [self.tableView deselectRowAtIndexPath:path animated:YES];
+  }
 }
 
 @end

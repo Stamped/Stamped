@@ -13,6 +13,8 @@
 #import "STStampDetailViewController.h"
 #import "STStampedAPI.h"
 #import "STMenuPopUp.h"
+#import "STActionManager.h"
+#import "STProfileViewController.h"
 
 @interface STStampedActions ()
 
@@ -68,7 +70,17 @@ static STStampedActions* _sharedInstance;
       else {
         handled = YES;
         if (flag) {
-          controller = [[[STStampDetailViewController alloc] initWithStampID:source.sourceID] autorelease];
+          [Util globalLoadingLock];
+          [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp) {
+            [Util globalLoadingUnlock];
+            if (stamp) {
+              [[Util sharedNavigationController] pushViewController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
+                                                           animated:YES];
+            }
+            else {
+              [Util warnWithMessage:[NSString stringWithFormat:@"Stamp loading failed for stamp %@!", source.sourceID, nil] andBlock:nil];
+            }
+          }];
         }
       }
       if (controller) {
@@ -78,9 +90,10 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
       UIViewController* controller = nil;
       if (context.user) {
-        //ProfileViewController* profileViewController = [[ProfileViewController alloc] init];
-        //profileViewController.user = context.user;
-        //controller = profileViewController;
+      }
+      else {
+        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
+        controller = profileViewController;
       }
       if (controller) {
         [[Util sharedNavigationController] pushViewController:controller animated:YES];
@@ -148,6 +161,19 @@ static STStampedActions* _sharedInstance;
   }
   return handled;
 }
+
+- (void)viewStampWithStampID:(NSString*)stampID {
+  STActionContext* context = [STActionContext context];
+  id<STAction> action = [STStampedActions actionViewStamp:stampID withOutputContext:context];
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
+- (void)viewUserWithUserID:(NSString*)userID {
+  STActionContext* context = [STActionContext context];
+  id<STAction> action = [STStampedActions actionViewUser:userID withOutputContext:context];
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
 
 + (id<STAction>)actionViewEntity:(NSString*)entityID withOutputContext:(STActionContext*)context {
   return [STSimpleAction actionWithType:@"stamped_view_entity" 

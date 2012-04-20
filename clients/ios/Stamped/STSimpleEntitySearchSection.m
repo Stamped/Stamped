@@ -12,12 +12,12 @@
 @implementation STSimpleEntitySearchSection
 
 @synthesize name = name_;
-@synthesize results = results_;
+@synthesize entities = entities_;
 
 - (void)dealloc
 {
   [name_ release];
-  [results_ release];
+  [entities_ release];
   [super dealloc];
 }
 
@@ -28,7 +28,7 @@
    @"name",
    nil];
   
-  [mapping mapRelationship:@"results" withMapping:[STSimpleEntitySearchResult mapping]];
+  [mapping mapRelationship:@"entities" withMapping:[STSimpleEntitySearchResult mapping]];
   
   return mapping;
 }

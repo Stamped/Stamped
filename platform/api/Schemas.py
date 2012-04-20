@@ -459,17 +459,14 @@ class Activity(Schema):
         users       = kwargs.pop('users', {})
         stamps      = kwargs.pop('stamps', {})
         entities    = kwargs.pop('entities', {})
+        comments    = kwargs.pop('comments', {})
+        authUserId  = kwargs.pop('authUserId', None)
 
         result              = EnrichedActivity()
         result.activity_id  = self.activity_id
         result.verb         = self.verb 
         result.benefit      = self.benefit
-        result.timestmp     = self.timestamp 
-
-        ### TODO: Image, icon, references, header, body, footer
-        result.header       = 'TEST HEADER' 
-        result.body         = 'TEST BODY'
-        result.footer       = self.footer 
+        result.timestamp    = self.timestamp 
 
         for userId in self.subjects:
             result.subjects.append(users[str(userId)])
@@ -482,6 +479,139 @@ class Activity(Schema):
 
         for entityId in self.objects.entity_ids:
             result.objects.entities.append(entities[str(entityId)])
+
+        for commentId in self.objects.comment_ids:
+            result.objects.comments.append(comments[str(commentId)])
+
+
+        ### TODO: Image, icon, references, header, body, footer
+
+        # result.header       = 'TEST HEADER' 
+        # result.body         = 'TEST BODY'
+        # result.footer       = self.footer 
+
+        def _formatUserObjects(users, required=True):
+            # Return string and references
+            userList = []
+            for user in users:
+                if authUserId == user.user_id:
+                    user = UserMini(user.value)
+                    user.screen_name = 'you'
+                    userList.insert(0, user)
+                else:
+                    userList.append(user)
+
+            if len(userList) == 0:
+                if required:
+                    raise Exception("No user objects!")
+                return None, []
+
+            if len(userList) == 1:
+                text = unicode(userList[0].screen_name)
+                # refs = [{ 
+                #     'indices'   : [0, len(text)],
+                #     'action'    : 'stamped_view_user',
+                # }]
+                return text, []
+
+            if len(userList) == 2:
+                return unicode('%s and %s' % (userList[0].screen_name, userList[1].screen_name)), []
+
+            return unicode('%s and %s others' % (userList[0].screen_name, len(userList) - 1)), []
+
+        def _formatStampObjects(stamps, required=True):
+            # Return string and references
+            if len(stamps) == 0:
+                if required:
+                    raise Exception("No stamp objects!")
+                return None, []
+
+            if len(stamps) == 1:
+                return unicode(stamps[0].entity.title), []
+
+            if len(stamps) == 2:
+                return unicode('%s and %s' % (stamps[0].entity.title, stamps[1].entity.title)), []
+
+            return unicode('%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)), []
+
+        def _formatEntityObjects(entities, required=True):
+            # Return string and references
+            if len(entities) == 0:
+                if required:
+                    raise Exception("No entity objects!")
+                return None, []
+
+            if len(entities) == 1:
+                return unicode(entities[0].title), []
+
+            if len(entities) == 2:
+                return unicode('%s and %s' % (entities[0].title, entities[1].title)), []
+
+            return unicode('%s and %s others' % (entities[0].title, len(entities) - 1)), []
+
+        def _formatCommentObjects(comments, required=True):
+            # Return string and references
+            if len(comments) == 0:
+                if required:
+                    raise Exception("No comment objects!")
+                return None, []
+
+            if len(comments) == 1:
+                return unicode('%s: %s' % (comments[0].user.screen_name, comments[0].blurb)), []
+
+            raise Exception("Too many comments! \n%s" % comments)
+
+        if self.verb == 'follow':
+            result.icon = 'news_follow'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
+            result.body = '%s is now following %s.' % (subjects, userObjects)
+
+        elif self.verb == 'like':
+            result.icon = 'news_like'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            stampObjects, stampObjectReferences = _formatStampObjects(result.objects.stamps)
+            result.body = '%s liked %s.' % (subjects, stampObjects)
+
+        elif self.verb == 'restamp':
+            result.icon = 'news_credit'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            userObjects, userObjectReferences = _formatUserObjects(result.objects.users)
+            result.body = '%s gave %s credit.' % (subjects, userObjects)
+
+        elif self.verb == 'todo':
+            result.icon = 'news_todo'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            entityObjects, entityObjectReferences = _formatEntityObjects(result.objects.entities)
+            result.body = '%s added %s as a to-do.' % (subjects, entityObjects)
+
+        elif self.verb == 'comment':
+            result.icon = 'news_comment'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
+            result.header = 'Comment on %s' % result.objects.stamps[0].entity.title 
+            result.body = '%s.' % commentObjects
+
+        elif self.verb == 'reply':
+            result.icon = 'news_reply'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments)
+            result.header = 'Reply on %s' % result.objects.stamps[0].entity.title 
+            result.body = '%s.' % commentObjects
+
+        elif self.verb == 'mention':
+            result.icon = 'news_mention'
+            subjects, subjectReferences = _formatUserObjects(result.subjects)
+            commentObjects, commentObjectReferences = _formatCommentObjects(result.objects.comments, required=False)
+            stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(result.objects.stamps, required=False)
+            result.header = 'Mention on %s' % result.objects.stamps[0].entity.title 
+            if commentObjects is not None:
+                result.body = '%s.' % commentObjects
+            else:
+                result.body = '%s.' % stampBlurbObjects
+
+        else:
+            raise Exception("Uncrecognized verb: %s" % self.verb)
 
         return result
 

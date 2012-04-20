@@ -22,6 +22,11 @@
 
 - (void)reloadStampedData;
 
+- (UIView*)loadToolbar;
+
+- (void)unloadToolbar;
+
 @property (nonatomic, readonly, retain) UIView* toolbar;
+@property (nonatomic, readonly, assign) CGFloat headerOffset;
 
 @end

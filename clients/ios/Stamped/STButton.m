@@ -74,7 +74,7 @@
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {  
-  self.touched = YES;
+  self.touched = NO;
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {

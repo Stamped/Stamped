@@ -738,7 +738,7 @@ static Rdio* _rdio;
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
   STImageView* imageView = [[[STImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
-  imageView.imageURL = [Util profileImageURLForUser:user withSize:STProfileImageSize31];
+  imageView.imageURL = [Util profileImageURLForUser:user withSize:size];
   imageView.layer.borderWidth = 1;
   imageView.layer.borderColor = [UIColor whiteColor].CGColor;
   imageView.layer.shadowOffset = CGSizeMake(0,1);

@@ -24,6 +24,10 @@
 #import "STEntitySuggested.h"
 #import "STSimpleEntitySearchResult.h"
 #import "STEntitySearch.h"
+#import "STEntitySearchResult.h"
+#import "STEntitySearchSection.h"
+#import "STActivity.h"
+#import "STStampNew.h"
 
 typedef enum {
   STStampedAPIScopeYou = 0,
@@ -53,6 +57,8 @@ typedef enum {
 
 - (void)stampedByForStampedBySlice:(STStampedBySlice*)slice andCallback:(void(^)(id<STStampedBy>, NSError*))block;
 
+- (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block;
+
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
 
 - (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block;
@@ -60,14 +66,19 @@ typedef enum {
 - (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block;
 
 - (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
-                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+                            andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error))block;
 
 - (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
                             andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
+- (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
+                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
+
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
+
+- (void)userDetailsForUserIDs:(NSArray*)userIDs andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error))block;
 
 - (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block;
 

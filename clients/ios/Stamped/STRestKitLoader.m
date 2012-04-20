@@ -9,6 +9,7 @@
 #import "STRestKitLoader.h"
 #import "Util.h"
 #import "AccountManager.h"
+#import "STDebug.h"
 
 @interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate>
 
@@ -28,6 +29,7 @@
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request:\n%@\n%@ ", objectLoader.URL, objectLoader.params]];
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
   [Util executeOnMainThread:^{
