@@ -495,6 +495,7 @@ class Activity(Schema):
             userList = []
             for user in users:
                 if authUserId == user.user_id:
+                    user = User(user.value)
                     user.screen_name = 'you'
                     userList.insert(0, user)
                 else:
