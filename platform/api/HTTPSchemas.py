@@ -1988,6 +1988,8 @@ class HTTPActivity(Schema):
             for comment in schema.objects.comments:
                 self.objects.comments.append(HTTPComment().importSchema(comment).value)
 
+
+
             def _buildStampAction(stamp):
                 source              = HTTPActionSource()
                 source.name         = 'View %s' % stamp.entity.title
@@ -2027,26 +2029,245 @@ class HTTPActivity(Schema):
 
                 return action
 
-            if self.verb in set(['comment', 'reply', 'mention', 'restamp', 'like']):
-                try:
-                    self.action = _buildStampAction(self.objects.stamps[0])
-                except Exception as e:
-                    logs.warning('Unable to build action for stamp: %s' % e)
+
+
+
+
+
+
+
+
+
+
+
+            def _formatUserObjects(users, required=True, offset=0):
+                if len(users) == 0:
+                    if required:
+                        raise Exception("No user objects!")
+                    return None, []
+
+                if len(users) == 1:
+                    text = unicode(users[0].screen_name)
+                    refs = [{ 
+                        'indices'   : [offset, offset + len(text)],
+                        'action'    : _buildUserAction(users[0]),
+                    }]
+                    return text, refs
+
+                if len(users) == 2:
+                    text = '%s and %s' % (users[0].screen_name, users[1].screen_name)
+                    refs = [
+                        {
+                            'indices'   : [offset, offset + len(users[0].screen_name)],
+                            'action'    : _buildUserAction(users[0]),
+                        },
+                        {
+                            'indices'   : [offset + len(text) - len(users[1].screen_name), offset + len(text)],
+                            'action'    : _buildUserAction(users[1]),
+                        }
+                    ]
+                    return text, refs
+
+                text = '%s and %s others' % (users[0].screen_name, len(users) - 1)
+                refs = [
+                    {
+                        'indices'   : [offset, offset + len(users[0].screen_name)],
+                        'action'    : _buildUserAction(users[0]),
+                    },
+                    {
+                        'indices'   : [offset + len(users[0].screen_name) + len(' and '), offset + len(text)],
+                    }
+                ]
+                return text, refs
+
+            def _formatStampObjects(stamps, required=True, offset=0):
+                if len(stamps) == 0:
+                    if required:
+                        raise Exception("No stamp objects!")
+                    return None, []
+
+                if len(stamps) == 1:
+                    text = unicode(stamps[0].entity.title)
+                    refs = [{ 
+                        'indices'   : [offset, offset + len(text)],
+                        'action'    : _buildStampAction(stamps[0]),
+                    }]
+                    return text, refs
+
+                if len(stamps) == 2:
+                    text = '%s and %s' % (stamps[0].entity.title, stamps[1].entity.title)
+                    refs = [
+                        {
+                            'indices'   : [offset, offset + len(stamps[0].entity.title)],
+                            'action'    : _buildStampAction(stamps[0]),
+                        },
+                        {
+                            'indices'   : [offset + len(text) - len(stamps[1].entity.title), offset + len(text)],
+                            'action'    : _buildStampAction(stamps[1]),
+                        }
+                    ]
+                    return text, refs
+
+                text = '%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)
+                refs = [
+                    {
+                        'indices'   : [offset, offset + len(stamps[0].entity.title)],
+                        'action'    : _buildStampAction(stamps[0]),
+                    },
+                    {
+                        'indices'   : [offset + len(stamps[0].entity.title) + len(' and '), offset + len(text)],
+                    }
+                ]
+                return text, refs
+
+            def _formatEntityObjects(entities, required=True, offset=0):
+                if len(entities) == 0:
+                    if required:
+                        raise Exception("No entity objects!")
+                    return None, []
+
+                if len(entities) == 1:
+                    text = unicode(entities[0].title)
+                    refs = [{ 
+                        'indices'   : [offset, offset + len(text)],
+                        'action'    : _buildEntityAction(entities[0]),
+                    }]
+                    return text, refs
+
+                if len(entities) == 2:
+                    text = '%s and %s' % (entities[0].title, entities[1].title)
+                    refs = [
+                        {
+                            'indices'   : [offset, offset + len(entities[0].title)],
+                            'action'    : _buildEntityAction(entities[0]),
+                        },
+                        {
+                            'indices'   : [offset + len(text) - len(entities[1].title), offset + len(text)],
+                            'action'    : _buildEntityAction(entities[1]),
+                        }
+                    ]
+                    return text, refs
+
+                text = '%s and %s others' % (entities[0].title, len(entities) - 1)
+                refs = [
+                    {
+                        'indices'   : [offset, offset + len(entities[0].title)],
+                        'action'    : _buildEntityAction(entities[0]),
+                    },
+                    {
+                        'indices'   : [offset + len(entities[0].title) + len(' and '), offset + len(text)],
+                    }
+                ]
+                return text, refs
+
+            def _formatCommentObjects(comments, required=True, offset=0):
+                if len(comments) == 0:
+                    if required:
+                        raise Exception("No comment objects!")
+                    return None, []
+
+                if len(comments) == 1:
+                    text = '%s: %s' % (comments[0].user.screen_name, comments[0].blurb)
+                    refs = [{ 
+                        'indices'   : [offset, offset + len(comments[0].user.screen_name)],
+                        'action'    : _buildUserAction(comments[0].user),
+                    }]
+                    return text, refs
+
+                raise Exception("Too many comments! \n%s" % comments)
+
+
+
+            if self.verb == 'follow':
+                self.icon = 'news_follow'
+                subjects, subjectReferences = _formatUserObjects(self.subjects)
+                verb = 'is now following'
+                offset = len(subjects) + len(verb) + 2
+                userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
+                self.body = '%s %s %s.' % (subjects, verb, userObjects)
+                self.body_references = userObjectReferences
+                self.action = _buildUserAction(self.objects.users[0])
+
+            elif self.verb == 'restamp':
+                self.icon = 'news_credit'
+                subjects, subjectReferences = _formatUserObjects(self.subjects)
+                if schema.personal:
+                    self.body = '%s gave you credit.' % (subjects)
+                    self.body_references = subjectReferences
+                else:
+                    verb = 'gave'
+                    offset = len(subjects) + len(verb) + 2
+                    userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
+                    self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
+                    self.body_references = subjectReferences + userObjectReferences
+                self.action = _buildStampAction(self.objects.stamps[0])
+
+            elif self.verb == 'like':
+                self.icon = 'news_like'
+                subjects, subjectReferences = _formatUserObjects(self.subjects)
+                verb = 'liked'
+                offset = len(subjects) + len(verb) + 2
+                stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                self.body = '%s %s %s.' % (subjects, verb, stampObjects)
+                self.body_references = subjectReferences + stampObjectReferences
+                self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'todo':
-                try:
-                    if len(self.objects.stamps) > 0:
-                        self.action = _buildStampAction(self.objects.stamps[0])
-                    else:
-                        self.action = _buildEntityAction(self.objects.entities[0])
-                except Exception as e:
-                    logs.warning('Unable to build action: %s' % e)
+                self.icon = 'news_todo'
+                subjects, subjectReferences = _formatUserObjects(self.subjects)
+                verb = 'added'
+                offset = len(subjects) + len(verb) + 2
+                entityObjects, entityObjectReferences = _formatEntityObjects(self.objects.entities, offset=offset)
+                self.body = '%s %s %s as a to-do.' % (subjects, verb, entityObjects)
+                self.body_references = subjectReferences + entityObjectReferences
+                if len(self.objects.stamps) > 0:
+                    self.action = _buildStampAction(self.objects.stamps[0])
+                else:
+                    self.action = _buildEntityAction(self.objects.entities[0])
 
-            elif self.verb in set(['follow', 'suggest_friend', 'twitter_friend', 'facebook_friend']):
-                try:
-                    self.action = _buildUserAction(self.objects.users[0])
-                except Exception as e:
-                    logs.warning('Unable to build action for user: %s' % e)
+            elif self.verb == 'comment':
+                self.icon = 'news_comment'
+                verb = 'Comment on'
+                offset = len(verb) + 1
+                commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
+                stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                self.header = '%s %s' % (verb, stampObjects)
+                self.header_references = stampObjectReferences
+                self.body = '%s.' % commentObjects
+                self.body_references = commentObjectReferences
+                self.action = _buildStampAction(self.objects.stamps[0])
+
+            elif self.verb == 'reply':
+                self.icon = 'news_reply'
+                verb = 'Reply on'
+                offset = len(verb) + 1
+                commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
+                stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                self.header = '%s %s' % (verb, self.objects.stamps[0].entity.title)
+                self.header_references = stampObjectReferences
+                self.body = '%s.' % commentObjects
+                self.body_references = commentObjectReferences
+                self.action = _buildStampAction(self.objects.stamps[0])
+
+            elif self.verb == 'mention':
+                self.icon = 'news_mention'
+                verb = 'Mention on'
+                offset = len(verb) + 1
+                commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
+                stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(self.objects.stamps, required=False)
+                stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                self.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
+                self.header_references = stampObjectReferences
+                if commentObjects is not None:
+                    self.body = '%s.' % commentObjects
+                    self.body_references = commentObjectReferences
+                else:
+                    self.body = '%s.' % stampBlurbObjects
+                    self.body_references = stampBlurbObjectReferences
+                self.action = _buildStampAction(self.objects.stamps[0])
+
+            else:
+                raise Exception("Uncrecognized verb: %s" % self.verb)
 
 
 
