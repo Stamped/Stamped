@@ -1,4 +1,7 @@
 
+TODO:
+    * add Memcache-specific unit tests
+
 * AClientProxy interface
 * override __setattr__ etc. to forward on to client if not overridden in proxy
 

@@ -820,11 +820,11 @@ class BasicEntity(Schema):
         self.stats                          = EntityStatsSchema()
         self.sources                        = EntitySourcesSchema()
         self.timestamp                      = TimestampSchema()
-
+    
     @property 
     def subtitle(self):
         return self._genericSubtitle()
-
+    
     @property 
     def category(self):
         return 'other'
