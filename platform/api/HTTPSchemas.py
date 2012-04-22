@@ -2269,6 +2269,10 @@ class HTTPActivity(Schema):
                     self.body_references = stampBlurbObjectReferences
                 self.action = _buildStampAction(self.objects.stamps[0])
 
+            elif self.verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+                self.icon = _getIconURL('news_friend')
+                self.action = _buildUserAction(self.subjects[0])
+
             else:
                 raise Exception("Uncrecognized verb: %s" % self.verb)
 

@@ -702,7 +702,8 @@ class StampedAPI(AStampedAPI):
         # Generate activity item
         self._addActivity(verb          = 'twitter_friend', 
                           userId        = authUserId, 
-                          recipientIds  = userIds)
+                          recipientIds  = userIds,
+                          body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
         
         twitter = TwitterAccountSchema(twitter_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
@@ -751,7 +752,8 @@ class StampedAPI(AStampedAPI):
         # Generate activity item
         self._addActivity(verb          = 'facebook_friend', 
                           userId        = authUserId, 
-                          recipientIds  = userIds)
+                          recipientIds  = userIds,
+                          body          = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
         
         facebook = FacebookAccountSchema(facebook_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
@@ -2813,6 +2815,7 @@ class StampedAPI(AStampedAPI):
 
         # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
 
+        body                    = None
         group                   = False
         groupRange              = None
         requireReceipient       = False
@@ -2859,6 +2862,7 @@ class StampedAPI(AStampedAPI):
 
         elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
             requireReceipient       = True
+            body                    = kwargs.pop('body', None)
             pass
 
         else:
@@ -2881,6 +2885,7 @@ class StampedAPI(AStampedAPI):
         self._activityDB.addActivity(verb           = verb, 
                                      subject        = userId, 
                                      objects        = objects, 
+                                     body           = body,
                                      recipientIds   = recipientIds, 
                                      benefit        = benefit,
                                      group          = group,

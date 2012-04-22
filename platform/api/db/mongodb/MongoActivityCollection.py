@@ -85,6 +85,7 @@ class MongoActivityCollection(AActivityDB):
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)
+        body            = kwargs.pop('body', None)
 
         sendAlert       = kwargs.pop('sendAlert', True)
         recipientIds    = kwargs.pop('recipientIds', [])
@@ -111,6 +112,8 @@ class MongoActivityCollection(AActivityDB):
                 activity.objects = ActivityObjectIds(objects)
             if benefit is not None:
                 activity.benefit = benefit
+            if body is not None:
+                activity.body = body
             activity.timestamp.created  = now
             activity.timestamp.modified = now
             return activity
