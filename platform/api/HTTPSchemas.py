@@ -2170,7 +2170,7 @@ class HTTPActivity(Schema):
 
 
             if self.verb == 'follow':
-                self.icon = 'news_follow'
+                self.icon = _getIconURL('news_follow')
                 if len(self.subjects) == 1:
                     verb = 'is now following'
                 else:
@@ -2187,7 +2187,7 @@ class HTTPActivity(Schema):
                 self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'restamp':
-                self.icon = 'news_credit'
+                self.icon = _getIconURL('news_credit')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 if schema.personal:
                     self.body = '%s gave you credit.' % (subjects)
@@ -2201,7 +2201,7 @@ class HTTPActivity(Schema):
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'like':
-                self.icon = 'news_like'
+                self.icon = _getIconURL('news_like')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 verb = 'liked'
                 offset = len(subjects) + len(verb) + 2
@@ -2216,7 +2216,7 @@ class HTTPActivity(Schema):
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'todo':
-                self.icon = 'news_todo'
+                self.icon = _getIconURL('news_todo')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 verb = 'added'
                 offset = len(subjects) + len(verb) + 2
@@ -2229,7 +2229,7 @@ class HTTPActivity(Schema):
                     self.action = _buildEntityAction(self.objects.entities[0])
 
             elif self.verb == 'comment':
-                self.icon = 'news_comment'
+                self.icon = _getIconURL('news_comment')
                 verb = 'Comment on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -2241,7 +2241,7 @@ class HTTPActivity(Schema):
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'reply':
-                self.icon = 'news_reply'
+                self.icon = _getIconURL('news_reply')
                 verb = 'Reply on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -2253,7 +2253,7 @@ class HTTPActivity(Schema):
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'mention':
-                self.icon = 'news_mention'
+                self.icon = _getIconURL('news_mention')
                 verb = 'Mention on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
