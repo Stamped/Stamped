@@ -41,6 +41,12 @@ class AStampedTestCase(unittest.TestCase):
             
             try:
                 result = func()
+                # print '\n\nRESULTS\n'
+                # for i in result:
+                #     print '%s\n' % ('='*40)
+                #     pprint (i)
+                #     print ''
+                # print '%s\n' % ('='*40)
                 
                 for assertion in assertions:
                     assertion(result)

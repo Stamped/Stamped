@@ -1036,7 +1036,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
         
         # Remove activity
-        self._activityDB.removeActivity(genre='follower', userId=authUserId, friendId=userId)
+        self._activityDB.removeActivity('follow', authUserId, friendId=userId)
     
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -2915,6 +2915,7 @@ class StampedAPI(AStampedAPI):
             personal = False
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
+            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
             for item in dirtyActivityData:
                 item.subjects = list(set(item.subjects.value).intersection(set(friends)))

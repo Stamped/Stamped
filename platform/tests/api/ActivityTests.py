@@ -53,131 +53,192 @@ class StampedAPIActivityTest(AStampedAPITestCase):
                 benefit = i['benefit']
         self.assertTrue(benefit is not None)
 
-class StampedAPIActivityShow(StampedAPIActivityTest):
-    def test_show(self):
+    def _assertFollowSubjects(self, result, numSubjects):
+        exists = False
+        for i in result:
+            if i['verb'] == 'follow':
+                self.assertTrue(len(i['subjects']) == numSubjects)
+                exists = True 
+                break
+        self.assertTrue(exists)
+
+    def _assertBody(self, result, body):
+        exists = False
+        for i in result:
+            if i['body'] == body:
+                exists = True 
+                break
+        self.assertTrue(exists)
+
+# class StampedAPIActivityShow(StampedAPIActivityTest):
+#     def test_show(self):
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#         }
+        
+#         self.async(lambda: self.handleGET(path, data), [ 
+#                    lambda x: self.assertEqual(len(x), 2), 
+#         ])
+
+    # def test_show_coordinates(self):
+    #     path = "activity/show.json"
+    #     data = { 
+    #         "oauth_token": self.tokenA['access_token'],
+    #         "coordinates": "40.745498,-73.977612",
+    #     }
+        
+    #     self.async(lambda: self.handleGET(path, data), [ 
+    #                lambda x: self.assertEqual(len(x), 2), 
+    #     ])
+
+class StampedAPIActivityFriendship(StampedAPIActivityTest):
+    def test_show_friendship(self):
         path = "activity/show.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
         }
         
+        # Default (1 follower)
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
+                   lambda x: self._assertFollowSubjects(x, 1),
         ])
 
-    def test_show_coordinates(self):
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "coordinates": "40.745498,-73.977612",
-        }
-        
+        # Add friend (2 followers)
+        self.createFriendship(self.tokenC, self.userA)
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
+                   lambda x: self._assertFollowSubjects(x, 2),
         ])
 
-class StampedAPIActivityMentions(StampedAPIActivityTest):
-    def test_show_stamp_mention(self):
-        entity = self.createEntity(self.tokenA)
-        stampData = {
-            "oauth_token": self.tokenA['access_token'],
-            "entity_id": entity['entity_id'],
-            "blurb": "Thanks @%s!" % self.userB['screen_name'],
-        }
-        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-        }
-        
+        # Remove friend (1 follower)
+        self.deleteFriendship(self.tokenC, self.userA)
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
+                   lambda x: self._assertFollowSubjects(x, 1),
         ])
-        
-        self.deleteStamp(self.tokenA, stamp['stamp_id'])
-        self.deleteEntity(self.tokenA, entity['entity_id'])
 
-class StampedAPIActivityCredit(StampedAPIActivityTest):
-    def test_show_stamp_credit(self):
-        entity = self.createEntity(self.tokenA)
-        stampData = {
-            "oauth_token": self.tokenA['access_token'],
-            "entity_id": entity['entity_id'],
-            "blurb": "Great spot!",
-            "credit": self.userB['screen_name'],
-        }
-        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-        
-        path = "activity/show.json"
+    def test_show_friendship_universal(self):
+        self.createFriendship(self.tokenC, self.userB)
+        path = "activity/friends.json"
         data = { 
-            "oauth_token": self.tokenB['access_token'],
+            "oauth_token": self.tokenC['access_token'],
         }
-        #utils.log(pprint.pformat(result))
-        
+
+        # Assert "B following A" exists
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertBenefit(x),
+                   lambda x: self._assertFollowSubjects(x, 1),
+                   lambda x: self._assertBody(x, 'UserB is now following UserA.'),
         ])
-        
-        self.deleteStamp(self.tokenA, stamp['stamp_id'])
-        self.deleteEntity(self.tokenA, entity['entity_id'])
 
-class StampedAPIActivityLikes(StampedAPIActivityTest):
-    def test_show_like_benefit(self):
-        entity = self.createEntity(self.tokenD)
-        stampData = {
-            "oauth_token": self.tokenD['access_token'],
-            "entity_id": entity['entity_id'],
-            "blurb": "Great spot!",
-        }
-        stamp = self.createStamp(self.tokenD, entity['entity_id'], stampData)
+        self.deleteFriendship(self.tokenC, self.userB)
+        
+
+# class StampedAPIActivityMentions(StampedAPIActivityTest):
+#     def test_show_stamp_mention(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+        
+#         self.async(lambda: self.handleGET(path, data), [ 
+#                    lambda x: self.assertEqual(len(x), 2), 
+#         ])
+        
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
+
+# class StampedAPIActivityCredit(StampedAPIActivityTest):
+#     def test_show_stamp_credit(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Great spot!",
+#             "credit": self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+        
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+#         #utils.log(pprint.pformat(result))
+        
+#         self.async(lambda: self.handleGET(path, data), [ 
+#                    lambda x: self.assertEqual(len(x), 2), 
+#                    lambda x: self._assertBenefit(x),
+#         ])
+        
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
+
+# class StampedAPIActivityLikes(StampedAPIActivityTest):
+#     def test_show_like_benefit(self):
+#         entity = self.createEntity(self.tokenD)
+#         stampData = {
+#             "oauth_token": self.tokenD['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Great spot!",
+#         }
+#         stamp = self.createStamp(self.tokenD, entity['entity_id'], stampData)
 
 
-        path = "stamps/likes/create.json"
+#         path = "stamps/likes/create.json"
 
-        for token in [self.tokenA, self.tokenB, self.tokenC]:
-            data = { 
-                "oauth_token": token['access_token'],
-                "stamp_id": stamp['stamp_id']
-            }
-            result = self.handlePOST(path, data)
+#         for token in [self.tokenA, self.tokenB, self.tokenC]:
+#             data = { 
+#                 "oauth_token": token['access_token'],
+#                 "stamp_id": stamp['stamp_id']
+#             }
+#             result = self.handlePOST(path, data)
         
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenD['access_token'],
-        }
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenD['access_token'],
+#         }
         
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertTrue(len(x) == 1),
-                   lambda x: self._assertBenefit(x),
-        ])
+#         self.async(lambda: self.handleGET(path, data), [ 
+#                    lambda x: self.assertTrue(len(x) == 1),
+#                    lambda x: self._assertBenefit(x),
+#         ])
         
-        self.deleteStamp(self.tokenD, stamp['stamp_id'])
-        self.deleteEntity(self.tokenD, entity['entity_id'])
+#         self.deleteStamp(self.tokenD, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenD, entity['entity_id'])
 
-class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
-    def test_show_stamp_mention_and_credit(self):
-        entity = self.createEntity(self.tokenA)
-        stampData = {
-            "oauth_token": self.tokenA['access_token'],
-            "entity_id": entity['entity_id'],
-            "blurb": "Thanks @%s!" % self.userB['screen_name'],
-            "credit": self.userB['screen_name'],
-        }
-        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+# class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
+#     def test_show_stamp_mention_and_credit(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
+#             "credit": self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
         
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-        }
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
         
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self.assertTrue(x[0]['verb'] == 'restamp'), 
-        ])
+#         self.async(lambda: self.handleGET(path, data), [ 
+#                    lambda x: self.assertEqual(len(x), 2), 
+#                    lambda x: self.assertTrue(x[0]['verb'] == 'restamp'), 
+#         ])
         
-        self.deleteStamp(self.tokenA, stamp['stamp_id'])
-        self.deleteEntity(self.tokenA, entity['entity_id'])
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
 
 if __name__ == '__main__':
     main()

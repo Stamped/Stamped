@@ -2169,7 +2169,7 @@ class HTTPActivity(Schema):
                 if len(comments) == 1:
                     text = '%s: %s' % (comments[0].user.screen_name, comments[0].blurb)
                     refs = [{ 
-                        'indices'   : [offset, offset + len(comments[0].user.screen_name)],
+                        'indices'   : [offset, offset + len(comments[0].user.screen_name) + 1],
                         'action'    : _buildUserAction(comments[0].user),
                     }]
                     return text, refs
@@ -2180,12 +2180,19 @@ class HTTPActivity(Schema):
 
             if self.verb == 'follow':
                 self.icon = 'news_follow'
+                if len(self.subjects) == 1:
+                    verb = 'is now following'
+                else:
+                    verb = 'are now following'
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
-                verb = 'is now following'
-                offset = len(subjects) + len(verb) + 2
-                userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
-                self.body = '%s %s %s.' % (subjects, verb, userObjects)
-                self.body_references = userObjectReferences
+                if schema.personal:
+                    self.body = '%s %s you.' % (subjects, verb)
+                    self.body_references = subjectReferences
+                else:
+                    offset = len(subjects) + len(verb) + 2
+                    userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
+                    self.body = '%s %s %s.' % (subjects, verb, userObjects)
+                    self.body_references = subjectReferences + userObjectReferences
                 self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'restamp':

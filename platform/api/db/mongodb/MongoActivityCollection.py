@@ -69,6 +69,7 @@ class MongoActivityCollection(AActivityDB):
     
     def getActivityForUsers(self, userIds, **kwargs):
         params = {
+            'verbs'     : kwargs.pop('verbs', []),
             'since'     : kwargs.pop('since', None),
             'before'    : kwargs.pop('before', None),
             'limit'     : kwargs.pop('limit', 200),
@@ -185,16 +186,21 @@ class MongoActivityCollection(AActivityDB):
         commentId   = kwargs.pop('commentId', None)
         friendId    = kwargs.pop('friendId', None)
 
+        subjects    = [ userId ]
+
         if verb in ['like', 'todo'] and stampId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, stampId=stampId)
+            objects = { 'stamp_ids' : [ stampId ] }
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
             self._removeSubject(activityIds, userId)
 
-        if verb in ['follower', 'friend'] and friendId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, friendId=friendId)
+        if verb in ['follow', 'friend'] and friendId is not None:
+            objects = { 'user_ids' : [ friendId ] }
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
             self._removeSubject(activityIds, userId)
 
         if verb in ['comment'] and commentId is not None:
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, userId=userId, commentId=commentId)
+            objects = { 'comment_ids' : [ commentId ] }
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
             self._removeSubject(activityIds, userId)
     
     def removeActivityForStamp(self, stampId):
@@ -202,6 +208,7 @@ class MongoActivityCollection(AActivityDB):
         self._removeActivityIds(activityIds)
     
     def removeUserActivity(self, userId):
-        activityIds = self.activity_items_collection.getActivityIds(userId=userId)
+        subjects    = [ userId ]
+        activityIds = self.activity_items_collection.getActivityIds(subjects=subjects)
         self._removeSubject(activityIds, userId)
 
