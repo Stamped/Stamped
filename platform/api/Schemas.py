@@ -485,13 +485,6 @@ class Activity(Schema):
         for commentId in self.objects.comment_ids:
             result.objects.comments.append(comments[str(commentId)])
 
-
-        ### TODO: Image, icon, references, header, body, footer
-
-        # result.header       = 'TEST HEADER' 
-        # result.body         = 'TEST BODY'
-        # result.footer       = self.footer 
-
         return result
 
 
@@ -506,20 +499,11 @@ class EnrichedActivity(Schema):
         self.verb               = SchemaElement(basestring, required=True)
         self.objects            = ActivityObjects()
 
-        # Image
-        self.image              = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
-
         # Text
         self.personal           = SchemaElement(bool)
         self.header             = SchemaElement(basestring)
         self.body               = SchemaElement(basestring)
         self.footer             = SchemaElement(basestring)
-        self.header_references  = SchemaList(ActivityReference())
-        self.body_references    = SchemaList(ActivityReference())
-        self.footer_references  = SchemaList(ActivityReference())
-
-
 
 
 class ActivityObjects(Schema):

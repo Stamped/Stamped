@@ -1953,11 +1953,11 @@ class HTTPActivity(Schema):
 
         # Text
         self.header             = SchemaElement(basestring)
-        self.header_references  = SchemaList(ActivityReference())
+        self.header_references  = SchemaList(HTTPActivityReference())
         self.body               = SchemaElement(basestring)
-        self.body_references    = SchemaList(ActivityReference())
+        self.body_references    = SchemaList(HTTPActivityReference())
         self.footer             = SchemaElement(basestring)
-        self.footer_references  = SchemaList(ActivityReference())
+        self.footer_references  = SchemaList(HTTPActivityReference())
 
 
     def importSchema(self, schema):
@@ -1989,29 +1989,28 @@ class HTTPActivity(Schema):
                 self.objects.comments.append(HTTPComment().importSchema(comment).value)
 
 
-
             def _buildStampAction(stamp):
                 source              = HTTPActionSource()
-                source.name         = 'View %s' % stamp.entity.title
+                source.name         = 'View "%s"' % stamp.entity.title
                 source.source       = 'stamped'
                 source.source_id    = stamp.stamp_id
 
                 action              = HTTPAction()
                 action.type         = 'stamped_view_stamp'
-                action.name         = 'View %s' % stamp.entity.title
+                action.name         = 'View "%s"' % stamp.entity.title
                 action.sources      = [ source ]
 
                 return action
 
             def _buildEntityAction(entity):
                 source              = HTTPActionSource()
-                source.name         = 'View %s' % entity.title
+                source.name         = 'View "%s"' % entity.title
                 source.source       = 'stamped'
                 source.source_id    = entity.entity_id
 
                 action              = HTTPAction()
                 action.type         = 'stamped_view_entity'
-                action.name         = 'View %s' % entity.title
+                action.name         = 'View "%s"' % entity.title
                 action.sources      = [ source ]
 
                 return action
@@ -2030,16 +2029,6 @@ class HTTPActivity(Schema):
                 return action
 
 
-
-
-
-
-
-
-
-
-
-
             def _formatUserObjects(users, required=True, offset=0):
                 if len(users) == 0:
                     if required:
@@ -2048,10 +2037,12 @@ class HTTPActivity(Schema):
 
                 if len(users) == 1:
                     text = unicode(users[0].screen_name)
-                    refs = [{ 
-                        'indices'   : [offset, offset + len(text)],
-                        'action'    : _buildUserAction(users[0]),
-                    }]
+                    refs = [
+                        { 
+                            'indices'   : [offset, offset + len(text)],
+                            'action'    : _buildUserAction(users[0]),
+                        }
+                    ]
                     return text, refs
 
                 if len(users) == 2:
@@ -2217,6 +2208,11 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, stampObjects)
                 self.body_references = subjectReferences + stampObjectReferences
+                if not schema.personal:
+                    stampUsers = map(lambda x: x['user'], self.objects.stamps)
+                    stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
+                    self.footer = 'via %s' % stampUserObjects
+                    self.footer_references = stampUserReferences
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'todo':
@@ -2281,6 +2277,11 @@ class HTTPActivity(Schema):
         else:
             raise NotImplementedError
         return self
+
+class HTTPActivityReference(Schema):
+    def setSchema(self):
+        self.indices            = SchemaList(SchemaElement(int))
+        self.action             = HTTPAction()
 
 class HTTPActivitySlice(HTTPGenericSlice):
     def setSchema(self):

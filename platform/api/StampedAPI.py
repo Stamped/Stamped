@@ -2185,11 +2185,12 @@ class StampedAPI(AStampedAPI):
                 if self._friendshipDB.blockExists(friendship) == False:
                     repliedUserIds.add(replied_user_id)
         
-        self._addActivity(verb          = 'reply', 
-                          userId        = authUserId, 
-                          recipientIds  = list(repliedUserIds), 
-                          stampId       = stamp.stamp_id,
-                          commentId     = comment.comment_id)
+        if len(repliedUserIds) > 0:
+            self._addActivity(verb          = 'reply', 
+                              userId        = authUserId, 
+                              recipientIds  = list(repliedUserIds), 
+                              stampId       = stamp.stamp_id,
+                              commentId     = comment.comment_id)
         
         # Increment comment count on stamp
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
