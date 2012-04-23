@@ -8,8 +8,9 @@ import libs.ec2_utils
 IS_PROD         = libs.ec2_utils.is_prod_stack()
 DEBUG           = (not utils.is_ec2())
 TEMPLATE_DEBUG  = DEBUG
+PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
-utils.log("Django DEBUG=%s" % DEBUG)
+utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
 
 ADMINS = (
     ('Stamped Dev', 'dev@stamped.com'), 
@@ -75,24 +76,21 @@ STATIC_URL = '/assets/'
 if IS_PROD:
     SITE_ROOT   = "http://static.stamped.com/"
 else:
-    SITE_ROOT   = os.path.abspath(os.path.dirname(__file__))
+    SITE_ROOT   = PROJ_ROOT
 
-STATIC_ROOT     = os.path.join(os.path.join(SITE_ROOT, 'assets'))
-STATIC_DOC_ROOT = STATIC_ROOT
+STATIC_DOC_ROOT = SITE_ROOT
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/'
+ADMIN_MEDIA_PREFIX = '/admin/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(STATIC_ROOT, 'js'), 
-    os.path.join(STATIC_ROOT, 'css'), 
-    os.path.join(STATIC_ROOT, 'img'), 
+    os.path.join(STATIC_DOC_ROOT, 'assets'), 
 )
 
 # List of finder classes that know how to find static files in
@@ -102,8 +100,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'aw$jm6l=^ut&u=2n@7!!#&ds^1s!dqrywkvw2x&x_@g^rhsivh'
@@ -123,14 +119,22 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware', 
 )
 
-ROOT_URLCONF = 'web.urls'
+ROOT_URLCONF = 'web2.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "templates",
-    "/stamped/stamped/platform/servers/web/templates"
+    os.path.join(PROJ_ROOT, "html"), 
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
 )
 
 INSTALLED_APPS = (
@@ -140,6 +144,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core', 
 )
 
 # A sample logging configuration. The only tangible logging

@@ -17,62 +17,54 @@
         <meta name="application-name"   content="Stamped">
         
         <!-- properties -->
-        <meta property="og:image"       content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+        <meta property="og:image"       content="{{ STATIC_URL }}img/stamped-logo.png"/>
         <meta property="og:title"       content="Stamped"/>
         <meta property="og:site_name"   content="Stamped"/>
         <meta property="og:type"        content="website"/>
         
         <!-- icons -->
-        <link rel="shortcut icon"       href="http://static.stamped.com/assets/img/favicon.ico"/>
-        <link rel="apple-touch-icon"    href="http://static.stamped.com/assets/img/apple-touch-icon.png"/>
+        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
         
         <!-- styles -->
-        <link rel="stylesheet"          href="css/style.css">
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/style.css">
          
-        {% if styles %}
-            {% for style in styles %}
-                <link rel="stylesheet"  href="css/{{ style }}.css">
-            {% endfor %}
-        {% endif %}
-        
         <!-- scripts loaded pre-document-body (most are loaded post-document-body) -->
-        <script src="js/libs/modernizr-2.5.3.min.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
         
-        {% if pre_scripts %}
-            {% for script in pre_scripts %}
-                <script src="js/{{ script }}.js"></script>
-            {% endfor %}
-        {% endif %}
-        
-        {% block head %} {% endblock %}
+        {% block head %} {% endblock head %}
     </head>
     
     <body>
-        <header>
-            {% block header %} {% endblock %}
-        </header>
+        {% block pre_header     %}<header >{% endblock pre_header %}
+        {% block header         %}{% endblock header %}
+        {% block post_header    %}</header>{% endblock post_header %}
         
-        <div role="main">
-            {% block main %} {% endblock %}
-        </div>
+        {% block pre_main       %}<div role="main">{% endblock pre_main %}
+        {% block main           %}{% endblock main %}
+        {% block post_main      %}</div>{% endblock post_main %}
         
-        <footer>
-            {% block footer %} {% endblock %}
-        </footer>
+        {% block pre_footer     %}<footer>{% endblock pre_footer %}
+        {% block footer         %}
+            <a href="/about">About Us</a>
+            <a href="/faq">FAQ</a>
+            <a href="http://help.stamped.com">Help</a>
+            <a href="http://blog.stamped.com">Blog</a>
+            <a href="/terms-of-service">Terms of Service</a>
+            <a href="/privacy">Privacy Policy</a>
+            <span class="copyright">
+                <a href="http://nytm.org/made/" class="made">Made in NY</a>
+                &copy;2012 Stamped, Inc.
+            </span>
+        {% endblock footer %}
+        {% block post_footer    %}</footer>{% endblock post_footer %}
         
         <!-- scripts loaded post-document-body -->
         {% block scripts %}
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+        <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
         
-        <script src="js/plugins.js"></script>
-        <script src="js/script.js"> </script>
-        
-        {% if scripts %}
-            {% for script in scripts %}
-                <script src="js/{{ script }}.js"></script>
-            {% endfor %}
-        {% endif %}
+        <script src="{{ STATIC_URL }}js/script.js"> </script>
         
         <script>
             var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
@@ -80,7 +72,7 @@
                 g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
                 s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
-        {% endblock %}
+        {% endblock scripts %}
     </body>
 </html>
 

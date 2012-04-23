@@ -1,23 +1,105 @@
 // NOTE (travis): used to be Eli's magic.js
 
-var stamped = stamped || {};
+if (typeof(stamped) == "undefined") {
+    stamped = {};
+}
 
-stamped.showVideo = function() {
-    $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0&amp;color=66a6ff&amp;autoplay=1" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
-    clearInterval(slidechanger);
-    $('.shadow, .lightbox').fadeIn('slow');
-};
-
-stamped.init = function(){
-    rotator = function(){
+stamped.init = function() {
+    inputManager = function() {
+        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        
+        validateEmail = function() {
+            if (!emailReg.test(currentText) || currentText.indexOf(' ') > -1) {
+                $('.signup form').removeClass('validated');
+            } else {
+                $('.signup form').addClass('validated');
+            };
+        };
+        
+        $('.signup input').each(function() {
+            targetInput = $(this);
+            defaultText = targetInput.attr('rel');
+            $(this).val(defaultText);
+            
+            targetInput.focus(function() {
+                currentText = targetInput.val();
+                $('.signup form').addClass('active');
+                if (currentText == defaultText) {
+                    targetInput.val('')
+                } else {
+                    validateEmail();
+                }
+            });
+            
+            targetInput.blur(function() {
+                currentText = targetInput.val();
+                $('.signup form').removeClass('active');
+                if (currentText.length == 0) {
+                    targetInput.val(defaultText);
+                };
+            });
+            
+            targetInput.keypress(function() {
+                currentText = targetInput.val();
+                if (currentText.length > 3) {
+                    validateEmail();
+                };
+            });
+        });
+        
+        showSignup = function() {
+            $('#entity .header').animate({
+                'margin-top' : '0'
+            }, 250);
+        }
+        
+        hideSignup = function() {
+            $('#entity .header').animate({
+                'margin-top' : '-108px'
+            }, 250);
+        }
+        
+        $('.signup form').submit(function() {
+            if ($('.signup form').hasClass('validated')) {
+                $.getJSON(
+                    this.action + "?callback=?",
+                    $(this).serialize(),
+                    function (data) {
+                        if (data.Status === 200) {
+                            $('.signup').fadeOut('fast', function() {
+                                $('.thanks').fadeIn('fast');
+                                if ($('#entity').length) {
+                                    setTimeout('hideSignup()', 2000);
+                                }
+                            });
+                        }
+                    }
+                );
+            };
+            
+            event.preventDefault();
+        });
+        
+        $('.signup-toggle').live('click', function() {
+            showSignup();
+            event.preventDefault();
+        });
+        
+        $('.hide').live('click', function() {
+            hideSignup();
+            event.preventDefault();
+        });
+    };
+    
+    rotator = function() {
         time = '6000';
         speed = 'slow ';
         
         // set up the first one
         $('#tool-tipper .tooltip:first .image-active').show();
         
-        updateSlide = function(){
-            if($('#tool-tipper .tooltip:last').hasClass('active')) {
+        updateSlide = function() {
+            if ($('#tool-tipper .tooltip:last').hasClass('active')) {
                 $('#tool-tipper .tooltip').removeClass('active').find('.image-active').fadeOut(speed);
                 $('#tool-tipper .tooltip:first').addClass('active').find('.image-active').fadeIn(speed);
                 
@@ -30,8 +112,8 @@ stamped.init = function(){
             }
         }
         
-        forceSlide = function(target){
-            if(!$(target).hasClass('active')) {
+        forceSlide = function(target) {
+            if (!$(target).hasClass('active')) {
                 $('#tool-tipper .tooltip.active').removeClass('active').find('.image-active').stop(true, true).fadeOut(speed);
                 $(target).addClass('active').find('.image-active').stop(true, true).fadeIn(speed);
                 targetScreen = $(target).attr('rel');
@@ -43,43 +125,47 @@ stamped.init = function(){
 
         slidechanger = setInterval(updateSlide, time);
         
-        $('.tooltip').mouseenter(function(){
+        $('.tooltip').mouseenter(function() {
             clearInterval(slidechanger);
             forceSlide(this);
         });
         
-        $('.tooltip').mouseleave(function(){
+        $('.tooltip').mouseleave(function() {
             slidechanger = setInterval(updateSlide, time);
         });
         
-        $('.tooltip').live('click', function(){
+        $('.tooltip').live('click', function() {
             forceSlide(this);
         });
     };
     
-    agentInspector = function(){
+    agentInspector = function() {
         agent = navigator.userAgent.toLowerCase();
-        is_iphone = ((agent.indexOf('iphone')!=-1));
-        is_ipad = ((agent.indexOf('ipad')!=-1));
+        
+        is_iphone  = ((agent.indexOf('iphone')!=-1));
+        is_ipad    = ((agent.indexOf('ipad')!=-1));
         is_android = ((agent.indexOf('android'))!=-1);
+        
         if (is_iphone) {
             $('body').addClass('mobile-iphone');
-        };
+        }
         if (is_ipad) {
             $('body').addClass('mobile-ipad');
-        };
+        }
         if (is_android) {
             $('body').addClass('mobile-android');
-        };
+        }
     };
     
-    $('.video-launcher').live('click', function(event){    
+    $('.video-launcher').live('click', function() {    
+        $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
+        clearInterval(slidechanger);
+        $('.shadow, .lightbox').fadeIn('slow');
         event.preventDefault();
-        stamped.showVideo();
     });
     
-    $('.close').live('click', function(event){
-        $('.shadow, .lightbox').fadeOut('slow', function(){
+    $('.close').live('click', function() {
+        $('.shadow, .lightbox').fadeOut('slow', function() {
             $('.shadow, .lightbox').remove();
         });
         slidechanger = setInterval(updateSlide, time);
@@ -89,9 +175,9 @@ stamped.init = function(){
     });
     
     var clearStutterTimer = null;
-    stutterBar = function(type, message){
-        clearStutter = function(){
-            $('.stutter-bar').stop('true', 'true').fadeOut('slow', function(){
+    stutterBar = function(type, message) {
+        clearStutter = function() {
+            $('.stutter-bar').stop('true', 'true').fadeOut('slow', function() {
                 $('.stutter-bar').remove();
             });
         }
@@ -100,8 +186,8 @@ stamped.init = function(){
         clearStutterTimer = setTimeout(clearStutter, 1500);
         
         // check for presence and update innerHTML if stutter-bar is there. otherwise do this:
-        if(type == 'success') {    
-            if($('.stutter-bar').length) {
+        if (type == 'success') {    
+            if ($('.stutter-bar').length) {
                 $('.stutter-bar').html('<span class="success text">'+message+'</span>');
             } else {
                 $('body').append('<div class="stutter-bar"><span class="success text">'+message+'</span></div>');
@@ -112,13 +198,10 @@ stamped.init = function(){
         }
         
         $('.stutter-bar').fadeIn('slow');
-        
     };
     
-    slider = function(){
-    
-    
-        sliderAnimateOff = function(target){
+    slider = function() {
+        sliderAnimateOff = function(target) {
             target.find('.knob').animate({
                 'left' : '-2px'
             }, 175);
@@ -128,8 +211,7 @@ stamped.init = function(){
             target.removeClass('on');
         };
         
-        sliderAnimateOn = function(target){
-            
+        sliderAnimateOn = function(target) {
             target.find('.knob').animate({
                 'left' : '49px'
             }, 175);
@@ -139,12 +221,12 @@ stamped.init = function(){
             target.addClass('on');
         };
         
-        updateParams = function(){
+        updateParams = function() {
             updatedParams = {};
             
-            $('.slider').each(function(){
+            $('.slider').each(function() {
                 sliderID = $(this).attr('id');
-                if($(this).hasClass('on')) {
+                if ($(this).hasClass('on')) {
                     sliderBool = true;
                 } else {
                     sliderBool = false;
@@ -166,14 +248,14 @@ stamped.init = function(){
             });
         }
         
-        $('.toggle-all').live('click', function(){
-            if($('.slider.on').length) {
-                $('.slider').each(function(){
+        $('.toggle-all').live('click', function() {
+            if ($('.slider.on').length) {
+                $('.slider').each(function() {
                     targetSetting = $(this);
                     sliderAnimateOff(targetSetting); 
                 });
             } else {
-                $('.slider').each(function(){
+                $('.slider').each(function() {
                     targetSetting = $(this);
                     sliderAnimateOn(targetSetting); 
                 });
@@ -183,18 +265,18 @@ stamped.init = function(){
             event.preventDefault();
         });
         
-        if(typeof(_PARAMS) != 'undefined') {
-            $.each(_PARAMS, function(key, value){
-                if(value == true) {
+        if (typeof(_PARAMS) != 'undefined') {
+            $.each(_PARAMS, function(key, value) {
+                if (value == true) {
                     $('#' + key).addClass('on');
                 }
             });
         };
         
-        $('.slider').live('click', function(){
+        $('.slider').live('click', function() {
             targetSetting = $(this);
             
-            if(targetSetting.hasClass('on')) {
+            if (targetSetting.hasClass('on')) {
                 sliderAnimateOff(targetSetting);
             } else {
                sliderAnimateOn(targetSetting)
@@ -203,28 +285,71 @@ stamped.init = function(){
             updateParams();
         });
     };
-
     
-    windowHeight = function(){
+    capsuleMore = function() {
+        what = $('div.capsule .what');
+        
+        if (what.length) {
+            if ($('div.capsule .feature').length) {
+                featureHeight = $('div.capsule .feature').innerHeight();
+            }
+            
+            whatWidth  = what.outerWidth();
+            lineHeight = what.css('lineHeight').replace('px','');
+            capLines   = 9;
+            capHeight  = parseInt(capLines * lineHeight);
+            
+            if (what.outerHeight() > capHeight) {
+                $('div.capsule .what').css({
+                    'height' : capHeight + 2,
+                    'overflow' : 'hidden',
+                    'text-overflow' : 'clip',
+                    'width' : whatWidth
+                });
+                $('<a class="more-toggle" href="#">Read more...</a>').insertAfter('div.capsule .what');
+            }
+            $('.more-toggle').click(function() {
+                $(this).hide();
+                what.css({
+                    'height' : 'auto'
+                });
+                event.preventDefault();
+            });
+            
+            if ($('#mobile-entity .what.contd *').length) {
+                $('.what.contd').wrapInner('<div class="more-cap"/>');
+                $('<a href="#" class="more-toggle-mobile">Show more information</a>').insertBefore('.more-cap');
+            };
+            
+            $('.more-toggle-mobile').click(function() {
+                $(this).hide();
+                $('.more-cap').fadeIn();
+                event.preventDefault();
+            });
+        }
+    };
+    
+    // setTimeout(capsuleMore, 150);
+    capsuleMore();
+    
+    windowHeight = function() {
         currentWindowHeight = window.innerHeight;
         smallBrowser = '700';
         
-        if(currentWindowHeight < smallBrowser) {
+        if (currentWindowHeight < smallBrowser) {
             $('body').removeClass('talldisplay').addClass('smalldisplay');
-            //console.log('small display!');
         } else {
             $('body').removeClass('smalldisplay').addClass('talldisplay');
-            //console.log('big display!');
         }
-    }; // windowHeight
+    };
     
-    $(window).resize(function(){
-        //console.log('resize');
+    $(window).resize(function() {
         windowHeight();
     });
     
     agentInspector();
     windowHeight();
+    inputManager();
     rotator();
     slider();
 };

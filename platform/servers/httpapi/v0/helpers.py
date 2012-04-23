@@ -52,7 +52,8 @@ def handleHTTPRequest(fn):
                 valid_origin = request.META['HTTP_ORIGIN'] if request.META['HTTP_ORIGIN'] in VALID_ORIGINS else None
             except:
                 valid_origin = None
-
+            
+            # allow API to gracefully handle cross-domain requests from trusted origins
             if request.method == 'OPTIONS' and valid_origin is not None:
                 response = HttpResponse()
                 response['Access-Control-Allow-Origin'] = valid_origin
@@ -60,7 +61,7 @@ def handleHTTPRequest(fn):
                 response['Access-Control-Max-Age'] = 1000
                 response['Access-Control-Allow-Headers'] = '*'
                 return response
-
+            
             logs.begin(
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
@@ -70,13 +71,13 @@ def handleHTTPRequest(fn):
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
-
+            
             if valid_origin is not None and isinstance(ret, HttpResponse):
                 ret['Access-Control-Allow-Origin'] = valid_origin
                 ret['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
                 ret['Access-Control-Max-Age'] = 1000
                 ret['Access-Control-Allow-Headers'] = '*'
-
+            
             return ret
         
         except StampedHTTPError as e:
