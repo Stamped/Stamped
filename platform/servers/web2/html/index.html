@@ -6,14 +6,6 @@
     <script src="{{ STATIC_URL }}/js/index.js"></script>
 {% endblock head %}
 
-{% block pre_main %}
-    <div id="home" class="wrap public flood">
-        <a href="." class="brand replaced">Stamped</a>
-        <div class="card">
-            <div class="top-wave"></div>
-                {{ block.super }}
-{% endblock pre_main %}
-
 {% block main %}
     {{ block.super }}
     
@@ -98,19 +90,6 @@
         </div>
     </div>
 {% endblock main %}
-
-{% block post_main %}
-                <div class="bottom-wave"></div>
-            {{ block.super }}
-            </div>
-        </div>
-    </div>
-{% endblock post_main %}
-
-{% block footer %}
-    {{ block.super }}
-
-{% endblock footer %}
 
 {% block scripts %}
     {{ block.super }}

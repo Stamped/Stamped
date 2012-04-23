@@ -36,28 +36,46 @@
     </head>
     
     <body>
-        {% block pre_header     %}<header >{% endblock pre_header %}
-        {% block header         %}{% endblock header %}
-        {% block post_header    %}</header>{% endblock post_header %}
-        
-        {% block pre_main       %}<div role="main">{% endblock pre_main %}
-        {% block main           %}{% endblock main %}
-        {% block post_main      %}</div>{% endblock post_main %}
-        
-        {% block pre_footer     %}<footer>{% endblock pre_footer %}
-        {% block footer         %}
-            <a href="/about">About Us</a>
-            <a href="/faq">FAQ</a>
-            <a href="http://help.stamped.com">Help</a>
-            <a href="http://blog.stamped.com">Blog</a>
-            <a href="/terms-of-service">Terms of Service</a>
-            <a href="/privacy">Privacy Policy</a>
-            <span class="copyright">
-                <a href="http://nytm.org/made/" class="made">Made in NY</a>
-                &copy;2012 Stamped, Inc.
-            </span>
-        {% endblock footer %}
-        {% block post_footer    %}</footer>{% endblock post_footer %}
+        {% block header %}
+        <div id="home" class="wrap public flood">
+            <a href="/" class="brand replaced">Stamped</a>
+            <div class="card">
+                <div class="top-wave"></div>
+                {% endblock header %}
+                
+                {% block pre_main %}
+                <div role="main">
+                {% endblock pre_main %}
+                
+                {% block main %}{% endblock main %}
+                
+                {% block post_main %}
+                </div> <!-- /main -->
+                <div class="bottom-wave"></div>
+            </div> <!-- /card -->
+            {% endblock post_main %}
+            
+            {% block pre_footer %}
+            <footer>
+                {% endblock pre_footer %}
+                
+                {% block footer %}
+                <a href="/about">About Us</a>
+                <a href="/faq">FAQ</a>
+                <a href="http://help.stamped.com">Help</a>
+                <a href="http://blog.stamped.com">Blog</a>
+                <a href="/terms-of-service">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <span class="copyright">
+                    <a href="http://nytm.org/made/" class="made">Made in NY</a>
+                    &copy;2012 Stamped, Inc.
+                </span>
+                {% endblock footer %}
+                
+                {% block post_footer %}
+            </footer>
+            {% endblock post_footer %}
+        </div> <!-- /home -->
         
         <!-- scripts loaded post-document-body -->
         {% block scripts %}
