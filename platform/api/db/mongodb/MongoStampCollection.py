@@ -371,36 +371,5 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             documentIds.append(self._getObjectIdFromString(stampId))
         result = self._removeMongoDocuments(documentIds)
         
-        return result     
-    
-    def extractBadges(self, stamp):
-        user_id = stamp.user_id
-        badges  = []
-        
-        if stamp.stamp_num == 1:
-            badges.append(Badge(dict(
-                user_id = user_id, 
-                genre   = "user_first_stamp", 
-            )))
-        
-        entity_stamp_ids = self.getStampsForEntity(stamp.entity.entity_id)
-        
-        if len(entity_stamp_ids) == 0:
-            badges.append(Badge(dict(
-                user_id = user_id, 
-                genre   = "entity_first_stamp", 
-            )))
-        else:
-            friend_stamp_ids = self.getStamps(self.inbox_stamps_collection.getInboxStampIds(user_id))
-            
-            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamp_ids))
-            friend_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, friend_stamp_ids))
-            
-            if len(entity_stamp_ids & friend_stamp_ids) == 0:
-                badges.append(Badge(dict(
-                    user_id = user_id, 
-                    genre   = "friends_first_stamp", 
-                )))
-        
-        return badges
+        return result
 
