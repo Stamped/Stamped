@@ -9,11 +9,13 @@ urlpatterns = patterns('',
     # DOWNLOAD!
     url(R'^download$',                      'teaser.views.download'),
     url(R'^download/$',                     'teaser.views.download'),
-
+    
     # Tweet Pages
-    url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
-    url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.mobile'),
-
+    url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
+        'sdetail.views.show'),
+    url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
+        'sdetail.views.mobile'),
+    
     # Settings
     url(R'^pw/(?P<token>[\w-]{36})$',       'appsettings.views.passwordReset'),
     url(R'^settings/password/forgot$',      'appsettings.views.passwordForgot'),
@@ -21,14 +23,14 @@ urlpatterns = patterns('',
     url(R'^settings/password/success$',     'appsettings.views.passwordSuccess'),
     url(R'^settings/alerts$',               'appsettings.views.alertSettings'),
     url(R'^settings/alerts/update.json$',   'appsettings.views.alertSettingsUpdate'),
-
+    
     # Mobile Pages
     url(R'^privacy-mobile',                 'teaser.views.mobilePrivacy'),
     url(R'^terms-mobile',                   'teaser.views.mobileTerms'),
     url(R'^feedback-mobile',                'teaser.views.mobileFeedback'),
     url(R'^licenses-mobile',                'teaser.views.mobileLicenses'),
     url(R'^faq-mobile',                     'teaser.views.mobileFaq'),
-
+    
     # Website
     url(R'^about$',                         'teaser.views.about'),
     url(R'^faq$',                           'teaser.views.faq'),
@@ -41,7 +43,7 @@ urlpatterns = patterns('',
     #url(R'^(?P<screen_name>[\w-]{1,20})/map$', 'maps.views.user'),
     
     # Static content
-    (r'^assets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
+    (R'^assets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
     
     # Index
     url(R'$',                               'teaser.views.index'), 

@@ -15,10 +15,12 @@
 
 @implementation STUserSource
 
+@synthesize user = user_;
+
 - (void)setSlice:(STGenericCollectionSlice *)slice {
   STUserCollectionSlice* friendsSlice = [[[STUserCollectionSlice alloc] init] autorelease];
   [friendsSlice importDictionaryParams:[slice asDictionaryParams]];
-  friendsSlice.userID = [[STStampedAPI sharedInstance] currentUser].userID;
+  friendsSlice.userID = self.user.userID;
   [super setSlice:friendsSlice];
 }
 
@@ -28,10 +30,10 @@
 
 - (NSString *)lastCellText {
   if (!self.slice.query) {
-    return @"Find something to Stamp";
+    return @"No more stamps";
   }
   else {
-    return @"Broaden your Scope";
+    return @"No more stamps";
   }
 }
 
@@ -40,17 +42,6 @@
 }
 
 - (void)selectedLastCell {
-  if (!self.slice.query) {
-    /*
-     TODO repair
-    UINavigationController* controller = [Util sharedNavigationController];
-    [controller pushViewController:[[[SearchEntitiesViewController alloc] initWithNibName:@"SearchEntitiesViewController" bundle:nil] autorelease]
-                          animated:YES];
-     */
-  }
-  else {
-    [self.delegate shouldSetScopeTo:STStampedAPIScopeFriends];
-  }
 }
 
 - (void)selectedNoStampsCell {

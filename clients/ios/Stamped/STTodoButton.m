@@ -32,6 +32,9 @@
       if (!error) {
         [Util reloadStampedData];
       }
+      else {
+        [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
+      }
     }];
     id<STAction> action;
     if (self.stamp.isTodod.boolValue) {

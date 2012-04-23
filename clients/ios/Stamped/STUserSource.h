@@ -7,7 +7,10 @@
 //
 
 #import "STStampsViewSource.h"
+#import "STUser.h"
 
 @interface STUserSource : STStampsViewSource
+
+@property (nonatomic, readwrite, retain) id<STUser> user;
 
 @end

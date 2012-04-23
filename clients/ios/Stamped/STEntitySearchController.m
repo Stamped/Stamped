@@ -16,12 +16,43 @@
 #import "STButton.h"
 #import "STStampedAPI.h"
 #import "EntityDetailViewController.h"
+#import "STEntitySearchSection.h"
+
+@interface STEntitySearchTableViewCell : UITableViewCell
+
++ (NSString*)reuseIdentifier;
+
+- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)searchResult;
+
+@end
+
+@implementation STEntitySearchTableViewCell
+
++ (NSString*)reuseIdentifier {
+  return @"searchCell";
+}
+
+- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)result {
+  self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
+  if (self) {
+    self.textLabel.text = result.title;
+    self.textLabel.font = [UIFont stampedTitleFont];
+    self.textLabel.textColor = [UIColor stampedDarkGrayColor];
+    self.detailTextLabel.text = result.subtitle;
+    self.detailTextLabel.font = [UIFont stampedSubtitleFont];
+    self.detailTextLabel.textColor = [UIColor stampedGrayColor];
+    self.imageView.image = [Util imageForCategory:result.category];
+  }
+  return self;
+}
+
+@end
 
 @interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
 
 @property (nonatomic, readonly, retain) NSString* category;
 @property (nonatomic, readonly, retain) NSString* initialQuery;
-@property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* suggestedResults;
+@property (nonatomic, readwrite, retain) NSArray<STEntitySearchSection>* suggestedSections;
 @property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* searchResults;
 @property (nonatomic, readwrite, retain) UITableView* tableView;
 
@@ -31,7 +62,7 @@
 
 @synthesize category = category_;
 @synthesize initialQuery = initialQuery_;
-@synthesize suggestedResults = suggestedResults_;
+@synthesize suggestedSections = suggestedSections_;
 @synthesize searchResults = searchResults_;
 @synthesize tableView = tableView_;
 
@@ -45,9 +76,17 @@
     initialQuery_ = [query retain];
     STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
     suggested.category = category;
-    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
-      for (id<STEntitySearchResult> result in results) {
-        NSLog(@"%@", result.title);
+    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error) {
+      NSLog(@"here:%@,%@",error,results);
+      if (results) {
+        for (id<STEntitySearchSection> section in results) {
+          NSLog(@"%@", section.name);
+          for (id<STEntitySearchResult> result in section.entities) {
+            NSLog(@"result:%@", result.title);
+          }
+        }
+        self.suggestedSections = results;
+        [self.tableView reloadData];
       }
     }];
   }
@@ -119,11 +158,12 @@
   
   
   tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
-                                                                     CGRectGetMaxY(header.frame), 
-                                                                     self.view.frame.size.width, 
-                                                                     self.view.frame.size.height - CGRectGetMaxY(header.frame))];
+                                                             CGRectGetMaxY(header.frame), 
+                                                             self.view.frame.size.width, 
+                                                             self.view.frame.size.height - CGRectGetMaxY(header.frame))];
   tableView_.delegate = self;
   tableView_.dataSource = self;
+  tableView_.rowHeight = 68;
   //tableView.backgroundColor = [UIColor grayColor];
   [self.view addSubview:tableView_];
   [self.view addSubview:header];
@@ -134,25 +174,56 @@
   if (self.searchResults) {
     return self.searchResults.count;
   }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+    return sectionObject.entities.count;
+  }
   return 0;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  return 1;
+  if (self.searchResults) {
+    return 1;
+  }
+  else if (self.suggestedSections) {
+    return self.suggestedSections.count;
+  }
+  else {
+    return 1;
+  }
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"test"] autorelease];
-  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
-  cell.textLabel.text = result.title;
-  return cell;
+  id<STEntitySearchResult> result;
+  if (self.searchResults) {
+    result = [self.searchResults objectAtIndex:indexPath.row];
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+    result = [section.entities objectAtIndex:indexPath.row];
+  }
+  if (result) {
+    return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+  }
+  else {
+    return nil;
+  }
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  id<STEntitySearchResult> result = [self.searchResults objectAtIndex:indexPath.row];
-  EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
-  [[Util sharedNavigationController] pushViewController:controller animated:YES];
-  NSLog(@"Chose %@, %@", result.title, result.searchID);
+  id<STEntitySearchResult> result;
+  if (self.searchResults) {
+    result = [self.searchResults objectAtIndex:indexPath.row];
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+    result = [section.entities objectAtIndex:indexPath.row];
+  }
+  if (result) {
+    EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    NSLog(@"Chose %@, %@", result.title, result.searchID);
+  }
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
@@ -171,6 +242,16 @@
       }
     }];
   }
+}
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+  if (self.searchResults) {
+    return nil;
+  }
+  else if (self.suggestedSections) {
+    id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+    return sectionObject.name;
+  }
+  return nil;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {

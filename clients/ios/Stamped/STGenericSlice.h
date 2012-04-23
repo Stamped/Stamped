@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STStampedParameter.h"
 
-@interface STGenericSlice : NSObject
+@interface STGenericSlice : STStampedParameter
 
 @property (nonatomic, readwrite, copy) NSNumber* limit;
 @property (nonatomic, readwrite, copy) NSNumber* offset;
@@ -17,10 +18,6 @@
 @property (nonatomic, readwrite, copy) NSString* coordinates;
 @property (nonatomic, readwrite, copy) NSDate* since;
 @property (nonatomic, readwrite, copy) NSDate* before;
-
-- (NSMutableDictionary*)asDictionaryParams;
-
-- (void)importDictionaryParams:(NSDictionary*)params;
 
 - (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset;
 

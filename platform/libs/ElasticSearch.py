@@ -6,34 +6,282 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import pyes, pymongo, re, time
+import pyes, sys, time
 
-from abc            import ABCMeta, abstractmethod
-from gevent         import Greenlet
+from abc    import ABCMeta, abstractmethod
+from pprint import pformat
 
-class AElasticSearchError    (Exception):          pass
+class AElasticSearchError   (Exception):           pass
 class InvalidMappingError   (AElasticSearchError): pass
 class InvalidIndexError     (AElasticSearchError): pass
 
-# TODO: utilize mappings to convert / strip newly added documents
-# TODO: enforce required mappings and type checking of newly added documents
+def deep_comparison(v0, v1):
+    if isinstance(v0, (set, frozenset)):
+        if not isinstance(v1, (set, frozenset)):
+            return False
+        if len(frozenset(v0.keys()) - frozenset(v1.keys())) > 0:
+            return False
+        
+        return all(deep_comparison(v0[k], v1[k]) for k in v0)
+    elif isinstance(v0, (list, tuple)):
+        if not isinstance(v1, (list, tuple)):
+            return False
+        
+        return all(deep_comparison(v0[i], v1[i]) for i in xrange(len(v0)))
+    else:
+        return v0 == v1
 
-# TODO: fix oplog state caching to work with config mappings / indices
-# TODO: how does modifying an existing mapping or index work?
+def coerce_iter(v):
+    if isinstance(v, basestring):
+        return [ v ]
+    elif isinstance(v, (list, tuple)):
+        return v
+    else:
+        try:
+            iter(v)
+            return v
+        except TypeError:
+            return [ v ]
 
 class ElasticSearch(object):
     
-    def __init__(self, config, **kwargs):
-        utils.log("[%s]: %s" % str(kwargs))
-        self._config = self._parse_config_file(config)
-        return
+    def __init__(self, config_file, force=False, **kwargs):
+        self._config_file = config_file
+        self._config = { }
+        self._cache  = { }
+        self._force  = force
+        
+        self._init_config()
+        self._init_client(**kwargs)
+        
+        self._sync_config()
+    
+    @property
+    def indices(self):
+        try:
+            return self._cache['indices']
+        except KeyError:
+            indices = self._client.get_indices()
+            self._cache['indices'] = indices
+            return indices
+    
+    @property
+    def mappings(self):
+        try:
+            return self._cache['mappings']
+        except KeyError:
+            try:
+                mappings = self._client.get_mapping()
+            except pyes.exceptions.NotFoundException:
+                mappings = { }
+            
+            self._cache['mappings'] = mappings
+            return mappings
+    
+    @property
+    def client(self):
+        return self._client
+    
+    def _init_config(self):
+        self._config = self._parse_config_file(self._config_file)
+        
+        indices  = self._config.get('ES_INDICES',  [])
+        mappings = self._config.get('ES_MAPPINGS', [])
+        
+        for index in indices:
+            self._validate_index(index)
+        
+        for mapping in mappings:
+            self._validate_mapping(mapping)
+    
+    def _sync_config(self):
+        indices  = self._config.get('ES_INDICES',  [])
+        mappings = self._config.get('ES_MAPPINGS', [])
+        
+        utils.log()
+        utils.log("-" * 80)
+        utils.log("[%s] SYNCING CONFIG:" % self)
+        utils.log()
+        utils.log("Desired indices:  %s" % pformat(indices))
+        utils.log("Actual indices:   %s" % pformat(self.indices))
+        utils.log()
+        utils.log("Desired mappings: %s" % pformat(mappings))
+        utils.log("Actual mappings:  %s" % pformat(self.mappings))
+        utils.log("-" * 80)
+        utils.log()
+        
+        # sync indices
+        # ------------
+        missing  = []
+        remove   = []
+        
+        # find all extraneous indices
+        for index in self.indices:
+            found = False
+            
+            for index2 in indices:
+                if index == index2['name']:
+                    found = True
+                    break
+            
+            if not found:
+                remove.append(index)
+        
+        # find all missing indices
+        for index in indices:
+            name  = index['name']
+            found = False
+            
+            for index2 in self.indices:
+                if name == index2:
+                    found = True
+                    break
+            
+            if not found:
+                missing.append(index)
+        
+        # remove all extraneous indices
+        for index in remove:
+            if not self._force:
+                utils.log("[%s] remove invalid index '%s'?" % (self, index))
+                response = utils.get_input()
+                
+                if response == 'n': # no
+                    continue
+                elif response == 'a': # abort
+                    sys.exit(1)
+            
+            self._delete_index(index)
+        
+        # add all missing indices
+        for index in missing:
+            name = index['name']
+            
+            if not self._force:
+                utils.log("[%s] add new index '%s'?" % (self, name))
+                response = utils.get_input()
+                
+                if response == 'n': # no
+                    continue
+                elif response == 'a': # abort
+                    sys.exit(1)
+            
+            self._create_index(name, index.get('settings', None))
+        
+        # sync mappings
+        # -------------
+        missing   = []
+        remove    = []
+        blacklist = frozenset(['boost', 'index'])
+        
+        def _prune(d):
+            if isinstance(d, dict):
+                return dict((k, _prune(v)) for k, v in d.iteritems() if k not in blacklist)
+            else:
+                return d
+        
+        # find all extraneous mappings
+        for index, types in self.mappings.iteritems():
+            for doc_type, properties in types.iteritems():
+                prefix = 'remove invalid'
+                found = False
+                
+                for mapping2 in mappings:
+                    if index in mapping2['indices'] and doc_type == mapping2['type']:
+                        if deep_comparison(_prune(mapping2['mapping']), _prune(properties)):
+                            found = True
+                            break
+                        else:
+                            prefix = 'remove stale'
+                
+                if not found:
+                    remove.append((index, doc_type, prefix))
+        
+        # find all missing mappings
+        for mapping2 in mappings:
+            properties2 = _prune(mapping2['mapping'])
+            type2 = mapping2['type']
+            
+            for index2 in mapping2['indices']:
+                prefix = 'add new'
+                found  = False
+                
+                for index, types in self.mappings.iteritems():
+                    if index == index2:
+                        for doc_type, properties in types.iteritems():
+                            if doc_type == mapping2['type']:
+                                if deep_comparison(properties2, _prune(properties)):
+                                    found = True
+                                    break
+                                else:
+                                    prefix = 'update'
+                    
+                    if found:
+                        break
+                
+                if not found:
+                    missing.append((mapping2, prefix))
+        
+        # remove all extraneous mappings
+        for index, doc_type, prefix in remove:
+            if not self._force:
+                utils.log("[%s] %s mapping '%s:%s'?" % (self, prefix, index, doc_type))
+                response = utils.get_input()
+                
+                if response == 'n': # no
+                    continue
+                elif response == 'a': # abort
+                    sys.exit(1)
+            
+            self._delete_mapping(index, doc_type)
+        
+        # add all missing mappings
+        for mapping, prefix in missing:
+            doc_type = mapping['type']
+            
+            for index in mapping['indices']:
+                if not self._force:
+                    utils.log("[%s] %s mapping '%s:%s'?" % (self, prefix, index, doc_type))
+                    response = utils.get_input()
+                    
+                    if response == 'n': # no
+                        continue
+                    elif response == 'a': # abort
+                        sys.exit(1)
+                
+                properties = mapping['mapping']
+                self._put_mapping(doc_type, properties, [ index ])
+        
+        self.update()
+    
+    def _parse_config_file(self, config_file):
+        with open(config_file, 'r') as f:
+            return self._parse_config(f.read())
+    
+    def _parse_config(self, config):
+        conf = {}
+        exec compile(config, '', "exec") in conf
+        
+        try:
+            del conf['__builtins__']
+        except KeyError:
+            pass
+        
+        # ignore any global config variables which don't begin with ES_
+        return dict(i for i in conf.iteritems() if i[0].startswith('ES_'))
+    
+    def update(self):
+        self._cache = {}
+    
+    def _init_client(self, **kwargs):
         retries = 5
         
         while True:
             try:
-                self._elasticsearch = pyes.ES(**kwargs)
-                info = self._elasticsearch.collect_info()
-                utils.log("[%s] pyes: %s" % (self, pformat(info)))
+                self._client = pyes.ES(**kwargs)
+                self._client.collect_info()
+                utils.log("[%s] pyes: %s" % (self, pformat(self._client.info)))
+                self.update()
                 break
             except Exception:
                 retries -= 1
@@ -43,185 +291,148 @@ class ElasticSearch(object):
                 utils.printException()
                 time.sleep(1)
     
-    def _parse_config_file(self, config_file):
-        with open(config_file, 'r') as f
-            return self._parse_config_file(f.read())
-    
-    def _parse_config(self, config):
-        conf = {}
-        exec compile(config, '', "exec") in conf
-        
-        pprint(conf)
-    
-    '''
-    def add_indices(self, indices, noop = False):
+    def _create_index(self, index, settings=None):
         """
-            Registers each of the given indices with the underlying elasticsearch instance.
+            Registers the given index with the underlying elasticsearch instance.
         """
         
-        for index in indices:
-            self._validate_index(index)
-            
-            name     = index['name']
-            settings = index.get('settings', None)
-            
-            # TODO: special-case if index already exists (pyes.exceptions.IndexAlreadyExistsException)
-            try:
-                if not noop:
-                    utils.log("[%s] add_index(%s)" % (self, name))
-                    self._elasticsearch.create_index(index=name, settings=settings)
-            except pyes.exceptions.IndexAlreadyExistsException, e:
-                # TODO!
-                raise
+        try:
+            utils.log("[%s] create_index(%s)" % (self, index))
+            self._client.create_index(index=index, settings=settings)
+            self.update()
+        except pyes.exceptions.IndexAlreadyExistsException, e:
+            pass
     
-    def add_mappings(self, mappings, noop = False):
+    def _put_mapping(self, doc_type, mapping, indices):
         """ 
-            Registers each of the given mappings with the underlying elasticsearch instance.
+            Registers the given mapping with the underlying elasticsearch instance.
         """
         
-        for doc in mappings:
-            self._validate_mapping(doc)
-            
-            doc_type = doc['type']
-            ns       = doc['ns']
-            indices  = doc.get('indices', None)
-            mapping  = doc['mapping']
-            
-            if isinstance(indices, basestring):
-                indices = [ indices ]
-            
-            if not noop:
-                utils.log("[%s] add_mapping(type=%s, indices=%s, %s)" % 
-                          (self, doc_type, indices, pformat(mapping)))
-                self._elasticsearch.put_mapping(doc_type, mapping, indices)
+        indices = coerce_iter(indices)
+        
+        utils.log("[%s] put_mapping(type=%s, indices=%s, %s)" % 
+                  (self, doc_type, indices, pformat(mapping)))
+        self._client.put_mapping(doc_type, mapping, indices)
+        self.update()
     
-    def remove_index(self, id):
+    def _delete_index(self, index):
         """ 
             Removes a single index from the underlying elasticsearch instance.
         """
         
-        try:
-            index = self._indices[id]
-        except KeyError:
-            raise InvalidIndexError(id)
-        
-        self._elasticsearch.delete_index(index)
-        del self._indices[id]
-        
-        # TODO: should we clear the state cache of affected sources here?
+        utils.log("[%s] delete_index(index=%s)" % (self, index))
+        self._client.delete_index(index)
+        self.update()
     
-    def remove_mapping(self, id):
+    def _delete_mapping(self, index, doc_type):
         """ 
-            Removes a single mapping from the underlying elasticsearch instance and stops any 
-            outstanding mongo listeners from needlessly continuing to poll changes if no more 
-            mappings exist.
+            Removes a single mapping from the underlying elasticsearch instance.
         """
         
+        utils.log("[%s] delete_mapping(index=%s, type=%s)" % (self, index, doc_type))
+        self._client.delete_mapping(index, doc_type)
+        self.update()
+    
+    def _get_mapping(self, index, doc_type):
         try:
-            indices, doc_type, ns = self._mappings[id]
+            return self.mappings[index][doc_type]
         except KeyError:
-            raise InvalidMappingError(id)
+            pass
         
-        if ns not in self._sources:
-            raise InvalidMappingError(id)
+        return None
+    
+    def add(self, documents, indices, doc_type, **kwargs):
+        """
+            Indexes all of the given documents with elasticsearch.
+        """
         
-        wrapper = self._sources[ns]
-        del wrapper['mappings'][id]
+        documents = coerce_iter(documents)
+        indices   = coerce_iter(indices)
         
-        if len(wrapper['mappings']) == 0:
-            source = wrapper['source']
-            source.stop()
-            del self._sources[ns]
+        count     = kwargs.pop('count', None)
+        max_batch = kwargs.pop('max_batch', 512)
+        inserts   = 0
+        cur_batch = 0
         
-        if indices:
+        try:
+            bulk  = (count and count > 1) or (len(documents) > 1)
+        except Exception:
+            bulk  = True
+        
+        try:
+            kwargs['bulk'] = kwargs.get('bulk', bulk)
+            
             for index in indices:
-                self._elasticsearch.delete_mapping(index, doc_type)
-        else:
-            self._elasticsearch.delete_mapping(None, doc_type)
-        
-        del self._mappings[id]
-    
-    def add(self, ns, documents, count = None, noop = False):
-        """
-            Indexes all documents in the given namespace with elasticsearch.
-        """
-        
-        try:
-            wrapper = self._sources[ns]
-        except KeyError:
-            utils.log(self._sources)
-            raise InvalidMappingError(ns)
-        
-        if not noop:
-            mappings = wrapper['mappings']
-            bulk     = count and count > 1
-            inserts  = 0
-            
-            for mapping_id, mapping in mappings.iteritems():
-                indices    = mapping[0]
-                doc_type   = mapping[1]
-                mapping_ns = mapping[2]
-                properties = mapping[3]
+                mapping = self._get_mapping(index, doc_type)
                 
-                if ns == mapping_ns:
-                    for index in indices:
-                        for doc in documents:
-                            id = str(doc.pop('_id'))
+                if mapping is None:
+                    utils.log("INVALID_MAPPING_ERROR: (index=%s, type=%s)" % (index, doc_type))
+                    
+                    raise InvalidMappingError("no mapping defined for (index=%s, type=%s)" % 
+                                              (index, doc_type))
+                
+                def _validate_doc(d, schema):
+                    for k, v in schema.iteritems():
+                        try:
+                            dv = d[k]
                             
-                            #utils.log("[%s] index(ns=%s, index=%s, type=%s, %s)" % 
-                            #          (self, ns, index, doc_type, pformat(doc)))
-                            
-                            def _validate_doc(d, schema):
-                                for k, v in schema.iteritems():
-                                    try:
-                                        dv = d[k]
-                                        
-                                        if isinstance(dv, dict):
-                                            _validate_doc(dv, v)
-                                    except KeyError:
-                                        try:
-                                            null_value = v['null_value']
-                                            d[k] = null_value
-                                        except KeyError:
-                                            pass
-                            
-                            # validate doc against mapping properties
-                            _validate_doc(doc, properties)
-                            
-                            self._elasticsearch.index(doc, index, doc_type, id=id, bulk=bulk)
-                            inserts += 1
+                            if isinstance(dv, dict):
+                                _validate_doc(dv, v)
+                        except KeyError:
+                            try:
+                                null_value = v['null_value']
+                                d[k] = null_value
+                            except KeyError:
+                                pass
+                
+                for doc in documents:
+                    id = str(doc.pop('_id', None))
+                    kwargs['id'] = id
+                    
+                    # validate this document against the predefined mapping
+                    _validate_doc(doc, mapping)
+                    
+                    # index this document with elasticsearch
+                    self._client.index(doc, index, doc_type, **kwargs)
+                    
+                    inserts   += 1
+                    cur_batch += 1
+                    
+                    # flush bulk batch once it gets too big
+                    if bulk and cur_batch >= max_batch:
+                        utils.log("[%s] flushing bulk indexing job of %d documents (%s:%s) (%d total)" % 
+                                  (self, cur_batch, index, doc_type, inserts))
+                        self._client.flush_bulk(True)
+                        cur_batch = 0
             
-            if bulk:
-                utils.log("[%s] flushing bulk indexing job of %d '%s' documents" % 
-                          (self, inserts, doc_type))
-                self._elasticsearch.flush_bulk()
+            # flush bulk batch
+            if bulk and cur_batch >= 0:
+                utils.log("[%s] flushing bulk indexing job of %d documents (%s:%s) (%d total)" % 
+                          (self, cur_batch, index, doc_type, inserts))
+                self._client.flush_bulk(True)
+                cur_batch = 0
+            else:
+                utils.log("[%s] finished bulk indexing job of %d documents (%s:%s)" % 
+                          (self, inserts, index, doc_type))
+        except:
+            utils.printException()
+            raise
     
-    def remove(self, ns, id):
+    def remove(self, indices, doc_type, ids):
         """
-            Removes a single document in the given namespace from any underlying 
-            elasticsearch indices.
+            Removes a single document from its underlying elasticsearch index.
         """
         
-        try:
-            wrapper = self._sources[ns]
-        except KeyError:
-            raise InvalidMappingError(ns)
+        indices = coerce_iter(indices)
+        ids     = coerce_iter(ids)
+        bulk    = True
         
-        todo = []
-        
-        for mapping in wrapper['mappings']:
-            doc_type = mapping[1]
-            
-            for index in mapping[0]:
-                todo.append([ index, doc_type, id ])
-        
-        bulk = len(todo) >= 2
-        
-        for item in todo:
-            self._elasticsearch.delete(*item, bulk=bulk)
+        for index in indices:
+            for id in ids:
+                self._client.delete(index, doc_type, id, bulk=bulk)
         
         if bulk:
-            self._elasticsearch.flush_bulk()
+            self._client.flush_bulk()
     
     @staticmethod
     def _validate_mapping(doc):
@@ -231,10 +442,6 @@ class ElasticSearch(object):
         
         ElasticSearch._validate_dict(doc, InvalidMappingError, {
             'type'          : {
-                'required'  : True, 
-                'type'      : basestring, 
-            }, 
-            'ns'            : {
                 'required'  : True, 
                 'type'      : basestring, 
             }, 
@@ -281,16 +488,17 @@ class ElasticSearch(object):
             
             if key in doc:
                 if _type is not None and not isinstance(doc[key], _type):
-                    raise error(doc)
+                    msg = "type error; attribute '%s' expected type '%s', found type '%s' in %s" % \
+                          (key, _type, type(doc[key]), pformat(doc))
+                    raise error(msg)
             elif required:
-                raise error(doc)
+                raise error("missing required attribute '%s' in %s" % (key, pformat(doc)))
         
         # optionally check for overflow
         if not allow_overflow:
             for key in doc:
                 if key != '_id' and key not in schema:
-                    raise error(doc)
-    '''
+                    raise error("unknown key found '%s' in %s" % (key, pformat(doc)))
     
     def __str__(self):
         return self.__class__.__name__
@@ -311,6 +519,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     args   = parser.parse_args()
-    
-    es     = ElasticSearch('test_es.py')
+    server = "%s:%s" % (args.es_host, args.es_port)
+    es     = ElasticSearch('test_es.py', force=args.force, server=server)
 

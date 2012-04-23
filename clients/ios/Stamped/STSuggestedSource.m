@@ -10,6 +10,7 @@
 #import "STStampedAPI.h"
 #import "Util.h"
 #import "STSearchField.h"
+#import "STEntitySearchController.h"
 
 @implementation STSuggestedSource
 
@@ -34,13 +35,9 @@
   if (!self.slice.query) {
   }
   else {
-    /*
-     TODO repair
-    SearchEntitiesViewController* search = [[[SearchEntitiesViewController alloc] initWithNibName:@"SearchEntitiesViewController" bundle:nil] autorelease];
     UINavigationController* controller = [Util sharedNavigationController];
-    [controller pushViewController:search
+    [controller pushViewController:[[[STEntitySearchController alloc] initWithCategory:self.slice.category andQuery:self.slice.query] autorelease]
                           animated:YES];
-     */
   }
 }
 

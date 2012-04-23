@@ -14,6 +14,7 @@
 @interface STActionContext : NSObject
 
 @property (nonatomic, readwrite, retain) id<STEntityDetail> entityDetail;
+@property (nonatomic, readwrite, retain) id<STEntity> entity;
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 @property (nonatomic, readwrite, assign) CGRect frame;
 @property (nonatomic, readwrite, retain) id<STUser> user;

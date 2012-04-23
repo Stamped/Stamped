@@ -11,7 +11,7 @@
 
 @protocol STEntitySearchSection <NSObject>
 
-@property (nonatomic, readwrite, copy) NSString* name;
-@property (nonatomic, readwrite, copy) NSArray<STEntitySearchResult>* results;
+@property (nonatomic, readonly, copy) NSString* name;
+@property (nonatomic, readonly, copy) NSArray<STEntitySearchResult>* entities;
 
 @end

@@ -31,6 +31,7 @@
 }
 
 - (void)importDictionaryParams:(NSDictionary*)params {
+  [super importDictionaryParams:params];
   NSArray* keys = [NSArray arrayWithObjects:
                    @"limit",
                    @"offset",
@@ -49,7 +50,7 @@
 }
 
 - (NSMutableDictionary*)asDictionaryParams {
-  NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+  NSMutableDictionary* dict = [super asDictionaryParams];
   NSArray* keys = [NSArray arrayWithObjects:
                    @"limit",
                    @"offset",

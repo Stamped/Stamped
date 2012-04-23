@@ -31,7 +31,7 @@
 }
 
 + (NSArray*)stampedLightGradient {
-  return [NSArray arrayWithObjects:[UIColor colorWithWhite:.95 alpha:1], [UIColor colorWithWhite:.90 alpha:1], nil];
+  return [NSArray arrayWithObjects:[UIColor colorWithWhite:.99 alpha:1], [UIColor colorWithWhite:.90 alpha:1], nil];
 }
 
 + (NSArray*)stampedGradient {
