@@ -220,7 +220,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
 class StampedAPIUsersFindTwitter(StampedAPIUserTest):
     def test_find_by_twitter(self):
-        ids = ['11131112','814122']
+        ids = ['11131112','26424187']
         path = "account/linked/twitter/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],

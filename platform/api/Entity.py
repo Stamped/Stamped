@@ -230,7 +230,8 @@ def deriveKindFromSubcategory(subcategory):
         'stadium'           : 'place', 
         'store'             : 'place', 
         'university'        : 'place', 
-        'zoo'               : 'place', 
+        'zoo'               : 'place',
+        'point_of_interest' : 'place',
 
         'other'             : 'other', 
         'video_game'        : 'other', 

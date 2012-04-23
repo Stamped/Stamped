@@ -1513,6 +1513,18 @@ class HTTPStamp(Schema):
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
 
+            try:
+                self.blurb                  = schema.contents[-1].blurb 
+                self.mentions               = schema.contents[-1].mentions 
+                self.created                = schema.contents[-1].timestamp.created
+                if len(schema.contents[-1].images) > 0:
+                    image = schema.contents[-1].images[0]
+                    self.image_dimensions   = "%s,%s" % (image.width, image.height)
+                    self.image_url          = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
+            except Exception as e:
+                logs.warning(e)
+                logs.info("No blurb found for stamp_id %s (%s)" % (self.stamp_id, schema.contents))
+
             self.num_comments = 0
             if schema.num_comments > 0:
                 self.num_comments       = schema.num_comments
@@ -1528,9 +1540,6 @@ class HTTPStamp(Schema):
             self.is_fav = False
             if schema.is_fav:
                 self.is_fav = True
-
-            if self.image_dimensions != None:
-                self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
             
             stamp_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
@@ -1963,8 +1972,8 @@ class HTTPActivity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'EnrichedActivity':
             data        = schema.value
-            data.pop('subjects')
-            data.pop('objects')
+            data.pop('subjects', None)
+            data.pop('objects', None)
 
             self.importData(data, overflow=True)
 
