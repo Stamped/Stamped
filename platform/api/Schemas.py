@@ -722,7 +722,7 @@ class BasicEntity(Schema):
             (self.rdio_id,              'T_RDIO_'), 
             (self.spotify_id,           'T_SPOTIFY_'), 
             (self.opentable_id,         'T_OPENTABLE_'), 
-            (self.googleplaces_id,      'T_GOOGLEPLACES_'), 
+            (self.googleplaces_reference,'T_GOOGLEPLACES_'),
             (self.factual_id,           'T_FACTUAL_'), 
             (self.tmdb_id,              'T_TMDB_'), 
             (self.thetvdb_id,           'T_THETVDB_'), 
