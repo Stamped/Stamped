@@ -2517,13 +2517,17 @@ class StampedAPI(AStampedAPI):
         
         if genericCollectionSlice.limit is None:
             genericCollectionSlice.limit = stampCap
+
+        # Adjustment for multiple blurbs to use "stamped" timestamp instead of "created"
+        if genericCollectionSlice.sort == 'created':
+            genericCollectionSlice.sort = 'stamped'
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
         
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         
         if self.__version == 0:
-            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created']):
+            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created', 'stamped']):
                 if len(stamps) >= genericCollectionSlice.limit:
                     genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
                 

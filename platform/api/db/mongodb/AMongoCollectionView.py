@@ -22,6 +22,7 @@ class AMongoCollectionView(AMongoCollection):
         # -----------------
         time_filter = 'timestamp.created'
         sort        = None
+        complexSort = None
         reverse     = genericCollectionSlice.reverse
         user_query  = genericCollectionSlice.query
         viewport    = (genericCollectionSlice.viewport and genericCollectionSlice.viewport.lowerRight.lat is not None)
@@ -66,6 +67,9 @@ class AMongoCollectionView(AMongoCollection):
             query["entity.coordinates.lng"] = { "$exists" : True}
             
             reverse = not reverse
+
+        elif genericCollectionSlice.sort == 'stamped':
+            complexSort = [('timestamp.stamped', pymongo.DESCENDING), ('timestamp.created', pymongo.DESCENDING)]
         
         if genericCollectionSlice.sort != 'relevance' and genericCollectionSlice.query is not None:
             raise StampedInputError("non-empty search query is only compatible with sort set to \"relevance\"")
@@ -176,7 +180,7 @@ class AMongoCollectionView(AMongoCollection):
         if sort is not None:
             # fast-path which uses built-in sorting
             # -------------------------------------
-            
+
             # order in which to return sorted results
             order   = pymongo.ASCENDING if reverse else pymongo.DESCENDING
             
@@ -184,6 +188,14 @@ class AMongoCollectionView(AMongoCollection):
                       .sort(sort, order) \
                       .skip(genericCollectionSlice.offset) \
                       .limit(genericCollectionSlice.limit)
+
+        elif complexSort is not None:
+            results = self._collection.find(query) \
+                      .sort(sort) \
+                      .skip(genericCollectionSlice.offset) \
+                      .limit(genericCollectionSlice.limit)
+
+
         else:
             # slow-path which uses custom map-reduce for sorting
             # --------------------------------------------------

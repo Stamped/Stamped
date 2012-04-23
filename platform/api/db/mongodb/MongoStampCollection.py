@@ -32,6 +32,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
+        self._collection.ensure_index([('timestamp.created', pymongo.ASCENDING)])
+        self._collection.ensure_index([('timestamp.stamped', pymongo.ASCENDING)])
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('entity.entity_id', pymongo.ASCENDING)])
