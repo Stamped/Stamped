@@ -1620,10 +1620,13 @@ class StampedAPI(AStampedAPI):
         userIds = {}
         userIds[user.user_id] = user.exportSchema(UserMini())
         
+        content = StampContent()
         # Extract mentions
         if blurbData is not None:
-            stamp.blurb    = blurbData.strip()
-            stamp.mentions = self._extractMentions(blurbData)
+            content.blurb = blurbData.strip()
+            content.mentions = self._extractMentions(blurbData)
+
+        stamp.contents = [ content ]
         
         # Extract credit
         if creditData is not None:
@@ -1674,8 +1677,13 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("invalid image dimensions")
             
             # Add image dimensions to stamp object
-            stamp.image_dimensions  = "%s,%s" % (image_width, image_height)
-            stamp                   = self._stampDB.updateStamp(stamp)
+            image           = ImageSchema()
+            image.width     = image_width
+            image.height    = image_height
+            image.image     = stamp.stamp_id 
+            content.images  = [ image ]
+            stamp.contents  = [ content ]
+            stamp           = self._stampDB.updateStamp(stamp)
             
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[stamp.stamp_id, image_url])
@@ -1783,7 +1791,7 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         mentionedUserIds = set()
-        for item in stamp.mentions:
+        for item in stamp.contents[-1].mentions:
             if item.user_id is not None and item.user_id != authUserId and item.user_id not in creditedUserIds:
                 mentionedUserIds.add(item.user_id)
         if len(mentionedUserIds) > 0:
@@ -2851,7 +2859,16 @@ class StampedAPI(AStampedAPI):
             requireReceipient       = True
 
         elif verb == 'mention':
-            objects.stamp_ids       = [ kwargs['stampId'] ] # TODO: Add check if block exists
+            recipientIds = kwargs.pop('recipientIds', [])
+            validRecipientIds = []
+            for recipientId in recipientIds:
+                # Check if block exists between user and mentioned user
+                friendship = Friendship(user_id=recipientId, friend_id=userId)
+                if self._friendshipDB.blockExists(friendship) == False:
+                    validRecipientIds.append(recipientId)
+            kwargs['recipientIds']  = validRecipientIds
+
+            objects.stamp_ids       = [ kwargs['stampId'] ]
             if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
             requireReceipient       = True

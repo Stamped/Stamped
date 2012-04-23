@@ -38,17 +38,17 @@ class StampedAPIStampPlacesShow(StampedAPIStampPlaceTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['blurb'], self.stamp['blurb'])
 
-class StampedAPIStampPlacesUpdate(StampedAPIStampPlaceTest):
-    def test_show(self):
-        path = "stamps/update.json"
-        blurb = "Really, really delicious."
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id'],
-            "blurb": blurb
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['blurb'], blurb)
+# class StampedAPIStampPlacesUpdate(StampedAPIStampPlaceTest):
+#     def test_show(self):
+#         path = "stamps/update.json"
+#         blurb = "Really, really delicious."
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "blurb": blurb
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['blurb'], blurb)
 
 class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
     def setUp(self):
@@ -95,55 +95,55 @@ class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
             self.userB['screen_name']
             )
 
-class StampedAPIStampPlacesMentionsUpdate(StampedAPIStampPlaceMentionsTest):
-    def test_no_mentions(self):
-        path = "stamps/update.json"
-        blurb = "Really, really delicious."
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id'],
-            "blurb": blurb
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['blurb'], blurb)
-        self.assertTrue('mentions' not in result)
+# class StampedAPIStampPlacesMentionsUpdate(StampedAPIStampPlaceMentionsTest):
+#     def test_no_mentions(self):
+#         path = "stamps/update.json"
+#         blurb = "Really, really delicious."
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "blurb": blurb
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['blurb'], blurb)
+#         self.assertTrue('mentions' not in result)
 
-    def test_two_mentions(self):
-        path = "stamps/update.json"
-        blurb = "Thanks again @%s! --@%s" % \
-                (self.userB['screen_name'], self.userA['screen_name'])
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id'],
-            "blurb": blurb
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['blurb'], blurb)
-        self.assertTrue(len(result['mentions']) == 2)
+#     def test_two_mentions(self):
+#         path = "stamps/update.json"
+#         blurb = "Thanks again @%s! --@%s" % \
+#                 (self.userB['screen_name'], self.userA['screen_name'])
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "blurb": blurb
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['blurb'], blurb)
+#         self.assertTrue(len(result['mentions']) == 2)
 
-class StampedAPIStampPlacesCreditUpdate(StampedAPIStampPlaceMentionsTest):
-    def test_no_credit(self):
-        path = "stamps/update.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id'],
-            "credit": None
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue('credit' not in result)
+# class StampedAPIStampPlacesCreditUpdate(StampedAPIStampPlaceMentionsTest):
+#     def test_no_credit(self):
+#         path = "stamps/update.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "credit": None
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertTrue('credit' not in result)
 
-    def test_two_credits(self):
-        path = "stamps/update.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id'],
-            "credit": "%s,%s" % (
-                self.userC['screen_name'],
-                self.userB['screen_name']
-            )
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(len(result['credit']) == 2)
+#     def test_two_credits(self):
+#         path = "stamps/update.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "credit": "%s,%s" % (
+#                 self.userC['screen_name'],
+#                 self.userB['screen_name']
+#             )
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertTrue(len(result['credit']) == 2)
 
 if __name__ == '__main__':
     main()

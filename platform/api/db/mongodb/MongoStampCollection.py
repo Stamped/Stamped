@@ -45,6 +45,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
+
+        # Convert single-blurb documents into new multi-blurb schema
+        if 'blurb' in document or 'mentions' in document or 'image_dimensions' in document:
+            contents =  {
+                'blurb'     : document.pop('blurb', None),
+                'mentions'  : document.pop('mentions', None),
+                'timestamp' : { 'created' : document['timestamp']['created'] },
+            }
+            if 'image_dimensions' in document:
+                contents['images'] = [
+                    {
+                        'width'     : document['image_dimensions'].split(',')[0],
+                        'height'    : document['image_dimensions'].split(',')[1],
+                        'image'     : document['stamp_id'],
+                    }
+                ]
+            document['contents'] = [ contents ]
+            document['timestamp']['stamped'] = document['timestamp']['created']
         
         entityData = document.pop('entity')
         entity = buildEntity(entityData, mini=True)

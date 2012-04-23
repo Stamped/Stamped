@@ -314,17 +314,26 @@ class Stamp(Schema):
         self.stamp_id           = SchemaElement(basestring)
         self.entity             = BasicEntity(required=True)
         self.user               = UserMini(required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(CreditSchema())
+        self.contents           = SchemaList(StampContent())
         self.comment_preview    = SchemaList(Comment())
-        self.image_dimensions   = SchemaElement(basestring)
-        self.timestamp          = TimestampSchema()
+        self.via                = SchemaElement(basestring)
+        self.timestamp          = StampTimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
-        self.via                = SchemaElement(basestring)
         self.attributes         = StampAttributesSchema()
         self.badges             = SchemaList(Badge())
+        ### DEPRECATED
+        self.blurb              = SchemaElement(basestring)
+        self.mentions           = SchemaList(MentionSchema())
+        self.image_dimensions   = SchemaElement(basestring)
+
+class StampContent(Schema):
+    def setSchema(self):
+        self.blurb              = SchemaElement(basestring)
+        self.images             = SchemaList(ImageSchema())
+        self.timestamp          = TimestampSchema()
+        self.mentions           = SchemaList(MentionSchema())
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -361,6 +370,11 @@ class Badge(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.genre              = SchemaElement(basestring, required=True)
+
+class StampTimestampSchema(TimestampSchema):
+    def setSchema(self):
+        TimestampSchema.setSchema(self)
+        self.stamped            = SchemaElement(datetime)
 
 
 # ######## #
