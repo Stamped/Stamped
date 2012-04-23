@@ -49,7 +49,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             del(document['_id'])
 
         # Convert single-blurb documents into new multi-blurb schema
-        if 'blurb' in document or 'mentions' in document or 'image_dimensions' in document:
+        if 'stamped' not in document['timestamp']:
             contents =  {
                 'blurb'     : document.pop('blurb', None),
                 'mentions'  : document.pop('mentions', None),

@@ -324,9 +324,9 @@ class Stamp(Schema):
         self.attributes         = StampAttributesSchema()
         self.badges             = SchemaList(Badge())
         ### DEPRECATED
-        self.blurb              = SchemaElement(basestring)
-        self.mentions           = SchemaList(MentionSchema())
-        self.image_dimensions   = SchemaElement(basestring)
+        # self.blurb              = SchemaElement(basestring)
+        # self.mentions           = SchemaList(MentionSchema())
+        # self.image_dimensions   = SchemaElement(basestring)
 
 class StampContent(Schema):
     def setSchema(self):
