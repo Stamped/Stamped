@@ -191,7 +191,7 @@ class AMongoCollectionView(AMongoCollection):
 
         elif complexSort is not None:
             results = self._collection.find(query) \
-                      .sort(sort) \
+                      .sort(complexSort) \
                       .skip(genericCollectionSlice.offset) \
                       .limit(genericCollectionSlice.limit)
 
