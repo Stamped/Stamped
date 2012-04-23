@@ -341,6 +341,11 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         # Returns user ids that have "liked" the stamp
         return self.stamp_likes_collection.getStampLikes(stampId) 
         
+    def getStampLikesAcrossStamps(self, stampIds, limit=4):
+        # Returns user ids that have "liked" the stamp
+        userIds = self.stamp_likes_collection.getStampLikesAcrossStampIds(stampIds, limit=limit) 
+        return map(self._getObjectIdFromString, userIds)
+        
     def getUserLikes(self, userId):
         # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 

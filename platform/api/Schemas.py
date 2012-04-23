@@ -278,6 +278,7 @@ class StampStatsSchema(Schema):
         self.num_likes          = SchemaElement(int)
         self.like_threshold_hit = SchemaElement(bool)
         self.stamp_num          = SchemaElement(int)
+        self.num_blurbs         = SchemaElement(int)
 
 
 # ########### #
@@ -316,7 +317,7 @@ class Stamp(Schema):
         self.user               = UserMini(required=True)
         self.credit             = SchemaList(CreditSchema())
         self.contents           = SchemaList(StampContent())
-        self.comment_preview    = SchemaList(Comment())
+        self.previews           = StampPreviews()
         self.via                = SchemaElement(basestring)
         self.timestamp          = StampTimestampSchema()
         self.flags              = FlagsSchema()
@@ -327,6 +328,7 @@ class Stamp(Schema):
         # self.blurb              = SchemaElement(basestring)
         # self.mentions           = SchemaList(MentionSchema())
         # self.image_dimensions   = SchemaElement(basestring)
+        # self.comment_preview    = SchemaList(Comment())
 
 class StampContent(Schema):
     def setSchema(self):
@@ -334,6 +336,13 @@ class StampContent(Schema):
         self.images             = SchemaList(ImageSchema())
         self.timestamp          = TimestampSchema()
         self.mentions           = SchemaList(MentionSchema())
+
+class StampPreviews(Schema):
+    def setSchema(self):
+        self.likes              = SchemaList(UserMini())
+        self.todos              = SchemaList(UserMini())
+        # self.credit             = SchemaList(Stamp())
+        self.comments           = SchemaList(Comment())
 
 class MentionSchema(Schema):
     def setSchema(self):
