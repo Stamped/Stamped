@@ -1520,7 +1520,7 @@ class HTTPStamp(Schema):
                 if len(schema.contents[-1].images) > 0:
                     image = schema.contents[-1].images[0]
                     self.image_dimensions   = "%s,%s" % (image.width, image.height)
-                    self.iamge_url          = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
+                    self.image_url          = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
             except Exception as e:
                 logs.warning(e)
                 logs.info("No blurb found for stamp_id %s (%s)" % (self.stamp_id, schema.contents))
