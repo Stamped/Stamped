@@ -1,14 +1,18 @@
 # Django settings for www project.
 
-import Globals, utils
+import Globals
+import utils
+import os
+import libs.ec2_utils
 
-DEBUG = (not utils.is_ec2())
-TEMPLATE_DEBUG = DEBUG
+IS_PROD         = libs.ec2_utils.is_prod_stack()
+DEBUG           = (not utils.is_ec2())
+TEMPLATE_DEBUG  = DEBUG
 
 utils.log("Django DEBUG=%s" % DEBUG)
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Stamped Dev', 'dev@stamped.com'), 
 )
 
 MANAGERS  = ADMINS
@@ -64,11 +68,10 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/assets/js/'
+STATIC_URL = '/assets/'
 
-import Globals, os, libs.ec2_utils
-IS_PROD = libs.ec2_utils.is_prod_stack()
-
+# utilize static.stamped.com CDN gateway on prod; otherwise, fallback to using 
+# less efficient but more accessible / productive local assets for development.
 if IS_PROD:
     SITE_ROOT   = "http://static.stamped.com/"
 else:
@@ -80,7 +83,7 @@ STATIC_DOC_ROOT = STATIC_ROOT
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+ADMIN_MEDIA_PREFIX = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -137,11 +140,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-    'sdetail'
 )
 
 # A sample logging configuration. The only tangible logging
