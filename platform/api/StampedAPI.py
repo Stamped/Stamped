@@ -1735,7 +1735,8 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.subcategory.%s' % entity.subcategory)
 
         # Enrich linked user, entity, favorites, etc. within the stamp
-        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds, entityIds=entityIds)
+        ### TODO: Pass userIds (need to scrape existing credited users)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
