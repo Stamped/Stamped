@@ -1584,68 +1584,73 @@ class StampedAPI(AStampedAPI):
         
         return stamps
     
+    def getStampBadges(self, stamp):
+        userId = stamp.user_id
+        badges  = []
+        
+        if stamp.stamp_num == 1:
+            badges.append(Badge(dict(
+                user_id = userId, 
+                genre   = "user_first_stamp", 
+            )))
+        
+        entity_stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        
+        if len(entity_stamps) == 0:
+            badges.append(Badge(dict(
+                user_id = userId, 
+                genre   = "entity_first_stamp", 
+            )))
+        else:
+            friend_stamp_ids = frozenset(self._collectionDB.getInboxStampIds(stamp.user.user_id))
+            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamps))
+            
+            if len(entity_stamp_ids & friend_stamp_ids) == 0:
+                badges.append(Badge(dict(
+                    user_id = userId, 
+                    genre   = "friends_first_stamp", 
+                )))
+        
+        return badges
+    
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
+
+        userIds     = { user.user_id : user.exportSchema(UserMini()) }
+        entityIds   = { entity.entity_id : entity }
         
         blurbData   = data.pop('blurb',  None)
         creditData  = data.pop('credit', None)
+
         imageData   = data.pop('image',  None)
+        imageUrl    = data.pop('temp_image_url',    None)
+        imageWidth  = data.pop('temp_image_width',  None)
+        imageHeight = data.pop('temp_image_height', None)
+        imageExists = False
+
+        now         = datetime.utcnow()
         
-        image_url    = data.pop('temp_image_url',    None)
-        image_width  = data.pop('temp_image_width',  None)
-        image_height = data.pop('temp_image_height', None)
+        # Check if the user has already stamped this entity
+        stampExists = self._stampDB.checkStamp(user.user_id, entity.entity_id)
         
         # Check to make sure the user has stamps left
-        if user.num_stamps_left <= 0:
+        if not stampExists and user.num_stamps_left <= 0:
             raise StampedIllegalActionError("No more stamps remaining")
-        
-        # Check to make sure the user hasn't already stamped this entity
-        if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            ### TODO: Change this to StampedDuplicationError (409). 
-            ### Need to phase in on client first (expecting 403 as of 1.0.4)
-            raise StampedIllegalActionError("Cannot stamp same entity twice (id = %s)" % entity.entity_id)
-        
-        # Build stamp
-        stamp                       = Stamp()
-        stamp.user_id               = user.user_id
-        stamp.entity                = entity
-        stamp.timestamp.created     = datetime.utcnow()
-        stamp.timestamp.modified    = datetime.utcnow()
-        stamp.stamp_num             = user.num_stamps_total + 1
-        
-        # Collect user ids
-        userIds = {}
-        userIds[user.user_id] = user.exportSchema(UserMini())
-        
+
+        # Build content
         content = StampContent()
-        # Extract mentions
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
+            content.timestamp.created = now
 
-        stamp.contents = [ content ]
-        
-        # Extract credit
-        if creditData is not None:
-            stamp.credit = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
-        
-        # Add stats
-        self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
-        self._statsSink.increment('stamped.api.stamps.subcategory.%s' % entity.subcategory)
-        
-        # Add badges
-        stamp.badges = self._stampDB.extractBadges(stamp)
-        
-        # Add the stamp data to the database
-        stamp = self._stampDB.addStamp(stamp)
-        ### TODO: Rollback adds stamp to "deleted stamps" table. Fix that.
-        self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
-        
         # Add image to stamp
         if imageData is not None:
+            raise NotImplementedError()
+            """
             if image_url is not None:
                 raise StampedInputError("either an image may be uploaded with the stamp itself or an " + 
                                  "external image may be referenced, but not both")
@@ -1655,7 +1660,8 @@ class StampedAPI(AStampedAPI):
             image_url = self._imageDB.addStampImage(stamp.stamp_id, image)
             
             image_width, image_height = image.size
-        elif image_url is not None:
+            """
+        elif imageUrl is not None:
             # ensure external image exists
             # TODO!!!
             """
@@ -1672,42 +1678,81 @@ class StampedAPI(AStampedAPI):
             """
             pass
         
-        if image_url is not None:
-            if image_width is None or image_height is None:
+        if imageUrl is not None:
+            if imageWidth is None or imageHeight is None:
                 raise StampedInputError("invalid image dimensions")
             
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            image.width     = image_width
-            image.height    = image_height
-            image.image     = stamp.stamp_id 
+            image.width     = imageWidth
+            image.height    = imageHeight
+            # image.image     = "%s.%s" % (stamp.stamp_id, now)
             content.images  = [ image ]
-            stamp.contents  = [ content ]
-            stamp           = self._stampDB.updateStamp(stamp)
-            
+
+            imageExists     = True
+        
+
+        # Update content if stamp exists
+        if stampExists:
+            stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
+            stamp.timestamp.stamped     = now
+            stamp.timestamp.modified    = now 
+            stamp.contents.append(content)
+
+            ### TODO: Extract credit
+            if creditData is not None:
+                raise NotImplementedError("Add credit for second stamp!")
+
+            stamp = self._stampDB.updateStamp(stamp)
+
+        # Build new stamp
+        else:
+            stamp                       = Stamp()
+            stamp.user_id               = user.user_id
+            stamp.entity                = entity
+            stamp.timestamp.created     = now
+            stamp.timestamp.stamped     = now
+            stamp.timestamp.modified    = now 
+            stamp.stamp_num             = user.num_stamps_total + 1
+            stamp.badges                = self.getStampBadges(stamp)
+            stamp.contents.append(content)
+
+            # Extract credit
+            if creditData is not None:
+                stamp.credit = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
+
+            stamp = self._stampDB.addStamp(stamp)
+            self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
+
+        # Resize image
+        if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[stamp.stamp_id, image_url])
-        
+            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
+
+        # Add stats
+        self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
+        self._statsSink.increment('stamped.api.stamps.subcategory.%s' % entity.subcategory)
+
         # Enrich linked user, entity, favorites, etc. within the stamp
-        entityIds = {entity.entity_id: entity}
-        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
-            userIds=userIds, entityIds=entityIds)
-        
-        # Add a reference to the stamp in the user's collection
-        self._rollback.append((self._stampDB.removeUserStampReference, \
-            {'stampId': stamp.stamp_id, 'userId': user.user_id}))
-        self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
-        
-        # Update user stats 
-        self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
-        distribution = self._getUserStampDistribution(authUserId)
-        self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
-        
-        # Asynchronously add references to the stamp in follower's inboxes and 
-        # add activity for credit and mentions
-        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds, entityIds=entityIds)
+
+        if not stampExists:
+            # Add a reference to the stamp in the user's collection
+            self._rollback.append((self._stampDB.removeUserStampReference, \
+                {'stampId': stamp.stamp_id, 'userId': user.user_id}))
+            self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
+            
+            # Update user stats 
+            self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
+            self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
+            self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
+            distribution = self._getUserStampDistribution(authUserId)
+            self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
+            
+            # Asynchronously add references to the stamp in follower's inboxes and 
+            # add activity for credit and mentions
+            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
 
         return stamp
     
@@ -1801,10 +1846,10 @@ class StampedAPI(AStampedAPI):
                               stampId       = stamp.stamp_id)
     
     @API_CALL
-    def addResizedStampImagesAsync(self, stamp_id, image_url):
-        assert image_url is not None, "stamp image url unavailable!"
+    def addResizedStampImagesAsync(self, imageId, imageUrl):
+        assert imageUrl is not None, "stamp image url unavailable!"
         
-        self._imageDB.addResizedStampImages(image_url, stamp_id)
+        self._imageDB.addResizedStampImages(imageUrl, imageId)
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):

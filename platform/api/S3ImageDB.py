@@ -178,7 +178,7 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size)
         return url
     
-    def addResizedStampImages(self, image_url, stampId):
+    def addResizedStampImages(self, image_url, imageId):
         try:
             f = utils.getFile(image_url)
         except urllib2.HTTPError:
@@ -186,7 +186,7 @@ class S3ImageDB(AImageDB):
             raise
         
         image    = self.getImage(f)
-        prefix   = 'stamps/%s' % stampId
+        prefix   = 'stamps/%s' % imageId
         max_size = (960, 960)
         
         sizes   = {
