@@ -507,7 +507,7 @@ def parseCommandLine():
 
 from LRUCache import lru_cache
 @lru_cache(3)
-def test_lrucache():
+def test_lrucache(arbitrary_arg):
     suggested = []
 
     def _add_suggested_section(title, entities):
