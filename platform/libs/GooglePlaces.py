@@ -507,9 +507,7 @@ def parseCommandLine():
 
 from LRUCache import lru_cache
 @lru_cache(3)
-def test_lrucache(self):
-    results = self._google_places.getEntityResultsByLatLng(coords, params)
-
+def test_lrucache():
     suggested = []
 
     def _add_suggested_section(title, entities):
