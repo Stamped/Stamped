@@ -1538,7 +1538,7 @@ class HTTPStamp(Schema):
                 item            = HTTPStampContent()
                 item.blurb      = content.blurb 
                 item.created    = content.timestamp.created 
-                item.modified   = content.timestamp.modified 
+                # item.modified   = content.timestamp.modified 
 
                 for image in content.images:
                     img = HTTPEntityGalleryItem()
@@ -1904,86 +1904,6 @@ class HTTPFavoriteNew(Schema):
 # Activity #
 # ######## #
 
-class HTTPActivityOld(Schema):
-    def setSchema(self):
-        # Metadata
-        self.activity_id        = SchemaElement(basestring, required=True)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = HTTPUserMini()
-        self.created            = SchemaElement(basestring)
-        self.benefit            = SchemaElement(int)
-
-        # Image
-        self.image              = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
-
-        # Text
-        self.subject            = SchemaElement(basestring)
-        self.subject_objects    = SchemaList(ActivityObjectSchema())
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = ActivityFormatSchema()
-        self.blurb_objects      = SchemaList(ActivityObjectSchema())
-
-        # Links
-        self.linked_user        = HTTPUserMini()
-        self.linked_stamp       = HTTPStamp()
-        self.linked_entity      = HTTPEntity()
-        self.linked_url         = HTTPLinkedURL()
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Activity':
-            data                = schema.value
-            link                = data.pop('link', {})
-            linked_entity       = link.pop('linked_entity', None)
-            linked_stamp        = link.pop('linked_stamp', None)
-            linked_user         = link.pop('linked_user', None)
-            linked_url          = link.pop('linked_url', None)
-            user                = data.pop('user', None)
-
-            self.importData(data, overflow=True)
-
-            if user is not None:
-                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
-            
-            if linked_stamp is not None:
-                self.linked_stamp = HTTPStamp().importSchema(schema.linked_stamp).value
-            elif linked_user is not None:
-                self.linked_user = HTTPUserMini().importSchema(schema.linked_user).value
-            elif linked_entity is not None:
-                self.linked_entity = HTTPEntity().importSchema(schema.linked_entity).value
-            elif linked_url is not None:
-                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(linked_url)).value
-
-            self.created = schema.timestamp.created
-
-        elif schema.__class__.__name__ == 'EnrichedActivityObject':
-            data         = schema.value
-            user         = data.pop('user', None)
-            entity       = data.pop('entity', None)
-            stamp        = data.pop('stamp', None)
-            url          = data.pop('url', None)
-
-            self.importData(data, overflow=True)
-
-            if user is not None:
-                self.user = HTTPUserMini().importSchema(UserMini(user)).value 
-            
-            if stamp is not None:
-                self.linked_stamp = HTTPStamp().importSchema(schema.stamp).value
-            elif user is not None:
-                self.linked_user = HTTPUserMini().importSchema(schema.user).value
-            elif entity is not None:
-                self.linked_entity = HTTPEntity().importSchema(schema.entity).value
-            elif url is not None:
-                self.linked_url = HTTPLinkedURL().importSchema(LinkedURL(url)).value
-
-            self.created = schema.timestamp.created
-        else:
-            raise NotImplementedError
-        return self
-
-
-
 class HTTPActivityObjects(Schema):
     def setSchema(self):
         self.users              = SchemaList(HTTPUserMini())
@@ -2227,11 +2147,12 @@ class HTTPActivity(Schema):
 
 
             if self.verb == 'follow':
-                self.icon = _getIconURL('news_follow')
                 if len(self.subjects) == 1:
                     verb = 'is now following'
+                    self.image = self.subjects[0].image_url 
                 else:
                     verb = 'are now following'
+                    self.image = _getIconURL('news_follow')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 if schema.personal:
                     self.body = '%s %s you.' % (subjects, verb)
@@ -2244,17 +2165,18 @@ class HTTPActivity(Schema):
                 self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'restamp':
-                self.icon = _getIconURL('news_credit')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 if schema.personal:
                     self.body = '%s gave you credit.' % (subjects)
                     self.body_references = subjectReferences
+                    self.image = _getIconURL('news_benefit_2')
                 else:
                     verb = 'gave'
                     offset = len(subjects) + len(verb) + 2
                     userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                     self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
                     self.body_references = subjectReferences + userObjectReferences
+                    self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'like':
@@ -2270,6 +2192,13 @@ class HTTPActivity(Schema):
                     stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                     self.footer = 'via %s' % stampUserObjects
                     self.footer_references = stampUserReferences
+                if schema.personal and self.benefit is not None:
+                    self.image = _getIconURL('news_benefit_1')
+                elif len(self.subjects) == 1:
+                    self.image = self.subjects[0].image_url 
+                else:
+                    ### TODO: What should this image be?
+                    self.image = None
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'todo':
@@ -2280,13 +2209,17 @@ class HTTPActivity(Schema):
                 entityObjects, entityObjectReferences = _formatEntityObjects(self.objects.entities, offset=offset)
                 self.body = '%s %s %s as a to-do.' % (subjects, verb, entityObjects)
                 self.body_references = subjectReferences + entityObjectReferences
+                if len(self.subjects) == 1:
+                    self.image = self.subjects[0].image_url 
+                else:
+                    ### TODO: What should this image be?
+                    self.image = None
                 if len(self.objects.stamps) > 0:
                     self.action = _buildStampAction(self.objects.stamps[0])
                 else:
                     self.action = _buildEntityAction(self.objects.entities[0])
 
             elif self.verb == 'comment':
-                self.icon = _getIconURL('news_comment')
                 verb = 'Comment on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -2295,10 +2228,10 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s.' % commentObjects
                 self.body_references = commentObjectReferences
+                self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'reply':
-                self.icon = _getIconURL('news_reply')
                 verb = 'Reply on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -2307,10 +2240,10 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s.' % commentObjects
                 self.body_references = commentObjectReferences
+                self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'mention':
-                self.icon = _getIconURL('news_mention')
                 verb = 'Mention on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
@@ -2324,10 +2257,12 @@ class HTTPActivity(Schema):
                 else:
                     self.body = '%s.' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
+                self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
                 self.icon = _getIconURL('news_friend')
+                self.image = self.subjects[0].image_url 
                 self.action = _buildUserAction(self.subjects[0])
 
             else:
