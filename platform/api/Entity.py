@@ -595,6 +595,10 @@ def fast_id_dedupe(entities, seen=None):
                           containing unique values seen so far for a given id.
     """
     
+    ### MIKE
+    logs.info("class name: %s" % entity.__class__.__name__)
+    logs.info("entity content: %s" % entity)
+    
     if seen is None:
         seen = defaultdict(set)
     
