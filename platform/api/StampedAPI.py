@@ -1501,7 +1501,7 @@ class StampedAPI(AStampedAPI):
         # Likes
         likeUserIds = {}
         for stamp in stampData:
-            likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)
+            likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)[:10]
             for likeUserId in likeUserIds[stamp.stamp_id]:
                 if likeUserId not in userIds:
                     userIds[likeUserId] = 1
@@ -1509,7 +1509,7 @@ class StampedAPI(AStampedAPI):
         # Todos
         todoUserIds = {}
         for stamp in stampData:
-            todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)
+            todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)[:10]
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 if todoUserId not in userIds:
                     userIds[todoUserId] = 1
