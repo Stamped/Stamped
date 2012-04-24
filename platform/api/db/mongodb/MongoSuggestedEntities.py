@@ -102,7 +102,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    @lru_cache(maxsize=8)
+    #@lru_cache(maxsize=8)
     #@memcached_function(time=2*24*60*60)
     def _getGlobalSuggestedEntities(self, coords, category, subcategory):
         """
@@ -130,8 +130,6 @@ class MongoSuggestedEntities(ASuggestedEntities):
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
             albums  = self._appleRSS.get_top_albums(limit=10)
-
-            logs.info('songs: %s   albums: %s' % (songs, albums))
             
             artists = []
             artists.extend([ s.artists[0] for s in filter(lambda s: len(s.artists) > 0, songs)  ])
