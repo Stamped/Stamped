@@ -51,18 +51,25 @@ def lru_cache(maxsize=100):
             # record recent use of this key
             queue_append(key)
             refcount[key] += 1
-            
+
+            ### MIKE - adding this import and modifying try / except below
+            import logs
+
             # get cache entry or compute if not found
             try:
                 result = cache[key]
                 wrapper.hits += 1
+                logs.info('\nhit cached result')
+
             except KeyError:
                 result = user_function(*args, **kwds)
                 cache[key] = result
                 wrapper.misses += 1
+                logs.info('\nmissed cached result, calling function')
                 
                 # purge least recently used cache entry
                 if len(cache) > maxsize:
+                    logs.info('\npurging cache')
                     key = queue_popleft()
                     refcount[key] -= 1
                     while refcount[key]:

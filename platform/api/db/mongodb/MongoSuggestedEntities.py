@@ -102,7 +102,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 8 items 
     # and also cached remotely via memcached with a TTL of 2 days
-    #@lru_cache(maxsize=8)
+    @lru_cache(maxsize=8)
     #@memcached_function(time=2*24*60*60)
     def _getGlobalSuggestedEntities(self, coords, category, subcategory):
         """
