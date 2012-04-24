@@ -516,8 +516,8 @@ def test_lrucache():
     entities = []
     entity = PlaceEntity()
     entity.title = 'Test'
-    entity.lat   = 'theLat'
-    entity.lng   = 'theLng'
+    entity.lat   = 100.1
+    entity.lng   = 10.2
     entity.googleplaces_id          = 'theGooglePlacesId'
     entity.googleplaces_reference   = 'theGooglePlacesReference'
 
