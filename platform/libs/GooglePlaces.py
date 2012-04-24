@@ -528,9 +528,6 @@ def test_lrucache(arbitrary_arg, copies):
     for x in xrange(copies):
         entities.append(copy.copy(entity))
 
-
-
-    entities = [entity]
     _add_suggested_section('testEntities', entities )
 
     return suggested
