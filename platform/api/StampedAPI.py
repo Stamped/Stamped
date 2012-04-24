@@ -2568,6 +2568,7 @@ class StampedAPI(AStampedAPI):
                 
                 if len(deleted) > 0:
                     stamps = stamps + deleted
+                    ### TODO: Fails if sort == 'stamped' since it doesn't exist in deletedStamp objects
                     stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps

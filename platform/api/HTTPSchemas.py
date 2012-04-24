@@ -1550,8 +1550,8 @@ class HTTPStamp(Schema):
                 self.contents.append(content)
 
                 # TEMP
-                self.blurb      = contents.blurb 
-                self.created    = contents.created 
+                self.blurb      = content.blurb 
+                self.created    = content.created 
 
             
             for comment in comments:
