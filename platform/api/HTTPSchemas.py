@@ -1510,6 +1510,7 @@ class HTTPStamp(Schema):
             coordinates         = data['entity'].pop('coordinates', None)
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
+            contents            = data.pop('contents', [])
 
             previews            = data.pop('previews', {})
             comments            = previews.pop('comments', [])
