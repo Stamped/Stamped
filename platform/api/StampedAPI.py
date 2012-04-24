@@ -1587,11 +1587,13 @@ class StampedAPI(AStampedAPI):
                 stamp.previews.comments = comments
 
             # Add likes
+            stamp.previews.likes = []
             for likeUserId in likeUserIds[stamp.stamp_id]:
                 assert userIds[likeUserId] != 1
                 stamp.previews.likes.append(userIds[likeUserId])
 
             # Add todos
+            stamp.previews.todos = []
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 assert userIds[todoUserId] != 1
                 stamp.previews.todos.append(userIds[todoUserId])
