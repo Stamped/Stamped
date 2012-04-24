@@ -507,7 +507,7 @@ def parseCommandLine():
 
 from LRUCache import lru_cache
 @lru_cache(3)
-def test_lrucache(arbitrary_arg, numcopies):
+def test_lrucache(arbitrary_arg, copies):
     suggested = []
 
     def _add_suggested_section(title, entities):
@@ -524,7 +524,8 @@ def test_lrucache(arbitrary_arg, numcopies):
     entity.googleplaces_id          = 'theGooglePlacesId'
     entity.googleplaces_reference   = 'theGooglePlacesReference'
 
-    for x in xrange(numcopies):
+    entities = []
+    for x in xrange(copies):
         entities.append(copy.copy(entity))
 
 
