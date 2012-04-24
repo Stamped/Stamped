@@ -366,35 +366,14 @@ stamped.init = function() {
         var url  = base + uri;
         
         window.log(url);
-        /*var request = new XMLHttpRequest();
         
-        request.open('POST', url, true);
-        request.onreadystatechange = function() {
-            if (request.readyState != 4) {
-                return;
-            }
-            
-            if (request.status != 200) {
-                alert("error: " + request.status);
-                return;
-            }
-            
-            success(request.responseText);
-        };
-        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        request.setRequestHeader("Content-length", params.length);
-        request.send(params);
-        return;*/
-        
-        // TODO: why doesn't this jQuery ajax request work?
         $.ajax({
-            type     : "POST", 
-            url      : url, 
-            data     : params, 
-            success  : success, 
+            type        : "POST", 
+            url         : url, 
+            data        : params, 
+            success     : success, 
             crossDomain : true, 
-            error    : function(jqXHR, textStatus, errorThrown) {
-                console.log("error");
+            error       : function(jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText)
                 console.log(this.toSource());
                 console.log(textStatus);

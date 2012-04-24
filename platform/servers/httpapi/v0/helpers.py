@@ -41,6 +41,8 @@ VALID_ORIGINS = [
 
 t1 = time.time()
 
+# TODO (travis): use single global stamped API instance
+# e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
 stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
