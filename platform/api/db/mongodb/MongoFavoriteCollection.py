@@ -102,6 +102,11 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
     def getFavoriteEntityIds(self, userId):
         return self.user_fav_entities_collection.getUserFavoriteEntities(userId)
     
+    def getFavoritesFromEntityId(self, entityId, limit=10):
+        ### TODO: Convert to index collection
+        documents = self._collection.find({'entity.entity_id': entityId}, fields={'user_id': 1}).sort('$natural', pymongo.DESCENDING).limit(limit)
+        return map(lambda x: x['user_id'], documents)
+    
     def completeFavorite(self, entityId, userId, complete=True):
         try:
             self._collection.update(

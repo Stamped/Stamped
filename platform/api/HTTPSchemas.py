@@ -1487,9 +1487,12 @@ class HTTPStamp(Schema):
         if schema.__class__.__name__ == 'Stamp':
             data                = schema.exportSparse()
             coordinates         = data['entity'].pop('coordinates', None)
-            comments            = data.pop('comment_preview', [])
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
+            previews            = data.pop('previews', {})
+            comments            = previews.pop('comments', [])
+
+            data['previews']    = {}
             
             comment_preview = []
             for comment in comments:

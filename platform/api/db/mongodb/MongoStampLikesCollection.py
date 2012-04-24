@@ -32,4 +32,5 @@ class MongoStampLikesCollection(AMongoCollection):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(stampId, limit)
         
-
+    def getStampLikesAcrossStampIds(self, stampIds, limit=None):
+        return self._getRelationshipsAcrossKeys(stampIds, limit)

@@ -1483,13 +1483,8 @@ class StampedAPI(AStampedAPI):
                     userIds[credit.user_id] = 1
                 
                 # Grab user_id from comments
-                for comment in stamp.comment_preview:
+                for comment in stamp.previews.comments:
                     userIds[comment.user_id] = 1
-            
-            users = self._userDB.lookupUsers(userIds.keys(), None)
-            
-            for user in users:
-                userIds[user.user_id] = user.exportSchema(UserMini())
         
         # Entities
         if len(entityIds) == 0:
@@ -1502,6 +1497,29 @@ class StampedAPI(AStampedAPI):
             
             for entity in entities:
                 entityIds[entity.entity_id] = entity
+
+        # Likes
+        likeUserIds = {}
+        for stamp in stampData:
+            likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)
+            for likeUserId in likeUserIds[stamp.stamp_id]:
+                if likeUserId not in userIds:
+                    userIds[likeUserId] = 1
+
+        # Todos
+        todoUserIds = {}
+        for stamp in stampData:
+            todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)
+            for todoUserId in todoUserIds[stamp.stamp_id]:
+                if todoUserId not in userIds:
+                    userIds[todoUserId] = 1
+
+        # Users
+        if 1 in userIds.values():
+            users = self._userDB.lookupUsers(userIds.keys(), None)
+            for user in users:
+                userIds[user.user_id] = user.exportSchema(UserMini())
+
         
         if authUserId:
             ### TODO: Intelligent matching with stampId
@@ -1556,17 +1574,27 @@ class StampedAPI(AStampedAPI):
                 stamp.credit = credits
             
             # Add commenting user(s)
-            if stamp.comment_preview is not None:
+            if len(stamp.previews.comments) > 0:
                 comments = []
                 
-                for i in xrange(len(stamp.comment_preview)):
-                    commentingUser = userIds[stamp.comment_preview[i].user_id]
+                for i in xrange(len(stamp.previews.comments)):
+                    commentingUser = userIds[stamp.previews.comments[i].user_id]
                     
                     if commentingUser != 1:
-                        stamp.comment_preview[i].user = commentingUser
-                        comments.append(stamp.comment_preview[i])
+                        stamp.previews.comments[i].user = commentingUser
+                        comments.append(stamp.previews.comments[i])
                 
-                stamp.comment_preview = comments
+                stamp.previews.comments = comments
+
+            # Add likes
+            for likeUserId in likeUserIds[stamp.stamp_id]:
+                assert userIds[likeUserId] != 1
+                stamp.previews.likes.append(userIds[likeUserId])
+
+            # Add todos
+            for todoUserId in todoUserIds[stamp.stamp_id]:
+                assert userIds[todoUserId] != 1
+                stamp.previews.todos.append(userIds[todoUserId])
             
             if authUserId:
                 # Mark as favorited
@@ -1697,6 +1725,7 @@ class StampedAPI(AStampedAPI):
             stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
             stamp.timestamp.stamped     = now
             stamp.timestamp.modified    = now 
+            stamp.num_blurbs            = stamp.num_blurbs + 1 if stamp.num_blurbs is not None else 2
             stamp.contents.append(content)
 
             ### TODO: Extract credit
@@ -1714,6 +1743,7 @@ class StampedAPI(AStampedAPI):
             stamp.timestamp.stamped     = now
             stamp.timestamp.modified    = now 
             stamp.stamp_num             = user.num_stamps_total + 1
+            stamp.num_blurbs            = 1
             stamp.badges                = self.getStampBadges(stamp)
             stamp.contents.append(content)
 
@@ -2562,7 +2592,7 @@ class StampedAPI(AStampedAPI):
         stamps = []
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
-                stamp.comment_preview = commentPreviews[stamp.stamp_id]
+                stamp.previews.comments = commentPreviews[stamp.stamp_id]
             
             stamps.append(stamp)
         
