@@ -1466,7 +1466,8 @@ class HTTPStampContent(Schema):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
         self.images             = SchemaList(ImageSchema())
-        # self.timestamp          = TimestampSchema()
+        self.created            = SchemaElement(basestring)
+        self.modified           = SchemaElement(basestring)
 
 class HTTPStampPreviews(Schema):
     def setSchema(self):
@@ -1488,6 +1489,7 @@ class HTTPStamp(Schema):
         self.url                = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
+        self.stamped            = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.is_liked           = SchemaElement(bool)
@@ -1508,6 +1510,7 @@ class HTTPStamp(Schema):
             coordinates         = data['entity'].pop('coordinates', None)
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
+            contents            = data.pop('contents', [])
 
             previews            = data.pop('previews', {})
             comments            = previews.pop('comments', [])
@@ -1529,18 +1532,27 @@ class HTTPStamp(Schema):
             self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
+            self.stamped                = schema.timestamp.stamped 
 
-            try:
-                self.blurb                  = schema.contents[-1].blurb 
-                self.mentions               = schema.contents[-1].mentions 
-                self.created                = schema.contents[-1].timestamp.created
-                if len(schema.contents[-1].images) > 0:
-                    image = schema.contents[-1].images[0]
-                    self.image_dimensions   = "%s,%s" % (image.width, image.height)
-                    self.image_url          = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
-            except Exception as e:
-                logs.warning(e)
-                logs.info("No blurb found for stamp_id %s (%s)" % (self.stamp_id, schema.contents))
+            for content in schema.contents:
+                item            = HTTPStampContent()
+                item.blurb      = content.blurb 
+                item.created    = content.timestamp.created 
+                item.modified   = content.timestamp.modified 
+
+                for image in content.images:
+                    img = HTTPEntityGalleryItem()
+                    img.image   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    img.width   = image.width 
+                    img.height  = image.height 
+
+                    item.images.append(img)
+
+                self.contents.append(item)
+
+                # TEMP
+                self.blurb      = item.blurb 
+                self.created    = item.created 
 
             
             for comment in comments:
