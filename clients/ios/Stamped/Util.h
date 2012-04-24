@@ -14,6 +14,7 @@
 #import "STUser.h"
 #import "STStamp.h"
 #import "STEntity.h"
+#import "STUserDetail.h"
 
 @class User;
 @class Entity;
@@ -64,6 +65,7 @@ extern NSString* const kKeychainTwitterToken;
 + (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
 + (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
 + (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
++ (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;
 + (UIView*)tapViewWithFrame:(CGRect)frame andCallback:(STCallback)callback;
 
@@ -147,5 +149,7 @@ extern NSString* const kKeychainTwitterToken;
 + (CGRect)standardFrameWithNavigationBar:(BOOL)navigationBar;
 
 + (NSMutableDictionary*)sparseDictionaryForObject:(id)object andKeyPaths:(NSArray*)keyPaths;
+
++ (NSString*)largeProfileImageURLWithUser:(id<STUserDetail>)userDetail;
 
 @end

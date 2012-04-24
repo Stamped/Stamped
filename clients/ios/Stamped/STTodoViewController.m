@@ -12,6 +12,7 @@
 #import "STActionManager.h"
 #import "STRootMenuView.h"
 #import "STDebug.h"
+#import "ECSlidingViewController.h"
 
 @interface STTodoCell : UITableViewCell
 
@@ -61,7 +62,7 @@ static STTodoViewController* _sharedInstance;
 }
 
 - (void)backButtonClicked:(id)button {
-  [[STRootMenuView sharedInstance] toggle];
+  [self.slidingViewController anchorTopViewTo:ECRight];
 }
 
 - (void)viewDidLoad

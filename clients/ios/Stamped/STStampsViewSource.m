@@ -34,6 +34,7 @@ static const NSInteger _batchSize = 20;
 
 @implementation STStampsViewSource
 
+@synthesize mainSection = mainSection_;
 @synthesize slice = _slice;
 @synthesize stamps = _stamps;
 @synthesize offset = _offset;
@@ -123,22 +124,31 @@ static const NSInteger _batchSize = 20;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if (section == 1) {
+  if (section < self.mainSection) {
+    return 0;
+  }
+  else if (section > self.mainSection) {
     return 1;
   }
-  NSInteger result = 0;
-  if (self.stamps) {
-    result = [self.stamps count];
+  else {
+    NSInteger result = 0;
+    if (self.stamps) {
+      result = [self.stamps count];
+    }
+    return result;
   }
-  return result;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  return 2;
+  return self.mainSection+2;
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  if (indexPath.section == 1) {
+  if (indexPath.section < self.mainSection) {
+    NSAssert(NO, @"Subclass must handle sections before mainSection");
+    return nil;
+  }
+  else if (indexPath.section > self.mainSection) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"lastCell"] autorelease];
     if (self.shouldLoadMore || self.waiting) {
       cell.textLabel.text = self.loadingText;
@@ -186,14 +196,14 @@ static const NSInteger _batchSize = 20;
 
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.section == 0) {
+  if (indexPath.section == self.mainSection) {
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
     STActionContext* context = [STActionContext context];
     context.stamp = stamp;
     id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
   }
-  else if (indexPath.section == 1) {
+  else if (indexPath.section > self.mainSection) {
     if (!self.shouldLoadMore && !self.waiting) { 
       if ([tableView.dataSource tableView:tableView numberOfRowsInSection:0] > 0) {
         [self selectedLastCell];
@@ -203,6 +213,13 @@ static const NSInteger _batchSize = 20;
       }
     }
   }
+  else {
+    //Nothing, for subclasses
+  }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  return 96;
 }
 
 - (void)reloadStampedData {
@@ -228,7 +245,6 @@ static const NSInteger _batchSize = 20;
   if (_table) {
     _table.delegate = self;
     _table.dataSource = self;
-    _table.rowHeight = 96;
     [_table reloadData];
   }
 }

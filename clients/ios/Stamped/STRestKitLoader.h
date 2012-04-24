@@ -23,6 +23,11 @@
                 mapping:(RKObjectMapping*)mapping 
             andCallback:(void(^)(id,NSError*))block;
 
+- (void)booleanWithPath:(NSString*)path
+                   post:(BOOL)post
+                 params:(NSDictionary*)params
+            andCallback:(void(^)(BOOL boolean, NSError* error))block;
+
 + (STRestKitLoader*)sharedInstance;
 
 @end

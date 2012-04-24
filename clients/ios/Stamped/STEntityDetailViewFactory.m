@@ -130,13 +130,17 @@
         if (self.context.stamp) {
           blacklist = [NSSet setWithObject:self.context.stamp.user.userID];
         }
+        STViewContainer* stampedByContainer = [[[STViewContainer alloc] initWithDelegate:view andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
         STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy 
                                                                            blacklist:blacklist
-                                                                         andDelegate:view] autorelease];
-        CGFloat height = stampedByView.frame.size.height;
-        [Util reframeView:stampedByView withDeltas:CGRectMake(0, 0, 0, -height)];
-        [view appendChildView:stampedByView];
-        [view childView:stampedByView shouldChangeHeightBy:height overDuration:.25];
+                                                                         andDelegate:stampedByContainer] autorelease];
+        [stampedByContainer appendChildView:stampedByView];
+        [Util reframeView:stampedByContainer withDeltas:CGRectMake(0, 0, 0, 10)];
+        CGFloat height = stampedByContainer.frame.size.height;
+        stampedByContainer.clipsToBounds = YES;
+        [Util reframeView:stampedByContainer withDeltas:CGRectMake(0, 0, 0, -height)];
+        [view appendChildView:stampedByContainer];
+        [view childView:stampedByContainer shouldChangeHeightBy:height overDuration:.25];
       }
     }];
     return view;

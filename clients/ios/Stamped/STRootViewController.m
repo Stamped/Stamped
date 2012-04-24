@@ -9,6 +9,8 @@
 #import "STRootViewController.h"
 #import "Util.h"
 #import "STNavigationBar.h"
+#import "ECSlidingViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -29,8 +31,22 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 {
   [super viewDidLoad];
   
+  self.view.layer.shadowOpacity = .75;
+  self.view.layer.shadowRadius = 10;
   self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
   [self setValue:[[[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease] forKey:@"navigationBar"];
+}
+- (void)viewWillAppear:(BOOL)animated
+{
+  [super viewWillAppear:animated];
+  [self.view addGestureRecognizer:self.slidingViewController.panGesture];
+  [self.slidingViewController setAnchorRightRevealAmount:280.0f];
+  [self.slidingViewController setAnchorLeftRevealAmount:100.0f];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  [self.view removeGestureRecognizer:self.slidingViewController.panGesture];
 }
 
 - (void)viewDidUnload

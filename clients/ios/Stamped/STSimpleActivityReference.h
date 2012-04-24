@@ -13,7 +13,7 @@
 @interface STSimpleActivityReference : NSObject <STActivityReference>
 
 @property (nonatomic, readwrite, copy) NSArray* indices;
-@property (nonatomic, readwrite, copy) id<STAction> action;
+@property (nonatomic, readwrite, retain) id<STAction> action;
 @property (nonatomic, readwrite, copy) NSDictionary* format;
 
 + (RKObjectMapping*)mapping;

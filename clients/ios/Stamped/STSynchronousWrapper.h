@@ -33,5 +33,4 @@ typedef void (^STSynchronousWrapperCallback)();
                                          stamp:(id<STStamp>)stamp
                                       delegate:(id<STViewDelegate>)delegate;
 
-
 @end

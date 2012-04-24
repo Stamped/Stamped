@@ -11,6 +11,7 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
+#import "ECSlidingViewController.h"
 
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";
@@ -60,7 +61,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)loadView {
-  self.view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 420)] autorelease];
+  self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:YES]] autorelease];
 }
 
 - (void)viewDidLoad {
@@ -68,7 +69,7 @@ static const CGFloat kReloadHeight = 60.0;
   UIView* toolbar = self.toolbar;
   NSLog(@"loaded:%@",toolbar);
   CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height : 0;
-  STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, 420 - toolbarHeight)] autorelease];
+  STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, self.view.frame.size.height - toolbarHeight)] autorelease];
   CGFloat bottomPadding = 0;
   UIImageView* shelfBackground = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_background"]] autorelease];
   _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, 320, 360)];
@@ -106,7 +107,9 @@ static const CGFloat kReloadHeight = 60.0;
   
   _scrollView = container;
   container.delegate = self;
+  NSLog(@"before%f",container.frame.size.height);
   [container appendChildView:_shelfView];
+  NSLog(@"after%f",container.frame.size.height);
   [container setScrollDelegate:self];
   UIImageView* backgroundImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"gradient_background"]] autorelease];
   [self.view addSubview:backgroundImage];

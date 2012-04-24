@@ -29,7 +29,7 @@
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request:\n%@\n%@ ", objectLoader.URL, objectLoader.params]];
+  [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request with %d:\n%@\n%@ ", objectLoader.response.statusCode, objectLoader.URL, objectLoader.params]];
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
   [Util executeOnMainThread:^{
@@ -41,6 +41,44 @@
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   [Util executeOnMainThread:^{
     self.callback(objects, nil);
+    [self autorelease];
+  }];
+}
+
+@end
+
+@interface STRestKitLoaderBooleanHelper : NSObject <RKRequestDelegate>
+
+@property (nonatomic, copy) void(^callback)(BOOL,NSError*);
+
+@end
+
+@implementation STRestKitLoaderBooleanHelper
+
+@synthesize callback = _callback;
+
+- (void)dealloc {
+  [_callback release];
+  [super dealloc];
+}
+
+#pragma mark - RKRequestDelegate methods
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request:\n%@\n%@ ", request.URL, request.params]];
+  //TODO handle bad token
+  //if ()
+  //  [[AccountManager sharedManager] refreshToken];
+  [Util executeOnMainThread:^{
+    self.callback(NO, error);
+    [self autorelease];
+  }];
+}
+
+- (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
+  [Util executeOnMainThread:^{
+    BOOL result = [response.bodyAsString isEqualToString:@"true"];
+    self.callback(result, nil);
     [self autorelease];
   }];
 }
@@ -103,6 +141,21 @@ static STRestKitLoader* _sharedInstance;
     }
     block(result, error);
   }];
+}
+
+- (void)booleanWithPath:(NSString*)path
+                   post:(BOOL)post
+                 params:(NSDictionary*)params
+            andCallback:(void(^)(BOOL boolean, NSError* error))block {
+  STRestKitLoaderBooleanHelper* helper = [[STRestKitLoaderBooleanHelper alloc] init];
+  helper.callback = block;
+  
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:path delegate:helper]; 
+  if (post) {
+    request.method = RKRequestMethodPOST;
+  }
+  request.params = params;
+  [request send];
 }
 
 @end
