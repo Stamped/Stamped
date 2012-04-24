@@ -32,6 +32,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
+        self._collection.ensure_index([('timestamp.created', pymongo.ASCENDING)])
+        self._collection.ensure_index([('timestamp.stamped', pymongo.ASCENDING)])
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('entity.entity_id', pymongo.ASCENDING)])
@@ -45,6 +47,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
+
+        # Convert single-blurb documents into new multi-blurb schema
+        if 'stamped' not in document['timestamp']:
+            contents =  {
+                'blurb'     : document.pop('blurb', None),
+                'mentions'  : document.pop('mentions', None),
+                'timestamp' : { 'created' : document['timestamp']['created'] },
+            }
+            if 'image_dimensions' in document:
+                contents['images'] = [
+                    {
+                        'width'     : document['image_dimensions'].split(',')[0],
+                        'height'    : document['image_dimensions'].split(',')[1],
+                        'image'     : document['stamp_id'],
+                    }
+                ]
+            document['contents'] = [ contents ]
+            document['timestamp']['stamped'] = document['timestamp']['created']
         
         entityData = document.pop('entity')
         entity = buildEntity(entityData, mini=True)
@@ -321,6 +341,11 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         # Returns user ids that have "liked" the stamp
         return self.stamp_likes_collection.getStampLikes(stampId) 
         
+    def getStampLikesAcrossStamps(self, stampIds, limit=4):
+        # Returns user ids that have "liked" the stamp
+        userIds = self.stamp_likes_collection.getStampLikesAcrossStampIds(stampIds, limit=limit) 
+        return map(self._getObjectIdFromString, userIds)
+        
     def getUserLikes(self, userId):
         # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 
@@ -353,36 +378,5 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             documentIds.append(self._getObjectIdFromString(stampId))
         result = self._removeMongoDocuments(documentIds)
         
-        return result     
-    
-    def extractBadges(self, stamp):
-        user_id = stamp.user_id
-        badges  = []
-        
-        if stamp.stamp_num == 1:
-            badges.append(Badge(dict(
-                user_id = user_id, 
-                genre   = "user_first_stamp", 
-            )))
-        
-        entity_stamp_ids = self.getStampsForEntity(stamp.entity.entity_id)
-        
-        if len(entity_stamp_ids) == 0:
-            badges.append(Badge(dict(
-                user_id = user_id, 
-                genre   = "entity_first_stamp", 
-            )))
-        else:
-            friend_stamp_ids = self.getStamps(self.inbox_stamps_collection.getInboxStampIds(user_id))
-            
-            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamp_ids))
-            friend_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, friend_stamp_ids))
-            
-            if len(entity_stamp_ids & friend_stamp_ids) == 0:
-                badges.append(Badge(dict(
-                    user_id = user_id, 
-                    genre   = "friends_first_stamp", 
-                )))
-        
-        return badges
+        return result
 

@@ -23,17 +23,26 @@ from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
 
+
+# TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
+# restrictive as possible.
+# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid?
+# TODO: (travis): should https also be a valid origin prefix?
+
 VALID_ORIGINS = [
-    'http://stamped.com',
+    'http://stamped.com', 
     'http://api.stamped.com', 
-    'http://www.stamped.com',
-    'http://dev.stamped.com',
-    'http://localhost:19000',
-    'http://localhost:18000',
+    'http://www.stamped.com', 
+    'http://dev.stamped.com', 
+    'http://localhost:19000', 
+    'http://localhost:18000', 
+    'http://localhost:8000', 
 ]
 
 t1 = time.time()
 
+# TODO (travis): use single global stamped API instance
+# e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
 stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
@@ -52,7 +61,8 @@ def handleHTTPRequest(fn):
                 valid_origin = request.META['HTTP_ORIGIN'] if request.META['HTTP_ORIGIN'] in VALID_ORIGINS else None
             except:
                 valid_origin = None
-
+            
+            # allow API to gracefully handle cross-domain requests from trusted origins
             if request.method == 'OPTIONS' and valid_origin is not None:
                 response = HttpResponse()
                 response['Access-Control-Allow-Origin'] = valid_origin
@@ -60,7 +70,7 @@ def handleHTTPRequest(fn):
                 response['Access-Control-Max-Age'] = 1000
                 response['Access-Control-Allow-Headers'] = '*'
                 return response
-
+            
             logs.begin(
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
@@ -70,13 +80,13 @@ def handleHTTPRequest(fn):
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
-
+            
             if valid_origin is not None and isinstance(ret, HttpResponse):
                 ret['Access-Control-Allow-Origin'] = valid_origin
                 ret['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
                 ret['Access-Control-Max-Age'] = 1000
                 ret['Access-Control-Allow-Headers'] = '*'
-
+            
             return ret
         
         except StampedHTTPError as e:

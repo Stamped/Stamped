@@ -230,7 +230,8 @@ def deriveKindFromSubcategory(subcategory):
         'stadium'           : 'place', 
         'store'             : 'place', 
         'university'        : 'place', 
-        'zoo'               : 'place', 
+        'zoo'               : 'place',
+        'point_of_interest' : 'place',
 
         'other'             : 'other', 
         'video_game'        : 'other', 
@@ -593,6 +594,10 @@ def fast_id_dedupe(entities, seen=None):
         seen (optional) - defaultdict(set) is a mapping of id keys to a set 
                           containing unique values seen so far for a given id.
     """
+    
+    ### MIKE
+    logs.info("class name: %s" % entity.__class__.__name__)
+    logs.info("entity content: %s" % entity)
     
     if seen is None:
         seen = defaultdict(set)

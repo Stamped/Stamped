@@ -9,6 +9,7 @@ import Globals, utils, logs, pymongo
 
 from AMongoCollection import AMongoCollection
 from Schemas import *
+from datetime import datetime
 
 class MongoActivityItemCollection(AMongoCollection):
     
@@ -23,9 +24,15 @@ class MongoActivityItemCollection(AMongoCollection):
     def addActivityItem(self, activity):
         return self._addObject(activity)
 
-    def addSubjectToActivityItem(self, activityId, subjectId):
+    def addSubjectToActivityItem(self, activityId, subjectId, modified=None):
+        if modified is None:
+            modified = datetime.utcnow()
         documentId = self._getObjectIdFromString(activityId)
-        result = self._collection.update({'_id': documentId}, {'$addToSet': {'subjects': subjectId}})
+        update = { 
+            '$addToSet' : { 'subjects' : subjectId }, 
+            '$set'      : { 'timestamp.modified': modified } 
+        }
+        result = self._collection.update({'_id': documentId}, update)
         return result
 
     def setBenefitForActivityItem(self, activityId, benefit):
@@ -45,14 +52,14 @@ class MongoActivityItemCollection(AMongoCollection):
 
     def removeSubjectFromActivityItem(self, activityId, subjectId):
         documentId = self._getObjectIdFromString(activityId)
-        result = self._collection.update({'_id': documentId}, {'$pullAll': {'subjects': subjectId}})
+        result = self._collection.update({'_id': documentId}, {'$pull': {'subjects': subjectId}})
         return result
 
     def removeSubjectFromActivityItems(self, activityIds, subjectId):
         documentIds = map(self._getObjectIdFromString, activityIds)
-        self._collection.update({'_id': {'$in': documentIds}}, {'$pullAll': {'subjects': subjectId}})
+        self._collection.update({'_id': {'$in': documentIds}}, {'$pull': {'subjects': subjectId}})
         emptyIds = self._collection.find({'_id': {'$in': documentIds}, 'subjects': []}, fields={'_id' : 1})
-        return map(self._convertFromMongo, emptyIds)
+        return map(lambda x: self._getStringFromObjectId(x['_id']), emptyIds)
 
     def getActivityItem(self, activityId):
         documentId = self._getObjectIdFromString(activityId)
@@ -85,6 +92,11 @@ class MongoActivityItemCollection(AMongoCollection):
             if len(v) > 0:
                 query['objects.%s' % k] = { '$in' : v }
 
+        # Timestamp
+        since = kwargs.pop('since', None)
+        if since is not None:
+            query['timestamp.created'] = { '$gte' : since }
+
         documents = self._collection.find(query, fields={'_id' : 1})
 
         result = []
@@ -96,11 +108,15 @@ class MongoActivityItemCollection(AMongoCollection):
         if len(userIds) == 0:
             return []
         
+        query       = { 'subjects' : { '$in' : userIds } }
+
+        verbs       = kwargs.pop('verbs', [])
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
         limit       = kwargs.pop('limit', 20)
 
-        query = { 'subjects' : {'$in' : userIds } }
+        if len(verbs) > 0:
+            query['verb'] = { '$in' : verbs }
 
         if since is not None and before is not None:
             query['timestamp.modified'] = { '$gte' : since, '$lte' : before }

@@ -60,6 +60,10 @@ class AMongoCollectionSink(AMongoMonitorObject):
 
 class AMongoMonitor(Greenlet, AMongoCollectionSink):
     
+    """
+        Abstract base class for monitoring an instance of MongoDB.
+    """
+    
     __metaclass__ = ABCMeta
     
     def __init__(self, 
@@ -169,7 +173,7 @@ class MongoCollectionMonitor(Greenlet, AMongoMonitorObject):
         else:
             self._initial_export()
         
-        # TODO: address async issue here..
+        # TODO: address potential async issues here..
         
         if not 'ts' in spec:
             try:
@@ -287,21 +291,30 @@ class MongoCollectionMonitor(Greenlet, AMongoMonitorObject):
 
 class BasicMongoMonitor(AMongoMonitor):
     
+    """
+        Basic, debugging implementation of AMongoMonitor, which monitors one or more 
+        MongoDB namespaces and simply logs all modifications to them via utils.log.
+    """
+    
     def __init__(self, ns, state_ns='local.mongomonitor', **kwargs):
         AMongoMonitor.__init__(self, **kwargs)
+        noop      = kwargs.get('noop', False)
+        inclusive = kwargs.get('noop', False)
+        force     = kwargs.get('force', False)
         
         if isinstance(ns, basestring):
-            self.ns = [ ns ]
+            self.ns = frozenset([ ns ])
         else:
-            self.ns = ns
+            self.ns = frozenset(ns)
         
+        self._sources = []
         for ns in self.ns:
-            self._sources = MongoCollectionMonitor(monitor   = self, 
-                                                   ns        = ns, 
-                                                   state_ns  = state_ns, 
-                                                   inclusive = inclusive, 
-                                                   force     = force, 
-                                                   noop      = self.kwargs.get('noop', False))
+            self._sources.append(MongoCollectionMonitor(monitor   = self, 
+                                                        ns        = ns, 
+                                                        state_ns  = state_ns, 
+                                                        inclusive = inclusive, 
+                                                        force     = force, 
+                                                        noop      = noop))
     
     def _run(self):
         for source in self._sources:

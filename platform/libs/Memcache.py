@@ -10,17 +10,19 @@ import binascii, bson, ec2_utils, functools, logs, utils, pylibmc
 
 from schema import Schema
 
-# TODO: Manipulating cache items via subscript-style syntax (e.g., cache[key]) 
-# is currently the only way pickling import/export conversion will take place 
-# for Schema objects. Depending on our needs in the future, we may need expand 
-# support for these conversions to the entire pylibmc.Client interface.
+"""
+NOTE (travis): Manipulating cache items via subscript-style syntax (e.g., cache[key]) 
+is currently the only way pickling import/export conversion will take place for 
+Schema objects. Depending on our needs in the future, we may need expand support 
+for these conversions to the entire pylibmc.Client interface.
+"""
 
 class Memcache(object):
     """
-        Lightweight wrapper around pylibmc memcached client which handles client 
-        initialization by obtaining the list of memcached servers from EC2 tags.
-        Also handles importing / exporting from / to our ORM, Schema, and 
-        pylibmc's basic, pickleable data types.
+        Lightweight wrapper around the pylibmc memcached client which handles 
+        client initialization by obtaining the list of memcached servers from 
+        EC2 tags. Also handles importing / exporting from / to our ORM, Schema, 
+        and pylibmc's basic, pickleable data types.
     """
     
     def __init__(self, binary=False, behaviors=None):
@@ -94,6 +96,8 @@ class Memcache(object):
             }
         elif isinstance(value, (list, tuple)):
             value = map(self._import_value, value)
+        elif isinstance(value, dict):
+            value = dict(map(lambda k, v: (k, self._import_value(v)), value.iteritems()))
         
         return value
     
@@ -103,13 +107,16 @@ class Memcache(object):
             within memcached into our own, pythonic version that is returned.
         """
         
-        if isinstance(value, dict) and '__schema__' in value and '__value__' in value:
-            # reinstantiate the Schema subclass with its prior data
-            return value['__schema__'](value['__value__'])
+        if isinstance(value, dict):
+            if '__schema__' in value and '__value__' in value:
+                # reinstantiate the Schema subclass with its prior data
+                return value['__schema__'](value['__value__'])
+            else:
+                return dict(map(lambda k, v: (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):
             value = map(self._export_value, value)
-        
-        return value
+        else:
+            return value
     
     def __str__(self):
         if self._client:
@@ -132,6 +139,7 @@ class StampedMemcache(Memcache):
 # what keys are we using for memcached entries?
 # object_id => [ dependencies ]
 
+"""
 class InvalidatingMemcache(Memcache):
     
     def _import_object_id(object_id):
@@ -176,6 +184,7 @@ class InvalidatingMemcache(Memcache):
             pass
         
         return dependencies
+"""
 
 def __global_api():
     from MongoStampedAPI import globalMongoStampedAPI
