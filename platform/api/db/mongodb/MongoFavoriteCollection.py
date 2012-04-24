@@ -43,8 +43,12 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
         stampData = document.pop('stamp', None)
         if stampData is not None:
             stampData.pop('entity')
-            stampData['entity'] = {'entity_id': entity.entity_id}
-            document['stamp'] = stampData
+            sparse = {
+                'stamp_id'  : stampData['stamp_id'],
+                'entity'    : { 'entity_id' : entity.entity_id },
+                'user'      : { 'user_id' : stampData['user']['user_id'] },
+            }
+            document['stamp'] = sparse
         
         favorite = self._obj(document, overflow=self._overflow)
         favorite.entity = entity
