@@ -1508,17 +1508,12 @@ class HTTPStamp(Schema):
             coordinates         = data['entity'].pop('coordinates', None)
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
+
             previews            = data.pop('previews', {})
             comments            = previews.pop('comments', [])
+            likes               = previews.pop('likes', [])
+            todos               = previews.pop('todos', [])
 
-            data['previews']    = {}
-            
-            comment_preview = []
-            for comment in comments:
-                comment = Comment(comment)
-                comment = HTTPComment().importSchema(comment).exportSparse()
-                comment_preview.append(comment)
-            data['comment_preview'] = comment_preview
 
             if len(mentions) > 0:
                 data['mentions'] = mentions
@@ -1546,6 +1541,24 @@ class HTTPStamp(Schema):
             except Exception as e:
                 logs.warning(e)
                 logs.info("No blurb found for stamp_id %s (%s)" % (self.stamp_id, schema.contents))
+
+            
+            for comment in comments:
+                comment = Comment(comment)
+                comment = HTTPComment().importSchema(comment)
+                self.previews.comments.append(comment)
+                # TEMP
+                self.comment_preview.append(comment)
+            
+            for user in todos:
+                user    = UserMini(user)
+                user    = HTTPUserMini().importSchema(user).exportSparse()
+                self.previews.todos.append(user)
+
+            for user in likes:
+                user    = UserMini(user)
+                user    = HTTPUserMini().importSchema(user).exportSparse()
+                self.previews.likes.append(user)
 
             self.num_comments = 0
             if schema.num_comments > 0:
