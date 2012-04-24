@@ -54,8 +54,8 @@ def lru_cache(maxsize=100):
 
             ### MIKE - adding this import and modifying try / except below
             import logs
-
-            logs.info("\nkey %s" % key)
+            import pprint
+            logs.info(pprint.pformat("\nkey %s" % key))
 
             # get cache entry or compute if not found
             try:
