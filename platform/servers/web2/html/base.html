@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en">
+    {% block pre_head %}
     <head>
+        {% endblock pre_head %}
+        
+        {% block head %}
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         
@@ -31,9 +35,11 @@
          
         <!-- scripts loaded pre-document-body (most are loaded post-document-body) -->
         <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
+        {% endblock head %}
         
-        {% block head %} {% endblock head %}
+        {% block post_head %}
     </head>
+    {% endblock post_head %}
     
     <body>
         {% block header %}
@@ -79,6 +85,8 @@
         
         <!-- scripts loaded post-document-body -->
         {% block scripts %}
+        
+        <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
         

@@ -4,6 +4,10 @@ user="ubuntu"
 node=$1
 coll=$2
 
+echo "Imports a single collection from the mongodb instance running on the given semantic node (e.g., peach.db1)."
+echo "usage: $0 node collection"
+echo "example: $0 peach.db1 stamps"
+echo ""
 echo "user: $user"
 echo "node: $node"
 echo "coll: $coll"

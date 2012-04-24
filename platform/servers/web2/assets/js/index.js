@@ -59,7 +59,7 @@ stamped.init = function() {
             }, 250);
         }
         
-        $('.signup form').submit(function() {
+        $('.signup form').submit(function(event) {
             if ($('.signup form').hasClass('validated')) {
                 $.getJSON(
                     this.action + "?callback=?",
@@ -80,12 +80,12 @@ stamped.init = function() {
             event.preventDefault();
         });
         
-        $('.signup-toggle').live('click', function() {
+        $('.signup-toggle').live('click', function(event) {
             showSignup();
             event.preventDefault();
         });
         
-        $('.hide').live('click', function() {
+        $('.hide').live('click', function(event) {
             hideSignup();
             event.preventDefault();
         });
@@ -157,21 +157,19 @@ stamped.init = function() {
         }
     };
     
-    $('.video-launcher').live('click', function() {    
+    $('.video-launcher').live('click', function(event) {    
         $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
         clearInterval(slidechanger);
         $('.shadow, .lightbox').fadeIn('slow');
         event.preventDefault();
     });
     
-    $('.close').live('click', function() {
+    $('.close').live('click', function(event) {
         $('.shadow, .lightbox').fadeOut('slow', function() {
             $('.shadow, .lightbox').remove();
         });
         slidechanger = setInterval(updateSlide, time);
-        
         event.preventDefault();
-        
     });
     
     var clearStutterTimer = null;
@@ -248,7 +246,7 @@ stamped.init = function() {
             });
         }
         
-        $('.toggle-all').live('click', function() {
+        $('.toggle-all').live('click', function(event) {
             if ($('.slider.on').length) {
                 $('.slider').each(function() {
                     targetSetting = $(this);
@@ -308,7 +306,7 @@ stamped.init = function() {
                 });
                 $('<a class="more-toggle" href="#">Read more...</a>').insertAfter('div.capsule .what');
             }
-            $('.more-toggle').click(function() {
+            $('.more-toggle').click(function(event) {
                 $(this).hide();
                 what.css({
                     'height' : 'auto'
@@ -321,7 +319,7 @@ stamped.init = function() {
                 $('<a href="#" class="more-toggle-mobile">Show more information</a>').insertBefore('.more-cap');
             };
             
-            $('.more-toggle-mobile').click(function() {
+            $('.more-toggle-mobile').click(function(event) {
                 $(this).hide();
                 $('.more-cap').fadeIn();
                 event.preventDefault();
@@ -347,10 +345,70 @@ stamped.init = function() {
         windowHeight();
     });
     
+    login = function(login, password) {
+        params = "login=" + login + "&password=" + password + "&client_id=" + "stampedtest" + "&client_secret=" + "august1ftw";
+        
+        call("/v0/oauth2/login.json", {
+            login : login, 
+            password : password, 
+            client_id : 'stampedtest', 
+            client_secret : 'august1ftw', 
+        }, function(data) {
+            console.log("success: " + data.toSource());
+            alert("success" + data.toSource());
+        });
+        
+        return false;
+    };
+    
+    call = function(uri, params, success) {
+        var base = "http://localhost:18000";
+        var url  = base + uri;
+        
+        window.log(url);
+        /*var request = new XMLHttpRequest();
+        
+        request.open('POST', url, true);
+        request.onreadystatechange = function() {
+            if (request.readyState != 4) {
+                return;
+            }
+            
+            if (request.status != 200) {
+                alert("error: " + request.status);
+                return;
+            }
+            
+            success(request.responseText);
+        };
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        request.setRequestHeader("Content-length", params.length);
+        request.send(params);
+        return;*/
+        
+        // TODO: why doesn't this jQuery ajax request work?
+        $.ajax({
+            type     : "POST", 
+            url      : url, 
+            data     : params, 
+            success  : success, 
+            crossDomain : true, 
+            error    : function(jqXHR, textStatus, errorThrown) {
+                console.log("error");
+                console.log(jqXHR.responseText)
+                console.log(this.toSource());
+                console.log(textStatus);
+                console.log(errorThrown);
+            }, 
+        });
+    };
+    
     agentInspector();
     windowHeight();
     inputManager();
     rotator();
     slider();
+    
+    login("travis", "****");
 };
 

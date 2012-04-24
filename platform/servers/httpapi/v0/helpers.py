@@ -23,13 +23,20 @@ from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
 
+
+# TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
+# restrictive as possible.
+# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid?
+# TODO: (travis): should https also be a valid origin prefix?
+
 VALID_ORIGINS = [
-    'http://stamped.com',
+    'http://stamped.com', 
     'http://api.stamped.com', 
-    'http://www.stamped.com',
-    'http://dev.stamped.com',
-    'http://localhost:19000',
-    'http://localhost:18000',
+    'http://www.stamped.com', 
+    'http://dev.stamped.com', 
+    'http://localhost:19000', 
+    'http://localhost:18000', 
+    'http://localhost:8000', 
 ]
 
 t1 = time.time()

@@ -1,7 +1,12 @@
 /* index.less
  * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+
+@import "elements.less";
 
 .public .wrap {
     position: relative;
@@ -141,6 +146,24 @@
 
 .video-block:hover .thumbnail {
     background-position: left bottom;
+}
+
+.public .card {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 0 none;
+    margin-top: 45px;
+    padding: 0;
+    width: 940px;
+}
+
+.card {
+    background: -moz-linear-gradient(left center , #33CCFF, #991111) repeat scroll 0 0 transparent;
+    border-bottom: 2px solid #FFFFFF;
+    border-top: 2px solid #FFFFFF;
+    margin: 111px auto 0;
+    width: 580px;
+    
+    .box-shadow(0, 5px, 10px, rgba(0, 0, 0, 0.15));
 }
 
 .public .card {
