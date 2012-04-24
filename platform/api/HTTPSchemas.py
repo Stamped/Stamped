@@ -1547,11 +1547,11 @@ class HTTPStamp(Schema):
 
                     item.images.append(img)
 
-                self.contents.append(content)
+                self.contents.append(item)
 
                 # TEMP
-                self.blurb      = content.blurb 
-                self.created    = content.created 
+                self.blurb      = item.blurb 
+                self.created    = item.created 
 
             
             for comment in comments:
