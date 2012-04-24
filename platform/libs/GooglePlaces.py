@@ -513,7 +513,6 @@ def test_lrucache():
     def _add_suggested_section(title, entities):
         suggested.append({ 'name' : title, 'entities' : entities })
 
-    entities = []
     entity = PlaceEntity()
     entity.title = 'Test'
     entity.lat   = 100.1
@@ -521,7 +520,7 @@ def test_lrucache():
     entity.googleplaces_id          = 'theGooglePlacesId'
     entity.googleplaces_reference   = 'theGooglePlacesReference'
 
-    entities.append = entity
+    entities = [entity]
     _add_suggested_section('testEntities', entities )
 
     return suggested
