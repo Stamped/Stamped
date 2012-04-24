@@ -504,6 +504,32 @@ def parseCommandLine():
     
     return (options, args)
 
+
+from LRUCache import lru_cache
+@lru_cache(3)
+def test_lrucache():
+    results = self._google_places.getEntityResultsByLatLng(coords, params)
+
+    suggested = []
+
+    def _add_suggested_section(title, entities):
+        suggested.append({ 'name' : title, 'entities' : entities })
+
+    entities = []
+    entity = PlaceEntity()
+    entity.title = 'Test'
+    entity.lat   = 'theLat'
+    entity.lng   = 'theLng'
+    entity.googleplaces_id          = 'theGooglePlacesId'
+    entity.googleplaces_reference   = 'theGooglePlacesReference'
+
+    entities[0] = entity
+    _add_suggested_section('testEntities', entities )
+
+    return suggested
+
+
+
 def main():
     """
         Usage: GooglePlaces.py [options] address|latLng
