@@ -1548,7 +1548,8 @@ class HTTPStamp(Schema):
 
                     item.images.append(img)
 
-                self.contents.append(item)
+                # Insert contents in descending chronological order
+                self.contents.insert(0, item)
 
                 # TEMP
                 self.blurb      = item.blurb 
