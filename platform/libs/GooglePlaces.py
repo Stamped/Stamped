@@ -512,11 +512,14 @@ def test_lrucache():
 
     def _add_suggested_section(title, entities):
         suggested.append({ 'name' : title, 'entities' : entities })
+    import random
+
+    random.seed()
 
     entity = PlaceEntity()
     entity.title = 'Test'
-    entity.lat   = 100.1
-    entity.lng   = 10.2
+    entity.lat   = float(random.randint(0,100000))
+    entity.lng   = float(random.randint(0,100000))
     entity.googleplaces_id          = 'theGooglePlacesId'
     entity.googleplaces_reference   = 'theGooglePlacesReference'
 
