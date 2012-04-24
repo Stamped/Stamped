@@ -37,7 +37,7 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             del(document['_id'])
         
         entityData = document.pop('entity')
-        entity = buildEntity(entityData, mini=True)
+        entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
 
         stampData = document.pop('stamp', None)

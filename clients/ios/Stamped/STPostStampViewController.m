@@ -15,20 +15,30 @@
 #import "STRippleViewContainer.h"
 #import "STRippleBar.h"
 #import "STInboxViewController.h"
+#import "STStampedByView.h"
+#import "STSimpleStampedBy.h"
+#import "STStampedActions.h"
+#import "STActionManager.h"
 
 @interface STPostStampViewController ()
 
 @property (nonatomic, readonly, retain) id<STStamp> stamp;
+@property (nonatomic, readwrite, retain) id<STStampedBy> stampedBy;
+@property (nonatomic, readwrite, retain) id<STUserDetail> userDetail;
 
 - (UIView*)createHeaderView;
 - (void)handleUserDetail:(id<STUserDetail>)userDetail withError:(NSError*)error;
+- (void)handleStampedBy:(id<STStampedBy>)stampedBy withError:(NSError*)error;
 - (void)addBadgesWithUser:(id<STUserDetail>)userDetail andView:(STViewContainer*)view;
+- (void)addFriendOrdinalToView:(STViewContainer*)view;
 
 @end
 
 @implementation STPostStampViewController
 
 @synthesize stamp = _stamp;
+@synthesize userDetail = userDetail_;
+@synthesize stampedBy = stampedBy_;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
   self = [super init];
@@ -41,6 +51,8 @@
 - (void)dealloc
 {
   [_stamp release];
+  [userDetail_ release];
+  [stampedBy_ release];
   [super dealloc];
 }
 
@@ -53,6 +65,12 @@
     [self.scrollView appendChildView:[self createHeaderView]];
     [[STStampedAPI sharedInstance] userDetailForUserID:self.stamp.user.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
       [self handleUserDetail:userDetail withError:error];
+    }];
+    STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
+    slice.entityID = self.stamp.entity.entityID;
+    slice.limit = [NSNumber numberWithInteger:10];
+    [[STStampedAPI alloc] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error) {
+      [self handleStampedBy:stampedBy withError:error];
     }];
   }
   else {
@@ -68,6 +86,19 @@
   // Release any retained subviews of the main view.
 }
 
+- (void)profileImageClicked:(id)nothing {
+  STActionContext* context = [STActionContext context];
+  id<STAction> action = [STStampedActions actionViewUser:self.stamp.user.userID withOutputContext:context];
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
+- (void)friendImageClicked:(id<STStamp>)stamp {
+  STActionContext* context = [STActionContext context];
+  context.stamp = stamp;
+  id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
 - (UIView*)createHeaderView {
   CGFloat height = 60;
   CGFloat paddingX = 8;
@@ -77,6 +108,9 @@
   UIView* profileImage = [Util profileImageViewForUser:self.stamp.user withSize:STProfileImageSize37];
   profileImage.frame = [Util centeredAndBounded:profileImage.frame.size inFrame:CGRectMake(paddingX, 0, height, height)];
   [view addSubview:profileImage];
+  
+  UIView* profileImageButton = [Util tapViewWithFrame:profileImage.frame target:self selector:@selector(profileImageClicked:) andMessage:nil];
+  [view addSubview:profileImageButton];
   
   CGFloat textX = CGRectGetMaxX(profileImage.frame) + paddingX;
   
@@ -107,33 +141,62 @@
   return view;
 }
 
+- (void)commonSetup {
+  STViewContainer* mainView = [[[STViewContainer alloc] initWithDelegate:self.scrollView andFrame:CGRectMake(5, 0, 310, 2)] autorelease];
+  mainView.backgroundColor = [UIColor whiteColor];
+  mainView.layer.shadowColor = [UIColor blackColor].CGColor;
+  mainView.layer.shadowOpacity = .1;
+  mainView.layer.shadowRadius = 4;
+  mainView.layer.shadowOffset = CGSizeMake(0,2);
+  STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:self.userDetail.primaryColor 
+                                                 andSecondaryColor:self.userDetail.secondaryColor 
+                                                             isTop:YES] autorelease];
+  [mainView appendChildView:topBar];
+  STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:self.userDetail.primaryColor
+                                                    andSecondaryColor:self.userDetail.secondaryColor
+                                                                isTop:NO] autorelease];
+  [self addUserDistributionWithUser:self.userDetail andView:mainView];
+  [self addFriendOrdinalToView:mainView];
+  [self addBadgesWithUser:self.userDetail andView:mainView];
+  
+  [mainView appendChildView:bottomBar];
+  [Util reframeView:mainView withDeltas:CGRectMake(0, 0, 0, 2)];
+  [self.scrollView appendChildView:mainView];
+  
+  STSimpleStampedBy* stampedByLimited = [[[STSimpleStampedBy alloc] init] autorelease];
+  stampedByLimited.everyone = self.stampedBy.everyone;
+  STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedByLimited
+                                                                     blacklist:[NSSet setWithObject:self.userDetail.userID] 
+                                                                   andDelegate:self.scrollView] autorelease];
+  [Util reframeView:stampedByView withDeltas:CGRectMake(0, 5, 0, 0)];
+  [self.scrollView appendChildView:stampedByView];
+  [[STInboxViewController sharedInstance] newStampCreated:self.stamp];
+}
+
 - (void)handleUserDetail:(id<STUserDetail>)userDetail withError:(NSError*)error {
   if (userDetail) {
-    STViewContainer* mainView = [[[STViewContainer alloc] initWithDelegate:self.scrollView andFrame:CGRectMake(5, 0, 310, 2)] autorelease];
-    mainView.backgroundColor = [UIColor whiteColor];
-    mainView.layer.shadowColor = [UIColor blackColor].CGColor;
-    mainView.layer.shadowOpacity = .1;
-    mainView.layer.shadowRadius = 4;
-    mainView.layer.shadowOffset = CGSizeMake(0,2);
-    STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:userDetail.primaryColor 
-                                                   andSecondaryColor:userDetail.secondaryColor 
-                                                               isTop:YES] autorelease];
-    [mainView appendChildView:topBar];
-    STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:userDetail.primaryColor
-                                                      andSecondaryColor:userDetail.secondaryColor
-                                                                  isTop:NO] autorelease];
-    [self addUserDistributionWithUser:userDetail andView:mainView];
-    [self addBadgesWithUser:userDetail andView:mainView];
-    
-    [mainView appendChildView:bottomBar];
-    [Util reframeView:mainView withDeltas:CGRectMake(0, 0, 0, 2)];
-    [self.scrollView appendChildView:mainView];
-    [[STInboxViewController sharedInstance] newStampCreated:self.stamp];
+    self.userDetail = userDetail;
+    if (self.stampedBy) {
+      [self commonSetup];
+    }
   }
   else {
-    NSLog(@"error retrieving user:%@",error);
+    [Util warnWithMessage:@"User Detail failed to load" andBlock:nil];
   }
 }
+
+- (void)handleStampedBy:(id<STStampedBy>)stampedBy withError:(NSError*)error {
+  if (stampedBy) {
+    self.stampedBy = stampedBy;
+    if (self.userDetail) {
+      [self commonSetup];
+    }
+  }
+  else {
+    [Util warnWithMessage:@"Also stamped by failed to load" andBlock:nil];
+  }
+}
+
 
 - (void)addUserDistributionWithUser:(id<STUserDetail>)userDetail andView:(STViewContainer*)view {
   if (userDetail.distribution) {
@@ -279,6 +342,61 @@
       }
     }
   }
+}
+
+- (void)addFriendOrdinalToView:(STViewContainer*)view {
+  STViewContainer* friendsView = [[[STViewContainer alloc] initWithDelegate:view andFrame:CGRectMake(0, 0, 310, 0)] autorelease];
+  UIView* header = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 310, 30)] autorelease];
+  CGFloat headerY = 5;
+  UIImageView* headerIcon = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_drag_inner_friends"]] autorelease];
+  headerIcon.frame = CGRectMake(5, headerY+5, 11, 11);
+  [header addSubview:headerIcon];
+  UIFont* normalFont = [UIFont stampedFontWithSize:14];
+  UIView* firstText = [Util viewWithText:@"You're the "
+                                    font:normalFont
+                                   color:[UIColor stampedGrayColor]
+                                    mode:UILineBreakModeClip
+                              andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+  [Util reframeView:firstText withDeltas:CGRectMake(CGRectGetMaxX(headerIcon.frame)+5, headerY, 0, 0)];
+  [header addSubview:firstText];
+  UIView* ordinalText = [Util viewWithText:[NSString stringWithFormat:@"%d", self.stampedBy.friends.count.integerValue + 1]
+                                      font:[UIFont stampedBoldFontWithSize:14]
+                                     color:[UIColor stampedDarkGrayColor]
+                                      mode:UILineBreakModeClip
+                                andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+  [Util reframeView:ordinalText withDeltas:CGRectMake(CGRectGetMaxX(firstText.frame), headerY, 0, 0)];
+  [header addSubview:ordinalText];
+  UIView* secondText = [Util viewWithText:@" of your friends to stamp this."
+                                     font:normalFont
+                                    color:[UIColor stampedGrayColor]
+                                     mode:UILineBreakModeClip
+                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+  [Util reframeView:secondText withDeltas:CGRectMake(CGRectGetMaxX(ordinalText.frame), headerY, 0, 0)];
+  [header addSubview:secondText];
+  [friendsView appendChildView:header];
+  [Util reframeView:friendsView withDeltas:CGRectMake(0, 0, 0, 50)];
+  NSMutableArray* stamps = [NSMutableArray arrayWithObject:self.stamp];
+  for (id<STStamp> stamp in self.stampedBy.friends.stamps) {
+    if (stamps.count > 7) {
+      break;
+    }
+    else {
+      [stamps addObject:stamp];
+    }
+  }
+  NSLog(@"%@",self.stampedBy.friends.stamps);
+  CGFloat xOffset = 5;
+  CGFloat yOffset = CGRectGetMaxY(ordinalText.frame)+10;
+  for (NSInteger i = stamps.count - 1; i >= 0; i--) {
+    id<STStamp> stamp = [stamps objectAtIndex:i];
+    UIView* imageView = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize37];
+    [Util reframeView:imageView withDeltas:CGRectMake(xOffset, yOffset, 0, 0)];
+    [friendsView addSubview:imageView];
+    UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(friendImageClicked:) andMessage:stamp];
+    [friendsView addSubview:imageButton];
+    xOffset += 40;
+  }
+  [view appendChildView:friendsView];
 }
 
 @end

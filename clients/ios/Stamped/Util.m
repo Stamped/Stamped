@@ -366,6 +366,10 @@ static Rdio* _rdio;
   return label;
 }
 
++ (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
+  return [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
+}
+
 + (CGRect)centeredAndBounded:(CGSize)size inFrame:(CGRect)frame {
   CGFloat delta_w = frame.size.width - size.width;
   CGFloat delta_h = frame.size.height - size.height;
@@ -409,13 +413,13 @@ static Rdio* _rdio;
 
 
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color {
-  UIView* window = [UIApplication sharedApplication].keyWindow.rootViewController.view;
+  UIView* window = [UIApplication sharedApplication].keyWindow;
   STPopUpView* cur = _currentPopUp;
   if (cur && cur.superview) {
     [cur removeFromSuperview];
   }
   if (view) {
-    STPopUpView* popup = [[STPopUpView alloc] initWithFrame:window.frame view:view dismissible:dismissible andColor:color];
+    STPopUpView* popup = [[STPopUpView alloc] initWithFrame:[Util fullscreenFrameAdjustedForStatusBar] view:view dismissible:dismissible andColor:color];
     popup.alpha = 0;
     [window addSubview:popup];
     _currentPopUp = popup;
@@ -766,6 +770,7 @@ static Rdio* _rdio;
 }
 
 + (CGRect)fullscreenFrame {
+  if (![UIApplication sharedApplication].keyWindow) return CGRectMake(0, 0, 320, 480);
   return [UIApplication sharedApplication].keyWindow.frame;
 }
 
@@ -807,6 +812,13 @@ static Rdio* _rdio;
   }
   return dictionary;
 }
+
++ (NSString*)largeProfileImageURLWithUser:(id<STUserDetail>)userDetail {
+  if (userDetail.imageURL)
+    return userDetail.imageURL;
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", userDetail.screenName.lowercaseString];
+}
+
 
 @end
 

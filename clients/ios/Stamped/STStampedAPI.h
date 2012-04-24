@@ -69,16 +69,21 @@ typedef enum {
                             andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error))block;
 
 - (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
-                            andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+                         andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
 
+- (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
+                                 andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
+
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
 - (void)userDetailsForUserIDs:(NSArray*)userIDs andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error))block;
+
+- (void)isFriendForUserID:(NSString*)userID andCallback:(void(^)(BOOL isFriend, NSError* error))block;
 
 - (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block;
 
@@ -102,6 +107,14 @@ typedef enum {
 
 - (void)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                             andCallback:(void(^)(NSArray<STTodo>*,NSError*))block;
+
+- (void)followerIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* followerIDs, NSError* error))block;
+
+- (void)addFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
+
+- (void)removeFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
+
+- (void)friendIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* friendIDs, NSError* error))block;
 
 + (STStampedAPI*)sharedInstance;
 

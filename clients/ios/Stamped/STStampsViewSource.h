@@ -26,6 +26,7 @@
 - (void)selectedNoStampsCell;
 - (void)selectedLastCell;
 
+@property (nonatomic, readwrite, assign) NSInteger mainSection;
 @property (nonatomic, readwrite, retain) STGenericCollectionSlice* slice;
 @property (nonatomic, readwrite, retain) UITableView* table;
 @property (nonatomic, readonly, retain) NSString* noStampsText;

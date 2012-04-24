@@ -11,48 +11,57 @@
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"
-
-@interface STUniversalNewsCell : UITableViewCell
-
-- (id)initWithActivity:(id<STActivity>)activity;
-
-@end
-
-@implementation STUniversalNewsCell
-
-- (id)initWithActivity:(id<STActivity>)activity {
-  self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"test"];
-  if (self) {
-    self.textLabel.text = activity.header;
-    self.detailTextLabel.text = activity.body;
-  }
-  return self;
-}
-
-@end
+#import "ECSlidingViewController.h"
+#import "STActivityCell.h"
 
 @interface STUniversalNewsController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, readonly, retain) NSMutableArray* newsItems;
+@property (nonatomic, readwrite, assign) STStampedAPIScope scope;
 
 @end
 
 @implementation STUniversalNewsController
 
 @synthesize newsItems = newsItems_;
+@synthesize scope = scope_;
+
+- (void)setScope:(STStampedAPIScope)scope {
+  scope_ = scope;
+  NSString* text;
+  if (scope == STStampedAPIScopeYou) {
+    text = @"Friends";
+  }
+  else {
+    text = @"You";
+  }
+  UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:text
+                                                                   style:UIBarButtonItemStylePlain
+                                                                  target:self
+                                                                  action:@selector(toggleButtonClicked:)] autorelease];
+  self.navigationItem.rightBarButtonItem = rightButton;
+  [self reloadStampedData];
+}
 
 - (id)init {
   self = [super initWithHeaderHeight:0];
   if (self) {
-    STGenericSlice* slice = [[[STGenericSlice alloc] init] autorelease];
-    slice.limit = [NSNumber numberWithInteger:100];
-    [self reloadStampedData];
+    self.scope = STStampedAPIScopeFriends;
   }
   return self;
 }
 
 - (void)backButtonClicked:(id)button {
-  [[STRootMenuView sharedInstance] toggle];
+  [self.slidingViewController anchorTopViewTo:ECRight];
+}
+
+- (void)toggleButtonClicked:(id)button {
+  if (self.scope == STStampedAPIScopeYou) {
+    self.scope = STStampedAPIScopeFriends;
+  }
+  else {
+    self.scope = STStampedAPIScopeYou;
+  }
 }
 
 - (void)viewDidLoad
@@ -73,11 +82,14 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   if (self.newsItems) {
-    NSLog(@"heraerae%d",self.newsItems.count);
     return self.newsItems.count;
   }
-  NSLog(@"alksfd");
   return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
+  return [STActivityCell heightForCellWithActivity:activity andScope:STStampedAPIScopeFriends];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -86,7 +98,7 @@
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
-  return [[[STUniversalNewsCell alloc] initWithActivity:activity] autorelease];
+  return [[[STActivityCell alloc] initWithActivity:activity andScope:STStampedAPIScopeFriends] autorelease];
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -97,16 +109,32 @@
 }
 
 - (void)reloadStampedData {
-  [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:nil andCallback:^(NSArray<STActivity> *activities, NSError *error) {
-    if (activities) {
-      NSLog(@"activities:%@",activities);
-      newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
-      [self.tableView reloadData];
-    }
-    else {
-      NSLog(@"activity error: %@",error);
-    }
-  }];
+  STGenericSlice* slice = [[[STGenericSlice alloc] init] autorelease];
+  slice.limit = [NSNumber numberWithInteger:100];
+  if (self.scope == STStampedAPIScopeYou) {
+    [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
+      if (activities) {
+        NSLog(@"activities:%@",activities);
+        newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
+        [self.tableView reloadData];
+      }
+      else {
+        NSLog(@"activity error: %@",error);
+      }
+    }];
+  }
+  else {
+    [[STStampedAPI sharedInstance] activitiesForFriendsWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
+      if (activities) {
+        NSLog(@"activities:%@",activities);
+        newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
+        [self.tableView reloadData];
+      }
+      else {
+        NSLog(@"activity error: %@",error);
+      }
+    }];
+  }
 }
 
 @end

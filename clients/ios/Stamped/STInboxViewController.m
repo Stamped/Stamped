@@ -25,6 +25,7 @@
 #import "STFriendsSource.h"
 #import "STEntitySearchController.h"
 #import "STYouSource.h"
+#import "ECSlidingViewController.h"
 
 @interface STInboxCategoryFilterView : UIView
 
@@ -276,7 +277,7 @@ static STInboxViewController* _sharedInstance;
 }
 
 - (void)backButtonClicked:(id)button {
-  [[STRootMenuView sharedInstance] toggle];
+  [self.slidingViewController anchorTopViewTo:ECRight];
 }
 
 - (void)categoryButtonPressed:(id)button {
@@ -284,8 +285,9 @@ static STInboxViewController* _sharedInstance;
 }
 
 - (void)rightButtonClicked:(id)button {
-  STEntitySearchController* controller = [[[STEntitySearchController alloc] initWithCategory:self.category andQuery:self.query] autorelease];
-  [[Util sharedNavigationController] pushViewController:controller animated:YES];
+  [self.slidingViewController anchorTopViewTo:ECLeft];
+  //STEntitySearchController* controller = [[[STEntitySearchController alloc] initWithCategory:self.category andQuery:self.query] autorelease];
+  //[[Util sharedNavigationController] pushViewController:controller animated:YES];
   /*
    TODO repair
   UINavigationController* controller = [Util sharedNavigationController];
@@ -377,7 +379,7 @@ static STInboxViewController* _sharedInstance;
   self.query = nil;
   [_slider setGranularity:STStampedAPIScopeFriends animated:NO];
   self.scope = STStampedAPIScopeFriends;
-  [[self.inboxSources objectForKey:[NSNumber numberWithInteger:self.scope]] setFlareSet:[NSSet setWithObject:stamp.stampID]];
+  //[[self.inboxSources objectForKey:[NSNumber numberWithInteger:self.scope]] setFlareSet:[NSSet setWithObject:stamp.stampID]];
   [self updateSource];
   [self reloadStampedData];
 }

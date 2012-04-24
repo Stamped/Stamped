@@ -13,6 +13,7 @@
 #import "STRootMenuView.h"
 #import "STDebugDatumViewController.h"
 #import "Util.h"
+#import "ECSlidingViewController.h"
 
 @interface STDebugCell : UITableViewCell
 
@@ -54,7 +55,7 @@
 }
 
 - (void)backButtonClicked:(id)button {
-  [[STRootMenuView sharedInstance] toggle];
+  [self.slidingViewController anchorTopViewTo:ECRight];
 }
 
 - (void)viewDidLoad

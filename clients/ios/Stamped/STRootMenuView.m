@@ -16,6 +16,8 @@
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
+#import "ECSlidingViewController.h"
+#import "STRootViewController.h"
 
 @interface STRootMenuView ()
 
@@ -107,6 +109,7 @@
 }
 
 - (void)clicked:(id)message {
+  /*
   if (!self.selected) {
     UINavigationController* sharedController = [Util sharedNavigationController];
     [UIView animateWithDuration:.35 animations:^{
@@ -120,6 +123,13 @@
   else {
     [[STRootMenuView sharedInstance] toggle];
   }
+   */
+  NSLog(@"testing");
+  ECSlidingViewController* slider = [ECSlidingViewController sharedInstance];
+  [slider anchorTopViewOffScreenTo:ECRight animations:nil onComplete:^{
+    [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObject:self.controller] animated:NO];
+    [slider resetTopView];
+  }];
 }
 
 - (BOOL)selected {
@@ -159,7 +169,7 @@ static STRootMenuView* _sharedInstance;
 {
   self = [super initWithFrame:CGRectMake(0, 0, 320, 30)];
   if (self) {
-    self.backgroundColor = [UIColor colorWithWhite:.3 alpha:1];
+    self.backgroundColor = [UIColor clearColor];
     UIView* stampedLabel = [Util viewWithText:@"STAMPED" 
                                          font:[UIFont stampedTitleFontWithSize:30] 
                                         color:[UIColor colorWithWhite:0 alpha:.5]

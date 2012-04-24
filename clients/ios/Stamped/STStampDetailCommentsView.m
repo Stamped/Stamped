@@ -259,9 +259,16 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @end
 
+@interface STStampDetailCommentsView ()
+
+@property (nonatomic, readonly, retain) STViewContainer* commentViews;
+
+@end
+
 @implementation STStampDetailCommentsView
 
 @synthesize addCommentView = _addCommentView;
+@synthesize commentViews = _commentViews;
 
 - (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate
 {
@@ -273,20 +280,13 @@ andProfileImageSize:(STProfileImageSize)size {
     [self appendChildView:topBar];
     UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp];
     [self appendChildView:blurbView];
-    if ([stamp.commentsPreview count] > 3 || [stamp numComments].integerValue > 3) {
-      for (NSInteger i = 0; i < 3 && i < stamp.commentsPreview.count; i++) {
-        id<STComment> comment = [stamp.commentsPreview objectAtIndex:i];
-        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-        [self appendChildView:commentView];
-      }
-    }
-    else {
-      for (id<STComment> comment in stamp.commentsPreview) {
-        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-        [self appendChildView:commentView];
-      }
+    NSInteger limit = stamp.commentsPreview.count > 3 ? 2 : stamp.commentsPreview.count;
+    for (NSInteger i = 0; i < limit; i++) {
+      NSInteger index = limit - (i + 1);
+      id<STComment> comment = [stamp.commentsPreview objectAtIndex:index];
+      [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
+      STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
+      [self appendChildView:commentView];
     }
     [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
     STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
@@ -311,6 +311,11 @@ andProfileImageSize:(STProfileImageSize)size {
 {
   [_addCommentView release];
   [super dealloc];
+}
+
+- (void)reloadStampedData {
+  [super reloadStampedData];
+  
 }
 
 @end

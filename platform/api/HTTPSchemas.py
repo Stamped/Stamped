@@ -1461,27 +1461,46 @@ class HTTPEntityActionEndpoint(Schema):
 # Stamps #
 # ###### #
 
+class HTTPStampContent(Schema):
+    def setSchema(self):
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_references   = SchemaList(HTTPTextReference())
+        self.images             = SchemaList(ImageSchema())
+        # self.timestamp          = TimestampSchema()
+
+class HTTPStampPreviews(Schema):
+    def setSchema(self):
+        self.likes              = SchemaList(HTTPUserMini())
+        self.todos              = SchemaList(HTTPUserMini())
+        # self.credit             = SchemaList(Stamp())
+        self.comments           = SchemaList(HTTPComment())
+
 class HTTPStamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.entity             = HTTPEntityMini(required=True)
         self.user               = HTTPUserMini(required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.mentions           = SchemaList(MentionSchema())
+        self.contents           = SchemaList(HTTPStampContent())
         self.credit             = SchemaList(CreditSchema())
-        self.comment_preview    = SchemaList(HTTPComment())
-        self.image_dimensions   = SchemaElement(basestring)
-        self.image_url          = SchemaElement(basestring)
+        self.previews           = HTTPStampPreviews()
+        self.badges             = SchemaList(HTTPBadge())
+        self.via                = SchemaElement(basestring)
+        self.url                = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
-        self.like_threshold_hit = SchemaElement(bool)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
-        self.via                = SchemaElement(basestring)
-        self.badges             = SchemaList(HTTPBadge())
-        self.url                = SchemaElement(basestring)
+
+        # DEPRECATED
+        self.comment_preview    = SchemaList(HTTPComment())
+        self.image_dimensions   = SchemaElement(basestring)
+        self.image_url          = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.blurb_references   = SchemaList(HTTPTextReference())
+        self.mentions           = SchemaList(MentionSchema())
+        self.like_threshold_hit = SchemaElement(bool)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -1965,11 +1984,11 @@ class HTTPActivity(Schema):
 
         # Text
         self.header             = SchemaElement(basestring)
-        self.header_references  = SchemaList(HTTPActivityReference())
+        self.header_references  = SchemaList(HTTPTextReference())
         self.body               = SchemaElement(basestring)
-        self.body_references    = SchemaList(HTTPActivityReference())
+        self.body_references    = SchemaList(HTTPTextReference())
         self.footer             = SchemaElement(basestring)
-        self.footer_references  = SchemaList(HTTPActivityReference())
+        self.footer_references  = SchemaList(HTTPTextReference())
 
 
     def importSchema(self, schema):
@@ -2294,7 +2313,7 @@ class HTTPActivity(Schema):
             raise NotImplementedError
         return self
 
-class HTTPActivityReference(Schema):
+class HTTPTextReference(Schema):
     def setSchema(self):
         self.indices            = SchemaList(SchemaElement(int))
         self.action             = HTTPAction()
