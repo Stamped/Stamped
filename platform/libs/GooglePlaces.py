@@ -507,12 +507,13 @@ def parseCommandLine():
 
 from LRUCache import lru_cache
 @lru_cache(3)
-def test_lrucache(arbitrary_arg):
+def test_lrucache(arbitrary_arg, numcopies):
     suggested = []
 
     def _add_suggested_section(title, entities):
         suggested.append({ 'name' : title, 'entities' : entities })
     import random
+    import copy
 
     random.seed()
 
@@ -522,6 +523,11 @@ def test_lrucache(arbitrary_arg):
     entity.lng   = float(random.randint(0,100000))
     entity.googleplaces_id          = 'theGooglePlacesId'
     entity.googleplaces_reference   = 'theGooglePlacesReference'
+
+    for x in xrange(numcopies):
+        entities.append(copy.copy(entity))
+
+
 
     entities = [entity]
     _add_suggested_section('testEntities', entities )
