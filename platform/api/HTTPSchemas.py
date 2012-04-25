@@ -1671,7 +1671,7 @@ class HTTPStamp(Schema):
                     self.previews.likes.append(user)
 
                 for credit in schema.previews.credits:
-                    credit  = HTTPStamp().importSchema().importSchema(credit).exportSparse()
+                    credit  = HTTPStamp().importSchema(credit).exportSparse()
                     self.previews.credits.append(credit)
 
             self.num_comments = 0
