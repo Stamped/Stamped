@@ -11,6 +11,6 @@
 
 @interface STUserSource : STStampsViewSource
 
-@property (nonatomic, readwrite, retain) id<STUser> user;
+@property (nonatomic, readwrite, retain) NSString* userID;
 
 @end

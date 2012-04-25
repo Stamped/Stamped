@@ -13,6 +13,7 @@
 #import "STButton.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STUsersViewController.h"
+#import "STTableViewController.h"
 
 const static NSInteger _headerHeight = 50;
 const static NSInteger _histogramHeight = 100;
@@ -37,6 +38,14 @@ const static NSInteger _histogramHeight = 100;
     
     CGRect barFrame = CGRectMake(10, 10, 45, bodyHeight - 30);
     for (id<STDistributionItem> item in userDetail.distribution) {
+      
+      UIView* background = [[[UIView alloc] initWithFrame:barFrame] autorelease];
+      background.backgroundColor = [UIColor colorWithWhite:.95 alpha:1];
+      background.layer.cornerRadius = 3;
+      background.layer.borderColor = [UIColor colorWithWhite:.8 alpha:1].CGColor;
+      background.layer.borderWidth = 1;
+      [self.contentView addSubview:background];
+      
       CGFloat height = MAX((item.count.integerValue * barFrame.size.height) / maxStamps, 3);
       UIView* histogram = [[[UIView alloc] initWithFrame:CGRectMake(barFrame.origin.x, barFrame.origin.y + barFrame.size.height - height, barFrame.size.width, height)] autorelease];
       
@@ -67,10 +76,34 @@ const static NSInteger _histogramHeight = 100;
                                                                                                barFrame.size.width, 
                                                                                                20)];
       [self.contentView addSubview:categoryIcon];
+      
+      STUserCollectionSlice* slice = [[[STUserCollectionSlice alloc] init] autorelease];
+      slice.category = item.category;
+      slice.userID = userDetail.userID;
+      slice.offset = [NSNumber numberWithInteger:0];
+      slice.limit = [NSNumber numberWithInteger:1000];
+      UIView* button = [Util tapViewWithFrame:CGRectMake(barFrame.origin.x, 
+                                                         barFrame.origin.y, 
+                                                         barFrame.size.width, 
+                                                         CGRectGetMaxY(categoryIcon.frame)-barFrame.origin.y)
+                                       target:self
+                                     selector:@selector(clickedBar:) 
+                                   andMessage:slice];
+      [self.contentView addSubview:button];
       barFrame = CGRectOffset(barFrame, barFrame.size.width+6, 0);
     }
   }
   return self;
+}
+
+- (void)clickedBar:(STUserCollectionSlice*)slice {
+  STTableViewController* controller = [[[STTableViewController alloc] initWithHeaderHeight:0] autorelease];
+  [controller view];
+  STUserSource* source = [[STUserSource alloc] init];
+  source.userID = slice.userID;
+  source.slice = slice;
+  source.table = controller.tableView;
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
 @end
@@ -100,7 +133,7 @@ const static NSInteger _histogramHeight = 100;
 - (id)initWithUserDetail:(id<STUserDetail>)userDetail {
   self = [super init];
   if (self) {
-    self.user = userDetail;
+    self.userID = userDetail.userID;
     self.userDetail = userDetail;
     STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
     slice.offset = [NSNumber numberWithInt:0];

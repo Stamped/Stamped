@@ -40,8 +40,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 {
   [super viewWillAppear:animated];
   [self.view addGestureRecognizer:self.slidingViewController.panGesture];
-  [self.slidingViewController setAnchorRightRevealAmount:280.0f];
-  [self.slidingViewController setAnchorLeftRevealAmount:100.0f];
+  [self.slidingViewController setAnchorRightRevealAmount:150.0f];
+  [self.slidingViewController setAnchorLeftRevealAmount:70.0f];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

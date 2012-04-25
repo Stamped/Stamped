@@ -13,6 +13,8 @@
 #import "STMention.h"
 #import "STCredit.h"
 #import "STBadge.h"
+#import "STContentItem.h"
+#import "STPreviews.h"
 
 @protocol STStamp <NSObject>
 
@@ -34,9 +36,10 @@
 
 @property (nonatomic, readonly, retain) id<STEntity> entity;
 @property (nonatomic, readonly, retain) id<STUser> user;
-@property (nonatomic, readonly, copy) NSArray<STComment>* commentsPreview;
+@property (nonatomic, readonly, retain) id<STPreviews> previews;
 @property (nonatomic, readonly, copy) NSArray<STMention>* mentions;
 @property (nonatomic, readonly, copy) NSArray<STCredit>* credits;
 @property (nonatomic, readonly, copy) NSArray<STBadge>* badges;
+@property (nonatomic, readonly, copy) NSArray<STContentItem>* contents;
 
 @end

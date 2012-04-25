@@ -10,8 +10,10 @@
 #import "Util.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "TTTAttributedLabel.h"
+#import "STActionManager.h"
 
-@interface STActivityCell ()
+@interface STActivityCell () <TTTAttributedLabelDelegate>
 
 + (CGFloat)headerHeightForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
 + (CGFloat)bodyHeightForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
@@ -31,14 +33,18 @@
 + (CGFloat)xOffsetForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
 + (CGFloat)textWidthForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
 
+@property (nonatomic, readonly, retain) NSMutableArray* actions;
 
 @end
 
 @implementation STActivityCell
 
+@synthesize actions = actions_;
+
 - (id)initWithActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
   self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"test"];
   if (self) {
+    actions_ = [[NSMutableArray alloc] init];
     self.accessoryType = UITableViewCellAccessoryNone;
     CGFloat height = [STActivityCell heightForCellWithActivity:activity andScope:scope];
     UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, [Util fullscreenFrame].size.width, height)] autorelease];
@@ -65,12 +71,51 @@
     }
     if (activity.body) {
       CGRect bodyBounds = [STActivityCell bodyBoundsForActivity:activity andScope:scope];
-      UIView* bodyView = [Util viewWithText:activity.body
-                                       font:[STActivityCell bodyFontForActivity:activity andScope:scope]
-                                      color:[UIColor stampedDarkGrayColor]
-                                       mode:UILineBreakModeWordWrap
-                                 andMaxSize:bodyBounds.size];
-      bodyView.frame = CGRectOffset(bodyView.frame, bodyBounds.origin.x, bodyBounds.origin.y);
+      CGRect bodyFrame = bodyBounds;
+      bodyFrame.size.height = [STActivityCell bodyHeightForActivity:activity andScope:scope];
+      TTTAttributedLabel* bodyView = [[[TTTAttributedLabel alloc] initWithFrame:bodyFrame] autorelease];
+      bodyView.delegate = self;
+      bodyView.userInteractionEnabled = YES;
+      bodyView.textColor = [UIColor stampedDarkGrayColor];
+      bodyView.font = [STActivityCell bodyFontForActivity:activity andScope:scope];
+      bodyView.dataDetectorTypes = UIDataDetectorTypeLink;
+      bodyView.lineBreakMode = UILineBreakModeWordWrap;
+      bodyView.text = activity.body;
+      NSLog(@"bodyView before:%f",bodyView.frame.origin.y);
+      [bodyView sizeToFit];
+      NSLog(@"bodyView after:%f",bodyView.frame.origin.y);
+      
+      if (activity.bodyReferences) {
+        NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
+        CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+        [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
+        CFRelease(font);
+        bodyView.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
+        for (id<STActivityReference> reference in activity.bodyReferences) {
+          if (reference.indices.count == 2) {
+            NSInteger start = [[reference.indices objectAtIndex:0] integerValue];
+            NSInteger end = [[reference.indices objectAtIndex:1] integerValue];
+            NSRange range = NSMakeRange(start, end-start);
+            NSString* key;
+            if (reference.action) {
+              key = [NSString stringWithFormat:@"%d", self.actions.count];
+              [self.actions addObject:reference.action];
+            }
+            else {
+              key = @"-1";
+            }
+            [bodyView addLinkToURL:[NSURL URLWithString:key] withRange:range];
+          }
+          /*
+           UIView* bodyView = [Util viewWithText:activity.body
+           font:[STActivityCell bodyFontForActivity:activity andScope:scope]
+           color:[UIColor stampedDarkGrayColor]
+           mode:UILineBreakModeWordWrap
+           andMaxSize:bodyBounds.size];
+           bodyView.frame = CGRectOffset(bodyView.frame, bodyBounds.origin.x, bodyBounds.origin.y);
+           */
+        }
+      }
       [view addSubview:bodyView];
     }
     CGRect footerBounds = [STActivityCell footerBoundsForActivity:activity andScope:scope];
@@ -97,6 +142,21 @@
   return self;
 }
 
+- (void)dealloc
+{
+  [actions_ release];
+  [super dealloc];
+}
+
+- (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
+  NSLog(@"url:%@",url);
+  NSString* string = [url absoluteString];
+  if (![string isEqualToString:@"-1"]) {
+    id<STAction> action = [self.actions objectAtIndex:[string integerValue]];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:[STActionContext context]];
+  }
+}
+
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
   [super setSelected:selected animated:animated];
@@ -110,7 +170,7 @@
   height += [STActivityCell imagesHeightForActivity:activity andScope:scope];
   height += [STActivityCell footerHeightForActivity:activity andScope:scope];
   height += [STActivityCell bottomPaddingForActivity:activity andScope:scope];
-  return height;
+  return MAX(height,50);
 }
 
 + (CGFloat)headerHeightForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
@@ -166,7 +226,7 @@
 
 + (UIFont*)headerFontForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
   if (activity.body) {
-  return [UIFont stampedFontWithSize:12];
+    return [UIFont stampedFontWithSize:12];
   }
   else {
     return [UIFont stampedFontWithSize:14];
@@ -174,7 +234,7 @@
 }
 
 + (UIFont*)bodyFontForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
-  return [UIFont stampedFontWithSize:14];
+  return [UIFont stampedFontWithSize:12];
 }
 
 + (UIFont*)footerFontForActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {

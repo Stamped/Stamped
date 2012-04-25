@@ -13,6 +13,8 @@
 #import "STSimpleCredit.h"
 #import "STSimpleMention.h"
 #import "STSimpleBadge.h"
+#import "STSimpleContentItem.h"
+#import "STSimplePreviews.h"
 
 @implementation STSimpleStamp
 
@@ -32,10 +34,11 @@
 
 @synthesize entity = _entity;
 @synthesize user = _user;
-@synthesize commentsPreview = _commentsPreview;
+@synthesize previews = previews_;
 @synthesize mentions = _mentions;
 @synthesize credits = _credits;
 @synthesize badges = _badges;
+@synthesize contents = contents_;
 
 - (void)dealloc
 {
@@ -55,10 +58,11 @@
   
   [_entity release];
   [_user release];
-  [_commentsPreview release];
+  [previews_ release];
   [_mentions release];
   [_credits release];
   [_badges release];
+  [contents_ release];
   [super dealloc];
 }
 
@@ -84,12 +88,11 @@
   
   [mapping mapRelationship:@"entity" withMapping:[STSimpleEntity mapping]];
   [mapping mapRelationship:@"user" withMapping:[STSimpleUser mapping]];
-  [mapping mapKeyPath:@"comment_preview" 
-       toRelationship:@"commentsPreview" 
-          withMapping:[STSimpleComment mapping]];
+  [mapping mapRelationship:@"previews" withMapping:[STSimplePreviews mapping]];
   [mapping mapRelationship:@"mentions" withMapping:[STSimpleMention mapping]];
   [mapping mapKeyPath:@"credit" toRelationship:@"credits" withMapping:[STSimpleCredit mapping]];
   [mapping mapRelationship:@"badges" withMapping:[STSimpleBadge mapping]];
+  [mapping mapRelationship:@"contents" withMapping:[STSimpleContentItem mapping]];
   return mapping;
 }
 

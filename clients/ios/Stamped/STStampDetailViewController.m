@@ -32,6 +32,7 @@
 #import "STStampButton.h"
 #import "STStampedAPI.h"
 #import "STButton.h"
+#import "TTTAttributedLabel.h"
 
 @interface STStampDetailToolbar : UIView
 
@@ -68,8 +69,8 @@
     self.layer.borderWidth = 1;
     [Util addGradientToLayer:self.layer 
                   withColors:[NSArray arrayWithObjects:
-                              [UIColor colorWithWhite:.4 alpha:1],
-                              [UIColor colorWithWhite:.2 alpha:1],
+                              [UIColor colorWithWhite:.4 alpha:.80],
+                              [UIColor colorWithWhite:.2 alpha:.85],
                               nil] 
                     vertical:YES];
     UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"toolbar_todoButton"]] autorelease];
@@ -186,9 +187,11 @@
   
   _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
   [self.scrollView appendChildView:_headerView];
-  _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp andDelegate:self.scrollView];
-  _commentsView.addCommentView.delegate = self;
-  [self.scrollView appendChildView:_commentsView];
+  for (NSInteger i = 0; i < self.stamp.contents.count; i++) {
+    _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp index:i andDelegate:self.scrollView];
+    _commentsView.addCommentView.delegate = self;
+    [self.scrollView appendChildView:_commentsView];
+  }
   
   NSMutableArray* views = [NSMutableArray arrayWithObjects:
                            [[[STLikeButton alloc] initWithStamp:self.stamp] autorelease],

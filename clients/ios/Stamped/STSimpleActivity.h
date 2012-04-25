@@ -26,9 +26,9 @@
 @property (nonatomic, readwrite, retain) id<STActivityObjects> objects;
 @property (nonatomic, readwrite, retain) id<STAction> action;
 
-@property (nonatomic, readwrite, retain) id<STActivityReference> headerReferences;
-@property (nonatomic, readwrite, retain) id<STActivityReference> bodyReferences;
-@property (nonatomic, readwrite, retain) id<STActivityReference> footerReferences;
+@property (nonatomic, readwrite, retain) NSArray<STActivityReference>* headerReferences;
+@property (nonatomic, readwrite, retain) NSArray<STActivityReference>* bodyReferences;
+@property (nonatomic, readwrite, retain) NSArray<STActivityReference>* footerReferences;
 
 + (RKObjectMapping*)mapping;
 
