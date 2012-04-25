@@ -29,8 +29,9 @@ non_numeric_re  = re.compile('\D')
 def _coordinatesDictToFlat(coordinates):
     try:
         if not isinstance(coordinates['lat'], float) or \
-            not isinstance(coordinates['lng'], float):
+           not isinstance(coordinates['lng'], float):
             raise
+        
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
     except Exception:
         return None
@@ -40,6 +41,7 @@ def _coordinatesFlatToDict(coordinates):
         coordinates = coordinates.split(',')
         lat = float(coordinates[0])
         lng = float(coordinates[1])
+        
         return {
             'lat': lat,
             'lng': lng
@@ -52,10 +54,11 @@ def _profileImageURL(screenName, cache=None):
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
         url = 'http://static.stamped.com/users/%s.jpg?%s' % \
-            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+              (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     else:
         url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg?%s' % \
-            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+              (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+    
     return url
 
 def _formatURL(url):
@@ -1538,15 +1541,15 @@ class HTTPStamp(Schema):
                 item.blurb      = content.blurb 
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
-
+                
                 for image in content.images:
                     img = HTTPEntityGalleryItem()
                     img.image   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     img.width   = image.width 
                     img.height  = image.height 
-
+                    
                     item.images.append(img)
-
+                
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
             

@@ -127,7 +127,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, 
+@handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
                    parse_request_kwargs={'obfuscate':['q', 'twitter_key', 'twitter_secret' ]})
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
@@ -159,7 +159,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, 
+@handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
                    parse_request_kwargs={'obfuscate':['q', 'facebook_token' ]})
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):

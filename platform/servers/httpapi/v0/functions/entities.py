@@ -69,7 +69,7 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.exportSparse())
 
 
-@handleHTTPRequest(http_schema=HTTPEntityId, schema=EntitySearch)
+@handleHTTPRequest(http_schema=HTTPEntitySearch, schema=EntitySearch)
 @require_http_methods(["GET"])
 def search(request, authUserId, schema, **kwargs):
     result = stampedAPI.searchEntities(authUserId=authUserId, 

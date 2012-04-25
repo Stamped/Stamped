@@ -65,13 +65,51 @@ def handleHTTPRequest(requires_auth=True,
                       upload=None, 
                       parse_request_kwargs=None, 
                       parse_request=True):
+    
+    """
+        handleHTTPRequest is Stamped API's main HTTP API function decorator, taking 
+        care of oauth, client, and request validation, optionally parsing the input 
+        GET or POST data against a target http_schema, logging, and error handling, 
+        including catching all top-level exceptions and converting them to their 
+        HTTP error equivalents. handleHTTPRequest also handles gracefully responding 
+        to cross-domain requests from a set of pre-defined, priveleged domains.
+        
+        Note that this decorator injects one or more of the following attributes 
+        into the wrapped function's keyword arguments (so all wrapped API functions 
+        must accept **kwargs):
+        
+            * http_schema  - if http_schema is specified, the input GET or POST data 
+                             will be parsed against this schema and the resulting 
+                             validated schema instance will be contained in http_schema.
+                             note: if 'upload' is specified, parseFileUpload will be 
+                             used instead of parseRequest (uploads also require POST).
+                             
+            * schema       - if schema is specified, the http_schema will be exported 
+                             to the given schema type.
+                             
+            * data         - if no schema is specified, data will contain the parsed 
+                             http_schema data exported sparsely to a dict.
+                             
+            * authUserId   - the user id of the authenticated user; will be None if 
+                             oauth validation failed (note that to enable 
+                             unauthenticated access to an API function, you must set 
+                             requires_auth to False).
+                             
+            * authClientId - the client id of the authenticated client; will be None if 
+                             oauth validation failed (note that to enable 
+                             unauthenticated access to an API function, you must set 
+                             requires_auth to False).
+                             
+            * client_id    - the client id of the unauthenticated client (circumventing 
+                             oauth). note that if an unauthenticated API function wishes 
+                             to require a valid client_id and client_secret, it must 
+                             set requires_client to True.
+    """
+    
     def decorator(fn):
-        if callable(fn):
-            logs.info("CALLABLE: %s" % type(fn))
-        else:
-            logs.info("NOT CALLABLE: %s" % type(fn))
-            logs.info(utils.getFormattedException())
-            assert False
+        # NOTE (travis): if you hit this assertion, you're likely using the 
+        # handleHTTPRequest incorrectly.
+        assert callable(fn)
         
         @wraps(fn)
         def handleHTTPRequest(request, *args, **kwargs):
