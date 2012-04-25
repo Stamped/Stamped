@@ -2967,12 +2967,11 @@ class StampedAPI(AStampedAPI):
         if not self._activity:
             return
 
-        # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
-
         body                    = None
         group                   = False
         groupRange              = None
         requireReceipient       = False
+        unique                  = False
 
         objects = ActivityObjectIds()
 
@@ -3022,14 +3021,17 @@ class StampedAPI(AStampedAPI):
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
             requireReceipient       = True
+            unique                  = True
 
         elif verb.startswith('friend_'):
-            requireReceipient       = True
             body                    = kwargs.pop('body', None)
+            requireReceipient       = True
+            unique                  = True
 
         elif verb.startswith('action_'):
-            requireReceipient       = True 
             objects.stamp_ids       = [ kwargs['stampId'] ]
+            requireReceipient       = True 
+            unique                  = True
 
         else:
             raise Exception("Unrecognized activity verb: %s" % verb)
@@ -3056,7 +3058,8 @@ class StampedAPI(AStampedAPI):
                                      benefit        = benefit,
                                      group          = group,
                                      groupRange     = groupRange,
-                                     sendAlert      = sendAlert)
+                                     sendAlert      = sendAlert,
+                                     unique         = unique)
 
         # Increment unread news for all recipients
         if len(recipientIds) > 0:
