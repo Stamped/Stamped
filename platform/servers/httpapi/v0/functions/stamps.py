@@ -11,22 +11,22 @@ import logs
 
 @handleHTTPRequest(http_schema=HTTPStampNew)
 @require_http_methods(["POST"])
-def create(request, authUserId, schema, **kwargs):
+def create(request, authUserId, data, **kwargs):
     entityRequest = {
-        'entity_id' : schema.pop('entity_id', None),
-        'search_id' : schema.pop('search_id', None)
+        'entity_id' : data.pop('entity_id', None),
+        'search_id' : data.pop('search_id', None)
     }
     
-    stamp = stampedAPI.addStamp(authUserId, entityRequest, schema)
+    stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
     stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
 @handleHTTPRequest(http_schema=HTTPStampEdit)
 @require_http_methods(["POST"])
-def update(request, authUserId, http_schema, schema, **kwargs):
+def update(request, authUserId, http_schema, data, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
-    del(schema['stamp_id'])
+    del(data['stamp_id'])
     
     for k, v in data.iteritems():
         if v == '':
@@ -42,7 +42,7 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 def update_image(request, authUserId, http_schema, **kwargs):
     ret   = stampedAPI.updateStampImage(authUserId, http_schema.stamp_id, 
-                                              http_schema.image)
+                                        http_schema.image)
     stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())

@@ -27,10 +27,10 @@ def remove(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPCommentSlice)
 @require_http_methods(["GET"])
-def show(request, authUserId, http_schema, schema, **kwargs):
-    del(schema['stamp_id'])
+def show(request, authUserId, http_schema, data, **kwargs):
+    del(data['stamp_id'])
 
-    comments = stampedAPI.getComments(http_schema.stamp_id, authUserId, **schema)
+    comments = stampedAPI.getComments(http_schema.stamp_id, authUserId, **data)
     results  = []
     
     for comment in comments:

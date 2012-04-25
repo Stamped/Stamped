@@ -1537,7 +1537,6 @@ class HTTPStamp(Schema):
 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
-
             
             for comment in comments:
                 comment = Comment(comment)

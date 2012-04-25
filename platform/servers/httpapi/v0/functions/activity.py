@@ -9,21 +9,21 @@ from httpapi.v0.helpers import *
 
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def show(request, authUserId, schema, **kwargs):
-    schema['distance'] = 0
-    activity = stampedAPI.getActivity(authUserId, **schema)
+def show(request, authUserId, data, **kwargs):
+    data['distance'] = 0
+    activity = stampedAPI.getActivity(authUserId, **data)
     
     result = []
     for item in activity:
         result.append(HTTPActivity().importSchema(item).exportSparse())
-
+    
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def friends(request, authUserId, schema, **kwargs):
-    schema['distance'] = 1
-    activity = stampedAPI.getActivity(authUserId, **schema)
+def friends(request, authUserId, data, **kwargs):
+    data['distance'] = 1
+    activity = stampedAPI.getActivity(authUserId, **data)
     
     result = []
     for item in activity:

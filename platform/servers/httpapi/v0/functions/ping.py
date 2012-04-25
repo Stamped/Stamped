@@ -8,7 +8,8 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 @handleHTTPRequest(requires_auth=False)
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def ping(request, **kwargs):
+    logs.info("HERE")
     return transformOutput(True)
 

@@ -35,7 +35,7 @@ def followers(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["GET"])
 def timeout(request, authUserId, **kwargs):
     schema = parseRequest(None, request)

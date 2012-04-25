@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -20,8 +19,8 @@ def show(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.getUsers(schema.user_ids.value, 
-                                schema.screen_names.value, 
+    users = stampedAPI.getUsers(http_schema.user_ids.value, 
+                                http_schema.screen_names.value, 
                                 authUserId)
     
     output = []

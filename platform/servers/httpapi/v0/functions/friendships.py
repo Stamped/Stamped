@@ -77,7 +77,7 @@ def blocksCheck(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["GET"])
 def blocking(request, authUserId, **kwargs):
     userIds = stampedAPI.getBlocks(authUserId)

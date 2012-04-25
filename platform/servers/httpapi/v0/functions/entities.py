@@ -38,23 +38,23 @@ def show(request, authUserId, authClientId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPEntityEdit)
 @require_http_methods(["POST"])
-def update(request, authUserId, authClientId, http_schema, schema, **kwargs):
+def update(request, authUserId, authClientId, http_schema, data, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
-    del(schema['entity_id'])
+    del(data['entity_id'])
     
-    for k, v in schema.iteritems():
+    for k, v in data.iteritems():
         if v == '':
-            schema[k] = None
-    if 'address' in schema:
-        schema['details.place.address'] = schema['address']
-        del(schema['address'])
-    if 'coordinates' in schema and schema['coordinates'] != None:
-        schema['coordinates'] = {
-            'lat': schema['coordinates'].split(',')[0],
-            'lng': schema['coordinates'].split(',')[-1]
+            data[k] = None
+    if 'address' in data:
+        data['details.place.address'] = data['address']
+        del(data['address'])
+    if 'coordinates' in data and data['coordinates'] != None:
+        data['coordinates'] = {
+            'lat': data['coordinates'].split(',')[0],
+            'lng': data['coordinates'].split(',')[-1]
         }
     
-    entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, schema)
+    entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, data)
     entity = _convertHTTPEntity(entity, authClientId)
     
     return transformOutput(entity.exportSparse())
