@@ -2261,7 +2261,7 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.header = '%s %s' % (verb, stampObjects)
                 self.header_references = stampObjectReferences
-                self.body = '%s.' % commentObjects
+                self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
@@ -2273,7 +2273,7 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.header = '%s %s' % (verb, self.objects.stamps[0].entity.title)
                 self.header_references = stampObjectReferences
-                self.body = '%s.' % commentObjects
+                self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
@@ -2287,10 +2287,10 @@ class HTTPActivity(Schema):
                 self.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
                 self.header_references = stampObjectReferences
                 if commentObjects is not None:
-                    self.body = '%s.' % commentObjects
+                    self.body = '%s' % commentObjects
                     self.body_references = commentObjectReferences
                 else:
-                    self.body = '%s.' % stampBlurbObjects
+                    self.body = '%s' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
