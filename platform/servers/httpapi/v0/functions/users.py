@@ -8,29 +8,22 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["GET"])
-def show(request):
-    authUserId, apiVersion = checkOAuth(request)
+def show(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.getUser(http_schema, authUserId)
+    user = HTTPUser().importSchema(user)
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.getUser(schema, authUserId)
-    user        = HTTPUser().importSchema(user)
-
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
-def lookup(request):
-    authUserId, apiVersion = checkOAuth(request)
+def lookup(request, authUserId, http_schema, **kwargs):
+    users = stampedAPI.getUsers(schema.user_ids.value, 
+                                schema.screen_names.value, 
+                                authUserId)
     
-    schema      = parseRequest(HTTPUserIds(), request)
-
-    users       = stampedAPI.getUsers(schema.user_ids.value, \
-                    schema.screen_names.value, authUserId)
-
     output = []
     for user in users:
         output.append(HTTPUser().importSchema(user).exportSparse())
@@ -38,14 +31,13 @@ def lookup(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserSearch)
 @require_http_methods(["POST"])
-def search(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPUserSearch(), request)
-    
-    users       = stampedAPI.searchUsers(authUserId, schema.q, schema.limit, schema.relationship)
+def search(request, authUserId, http_schema, **kwargs):
+    users  = stampedAPI.searchUsers(authUserId, 
+                                    http_schema.q, 
+                                    http_schema.limit, 
+                                    http_schema.relationship)
     
     output = []
     for user in users:
@@ -55,15 +47,11 @@ def search(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPSuggestedUsers, schema=SuggestedUserRequest)
 @require_http_methods(["GET"])
-def suggested(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPSuggestedUsers(), request).exportSchema(SuggestedUserRequest())
-    
-    results     = stampedAPI.getSuggestedUsers(authUserId, schema)
-    output      = []
+def suggested(request, authUserId, schema, **kwargs):
+    results = stampedAPI.getSuggestedUsers(authUserId, schema)
+    output  = []
     
     if schema.personalized:
         for user, explanations in results:
@@ -78,37 +66,29 @@ def suggested(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["GET"])
-def privacy(request):
-    authUserId, apiVersion = checkOAuth(request)
+def privacy(request, authUserId, http_schema, **kwargs):
+    privacy = stampedAPI.getPrivacy(http_schema)
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    privacy     = stampedAPI.getPrivacy(schema)
-
     return transformOutput(privacy)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
-def findEmail(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
-
-    q = schema.q.value
+def findEmail(request, authUserId, http_schema, **kwargs):
+    q = http_schema.q.value
     emails = []
-
+    
     for email in q:
         try:
             emails.append(email.decode('ascii'))
         except:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
-
+    
     users       = stampedAPI.findUsersByEmail(authUserId, emails)
-
+    
     output = []
     for user in users:
         if user.user_id != authUserId:
@@ -117,22 +97,18 @@ def findEmail(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
-def findPhone(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
-
-    q = schema.q.value
+def findPhone(request, authUserId, http_schema, **kwargs):
+    q = http_schema.q.value
     phoneNumbers = []
-
+    
     for item in q:
         try:
             if 11 == len(item) and item.startswith('1'):
                 number = int(item[1:])
                 phoneNumbers.append(item)
-
+            
             if len(item) <= 3:
                 raise Exception
             
@@ -142,7 +118,7 @@ def findPhone(request):
             msg = 'Invalid phone number: %s' % item
             logs.warning(msg)
     
-    users       = stampedAPI.findUsersByPhone(authUserId, phoneNumbers)
+    users  = stampedAPI.findUsersByPhone(authUserId, phoneNumbers)
     
     output = []
     for user in users:
@@ -152,25 +128,20 @@ def findPhone(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, 
+                   parse_request_kwargs={'obfuscate':['q', 'twitter_key', 'twitter_secret' ]})
 @require_http_methods(["POST"])
-def findTwitter(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindTwitterUser(), request, obfuscate=['q', 'twitter_key', 'twitter_secret'])
-
+def findTwitter(request, authUserId, http_schema, **kwargs):
     users = []
 
-    if schema.twitter_key is not None and schema.twitter_secret is not None:
+    if http_schema.twitter_key is not None and http_schema.twitter_secret is not None:
         users = stampedAPI.findUsersByTwitter(authUserId, 
-                                              twitterKey=schema.twitter_key, 
-                                              twitterSecret=schema.twitter_secret)
-
-    elif schema.q is not None:
-        q = schema.q.value
-
+                                              twitterKey=http_schema.twitter_key, 
+                                              twitterSecret=http_schema.twitter_secret)
+    elif http_schema.q is not None:
+        q = http_schema.q.value
         twitterIds = []
-
+        
         for item in q:
             try:
                 number = int(item)
@@ -178,9 +149,9 @@ def findTwitter(request):
             except:
                 msg = 'Invalid twitter id: %s' % item
                 logs.warning(msg)
-
+        
         users = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
-
+    
     output = []
     for user in users:
         if user.user_id != authUserId:
@@ -189,22 +160,18 @@ def findTwitter(request):
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, 
+                   parse_request_kwargs={'obfuscate':['q', 'facebook_token' ]})
 @require_http_methods(["POST"])
-def findFacebook(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindFacebookUser(), request, obfuscate=['q', 'facebook_token'])
-
+def findFacebook(request, authUserId, http_schema, **kwargs):
     users = []
-
-    if schema.facebook_token is not None:
-        users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=schema.facebook_token)
-
-    elif schema.q is not None:
-        q = schema.q.value
+    
+    if http_schema.facebook_token is not None:
+        users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
+    elif http_schema.q is not None:
+        q = http_schema.q.value
         facebookIds = []
-
+        
         for item in q:
             try:
                 number = int(item)
@@ -212,9 +179,9 @@ def findFacebook(request):
             except:
                 msg = 'Invalid facebook id: %s' % item
                 logs.warning(msg)
-
+        
         users = stampedAPI.findUsersByFacebook(authUserId, facebookIds)
-
+    
     output = []
     for user in users:
         if user.user_id != authUserId:

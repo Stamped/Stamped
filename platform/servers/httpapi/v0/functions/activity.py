@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -8,15 +7,11 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def show(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPActivitySlice(), request)
-    schema.distance = 0
-
-    activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
+def show(request, authUserId, schema, **kwargs):
+    schema['distance'] = 0
+    activity = stampedAPI.getActivity(authUserId, **schema)
     
     result = []
     for item in activity:
@@ -24,19 +19,15 @@ def show(request):
 
     return transformOutput(result)
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def friends(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPActivitySlice(), request)
-    schema.distance = 1
-
-    activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
+def friends(request, authUserId, schema, **kwargs):
+    schema['distance'] = 1
+    activity = stampedAPI.getActivity(authUserId, **schema)
     
     result = []
     for item in activity:
         result.append(HTTPActivity().importSchema(item).exportSparse())
-
+    
     return transformOutput(result)
 

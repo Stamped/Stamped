@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -8,52 +7,35 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPCommentNew)
 @require_http_methods(["POST"])
-def create(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPCommentNew(), request)
-    stampId     = schema.stamp_id
-    blurb       = schema.blurb
-
-    comment     = stampedAPI.addComment(authUserId, stampId, blurb)
-    comment     = HTTPComment().importSchema(comment)
-
-    return transformOutput(comment.exportSparse())
-
-
-@handleHTTPRequest
-@require_http_methods(["POST"])
-def remove(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPCommentId(), request)
-
-    comment     = stampedAPI.removeComment(authUserId, schema.comment_id)
-    comment     = HTTPComment().importSchema(comment)
+def create(request, authUserId, http_schema, **kwargs):
+    comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
+    comment = HTTPComment().importSchema(comment)
     
     return transformOutput(comment.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPCommentId)
+@require_http_methods(["POST"])
+def remove(request, authUserId, http_schema, **kwargs):
+    comment = stampedAPI.removeComment(authUserId, http_schema.comment_id)
+    comment = HTTPComment().importSchema(comment)
+    
+    return transformOutput(comment.exportSparse())
+
+
+@handleHTTPRequest(http_schema=HTTPCommentSlice)
 @require_http_methods(["GET"])
-def show(request):
-    authUserId, apiVersion = checkOAuth(request)
+def show(request, authUserId, http_schema, schema, **kwargs):
+    del(schema['stamp_id'])
+
+    comments = stampedAPI.getComments(http_schema.stamp_id, authUserId, **schema)
+    results  = []
     
-    schema      = parseRequest(HTTPCommentSlice(), request)
-
-    data        = schema.exportSparse()
-    del(data['stamp_id'])
-
-    comments    = stampedAPI.getComments(schema.stamp_id, authUserId, **data)
-
-    result = []
     for comment in comments:
-        result.append(HTTPComment().importSchema(comment).exportSparse())
+        results.append(HTTPComment().importSchema(comment).exportSparse())
     
-    result = sorted(result, key=lambda k: k['created'])
-
-    return transformOutput(result)
-
+    results = sorted(results, key=lambda k: k['created'])
+    return transformOutput(results)
 

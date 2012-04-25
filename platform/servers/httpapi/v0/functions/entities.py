@@ -10,92 +10,73 @@ from httpapi.v0.helpers import *
 
 def _convertHTTPEntity(entity, authClientId=None):
     client = stampedAuth.getClientDetails(authClientId)
-
+    
     if client.api_version < 1:
         return HTTPEntity_stampedtest().importSchema(entity)
     else:
         return HTTPEntity().importEntity(entity, client)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntityNew)
 @require_http_methods(["POST"])
-def create(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    httpEntityNew   = parseRequest(HTTPEntityNew(), request)
-    entity          = httpEntityNew.exportEntity(authUserId)
+def create(request, authUserId, authClientId, http_schema, **kwargs):
+    entity          = http_schema.exportEntity(authUserId)
     
     entity          = stampedAPI.addEntity(entity)
     entity          = _convertHTTPEntity(entity, authClientId)
-
-    return transformOutput(entity.exportSparse())
-
-
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def show(request):
-    authUserId, authClientId = checkOAuth(request)
-
-    schema      = parseRequest(HTTPEntityIdSearchId(), request)
-    entity      = stampedAPI.getEntity(schema, authUserId)
-    entity      = _convertHTTPEntity(entity, authClientId)
-
-    return transformOutput(entity.exportSparse())
-
-@handleHTTPRequest
-@require_http_methods(["POST"])
-def update(request):
-    authUserId, authClientId = checkOAuth(request)
     
-    schema      = parseRequest(HTTPEntityEdit(), request)
+    return transformOutput(entity.exportSparse())
 
+
+@handleHTTPRequest(http_schema=HTTPEntityIdSearchId)
+@require_http_methods(["GET"])
+def show(request, authUserId, authClientId, http_schema, **kwargs):
+    entity      = stampedAPI.getEntity(http_schema, authUserId)
+    entity      = _convertHTTPEntity(entity, authClientId)
+    
+    return transformOutput(entity.exportSparse())
+
+@handleHTTPRequest(http_schema=HTTPEntityEdit)
+@require_http_methods(["POST"])
+def update(request, authUserId, authClientId, http_schema, schema, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
-    data        = schema.exportSparse()
-    del(data['entity_id'])
-
-    for k, v in data.iteritems():
+    del(schema['entity_id'])
+    
+    for k, v in schema.iteritems():
         if v == '':
-            data[k] = None
-    if 'address' in data:
-        data['details.place.address'] = data['address']
-        del(data['address'])
-    if 'coordinates' in data and data['coordinates'] != None:
-        data['coordinates'] = {
-            'lat': data['coordinates'].split(',')[0],
-            'lng': data['coordinates'].split(',')[-1]
+            schema[k] = None
+    if 'address' in schema:
+        schema['details.place.address'] = schema['address']
+        del(schema['address'])
+    if 'coordinates' in schema and schema['coordinates'] != None:
+        schema['coordinates'] = {
+            'lat': schema['coordinates'].split(',')[0],
+            'lng': schema['coordinates'].split(',')[-1]
         }
     
-    entity      = stampedAPI.updateCustomEntity(authUserId, schema.entity_id, data)
-    entity      = _convertHTTPEntity(entity, authClientId)
-
+    entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, schema)
+    entity = _convertHTTPEntity(entity, authClientId)
+    
     return transformOutput(entity.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])
-def remove(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPEntityId(), request)
-    entity      = stampedAPI.removeCustomEntity(authUserId, schema.entity_id)
-    entity      = _convertHTTPEntity(entity, authClientId)
+def remove(request, authUserId, authClientId, http_schema, **kwargs):
+    entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
+    entity = _convertHTTPEntity(entity, authClientId)
 
     return transformOutput(entity.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntityId, schema=EntitySearch)
 @require_http_methods(["GET"])
-def search(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPEntitySearch(), request)
-    search      = schema.exportSchema(EntitySearch())
-    
-    result      = stampedAPI.searchEntities(query=search.q, 
-                                            coords=search.coordinates, 
-                                            authUserId=authUserId, 
-                                            category=search.category, 
-                                            subcategory=search.subcategory)
+def search(request, authUserId, schema, **kwargs):
+    result = stampedAPI.searchEntities(authUserId=authUserId, 
+                                       query=schema.q, 
+                                       coords=schema.coordinates, 
+                                       category=schema.category, 
+                                       subcategory=schema.subcategory)
     
     autosuggest = []
     for item in result:
@@ -108,19 +89,14 @@ def search(request):
     return transformOutput(autosuggest)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntityNearby, schema=EntityNearby)
 @require_http_methods(["GET"])
-def nearby(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPEntityNearby(), request)
-    search      = schema.exportSchema(EntityNearby())
-    
-    result      = stampedAPI.searchNearby(coords=search.coordinates, 
-                                          authUserId=authUserId, 
-                                          category=search.category, 
-                                          subcategory=search.subcategory, 
-                                          page=search.page)
+def nearby(request, authUserId, schema, **kwargs):
+    result      = stampedAPI.searchNearby(authUserId=authUserId, 
+                                          coords=schema.coordinates, 
+                                          category=schema.category, 
+                                          subcategory=schema.subcategory, 
+                                          page=schema.page)
     
     autosuggest = []
     for item in result:
@@ -130,66 +106,61 @@ def nearby(request):
     return transformOutput(autosuggest)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntitySuggested, schema=EntitySuggested)
 @require_http_methods(["GET"])
-def suggested(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPEntitySuggested(), request)
-    schema      = schema.exportSchema(EntitySuggested())
+def suggested(request, authUserId, schema, **kwargs):
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
     convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse()
     
-    logs.info(len(results))
     for section in results:
         section['entities'] = map(convert, section['entities'])
     
     return transformOutput(results)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["GET"])
-def menu(request):
-    authUserId, authClientId = checkOAuth(request)
+def menu(request, authUserId, http_schema, **kwargs):
+    menu        = stampedAPI.getMenu(http_schema.entity_id)
+    http_menu   = HTTPMenu().importSchema(menu)
     
-    schema      = parseRequest(HTTPEntityId(), request)
-    menu        = stampedAPI.getMenu(schema.entity_id)
-    httpMenu    = HTTPMenu().importSchema(menu)
-    return transformOutput(httpMenu.exportSparse())
+    return transformOutput(http_menu.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampedBySlice)
 @require_http_methods(["GET"])
-def stampedBy(request):
-    authUserId, authClientId = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampedBySlice(), request)
-    showCount   = True if schema.group is None else False
+def stampedBy(request, authUserId, http_schema, **kwargs):
+    showCount   = True if http_schema.group is None else False
     
     result      = HTTPStampedBy()
     
-    if schema.group is None or schema.group == 'friends':
-        requestSlice = schema.exportSchema(FriendsSlice())
+    if http_schema.group is None or http_schema.group == 'friends':
+        requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 1
-        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+        
+        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        
         for stamp in stamps:
             result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.friends.count = count
     
-    if schema.group is None or schema.group == 'fof':
-        requestSlice = schema.exportSchema(FriendsSlice())
+    if http_schema.group is None or http_schema.group == 'fof':
+        requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
         requestSlice.inclusive = False
-        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+        
+        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        
         for stamp in stamps:
             result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.fof.count = count
     
-    if schema.group is None or schema.group == 'all':
-        requestSlice = schema.exportSchema(GenericCollectionSlice())
-        stamps, count = stampedAPI.getEntityStamps(schema.entity_id, authUserId, requestSlice, showCount)
+    if http_schema.group is None or http_schema.group == 'all':
+        requestSlice  = http_schema.exportSchema(GenericCollectionSlice())
+        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        
         for stamp in stamps:
             result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:

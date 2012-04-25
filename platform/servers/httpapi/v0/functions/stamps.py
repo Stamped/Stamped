@@ -9,121 +9,86 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 import logs
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampNew)
 @require_http_methods(["POST"])
-def create(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseFileUpload(HTTPStampNew(), request, 'image')
-    
-    data        = schema.exportSparse()
+def create(request, authUserId, schema, **kwargs):
     entityRequest = {
-        'entity_id': data.pop('entity_id', None),
-        'search_id': data.pop('search_id', None)
+        'entity_id' : schema.pop('entity_id', None),
+        'search_id' : schema.pop('search_id', None)
     }
     
-    stamp       = stampedAPI.addStamp(authUserId, entityRequest, data)
-    stamp       = HTTPStamp().importSchema(stamp)
+    stamp = stampedAPI.addStamp(authUserId, entityRequest, schema)
+    stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampEdit)
 @require_http_methods(["POST"])
-def update(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampEdit(), request)
-
+def update(request, authUserId, http_schema, schema, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
-    data        = schema.exportSparse()
-    del(data['stamp_id'])
-
+    del(schema['stamp_id'])
+    
     for k, v in data.iteritems():
         if v == '':
             data[k] = None
     
-    stamp       = stampedAPI.updateStamp(authUserId, schema.stamp_id, data)
-    stamp       = HTTPStamp().importSchema(stamp)
-
+    stamp = stampedAPI.updateStamp(authUserId, http_schema.stamp_id, data)
+    stamp = HTTPStamp().importSchema(stamp)
+    
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampImage, upload='image')
 @require_http_methods(["POST"])
-def update_image(request):
-    authUserId, apiVersion = checkOAuth(request)
+def update_image(request, authUserId, http_schema, **kwargs):
+    ret   = stampedAPI.updateStampImage(authUserId, http_schema.stamp_id, 
+                                              http_schema.image)
+    stamp = HTTPStamp().importSchema(stamp)
     
-    schema      = parseFileUpload(HTTPStampImage(), request, 'image')
-    
-    ret         = stampedAPI.updateStampImage(authUserId, schema.stamp_id, \
-                                                schema.image)
-
-    stamp       = HTTPStamp().importSchema(stamp)
-
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["GET"])
-def show(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampId(), request)
-
-    stamp       = stampedAPI.getStamp(schema.stamp_id, authUserId)
-    stamp       = HTTPStamp().importSchema(stamp)
+def show(request, authUserId, http_schema, **kwargs):
+    stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
+    stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
-def remove(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampId(), request)
-
-    stamp       = stampedAPI.removeStamp(authUserId, schema.stamp_id)
-    stamp       = HTTPStamp().importSchema(stamp)
+def remove(request, authUserId, http_schema, **kwargs):
+    stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
+    stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
-def likesCreate(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampId(), request)
-
-    stamp       = stampedAPI.addLike(authUserId, schema.stamp_id)
-    stamp       = HTTPStamp().importSchema(stamp)
+def likesCreate(request, authUserId, http_schema, **kwargs):
+    stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
+    stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
-def likesRemove(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampId(), request)
-
-    stamp       = stampedAPI.removeLike(authUserId, schema.stamp_id)
-    stamp       = HTTPStamp().importSchema(stamp)
+def likesRemove(request, authUserId, http_schema, **kwargs):
+    stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
+    stamp = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["GET"])
-def likesShow(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPStampId(), request)
-
-    userIds     = stampedAPI.getLikes(authUserId, schema.stamp_id)
-    output      = { 'user_ids': userIds }
+def likesShow(request, authUserId, http_schema, **kwargs):
+    userIds = stampedAPI.getLikes(authUserId, http_schema.stamp_id)
+    output  = { 'user_ids': userIds }
     
     return transformOutput(output)
 

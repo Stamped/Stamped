@@ -1,4 +1,7 @@
-// NOTE (travis): used to be Eli's magic.js
+/* index.js
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
 
 if (typeof(stamped) == "undefined") {
     stamped = {};
@@ -345,49 +348,10 @@ stamped.init = function() {
         windowHeight();
     });
     
-    login = function(login, password) {
-        params = "login=" + login + "&password=" + password + "&client_id=" + "stampedtest" + "&client_secret=" + "august1ftw";
-        
-        call("/v0/oauth2/login.json", {
-            login : login, 
-            password : password, 
-            client_id : 'stampedtest', 
-            client_secret : 'august1ftw', 
-        }, function(data) {
-            console.log("success: " + data.toSource());
-            alert("success" + data.toSource());
-        });
-        
-        return false;
-    };
-    
-    call = function(uri, params, success) {
-        var base = "http://localhost:18000";
-        var url  = base + uri;
-        
-        window.log(url);
-        
-        $.ajax({
-            type        : "POST", 
-            url         : url, 
-            data        : params, 
-            success     : success, 
-            crossDomain : true, 
-            error       : function(jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR.responseText)
-                console.log(this.toSource());
-                console.log(textStatus);
-                console.log(errorThrown);
-            }, 
-        });
-    };
-    
     agentInspector();
     windowHeight();
     inputManager();
     rotator();
     slider();
-    
-    login("travis", "****");
 };
 

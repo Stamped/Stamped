@@ -16,7 +16,7 @@ class StampedHTTPError(Exception):
         self.code = code
         self.msg  = msg
         self.desc = desc
-
+        
         if msg is not None:
             logs.warning(msg)
 
@@ -97,4 +97,7 @@ class StampedAuthError(Exception):
         Exception.__init__(self, msg)
         self.msg  = msg
         self.desc = desc
+        
+        if msg is not None:
+            logs.warning(msg)
 
