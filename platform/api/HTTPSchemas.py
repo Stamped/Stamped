@@ -1517,7 +1517,7 @@ class HTTPStamp(Schema):
             self.importData(data, overflow=True)
             self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
             self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
-            self.created                = schema.timestamp.created
+            self.created                = schema.timestamp.stamped # Temp
             self.modified               = schema.timestamp.modified
             self.stamped                = schema.timestamp.stamped 
 
