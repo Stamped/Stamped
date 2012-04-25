@@ -815,7 +815,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedPermissionsError("Insufficient privileges to view user")
 
         if self.__version > 0 and len(user.distribution) == 0:
-            user.distribution = self._getUserStampDistribution(authUserId)
+            user.distribution = self._getUserStampDistribution(user.user_id)
         
         return user
     
@@ -1439,9 +1439,8 @@ class StampedAPI(AStampedAPI):
     def _user_regex(self):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
     
-    def _extractMentions(self, text):
-        screenNames = set()
-        mentions    = [] 
+    def _extractMentions(self, text, screenNames={}):
+        mentions = [] 
         
         # Run through and grab mentions
         for user in self._user_regex.finditer(text):
@@ -1449,21 +1448,20 @@ class StampedAPI(AStampedAPI):
             data['indices'] = [user.start(), user.end()]
             data['screen_name'] = user.groups()[0]
             
+            if data['screen_name'] in screenNames:
+                data['user_id'] = screenNames[data['user_id']]
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
-                data['screen_name'] = user.screen_name
             except Exception:
                 logs.warning("User not found (%s)" % data['screen_name'])
             
-            if data['screen_name'] not in screenNames:
-                screenNames.add(data['screen_name'])
-                mentions.append(data)
+            if data['screen_name'] not in screenNames.keys() and data['user_id'] is not None:
+                screenNames[data['screen_name']] = data['user_id']
+
+            mentions.append(data)
         
-        if len(mentions) > 0:
-            return mentions
-        
-        return None
+        return mentions
     
     def _extractCredit(self, creditData, user_id, entity_id, userIds):
         creditedUserIds = set()
@@ -1527,6 +1525,12 @@ class StampedAPI(AStampedAPI):
                 # Grab user_id from comments
                 for comment in stamp.previews.comments:
                     userIds[comment.user_id] = 1
+
+        # Mentions
+        screenNameMapping = {}
+        for stamp in stampData:
+            for content in stamp.contents:
+                content.mentions = self._extractMentions(content.blurb, screenNameMapping)
         
         # Entities
         if len(entityIds) == 0:
