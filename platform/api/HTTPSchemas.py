@@ -1166,92 +1166,94 @@ class HTTPEntity(Schema):
 
 class HTTPAction(Schema):
     def setSchema(self):
-        self.type               = SchemaElement(basestring, required=True)
-        self.name               = SchemaElement(basestring, required=True)
-        self.sources            = SchemaList(HTTPActionSource(), required=True)
+        self.type                   = SchemaElement(basestring, required=True)
+        self.name                   = SchemaElement(basestring, required=True)
+        self.sources                = SchemaList(HTTPActionSource(), required=True)
 
 class HTTPActionSource(Schema):
     def setSchema(self):
-        self.name               = SchemaElement(basestring, required=True)
-        self.source             = SchemaElement(basestring, required=True)
-        self.source_id          = SchemaElement(basestring)
-        self.source_data        = SchemaElement(basestring)
-        self.endpoint           = SchemaElement(basestring)
-        self.link               = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
+        self.name                   = SchemaElement(basestring, required=True)
+        self.source                 = SchemaElement(basestring, required=True)
+        self.source_id              = SchemaElement(basestring)
+        self.source_data            = SchemaElement(basestring)
+        self.endpoint               = SchemaElement(basestring)
+        self.link                   = SchemaElement(basestring)
+        self.icon                   = SchemaElement(basestring)
+        self.completion_endpoint    = SchemaElement(basestring)
+        self.completion_data        = SchemaElement(basestring) # dictionary?
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
-        self.action             = HTTPAction(required=True)
-        self.name               = SchemaElement(basestring, required=True)
-        self.icon               = SchemaElement(basestring)
+        self.action                 = HTTPAction(required=True)
+        self.name                   = SchemaElement(basestring, required=True)
+        self.icon                   = SchemaElement(basestring)
 
 class HTTPEntityMetadataItem(Schema):
     def setSchema(self):
-        self.name               = SchemaElement(basestring, required=True)
-        self.value              = SchemaElement(basestring, required=True)
-        self.key                = SchemaElement(basestring)
-        self.action             = HTTPAction()
-        self.icon               = SchemaElement(basestring)
-        self.extended           = SchemaElement(bool)
-        self.optional           = SchemaElement(bool)
+        self.name                   = SchemaElement(basestring, required=True)
+        self.value                  = SchemaElement(basestring, required=True)
+        self.key                    = SchemaElement(basestring)
+        self.action                 = HTTPAction()
+        self.icon                   = SchemaElement(basestring)
+        self.extended               = SchemaElement(bool)
+        self.optional               = SchemaElement(bool)
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
-        self.data               = SchemaList(HTTPEntityGalleryItem(), required=True)
-        self.name               = SchemaElement(basestring)
-        self.layout             = SchemaElement(basestring) # 'list' or None
+        self.data                   = SchemaList(HTTPEntityGalleryItem(), required=True)
+        self.name                   = SchemaElement(basestring)
+        self.layout                 = SchemaElement(basestring) # 'list' or None
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
-        self.image              = SchemaElement(basestring, required=True)
-        self.action             = HTTPAction()
-        self.caption            = SchemaElement(basestring)
-        self.height             = SchemaElement(int)
-        self.width              = SchemaElement(int)
+        self.image                  = SchemaElement(basestring, required=True)
+        self.action                 = HTTPAction()
+        self.caption                = SchemaElement(basestring)
+        self.height                 = SchemaElement(int)
+        self.width                  = SchemaElement(int)
 
 class HTTPEntityPlaylist(Schema):
     def setSchema(self):
-        self.data               = SchemaList(HTTPEntityPlaylistItem(), required=True)
-        self.name               = SchemaElement(basestring)
+        self.data                   = SchemaList(HTTPEntityPlaylistItem(), required=True)
+        self.name                   = SchemaElement(basestring)
 
 class HTTPEntityPlaylistItem(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
-        self.name               = SchemaElement(basestring, required=True)
-        self.action             = HTTPAction()
-        self.length             = SchemaElement(int)
-        self.icon               = SchemaElement(basestring)
+        self.entity_id              = SchemaElement(basestring)
+        self.name                   = SchemaElement(basestring, required=True)
+        self.action                 = HTTPAction()
+        self.length                 = SchemaElement(int)
+        self.icon                   = SchemaElement(basestring)
 
 class HTTPEntityStampedBy(Schema):
     def setSchema(self):
-        self.friends            = SchemaElement(int, required=True)
-        self.friends_of_friends = SchemaElement(int)
-        self.everyone           = SchemaElement(int)
+        self.friends                = SchemaElement(int, required=True)
+        self.friends_of_friends     = SchemaElement(int)
+        self.everyone               = SchemaElement(int)
 
 class HTTPEntityRelated(Schema):
     def setSchema(self):
-        self.data               = SchemaList(HTTPEntityMini(), required=True)
-        self.title              = SchemaElement(basestring)
+        self.data                   = SchemaList(HTTPEntityMini(), required=True)
+        self.title                  = SchemaElement(basestring)
 
 # Related
 
 class HTTPEntityMini(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.coordinates        = SchemaElement(basestring)
+        self.entity_id              = SchemaElement(basestring, required=True)
+        self.title                  = SchemaElement(basestring, required=True)
+        self.subtitle               = SchemaElement(basestring, required=True)
+        self.category               = SchemaElement(basestring, required=True)
+        self.subcategory            = SchemaElement(basestring, required=True)
+        self.coordinates            = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if isinstance(schema, BasicEntity):
-            self.entity_id      = schema.entity_id
-            self.title          = schema.title 
-            self.subtitle       = schema.subtitle
-            self.category       = schema.category
-            self.subcategory    = schema.subcategory 
+            self.entity_id          = schema.entity_id
+            self.title              = schema.title 
+            self.subtitle           = schema.subtitle
+            self.category           = schema.category
+            self.subcategory        = schema.subcategory 
 
             try:
                 if 'coordinates' in schema.value:
@@ -1265,19 +1267,19 @@ class HTTPEntityMini(Schema):
 
 class HTTPEntityNew(Schema):
     def setSchema(self):
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-        self.cast               = SchemaElement(basestring)
-        self.director           = SchemaElement(basestring)
-        self.release_date       = SchemaElement(basestring)
-        self.artist             = SchemaElement(basestring)
-        self.album              = SchemaElement(basestring)
-        self.author             = SchemaElement(basestring)
+        self.title                  = SchemaElement(basestring, required=True)
+        self.subtitle               = SchemaElement(basestring, required=True)
+        self.category               = SchemaElement(basestring, required=True)
+        self.subcategory            = SchemaElement(basestring, required=True)
+        self.desc                   = SchemaElement(basestring)
+        self.address                = SchemaElement(basestring)
+        self.coordinates            = SchemaElement(basestring)
+        self.cast                   = SchemaElement(basestring)
+        self.director               = SchemaElement(basestring)
+        self.release_date           = SchemaElement(basestring)
+        self.artist                 = SchemaElement(basestring)
+        self.album                  = SchemaElement(basestring)
+        self.author                 = SchemaElement(basestring)
 
     def exportEntity(self, authUserId):
 
@@ -1455,6 +1457,16 @@ class HTTPEntityActionEndpoint(Schema):
         self.status             = SchemaElement(basestring)
         self.message            = SchemaElement(basestring)
         self.redirect           = SchemaElement(basestring)
+
+class HTTPActionComplete(Schema):
+    def setSchema(self):
+        self.action             = SchemaElement(basestring)
+        self.source             = SchemaElement(basestring)
+        self.source_id          = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.user_id            = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+
 
 
 # ###### #
@@ -2151,6 +2163,22 @@ class HTTPActivity(Schema):
 
                 raise Exception("Too many comments! \n%s" % comments)
 
+            def _formatStampBlurbObjects(stamps, required=True, offset=0):
+                if len(stamps) == 0:
+                    if required:
+                        raise Exception("No stamp objects!")
+                    return None, []
+
+                if len(stamps) == 1:
+                    text = '%s: %s' % (stamps[0].user.screen_name, stamps[0].contents[0].blurb)
+                    refs = [{ 
+                        'indices'   : [offset, offset + len(stamps[0].user.screen_name) + 1],
+                        'action'    : _buildUserAction(stamps[0].user),
+                    }]
+                    return text, refs
+
+                raise Exception("Too many stamps! \n%s" % stamps)
+
 
 
             if self.verb == 'follow':
@@ -2205,7 +2233,7 @@ class HTTPActivity(Schema):
                     self.image = self.subjects[0].image_url 
                 else:
                     ### TODO: What should this image be?
-                    self.image = None
+                    self.image = _getIconURL('news_like')
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'todo':
@@ -2220,7 +2248,7 @@ class HTTPActivity(Schema):
                     self.image = self.subjects[0].image_url 
                 else:
                     ### TODO: What should this image be?
-                    self.image = None
+                    self.image = _getIconURL('news_todo')
                 if len(self.objects.stamps) > 0:
                     self.action = _buildStampAction(self.objects.stamps[0])
                 else:
@@ -2254,7 +2282,7 @@ class HTTPActivity(Schema):
                 verb = 'Mention on'
                 offset = len(verb) + 1
                 commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
-                stampBlurbObjects, stampBlurbObjectReferences = _formatCommentObjects(self.objects.stamps, required=False)
+                stampBlurbObjects, stampBlurbObjectReferences = _formatStampBlurbObjects(self.objects.stamps, required=False)
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
                 self.header_references = stampObjectReferences
@@ -2267,10 +2295,35 @@ class HTTPActivity(Schema):
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
-            elif self.verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+            elif self.verb.startswith('friend_'):
                 self.icon = _getIconURL('news_friend')
                 self.image = self.subjects[0].image_url 
                 self.action = _buildUserAction(self.subjects[0])
+
+            elif self.verb.startswith('action_'):
+                actionMapping = {
+                    'listen'    : ('listened to', ''),
+                    'playlist'  : ('added', 'to their playlist'),
+                    'download'  : ('downloaded', ''),
+                    'reserve'   : ('made a reservation at', ''),
+                    'menu'      : ('viewed the menu for', ''),
+                    'buy'       : ('bought', ''),
+                    'watch'     : ('watched', ''),
+                    'tickets'   : ('bought tickets for', ''),
+                }
+                subjects, subjectReferences = _formatUserObjects(self.subjects)
+                verbs = ('completed', '')
+                if self.verb[7:] in actionMapping.keys():
+                    verbs = actionMapping[self.verb[7:]]
+                offset = len(subjects) + len(verbs[0]) + 2
+                stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                if len(verbs[1]) > 0:
+                    self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
+                else:
+                    self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+                self.body_references = subjectReferences + stampObjectReferences
+                self.image = self.subjects[0].image_url 
+                self.action = _buildStampAction(self.objects.stamps[0])
 
             else:
                 raise Exception("Uncrecognized verb: %s" % self.verb)

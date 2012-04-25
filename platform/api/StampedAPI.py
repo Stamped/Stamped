@@ -700,7 +700,7 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(verb          = 'twitter_friend', 
+        self._addActivity(verb          = 'friend_twitter', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
@@ -750,7 +750,7 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(verb          = 'facebook_friend', 
+        self._addActivity(verb          = 'friend_facebook', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
@@ -1382,6 +1382,48 @@ class StampedAPI(AStampedAPI):
                                                             category=suggested.category, 
                                                             subcategory=suggested.subcategory, 
                                                             limit=suggested.limit)
+
+    @API_CALL
+    def completeAction(self, authUserId, **kwargs):
+        action      = kwargs.pop('action', None)
+        source      = kwargs.pop('source', None)
+        sourceId    = kwargs.pop('source_id', None)
+        entityId    = kwargs.pop('entity_id', None)
+        userId      = kwargs.pop('user_id', None)
+        stampId     = kwargs.pop('stamp_id', None)
+
+        actions = set([
+            # 'link',
+            # 'phone',
+            # 'stamped_view_entity',
+            # 'stamped_view_stamp',
+            # 'stamped_view_user',
+            'listen',
+            'playlist',
+            'download',
+            'reserve',
+            'menu',
+            'buy',
+            'watch',
+            'tickets',
+        ])
+
+        # For now, only complete the action if it's associated with an entity and a stamp
+        if stampId is not None:
+            stamp   = self._stampDB.getStamp(stampId)
+            user    = self._userDB.getUser(stamp.user.user_id)
+            entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+
+            if action in actions:
+                self._addActivity(verb          = 'action_%s' % action, 
+                                  userId        = authUserId, 
+                                  friendId      = stamp.user.user_id, 
+                                  stampId       = stamp.stamp_id)
+
+        return True
+
+
+
     
     """
      #####                                    
@@ -2976,10 +3018,13 @@ class StampedAPI(AStampedAPI):
             objects.user_ids        = [ kwargs['friendId'] ]
             requireReceipient       = True
 
-        elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
+        elif verb.startswith('friend_'):
             requireReceipient       = True
             body                    = kwargs.pop('body', None)
-            pass
+
+        elif verb.startswith('action_'):
+            requireReceipient       = True 
+            objects.stamp_ids       = [ kwargs['stampId'] ]
 
         else:
             raise Exception("Unrecognized activity verb: %s" % verb)

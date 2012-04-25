@@ -197,3 +197,14 @@ def stampedBy(request):
     
     return transformOutput(result.exportSparse())
 
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def completeAction(request):
+    authUserId, authClientId = checkOAuth(request)
+    
+    schema      = parseRequest(HTTPActionComplete(), request)
+    result      = stampedAPI.completeAction(authUserId, schema.value)
+
+    return transformOutput(result)
+
