@@ -13,8 +13,15 @@ window.log = function f(){ log.history = log.history || []; log.history.push(arg
 
 if (typeof(StampedClient) == "undefined") {
     var StampedClient = function() {
-        var base = "http://localhost:18000";
+        var base = "https://dev.stamped.com";
         var that = this;
+        
+        var client_id     = "stampedtest";
+        var client_secret = "august1ftw";
+        
+        /*
+         * Public API Functions
+         */
         
         this.init = function() {
             // pass
@@ -24,11 +31,31 @@ if (typeof(StampedClient) == "undefined") {
             return _post("/v0/oauth2/login.json", {
                 login         : login, 
                 password      : password, 
-                client_id     : 'stampedtest', 
-                client_secret : 'august1ftw', 
+                client_id     : client_id, 
+                client_secret : client_secret, 
             }).done(function (data) {
                 alert(data.toSource());
             });
+        };
+        
+        this.get_user_by_id = function(user_id) {
+            return _get("/v0/collections/user.json", { 'user_id' : user_id });
+        };
+        
+        this.get_user_by_screen_name = function(screen_name) {
+            return _get("/v0/collections/user.json", { 'screen_name' : screen_name });
+        };
+        
+        /*
+         * Private API Functions
+         */
+        
+        var _is_defined = function(v) {
+            return (typeof v != "undefined" && v != null);
+        };
+         
+        var _get = function(uri, params) {
+            return _ajax("GET", uri, params);
         };
         
         var _post = function(uri, params) {
@@ -38,8 +65,8 @@ if (typeof(StampedClient) == "undefined") {
         var _ajax = function(type, uri, params) {
             var url = base + uri;
             
-            window.log(type + ": " + url);
-            window.log(params);
+            window.log(type + ": " + url, this);
+            window.log(params, this);
             
             return $.ajax({
                 type        : type, 
@@ -47,7 +74,8 @@ if (typeof(StampedClient) == "undefined") {
                 data        : params, 
                 crossDomain : true, 
                 error       : function(jqXHR, textStatus, errorThrown) {
-                    window.log("ERROR: '" + type + "' to '" + url + "' returned " + textStatus + " (" + params.toSource() + ")");
+                    msg = "ERROR: '" + type + "' to '" + url + "' returned " + textStatus + " (" + params.toSource() + ")"
+                    window.log(msg, this);
                 }
             });
         };
@@ -58,7 +86,12 @@ if (typeof(StampedClient) == "undefined") {
     $(document).ready(function() {
         client = new StampedClient();
         client.init();
-        client.login("travis", "cierfshs2");
+        
+        userP = client.get_user_by_screen_name("travis");
+        userP.done(function (user) {
+            alert(JSON.stringify(user, undefined, 2));
+        });
+        //client.login("travis", "cierfshs2");
     });
 })();
 

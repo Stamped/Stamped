@@ -1624,16 +1624,16 @@ class HTTPStamp(Schema):
             mentions            = data.pop('mentions', [])
             credit              = data.pop('credit', [])
             contents            = data.pop('contents', [])
-
+            
             previews            = data.pop('previews', {})
             comments            = previews.pop('comments', [])
             likes               = previews.pop('likes', [])
             todos               = previews.pop('todos', [])
             credits             = previews.pop('credits', [])
-
+            
             if len(credit) > 0:
                 data['credit'] = credit
-
+            
             data['entity'] = HTTPEntityMini().importSchema(schema.entity).exportSparse()
             
             self.importData(data, overflow=True)
@@ -1642,7 +1642,7 @@ class HTTPStamp(Schema):
             self.created                = schema.timestamp.stamped # Temp
             self.modified               = schema.timestamp.modified
             self.stamped                = schema.timestamp.stamped 
-
+            
             for content in schema.contents:
                 item            = HTTPStampContent()
                 item.blurb      = content.blurb 

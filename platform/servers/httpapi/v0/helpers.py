@@ -114,8 +114,11 @@ def handleHTTPRequest(requires_auth=True,
         @wraps(fn)
         def handleHTTPRequest(request, *args, **kwargs):
             try:
+                origin = ""
+                
                 try:
-                    valid_origin = request.META['HTTP_ORIGIN']
+                    origin = request.META['HTTP_ORIGIN']
+                    valid_origin = origin
                     assert valid_origin in VALID_ORIGINS
                 except Exception:
                     valid_origin = None
@@ -136,6 +139,9 @@ def handleHTTPRequest(requires_auth=True,
                            requestData=request,
                            nodeName=stampedAPI.node_name)
                 logs.info("%s %s" % (request.method, request.path))
+                
+                if not valid_origin:
+                    logs.warn("INVALID ORIGIN: %s" % origin)
                 
                 params = {}
                 

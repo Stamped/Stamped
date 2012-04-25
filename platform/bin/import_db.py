@@ -15,7 +15,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('-D', '--drop', action="store_true", default=False,
+    parser.add_argument('-d', '--drop', action="store_true", default=False,
                         help="drop existing collections before importing")
     
     parser.add_argument("-s", "--source", default=None, type=str, help="db to import from")
@@ -24,6 +24,9 @@ def main():
     
     args = parser.parse_args()
     host, port = utils.get_db_config(args.source)
+    
+    utils.log("SOURCE: %s:%s" % (host, port))
+    
     old_host        = host
     old_connection  = pymongo.Connection(host, port)
     old_database    = old_connection['stamped']
@@ -33,6 +36,8 @@ def main():
     if new_host is None:
         dest            = MongoDBConfig.getInstance()
         new_host        = dest.host
+    
+    utils.log("DEST: %s:%s" % (new_host, port))
     
     if not os.path.isdir('/stamped/tmp/stamped/'):
        os.makedirs('/stamped/tmp/stamped')

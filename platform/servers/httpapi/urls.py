@@ -55,17 +55,16 @@ urlpatterns = patterns('',
     (r'v0/account/alerts/update.json',              'v0.functions.account.update_alerts'),
     (r'v0/account/alerts/ios/update.json',          'v0.functions.account.update_apns'),
     (r'v0/account/alerts/ios/remove.json',          'v0.functions.account.remove_apns'),
-
+    
     # TODO: REMOVE FROM PROD
     (r'v0/account/linked_accounts.json',            'v0.functions.account.linked_accounts'),
-
+    
     (r'v0/account/linked/twitter/update.json',      'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/twitter/followers.json',   'v0.functions.account.alertFollowersFromTwitter'),
     (r'v0/account/linked/twitter/remove.json',      'v0.functions.account.removeTwitter'),
     (r'v0/account/linked/facebook/update.json',     'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/facebook/followers.json',  'v0.functions.account.alertFollowersFromFacebook'),
     (r'v0/account/linked/facebook/remove.json',     'v0.functions.account.removeFacebook'),
-    
     
     ### USERS
     (r'v0/users/show.json',                         'v0.functions.users.show'),
