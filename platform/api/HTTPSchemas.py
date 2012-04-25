@@ -19,6 +19,9 @@ from datetime           import datetime, date, timedelta
 # PRIVATE #
 # ####### #
 
+### WARNING: COMPLETION ENDPOINT HARDCODED TO DEV!
+COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
+
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
 AMAZON_TOKEN    = 'stamped01-20'
@@ -664,7 +667,9 @@ class HTTPEntity(Schema):
 
             # Actions: Reservation
 
-            sources = []
+            actionType  = 'reserve'
+            actionIcon  = _getIconURL('act_reserve_primary', client=client)
+            sources     = []
 
             if entity.sources.opentable_id is not None or entity.sources.opentable_nickname is not None:
                 source              = HTTPActionSource()
@@ -673,14 +678,21 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.opentable_id
                 source.link         = _buildOpenTableURL(entity.opentable_id, entity.opentable_nickname, client)
                 source.icon         = _getIconURL('src_opentable', client=client)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_reserve_primary', client=client)
-            self._addAction('reserve', 'Reserve a table', sources, icon=actionIcon)
+            self._addAction(actionType, 'Reserve a table', sources, icon=actionIcon)
 
             # Actions: Call
 
-            sources = []
+            actionType  = 'phone'
+            actionIcon  = _getIconURL('act_call', client=client)
+            sources     = []
 
             if entity.contact.phone is not None:
                 source              = HTTPActionSource()
@@ -689,22 +701,28 @@ class HTTPEntity(Schema):
                 source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_call', client=client)
-            self._addAction('phone', entity.contact.phone, sources, icon=actionIcon)
+            self._addAction(actionType, entity.contact.phone, sources, icon=actionIcon)
 
             # Actions: View Menu
 
-            sources = []
+            actionType  = 'menu'
+            actionIcon  = _getIconURL('act_menu', client=client)
+            sources     = []
 
             if entity.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'
                 source.source_id    = entity.entity_id
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_menu', client=client)
-            self._addAction('menu', 'View menu', sources, icon=actionIcon)
+            self._addAction(actionType, 'View menu', sources, icon=actionIcon)
 
         # Generic Place
         elif entity.kind == 'place':
@@ -723,7 +741,9 @@ class HTTPEntity(Schema):
 
             # Actions: Call
 
-            sources = []
+            actionType  = 'phone'
+            actionIcon  = _getIconURL('act_call', client=client)
+            sources     = []
 
             if entity.contact.phone is not None:
                 source              = HTTPActionSource()
@@ -732,8 +752,7 @@ class HTTPEntity(Schema):
                 source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_call', client=client)
-            self._addAction('phone', entity.contact.phone, sources, icon=actionIcon)
+            self._addAction(actionType, entity.contact.phone, sources, icon=actionIcon)
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -750,7 +769,9 @@ class HTTPEntity(Schema):
 
             # Actions: Buy
 
-            sources = []
+            actionType  = 'buy'
+            actionIcon  = _getIconURL('act_buy_primary', client=client)
+            sources     = []
 
             if entity.sources.amazon_underlying is not None:
                 source              = HTTPActionSource()
@@ -759,10 +780,15 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.amazon_underlying
                 source.icon         = _getIconURL('src_amazon', client=client)
                 source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_buy_primary', client=client)
-            self._addAction('buy', 'Buy now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Buy now', sources, icon=actionIcon)
 
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
@@ -788,7 +814,9 @@ class HTTPEntity(Schema):
 
             # Actions: Watch Now
 
-            sources = []
+            actionType  = 'watch'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
@@ -799,14 +827,23 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_play_primary', client=client)
-            self._addAction('watch', 'Watch now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
-            sources = []
+            actionType  = 'tickets'
+            actionIcon  = _getIconURL('act_ticket_primary', client=client)
+            if len(self.actions) == 0:
+                actionIcon = _getIconURL('act_ticket', client=client)
+            sources     = []
 
             if entity.sources.fandango_id is not None:
                 source              = HTTPActionSource()
@@ -818,12 +855,15 @@ class HTTPEntity(Schema):
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = _getIconURL('src_fandango', client=client)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_ticket_primary', client=client)
-            if len(self.actions) == 0:
-                actionIcon = _getIconURL('act_ticket', client=client)
-            self._addAction('tickets', 'Find tickets', sources, icon=actionIcon)
+            self._addAction(actionType, 'Find tickets', sources, icon=actionIcon)
 
             # Actions: Add to Queue
 
@@ -835,7 +875,9 @@ class HTTPEntity(Schema):
 
             # Actions: Download
 
-            sources = []
+            actionType  = 'buy'
+            actionIcon  = _getIconURL('act_buy', client=client)
+            sources     = []
 
             if entity.sources.amazon_underlying is not None:
                 source              = HTTPActionSource()
@@ -845,8 +887,7 @@ class HTTPEntity(Schema):
                 source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_buy', client=client)
-            self._addAction('buy', 'Buy', sources, icon=actionIcon)
+            self._addAction(actionType, 'Buy', sources, icon=actionIcon)
 
         # Music
         elif entity.category == 'music':
@@ -903,7 +944,16 @@ class HTTPEntity(Schema):
 
             # Actions: Listen
 
-            sources = []
+            actionType  = 'listen'
+            actionTitle = 'Listen'
+            if entity.subcategory == 'artist':
+                actionTitle = 'Listen to top songs'
+            elif entity.subcategory == 'album':
+                actionTitle = 'Listen to album'
+            elif entity.subcategory == 'song':
+                actionTitle = 'Listen to song'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview:
                 source              = HTTPActionSource()
@@ -914,6 +964,12 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
             if entity.sources.rdio_id is not None:
@@ -924,6 +980,12 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_rdio', client=client)
                 if entity.rdio_url is not None:
                     source.link     = entity.rdio_url
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
             if entity.sources.spotify_id is not None:
@@ -934,28 +996,36 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_spotify', client=client)
                 if entity.spotify_url is not None:
                     source.link     = entity.spotify_url
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionTitle = 'Listen'
-            if entity.subcategory == 'artist':
-                actionTitle = 'Listen to top songs'
-            elif entity.subcategory == 'album':
-                actionTitle = 'Listen to album'
-            elif entity.subcategory == 'song':
-                actionTitle = 'Listen to song'
-                    
-            actionIcon = _getIconURL('act_play_primary', client=client)
-            self._addAction('listen', actionTitle, sources, icon=actionIcon)
+            self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Actions: Add to Playlist
 
-            sources = []
+            actionType  = 'playlist'
+            actionTitle = 'Add to playlist'
+            if entity.subcategory == 'artist':
+                actionTitle = 'Add artist to playlist'
+            actionIcon  = _getIconURL('act_playlist_music', client=client)
+            sources     = []
 
             if entity.sources.rdio_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Add to playlist on Rdio'
                 source.source       = 'rdio'
                 source.source_id    = entity.sources.rdio_id
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
             if entity.sources.spotify_id is not None:
@@ -963,18 +1033,22 @@ class HTTPEntity(Schema):
                 source.name         = 'Add to playlist on Spotify'
                 source.source       = 'spotify'
                 source.source_id    = entity.sources.spotify_id
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionTitle = 'Add to playlist'
-            if entity.subcategory == 'artist':
-                actionTitle = 'Add artist to playlist'
-            
-            actionIcon = _getIconURL('act_playlist_music', client=client)
-            self._addAction('playlist', actionTitle, sources, icon=actionIcon)
+            self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Actions: Download
 
-            sources = []
+            actionType  = 'download'
+            actionTitle = 'Download %s' % entity.subcategory
+            actionIcon  = _getIconURL('act_download', client=client)
+            sources     = []
 
             if entity.sources.itunes_id is not None:
                 source              = HTTPActionSource()
@@ -983,11 +1057,15 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.itunes_id
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionTitle = 'Download %s' % entity.subcategory
-            actionIcon  = _getIconURL('act_download', client=client)
-            self._addAction('download', actionTitle, sources, icon=actionIcon)
+            self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Playlist
         
@@ -1013,34 +1091,34 @@ class HTTPEntity(Schema):
                         sources = []
 
                         if song.sources.itunes_id is not None and song.sources.itunes_preview is not None:
-                            source              = HTTPActionSource()
-                            source.name         = 'Listen on iTunes'
-                            source.source       = 'itunes'
-                            source.source_id    = song.sources.itunes_id
-                            source.source_data  = song.sources.itunes_preview
-                            source.icon         = _getIconURL('src_itunes', client=client)
+                            source                      = HTTPActionSource()
+                            source.name                 = 'Listen on iTunes'
+                            source.source               = 'itunes'
+                            source.source_id            = song.sources.itunes_id
+                            source.source_data          = song.sources.itunes_preview
+                            source.icon                 = _getIconURL('src_itunes', client=client)
                             sources.append(source)
 
                             if item.entity_id is None:
                                 item.entity_id = 'T_ITUNES_%s' % song.itunes_id
 
                         if song.sources.rdio_id is not None:
-                            source              = HTTPActionSource()
-                            source.name         = 'Listen on Rdio'
-                            source.source       = 'rdio'
-                            source.source_id    = song.sources.rdio_id
-                            source.icon         = _getIconURL('src_rdio', client=client)
+                            source                      = HTTPActionSource()
+                            source.name                 = 'Listen on Rdio'
+                            source.source               = 'rdio'
+                            source.source_id            = song.sources.rdio_id
+                            source.icon                 = _getIconURL('src_rdio', client=client)
                             sources.append(source)
 
                             if item.entity_id is None:
                                 item.entity_id = 'T_RDIO_%s' % song.rdio_id
 
                         if song.sources.spotify_id is not None:
-                            source              = HTTPActionSource()
-                            source.name         = 'Listen on Spotify'
-                            source.source       = 'spotify'
-                            source.source_id    = song.sources.spotify_id
-                            source.icon         = _getIconURL('src_spotify', client=client)
+                            source                      = HTTPActionSource()
+                            source.name                 = 'Listen on Spotify'
+                            source.source               = 'spotify'
+                            source.source_id            = song.sources.spotify_id
+                            source.icon                 = _getIconURL('src_spotify', client=client)
                             sources.append(source)
 
                             if item.entity_id is None:
@@ -1050,6 +1128,15 @@ class HTTPEntity(Schema):
                             action = HTTPAction()
                             action.type = 'listen'
                             action.name = 'Listen to song'
+
+                            for source in sources:
+                                source.setCompletion({
+                                    'action'    : action.type,
+                                    'entity_id' : entity.entity_id,
+                                    'source'    : source.source,
+                                    'source_id' : source.source_id,
+                                })
+
                             action.sources = sources
 
                             item.action = action
@@ -1106,7 +1193,9 @@ class HTTPEntity(Schema):
 
             # Actions: Download
 
-            sources = []
+            actionType  = 'download'
+            actionIcon  = _getIconURL('act_download_primary', client=client)
+            sources     = []
 
             if entity.sources.itunes_id is not None:
                 source              = HTTPActionSource()
@@ -1116,10 +1205,15 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
+                source.setCompletion({
+                    'action'    : actionType,
+                    'entity_id' : entity.entity_id,
+                    'source'    : source.source,
+                    'source_id' : source.source_id,
+                })
                 sources.append(source)
 
-            actionIcon = _getIconURL('act_download_primary', client=client)
-            self._addAction('download', 'Download', sources, icon=actionIcon)
+            self._addAction(actionType, 'Download', sources, icon=actionIcon)
 
             # Screenshots
 
@@ -1181,6 +1275,19 @@ class HTTPActionSource(Schema):
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
         self.completion_data        = SchemaElement(basestring) # dictionary?
+
+    def completion(self, **kwargs):
+        self.completion_endpoint    = COMPLETION_ENDPOINT
+        self.completion_data        = HTTPActionCompletionData(kwargs, overflow=True)
+
+class HTTPActionCompletionData(Schema):
+    def setSchema(self):
+        self.action                 = SchemaElement(basestring)
+        self.source                 = SchemaElement(basestring)
+        self.source_id              = SchemaElement(basestring)
+        self.entity_id              = SchemaElement(basestring)
+        self.user_id                = SchemaElement(basestring)
+        self.stamp_id               = SchemaElement(basestring)
 
 class HTTPEntityAction(Schema):
     def setSchema(self):
@@ -1508,7 +1615,7 @@ class HTTPStamp(Schema):
         self.is_fav             = SchemaElement(bool)
     
     def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Stamp':
+        if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
             data                = schema.exportSparse()
             coordinates         = data['entity'].pop('coordinates', None)
             mentions            = data.pop('mentions', [])
@@ -1550,26 +1657,22 @@ class HTTPStamp(Schema):
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
 
-            
-            for comment in comments:
-                comment = Comment(comment)
-                comment = HTTPComment().importSchema(comment)
-                self.previews.comments.append(comment)
-            
-            for user in todos:
-                user    = UserMini(user)
-                user    = HTTPUserMini().importSchema(user).exportSparse()
-                self.previews.todos.append(user)
+            if schema.__class__.__name__ == 'Stamp':
+                for comment in schema.previews.comments:
+                    comment = HTTPComment().importSchema(comment)
+                    self.previews.comments.append(comment)
+                
+                for user in schema.previews.todos:
+                    user    = HTTPUserMini().importSchema(user).exportSparse()
+                    self.previews.todos.append(user)
 
-            for user in likes:
-                user    = UserMini(user)
-                user    = HTTPUserMini().importSchema(user).exportSparse()
-                self.previews.likes.append(user)
+                for user in schema.previews.likes:
+                    user    = HTTPUserMini().importSchema(user).exportSparse()
+                    self.previews.likes.append(user)
 
-            for credit in credits:
-                credit  = Stamp(credit)
-                credit  = HTTPStamp.importSchema().importSchema(credit).exportSparse()
-                self.previews.credits.append(credit)
+                for credit in schema.previews.credits:
+                    credit  = HTTPStamp.importSchema().importSchema(credit).exportSparse()
+                    self.previews.credits.append(credit)
 
             self.num_comments = 0
             if schema.num_comments > 0:
