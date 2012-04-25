@@ -678,7 +678,7 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.opentable_id
                 source.link         = _buildOpenTableURL(entity.opentable_id, entity.opentable_nickname, client)
                 source.icon         = _getIconURL('src_opentable', client=client)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -714,7 +714,7 @@ class HTTPEntity(Schema):
                 source.name         = 'View menu'
                 source.source       = 'stamped'
                 source.source_id    = entity.entity_id
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -780,7 +780,7 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.amazon_underlying
                 source.icon         = _getIconURL('src_amazon', client=client)
                 source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -827,7 +827,7 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -855,7 +855,7 @@ class HTTPEntity(Schema):
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = _getIconURL('src_fandango', client=client)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -964,7 +964,7 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -980,7 +980,7 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_rdio', client=client)
                 if entity.rdio_url is not None:
                     source.link     = entity.rdio_url
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -996,7 +996,7 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_spotify', client=client)
                 if entity.spotify_url is not None:
                     source.link     = entity.spotify_url
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -1020,7 +1020,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Add to playlist on Rdio'
                 source.source       = 'rdio'
                 source.source_id    = entity.sources.rdio_id
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -1033,7 +1033,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Add to playlist on Spotify'
                 source.source       = 'spotify'
                 source.source_id    = entity.sources.spotify_id
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -1057,7 +1057,7 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.itunes_id
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -1130,7 +1130,7 @@ class HTTPEntity(Schema):
                             action.name = 'Listen to song'
 
                             for source in sources:
-                                source.setCompletion({
+                                source.setCompletion(**{
                                     'action'    : action.type,
                                     'entity_id' : entity.entity_id,
                                     'source'    : source.source,
@@ -1205,7 +1205,7 @@ class HTTPEntity(Schema):
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
-                source.setCompletion({
+                source.setCompletion(**{
                     'action'    : actionType,
                     'entity_id' : entity.entity_id,
                     'source'    : source.source,
@@ -1276,7 +1276,7 @@ class HTTPActionSource(Schema):
         self.completion_endpoint    = SchemaElement(basestring)
         self.completion_data        = SchemaElement(basestring) # dictionary?
 
-    def completion(self, **kwargs):
+    def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
         self.completion_data        = HTTPActionCompletionData(kwargs, overflow=True)
 
