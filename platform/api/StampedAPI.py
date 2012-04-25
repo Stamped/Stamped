@@ -1526,12 +1526,6 @@ class StampedAPI(AStampedAPI):
                 # Grab user_id from comments
                 for comment in stamp.previews.comments:
                     userIds[comment.user_id] = 1
-
-        # Mentions
-        screenNameMapping = {}
-        for stamp in stampData:
-            for content in stamp.contents:
-                content.mentions = self._extractMentions(content.blurb, screenNameMapping)
         
         # Entities
         if len(entityIds) == 0:

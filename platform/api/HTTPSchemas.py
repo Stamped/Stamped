@@ -9,6 +9,7 @@ import copy, urllib, urlparse, re, logs, string, time, utils
 
 from errors             import *
 from schema             import *
+from utils              import lazyProperty
 from api.Schemas        import *
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
@@ -1616,6 +1617,10 @@ class HTTPStamp(Schema):
         self.num_likes          = SchemaElement(int)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
+
+    @lazyProperty
+    def _user_regex(self):
+        return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
@@ -1648,6 +1653,23 @@ class HTTPStamp(Schema):
                 item.blurb      = content.blurb 
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
+
+                for reference in self._user_regex.finditer(content.blurb):
+                    source              = HTTPActionSource()
+                    source.name         = 'View profile'
+                    source.source       = 'stamped'
+                    source.source_id    = reference.groups()[0]
+
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_screen_name'
+                    action.name         = 'View profile'
+                    action.sources      = [ source ]
+
+                    reference           = HTTPTextReference()
+                    reference.indices   = [ reference.start(), reference.end() ]
+                    reference.action    = action
+
+                    item.blurb_references.append(reference)
                 
                 for image in content.images:
                     img = HTTPEntityGalleryItem()
