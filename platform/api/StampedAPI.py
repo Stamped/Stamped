@@ -1449,12 +1449,13 @@ class StampedAPI(AStampedAPI):
             data['screen_name'] = user.groups()[0]
             
             if data['screen_name'] in screenNames:
-                data['user_id'] = screenNames[data['user_id']]
-            try:
-                user = self._userDB.getUserByScreenName(data['screen_name'])
-                data['user_id'] = user.user_id
-            except Exception:
-                logs.warning("User not found (%s)" % data['screen_name'])
+                data['user_id'] = screenNames[data['screen_name']]
+            else:
+                try:
+                    user = self._userDB.getUserByScreenName(data['screen_name'])
+                    data['user_id'] = user.user_id
+                except Exception:
+                    logs.warning("User not found (%s)" % data['screen_name'])
             
             if data['screen_name'] not in screenNames.keys() and data['user_id'] is not None:
                 screenNames[data['screen_name']] = data['user_id']
