@@ -1685,18 +1685,18 @@ class StampedAPI(AStampedAPI):
                 genre   = "user_first_stamp", 
             )))
         
-        entity_stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
         
-        if len(entity_stamps) == 0:
+        if len(stamps) == 0:
             badges.append(Badge(dict(
                 user_id = userId, 
                 genre   = "entity_first_stamp", 
             )))
         else:
-            friend_stamp_ids = frozenset(self._collectionDB.getInboxStampIds(stamp.user.user_id))
-            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamps))
+            friendIds       = set(self._friendshipDB.getFriends(stamp.user.user_id))
+            stampUserIds    = set(map(lambda s: s.user.user_id, stamps))
             
-            if len(entity_stamp_ids & friend_stamp_ids) == 0:
+            if friendIds.intersection(stampUserIds) == 0:
                 badges.append(Badge(dict(
                     user_id = userId, 
                     genre   = "friends_first_stamp", 

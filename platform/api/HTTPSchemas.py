@@ -1660,26 +1660,6 @@ class HTTPStamp(Schema):
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
             
-            for comment in comments:
-                comment = Comment(comment)
-                comment = HTTPComment().importSchema(comment)
-                self.previews.comments.append(comment)
-            
-            for user in todos:
-                user    = UserMini(user)
-                user    = HTTPUserMini().importSchema(user).exportSparse()
-                self.previews.todos.append(user)
-            
-            for user in likes:
-                user    = UserMini(user)
-                user    = HTTPUserMini().importSchema(user).exportSparse()
-                self.previews.likes.append(user)
-            
-            for credit in credits:
-                credit  = Stamp(credit)
-                credit  = HTTPStamp.importSchema().importSchema(credit).exportSparse()
-                self.previews.credits.append(credit)
-            
             self.num_comments = 0
             if schema.num_comments > 0:
                 self.num_comments       = schema.num_comments
@@ -1688,17 +1668,35 @@ class HTTPStamp(Schema):
             if schema.num_likes > 0:
                 self.num_likes          = schema.num_likes
             
-            self.is_liked = False
-            if schema.is_liked:
-                self.is_liked = True
-            
-            self.is_fav = False
-            if schema.is_fav:
-                self.is_fav = True
-            
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, url_title)
+
+            if schema.__class__.__name__ == 'Stamp':
+                for comment in schema.previews.comments:
+                    comment = HTTPComment().importSchema(comment)
+                    self.previews.comments.append(comment)
+                
+                for user in schema.previews.todos:
+                    user    = HTTPUserMini().importSchema(user).exportSparse()
+                    self.previews.todos.append(user)
+
+                for user in schema.previews.likes:
+                    user    = HTTPUserMini().importSchema(user).exportSparse()
+                    self.previews.likes.append(user)
+
+                for credit in schema.previews.credits:
+                    credit  = HTTPStamp().importSchema(credit).minimize().exportSparse()
+                    self.previews.credits.append(credit)
+
+                self.is_liked = False
+                if schema.is_liked:
+                    self.is_liked = True
+
+                self.is_fav = False
+                if schema.is_fav:
+                    self.is_fav = True
+
         else:
             logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
