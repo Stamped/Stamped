@@ -13,7 +13,7 @@ window.log = function f(){ log.history = log.history || []; log.history.push(arg
 
 if (typeof(StampedClient) == "undefined") {
     var StampedClient = function() {
-        var base = "https://dev.stamped.com";
+        var stamped_url_base = "https://dev.stamped.com/v0/";
         var that = this;
         
         var client_id     = "stampedtest";
@@ -39,11 +39,19 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_user_by_id = function(user_id) {
-            return _get("/v0/collections/user.json", { 'user_id' : user_id });
+            return _get("users/show.json", { 'user_id' : user_id });
         };
         
         this.get_user_by_screen_name = function(screen_name) {
-            return _get("/v0/collections/user.json", { 'screen_name' : screen_name });
+            return _get("users/show.json", { 'screen_name' : screen_name });
+        };
+        
+        this.get_user_stamps_by_id = function(user_id) {
+            return _get("collections/user.json", { 'user_id' : user_id });
+        };
+        
+        this.get_user_stamps_by_screen_name = function(screen_name) {
+            return _get("collections/user.json", { 'screen_name' : screen_name });
         };
         
         /*
@@ -63,7 +71,7 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         var _ajax = function(type, uri, params) {
-            var url = base + uri;
+            var url = stamped_url_base + uri;
             
             window.log(type + ": " + url, this);
             window.log(params, this);

@@ -7,7 +7,8 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False, 
+                   http_schema=HTTPUserId)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)

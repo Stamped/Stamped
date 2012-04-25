@@ -64,7 +64,6 @@ def handleHTTPRequest(requires_auth=True,
                       upload=None, 
                       parse_request_kwargs=None, 
                       parse_request=True):
-    
     """
         handleHTTPRequest is Stamped API's main HTTP API function decorator, taking 
         care of oauth, client, and request validation, optionally parsing the input 
@@ -84,7 +83,7 @@ def handleHTTPRequest(requires_auth=True,
                              used instead of parseRequest (uploads also require POST).
                              
             * schema       - if schema is specified, the http_schema will be exported 
-                             to the given schema type.
+                             to an instance of the given schema type.
                              
             * data         - if no schema is specified, data will contain the parsed 
                              http_schema data exported sparsely to a dict.
@@ -256,7 +255,7 @@ def handleHTTPRequest(requires_auth=True,
                     logs.save()
                 except:
                     pass
-    
+        
         return handleHTTPRequest
     return decorator
 
@@ -312,10 +311,10 @@ def checkOAuth(request):
         
         logs.user(authenticated_user_id)
         logs.client(client_id)
-
+        
         client = stampedAuth.getClientDetails(client_id)
         stampedAPI.setVersion(client.api_version)
-
+        
         return authenticated_user_id, client_id
     except StampedHTTPError:
         raise
@@ -428,7 +427,7 @@ def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
     
-    output_json = json.dumps(value, sort_keys=True)
+    output_json = json.dumps(value, sort_keys=not IS_PROD)
     output      = HttpResponse(output_json, **kwargs)
     
     logs.output(output_json)
