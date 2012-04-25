@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
-Helper utilities for API functions.
+    Helper utilities for API functions.
+"""
 
-DOCUMENTED SAMPLE PATH MODULE
-MULTIPLE USES from functions/account.py
-"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -13,6 +10,7 @@ __license__   = "TODO"
 
 import stamped
 import os, json, utils, random, time, hashlib, logs
+import libs.ec2_utils
 
 from pprint                         import pformat
 from errors                         import *
@@ -24,10 +22,11 @@ from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
 
+IS_PROD = libs.ec2_utils.is_prod_stack()
 
 # TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
 # restrictive as possible.
-# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid?
+# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid? methinks yes...
 # TODO: (travis): should https also be a valid origin prefix?
 
 VALID_ORIGINS = [
@@ -37,7 +36,7 @@ VALID_ORIGINS = [
     'http://dev.stamped.com', 
 ]
 
-if not utils.is_ec2():
+if not IS_PROD:
     VALID_ORIGINS.extend([
         'http://localhost:19000', 
         'http://localhost:18000', 
