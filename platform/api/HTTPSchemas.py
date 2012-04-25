@@ -1473,7 +1473,7 @@ class HTTPStampPreviews(Schema):
     def setSchema(self):
         self.likes              = SchemaList(HTTPUserMini())
         self.todos              = SchemaList(HTTPUserMini())
-        # self.credit             = SchemaList(Stamp())
+        self.credits            = SchemaList(HTTPStampMini())
         self.comments           = SchemaList(HTTPComment())
 
 class HTTPStamp(Schema):
@@ -1494,15 +1494,6 @@ class HTTPStamp(Schema):
         self.num_likes          = SchemaElement(int)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
-
-        # DEPRECATED
-        self.comment_preview    = SchemaList(HTTPComment())
-        self.image_dimensions   = SchemaElement(basestring)
-        self.image_url          = SchemaElement(basestring)
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_references   = SchemaList(HTTPTextReference())
-        self.mentions           = SchemaList(MentionSchema())
-        self.like_threshold_hit = SchemaElement(bool)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -1516,10 +1507,7 @@ class HTTPStamp(Schema):
             comments            = previews.pop('comments', [])
             likes               = previews.pop('likes', [])
             todos               = previews.pop('todos', [])
-
-
-            if len(mentions) > 0:
-                data['mentions'] = mentions
+            credits             = previews.pop('credits', [])
 
             if len(credit) > 0:
                 data['credit'] = credit
@@ -1529,7 +1517,6 @@ class HTTPStamp(Schema):
             self.importData(data, overflow=True)
             self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
             self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
-            self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
             self.stamped                = schema.timestamp.stamped 
@@ -1551,17 +1538,11 @@ class HTTPStamp(Schema):
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
 
-                # TEMP
-                self.blurb      = item.blurb 
-                self.created    = item.created 
-
             
             for comment in comments:
                 comment = Comment(comment)
                 comment = HTTPComment().importSchema(comment)
                 self.previews.comments.append(comment)
-                # TEMP
-                self.comment_preview.append(comment)
             
             for user in todos:
                 user    = UserMini(user)
@@ -1572,6 +1553,11 @@ class HTTPStamp(Schema):
                 user    = UserMini(user)
                 user    = HTTPUserMini().importSchema(user).exportSparse()
                 self.previews.likes.append(user)
+
+            for credit in credits:
+                credit  = Stamp(credit)
+                credit  = HTTPStamp.importSchema().importSchema(credit).exportSparse()
+                self.previews.credits.append(credit)
 
             self.num_comments = 0
             if schema.num_comments > 0:
@@ -1589,14 +1575,35 @@ class HTTPStamp(Schema):
             if schema.is_fav:
                 self.is_fav = True
             
-            stamp_title = encodeStampTitle(schema.entity.title)
+            url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
-                (schema.user.screen_name, schema.stamp_num, stamp_title)
+                (schema.user.screen_name, schema.stamp_num, url_title)
         else:
             logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
         
         return self
+
+    def minimize(self):
+        return HTTPStampMini(self.value, overflow=True)
+
+class HTTPStampMini(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.entity             = HTTPEntityMini(required=True)
+        self.user               = HTTPUserMini(required=True)
+        self.contents           = SchemaList(HTTPStampContent())
+        self.credit             = SchemaList(CreditSchema())
+        self.badges             = SchemaList(HTTPBadge())
+        self.via                = SchemaElement(basestring)
+        self.url                = SchemaElement(basestring)
+        self.created            = SchemaElement(basestring)
+        self.modified           = SchemaElement(basestring)
+        self.stamped            = SchemaElement(basestring)
+        self.num_comments       = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        # self.is_liked           = SchemaElement(bool)
+        # self.is_fav             = SchemaElement(bool)
 
 class HTTPBadge(Schema):
     def setSchema(self):

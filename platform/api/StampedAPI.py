@@ -1499,6 +1499,7 @@ class StampedAPI(AStampedAPI):
                 entityIds[entity.entity_id] = entity
 
         # Likes
+        ### TODO: Rewrite to minimze db calls
         likeUserIds = {}
         for stamp in stampData:
             likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)[:10]
@@ -1507,12 +1508,21 @@ class StampedAPI(AStampedAPI):
                     userIds[likeUserId] = 1
 
         # Todos
+        ### TODO: Rewrite to minimize db calls
         todoUserIds = {}
         for stamp in stampData:
             todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)[:10]
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 if todoUserId not in userIds:
                     userIds[todoUserId] = 1
+
+        # Credit
+        creditIds = {}
+        for stamp in stampData:
+            creditIds[stamp.stamp_id] = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=10)
+            for creditItem in creditIds[stamp.stamp_id]:
+                if creditItem.user.user_id not in userIds:
+                    userIds[creditItem.user.user_id] = 1
 
         # Users
         if 1 in userIds.values():
@@ -1597,6 +1607,15 @@ class StampedAPI(AStampedAPI):
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 assert userIds[todoUserId] != 1
                 stamp.previews.todos.append(userIds[todoUserId])
+
+            # Add restamps
+            stamp.previews.credits = []
+            for credit in creditIds[stamp.stamp_id]:
+                assert userIds[credit.user.user_id] != 1
+                assert entityIds[credit.entity.entity_id] != 1
+                credit.user = userIds[credit.user.user_id]
+                credit.entity = entityIds[credit.entity.entity_id]
+                stamp.previews.credits.append(credit)
             
             if authUserId:
                 # Mark as favorited
@@ -1692,8 +1711,7 @@ class StampedAPI(AStampedAPI):
             image_width, image_height = image.size
             """
         elif imageUrl is not None:
-            # ensure external image exists
-            # TODO!!!
+            ### TODO: Ensure external image exists
             """
             # TODO: 
             response = utils.getHeadRequest(image_url)
@@ -1716,11 +1734,9 @@ class StampedAPI(AStampedAPI):
             image           = ImageSchema()
             image.width     = imageWidth
             image.height    = imageHeight
-            # image.image     = "%s.%s" % (stamp.stamp_id, now)
             content.images  = [ image ]
 
             imageExists     = True
-        
 
         # Update content if stamp exists
         if stampExists:

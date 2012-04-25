@@ -111,7 +111,6 @@ class Account(Schema):
         self.locale             = LocaleSchema()
         self.linked_accounts    = LinkedAccounts()
         self.devices            = DevicesSchema()
-        self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema()
         self.alerts             = AccountAlerts()
@@ -186,7 +185,6 @@ class User(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema(required=True)
         self.identifier         = SchemaElement(basestring)
@@ -234,16 +232,6 @@ class Invite(Schema):
         self.recipient_email    = SchemaElement(basestring, required=True)
         self.user_id            = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
-
-
-# ##### #
-# Flags #
-# ##### #
-
-class FlagsSchema(Schema):
-    def setSchema(self):
-        self.flagged            = SchemaElement(bool)
-        self.locked             = SchemaElement(bool)
 
 
 # ##### #
@@ -320,15 +308,25 @@ class Stamp(Schema):
         self.previews           = StampPreviews()
         self.via                = SchemaElement(basestring)
         self.timestamp          = StampTimestampSchema()
-        self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
         self.attributes         = StampAttributesSchema()
         self.badges             = SchemaList(Badge())
-        ### DEPRECATED
-        # self.blurb              = SchemaElement(basestring)
-        # self.mentions           = SchemaList(MentionSchema())
-        # self.image_dimensions   = SchemaElement(basestring)
-        # self.comment_preview    = SchemaList(Comment())
+
+    def minimize(self):
+        return StampMini(self.value, overflow=True)
+
+class StampMini(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity             = BasicEntity(required=True)
+        self.user               = UserMini(required=True)
+        self.credit             = SchemaList(CreditSchema())
+        self.contents           = SchemaList(StampContent())
+        self.via                = SchemaElement(basestring)
+        self.timestamp          = StampTimestampSchema()
+        self.stats              = StampStatsSchema()
+        self.attributes         = StampAttributesSchema()
+        self.badges             = SchemaList(Badge())
 
 class StampContent(Schema):
     def setSchema(self):
@@ -341,7 +339,7 @@ class StampPreviews(Schema):
     def setSchema(self):
         self.likes              = SchemaList(UserMini())
         self.todos              = SchemaList(UserMini())
-        # self.credit             = SchemaList(Stamp())
+        self.credits            = SchemaList(StampMini())
         self.comments           = SchemaList(Comment())
 
 class MentionSchema(Schema):
@@ -404,62 +402,6 @@ class Comment(Schema):
 # ######## #
 # Activity #
 # ######## #
-
-"""
-class Activity(Schema):
-    def setSchema(self):
-        # Metadata
-        self.activity_id        = SchemaElement(basestring)
-        self.recipient_id       = SchemaElement(basestring)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = UserMini()
-        self.timestamp          = TimestampSchema()
-        self.benefit            = SchemaElement(int)
-
-        # Image
-        self.image              = SchemaElement(basestring)
-        self.icon               = SchemaElement(basestring)
-
-        # Text
-        self.subject            = SchemaElement(basestring)
-        self.subject_objects    = SchemaList(ActivityObjectSchema())
-        self.blurb              = SchemaElement(basestring)
-        self.blurb_format       = ActivityFormatSchema()
-        self.blurb_objects      = SchemaList(ActivityObjectSchema())
-
-        # Links
-        self.link               = ActivityLinkSchema()
-
-class ActivityLinkSchema(Schema):
-    def setSchema(self):
-        self.linked_user        = UserMini()
-        self.linked_user_id     = SchemaElement(basestring)
-        self.linked_stamp       = Stamp()
-        self.linked_stamp_id    = SchemaElement(basestring)
-        self.linked_entity      = BasicEntity()
-        self.linked_entity_id   = SchemaElement(basestring)
-        self.linked_comment     = Comment()
-        self.linked_comment_id  = SchemaElement(basestring)
-        self.linked_url         = LinkedURL()
-
-class ActivityObjectSchema(Schema):
-    def setSchema(self):
-        self.user_id            = SchemaElement(basestring)
-        self.stamp_id           = SchemaElement(basestring)
-        self.entity_id          = SchemaElement(basestring)
-        self.indices            = SchemaList(SchemaElement(int))
-
-class ActivityFormatSchema(Schema):
-    def setSchema(self):
-        self.title              = SchemaElement(bool)
-
-class LinkedURL(Schema):
-    def setSchema(self):
-        self.url                = SchemaElement(basestring, required=True)
-        self.chrome             = SchemaElement(bool)
-"""
-
-
 
 class Activity(Schema):
     def setSchema(self):
