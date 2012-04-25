@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 
 import collections
-import functools
+import functools, operator
 
 from itertools import ifilterfalse
 from heapq import nsmallest
@@ -44,18 +44,32 @@ def lru_cache(maxsize=100):
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
             # cache key records both positional and keyword args
-            key = args
-            if kwds:
-                key += (kwd_mark,) + tuple(sorted(kwds.items()))
+            key = '%s' % user_function.__name__
+            for arg in args:
+                try:
+                    arg = arg.value
+                except Exception:
+                    pass
+                key = "%s - %s" % (key, arg)
+            for k, v in sorted(kwds.iteritems()):
+                try:
+                    v = v.value
+                except Exception:
+                    pass
+                key = "%s - %s (%s)" % (key, k, v)
+
+            if key == '':
+                raise Exception("Key not set! (%s)" % user_function)
             
             # record recent use of this key
             queue_append(key)
             refcount[key] += 1
-            
+
             # get cache entry or compute if not found
             try:
                 result = cache[key]
                 wrapper.hits += 1
+
             except KeyError:
                 result = user_function(*args, **kwds)
                 cache[key] = result

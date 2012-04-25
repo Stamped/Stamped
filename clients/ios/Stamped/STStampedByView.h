@@ -12,6 +12,6 @@
 
 @interface STStampedByView : STViewContainer
 
-- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist andDelegate:(id<STViewDelegate>)delegate;
+- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate;
 
 @end

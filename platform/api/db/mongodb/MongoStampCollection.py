@@ -310,7 +310,18 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self.credit_givers_collection.removeGiver(creditedUserId, stamp.user.user_id)
     
     def countCredits(self, userId):
-        return self.credit_received_collection.numCredit(userId)   
+        return self.credit_received_collection.numCredit(userId)
+
+    def getRestamps(self, userId, entityId, limit=None):
+        try:
+            query = {
+                'entity.entity_id'  : entityId,
+                'credit.user_id'    : userId,
+            }
+            documents = self._collection.find(query).sort('$natural', pymongo.DESCENDING).limit(limit)
+            return map(self._convertFromMongo, documents)
+        except:
+            return []
     
     def giveLikeCredit(self, stampId):
         self._collection.update(

@@ -23,6 +23,32 @@
 #import "STSimpleEntitySearchSection.h"
 #import "STSimpleActivity.h"
 
+@interface STStampedAPIUserIDs : NSObject
+
+@property (nonatomic, readwrite, copy) NSArray* userIDs;
+
++ (RKObjectMapping*)mapping;
+
+@end
+
+@implementation STStampedAPIUserIDs
+
+@synthesize userIDs = userIDs_;
+
+- (void)dealloc
+{
+  [userIDs_ release];
+  [super dealloc];
+}
+
++ (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STStampedAPIUserIDs class]];
+  [mapping mapKeyPath:@"user_ids" toAttribute:@"userIDs"];
+  return mapping;
+}
+
+@end
+
 @interface STStampedAPI () <STCacheModelSourceDelegate>
 
 @property (nonatomic, readonly, retain) STCacheModelSource* menuCache;
@@ -190,8 +216,8 @@ static STStampedAPI* _sharedInstance;
 
 - (void)userDetailsForUserIDs:(NSArray*)userIDs andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error))block {
   NSString* path = @"/users/lookup.json";
-  NSDictionary* params = [NSDictionary dictionaryWithObject:userIDs forKey:@"user_ids"];
-  [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleUserDetail mapping] andCallback:^(NSArray* array, NSError* error) {
+  NSDictionary* params = [NSDictionary dictionaryWithObject:[userIDs componentsJoinedByString:@","] forKey:@"user_ids"];
+  [[STRestKitLoader sharedInstance] loadWithPath:path post:YES params:params mapping:[STSimpleUserDetail mapping] andCallback:^(NSArray* array, NSError* error) {
     block((NSArray<STUserDetail>*)array, error);
   }];
 }
@@ -215,8 +241,21 @@ static STStampedAPI* _sharedInstance;
 
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-  NSString* path = @"/activity/friends.json";
+  NSString* path = @"/activity/show.json";
 
+  [[STRestKitLoader sharedInstance] loadWithPath:path 
+                                            post:NO
+                                          params:slice.asDictionaryParams
+                                         mapping:[STSimpleActivity mapping]
+                                     andCallback:^(NSArray* array, NSError* error) {
+                                       block((NSArray<STActivity>*)array, error);
+                                     }];
+}
+
+- (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
+                                 andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
+  NSString* path = @"/activity/friends.json";
+  
   [[STRestKitLoader sharedInstance] loadWithPath:path 
                                             post:NO
                                           params:slice.asDictionaryParams
@@ -311,6 +350,70 @@ static STStampedAPI* _sharedInstance;
     }
     block(error == nil, error);
   }];
+}
+
+- (void)followerIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* followerIDs, NSError* error))block {
+  NSString* path = @"/friendships/followers.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                            post:NO
+                                          params:params
+                                         mapping:[STStampedAPIUserIDs mapping]
+                                     andCallback:^(id result, NSError* error) {
+                                       STStampedAPIUserIDs* userIDs = result;
+                                       block(userIDs ? userIDs.userIDs : nil, error);
+                                     }];
+}
+
+- (void)friendIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* friendIDs, NSError* error))block {
+  NSString* path = @"/friendships/friends.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                               post:NO
+                                             params:params
+                                            mapping:[STStampedAPIUserIDs mapping]
+                                        andCallback:^(id result, NSError* error) {
+                                          STStampedAPIUserIDs* userIDs = result;
+                                          block(userIDs ? userIDs.userIDs : nil, error);
+                                        }];
+}
+
+- (void)isFriendForUserID:(NSString*)userID andCallback:(void(^)(BOOL isFriend, NSError* error))block {
+  NSString* path = @"/friendships/check.json";
+  NSDictionary* dictionary = [NSDictionary dictionaryWithObjectsAndKeys:
+                              userID, @"user_id_b", 
+                              [AccountManager sharedManager].currentUser.userID, @"user_id_a",
+                              nil];
+  [[STRestKitLoader sharedInstance] booleanWithPath:path
+                                               post:NO
+                                             params:dictionary
+                                        andCallback:^(BOOL boolean, NSError *error) {
+                                          block(boolean, error);
+                                        }];
+}
+
+- (void)addFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block {
+  NSString* path = @"/friendships/create.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                               post:YES
+                                             params:params 
+                                            mapping:[STSimpleUserDetail mapping]
+                                        andCallback:^(id result, NSError* error) {
+                                          block(result, error);
+                                        }];
+}
+
+- (void)removeFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block {
+  NSString* path = @"/friendships/remove.json";
+  NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
+  [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                               post:YES
+                                             params:params 
+                                            mapping:[STSimpleUserDetail mapping]
+                                        andCallback:^(id result, NSError* error) {
+                                          block(result, error);
+                                        }];
 }
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block {

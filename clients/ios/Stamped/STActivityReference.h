@@ -12,7 +12,7 @@
 @protocol STActivityReference <NSObject>
 
 @property (nonatomic, readonly, copy) NSArray* indices;
-@property (nonatomic, readonly, copy) id<STAction> action;
+@property (nonatomic, readonly, retain) id<STAction> action;
 @property (nonatomic, readonly, copy) NSDictionary* format;
 
 @end

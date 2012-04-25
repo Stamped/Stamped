@@ -14,6 +14,9 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STActionManager.h"
 #import "STStampedActions.h"
+#import "STTableViewController.h"
+#import "STStampsViewSource.h"
+#import "STStampedBySource.h"
 
 @interface STStampedByCell : STViewContainer
 
@@ -21,15 +24,22 @@
                imagesEnabled:(BOOL)imagesEnabled 
                        scope:(STStampedAPIScope)scope 
                    blacklist:(NSSet*)blacklist
+                    entityID:(NSString*)entityID
                  andDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, readonly, assign) BOOL hasImages;
+@property (nonatomic, readonly, retain) id<STStampedByGroup> group;
+@property (nonatomic, readonly, assign) STStampedAPIScope scope;
+@property (nonatomic, readonly, retain) NSString* entityID;
 
 @end
 
 @implementation STStampedByCell
 
 @synthesize hasImages = _hasImages;
+@synthesize group = group_;
+@synthesize scope = scope_;
+@synthesize entityID = entityID_;
 
 - (void)userImageClicked:(id<STStamp>)stamp {
   STActionContext* context = [STActionContext contextInView:self];
@@ -41,10 +51,14 @@
 - (id)initWithStampedByGroup:(id<STStampedByGroup>)group 
                imagesEnabled:(BOOL)imagesEnabled 
                        scope:(STStampedAPIScope)scope 
-                   blacklist:(NSSet*)blacklist
+                   blacklist:(NSSet*)blacklist 
+                    entityID:(NSString*)entityID
                  andDelegate:(id<STViewDelegate>)delegate {
   self = [super initWithDelegate:delegate andFrame:CGRectMake(0, 0, 290, 0)];
   if (self) {
+    entityID_ = [entityID retain];
+    group_ = [group retain];
+    scope_ = scope;
     CGFloat xOffset = 15;
     CGFloat yOffset = 10;
     NSString* formatString = nil;
@@ -76,6 +90,9 @@
                                                        0)];
     [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, CGRectGetMaxY(headerText.frame)+yOffset)];
     [self addSubview:headerText];
+    
+    UIView* viewAllButton = [Util tapViewWithFrame:self.frame target:self selector:@selector(viewAllClicked:) andMessage:nil];
+    [self addSubview:viewAllButton];
     if (group.stamps.count > 0 && imagesEnabled) {
       NSInteger limit = 7;
       UIView* images = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, 0, self.frame.size.width - (2 * xOffset), 40)] autorelease];
@@ -107,11 +124,40 @@
   return self;
 }
 
+- (void)dealloc
+{
+  [group_ release];
+  [entityID_ release];
+  [super dealloc];
+}
+
+- (void)viewAllClicked:(id)nothing {
+  STTableViewController* controller = [[[STTableViewController alloc] initWithHeaderHeight:0] autorelease];
+  [controller view];
+  STStampedBySource* source = [[STStampedBySource alloc] init];
+  STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
+  if (self.scope == STStampedAPIScopeFriends) {
+    slice.group = @"friends";
+  }
+  else if (self.scope == STStampedAPIScopeFriendsOfFriends) {
+    slice.group = @"fof";
+  }
+  else if (self.scope == STStampedAPIScopeEveryone) {
+    slice.group = @"all";
+  }
+  slice.offset = [NSNumber numberWithInteger:0];
+  slice.limit = [NSNumber numberWithInteger:1000];
+  slice.entityID = self.entityID;
+  source.slice = slice;
+  source.table = controller.tableView;
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
+}
+                                     
 @end
 
 @implementation STStampedByView
 
-- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist andDelegate:(id<STViewDelegate>)delegate
+- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate
 {
   self = [super initWithDelegate:delegate andFrame:CGRectMake(15, 0, 290, 0)];
   if (self) {
@@ -121,7 +167,8 @@
       STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.friends 
                                                                imagesEnabled:YES
                                                                        scope:STStampedAPIScopeFriends
-                                                                   blacklist:blacklist
+                                                                      blacklist:blacklist 
+                                                                       entityID:entityID
                                                                     andDelegate:self] autorelease];
       [array addObject:child];
       hasImages = hasImages | child.hasImages;
@@ -130,7 +177,8 @@
       STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.friendsOfFriends
                                                           imagesEnabled:!hasImages
                                                                   scope:STStampedAPIScopeFriendsOfFriends
-                                                              blacklist:blacklist
+                                                                      blacklist:blacklist
+                                                                       entityID:entityID
                                                                     andDelegate:self] autorelease];
       [array addObject:child];
       hasImages = hasImages | child.hasImages;
@@ -140,7 +188,8 @@
       STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.everyone
                                                           imagesEnabled:!hasImages
                                                                   scope:STStampedAPIScopeEveryone
-                                                              blacklist:blacklist
+                                                                      blacklist:blacklist
+                                                                       entityID:entityID
                                                             andDelegate:self] autorelease];
       [array addObject:child];
       hasImages = hasImages | child.hasImages;

@@ -15,6 +15,7 @@
 #import "WebViewController.h"
 #import "TOSViewController.h"
 #import "STRootMenuView.h"
+#import "ECSlidingViewController.h"
 
 @implementation SettingsViewController
 
@@ -44,6 +45,10 @@
 
 #pragma mark - View lifecycle
 
+- (void)backButtonClicked:(id)button {
+  [self.slidingViewController anchorTopViewTo:ECRight];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
   [scrollView_ addSubview:self.contentView];
@@ -56,8 +61,8 @@
   [backButton release];
   self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
                                                                             style:UIBarButtonItemStyleDone
-                                                                           target:[STRootMenuView sharedInstance]
-                                                                           action:@selector(toggle)] autorelease];
+                                                                           target:self
+                                                                           action:@selector(backButtonClicked:)] autorelease];
 }
 
 - (void)viewDidUnload {

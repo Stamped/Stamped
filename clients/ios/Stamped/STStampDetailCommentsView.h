@@ -11,7 +11,7 @@
 
 @interface STStampDetailCommentsView : STViewContainer
 
-- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate;
+- (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index andDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, readonly, retain) UITextField* addCommentView;
 

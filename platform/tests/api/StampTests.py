@@ -36,7 +36,7 @@ class StampedAPIStampsShow(StampedAPIStampTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
 # class StampedAPIStampsUpdate(StampedAPIStampTest):
 #     def test_show(self):
@@ -59,7 +59,8 @@ class StampedAPIStampsRestamp(StampedAPIStampTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result['blurb'], 'ASDF')
+        self.assertEqual(len(result['contents']), 2)
+        self.assertEqual(result['contents'][0]['blurb'], 'ASDF')
 
 
 class StampedAPIStampsUserDetails(StampedAPIStampTest):
@@ -116,7 +117,7 @@ class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
         self.assertEqual(
             result['credit'][0]['screen_name'], 
             self.stampData['credit']
@@ -334,12 +335,6 @@ class StampedAPILikesPass(StampedAPIStampLikesTest):
             self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
             self.assertEqual(result['num_likes'], i + 1)
 
-            if i + 1 >= 3:
-                self.assertTrue(result['like_threshold_hit'])
-            else:
-                if 'like_threshold_hit' in result:
-                    self.assertEqual(result['like_threshold_hit'], False)
-
             # Verify likes that exist
             path = "stamps/likes/show.json"
             data = { 
@@ -419,7 +414,6 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
                 "stamp_id": self.stamp['stamp_id']
             }
             result = self.handlePOST(path, data)
-
 
 
 if __name__ == '__main__':

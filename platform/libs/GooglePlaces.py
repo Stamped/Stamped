@@ -504,6 +504,36 @@ def parseCommandLine():
     
     return (options, args)
 
+
+from LRUCache import lru_cache
+@lru_cache(3)
+def test_lrucache(arbitrary_arg, copies):
+    suggested = []
+
+    def _add_suggested_section(title, entities):
+        suggested.append({ 'name' : title, 'entities' : entities })
+    import random
+    import copy
+
+    random.seed()
+
+    entity = PlaceEntity()
+    entity.title = 'Test'
+    entity.lat   = float(random.randint(0,100000))
+    entity.lng   = float(random.randint(0,100000))
+    entity.googleplaces_id          = 'theGooglePlacesId'
+    entity.googleplaces_reference   = 'theGooglePlacesReference'
+
+    entities = []
+    for x in xrange(copies):
+        entities.append(copy.copy(entity))
+
+    _add_suggested_section('testEntities', entities )
+
+    return suggested
+
+
+
 def main():
     """
         Usage: GooglePlaces.py [options] address|latLng

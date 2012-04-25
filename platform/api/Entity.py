@@ -600,6 +600,7 @@ def fast_id_dedupe(entities, seen=None):
     
     output = []
     for entity in entities:
+
         keys = [ k for k in entity.sources if k.endswith('_id') ]
         keep = True
         

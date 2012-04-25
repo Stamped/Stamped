@@ -37,14 +37,18 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
             del(document['_id'])
         
         entityData = document.pop('entity')
-        entity = buildEntity(entityData, mini=True)
+        entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
 
         stampData = document.pop('stamp', None)
         if stampData is not None:
             stampData.pop('entity')
-            stampData['entity'] = {'entity_id': entity.entity_id}
-            document['stamp'] = stampData
+            sparse = {
+                'stamp_id'  : stampData['stamp_id'],
+                'entity'    : { 'entity_id' : entity.entity_id },
+                'user'      : { 'user_id' : stampData['user']['user_id'] },
+            }
+            document['stamp'] = sparse
         
         favorite = self._obj(document, overflow=self._overflow)
         favorite.entity = entity

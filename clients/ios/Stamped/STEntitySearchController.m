@@ -17,6 +17,7 @@
 #import "STStampedAPI.h"
 #import "EntityDetailViewController.h"
 #import "STEntitySearchSection.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface STEntitySearchTableViewCell : UITableViewCell
 
@@ -48,7 +49,7 @@
 
 @end
 
-@interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
+@interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, CLLocationManagerDelegate>
 
 @property (nonatomic, readonly, retain) NSString* category;
 @property (nonatomic, readonly, retain) NSString* initialQuery;
@@ -76,17 +77,25 @@
     initialQuery_ = [query retain];
     STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
     suggested.category = category;
+    CLLocationManager* locationManager = [[CLLocationManager alloc] init];
+    locationManager.delegate = self; 
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+    locationManager.distanceFilter = kCLDistanceFilterNone; 
+    [locationManager startUpdatingLocation];
+    [locationManager stopUpdatingLocation];
+    CLLocation *location = [locationManager location];
+    if (location) {
+      float longitude=location.coordinate.longitude;
+      float latitude=location.coordinate.latitude;
+      suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+    }
     [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error) {
-      NSLog(@"here:%@,%@",error,results);
       if (results) {
-        for (id<STEntitySearchSection> section in results) {
-          NSLog(@"%@", section.name);
-          for (id<STEntitySearchResult> result in section.entities) {
-            NSLog(@"result:%@", result.title);
-          }
-        }
         self.suggestedSections = results;
         [self.tableView reloadData];
+      }
+      else {
+        [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
       }
     }];
   }
@@ -123,6 +132,7 @@
   }
   searchField.enablesReturnKeyAutomatically = NO;
   searchField.frame = [Util centeredAndBounded:searchField.frame.size inFrame:header.frame];
+  [Util reframeView:searchField withDeltas:CGRectMake(0, 2, 0, 0)];
   searchField.delegate = self;
   CGFloat xPadding = 5;
   CGFloat buttonWidth = 60;

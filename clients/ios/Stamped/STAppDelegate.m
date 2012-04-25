@@ -23,6 +23,11 @@
 #import "SearchResult.h"
 #import "STNavigationBar.h"
 #import "STDebug.h"
+#import "Util.h"
+#import "STRootScrollView.h"
+#import "ECSlidingViewController.h"
+#import "STLeftMenuViewController.h"
+#import "STRightMenuViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -79,12 +84,15 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   // Override point for customization after application launch.
   self.window.backgroundColor = [UIColor whiteColor];
   _navigationController = [[STRootViewController alloc] init];
-  [self.window setRootViewController:_navigationController];
-  UIView* testView = [[[STRootMenuView alloc] init] autorelease];
-  [self.window insertSubview:testView atIndex:0];
+  //[self.window setRootViewController:_navigationController];
+  ECSlidingViewController* slider = [ECSlidingViewController sharedInstance];
+  slider.topViewController = _navigationController;
+  [self.window setRootViewController:slider];
+  [self.window makeKeyAndVisible];
+  slider.underLeftViewController = [[[STLeftMenuViewController alloc] init] autorelease];
+  slider.underRightViewController = [[[STRightMenuViewController alloc] init] autorelease];
   [[AccountManager sharedManager] authenticate];
   [_navigationController pushViewController:[STInboxViewController sharedInstance] animated:NO];
-  [self.window makeKeyAndVisible];
   STLog(@"Finished Loading application");
   return YES;
 }
