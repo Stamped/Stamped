@@ -601,10 +601,6 @@ def fast_id_dedupe(entities, seen=None):
     output = []
     for entity in entities:
 
-        ### MIKE
-        logs.info("class name: %s" % entity.__class__.__name__)
-        logs.info("entity content: %s" % entity)
-
         keys = [ k for k in entity.sources if k.endswith('_id') ]
         keep = True
         

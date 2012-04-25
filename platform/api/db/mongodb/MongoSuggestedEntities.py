@@ -82,12 +82,6 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 
                 section  = suggested[i]
 
-                ### MIKE
-                import pprint
-                logs.info("section[name]: %s" % section['name'])
-                logs.info(pprint.pformat("section[entities]: %s" % section['entities']))
-
-
                 entities = Entity.fast_id_dedupe(section['entities'], seen)
                 entities = entities[:section_limit]
                 
