@@ -93,8 +93,8 @@
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
         
         <script src="{{ STATIC_URL }}js/script.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/underscore.min.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/backbone.min.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/underscore{% if IS_PROD %}.min{% endif %}.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/backbone{% if IS_PROD %}.min{% endif %}.js"></script>
         
         <script>
             var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

@@ -113,6 +113,8 @@ window.log = function f(){ log.history = log.history || []; log.history.push(arg
 })();
 
 if (typeof(StampedClient) == "undefined") {
+    
+    // TODO: use Class.extend here instead of functional object syntax.
     var StampedClient = function() {
         var stamped_api_url_base    = "https://dev.stamped.com/v0";
         var stamped_static_url_base = "http://static.stamped.com/assets";
@@ -208,115 +210,346 @@ if (typeof(StampedClient) == "undefined") {
          * Private API Classes / Models
          * ------------------------------------------------------------------ */
         
-        /*
+        var _getValue = function(object, prop) {
+            if (object) {
+                value = object[prop];
+                
+                if (value !== undefined) {
+                    return _.isFunction(value) ? value() : value;
+                }
+            }
+            
+            return null;
+        };
+        
+        var _typeCheck = function(value, type) {
+            var array = false;
+            
+            if (type == 'array') {
+                type  = 'object';
+                array = true;
+            }
+            
+            return (typeof(value) == type && (!array || typeof(value.length) != "undefined"));
+        }
+        
         var SchemaElement = Class.extend({
-            'init' : function(name, constraints) {
+            // optional String name, Object constraints
+            init : function(name, constraints) {
+                if (typeof(constraints) == "undefined" && typeof(name) != "string") {
+                    name = null;
+                    constraints = name;
+                }
+                
                 this.name = name;
                 this.constraints = constraints;
+                this.has_default = ('default' in constraints);
                 
                 if (!('type' in constraints)) {
                     throw "(element '" + name + "') type is required";
                 }
-                if (!('required' in constraints)) {
-                    constraints['required'] = true;
-                }
                 
-                if ('default' in constraints) {
-                    d = constraint['default'];
+                if (this.has_default) {
+                    d = constraints['default'];
+                    type = constraints['type'];
                     
-                    if (!(d instanceof constraints['type'])) {
-                        throw "(element '" + name + "') invalid default '" + d + "' (not of required type '" + constraints['type'] + "')";
+                    if (!_typeCheck(d, type)) {
+                        throw "(element '" + name + "') invalid default '" + d + "' (not of required type '" + type + "')";
                     }
                 }
             }, 
             
             validate : function(value) {
                 if (!_is_defined(value)) {
-                    if (constraints.required) {
-                        throw "missing required element '" + name + "'";
+                    if ('required' in this.constraints && !!_getValue(this.constraints, 'required')) {
+                        throw "missing required element '" + this.name + "'";
                     }
                     
-                    if ("default" in constraints) {
-                        return constraints["default"];
+                    if ("default" in this.constraints) {
+                        return _getValue(this.constraints, "default");
                     } else {
-                        return constraints['type']();
+                        return undefined;
                     }
                 } else {
-                    if (!value instanceof constraints['type']) {
-                        throw "(element '" + name + "') type mismatch '" + value + "' not of type '" + constraints['type'] + "'";
+                    var type = this.constraints['type'];
+                    
+                    if (!_typeCheck(value, type)) {
+                        throw "(element '" + name + "') type mismatch '" + typeof(value) + "' not of type '" + type + "'";
                     }
                     
                     return value;
                 }
             }
-        };
+        });
         
-        var Schema = SchemaElement.extend({
-            'init' : function(name) {
+        var SchemaList = SchemaElement.extend({
+            // optional String name, optional Object constraints, subelement schema
+            init : function() {
+                var varargs = Array.prototype.slice.call(arguments);
                 
-            var varargs  = Array.prototype.slice.call(arguments);
-            var elements = []
-            var schema   = {}
-            
-            for (element in arguments) {
-                if (!(element instanceof SchemaElement)) {
-                    throw "all arguments to Schema must be SchemaElements";
+                var constraints = {
+                    'type' : "array", 
+                };
+                
+                var length = varargs.length;
+                var index  = 0;
+                var name   = null;
+                var that   = this;
+                
+                if (length > index && typeof(varargs[index]) == "string") {
+                    name   = varargs[index];
+                    index += 1;
                 }
                 
-                elements.push(element);
-                schema[element.name] = element;
-            }
-            
-            this.validate = function(value) {
-                if (!(value instanceof Object)) {
-                    throw "invalid schema object";
+                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement)) {
+                    $.each(varargs[index], function(k, v) {
+                        constraints[k] = v;
+                    });
+                    
+                    index += 1;
                 }
                 
-                for (element in elements) {
-                    element.validate(value[element.name] || null);
-                }
+                this._super(name, constraints);
                 
-                for (k in value) {
-                    if (!(k in schema)) {
-                        throw "unrecognized attribute '" + k + "'";
+                if (index != length - 1) {
+                    throw "SchemaList.init must be given exactly one subelement type: " + index + " vs " + length;
+                } else {
+                    this.schema = varargs[index];
+                    
+                    if (!(this.schema instanceof SchemaElement)) {
+                        try {
+                            this.schema = varargs[index].schema();
+                        } catch(e) {
+                            this.schema = null;
+                        }
+                        
+                        if (!(this.schema instanceof SchemaElement)) {
+                            throw "invalid subelement type for SchemaList";
+                        }
                     }
                 }
-            };
+            }, 
+            
+            validate : function(value) {
+                this._super(value);
+                var that = this;
+                
+                $.each(value, function(index, element) {
+                    that.schema.validate(element);
+                });
+            }
         });
         
-        var Schema = Backbone.Model.extend({
-            get_schema : function() {
-                return Schema(
-                    SchemaElement('user_id',            { 'type' : String, 'required' : true }), 
-                    SchemaElement('name',               { 'type' : String, 'required' : true }), 
-                    SchemaElement('screen_name',        { 'type' : String, 'required' : true }), 
-                    SchemaElement('color_primary',      { 'type' : String, 'default'  : "004AB2" }), 
-                    SchemaElement('color_secondary',    { 'type' : String, }), 
-                    SchemaElement('bio',                { 'type' : String, }), 
-                    SchemaElement('website',            { 'type' : String, }), 
-                    SchemaElement('location',           { 'type' : String, }), 
-                    SchemaElement('privacy',            { 'type' : Boolean, 'required' : true }), 
-                    SchemaElement('image_url',          { 'type' : String, 'default'  : _get_static_asset_url('/img/default.jpg') }), 
-                    SchemaElement('identifier',         { 'type' : String, }), 
-                    SchemaElement('num_stamps',         { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_stamps_left',    { 'type' : Number, 'default'  : 100 }), 
-                    SchemaElement('num_friends',        { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_followers',      { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_faves',          { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_credits',        { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_credits_given',  { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_likes',          { 'type' : Number, 'default'  : 0 }), 
-                    SchemaElement('num_likes_given',    { 'type' : Number, 'default'  : 0 }), 
+        var Schema = SchemaElement.extend({
+            // optional String name, optional Object constraints, optional varargs elements
+            init : function() {
+                var varargs = Array.prototype.slice.call(arguments);
+                
+                var constraints = {
+                    'type' : "object", 
+                    'allow_overflow' : true, 
+                };
+                
+                var length  = varargs.length;
+                var index   = 0;
+                var name    = null;
+                var primary = null;
+                var that    = this;
+                
+                if (length > index && typeof(varargs[index]) == "string") {
+                    name   = varargs[index];
+                    index += 1;
+                }
+                
+                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement)) {
+                    $.each(varargs[index], function(k, v) {
+                        constraints[k] = v;
+                    });
+                    
+                    index += 1;
+                }
+                
+                this._super(name, constraints);
+                
+                this.elements = [];
+                this.schema   = {};
+                this.defaults = {};
+                
+                // if there are elements
+                if (index < length) {
+                    $.each(varargs.slice(index), function(index, element) {
+                        if (!(element instanceof SchemaElement)) {
+                            throw "all arguments to Schema must be SchemaElements";
+                        }
+                        
+                        if (_getValue(element.constraints, 'primary_id')) {
+                            if (primary != null) {
+                                throw "only one key may be primary; primary_id set on '" + primary + "' and '" + element.name + "'";
+                            }
+                            
+                            primary = element.name;
+                        }
+                        
+                        that.elements.push(element);
+                        that.schema[element.name] = element;
+                    });
+                    
+                    $.each(this.elements, function(index, element) {
+                        if (element.has_default) {
+                            that.defaults[element.name] = element.constraints["default"];
+                        }
+                    });
+                    
+                    if (primary != null) {
+                        this.idAttribute = primary;
+                    }
+                }
+            }, 
+            
+            validate : function(value) {
+                //$("data").html("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + d + "</code></pre>");
+                this._super(value);
+                var that = this;
+                
+                $.each(this.elements, function(index, element) {
+                    element.validate(_getValue(value, element.name));
+                });
+                
+                if (!_getValue(this.constraints, 'allow_overflow')) {
+                    $.each(value, function(key, _) {
+                        if (!(key in that.schema)) {
+                            throw "unrecognized attribute '" + key + "'";
+                        }
+                    });
+                }
+            }
+        });
+        
+        var AStampedModel = Backbone.Model.extend({
+            validate    : function(attributes) {
+                try {
+                    this.schema().validate(attributes);
+                } catch(e) {
+                    console.debug(e);
+                    throw e;
+                    
+                    return "" + e;
+                }
+            }, 
+            
+            schema      : function() {
+                if (this.__schema === undefined) {
+                    this.__schema = this._get_schema();
+                }
+                
+                if (this.__schema === null || this.__schema === undefined) {
+                    throw "stamped model schema error: undefined schema";
+                }
+                
+                if (!(this.__schema instanceof Schema)) {
+                    throw "stamped model schema error: schema is of wrong type '" + type(this.__schema) + "'";
+                }
+                
+                return this.__schema;
+            }, 
+            
+            defaults    : function() {
+                return _getValue(this.schema(), 'defaults');
+            }, 
+            
+            idAttribute : function() {
+                return _getValue(this.schema(), 'idAttribute');
+            }, 
+            
+            _get_schema : function() { throw "must override _get_schema"; }
+        });
+        
+        this.User = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('user_id',            { 'type' : "string", 'required' : true, 'primary_id' : true }), 
+                    new SchemaElement('name',               { 'type' : "string", 'required' : true }), 
+                    new SchemaElement('screen_name',        { 'type' : "string", 'required' : true }), 
+                    new SchemaElement('color_primary',      { 'type' : "string", 'default'  : "004AB2" }), 
+                    new SchemaElement('color_secondary',    { 'type' : "string", }), 
+                    new SchemaElement('bio',                { 'type' : "string", }), 
+                    new SchemaElement('website',            { 'type' : "string", }), 
+                    new SchemaElement('location',           { 'type' : "string", }), 
+                    new SchemaElement('privacy',            { 'type' : "boolean", 'required' : true }), 
+                    new SchemaElement('image_url',          { 'type' : "string", 'default'  : _get_static_asset_url('/img/default.jpg') }), 
+                    new SchemaElement('identifier',         { 'type' : "string", }), 
+                    new SchemaElement('num_stamps',         { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_stamps_left',    { 'type' : "number", 'default'  : 100 }), 
+                    new SchemaElement('num_friends',        { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_followers',      { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_faves',          { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_credits',        { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_credits_given',  { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_likes',          { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaElement('num_likes_given',    { 'type' : "number", 'default'  : 0 }), 
+                    new SchemaList   ('distribution', new Schema(
+                        new SchemaElement('category',       { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('name',           { 'type' : "string" }), 
+                        new SchemaElement('icon',           { 'type' : "string" }), 
+                        new SchemaElement('count',          { 'type' : "number", 'default'  : 0 })
+                    ))
                 );
             }
-            
-            defaults : 
         });
         
-        var User = Backbone.Model.extend({
-            initialize : function() { }, 
+        var Action = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('type',               { 'type' : "string", 'required' : true }), 
+                    new SchemaElement('name',               { 'type' : "string", 'required' : true }), 
+                    new SchemaList('sources', { 'required' : true }, new Schema(
+                        new SchemaElement('name',           { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('source',         { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('source_id',      { 'type' : "string", }), 
+                        new SchemaElement('source_data',    { 'type' : "string", }), 
+                        new SchemaElement('endpoint',       { 'type' : "string", }), 
+                        new SchemaElement('link',           { 'type' : "string", }), 
+                        new SchemaElement('icon',           { 'type' : "string", }), 
+                        new SchemaElement('completion_endpoint',    { 'type' : "string", }), 
+                        new SchemaElement('completion_data',{ 'type' : "string", })
+                    ))
+                );
+            }
         });
-        */
+        
+        var Image = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('image',              { 'type' : "string" }), 
+                    new SchemaElement('width',              { 'type' : "number" }), 
+                    new SchemaElement('height',             { 'type' : "number" }), 
+                    new SchemaElement('source',             { 'type' : "string" })
+                );
+            }
+        });
+        
+        /*
+        this.Stamp = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('stamp_id',           { 'type' : "string", 'required' : true, 'primary_id' : true }), 
+                    //TODO: new Entity('entity', 
+                    
+                    new SchemaList   ('contents', new Schema(
+                        new SchemaElement('blurb',              { 'type' : "string" }), 
+                        new SchemaElement('blurb_references', new SchemaList(new Schema(
+                            new SchemaList('indices', new SchemaList(new SchemaElement({ 'type' : 'number' }))), 
+                            
+                            // TODO: how to create an Action here and utilize its schema?
+                            new Action('action').schema()
+                        ))), 
+                        new SchemaElement('images', new SchemaList(new Image().schema())), 
+                        new SchemaElement('created',        { 'type' : "string" }), 
+                        new SchemaElement('modified',       { 'type' : "string" })
+                    ))
+                );
+            }
+        });*/
     };
 }
 
