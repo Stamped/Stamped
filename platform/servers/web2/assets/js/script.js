@@ -234,7 +234,13 @@ if (typeof(StampedClient) == "undefined") {
         }
         
         var SchemaElement = Class.extend({
+            // optional String name, Object constraints
             init : function(name, constraints) {
+                if (typeof(constraints) == "undefined" && typeof(name) != "string") {
+                    name = null;
+                    constraints = name;
+                }
+                
                 this.name = name;
                 this.constraints = constraints;
                 this.has_default = ('default' in constraints);
@@ -276,77 +282,6 @@ if (typeof(StampedClient) == "undefined") {
             }
         });
         
-        var Schema = SchemaElement.extend({
-            // optional String name, optional Object constraints, optional varargs elements
-            init : function() {
-                var varargs = Array.prototype.slice.call(arguments);
-                
-                var constraints = {
-                    'type' : "object", 
-                };
-                
-                var length = varargs.length;
-                var index  = 0;
-                var name   = null;
-                var that   = this;
-                
-                if (length > index && typeof(varargs[index]) == "string") {
-                    name   = varargs[index];
-                    index += 1;
-                }
-                
-                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement || varargs[index] instanceof Backbone.Model)) {
-                    $.each(varargs[index], function(k, v) {
-                        constraints[k] = v;
-                    });
-                    
-                    index += 1;
-                }
-                
-                this._super(name, constraints);
-                
-                this.elements = [];
-                this.schema   = {};
-                this.defaults = {};
-                
-                // if there are elements
-                if (index < length) {
-                    $.each(varargs.slice(index), function(index, element) {
-                        if (!(element instanceof SchemaElement)) {
-                            throw "all arguments to Schema must be SchemaElements";
-                        }
-                        
-                        that.elements.push(element);
-                        that.schema[element.name] = element;
-                    });
-                    
-                    $.each(this.elements, function(index, element) {
-                        if (element.has_default) {
-                            that.defaults[element.name] = element.constraints["default"];
-                        }
-                    });
-                }
-            }, 
-            
-            validate : function(value) {
-                //$("data").html("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + d + "</code></pre>");
-                this._super(value);
-                var that = this;
-                
-                $.each(this.elements, function(index, element) {
-                    element.validate(_getValue(value, element.name));
-                });
-                
-                if (!_getValue(this.constraints, 'allow_overflow')) {
-                    $.each(value, function(key, _) {
-                        if (!(key in that.schema)) {
-                            throw "unrecognized attribute '" + key + "'";
-                        }
-                    });
-                }
-            }
-        });
-        
         var SchemaList = SchemaElement.extend({
             // optional String name, optional Object constraints, subelement schema
             init : function() {
@@ -366,7 +301,7 @@ if (typeof(StampedClient) == "undefined") {
                     index += 1;
                 }
                 
-                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement || varargs[index] instanceof Backbone.Model)) {
+                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement)) {
                     $.each(varargs[index], function(k, v) {
                         constraints[k] = v;
                     });
@@ -404,7 +339,92 @@ if (typeof(StampedClient) == "undefined") {
                 });
             }
         });
-
+        
+        var Schema = SchemaElement.extend({
+            // optional String name, optional Object constraints, optional varargs elements
+            init : function() {
+                var varargs = Array.prototype.slice.call(arguments);
+                
+                var constraints = {
+                    'type' : "object", 
+                    'allow_overflow' : true, 
+                };
+                
+                var length  = varargs.length;
+                var index   = 0;
+                var name    = null;
+                var primary = null;
+                var that    = this;
+                
+                if (length > index && typeof(varargs[index]) == "string") {
+                    name   = varargs[index];
+                    index += 1;
+                }
+                
+                if (length > index && typeof(varargs[index]) == "object" && !(varargs[index] instanceof SchemaElement)) {
+                    $.each(varargs[index], function(k, v) {
+                        constraints[k] = v;
+                    });
+                    
+                    index += 1;
+                }
+                
+                this._super(name, constraints);
+                
+                this.elements = [];
+                this.schema   = {};
+                this.defaults = {};
+                
+                // if there are elements
+                if (index < length) {
+                    $.each(varargs.slice(index), function(index, element) {
+                        if (!(element instanceof SchemaElement)) {
+                            throw "all arguments to Schema must be SchemaElements";
+                        }
+                        
+                        if (_getValue(element.constraints, 'primary_id')) {
+                            if (primary != null) {
+                                throw "only one key may be primary; primary_id set on '" + primary + "' and '" + element.name + "'";
+                            }
+                            
+                            primary = element.name;
+                        }
+                        
+                        that.elements.push(element);
+                        that.schema[element.name] = element;
+                    });
+                    
+                    $.each(this.elements, function(index, element) {
+                        if (element.has_default) {
+                            that.defaults[element.name] = element.constraints["default"];
+                        }
+                    });
+                    
+                    if (primary != null) {
+                        this.idAttribute = primary;
+                    }
+                }
+            }, 
+            
+            validate : function(value) {
+                //$("data").html("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + d + "</code></pre>");
+                this._super(value);
+                var that = this;
+                
+                $.each(this.elements, function(index, element) {
+                    element.validate(_getValue(value, element.name));
+                });
+                
+                if (!_getValue(this.constraints, 'allow_overflow')) {
+                    $.each(value, function(key, _) {
+                        if (!(key in that.schema)) {
+                            throw "unrecognized attribute '" + key + "'";
+                        }
+                    });
+                }
+            }
+        });
+        
         var AStampedModel = Backbone.Model.extend({
             validate    : function(attributes) {
                 try {
@@ -434,33 +454,20 @@ if (typeof(StampedClient) == "undefined") {
             }, 
             
             defaults    : function() {
-                var schema = this.schema();
-                
                 return _getValue(this.schema(), 'defaults');
+            }, 
+            
+            idAttribute : function() {
+                return _getValue(this.schema(), 'idAttribute');
             }, 
             
             _get_schema : function() { throw "must override _get_schema"; }
         });
         
-        var UserCategoryDistribution = AStampedModel.extend({
-            _get_schema : function() {
-                return new Schema({ 'allow_overflow' : true }, 
-                    new SchemaElement('category',           { 'type' : "string", 'required' : true }), 
-                    new SchemaElement('name',               { 'type' : "string" }), 
-                    new SchemaElement('icon',               { 'type' : "string" }), 
-                    new SchemaElement('count',              { 'type' : "number", 'default'  : 0 })
-                );
-            }
-        });
-        
         this.User = AStampedModel.extend({
-            idAttribute : 'user_id', 
-            
             _get_schema : function() {
-                log("_get_schema");
-                
-                return new Schema({ 'allow_overflow' : true }, 
-                    new SchemaElement('user_id',            { 'type' : "string", 'required' : true }), 
+                return new Schema(
+                    new SchemaElement('user_id',            { 'type' : "string", 'required' : true, 'primary_id' : true }), 
                     new SchemaElement('name',               { 'type' : "string", 'required' : true }), 
                     new SchemaElement('screen_name',        { 'type' : "string", 'required' : true }), 
                     new SchemaElement('color_primary',      { 'type' : "string", 'default'  : "004AB2" }), 
@@ -480,10 +487,69 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('num_credits_given',  { 'type' : "number", 'default'  : 0 }), 
                     new SchemaElement('num_likes',          { 'type' : "number", 'default'  : 0 }), 
                     new SchemaElement('num_likes_given',    { 'type' : "number", 'default'  : 0 }), 
-                    new SchemaList('distribution', new UserCategoryDistribution())
+                    new SchemaList   ('distribution', new Schema(
+                        new SchemaElement('category',       { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('name',           { 'type' : "string" }), 
+                        new SchemaElement('icon',           { 'type' : "string" }), 
+                        new SchemaElement('count',          { 'type' : "number", 'default'  : 0 })
+                    ))
                 );
             }
         });
+        
+        var Action = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('type',               { 'type' : "string", 'required' : true }), 
+                    new SchemaElement('name',               { 'type' : "string", 'required' : true }), 
+                    new SchemaList('sources', { 'required' : true }, new Schema(
+                        new SchemaElement('name',           { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('source',         { 'type' : "string", 'required' : true }), 
+                        new SchemaElement('source_id',      { 'type' : "string", }), 
+                        new SchemaElement('source_data',    { 'type' : "string", }), 
+                        new SchemaElement('endpoint',       { 'type' : "string", }), 
+                        new SchemaElement('link',           { 'type' : "string", }), 
+                        new SchemaElement('icon',           { 'type' : "string", }), 
+                        new SchemaElement('completion_endpoint',    { 'type' : "string", }), 
+                        new SchemaElement('completion_data',{ 'type' : "string", })
+                    ))
+                );
+            }
+        });
+        
+        var Image = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('image',              { 'type' : "string" }), 
+                    new SchemaElement('width',              { 'type' : "number" }), 
+                    new SchemaElement('height',             { 'type' : "number" }), 
+                    new SchemaElement('source',             { 'type' : "string" })
+                );
+            }
+        });
+        
+        /*
+        this.Stamp = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(
+                    new SchemaElement('stamp_id',           { 'type' : "string", 'required' : true, 'primary_id' : true }), 
+                    //TODO: new Entity('entity', 
+                    
+                    new SchemaList   ('contents', new Schema(
+                        new SchemaElement('blurb',              { 'type' : "string" }), 
+                        new SchemaElement('blurb_references', new SchemaList(new Schema(
+                            new SchemaList('indices', new SchemaList(new SchemaElement({ 'type' : 'number' }))), 
+                            
+                            // TODO: how to create an Action here and utilize its schema?
+                            new Action('action').schema()
+                        ))), 
+                        new SchemaElement('images', new SchemaList(new Image().schema())), 
+                        new SchemaElement('created',        { 'type' : "string" }), 
+                        new SchemaElement('modified',       { 'type' : "string" })
+                    ))
+                );
+            }
+        });*/
     };
 }
 
