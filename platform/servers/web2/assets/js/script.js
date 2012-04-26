@@ -154,7 +154,7 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_user_by_screen_name = function(screen_name) {
-            return _get("/users/show.json", { 'screen_name' : screen_name });
+            return _get("/users/show.json", { 'screen_name' : screen_name })
                 .pipe(function (data) {
                     return User(data);
                 });
@@ -163,14 +163,14 @@ if (typeof(StampedClient) == "undefined") {
         /* STAMPS */
         
         this.get_user_stamps_by_id = function(user_id) {
-            return _get("/collections/user.json", { 'user_id' : user_id });
+            return _get("/collections/user.json", { 'user_id' : user_id })
                 .pipe(function (data) {
                     return Stamps(data);
                 });
         };
         
         this.get_user_stamps_by_screen_name = function(screen_name) {
-            return _get("/collections/user.json", { 'screen_name' : screen_name });
+            return _get("/collections/user.json", { 'screen_name' : screen_name })
                 .pipe(function (data) {
                     return Stamps(data);
                 });
