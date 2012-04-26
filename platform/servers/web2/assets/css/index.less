@@ -8,46 +8,35 @@
 
 @import "elements.less";
 
-.public .wrap {
-    position: relative;
-}
-
-.public .brand {
-    margin: -180px auto 0;
-    float: none;
-    position: relative;
-    bottom: -197px;
-}
-
-.public .pitch {
+.pitch {
     height: 35px;
     background: url(/assets/img/public-home/text-put-your-stamp-on-the-world.png) left top no-repeat;
     width: 611px;
-    margin: 174px auto 14px;
+    margin: 0 auto 14px;
 }
 
-.public .intro {
+.intro {
     font-size: 16px;
     text-align: center;
     line-height: 29px;
 }
 
-.public .intro span {
+.intro span {
     display: block;
 }
 
-.public .intro a {
+.intro a {
     font-weight: bold;
 }
 
-.public .itunes {
+.itunes {
     width: 247px;
     height: 84px;
     background: url(/assets/img/public-home/free-download-sprite.png) left top no-repeat;
     margin: 23px auto;
 }
 
-.public .itunes:hover {
+.itunes:hover {
     background-position: left bottom;
 }
 
@@ -148,111 +137,9 @@
     background-position: left bottom;
 }
 
-.public .card {
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 0 none;
-    margin-top: 45px;
-    padding: 0;
-    width: 940px;
-}
-
-.card {
-    background: -moz-linear-gradient(left center , #33CCFF, #991111) repeat scroll 0 0 transparent;
-    border-bottom: 2px solid #FFFFFF;
-    border-top: 2px solid #FFFFFF;
-    margin: 111px auto 0;
-    width: 580px;
-    
-    .box-shadow(0, 5px, 10px, rgba(0, 0, 0, 0.15));
-}
-
-.public .card {
-    background: none;
-    padding: 0;
-    background-color: #fff;
-    width: 940px;
-    margin-top: 45px;
-    border: 0;
-}
-
-.public .card .inner {
-    clear: both;
-    padding: 0 27px 25px;
-}
-
-.public .card .top-wave {
-    background: url(/assets/img/main-topcap.png) left top no-repeat;
-    height: 8px;
-    margin: 0;
-}
-
-.public .card .bottom-wave {
-    background: url(/assets/img/main-botcap.png) left top no-repeat;
-    height: 8px;
-    margin: 0;
-}
-
-.public footer {
-    margin: 30px 0;
-    padding-bottom: 30px;
-}
-
-.public footer a {
-    margin-left: 0;
-    margin-right: 15px;
-}
-
-.public footer .copyright, footer .copyright {
-    float: right;
-}
-
-.public footer .copyright a, footer .copyright a {
-    color: #999;
-    font-weight: normal;
-    margin-right: 10px;
-}
-
-.wrap {
-    position: relative;
-}
-
-.smalldisplay .iphone {
-    margin-top: -60px;
-    position: relative;
-}
-
-.talldisplay .iphone {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-left: -470px;
-    margin-top: -405px;
-}
-
-.brand {
-    background: url(/assets/img/stamped-logo.png) left top no-repeat;
-    width: 180px;
-    height: 180px;
-    margin-top: 80px;
-    margin-bottom: 40px;
-    float: left;
-}
-
-.pitch {
-    background: url(/assets/img/building-message.png) left top no-repeat;
-    width: 544px;
-    height: 96px;
-    clear: both;
-    margin-bottom: 50px;
-}
-
 .thanks {
     margin-top: 90px;
     margin-left: 5px;
-}
-
-footer {
-    position: relative;
 }
 
 #press {
@@ -320,5 +207,25 @@ footer {
 
 #press a:hover {
     background-position: left bottom;
+}
+
+.stutter-bar {
+    position: fixed;
+    top: 0;
+    display: none;
+    text-align: center;
+    padding: 15px 0;
+    width: 100%;
+    z-index: 5000;
+    background-color: #fff;
+    
+    .box-shadow(0, 0, 10px, rgba(0,0,0,0.35));
+}
+
+.stutter-bar .success {
+    font-size: 16px;
+    font-weight: bold;
+    background: url(/assets/img/notifications_check.png) left 1px no-repeat;
+    padding-left: 23px;
 }
 

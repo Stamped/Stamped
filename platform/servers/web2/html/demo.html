@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ block.super }}
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/demo.css">
+{% endblock head %}
+
+{% block main %}
+    {{ block.super }}
+    
+    <div id="data"></div>
+{% endblock main %}
+
+{% block scripts %}
+    {{ block.super }}
+     
+    <script src="{{ STATIC_URL }}js/demo.js"></script>
+{% endblock scripts %}
+

@@ -1,4 +1,4 @@
-/* style.less - Main Stamped.com Stylesheet
+/* styles.less - Main Stamped.com Stylesheet
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -41,33 +41,15 @@ a:hover {
 }
 
 .wrap {
-    width: 940px;
-    margin: 0 auto;
     background: url(/assets/img/noisegradient.png) center top no-repeat;
-    height: 100%;
+    margin: 0 auto;
     position: relative;
+    width: 940px;
+    height: 100%;
 }
 
 .user {
     font-weight: bold;
-}
-
-.available-now {
-    background: url(/assets/img/available-now.png) left top no-repeat;
-    width: 161px;
-    height: 49px;
-}
-
-footer {
-    font-size: 12px;
-    color: #999;
-}
-
-footer a {
-    color: #7a9ccc;
-    margin-left: 15px;
-    font-weight: bold;
-    display: inline-block;
 }
 
 .italics {
@@ -81,10 +63,10 @@ footer a {
     top: 0;
     left: 0;
     background: #000;
-    filter: alpha(opacity=65);
     background: rgba(0,0,0,0.65);
     z-index: 100;
     display: none;
+    filter: alpha(opacity=65);
 }
 
 .lightbox {
@@ -113,23 +95,79 @@ footer a {
     background-position: left bottom;
 }
 
-.stutter-bar {
-    position: fixed;
-    top: 0;
-    display: none;
-    text-align: center;
-    padding: 15px 0;
-    width: 100%;
-    z-index: 5000;
-    background-color: #fff;
-    
-    .box-shadow(0, 0, 10px, rgba(0,0,0,0.35));
+.brand {
+    background: url(/assets/img/stamped-logo.png) left top no-repeat;
+    width: 180px;
+    height: 180px;
+    margin: -180px auto 0;
+    float: none;
+    position: relative;
+    bottom: -197px;
 }
 
-.stutter-bar .success {
-    font-size: 16px;
+.card {
+    margin: 45px auto 0;
+    padding: 0;
+    width: 940px;
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 0 none;
+    
+    .box-shadow(0, 5px, 10px, rgba(0, 0, 0, 0.15));
+}
+
+.card .inner {
+    clear: both;
+    padding: 175px 27px .3em;
+}
+
+.card .top-wave {
+    background: url(/assets/img/main-topcap.png) left top no-repeat;
+    height: 8px;
+    margin: 0;
+}
+
+.card .bottom-wave {
+    background: url(/assets/img/main-botcap.png) left top no-repeat;
+    height: 8px;
+    margin: 0;
+}
+
+footer {
+    margin: 30px 0;
+    padding-bottom: 30px;
+    position: relative;
+    font-size: 12px;
+    color: #999;
+}
+
+footer a {
+    color: #7a9ccc;
+    margin-left: 0px;
+    margin-right: 15px;
     font-weight: bold;
-    background: url(/assets/img/notifications_check.png) left 1px no-repeat;
-    padding-left: 23px;
+    display: inline-block;
+}
+
+footer .copyright, footer .copyright {
+    float: right;
+}
+
+footer .copyright a, footer .copyright a {
+    color: #999;
+    font-weight: normal;
+    margin-right: 10px;
+}
+
+.smalldisplay .iphone {
+    margin-top: -60px;
+    position: relative;
+}
+
+.talldisplay .iphone {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -470px;
+    margin-top: -405px;
 }
 

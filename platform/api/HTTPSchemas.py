@@ -1763,7 +1763,7 @@ class HTTPStampId(Schema):
         # self.offset             = SchemaElement(int)
         # self.coordinates        = SchemaElement(basestring) # "lat,lng"
         # self.category           = SchemaElement(basestring)
-        
+
 
 class HTTPGenericSlice(Schema):
     def setSchema(self):
