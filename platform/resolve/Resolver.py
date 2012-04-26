@@ -1588,7 +1588,7 @@ class Resolver(object):
             
             print( "%s: %s" % (source, item))
 
-def demo(generic_source, default_title):
+def demo(generic_source, default_title, subcategory=None):
     """
     Generic command-line demo function
 
@@ -1616,7 +1616,6 @@ def demo(generic_source, default_title):
     import Schemas
 
     title = default_title
-    subcategory = None
     count = 1
 
     resolver = Resolver(verbose=True)
@@ -1638,7 +1637,6 @@ def demo(generic_source, default_title):
     db = api._entityDB
     query = {'titlel':title.lower()}
     if subcategory is not None:
-        raise NotImplementedError
         query['subcategory'] = subcategory
     else:
         query = { 'titlel' : title.lower() }
@@ -1649,12 +1647,12 @@ def demo(generic_source, default_title):
         return
     result = cursor[index]
     entity = db._convertFromMongo(result)
-    query = entity_source.proxyFromEntity(entity)
-    results = resolver.resolve(query, generic_source.matchSource(query), count=count)
+    proxy = entity_source.proxyFromEntity(entity)
+    results = resolver.resolve(proxy, generic_source.matchSource(proxy), count=count)
     print '%s Results' % len(results)
     pprint(results)
     print("\n\nFinal result:\n")
-    print(query)
+    print(proxy)
     if len(results) > 0:
         best = results[0]
         pprint(best[0])
@@ -1666,7 +1664,7 @@ def demo(generic_source, default_title):
             print('Inversion results:\n%s' % pformat(new_results) )
             if len(new_results) > 0 and new_results[0][0]['resolved']:
                 best = new_results[0][1]
-                if best.key == query.key:
+                if best.key == proxy.key:
                     print("Inversion succesful")
                 else:
                     print("Inverted to different entity! (dup or false positive)")
@@ -1677,7 +1675,8 @@ def demo(generic_source, default_title):
             # blank = entityProxy.buildEntity()
 
             # pprint(blank.value)
-
+            return results[0]
+        print('\nFound results, but none are resolved')
     else:
         print("No results")
-
+    return None

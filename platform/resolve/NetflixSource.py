@@ -18,7 +18,9 @@ try:
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
+    from pprint                     import pformat
     from Resolver                   import *
+    from ResolverObject             import *
 except:
     report()
     raise
@@ -40,7 +42,7 @@ class _NetflixObject(object):
 
     def __init__(self, titleObj):
         self.__key = str(titleObj['id'])
-        self.__titleObj = titleObj
+        self._titleObj = titleObj
 
     @property
     def key(selfself):
@@ -56,7 +58,7 @@ class _NetflixObject(object):
 
     @lazyProperty
     def name(self):
-        return self.__titleObj['title']
+        return self._titleObj['title']['regular']
 
 
 #    @abstractproperty
@@ -67,28 +69,28 @@ class _NetflixObject(object):
 #        return pformat(self.info)
 
     def __repr__(self):
-        return "<%s %s %s>" % (self.source, self.type, self.name)
+#        return "<%s %s %s>" % (self.source, self.type, self.name)
+        return pformat( self._titleObj )
 
-
-class _NetflixMovie(_NetflixObject, ResolverMediaItem):
+class NetflixMovie(_NetflixObject, ResolverMediaItem):
     """
     Netflix movie proxy
     """
     def __init__(self, titleObj):
         _NetflixObject.__init__(self, titleObj)
-        ResolveMediaItem.__init__(self, types=['movie'])
+        ResolverMediaItem.__init__(self, types=['movie'])
 
     @lazyProperty
     def popularity(self):
         try:
-            return self.__titleObj['average_rating']
+            return self._titleObj['average_rating']
         except KeyError:
             return None
 
     @lazyProperty
     def cast(self):
         try:
-            cast = filter(lambda link : 'cast' in link['href'], self.__titleObj['link'])[0]['people']['link']
+            cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
             return [
                 {
                     'name':         entry['title'],
@@ -97,18 +99,19 @@ class _NetflixMovie(_NetflixObject, ResolverMediaItem):
                     for entry in cast
             ]
         except Exception:
-            return None
+            logs.info("\nError retrieving cast from NetflixMovie")
+            return []
 
     @lazyProperty
     def release_date(self):
         try:
-            string = self.__titleObj['release_year']
+            string = self._titleObj['release_year']
         except KeyError:
             return None
 
 
 
-class _NetflixTVShow(_NetflixObject, ResolverMediaCollection):
+class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
     """
     Netflix tv show proxy
     """
@@ -174,7 +177,11 @@ class NetflixSource(GenericSource):
     def __genericSourceGen(self, query, filter):
         def gen():
             try:
-                results = self.__netflix.title_search(query.name)['catalog_titles']
+                results = self.__netflix.title_search(query.name)
+                if 'catalog_titles' not in results:
+                    return
+
+                results = results['catalog_titles']
                 for title in results['catalog_title']:
                     if (filter(title)):
                         yield title
@@ -184,9 +191,13 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while (result_counter < num_results):
-                    results = self.__netflix.title_search(query, start_index=result_counter)['catalog_titles']
+                    results = self.__netflix.title_search(query, start_index=result_counter)
+                    if 'catalog_titles' not in results:
+                        return
+                    results = results['catalog_titles']
                     result_counter += results['results_per_page']
-                    # 'catalog_title'value  is the actual dict of values for a given result.  It's a weird structure.
+
+                    # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
                     for title in results['catalog_title']:
                         yield title
             except GeneratorExit:
@@ -195,13 +206,13 @@ class NetflixSource(GenericSource):
 
     def movieSource(self, query):
         def filter(title):
-            return title['id'].contains('/movies/')
+            return title['id'].find('/movies/') != -1
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixMovie)
 
     def tvSource(self, query):
         def filter(title):
-            return title['id'].contains('/series/')
+            return title['id'].find('/series/') != -1
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixTVShow)
 
@@ -212,3 +223,6 @@ class NetflixSource(GenericSource):
                 results = self.__netflix.movie_search
             except GeneratorExit:
                     pass
+
+if __name__ == '__main__':
+    demo(NetflixSource(), 'Inception')

@@ -8,7 +8,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedSource', 'EntitySearchAll' ]
+__all__ = [ 'StampedSource',
+            'EntityArtist', 'EntityAlbum', 'EntityTrack', 'EntityMovie', 'EntityTV',
+            'EntityBook', 'EntityPlace', 'EntityApp', 'EntitySearchAll']
 
 import Globals
 from logs import report
