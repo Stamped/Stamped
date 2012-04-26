@@ -1654,11 +1654,11 @@ class HTTPStamp(Schema):
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
 
-                for reference in self._user_regex.finditer(content.blurb):
+                for screenName in self._user_regex.finditer(content.blurb):
                     source              = HTTPActionSource()
                     source.name         = 'View profile'
                     source.source       = 'stamped'
-                    source.source_id    = reference.groups()[0]
+                    source.source_id    = screenName.groups()[0]
 
                     action              = HTTPAction()
                     action.type         = 'stamped_view_screen_name'
@@ -1666,7 +1666,7 @@ class HTTPStamp(Schema):
                     action.sources      = [ source ]
 
                     reference           = HTTPTextReference()
-                    reference.indices   = [ reference.start(), reference.end() ]
+                    reference.indices   = [ screenName.start(), screenName.end() ]
                     reference.action    = action
 
                     item.blurb_references.append(reference)
