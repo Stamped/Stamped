@@ -444,6 +444,16 @@ class Netflix(object):
         self.__consumer = oauth.OAuthConsumer(self.__key, self.__secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
+
+    def title_search(self, title, start_index=0, max_results=100):
+        return self.get(
+                        'catalog/titles',
+                        term            = title,
+                        start_index     = start_index,
+                        max_results     = max_results,
+                        expand          ='synopsis,cast'
+                    )
+
     def get(self, service, token=None, **parameters):
         connection = httplib.HTTPConnection("%s:%s" % (HOST, PORT))
         if service.startswith('http'):
@@ -451,6 +461,8 @@ class Netflix(object):
         else:
             url = "http://%s/%s" % (HOST, service)
         parameters['output'] = 'json'
+#        It appears that Version 1.5 forces us to make calls on every result for detailed information
+#        parameters['v'] = '1.5'
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,
@@ -469,5 +481,5 @@ def globalNetflix():
     if __globalNetflix is None:
         __globalNetflix = Netflix()
     
-    return _globalNetflix
+    return __globalNetflix
 
