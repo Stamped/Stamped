@@ -88,6 +88,7 @@ class MongoActivityCollection(AActivityDB):
         body            = kwargs.pop('body', None)
 
         sendAlert       = kwargs.pop('sendAlert', True)
+        unique          = kwargs.pop('unique', False)   # Check if activity item exists before creating
         recipientIds    = kwargs.pop('recipientIds', [])
         group           = kwargs.pop('group', False)
         groupRange      = kwargs.pop('groupRange', None)
@@ -120,6 +121,12 @@ class MongoActivityCollection(AActivityDB):
 
         # Insert the activity item individually
         if not group:
+            # Short-circuit if the item exists and it's considered unique
+            if unique:
+                activityIds = self.activity_items_collection.getActivityIds(verb=verb, objects=objects)
+                if len(activityIds) > 0:
+                    return
+
             activity    = _buildActivity()
             activity    = self.activity_items_collection.addActivityItem(activity)
             activityId  = activity.activity_id
