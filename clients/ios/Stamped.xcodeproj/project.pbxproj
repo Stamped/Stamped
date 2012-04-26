@@ -1114,6 +1114,12 @@
 		63BA7A1D1546FF6B00EE95DA /* STToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */; };
 		63BA7A1E1546FF6B00EE95DA /* STToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */; };
 		63BA7A1F1546FF6B00EE95DA /* STToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */; };
+		63BA7A581547415400EE95DA /* STSimpleContentItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A571547415400EE95DA /* STSimpleContentItem.m */; };
+		63BA7A591547415400EE95DA /* STSimpleContentItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A571547415400EE95DA /* STSimpleContentItem.m */; };
+		63BA7A5A1547415400EE95DA /* STSimpleContentItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A571547415400EE95DA /* STSimpleContentItem.m */; };
+		63BA7A5E1547478E00EE95DA /* STSimplePreviews.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */; };
+		63BA7A5F1547478E00EE95DA /* STSimplePreviews.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */; };
+		63BA7A601547478E00EE95DA /* STSimplePreviews.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */; };
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
@@ -2965,6 +2971,12 @@
 		63BA7A171546FB3C00EE95DA /* dots@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dots@2x.png"; sourceTree = "<group>"; };
 		63BA7A1B1546FF6A00EE95DA /* STToggleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToggleButton.h; sourceTree = "<group>"; };
 		63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToggleButton.m; sourceTree = "<group>"; };
+		63BA7A55154740C600EE95DA /* STContentItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STContentItem.h; sourceTree = "<group>"; };
+		63BA7A561547415400EE95DA /* STSimpleContentItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleContentItem.h; sourceTree = "<group>"; };
+		63BA7A571547415400EE95DA /* STSimpleContentItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleContentItem.m; sourceTree = "<group>"; };
+		63BA7A5B154746E700EE95DA /* STPreviews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPreviews.h; sourceTree = "<group>"; };
+		63BA7A5C1547478D00EE95DA /* STSimplePreviews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimplePreviews.h; sourceTree = "<group>"; };
+		63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimplePreviews.m; sourceTree = "<group>"; };
 		63BC667C1522634300DA2579 /* STRdio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdio.h; sourceTree = "<group>"; };
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63BFCC7B1541F7AE00817EC5 /* STUserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserCell.h; sourceTree = "<group>"; };
@@ -4166,6 +4178,8 @@
 				6360B5CC153F7A4F00BB8C82 /* STActivity.h */,
 				6360B5CD153F7A9600BB8C82 /* STActivityReference.h */,
 				6360B5CF153F7E2300BB8C82 /* STActivityObjects.h */,
+				63BA7A55154740C600EE95DA /* STContentItem.h */,
+				63BA7A5B154746E700EE95DA /* STPreviews.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -4256,6 +4270,10 @@
 				6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */,
 				6360B5D8153FA80900BB8C82 /* STSimpleActivityReference.h */,
 				6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */,
+				63BA7A561547415400EE95DA /* STSimpleContentItem.h */,
+				63BA7A571547415400EE95DA /* STSimpleContentItem.m */,
+				63BA7A5C1547478D00EE95DA /* STSimplePreviews.h */,
+				63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -8100,6 +8118,8 @@
 				63BA77971545F69400EE95DA /* STRightMenuViewController.m in Sources */,
 				63BA77981545F69400EE95DA /* STProfileSource.m in Sources */,
 				63BA7A1F1546FF6B00EE95DA /* STToggleButton.m in Sources */,
+				63BA7A5A1547415400EE95DA /* STSimpleContentItem.m in Sources */,
+				63BA7A601547478E00EE95DA /* STSimplePreviews.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8328,6 +8348,8 @@
 				63159A8B1544E95A008E75DD /* STRightMenuViewController.m in Sources */,
 				63BA76A11545A2AA00EE95DA /* STProfileSource.m in Sources */,
 				63BA7A1E1546FF6B00EE95DA /* STToggleButton.m in Sources */,
+				63BA7A591547415400EE95DA /* STSimpleContentItem.m in Sources */,
+				63BA7A5F1547478E00EE95DA /* STSimplePreviews.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8556,6 +8578,8 @@
 				63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */,
 				63BA76A01545A2AA00EE95DA /* STProfileSource.m in Sources */,
 				63BA7A1D1546FF6B00EE95DA /* STToggleButton.m in Sources */,
+				63BA7A581547415400EE95DA /* STSimpleContentItem.m in Sources */,
+				63BA7A5E1547478E00EE95DA /* STSimplePreviews.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -700,7 +700,7 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(verb          = 'twitter_friend', 
+        self._addActivity(verb          = 'friend_twitter', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
@@ -750,7 +750,7 @@ class StampedAPI(AStampedAPI):
                 userIds.append(user.user_id)
         
         # Generate activity item
-        self._addActivity(verb          = 'facebook_friend', 
+        self._addActivity(verb          = 'friend_facebook', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
@@ -815,7 +815,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedPermissionsError("Insufficient privileges to view user")
 
         if self.__version > 0 and len(user.distribution) == 0:
-            user.distribution = self._getUserStampDistribution(authUserId)
+            user.distribution = self._getUserStampDistribution(user.user_id)
         
         return user
     
@@ -1382,6 +1382,48 @@ class StampedAPI(AStampedAPI):
                                                             category=suggested.category, 
                                                             subcategory=suggested.subcategory, 
                                                             limit=suggested.limit)
+
+    @API_CALL
+    def completeAction(self, authUserId, **kwargs):
+        action      = kwargs.pop('action', None)
+        source      = kwargs.pop('source', None)
+        sourceId    = kwargs.pop('source_id', None)
+        entityId    = kwargs.pop('entity_id', None)
+        userId      = kwargs.pop('user_id', None)
+        stampId     = kwargs.pop('stamp_id', None)
+
+        actions = set([
+            # 'link',
+            # 'phone',
+            # 'stamped_view_entity',
+            # 'stamped_view_stamp',
+            # 'stamped_view_user',
+            'listen',
+            'playlist',
+            'download',
+            'reserve',
+            'menu',
+            'buy',
+            'watch',
+            'tickets',
+        ])
+
+        # For now, only complete the action if it's associated with an entity and a stamp
+        if stampId is not None:
+            stamp   = self._stampDB.getStamp(stampId)
+            user    = self._userDB.getUser(stamp.user.user_id)
+            entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+
+            if action in actions:
+                self._addActivity(verb          = 'action_%s' % action, 
+                                  userId        = authUserId, 
+                                  friendId      = stamp.user.user_id, 
+                                  stampId       = stamp.stamp_id)
+
+        return True
+
+
+
     
     """
      #####                                    
@@ -1397,9 +1439,8 @@ class StampedAPI(AStampedAPI):
     def _user_regex(self):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
     
-    def _extractMentions(self, text):
-        screenNames = set()
-        mentions    = [] 
+    def _extractMentions(self, text, screenNames={}):
+        mentions = [] 
         
         # Run through and grab mentions
         for user in self._user_regex.finditer(text):
@@ -1407,21 +1448,21 @@ class StampedAPI(AStampedAPI):
             data['indices'] = [user.start(), user.end()]
             data['screen_name'] = user.groups()[0]
             
-            try:
-                user = self._userDB.getUserByScreenName(data['screen_name'])
-                data['user_id'] = user.user_id
-                data['screen_name'] = user.screen_name
-            except Exception:
-                logs.warning("User not found (%s)" % data['screen_name'])
+            if data['screen_name'] in screenNames:
+                data['user_id'] = screenNames[data['screen_name']]
+            else:
+                try:
+                    user = self._userDB.getUserByScreenName(data['screen_name'])
+                    data['user_id'] = user.user_id
+                except Exception:
+                    logs.warning("User not found (%s)" % data['screen_name'])
             
-            if data['screen_name'] not in screenNames:
-                screenNames.add(data['screen_name'])
-                mentions.append(data)
+            if data['screen_name'] not in screenNames.keys() and data['user_id'] is not None:
+                screenNames[data['screen_name']] = data['user_id']
+
+            mentions.append(data)
         
-        if len(mentions) > 0:
-            return mentions
-        
-        return None
+        return mentions
     
     def _extractCredit(self, creditData, user_id, entity_id, userIds):
         creditedUserIds = set()
@@ -1499,6 +1540,7 @@ class StampedAPI(AStampedAPI):
                 entityIds[entity.entity_id] = entity
 
         # Likes
+        ### TODO: Rewrite to minimze db calls
         likeUserIds = {}
         for stamp in stampData:
             likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)[:10]
@@ -1507,12 +1549,21 @@ class StampedAPI(AStampedAPI):
                     userIds[likeUserId] = 1
 
         # Todos
+        ### TODO: Rewrite to minimize db calls
         todoUserIds = {}
         for stamp in stampData:
             todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)[:10]
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 if todoUserId not in userIds:
                     userIds[todoUserId] = 1
+
+        # Credit
+        creditIds = {}
+        for stamp in stampData:
+            creditIds[stamp.stamp_id] = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=10)
+            for creditItem in creditIds[stamp.stamp_id]:
+                if creditItem.user.user_id not in userIds:
+                    userIds[creditItem.user.user_id] = 1
 
         # Users
         if 1 in userIds.values():
@@ -1597,6 +1648,15 @@ class StampedAPI(AStampedAPI):
             for todoUserId in todoUserIds[stamp.stamp_id]:
                 assert userIds[todoUserId] != 1
                 stamp.previews.todos.append(userIds[todoUserId])
+
+            # Add restamps
+            stamp.previews.credits = []
+            for credit in creditIds[stamp.stamp_id]:
+                assert userIds[credit.user.user_id] != 1
+                assert entityIds[credit.entity.entity_id] != 1
+                credit.user = userIds[credit.user.user_id]
+                credit.entity = entityIds[credit.entity.entity_id]
+                stamp.previews.credits.append(credit)
             
             if authUserId:
                 # Mark as favorited
@@ -1624,18 +1684,18 @@ class StampedAPI(AStampedAPI):
                 genre   = "user_first_stamp", 
             )))
         
-        entity_stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
         
-        if len(entity_stamps) == 0:
+        if len(stamps) == 0:
             badges.append(Badge(dict(
                 user_id = userId, 
                 genre   = "entity_first_stamp", 
             )))
         else:
-            friend_stamp_ids = frozenset(self._collectionDB.getInboxStampIds(stamp.user.user_id))
-            entity_stamp_ids = frozenset(map(lambda s: s.entity.entity_id, entity_stamps))
+            friendIds       = set(self._friendshipDB.getFriends(stamp.user.user_id))
+            stampUserIds    = set(map(lambda s: s.user.user_id, stamps))
             
-            if len(entity_stamp_ids & friend_stamp_ids) == 0:
+            if friendIds.intersection(stampUserIds) == 0:
                 badges.append(Badge(dict(
                     user_id = userId, 
                     genre   = "friends_first_stamp", 
@@ -1692,8 +1752,7 @@ class StampedAPI(AStampedAPI):
             image_width, image_height = image.size
             """
         elif imageUrl is not None:
-            # ensure external image exists
-            # TODO!!!
+            ### TODO: Ensure external image exists
             """
             # TODO: 
             response = utils.getHeadRequest(image_url)
@@ -1716,11 +1775,9 @@ class StampedAPI(AStampedAPI):
             image           = ImageSchema()
             image.width     = imageWidth
             image.height    = imageHeight
-            # image.image     = "%s.%s" % (stamp.stamp_id, now)
             content.images  = [ image ]
 
             imageExists     = True
-        
 
         # Update content if stamp exists
         if stampExists:
@@ -2904,12 +2961,11 @@ class StampedAPI(AStampedAPI):
         if not self._activity:
             return
 
-        # logs.info('\n\nADD ACTIVITY\nVerb: %s\nUser: %s\nData: %s\n' % (verb, userId, kwargs))
-
         body                    = None
         group                   = False
         groupRange              = None
         requireReceipient       = False
+        unique                  = False
 
         objects = ActivityObjectIds()
 
@@ -2959,11 +3015,17 @@ class StampedAPI(AStampedAPI):
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
             requireReceipient       = True
+            unique                  = True
 
-        elif verb in ['suggest_friend', 'twitter_friend', 'facebook_friend']:
-            requireReceipient       = True
+        elif verb.startswith('friend_'):
             body                    = kwargs.pop('body', None)
-            pass
+            requireReceipient       = True
+            unique                  = True
+
+        elif verb.startswith('action_'):
+            objects.stamp_ids       = [ kwargs['stampId'] ]
+            requireReceipient       = True 
+            unique                  = True
 
         else:
             raise Exception("Unrecognized activity verb: %s" % verb)
@@ -2990,7 +3052,8 @@ class StampedAPI(AStampedAPI):
                                      benefit        = benefit,
                                      group          = group,
                                      groupRange     = groupRange,
-                                     sendAlert      = sendAlert)
+                                     sendAlert      = sendAlert,
+                                     unique         = unique)
 
         # Increment unread news for all recipients
         if len(recipientIds) > 0:

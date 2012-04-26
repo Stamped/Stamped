@@ -31,7 +31,7 @@
         <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
         
         <!-- styles -->
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/style.css">
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
          
         <!-- scripts loaded pre-document-body (most are loaded post-document-body) -->
         <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
@@ -41,16 +41,18 @@
     </head>
     {% endblock post_head %}
     
+    {% block pre_body %}
     <body>
+        {% endblock pre_body %}
         {% block header %}
-        <div id="home" class="wrap public flood">
+        <div class="wrap flood">
             <a href="/" class="brand replaced">Stamped</a>
             <div class="card">
                 <div class="top-wave"></div>
                 {% endblock header %}
                 
                 {% block pre_main %}
-                <div role="main">
+                <div role="main" class="inner">
                 {% endblock pre_main %}
                 
                 {% block main %}{% endblock main %}
@@ -90,7 +92,9 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
         
-        <script src="{{ STATIC_URL }}js/script.js"> </script>
+        <script src="{{ STATIC_URL }}js/script.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/underscore.min.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/backbone.min.js"></script>
         
         <script>
             var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
@@ -99,6 +103,9 @@
                 s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
         {% endblock scripts %}
+        
+        {% block post_body %}
     </body>
+    {% endblock post_body %}
 </html>
 

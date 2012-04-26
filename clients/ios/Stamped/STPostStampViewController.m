@@ -167,6 +167,7 @@
   stampedByLimited.everyone = self.stampedBy.everyone;
   STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedByLimited
                                                                      blacklist:[NSSet setWithObject:self.userDetail.userID] 
+                                                                      entityID:self.stamp.entity.entityID
                                                                    andDelegate:self.scrollView] autorelease];
   [Util reframeView:stampedByView withDeltas:CGRectMake(0, 5, 0, 0)];
   [self.scrollView appendChildView:stampedByView];

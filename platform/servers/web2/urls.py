@@ -5,10 +5,11 @@ import settings
 urlpatterns = patterns('',
     # blog
     url(r'^blog$',                  'core.views.blog'), 
+    url(r'^demo$',                  'core.views.demo'), 
     
     # index
     url(r'^index$',                 'core.views.index'), 
-    url(r'^index.htmll?$',          'core.views.index'), 
+    url(r'^index\.html?$',           'core.views.index'), 
     url(r'^/?$',                    'core.views.index'), 
 )
 

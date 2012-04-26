@@ -42,8 +42,8 @@
   [self selectedLastCell];
 }
 
-- (id<STUser>)user {
-  return [STSimpleUser userFromLegacyUser:[AccountManager sharedManager].currentUser];
+- (NSString*)user {
+  return [AccountManager sharedManager].currentUser.userID;
 }
 
 @end

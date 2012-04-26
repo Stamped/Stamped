@@ -8,15 +8,10 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 from Schemas            import ClientLogsEntry
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPClientLogsEntry, schema=ClientLogsEntry)
 @require_http_methods(["POST"])
-def create(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema          = parseRequest(HTTPClientLogsEntry(), request)
-    
-    entry           = schema.exportSchema(ClientLogsEntry())
-    result          = stampedAPI.addClientLogsEntry(authUserId, entry)
+def create(request, authUserId, schema, **kwargs):
+    result = stampedAPI.addClientLogsEntry(authUserId, schema)
     
     return transformOutput(True)
 

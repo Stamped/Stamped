@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -8,37 +7,28 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthTokenRequest)
 @require_http_methods(["POST"])
-def token(request):
-    client_id   = checkClient(request)
-    schema      = parseRequest(OAuthTokenRequest(), request)
-
-    if str(schema.grant_type).lower() != 'refresh_token':
-        msg = "Grant type incorrect"
-        logs.warning(msg)
-        raise StampedHTTPError("invalid_request", 400, msg)
-
-    token       = stampedAuth.verifyRefreshToken(client_id, schema.refresh_token)
+def token(request, client_id, http_schema, **kwargs):
+    if str(http_schema.grant_type).lower() != 'refresh_token':
+        raise StampedHTTPError("invalid_request", 400, "Grant type incorrect")
+    
+    token = stampedAuth.verifyRefreshToken(client_id, http_schema.refresh_token)
     
     return transformOutput(token)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthLogin)
 @require_http_methods(["POST"])
-def login(request):
-    client_id   = checkClient(request)
-    schema      = parseRequest(OAuthLogin(), request)
-    
+def login(request, client_id, http_schema, **kwargs):
     user, token = stampedAuth.verifyUserCredentials(client_id, \
-                                                    schema.login, \
-                                                    schema.password)
-
-    user        = HTTPUser().importSchema(user)
+                                                    http_schema.login, \
+                                                    http_schema.password)
+    
+    user = HTTPUser().importSchema(user)
     logs.user(user.user_id)
-
-    output      = { 'user': user.exportSparse(), 'token': token }
-
+    
+    output = { 'user' : user.exportSparse(), 'token' : token }
+    
     return transformOutput(output)
-
 

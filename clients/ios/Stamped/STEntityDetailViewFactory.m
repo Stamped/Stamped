@@ -132,7 +132,8 @@
         }
         STViewContainer* stampedByContainer = [[[STViewContainer alloc] initWithDelegate:view andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
         STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy 
-                                                                           blacklist:blacklist
+                                                                           blacklist:blacklist 
+                                                                            entityID:self.entityDetail.entityID
                                                                          andDelegate:stampedByContainer] autorelease];
         [stampedByContainer appendChildView:stampedByView];
         [Util reframeView:stampedByContainer withDeltas:CGRectMake(0, 0, 0, 10)];

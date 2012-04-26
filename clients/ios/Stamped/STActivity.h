@@ -26,8 +26,8 @@
 @property (nonatomic, readonly, retain) id<STActivityObjects> objects;
 @property (nonatomic, readonly, retain) id<STAction> action;
 
-@property (nonatomic, readonly, retain) id<STActivityReference> headerReferences;
-@property (nonatomic, readonly, retain) id<STActivityReference> bodyReferences;
-@property (nonatomic, readonly, retain) id<STActivityReference> footerReferences;
+@property (nonatomic, readonly, retain) NSArray<STActivityReference>* headerReferences;
+@property (nonatomic, readonly, retain) NSArray<STActivityReference>* bodyReferences;
+@property (nonatomic, readonly, retain) NSArray<STActivityReference>* footerReferences;
 
 @end

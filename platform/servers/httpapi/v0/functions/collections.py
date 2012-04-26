@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -19,55 +18,40 @@ def transform_stamps(stamps):
         except:
             logs.warn(utils.getFormattedException())
     
-    return result
+    return transformOutput(result)
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
 @require_http_methods(["GET"])
-def inbox(request):
-    authUserId, apiVersion = checkOAuth(request)
+def inbox(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getInboxStamps(authUserId, schema)
     
-    schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
-    stamps      = stampedAPI.getInboxStamps(authUserId, schema)
-    
-    return transformOutput(transform_stamps(stamps))
+    return transform_stamps(stamps)
 
-@handleHTTPRequest
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
 @require_http_methods(["GET"])
-def user(request):
-    authUserId, apiVersion = checkOAuth(request)
+def user(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getUserStamps(authUserId, schema)
     
-    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
-    stamps      = stampedAPI.getUserStamps(authUserId, schema)
-    
-    return transformOutput(transform_stamps(stamps))
+    return transform_stamps(stamps)
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
 @require_http_methods(["GET"])
-def credit(request):
-    authUserId, apiVersion = checkOAuth(request)
+def credit(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getCreditedStamps(authUserId, schema)
     
-    schema      = parseRequest(HTTPUserCollectionSlice(), request).exportSchema(UserCollectionSlice())
-    stamps      = stampedAPI.getCreditedStamps(authUserId, schema)
-    
-    return transformOutput(transform_stamps(stamps))
+    return transform_stamps(stamps)
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFriendsSlice, schema=FriendsSlice)
 @require_http_methods(["GET"])
-def friends(request):
-    authUserId, apiVersion = checkOAuth(request)
+def friends(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getFriendsStamps(authUserId, schema)
     
-    schema      = parseRequest(HTTPFriendsSlice(), request).exportSchema(FriendsSlice())
-    stamps      = stampedAPI.getFriendsStamps(authUserId, schema)
-    
-    return transformOutput(transform_stamps(stamps))
+    return transform_stamps(stamps)
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
 @require_http_methods(["GET"])
-def suggested(request):
-    authUserId, apiVersion = checkOAuth(request)
+def suggested(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
     
-    schema      = parseRequest(HTTPGenericCollectionSlice(), request).exportSchema(GenericCollectionSlice())
-    stamps      = stampedAPI.getSuggestedStamps(authUserId, schema)
-    
-    return transformOutput(transform_stamps(stamps))
+    return transform_stamps(stamps)
 

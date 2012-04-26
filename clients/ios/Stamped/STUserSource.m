@@ -15,12 +15,18 @@
 
 @implementation STUserSource
 
-@synthesize user = user_;
+@synthesize userID = userID_;
+
+- (void)dealloc
+{
+  [userID_ release];
+  [super dealloc];
+}
 
 - (void)setSlice:(STGenericCollectionSlice *)slice {
   STUserCollectionSlice* friendsSlice = [[[STUserCollectionSlice alloc] init] autorelease];
   [friendsSlice importDictionaryParams:[slice asDictionaryParams]];
-  friendsSlice.userID = self.user.userID;
+  friendsSlice.userID = self.userID;
   [super setSlice:friendsSlice];
 }
 
@@ -38,7 +44,7 @@
 }
 
 - (NSString *)noStampsText {
-  return self.lastCellText;
+  return @"No stamps";
 }
 
 - (void)selectedLastCell {

@@ -36,7 +36,7 @@ class StampedAPIStampPlacesShow(StampedAPIStampPlaceTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
 # class StampedAPIStampPlacesUpdate(StampedAPIStampPlaceTest):
 #     def test_show(self):
@@ -83,7 +83,7 @@ class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
         }
         result = self.handleGET(path, data)
 
-        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
         self.assertTrue(len(result['credit']) == 1)
         self.assertEqual(
             result['credit'][0]['screen_name'], 

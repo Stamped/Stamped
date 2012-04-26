@@ -186,14 +186,15 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @interface STStampDetailBlurbView : STAStampDetailCommentWithText
 
-- (id)initWithStamp:(id<STStamp>)stamp;
+- (id)initWithStamp:(id<STStamp>)stamp andIndex:(NSInteger)index;
 
 @end
 
 @implementation STStampDetailBlurbView
 
-- (id)initWithStamp:(id<STStamp>)stamp {
-  self = [super initWithUser:stamp.user created:stamp.created text:stamp.blurb andProfileImageSize:ProfileImageSize46];
+- (id)initWithStamp:(id<STStamp>)stamp andIndex:(NSInteger)index {
+  id<STContentItem> item = [stamp.contents objectAtIndex:index];
+  self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:ProfileImageSize46];
   if (self) {
     //TODO likes, credited, border
   }
@@ -270,7 +271,7 @@ andProfileImageSize:(STProfileImageSize)size {
 @synthesize addCommentView = _addCommentView;
 @synthesize commentViews = _commentViews;
 
-- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate
+- (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index andDelegate:(id<STViewDelegate>)delegate
 {
   CGFloat width = _totalWidth;
   CGFloat padding_x = 5;
@@ -278,21 +279,22 @@ andProfileImageSize:(STProfileImageSize)size {
   if (self) {
     STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
     [self appendChildView:topBar];
-    UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp];
+    UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp andIndex:index];
     [self appendChildView:blurbView];
-    NSInteger limit = stamp.commentsPreview.count > 3 ? 2 : stamp.commentsPreview.count;
-    for (NSInteger i = 0; i < limit; i++) {
-      NSInteger index = limit - (i + 1);
-      id<STComment> comment = [stamp.commentsPreview objectAtIndex:index];
+    if (index == 0) {
+      NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
+      for (NSInteger i = 0; i < limit; i++) {
+        NSInteger index = limit - (i + 1);
+        id<STComment> comment = [stamp.previews.comments objectAtIndex:index];
+        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
+        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
+        [self appendChildView:commentView];
+      }
       [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-      STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-      [self appendChildView:commentView];
+      STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
+      [self appendChildView:addCommentView];
+      _addCommentView = [addCommentView.textField retain];
     }
-    [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-    STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
-    [self appendChildView:addCommentView];
-    _addCommentView = [addCommentView.textField retain];
-    
     STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:NO] autorelease];
     [self appendChildView:bottomBar];
     [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];

@@ -15,7 +15,7 @@ from django.template            import RequestContext
 from django.shortcuts           import render_to_response
 from django.utils.functional    import wraps
 
-def VIEW(f):
+def handleView(f):
     @wraps(f)
     def _wrapper(*args, **kwargs):
         try:
@@ -33,14 +33,17 @@ def VIEW(f):
     
     return _wrapper
 
-@VIEW
+@handleView
 def index(request):
     autoplay_video = bool(request.GET.get('video', False))
     
-    return render_to_response('index.html', locals(), 
-                              context_instance=RequestContext(request))
+    return render_to_response('index.html', locals(), context_instance=RequestContext(request))
 
-@VIEW
+@handleView
+def demo(request):
+    return render_to_response('demo.html', locals(), context_instance=RequestContext(request))
+
+@handleView
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 

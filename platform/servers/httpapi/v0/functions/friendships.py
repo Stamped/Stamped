@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -8,143 +7,98 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["POST"])
-def create(request):
-    authUserId, apiVersion = checkOAuth(request)
+def create(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.addFriendship(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.addFriendship(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
-
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["POST"])
-def remove(request):
-    authUserId, apiVersion = checkOAuth(request)
+def remove(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.removeFriendship(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.removeFriendship(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
-
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserRelationship)
 @require_http_methods(["GET"])
-def check(request):
-    authUserId, apiVersion = checkOAuth(request)
+def check(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.checkFriendship(authUserId, schema)
     
-    schema      = parseRequest(HTTPUserRelationship(), request)
+    return transformOutput(result)
 
-    result      = stampedAPI.checkFriendship(authUserId, schema)
+
+@handleHTTPRequest(http_schema=HTTPUserId)
+@require_http_methods(["GET"])
+def friends(request, authUserId, http_schema, **kwargs):
+    userIds = stampedAPI.getFriends(http_schema)
+    output  = { 'user_ids' : userIds }
+
+    return transformOutput(output)
+
+
+@handleHTTPRequest(http_schema=HTTPUserId)
+@require_http_methods(["GET"])
+def followers(request, authUserId, http_schema, **kwargs):
+    userIds = stampedAPI.getFollowers(http_schema)
+    output  = { 'user_ids': userIds }
+
+    return transformOutput(output)
+
+
+@handleHTTPRequest(http_schema=HTTPUserId)
+@require_http_methods(["POST"])
+def approve(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.approveFriendship(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
+
+    return transformOutput(user.exportSparse())
+
+
+@handleHTTPRequest(http_schema=HTTPUserId)
+@require_http_methods(["POST"])
+def blocksCreate(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.addBlock(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
+    
+    return transformOutput(user.exportSparse())
+
+
+@handleHTTPRequest(http_schema=HTTPUserId)
+@require_http_methods(["GET"])
+def blocksCheck(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.checkBlock(authUserId, http_schema)
 
     return transformOutput(result)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["GET"])
-def friends(request):
-    authUserId, apiVersion = checkOAuth(request)
+def blocking(request, authUserId, **kwargs):
+    userIds = stampedAPI.getBlocks(authUserId)
+    output  = { 'user_ids' : userIds }
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    userIds     = stampedAPI.getFriends(schema)
-    output      = { 'user_ids': userIds }
-
     return transformOutput(output)
 
 
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def followers(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPUserId(), request)
-
-    userIds     = stampedAPI.getFollowers(schema)
-    output      = { 'user_ids': userIds }
-
-    return transformOutput(output)
-
-
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["POST"])
-def approve(request):
-    authUserId, apiVersion = checkOAuth(request)
+def blocksRemove(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.removeBlock(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
     
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.approveFriendship(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
-
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPEmail)
 @require_http_methods(["POST"])
-def blocksCreate(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.addBlock(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
-
-    return transformOutput(user.exportSparse())
-
-
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def blocksCheck(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPUserId(), request)
-
-    result      = stampedAPI.checkBlock(authUserId, schema)
-
-    return transformOutput(result)
-
-
-@handleHTTPRequest
-@require_http_methods(["GET"])
-def blocking(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(None, request)
-
-    userIds     = stampedAPI.getBlocks(authUserId)
-    output      = { 'user_ids': userIds }
-
-    return transformOutput(output)
-
-
-@handleHTTPRequest
-@require_http_methods(["POST"])
-def blocksRemove(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPUserId(), request)
-
-    user        = stampedAPI.removeBlock(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
-
-    return transformOutput(user.exportSparse())
-
-
-@handleHTTPRequest
-@require_http_methods(["POST"])
-def invite(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPEmail(), request)
-
-    result      = stampedAPI.inviteFriend(authUserId, schema.email)
+def invite(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.inviteFriend(authUserId, http_schema.email)
 
     return transformOutput(True)
-
 

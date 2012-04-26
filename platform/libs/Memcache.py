@@ -139,53 +139,6 @@ class StampedMemcache(Memcache):
 # what keys are we using for memcached entries?
 # object_id => [ dependencies ]
 
-"""
-class InvalidatingMemcache(Memcache):
-    
-    def _import_object_id(object_id):
-        return bson.objectid.ObjectId(object_id).binary
-    
-    def _export_object_id(binary_object_id):
-        return binascii.hexlify(binary_object_id)
-    
-    def _import_value(self, value):
-        dependencies = self._find_dependencies(values)
-        # TODO: store dependencies
-        
-        return super(InvalidatingMemcache, self)._import_value(value)
-    
-    def _get_object_id(self, value):
-        if isinstance(value, basestring) and 24 == len(value):
-            try:
-                return self._import_object_id(value)
-            except:
-                pass
-        
-        return None
-    
-    def _find_dependencies(self, value):
-        _get_object_id = self._get_object_id
-        dependencies   = []
-        
-        try:
-            for v in value:
-                object_id = _get_object_id(v)
-                
-                if object_id is not None:
-                    dependencies.append(object_id)
-                else:
-                    dependencies.extend(self._find_dependencies(v))
-        except TypeError:
-            object_id = _get_object_id(value)
-            
-            if object_id is not None:
-                dependencies.append(object_id)
-        except:
-            pass
-        
-        return dependencies
-"""
-
 def __global_api():
     from MongoStampedAPI import globalMongoStampedAPI
     

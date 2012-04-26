@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
-Account creation functions
+    Account creation functions
+"""
 
-DOCUMENTED SAMPLE PATH MODULE
-prev:   platform.servers.httpapi.urls.
-uses:   ../helpers.py
-uses:   platform/api/HTTPSchemas.py
-uses:
-next:
-"""
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -17,136 +10,105 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest
+@handleHTTPRequest(requires_auth=False, 
+                   requires_client=True, 
+                   http_schema=HTTPAccountNew, 
+                   schema=Account, 
+                   upload='porfile_image')
 @require_http_methods(["POST"])
-def create(request):
-    """
-    Create new account
-
-    DOCUMENTED SAMPLE PATH COMPONENT
-    prev:   platform.servers.httpapi.urls
-    next:   
-    """
-    client_id   = checkClient(request)
-    schema      = parseFileUpload(HTTPAccountNew(), request, 'profile_image')
-    account     = schema.exportSchema(Account())
-
-    account     = stampedAPI.addAccount(account, schema.profile_image)
-    user        = HTTPUser().importSchema(account)
+def create(request, client_id, http_schema, schema, **kwargs):
+    schema = stampedAPI.addAccount(schema, http_schema.profile_image)
+    user   = HTTPUser().importSchema(schema)
     logs.user(user.user_id)
-
-    token       = stampedAuth.addRefreshToken(client_id, user.user_id)
-
-    output      = { 'user': user.exportSparse(), 'token': token }
-
+    
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.exportSparse(), 'token': token }
+    
     return transformOutput(output)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["POST"])
-def remove(request):
-    authUserId, apiVersion = checkOAuth(request)
+def remove(request, authUserId, **kwargs):
+    account = stampedAPI.removeAccount(authUserId)
+    account = HTTPAccount().importSchema(account)
     
-    schema      = parseRequest(None, request)
-
-    account     = stampedAPI.removeAccount(authUserId)
-    account     = HTTPAccount().importSchema(account)
-
     return transformOutput(account.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(parse_request=False)
 @require_http_methods(["POST", "GET"])
-def settings(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
+def settings(request, authUserId, **kwargs):
     if request.method == 'POST':
-
         ### TODO: Carve out password changes, require original password sent again?
-
+        
         ### TEMP: Generate list of changes. Need to do something better eventually..
-        schema      = parseRequest(HTTPAccountSettings(), request)
-        data        = schema.exportSparse()
-
+        schema = parseRequest(HTTPAccountSettings(), request)
+        data   = schema.exportSparse()
+        
         for k, v in data.iteritems():
             if v == '':
                 data[k] = None
-
+        
         ### TODO: Verify email is valid
-        account     = stampedAPI.updateAccountSettings(authUserId, data)
+        account = stampedAPI.updateAccountSettings(authUserId, data)
     else:
-        schema      = parseRequest(None, request)
-        account     = stampedAPI.getAccount(authUserId)
+        schema  = parseRequest(None, request)
+        account = stampedAPI.getAccount(authUserId)
     
     account     = HTTPAccount().importSchema(account)
     
     return transformOutput(account.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAccountProfile)
 @require_http_methods(["POST"])
-def update_profile(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPAccountProfile(), request)
-
+def update_profile(request, authUserId, data, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
-    data        = schema.exportSparse()
-
     for k, v in data.iteritems():
         if v == '':
             data[k] = None
     
-    account     = stampedAPI.updateProfile(authUserId, data)
-    user        = HTTPUser().importSchema(account)
-
-    return transformOutput(user.exportSparse())
-
-
-@handleHTTPRequest
-@require_http_methods(["POST"])
-def update_profile_image(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
-    
-    user        = stampedAPI.updateProfileImage(authUserId, schema)
-    user        = HTTPUser().importSchema(user)
+    account = stampedAPI.updateProfile(authUserId, data)
+    user    = HTTPUser().importSchema(account)
     
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAccountProfileImage, upload='profile_image')
 @require_http_methods(["POST"])
-def customize_stamp(request):
-    authUserId, apiVersion = checkOAuth(request)
+def update_profile_image(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.updateProfileImage(authUserId, http_schema)
+    user = HTTPUser().importSchema(user)
     
-    schema      = parseRequest(HTTPCustomizeStamp(), request)
-    data        = schema.exportSparse()
-    
-    account     = stampedAPI.customizeStamp(authUserId, data)
-    user        = HTTPUser().importSchema(account)
-
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPCustomizeStamp)
 @require_http_methods(["POST"])
-def check(request):
-    client_id   = checkClient(request)
-    schema      = parseRequest(HTTPAccountCheck(), request)
+def customize_stamp(request, authUserId, data, **kwargs):
+    account = stampedAPI.customizeStamp(authUserId, data)
+    user    = HTTPUser().importSchema(account)
+    
+    return transformOutput(user.exportSparse())
 
+
+@handleHTTPRequest(requires_auth=False, 
+                   requires_client=True, 
+                   http_schema=HTTPAccountCheck)
+@require_http_methods(["POST"])
+def check(request, client_id, http_schema, **kwargs):
     try:
-        user    = stampedAPI.checkAccount(schema.login)
-        user    = HTTPUser().importSchema(user)
-
+        user = stampedAPI.checkAccount(http_schema.login)
+        user = HTTPUser().importSchema(user)
+        
         ### TODO: REMOVE THIS TEMPORARY CONVERSION!!!!
         try:
-            if str(schema.login).lower() == str(user.screen_name).lower():
-                user.screen_name = str(schema.login)
+            if str(http_schema.login).lower() == str(user.screen_name).lower():
+                user.screen_name = str(http_schema.login)
         except:
             pass
-
+        
         return transformOutput(user.exportSparse())
     except KeyError:
         response = HttpResponse("not_found")
@@ -158,60 +120,45 @@ def check(request):
         return response
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPLinkedAccounts)
 @require_http_methods(["POST"])
-def linked_accounts(request):
-    authUserId, apiVersion = checkOAuth(request)
+def linked_accounts(request, authUserId, http_schema, **kwargs):
+    linked       = http_schema.exportSchema(LinkedAccounts())
+    twitterAuth  = http_schema.exportSchema(TwitterAuthSchema())
+    facebookAuth = http_schema.exportSchema(FacebookAuthSchema())
     
-    schema          = parseRequest(HTTPLinkedAccounts(), request)
-
-    linked          = schema.exportSchema(LinkedAccounts())
-    twitterAuth     = schema.exportSchema(TwitterAuthSchema())
-    facebookAuth    = schema.exportSchema(FacebookAuthSchema())
-
     data = {
-        'twitter': linked.twitter,
-        'facebook': linked.facebook,
-        'twitterAuth': twitterAuth,
-        'facebookAuth': facebookAuth,
+        'twitter'       : linked.twitter, 
+        'facebook'      : linked.facebook, 
+        'twitterAuth'   : twitterAuth, 
+        'facebookAuth'  : facebookAuth, 
     }
     stampedAPI.updateLinkedAccounts(authUserId, **data)
     
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["POST"])
-def removeTwitter(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(None, request)
-
+def removeTwitter(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
     
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["POST"])
-def removeFacebook(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(None, request)
-
+def removeFacebook(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
     
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, 
+                   parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
-def alertFollowersFromTwitter(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
-
-    q = schema.q.value
+def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
+    q = http_schema.q.value
     twitterIds = []
 
     for item in q:
@@ -222,19 +169,16 @@ def alertFollowersFromTwitter(request):
             msg = 'Invalid twitter id: %s' % item
             logs.warning(msg)
 
-    result      = stampedAPI.alertFollowersFromTwitter(authUserId, twitterIds)
+    result = stampedAPI.alertFollowersFromTwitter(authUserId, twitterIds)
     
     return transformOutput(result)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPFindUser, 
+                   parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
-def alertFollowersFromFacebook(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
-
-    q = schema.q.value
+def alertFollowersFromFacebook(request, authUserId, http_schema, **kwargs):
+    q = http_schema.q.value
     facebookIds = []
 
     for item in q:
@@ -245,89 +189,66 @@ def alertFollowersFromFacebook(request):
             msg = 'Invalid facebook id: %s' % item
             logs.warning(msg)
 
-    result      = stampedAPI.alertFollowersFromFacebook(authUserId, facebookIds)
+    result = stampedAPI.alertFollowersFromFacebook(authUserId, facebookIds)
     
     return transformOutput(result)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAccountChangePassword, 
+                   parse_request_kwargs={'obfuscate':['old_password', 'new_password']})
 @require_http_methods(["POST"])
-def change_password(request):
-    authUserId, apiVersion = checkOAuth(request)
+def change_password(request, authUserId, http_schema, **kwargs):
+    new = http_schema.new_password
+    old = http_schema.old_password
     
-    schema      = parseRequest(HTTPAccountChangePassword(), request, \
-                    obfuscate=['old_password', 'new_password'])
-    new         = schema.new_password
-    old         = schema.old_password
-
     stampedAuth.verifyPassword(authUserId, old)
-
-    result      = stampedAuth.updatePassword(authUserId, new)
-
+    result = stampedAuth.updatePassword(authUserId, new)
+    
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEmail)
 @require_http_methods(["POST"])
-def reset_password(request):
-    client_id   = checkClient(request)
-    schema      = parseRequest(HTTPEmail(), request)
-
-    stampedAuth.resetPassword(schema.email)
+def reset_password(request, client_id, http_schema, **kwargs):
+    stampedAuth.resetPassword(http_schema.email)
 
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["GET"])
-def show_alerts(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(None, request)
-    
-    account     = stampedAPI.getAccount(authUserId)
-    settings    = HTTPAccountAlerts().importSchema(account)
+def show_alerts(request, authUserId, **kwargs):
+    account  = stampedAPI.getAccount(authUserId)
+    settings = HTTPAccountAlerts().importSchema(account)
 
     return transformOutput(settings.value)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAccountAlerts)
 @require_http_methods(["POST"])
-def update_alerts(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    alerts      = parseRequest(HTTPAccountAlerts(), request)
-    
-    account     = stampedAPI.updateAlerts(authUserId, alerts)
-    settings    = HTTPAccountAlerts().importSchema(account)
+def update_alerts(request, authUserId, http_schema, **kwargs):
+    account  = stampedAPI.updateAlerts(authUserId, http_schema)
+    settings = HTTPAccountAlerts().importSchema(account)
 
     return transformOutput(settings.value)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAPNSToken)
 @require_http_methods(["POST"])
-def update_apns(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPAPNSToken(), request)
-
-    if len(schema.token) != 64:
+def update_apns(request, authUserId, http_schema, **kwargs):
+    if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
     
-    stampedAPI.updateAPNSToken(authUserId, schema.token)
+    stampedAPI.updateAPNSToken(authUserId, http_schema.token)
     return transformOutput(True)
 
 
-@handleHTTPRequest
+@handleHTTPRequest(http_schema=HTTPAPNSToken)
 @require_http_methods(["POST"])
-def remove_apns(request):
-    authUserId, apiVersion = checkOAuth(request)
-    
-    schema      = parseRequest(HTTPAPNSToken(), request)
-
-    if len(schema.token) != 64:
+def remove_apns(request, authUserId, http_schema, **kwargs):
+    if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
     
-    stampedAPI.removeAPNSTokenForUser(authUserId, schema.token)
+    stampedAPI.removeAPNSTokenForUser(authUserId, http_schema.token)
     return transformOutput(True)
 
