@@ -3,6 +3,9 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+/*jslint strict: true, plusplus: false */
+/*global window, navigator, document, jQuery, setTimeout, opera, Backbone, Handlebars, _ */
+
 // usage: log('inside coolFunc', this, arguments);
 // paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
 window.log = function f(){ log.history = log.history || []; log.history.push(arguments); if(this.console) { var args = arguments, newarr; args.callee = args.callee.caller; newarr = [].slice.call(args); if (typeof console.log === 'object') log.apply.call(console.log, console, newarr); else console.log.apply(console, newarr);}};
@@ -123,6 +126,9 @@ if (typeof(StampedClient) == "undefined") {
         var client_id     = "stampedtest";
         var client_secret = "august1ftw";
         
+        var _token = null;
+        var _user  = null;
+        
         /* ------------------------------------------------------------------
          * Public API Functions
          * ------------------------------------------------------------------ */
@@ -139,9 +145,20 @@ if (typeof(StampedClient) == "undefined") {
                 password      : password, 
                 client_id     : client_id, 
                 client_secret : client_secret, 
-            }).done(function (data) {
-                alert(data.toSource());
+            }).pipe(function (data) {
+                _user  = new User(data['user']);
+                _token = data['token'];
+                
+                return _user;
             });
+        };
+        
+        this.is_authorized_user  = function() {
+            return !!_token;
+        };
+        
+        this.get_authorized_user = function() {
+            return _user;
         };
         
         /* USERS */
@@ -154,26 +171,29 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_user_by_screen_name = function(screen_name) {
-            return _get("/users/show.json", { 'screen_name' : screen_name })
-                .pipe(function (data) {
-                    return new User(data);
-                });
+            return _get("/users/show.json", {
+                'screen_name' : screen_name
+            }).pipe(function (data) {
+                return new User(data);
+            });
         };
         
         /* STAMPS */
         
         this.get_user_stamps_by_id = function(user_id) {
-            return _get("/collections/user.json", { 'user_id' : user_id })
-                .pipe(function (data) {
-                    return new Stamps(data);
-                });
+            return _get("/collections/user.json", {
+                'user_id' : user_id
+            }).pipe(function (data) {
+                return new Stamps(data);
+            });
         };
         
         this.get_user_stamps_by_screen_name = function(screen_name) {
-            return _get("/collections/user.json", { 'screen_name' : screen_name })
-                .pipe(function (data) {
-                    return new Stamps(data);
-                });
+            return _get("/collections/user.json", {
+                'screen_name' : screen_name
+            }).pipe(function (data) {
+                return new Stamps(data);
+            });
         };
         
         /* ------------------------------------------------------------------
@@ -195,7 +215,7 @@ if (typeof(StampedClient) == "undefined") {
         var _ajax = function(type, uri, params) {
             var url = stamped_api_url_base + uri;
             
-            window.log("AJAX " + type + ": " + url + " " + params, this);
+            window.log("StampedClient - " + type + ": " + url, this);
             window.log(params, this);
             
             return $.ajax({
@@ -203,10 +223,6 @@ if (typeof(StampedClient) == "undefined") {
                 url         : url, 
                 data        : params, 
                 crossDomain : true, 
-                error       : function(jqXHR, textStatus, errorThrown) {
-                    msg = "ERROR: '" + type + "' to '" + url + "' returned " + textStatus + " (" + params.toSource() + ")"
-                    window.log(msg, this);
-                }
             }).pipe(function (data) {
                 return $.parseJSON(data);
             });
@@ -220,11 +236,7 @@ if (typeof(StampedClient) == "undefined") {
             return stamped_static_url_base + path;
         };
         
-        /* ------------------------------------------------------------------
-         * Private API Classes / Models
-         * ------------------------------------------------------------------ */
-        
-        var _getValue = function(object, prop) {
+        var _get_value = function(object, prop) {
             if (object) {
                 value = object[prop];
                 
@@ -236,7 +248,7 @@ if (typeof(StampedClient) == "undefined") {
             return null;
         };
         
-        var _typeCheck = function(value, type) {
+        var _type_check = function(value, type) {
             var array = false;
             
             if (type == 'array') {
@@ -254,6 +266,18 @@ if (typeof(StampedClient) == "undefined") {
             
             throw msg;
         };
+        
+        var _verify_auth = function() {
+            if (!that.is_authorized_user) {
+                var func = arguments.callee.caller.name || "authorized function";
+                
+                _throw(func + " requires authorization; please login first.");
+            }
+        };
+        
+        /* ------------------------------------------------------------------
+         * Private API Classes / Models
+         * ------------------------------------------------------------------ */
         
         /*
          * SchemaElement provides a way to validate the type and integrity of a 
@@ -282,21 +306,17 @@ if (typeof(StampedClient) == "undefined") {
                 this.name = name || "";
                 this.constraints = constraints || {};
                 
-                try {
-                    this.has_default = ('default' in this.constraints);
-                    
-                    if (!('type' in this.constraints)) {
-                        _throw("(element '" + this.name + "') type is required");
-                    }
-                } catch (e) {
-                    debugger;
+                this.has_default = ('default' in this.constraints);
+                
+                if (!('type' in this.constraints)) {
+                    _throw("(element '" + this.name + "') type is required");
                 }
                 
                 if (this.has_default) {
-                    d = this.constraints['default'];
-                    type = this.constraints['type'];
+                    var d = this.constraints['default'];
+                    var type = this.constraints['type'];
                     
-                    if (!_typeCheck(d, type)) {
+                    if (!_type_check(d, type)) {
                         _throw("(element '" + this.name + "') invalid default '" + d + "' (not of required type '" + type + "')");
                     }
                 }
@@ -304,19 +324,19 @@ if (typeof(StampedClient) == "undefined") {
             
             validate : function(value) {
                 if (!_is_defined(value)) {
-                    if ('required' in this.constraints && !!_getValue(this.constraints, 'required')) {
+                    if ('required' in this.constraints && !!_get_value(this.constraints, 'required')) {
                         _throw("missing required element '" + this.name + "'");
                     }
                     
                     if ("default" in this.constraints) {
-                        return _getValue(this.constraints, "default");
+                        return _get_value(this.constraints, "default");
                     } else {
                         return undefined;
                     }
                 } else {
                     var type = this.constraints['type'];
                     
-                    if (!_typeCheck(value, type)) {
+                    if (!_type_check(value, type)) {
                         _throw("(element '" + name + "') type mismatch '" + typeof(value) + "' not of type '" + type + "'");
                     }
                     
@@ -436,12 +456,12 @@ if (typeof(StampedClient) == "undefined") {
                 function parse_args(args, i) {
                     var length2 = args.length;
                     
-                    if (length2 > i && _typeCheck(args[i], "string")) {
+                    if (length2 > i && _type_check(args[i], "string")) {
                         name = args[i];
                         i   += 1;
                     }
                     
-                    if (length2 > i && _typeCheck(args[i], "object") && !(args[i] instanceof SchemaElement)) {
+                    if (length2 > i && _type_check(args[i], "object") && !(args[i] instanceof SchemaElement)) {
                         $.each(args[i], function(k, v) {
                             constraints[k] = v;
                         });
@@ -454,10 +474,10 @@ if (typeof(StampedClient) == "undefined") {
                 
                 // small hack to allow name and constraints to be passed to init as arguments from 
                 // another function invokation (allows for more flexible chaining).
-                if (length > index && _typeCheck(varargs[index], "array")) {
+                if (length > index && _type_check(varargs[index], "array")) {
                     args = varargs[index];
                     
-                    while (args.length == 1 && _typeCheck(args, "array")) {
+                    while (args.length == 1 && _type_check(args, "array")) {
                         args = args[0];
                     }
                     
@@ -483,7 +503,7 @@ if (typeof(StampedClient) == "undefined") {
                             _throw(msg);
                         }
                         
-                        if (_getValue(element.constraints, 'primary_id')) {
+                        if (_get_value(element.constraints, 'primary_id')) {
                             if (primary != null) {
                                 _throw("only one key may be primary; primary_id set on '" + primary + "' and '" + element.name + "'");
                             }
@@ -513,10 +533,10 @@ if (typeof(StampedClient) == "undefined") {
                 var that = this;
                 
                 $.each(this.elements, function(index, element) {
-                    element.validate(_getValue(value, element.name));
+                    element.validate(_get_value(value, element.name));
                 });
                 
-                if (!_getValue(this.constraints, 'allow_overflow')) {
+                if (!_get_value(this.constraints, 'allow_overflow')) {
                     $.each(value, function(key, _) {
                         if (!(key in that.schema)) {
                             _throw("unrecognized attribute '" + key + "'");
@@ -564,39 +584,46 @@ if (typeof(StampedClient) == "undefined") {
             }, 
             
             defaults    : function() {
-                return _getValue(this.schema(), 'defaults');
+                return _get_value(this.schema(), 'defaults');
             }, 
             
             idAttribute : function() {
-                return _getValue(this.schema(), 'idAttribute');
+                return _get_value(this.schema(), 'idAttribute');
             }, 
             
             _get_schema : function() { _throw("must override _get_schema"); }
         });
         
         var AStampedCollection = Backbone.Collection.extend({ });
-        var AStampedView       = Backbone.View.extend({
+        
+        var AStampedView = Backbone.View.extend({
             render : function() {
-                $(this.el).html(_getValue(this, 'template')(this.model.toJSON()));
+                var render_template = _get_value(this, '_render_template');
+                $(this.el).html(render_template(this.model.toJSON()));
                 
                 return this;
             }, 
             
-            template        : function() {
+            _render_template : function() {
                 if (this.__template === undefined) {
-                    this.__template = _getValue(this, '_template');
+                    this.__template = _get_value(this, '_template');
                 }
                 
-                return function(view) {
-                    return Mustache.render(this.__template, view);
+                if (this.__template_cache === undefined) {
+                    this.__template_cache = Handlebars.compile(this.__template);
                 }
+                
+                return this.__template_cache;
             }, 
             
             _template       : function() { _throw("must override _template"); }
         });
         
         var StampsView = AStampedView.extend({
-            // TODO
+            _template       : function() {
+                // TODO: where to load templates from? ideally pre-compiled and pre-inserted into DOM?
+                // TODO: import templates.html containing any necessary precompiled Handlebars templates?
+            }
         });
         
         var User = AStampedModel.extend({
