@@ -149,14 +149,14 @@ if (typeof(StampedClient) == "undefined") {
         this.get_user_by_id = function(user_id) {
             return _get("/users/show.json", { 'user_id' : user_id })
                 .pipe(function (data) {
-                    return User(data);
+                    return new User(data);
                 });
         };
         
         this.get_user_by_screen_name = function(screen_name) {
             return _get("/users/show.json", { 'screen_name' : screen_name })
                 .pipe(function (data) {
-                    return User(data);
+                    return new User(data);
                 });
         };
         
@@ -165,14 +165,14 @@ if (typeof(StampedClient) == "undefined") {
         this.get_user_stamps_by_id = function(user_id) {
             return _get("/collections/user.json", { 'user_id' : user_id })
                 .pipe(function (data) {
-                    return Stamps(data);
+                    return new Stamps(data);
                 });
         };
         
         this.get_user_stamps_by_screen_name = function(screen_name) {
             return _get("/collections/user.json", { 'screen_name' : screen_name })
                 .pipe(function (data) {
-                    return Stamps(data);
+                    return new Stamps(data);
                 });
         };
         
@@ -432,6 +432,7 @@ if (typeof(StampedClient) == "undefined") {
                 var primary = null;
                 var that    = this;
                 
+                // attempt to parse name and constraints parameters via order and type constraints
                 function parse_args(args, i) {
                     var length2 = args.length;
                     
@@ -451,6 +452,8 @@ if (typeof(StampedClient) == "undefined") {
                     return i;
                 }
                 
+                // small hack to allow name and constraints to be passed to init as arguments from 
+                // another function invokation (allows for more flexible chaining).
                 if (length > index && _typeCheck(varargs[index], "array")) {
                     args = varargs[index];
                     
@@ -523,6 +526,11 @@ if (typeof(StampedClient) == "undefined") {
             }
         });
         
+        /*
+         * AStampedModel is the superclass of all stamped models, combining the 
+         * attribute binding benefits of Backbone.Model with the strict data 
+         * validation provided by Schema.
+         */
         var AStampedModel = Backbone.Model.extend({
             validate    : function(attributes) {
                 try {
@@ -567,6 +575,29 @@ if (typeof(StampedClient) == "undefined") {
         });
         
         var AStampedCollection = Backbone.Collection.extend({ });
+        var AStampedView       = Backbone.View.extend({
+            render : function() {
+                $(this.el).html(_getValue(this, 'template')(this.model.toJSON()));
+                
+                return this;
+            }, 
+            
+            template        : function() {
+                if (this.__template === undefined) {
+                    this.__template = _getValue(this, '_template');
+                }
+                
+                return function(view) {
+                    return Mustache.render(this.__template, view);
+                }
+            }, 
+            
+            _template       : function() { _throw("must override _template"); }
+        });
+        
+        var StampsView = AStampedView.extend({
+            // TODO
+        });
         
         var User = AStampedModel.extend({
             _get_schema : function() {

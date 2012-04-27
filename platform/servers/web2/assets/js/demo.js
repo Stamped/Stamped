@@ -22,9 +22,8 @@
             stampsP.done(function (stamps) {
                 //console.debug(stamps);
                 //stamps = JSON.stringify(stamps, null, 4);
-                var s = new client.Stamps(stamps);
                 
-                $("#data").append("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + JSON.stringify(s.toJSON(), null, 4) + "</code></pre>");
+                $("#data").append("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + JSON.stringify(stamps.toJSON(), null, 4) + "</code></pre>");
             });
         });
     });
