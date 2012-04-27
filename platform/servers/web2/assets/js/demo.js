@@ -6,6 +6,7 @@
 (function() {
     $(document).ready(function() {
         var client = new StampedClient();
+        return;
         var screen_name = "travis";
         
         var userP = client.get_user_by_screen_name(screen_name);

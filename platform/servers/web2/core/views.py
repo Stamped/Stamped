@@ -7,31 +7,12 @@ __license__   = "TODO"
 
 import Globals
 import utils
-import logs
-import datetime
 
-from django.http                import HttpResponse, Http404, HttpResponseRedirect
+from helpers                    import *
+
+from django.http                import HttpResponseRedirect
 from django.template            import RequestContext
 from django.shortcuts           import render_to_response
-from django.utils.functional    import wraps
-
-def handleView(f):
-    @wraps(f)
-    def _wrapper(*args, **kwargs):
-        try:
-            response = f(*args, **kwargs)
-            
-            response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
-            response['Cache-Control'] = 'max-age=600'
-            
-            return response
-        except Exception, e:
-            logs.warning("500 Error: %s" % e)
-            logs.warning(utils.getFormattedException())
-            
-            return HttpResponse("internal server error", status=500)
-    
-    return _wrapper
 
 @handleView
 def index(request):
@@ -40,10 +21,13 @@ def index(request):
     return render_to_response('index.html', locals(), context_instance=RequestContext(request))
 
 @handleView
-def demo(request):
-    return render_to_response('demo.html', locals(), context_instance=RequestContext(request))
-
-@handleView
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
+
+@handleView
+def profile(request, screen_name, **kwargs):
+    user   = stampedAPIProxy.getUser(screen_name=screen_name)
+    stamps = stampedAPIProxy.getUserStamps(user_id=user['user_id'])
+    
+    return render_to_response('demo.html', locals(), context_instance=RequestContext(request))
 

@@ -179,6 +179,9 @@ if (typeof(StampedClient) == "undefined") {
         /* STAMPS */
         
         this.get_user_stamps_by_id = function(user_id) {
+            // TODO: support genericslice params
+            
+            //return _get_user_stamps({ 'user_id' : user_id }, params);
             return _get("/collections/user.json", {
                 'user_id' : user_id
             }).pipe(function (data) {
@@ -187,6 +190,8 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_user_stamps_by_screen_name = function(screen_name) {
+            // TODO: support genericslice params
+            
             return _get("/collections/user.json", {
                 'screen_name' : screen_name
             }).pipe(function (data) {
@@ -642,7 +647,13 @@ if (typeof(StampedClient) == "undefined") {
         var StampsView = AStampedView.extend({
             _template       : function() {
                 // TODO: where to load templates from? ideally pre-compiled and pre-inserted into DOM?
-                // TODO: import templates.html containing any necessary precompiled Handlebars templates?
+                // TODO: import pre-compiled templates.html containing any necessary Handlebars templates?
+                
+                // will pre-compiling work if we need to insert templates into html server-side?
+                // compiled templates are javascript -- need to support noscript environments...
+                // possibly use Mustache instead and invoke templates from python?
+                
+                // TODO: google best client and server-side templating
             }
         });
         
