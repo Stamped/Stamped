@@ -59,6 +59,9 @@ except Exception:
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
 
+# TODO (travis): refactor API function calling conventions to place optional last 
+# instead of first.
+
 class StampedAPI(AStampedAPI):
     """
         Database-agnostic implementation of the internal API for accessing 
@@ -802,7 +805,7 @@ class StampedAPI(AStampedAPI):
     ### PUBLIC
     
     @API_CALL
-    def getUser(self, userRequest, authUserId):
+    def getUser(self, userRequest, authUserId=None):
         user = self._getUserFromIdOrScreenName(userRequest)
         
         if user.privacy == True:
@@ -813,7 +816,7 @@ class StampedAPI(AStampedAPI):
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
-
+        
         if self.__version > 0 and len(user.distribution) == 0:
             user.distribution = self._getUserStampDistribution(user.user_id)
         
