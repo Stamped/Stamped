@@ -7,13 +7,15 @@
  */
 
 @import "elements.less";
+@import "isotope.less";
 
 .stamp-gallery {
-    
+    width: 100%;
 }
 
 .stamp-gallery-item {
     background: #000;
+    position: relative;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top no-repeat;
@@ -25,6 +27,11 @@
         background: url(/assets/img/main-botcap.png) left top no-repeat;
         height: 8px;
         margin: 0;
+    }
+    
+    .content {
+        margin: 0 auth;
+        width: 304px;
     }
 }
 
