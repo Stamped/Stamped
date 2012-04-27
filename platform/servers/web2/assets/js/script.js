@@ -133,10 +133,6 @@ if (typeof(StampedClient) == "undefined") {
          * Public API Functions
          * ------------------------------------------------------------------ */
         
-        this.init = function() {
-            // pass
-        };
-        
         /* AUTH */
         
         this.login = function(login, password) {
@@ -158,6 +154,8 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_authorized_user = function() {
+            _verify_auth();
+            
             return _user;
         };
         
@@ -217,6 +215,9 @@ if (typeof(StampedClient) == "undefined") {
             
             window.log("StampedClient - " + type + ": " + url, this);
             window.log(params, this);
+            
+            // TODO: augment params with auth token if required or available
+            // TODO: handle oauth-related token renewal special-case
             
             return $.ajax({
                 type        : type, 
