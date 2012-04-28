@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load stamped_tags %}
 
 {% block head %}
     {{ block.super }}
@@ -9,12 +10,14 @@
 {% block main %}
     {{ block.super }}
     
+    {% custom_template "stamp-gallery" %}
     <div id="data"></div>
 {% endblock main %}
 
 {% block scripts %}
     {{ block.super }}
      
+    <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
     <script src="{{ STATIC_URL }}js/demo.js"></script>
 {% endblock scripts %}
 

@@ -15,7 +15,7 @@ import libs.ec2_utils
 from pprint                         import pformat
 from errors                         import *
 from HTTPSchemas                    import *
-from api.MongoStampedAPI            import MongoStampedAPI
+from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
 
 from django.views.decorators.http   import require_http_methods
@@ -47,7 +47,7 @@ t1 = time.time()
 
 # TODO (travis): use single global stamped API instance
 # e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
-stampedAPI  = MongoStampedAPI()
+stampedAPI  = globalMongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
 t2 = time.time()

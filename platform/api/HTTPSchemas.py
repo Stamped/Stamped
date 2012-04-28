@@ -1625,7 +1625,7 @@ class HTTPStamp(Schema):
         self.num_likes          = SchemaElement(int)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
-
+    
     @lazyProperty
     def _user_regex(self):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
