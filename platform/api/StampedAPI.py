@@ -637,6 +637,8 @@ class StampedAPI(AStampedAPI):
         twitterAuth     = kwargs.pop('twitterAuth', None)
         facebook        = kwargs.pop('facebook', None)
         facebookAuth    = kwargs.pop('facebookAuth', None)
+        netflix         = kwargs.pop('netflix', None)
+        netflixAuth     = kwargs.pop('netflixAuth', None)
         
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
         
@@ -757,8 +759,53 @@ class StampedAPI(AStampedAPI):
         
         facebook = FacebookAccountSchema(facebook_alerts_sent=True)
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
-    
-    
+
+    @API_CALL
+    def addToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+        """
+         Asynchronously add an entity to the user's netflix queue
+        """
+        account   = self._accountDB.getAccount(authUserId)
+
+#        # Only send alert once (when the user initially connects to Twitter)
+#        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+#            return False
+#
+#        users = []
+#
+#        # Grab friend list from Twitter API
+#        if twitterKey is not None and twitterSecret is not None:
+#            users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
+#        elif twitterIds is not None:
+#            ### DEPRECATED
+#            users = self._userDB.findUsersByTwitter(twitterIds)
+#
+#        # Send alert to people not already following the user
+#        followers = self._friendshipDB.getFollowers(authUserId)
+#        userIds = []
+#        for user in users:
+#            if user.user_id not in followers:
+#                userIds.append(user.user_id)
+#
+#        # Generate activity item
+#        self._addActivity(verb          = 'friend_twitter',
+#            userId        = authUserId,
+#            recipientIds  = userIds,
+#            body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
+#
+#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
+#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
+
+        return True
+
+    @API_CALL
+    def removeToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+
+        account   = self._accountDB.getAccount(authUserId)
+
+        return True
+
+
     """
     #     #                             
     #     #  ####  ###### #####   ####  

@@ -159,6 +159,17 @@ class FandangoGroup(AMovieGroup):
         self.addField(['fandango_id'])
         self.addField(['fandango_url'])
 
+class NetflixGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'netflix')
+        self.addKind('media_item')
+        self.addType('movie')
+        self.addType('tv')
+
+        self.addField(['netflix_id'])
+        self.addField(['netflix_url'])
+
 class RdioGroup(AKindTypeGroup):
     
     def __init__(self, *args, **kwargs):
@@ -217,7 +228,6 @@ class iTunesGroup(AKindTypeGroup):
 
         self.addField(['itunes_id'])
         self.addField(['itunes_url'])
-        self.addField(['itunes_data'])
 
 class AddressGroup(APlaceGroup):
 
@@ -441,6 +451,7 @@ allGroups = [
     iTunesGroup,
     AmazonGroup,
     FandangoGroup,
+    NetflixGroup,
     StampedTombstoneGroup,
 
     # AmazonLinkGroup,

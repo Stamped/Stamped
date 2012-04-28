@@ -278,6 +278,9 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
+        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_token          = SchemaElement(basestring)
+        self.netflix_secret         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
@@ -286,11 +289,15 @@ class HTTPLinkedAccounts(Schema):
             schema.facebook_id          = self.facebook_id
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
+            schema.netflix_id           = self.netflix_id
         elif schema.__class__.__name__ == 'TwitterAuthSchema':
             schema.twitter_key          = self.twitter_key
             schema.twitter_secret       = self.twitter_secret
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
+        elif schema.__class__.__name__ == 'NetflixAuthSchema':
+            schema.netflix.token        = self.netflix_token
+            schema.netflix.secret       = self.netflix_secret
         else:
             raise NotImplementedError(type(schema))
         return schema
@@ -299,6 +306,7 @@ class HTTPAvailableLinkedAccounts(Schema):
     def setSchema(self):
         self.twitter                = SchemaElement(bool)
         self.facebook               = SchemaElement(bool)
+        self.netflix                = SchemaElement(bool)
 
 class HTTPAccountChangePassword(Schema):
     def setSchema(self):
