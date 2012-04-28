@@ -8,11 +8,10 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from helpers                    import *
-
-from django.http                import HttpResponseRedirect
-from django.template            import RequestContext
-from django.shortcuts           import render_to_response
+from django.http        import HttpResponseRedirect
+from django.template    import RequestContext
+from django.shortcuts   import render_to_response
+from helpers            import *
 
 @handleView
 def index(request):

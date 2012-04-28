@@ -11,15 +11,14 @@ import libs.ec2_utils
 import datetime as dt
 
 from MongoStampedAPI            import globalMongoStampedAPI
-from errors                     import *
 from HTTPSchemas                import *
+from errors                     import *
 
 from django.http                import HttpResponse
 from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD     = libs.ec2_utils.is_prod_stack()
-#_baseurl   = "http://localhost:18000/v0"
 _baseurl    = "https://dev.stamped.com/v0"
 
 class StampedAPIProxy(object):

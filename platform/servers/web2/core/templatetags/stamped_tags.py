@@ -36,12 +36,12 @@ class MustacheTemplateLibrary(object):
                 text = f.read()
             
             name = template[:-len(suffix)]
-            self.templates[name] = text
+            self.templates[name] = (path, text)
         
         logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
     
     def render(self, template_name, context):
-        return self._renderer.render(self.templates[template_name], context)
+        return self._renderer.render(self.templates[template_name][1], context)
     
     def __str__(self):
         return self.__class__.__name__
