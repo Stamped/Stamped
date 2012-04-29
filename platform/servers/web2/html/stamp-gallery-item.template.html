@@ -1,7 +1,7 @@
 
-<!-- TODO:
+{{! TODO:
     * how to reference this specific stamp-gallery-item via stamp_id or entity_id
--->
+}}
 
 <div class="stamp-gallery-item">
     <div class="top-wave"></div>
@@ -24,11 +24,26 @@
                 {{#contents}}
                 <div class="stamped-content">
                     <span class="blurb">{{blurb}}</span>
-                    <span class="blurb_references">{{blurb_references}}</span>
+                    <span class="blurb-references">
+                    {{#blurb-references}}
+                        <span class="blurb-reference">
+                            <span class="indices">
+                                {{#indices}}
+                                    <span class="index">
+                                        {{.}}
+                                    </span>
+                                {{/indices}}
+                                
+                                {{! TODO: Action }}
+                            <span class="/indices">
+                        </span>
+                    {{/blurb-references}}
+                    </span>
                     <span class="images">
                     {{#images}}
-                        <!-- TODO: here would be a perfect example of Handlebars relative paths being handy -->
-                        <!-- e.g., using entity.title as the alt text -->
+                        {{! TODO: here would be a perfect example of Handlebars relative 
+                            paths being handy; e.g., using entity.title as the alt text.
+                        }}
                         <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
                     {{/images}}
                     </span>
