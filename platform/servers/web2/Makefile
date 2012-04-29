@@ -1,3 +1,11 @@
+# Makefile
+# 
+#     Contains dependency logic for preprocessing and optimizing resources 
+# used by the main Stamped website. Also contains logic for collecting and 
+# deploying assets to our cloud infrastructure (e.g., dev and prod).
+# 
+# @author:    Stamped (dev@stamped.com)
+# @copyright: (c) 2011-2012 Stamped.com
 
 override PROJECT_BASE_DIR	= .
 override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
@@ -6,8 +14,8 @@ TEMPLATE_DIRS	= html
 TEMPLATE_SUFFIX	= template.html
 TEMPLATE_DEST	= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
 TEMPLATE_PROG	= ./process_templates.py
-TEMPLATES 		= $(strip $(call CLEAN_PATH, \
-	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX)))))
+TEMPLATES 		= $(strip \
+	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX))))
 
 DEPENDENCIES	= $(TEMPLATES) $(TEMPLATE_PROG) assets/js/libs/mustache.js core/templatetags/stamped_tags.py
 

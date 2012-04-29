@@ -19,12 +19,11 @@ class MustacheTemplateLibrary(object):
         root = os.path.dirname(os.path.dirname(path))
         name = os.path.join(root, 'html')
         
-        self.templates = {}
-        
         self._load_templates(name)
-        self._renderer = pystache.Renderer(partials=self.templates)
+        self._renderer = pystache.Renderer(partials=self.partials)
     
     def _load_templates(self, directory):
+        self.templates = {}
         suffix = '.template.html'
         
         for template in sorted(os.listdir(directory)):
@@ -38,6 +37,7 @@ class MustacheTemplateLibrary(object):
             name = template[:-len(suffix)]
             self.templates[name] = (path, text)
         
+        self.partials = dict(((k, v[1]) for k, v in self.templates.iteritems()))
         logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
     
     def render(self, template_name, context):
@@ -85,13 +85,17 @@ class CustomTemplateNode(template.Node):
             # convert django context object to a normal python dict for ease of 
             # use / interop with the custom template library's renderer.
             for d in context:
-                utils.log()
-                utils.log(pformat(d))
-                utils.log()
-                context_dict.update(d)
+                for k, v in d.iteritems():
+                    if k not in context_dict:
+                        context_dict[k] = v
             
-            return self._library.render(self._template_name, context_dict)
+            result = self._library.render(self._template_name, context_dict)
+            if len(result.strip()) == 0:
+                logs.warn("CustomTemplateNode.render warning empty result (%s)" % self._template_name)
+            
+            return result
         except Exception, e:
             logs.warn("CustomTemplateNode.render error (%s): %s" % (self._template_name, e))
+            raise
             return ''
 

@@ -291,9 +291,9 @@ endif
 # -------------------------
 
 RED			= 1
-GREEN			= 2
+GREEN		= 2
 YELLOW		= 3
-BLUE			= 4
+BLUE		= 4
 PURPLE		= 5
 LIGHT_BLUE	= 6
 LIGHT_TAN	= 7
