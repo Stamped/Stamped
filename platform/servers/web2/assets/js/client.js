@@ -3,6 +3,9 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+/*jslint plusplus: false */
+/*global window, navigator, document, jQuery, setTimeout, opera, Backbone, Mustache, _ */
+
 if (typeof(StampedClient) == "undefined") {
     
     // TODO: use Class.extend here instead of functional object syntax.

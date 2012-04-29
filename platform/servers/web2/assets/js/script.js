@@ -3,8 +3,8 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
-/*jslint strict: true, plusplus: false */
-/*global window, navigator, document, jQuery, setTimeout, opera, Backbone, Handlebars, _ */
+/*jslint plusplus: false */
+/*global window, navigator, document, jQuery, setTimeout, opera */
 
 // usage: log('inside coolFunc', this, arguments);
 // paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
