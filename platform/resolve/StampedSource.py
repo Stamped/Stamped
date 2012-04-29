@@ -196,7 +196,7 @@ class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
             return None
 
 
-class EntityProxyTV(_EntityProxyObject, ResolverMediaItem):
+class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
     """
     Entity tv proxy
     """

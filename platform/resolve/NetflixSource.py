@@ -2,6 +2,7 @@
 
 """
 """
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -19,6 +20,7 @@ try:
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pformat
+    from datetime                   import datetime
     from Resolver                   import *
     from ResolverObject             import *
 except:
@@ -45,7 +47,7 @@ class _NetflixObject(object):
         self._titleObj = titleObj
 
     @property
-    def key(selfself):
+    def key(self):
         return self.__key
 
     @property
@@ -60,13 +62,46 @@ class _NetflixObject(object):
     def name(self):
         return self._titleObj['title']['regular']
 
+    @lazyProperty
+    def cast(self):
+        try:
+            cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
+            for entry in cast:
+                print("\nCAST MEMBER: %s" % entry['title'])
+            return [
+                {
+                'name':         entry['title'],
+                'source':       self.source,
+                }
+            for entry in cast
+            ]
+        except Exception:
+            return []
 
-#    @abstractproperty
-#    def info(self):
-#        pass
+    @lazyProperty
+    def images(self):
+        try:
+            return [ self._titleObj['box_art']['large'] ]
+        except Exception:
+            return []
 
-#    def __repr__(self):
-#        return pformat(self.info)
+    # Netflix only returns the release year.  Since the API can't distinguish exact dates from years, this is
+    #  excluded.  Also, the dateWeight function is only checking for exact matches anyway.
+#    @lazyProperty
+#    def release_date(self):
+#        try:
+#            return datetime(self._titleObj['release_year'], 1, 1)
+#        except KeyError:
+#            return None
+
+    @lazyProperty
+    def url(self):
+        try:
+            webpage = filter(lambda link :  link['title'] ==  u'web page',  self._titleObj['category'])[0]
+            return webpage['href']
+        except KeyError:
+            return None
+
 
     def __repr__(self):
 #        return "<%s %s %s>" % (self.source, self.type, self.name)
@@ -88,27 +123,51 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
             return None
 
     @lazyProperty
-    def cast(self):
+    def directors(self):
         try:
-            cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
-            return [
-                {
+            directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
+            # api returns either a dict or a list of dicts depending on len > 1
+            if isinstance(directors, list):
+                for dir in directors:
+                    print("\n" + dir['title'])
+                return [
+                    {
                     'name':         entry['title'],
                     'source':       self.source,
-                }
-                    for entry in cast
-            ]
+                    }
+                        for entry in directors
+                ]
+            else:
+                return [
+                    {
+                    'name':         directors['title'],
+                    'source':       self.source
+                    }
+                ]
         except Exception:
-            logs.info("\nError retrieving cast from NetflixMovie")
             return []
 
     @lazyProperty
-    def release_date(self):
+    def length(self):
         try:
-            string = self._titleObj['release_year']
+            return self._titleObj['runtime']
         except KeyError:
             return None
 
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            rating = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._titleObj['category'])[0]
+            return rating['label']
+        except KeyError:
+            return None
+
+#    @lazyProperty
+#    def directors(self):
+#        try:
+#            return [ { 'name' : self._titleObj['']}]
+#        except:
+#            return
 
 
 class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
@@ -117,8 +176,15 @@ class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
     """
     def __init__(self, titleObj):
         _NetflixObject.__init__(self, titleObj)
-        ResolverMediaItem.__init__(self, types=['tv'])
+        ResolverMediaCollection.__init__(self, types=['tv'])
 
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            rating = filter(lambda link : '/tv_ratings' in link['scheme'],  self._titleObj['category'])[0]
+            return rating['label']
+        except KeyError:
+            return None
 
 
 
@@ -135,15 +201,15 @@ class NetflixSource(GenericSource):
         GenericSource.__init__(self, 'netflix',
             groups=[
                 'release_date',
+                'desc',
                 'directors',
                 'cast',
-                'desc',
                 'mpaa_rating',
                 'genres',
-                'tracks',
-                'publishers',
+                'directors',
                 'images',
-                'length'
+                'length',
+                'url'
             ],
             kinds=[
                 'media_item',
@@ -177,11 +243,8 @@ class NetflixSource(GenericSource):
     def __genericSourceGen(self, query, filter):
         def gen():
             try:
-                results = self.__netflix.title_search(query.name)
-                if 'catalog_titles' not in results:
-                    return
+                results = self.__netflix.searchTitles(query.name)
 
-                results = results['catalog_titles']
                 for title in results['catalog_title']:
                     if (filter(title)):
                         yield title
@@ -190,11 +253,8 @@ class NetflixSource(GenericSource):
                 result_counter = results['results_per_page']
 
                 # return all remaining results through separate page calls to the api
-                while (result_counter < num_results):
-                    results = self.__netflix.title_search(query, start_index=result_counter)
-                    if 'catalog_titles' not in results:
-                        return
-                    results = results['catalog_titles']
+                while result_counter < num_results:
+                    results = self.__netflix.searchTitles(query, start_index=result_counter)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
@@ -217,12 +277,12 @@ class NetflixSource(GenericSource):
         return self.generatorSource(gen, constructor=NetflixTVShow)
 
 
-    def searchAllSource(self, query):
-        def gen():
-            try:
-                results = self.__netflix.movie_search
-            except GeneratorExit:
-                    pass
+#    def searchAllSource(self, query):
+#        def gen():
+#            try:
+#                results = self.__netflix.movie_search
+#            except GeneratorExit:
+#                    pass
 
 if __name__ == '__main__':
     demo(NetflixSource(), 'Inception')
