@@ -143,7 +143,7 @@ class FacebookAuthSchema(Schema):
     def setSchema(self):
         self.facebook_token         = SchemaElement(basestring)
 
-class NetflixAccountSchema(Schem):
+class NetflixAccountSchema(Schema):
     def setSchema(self):
         self.netflix_id             = SchemaElement(basestring)
 

@@ -13,7 +13,21 @@ from django import template
 
 register = template.Library()
 
+__global_template_library = None
+def global_custom_template_library():
+    global __global_template_library
+    
+    if __global_template_library is None:
+        __global_template_library = MustacheTemplateLibrary()
+    
+    return __global_template_library
+
 class MustacheTemplateLibrary(object):
+    
+    """
+        Container for all custom mustache templates used in this django project.
+    """
+    
     def __init__(self):
         path = os.path.abspath(os.path.dirname(__file__))
         root = os.path.dirname(os.path.dirname(path))
@@ -46,17 +60,14 @@ class MustacheTemplateLibrary(object):
     def __str__(self):
         return self.__class__.__name__
 
-__global_template_library = None
-def global_custom_template_library():
-    global __global_template_library
-    
-    if __global_template_library is None:
-        __global_template_library = MustacheTemplateLibrary()
-    
-    return __global_template_library
-
 @register.tag
 def custom_template(parser, token):
+    """
+        Defines a custom tag for the django templating engine called 'custom_template' 
+        which accepts exactly one parameter, the name of the custom template to render 
+        in the context of the current django templating context.
+    """
+    
     try:
         tag_name, template_name = token.split_contents()
     except ValueError:
@@ -74,6 +85,12 @@ def custom_template(parser, token):
     return CustomTemplateNode(template_name, library)
 
 class CustomTemplateNode(template.Node):
+    """
+        Defines the renderer (e.g., View in MVC) for our custom_template tag, 
+        which renders custom templates w.r.t. django's current templating 
+        context.
+    """
+    
     def __init__(self, template_name, library):
         self._template_name = template_name
         self._library       = library
@@ -96,6 +113,7 @@ class CustomTemplateNode(template.Node):
             return result
         except Exception, e:
             logs.warn("CustomTemplateNode.render error (%s): %s" % (self._template_name, e))
-            raise
+            logs.warn(utils.getFormattedException())
+            
             return ''
 

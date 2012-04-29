@@ -208,7 +208,8 @@ def save():
             raise
         localData.saveLog(localData.log)
     except:
-        pprint.pprint(localData.log)
+        #pprint.pprint(localData.log)
+        pass
     
     try:
         if localData.saveStat is None:

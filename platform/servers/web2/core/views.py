@@ -6,9 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
+import os, utils
 
-from django.http    import HttpResponseRedirect
+from django.http    import HttpResponse, HttpResponseRedirect
 from helpers        import *
 
 @stamped_view
@@ -27,4 +27,16 @@ def profile(request, screen_name, **kwargs):
     stamps = stampedAPIProxy.getUserStamps(user_id=user['user_id'])
     
     return stamped_render(request, 'demo.html', locals())
+
+@stamped_view
+def test(request, **kwargs):
+    screen_name = 'travis'
+    
+    path = os.path.abspath(os.path.dirname(__file__))
+    path = os.path.join(os.path.join(os.path.join(path, '..'), 'html'), 'test.html')
+    
+    with open(path, 'r') as f:
+        source = f.read()
+    
+    return HttpResponse(source, content_type='text/html')
 
