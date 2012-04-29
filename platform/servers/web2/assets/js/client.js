@@ -81,8 +81,6 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         this.get_user_stamps_by_screen_name = function(screen_name) {
-            // TODO: support genericslice params
-            
             return _get("/collections/user.json", {
                 'screen_name' : screen_name
             }).pipe(function (data) {
