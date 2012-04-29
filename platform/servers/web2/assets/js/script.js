@@ -602,58 +602,50 @@ if (typeof(StampedClient) == "undefined") {
         
         var AStampedCollection = Backbone.Collection.extend({ });
         
+        var partial_templates = {}
+        
+        $(".mustache-template").each(function (i) {
+            partial_templates[$(this).attr('id')] = $(this).html();
+        });
+        
         var AStampedView = Backbone.View.extend({
             render : function() {
-                var render_template = _get_value(this, '_render_template');
-                $(this.el).html(render_template(this.model.toJSON()));
+                var result = this._render_template(this._get_context());
+                $(this.el).html(result);
                 
                 return this;
             }, 
             
-            _render_template : function() {
+            _render_template : function(view) {
                 if (this.__template === undefined) {
-                    this.__template = _get_value(this, '_template');
+                    this.__template = this._get_template();
                 }
                 
-                if (this.__template_cache === undefined) {
-                    this.__template_cache = Handlebars.compile(this.__template);
+                if (this.__template === undefined || this.__template === null) {
+                    _throw("stamped render error: invaild template");
                 }
                 
-                return this.__template_cache;
+                return Mustache.render(this.__template, view, partial_templates);
             }, 
             
-            _load_template  : function(template_id) {
-                /*function load(url, onComplete) {
-                    return $.Deferred(function (dfd) {
-                        $.get(url)
-                            .done(function (templates) {
-                                $(templates).filter('script').each(function (i, el) {
-                                    add(el.id, $(el).html().trim());
-                                });
-                                
-                                if ($.isFunction(onComplete)) {
-                                    onComplete();
-                                }
-                                dfd.resolve();
-                            })
-                            .fail(dfd.reject);
-                    }).promise();
-                }*/
+            _get_context    : function() {
+                return this.model.toJSON();
             }, 
             
-            _template       : function() { _throw("must override _template"); }
+            _load_template  : function(template_name) {
+                return $("#" + template_name).html();
+            }, 
+            
+            _get_template   : function() { _throw("must override _get_template"); }
         });
         
-        var StampsView = AStampedView.extend({
-            _template       : function() {
-                // TODO: where to load templates from? ideally pre-compiled and pre-inserted into DOM?
-                // TODO: import pre-compiled templates.html containing any necessary Handlebars templates?
-                
-                // will pre-compiling work if we need to insert templates into html server-side?
-                // compiled templates are javascript -- need to support noscript environments...
-                // possibly use Mustache instead and invoke templates from python?
-                
-                // TODO: google best client and server-side templating
+        this.StampsGalleryView = AStampedView.extend({
+            _get_template   : function() {
+                return this._load_template('stamp-gallery');
+            }, 
+            
+            _get_context    : function() {
+                return { 'stamps' : AStampedView.prototype._get_context.apply(this) };
             }
         });
         
