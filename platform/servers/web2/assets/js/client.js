@@ -752,17 +752,18 @@ if (typeof(StampedClient) == "undefined") {
                 return Mustache.render(this.__template, view, partial_templates);
             }, 
             
-            _get_context    : function() {
-                return this.model.toJSON();
-            }, 
-            
             _load_template  : function(template_name) {
                 return $("#" + template_name).html();
+            }, 
+            
+            _get_context    : function() {
+                return this.model.toJSON();
             }, 
             
             _get_template   : function() { _throw("must override _get_template"); }
         });
         
+        // TODO: make this private
         this.StampsGalleryView = AStampedView.extend({
             _get_template   : function() {
                 return this._load_template('stamp-gallery');
