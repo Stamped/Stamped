@@ -90,6 +90,15 @@ def stamped_view(f):
             response['Cache-Control'] = 'max-age=600'
             
             return response
+        
+        except urllib2.HTTPError, e:
+            logs.warning("%s Error: %s" % (e.code, e))
+            logs.warning(utils.getFormattedException())
+            
+            response = HttpResponse("%s" % e, status=e.code)
+            logs.error(response.status_code)
+            return response
+        
         except StampedHTTPError as e:
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
             logs.warning(utils.getFormattedException())

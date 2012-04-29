@@ -6,7 +6,8 @@
 (function() {
     $(document).ready(function() {
         var client = new StampedClient();
-        var screen_name = "travis";
+        var screen_name = document.URL.replace(/^.*\/(\w{1,20})\/?/, "$1");
+        console.debug("Stamped profile page for screen_name '" + screen_name + "'");
         
         var userP = client.get_user_by_screen_name(screen_name);
         userP.done(function (user) {
