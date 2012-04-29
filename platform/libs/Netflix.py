@@ -458,19 +458,19 @@ class Netflix(object):
         self.__blacklistLifespan = datetime.timedelta(days=2)
         self.__blacklistThreshold = 5
 
-    def _checkBlacklistExpiration(self):
+    def __checkBlacklistExpiration(self):
         if (datetime.datetime.now() - self.__blacklistClearDate) > self.__blacklistLifespan:
             self.__blacklist.clear()
             self.__blacklistClearDate = datetime.datetime.now()
 
-    def _addToBlacklistCount(self, user_id):
+    def __addToBlacklistCount(self, user_id):
         """
         Increments the blacklist counter for a given user, and returns a bool on whether the threshold is hit
         """
         count = self.__blacklist.setdefault(user_id, 0) + 1
         self.__blacklist[user_id] = count
         if (count >= self.__blacklistThreshold):
-            text = "Netflix user_id: %s hit the blacklist threshold of %d 403/401 errors." % (user_id, __blacklistThreshold)
+            text = "Netflix user_id: %s hit the blacklist threshold of %d 403/401 errors." % (user_id, self.__blacklistThreshold)
             logs.info(text)
             msg = {}
             msg['to'] = 'dev@stamped.com'
@@ -481,18 +481,17 @@ class Netflix(object):
             return True
         return False
 
-    def _isUserBlacklisted(self, user_id):
-        if
+    def __isUserBlacklisted(self, user_id):
+        return self.__blacklist.get(user_id, 0) >= self.__blacklistThreshold
 
-
-    def get(self, service, user_id=None, token=None, **parameters):
+    def __get(self, service, user_id=None, token=None, **parameters):
         """
         Makes a request to the Netflix API
         """
-        self._checkBlacklistExpiration()
+        self.__checkBlacklistExpiration()
 
         #if a user is specified, and she is in the blacklist, return None
-        if user_id is not None and user_id in self.__blacklist:
+        if user_id is not None and self.__isUserBlacklisted(user_id):
             return None
         connection = httplib.HTTPConnection("%s:%s" % (HOST, PORT))
         if service.startswith('http'):
@@ -520,14 +519,14 @@ class Netflix(object):
             connection.request('GET', oauthRequest.to_url())
             response = connection.getresponse()
             # if the response is a 401 or 403, blacklist the user until the day expires
-            #if response.status in (401,403):
-            if self._addToBlacklistCount(user_id):
-                return None
+            if response.status in (401,403):
+                if self.__addToBlacklistCount(user_id):
+                    return None
 
         return json.loads(response.read())
 
 
-    def asList(self, elmt):
+    def __asList(self, elmt):
         if isinstance(elmt, list):
             return elmt
         elif elmt == None:
@@ -536,7 +535,7 @@ class Netflix(object):
 
     def getFromLinks(self, links, key, search, returnKey):
         """
-        search a netflix 'link' list of dicts for a given substring in a given key.  If it is found, provide the value
+        Search a netflix 'link' list of dicts for a given substring in a given key.  If it is found, provide the value
          of the returnKey in that dict
         """
         for item in links:
@@ -549,7 +548,7 @@ class Netflix(object):
         Searches the netflix catalog for titles with a given search string.
         returns the json result as a dict
         """
-        results = self.get(
+        results = self.__get(
                         'catalog/titles',
                         term            = title,
                         start_index     = start,
@@ -563,7 +562,7 @@ class Netflix(object):
         Returns a list of (date, {netflix_id:<ID>}) tuples for the user identified by auth
         """
         token = oauth.OAuthToken(user_token, user_secret)
-        results = self.get(
+        results = self.__get(
                             'users/' + user_id + '/queues/instant',
                             token                   = token,
                             start_index             = start,
@@ -576,17 +575,19 @@ class Netflix(object):
         Returns a list of (date, {netflix_id:<ID>}) tuples for the user identified by auth
         """
         token = oauth.OAuthToken(user_token, user_secret)
-        results = self.get(
+        results = self.__get(
             'rental_history',
             user_id                 = user_id,
             token                   = token,
             start_index             = start,
             max_results             = count,
         )
+        if results is None:
+            return None
         recent = []
-        for item in self.asList(results['rental_history']['rental_history_item']):
+        for item in self.__asList(results['rental_history']['rental_history_item']):
             date = datetime.datetime.fromtimestamp(item['watched_date'])
-            netflix_id = self.getFromLinks(self.asList(item['link']), 'rel', 'catalog/title', 'href')
+            netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
             if netflix_id is not None:
                 recent.append( (date, {'netflix_id': netflix_id}) )
         return recent

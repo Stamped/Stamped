@@ -37,7 +37,7 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGlobalPriority('entity', -1)
         self.setGlobalPriority('thetvdb', 2)
         self.setGlobalPriority('itunes', 1)
-        self.setGlobalPriority('netflix',1000)
+        self.setGlobalPriority('netflix',1)
 
         self.setGroupPriority('amazon', 'tracks', -1)
         self.setGroupPriority('amazon', 'albums', -1)
