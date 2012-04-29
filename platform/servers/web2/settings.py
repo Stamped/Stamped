@@ -80,11 +80,6 @@ else:
 
 STATIC_DOC_ROOT = SITE_ROOT
 
-# URL prefix for admin static files -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/admin/static/'
-
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -121,11 +116,24 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'web2.urls'
 
+STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
+STAMPED_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR, "templates.generated.html")
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJ_ROOT, "html"), 
+    STAMPED_TEMPLATE_DIR, 
+)
+
+# A tuple of strings representing allowed prefixes for the {% ssi %} template 
+# tag. This is a security measure, so that template authors can't access files 
+# that they shouldn't be accessing.
+# 
+# For example, if ALLOWED_INCLUDE_ROOTS is ('/home/html', '/var/www'), then 
+# {% ssi /home/html/foo.txt %} would work, but {% ssi /etc/passwd %} wouldn't.
+ALLOWED_INCLUDE_ROOTS = (
+    STAMPED_TEMPLATE_DIR, 
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

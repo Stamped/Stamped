@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% load stamped_tags %}
 
+<!-- 
+    NOTE: this is a workaround because the built-in ssi tag doesn't support 
+    context variables as arguments. We use ssi to include other html files 
+    which contain non-django templates that the django templating system 
+    should not attempt to parse. Note that we would use the built-in include 
+    tag if we wanted to parse an external template before inclusion.
+-->
+{% load ssi from future %}
+
 {% block head %}
     {{ block.super }}
     
@@ -10,14 +19,20 @@
 {% block main %}
     {{ block.super }}
     
-    {% custom_template "stamp-gallery" %}
-    <div id="data"></div>
+    <div id="data">
+        {% custom_template "stamp-gallery" %}
+    </div>
+    
+    <div id="data2"></div>
 {% endblock main %}
 
 {% block scripts %}
     {{ block.super }}
      
     <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
+    <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/demo.js"></script>
+    
+    {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}
 

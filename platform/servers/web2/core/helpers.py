@@ -6,20 +6,28 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import json, logs, urllib2, utils
+import copy, json, logs, urllib2, utils
 import libs.ec2_utils
 import datetime as dt
+import settings
 
 from MongoStampedAPI            import globalMongoStampedAPI
 from HTTPSchemas                import *
 from errors                     import *
 
 from django.http                import HttpResponse
+from django.shortcuts           import render_to_response
+from django.template            import RequestContext
 from django.utils.functional    import wraps
 
 # initialize several useful globals
-IS_PROD     = libs.ec2_utils.is_prod_stack()
-_baseurl    = "https://dev.stamped.com/v0"
+IS_PROD  = libs.ec2_utils.is_prod_stack()
+_baseurl = "https://dev.stamped.com/v0"
+
+# extract all of the settings from django's settings.py which begin with STAMPED_
+# note that these settings will be included in the context of every rendered template.
+STAMPED_SETTINGS = filter(lambda s: s.startswith('STAMPED_'), dir(settings))
+STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETTINGS))
 
 class StampedAPIProxy(object):
     
@@ -65,7 +73,7 @@ class StampedAPIProxy(object):
 
 stampedAPIProxy = StampedAPIProxy()
 
-def handleView(f):
+def stamped_view(f):
     @wraps(f)
     def _wrapper(request, *args, **kwargs):
         try:
@@ -141,6 +149,7 @@ def handleView(f):
         except Exception as e:
             logs.warning("500 Error: %s" % e)
             logs.warning(utils.getFormattedException())
+            utils.printException()
             
             response = HttpResponse("internal server error", status=500)
             logs.error(response.status_code)
@@ -153,4 +162,13 @@ def handleView(f):
                 pass
 
     return _wrapper
+
+def stamped_render(request, template, context, **kwargs):
+    # augment template context with global django / stamped settings
+    kwargs['context_instance'] = kwargs.get('context_instance', RequestContext(request))
+    
+    context = copy.copy(context)
+    context.update(STAMPED_SETTINGS)
+    
+    return render_to_response(template, context, **kwargs)
 
