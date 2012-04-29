@@ -65,6 +65,7 @@ def custom_template(parser, token):
     for s in [ '"', '"' ]:
         if (template_name.startswith(s) and template_name.endswith(s)):
             template_name = template_name[len(s):-len(s)]
+            break
     
     library = global_custom_template_library()
     if (template_name not in library.templates):
@@ -79,9 +80,10 @@ class CustomTemplateNode(template.Node):
     
     def render(self, context):
         try:
-            # convert django context object to a normal python dict
             context_dict = {}
             
+            # convert django context object to a normal python dict for ease of 
+            # use / interop with the custom template library's renderer.
             for d in context:
                 utils.log()
                 utils.log(pformat(d))
