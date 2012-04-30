@@ -424,6 +424,9 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         raise StampedHTTPError("invalid_form", 400)
 
 def transformOutput(value, **kwargs):
+    """
+    Serialize object to json and return it as an HttpResponse object
+    """
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
     
