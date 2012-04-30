@@ -7,15 +7,19 @@
  */
 
 @import "libs/elements.less";
-@import "ilibs/sotope.less";
+@import "libs/isotope.less";
 
 .stamp-gallery {
+    position: relative;
     width: 100%;
+    clear: both;
 }
 
 .stamp-gallery-item {
-    background: #000;
-    position: relative;
+    background: #fff;
+    float: left;
+    width: 28%;
+    margin: 1em;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top no-repeat;
@@ -31,7 +35,12 @@
     
     .content {
         margin: 0 auth;
-        width: 304px;
+        
+        .stamp-contents .images img {
+            border: 1px solid;
+            max-width: 128px;
+            height: auto;
+        }
     }
 }
 

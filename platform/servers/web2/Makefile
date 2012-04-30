@@ -10,7 +10,7 @@
 override PROJECT_BASE_DIR	= .
 override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
 
-TEMPLATE_DIRS	= html
+TEMPLATE_DIRS	= templates
 TEMPLATE_SUFFIX	= template.html
 TEMPLATE_DEST	= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
 TEMPLATE_PROG	= ./process_templates.py
