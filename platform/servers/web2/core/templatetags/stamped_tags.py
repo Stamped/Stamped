@@ -31,7 +31,7 @@ class MustacheTemplateLibrary(object):
     def __init__(self):
         path = os.path.abspath(os.path.dirname(__file__))
         root = os.path.dirname(os.path.dirname(path))
-        name = os.path.join(root, 'html')
+        name = os.path.join(root, 'templates')
         
         self._load_templates(name)
         self._renderer = pystache.Renderer(partials=self.partials)

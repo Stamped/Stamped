@@ -37,7 +37,7 @@ def process_templates(output_path):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--output', type=str, default='html/templates.generated.html')
+    parser.add_argument('-o', '--output', type=str, default='templates/templates.generated.html')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     args = parser.parse_args()
     

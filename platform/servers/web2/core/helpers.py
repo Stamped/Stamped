@@ -175,9 +175,18 @@ def stamped_view(f):
 def stamped_render(request, template, context, **kwargs):
     # augment template context with global django / stamped settings
     kwargs['context_instance'] = kwargs.get('context_instance', RequestContext(request))
-    
-    context = copy.copy(context)
-    context.update(STAMPED_SETTINGS)
+    context = get_stamped_context(context)
     
     return render_to_response(template, context, **kwargs)
+
+def get_stamped_context(context):
+    context = copy.copy(context)
+    json_context = json.dumps(context, indent=4, sort_keys=not IS_PROD)
+    preload = "var STAMPED_PRELOAD = %s;" % json_context
+    
+    context["IS_PROD"] = IS_PROD
+    context["STAMPED_PRELOAD_JS"] = preload
+    context.update(STAMPED_SETTINGS)
+    
+    return context
 
