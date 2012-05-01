@@ -110,7 +110,7 @@ def handleHTTPRequest(requires_auth=True,
         assert callable(fn)
         
         @wraps(fn)
-        def handleHTTPRequest(request, *args, **kwargs):
+        def wrapper(request, *args, **kwargs):
             try:
                 origin = ""
                 
@@ -256,7 +256,7 @@ def handleHTTPRequest(requires_auth=True,
                 except:
                     pass
         
-        return handleHTTPRequest
+        return wrapper
     return decorator
 
 def checkClient(request):

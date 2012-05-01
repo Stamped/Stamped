@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% load stamped_tags %}
 
 <!-- 
@@ -19,7 +19,46 @@
 {% block main %}
     {{ block.super }}
     
-    <div id="data">
+    <!-- TODO:  customize header -->
+    
+    <div class="profile-header fullwidth">
+        <div class="profile-header-pre"></div>
+        
+        <div class="profile-header-body fixedwidth clearfix">
+            <div class="profile-image floatleft">
+                <img src="{{user.image_url}}" />
+            </div>
+            
+            <div class="floatleft profile-section0">
+                <p>
+                    <a class='pronounced-title large' href="/{{user.screen_name}}">{{user.name}}</a>
+                    <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
+                </p>
+                <p>
+                    {{user.bio}}
+                </p>
+                
+                <!-- TODO: FOLLOW button -->
+            </div>
+            
+            <div class="floatleft profile-section2">
+                <p class="number">{{user.num_friends}}</p>
+                <p>following</p>
+                
+                <!-- TODO: reusable friend images gallery -->
+            </div>
+            
+            <div class="floatleft profile-section1">
+                <p class="number">{{user.num_followers}}</p>
+                <p>followers</p>
+                
+                <!-- TODO: reusable follower images gallery -->
+            </div>
+        </div>
+        <div class="profile-header-post"></div>
+    </div>
+    
+    <div id="data" class="fixedwidth">
         {% custom_template "stamp-gallery" %}
     </div>
     
@@ -30,6 +69,9 @@
     {{ block.super }}
      
     <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
     <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/demo.js"></script>
     

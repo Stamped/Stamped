@@ -9,16 +9,34 @@
 @import "libs/h5bp.min.css";
 @import "libs/elements.less";
 
+@font-face {
+    font-family: "StampedEntityFont";
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFBComp-Light.otf") format("opentype");
+}
+
+@font-face {
+    font-family: "StampedScreenNameFont";
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFBComp-Reg.otf") format("opentype");
+}
+
+@font-face {
+    font-family: "StampedButtonFont";
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
+}
+
 body, html {
     width:  100%;
     height: 100%;
 }
 
 body {
-    background: url(/assets/img/main-noise.png) left top repeat;
-    font-family: 'arial',sans-serif;
+    background: #fff;
+    font-family: 'arial', sans-serif;
     color: #666;
-    font-size: 16px;
+    font-size: 1em;
 }
 
 a, a:visited {
@@ -30,22 +48,89 @@ a:hover {
     text-decoration: underline;
 }
 
-.flood {
-    background: url(/assets/img/noisegradient.png) center top no-repeat;
-}
-
 .replaced {
     display: block;
     text-indent: -9999em;
     overflow: hidden;
 }
 
-.wrap {
-    background: url(/assets/img/noisegradient.png) center top no-repeat;
-    margin: 0 auto;
-    position: relative;
-    width: 940px;
+.fullwidth {
+    width: 100%;
     height: 100%;
+    position: relative;
+}
+
+.floatleft {
+    float: left;
+}
+
+.floatright {
+    float: right;
+}
+
+header, footer, .fixedwidth {
+    width: 940px;
+    margin: 0 auto;
+    padding: 0;
+    border: 0 none;
+}
+
+.profile-header {
+    background: url(/assets/img/main-noise.png) left top repeat;
+    /*background: url(/assets/img/noisegradient.png) left top repeat;*/
+    
+    .profile-header-pre {
+        background: url(/assets/img/main-topcap.png) left top repeat-x;
+        width: 100%;
+        height: 8px;
+        margin: 0;
+    }
+    
+    .profile-header-body {
+        padding: 34px 0;
+        
+        .floatleft {
+            margin: 0 24px 0 0;
+        }
+        
+        p {
+            margin: 0;
+        }
+    }
+    
+    .profile-header-post {
+        background: url(/assets/img/main-botcap.png) left top repeat-x;
+        width: 100%;
+        height: 8px;
+        margin: 0;
+    }
+}
+
+.profile-image {
+    .floatleft;
+    
+    img {
+        max-width: 128px;
+        height: auto;
+        border: 4px solid #fff;
+        
+        .box-shadow(2px, 2px, 1px, rgba(0, 0, 0, 0.15));
+    }
+}
+
+.profile-section0 {
+    .floatleft;
+    width: 35%;
+}
+
+.profile-section1, .profile-section2 {
+    .floatright;
+    width: 18%;
+    
+    .number {
+        font-family: "StampedButtonFont", helvetica, sans-serif;
+        color: #000;
+    }
 }
 
 .user {
@@ -67,32 +152,6 @@ a:hover {
     z-index: 100;
     display: none;
     filter: alpha(opacity=65);
-}
-
-.lightbox {
-    width: 854px;
-    height: 482px;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-left: -427px;
-    margin-top: -241px;
-    background: #000;
-    z-index: 101;
-    display: none;
-}
-
-.close {
-    background: url(/assets/img/public-home/close-sprite.png) left top no-repeat;
-    width: 66px;
-    height: 65px;
-    position: absolute;
-    left: -33px;
-    top: -33px;
-}
-
-.close:hover {
-    background-position: left bottom;
 }
 
 .brand {
@@ -117,7 +176,7 @@ a:hover {
 
 .card .inner {
     clear: both;
-    padding: 175px 0px .3em;
+    padding: 175px 20px .3em;
 }
 
 .card .top-wave {
@@ -166,8 +225,58 @@ footer .copyright a, footer .copyright a {
 .talldisplay .iphone {
     position: absolute;
     left: 50%;
-    top: 50%;
+    top:  50%;
     margin-left: -470px;
-    margin-top: -405px;
+    margin-top:  -405px;
+}
+
+.stamp-category-book .icon {
+    background: url(/assets/img/entity-type-book.png) no-repeat;
+    width:  19px;
+    height: 15px;
+}
+
+.stamp-category-film .icon {
+    background: url(/assets/img/entity-type-film.png) no-repeat;
+    width:  15px;
+    height: 15px;
+}
+
+.stamp-category-food .icon {
+    background: url(/assets/img/entity-type-food.png) no-repeat;
+    width:  21px;
+    height: 15px;
+}
+
+.stamp-category-music .icon {
+    background: url(/assets/img/entity-type-music.png) no-repeat;
+    width:  15px;
+    height: 15px;
+}
+
+.stamp-category-other .icon, .stamp-category- .icon {
+    background: url(/assets/img/entity-type-other.png) no-repeat;
+    width:  12px;
+    height: 15px;
+}
+
+.screen-name {
+    text-transform: lowercase;
+    font-family: "StampedScreenNameFont", helvetica, sans-serif;
+    letter-spacing: .05em;
+}
+
+.pronounced-title a, a.pronounced-title {
+    color: #000;
+}
+
+.pronounced-title {
+    font-family: "StampedEntityFont", helvetica, sans-serif;
+    font-size: 2em;
+    letter-spacing: .025em;
+}
+
+.large {
+    font-size: 2.2em;
 }
 
