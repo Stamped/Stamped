@@ -659,6 +659,8 @@ class HTTPEntity(Schema):
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
 
+        logs.info("\n HIT importEntity ######")
+
         subcategory             = self._formatSubcategory(self.subcategory)
         
         # Restaurant / Bar
@@ -872,7 +874,7 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-            else
+            else:
                 logs.info ('\n NOT ADDING NETFLIX SOURCE\nnetflix_id: %s   is_insant_available: %s' % (entity.sources.netflix_id, entity.sources.netflix_is_instant_available))
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
