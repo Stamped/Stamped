@@ -838,6 +838,8 @@ class EntitySourcesSchema(Schema):
         self.netflix_id                     = SchemaElement(basestring)
         self.netflix_url                    = SchemaElement(basestring)
         self.netflix_source                 = SchemaElement(basestring)
+        self.netflix_is_instant_available   = SchemaElement(bool)
+        self.netflix_instant_available_until= SchemaElement(datetime)
         self.netflix_timestamp              = SchemaElement(datetime)
 
         self.singleplatform_id              = SchemaElement(basestring)

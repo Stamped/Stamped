@@ -11,10 +11,10 @@ import httplib
 import time
 import simplejson
 import json
-import datetime
 import utils
 import logs
 
+from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 from urlparse           import urlparse
 from xml.dom.minidom    import parseString
@@ -454,14 +454,14 @@ class Netflix(object):
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared
         self.__blacklist = dict()#dict({USER_ID: 4})
-        self.__blacklistClearDate = datetime.datetime.now()
-        self.__blacklistLifespan = datetime.timedelta(days=2)
+        self.__blacklistClearDate = datetime.now()
+        self.__blacklistLifespan = timedelta(days=2)
         self.__blacklistThreshold = 5
 
     def __checkBlacklistExpiration(self):
-        if (datetime.datetime.now() - self.__blacklistClearDate) > self.__blacklistLifespan:
+        if (datetime.now() - self.__blacklistClearDate) > self.__blacklistLifespan:
             self.__blacklist.clear()
-            self.__blacklistClearDate = datetime.datetime.now()
+            self.__blacklistClearDate = datetime.now()
 
     def __addToBlacklistCount(self, user_id):
         """
@@ -532,6 +532,9 @@ class Netflix(object):
 
         return json.loads(response.read())
 
+    def get(self, service, user_id=None, token=None, **parameters):
+        return self.__get(service, user_id, token, **parameters)
+
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -564,12 +567,21 @@ class Netflix(object):
         returns the json result as a dict
         """
         results = self.__get(
-                        'catalog/titles',
+                        service         = 'catalog/titles',
                         term            = title,
                         start_index     = start,
                         max_results     = count,
-                        expand          ='synopsis,cast,directors'
+                        expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
+        return results.get('catalog_titles', None)
+
+    def getTitleDetails(self, netflix_id):
+        results = self.__get(
+            service         = netflix_id,
+            expand          ='synopsis,cast,directors'
+        )
+        import pprint
+        pprint.pprint (results)
         return results.get('catalog_titles', None)
 
     def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
@@ -601,7 +613,7 @@ class Netflix(object):
             return None
         recent = []
         for item in self.__asList(results['rental_history']['rental_history_item']):
-            date = datetime.datetime.fromtimestamp(item['watched_date'])
+            date = datetime.fromtimestamp(item['watched_date'])
             netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
             if netflix_id is not None:
                 recent.append( (date, {'netflix_id': netflix_id}) )
@@ -688,8 +700,13 @@ def demo(method, **params):
 #    )
 
     #result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-    result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
-    #result = netflix.searchTitles("hope floats")
+    #result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
+    result = netflix.searchTitles("inception")
+
+#    result = netflix.getTitleDetails(BIGLEB_ID)
+#    result = netflix.get('http://api.netflix.com/catalog/titles/movies/1181532/format_availability')
+
+#    result = netflix.__get('http://api.netflix.com/catalog/titles/movies/1181532/format_availability')
 
 #    result = netflix.get('https://api-user.netflix.com/oauth/login', token=token, application_name='Stamped')
     #pprint.pprint(result)
