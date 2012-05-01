@@ -93,7 +93,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             raise StampedUnavailableError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
 
-    def updateLinkedAccounts(self, userId, twitter=None, facebook=None):
+    def updateLinkedAccounts(self, userId, twitter=None, facebook=None, netflix=None):
 
         ### TODO: Derive valid_twitter/facebook from schema
 
@@ -112,6 +112,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'facebook_expire',
             'facebook_alerts_sent',
         ]
+
+        valid_netflix = [
+            'netflix_id'
+            'netflix_token',
+            'netflix_secret',
+        ]
         
         fields = {}
 
@@ -126,6 +132,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             for k, v in facebook.value.iteritems():
                 if k in valid_facebook and v is not None:
                     fields['linked_accounts.facebook.%s' % k] = v
+
+        # Netflix
+        if netflix is not None:
+            for k, v in netflix.value.iteritems():
+                if k in valid_netflix and v is not none:
+                    field['linked_accounts.netflix.%s' % k] = v
             
         if len(fields) > 0:
             self._collection.update(

@@ -143,6 +143,15 @@ class FacebookAuthSchema(Schema):
     def setSchema(self):
         self.facebook_token         = SchemaElement(basestring)
 
+class NetflixAccountSchema(Schema):
+    def setSchema(self):
+        self.netflix_id             = SchemaElement(basestring)
+
+class NetflixAuthSchema(Schema):
+    def setSchema(self):
+        self.netflix_token          = SchemaElement(basestring)
+        self.netflix_secret         = SchemaElement(basestring)
+
 class DevicesSchema(Schema):
     def setSchema(self):
         self.ios_device_tokens  = SchemaList(SchemaElement(basestring))
@@ -587,6 +596,13 @@ class FriendsSlice(GenericCollectionSlice):
         self.distance           = SchemaElement(int,  default=2)
         self.inclusive          = SchemaElement(bool, default=True)
 
+class ConsumptionSlice(GenericCollectionSlice):
+    def setSchema(self):
+        GenericCollectionSlice.setSchema(self)
+
+        self.scope              = SchemaElement(basestring)
+
+
 class ViewportSchema(Schema):
     def setSchema(self):
         self.upperLeft          = CoordinatesSchema()
@@ -678,7 +694,8 @@ class BasicEntity(Schema):
             (self.tmdb_id,              'T_TMDB_'), 
             (self.thetvdb_id,           'T_THETVDB_'), 
             (self.amazon_id,            'T_AMAZON_'), 
-            (self.fandango_id,          'T_FANDANGO_'), 
+            (self.fandango_id,          'T_FANDANGO_'),
+            (self.netflix_id,           'T_NETFLIX_'),
         ]
         
         for (id, prefix) in ids:
@@ -817,6 +834,11 @@ class EntitySourcesSchema(Schema):
         self.fandango_url                   = SchemaElement(basestring)
         self.fandango_source                = SchemaElement(basestring)
         self.fandango_timestamp             = SchemaElement(datetime)
+
+        self.netflix_id                     = SchemaElement(basestring)
+        self.netflix_url                    = SchemaElement(basestring)
+        self.netflix_source                 = SchemaElement(basestring)
+        self.netflix_timestamp              = SchemaElement(datetime)
 
         self.singleplatform_id              = SchemaElement(basestring)
         self.singleplatform_url             = SchemaElement(basestring)

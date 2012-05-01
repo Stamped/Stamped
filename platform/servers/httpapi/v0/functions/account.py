@@ -126,12 +126,14 @@ def linked_accounts(request, authUserId, http_schema, **kwargs):
     linked       = http_schema.exportSchema(LinkedAccounts())
     twitterAuth  = http_schema.exportSchema(TwitterAuthSchema())
     facebookAuth = http_schema.exportSchema(FacebookAuthSchema())
+    netflixAuth = http_schema.exportSchema(NetflixAuthSchema())
     
     data = {
         'twitter'       : linked.twitter, 
         'facebook'      : linked.facebook, 
         'twitterAuth'   : twitterAuth, 
-        'facebookAuth'  : facebookAuth, 
+        'facebookAuth'  : facebookAuth,
+        'netflixAuth'   : netflixAuth,
     }
     stampedAPI.updateLinkedAccounts(authUserId, **data)
     
@@ -192,6 +194,13 @@ def alertFollowersFromFacebook(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.alertFollowersFromFacebook(authUserId, facebookIds)
     
     return transformOutput(result)
+
+@handleHTTPRequest()
+@require_http_methods(["POST"])
+def removeTwitter(request, authUserId, **kwargs):
+    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
+
+    return transformOutput(True)
 
 
 @handleHTTPRequest(http_schema=HTTPAccountChangePassword, 

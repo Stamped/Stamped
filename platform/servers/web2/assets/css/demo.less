@@ -6,5 +6,46 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
-@import "elements.less";
+@import "libs/elements.less";
+@import "libs/isotope.less";
+
+.stamp-gallery {
+    position: relative;
+    width: 100%;
+    clear: both;
+}
+
+.stamp-gallery-item {
+    background: url(/assets/img/main-noise.png) left top repeat;
+    float: left;
+    width: 28%;
+    margin: 1em;
+    
+    .top-wave {
+        background: url(/assets/img/main-topcap.png) left top repeat-x;
+        height: 8px;
+        margin: 0;
+    }
+    
+    .bottom-wave {
+        background: url(/assets/img/main-botcap.png) left top repeat-x;
+        height: 8px;
+        margin: 0;
+    }
+    
+    .content {
+        margin: 0 auth;
+        
+        .stamp-contents .images img {
+            border: 1px solid;
+            max-width: 128px;
+            height: auto;
+        }
+    }
+}
+
+.stamp-gallery-loading {
+    text-align: center;
+    margin: 0 auto;
+}
 

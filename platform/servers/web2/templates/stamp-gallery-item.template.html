@@ -1,0 +1,105 @@
+
+{{! TODO:
+    * how to reference this specific stamp-gallery-item via stamp_id or entity_id
+}}
+
+<div class="stamp-gallery-item">
+    <div class="top-wave"></div>
+    <div class="content">
+        <div class="stamp-category-{{#entity}}{{category}}{{/entity}}">
+            <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
+            <div class="personal-stamp-logo"></div>
+            <div class="icon replaced"></div>
+            {{#entity}}<div class="subtitle">{{subtitle}}</div>{{/entity}}
+            
+            {{#entity}}
+            {{#image}}
+            <div class="stamp-image">
+                <img src="{{.}}" />
+            </div>
+            {{/image}}
+            {{/entity}}
+            
+            <div class="stamp-contents">
+                {{#contents}}
+                <div class="stamped-content">
+                    <span class="blurb">{{blurb}}</span>
+                    <span class="blurb-references">
+                    {{#blurb-references}}
+                        <span class="blurb-reference">
+                            <span class="indices">
+                                {{#indices}}
+                                    <span class="index">
+                                        {{.}}
+                                    </span>
+                                {{/indices}}
+                                
+                                {{! TODO: Action }}
+                            <span class="/indices">
+                        </span>
+                    {{/blurb-references}}
+                    </span>
+                    <span class="images">
+                    {{#images}}
+                        {{! TODO: here would be a perfect example of Handlebars relative 
+                            paths being handy; e.g., using entity.title as the alt text.
+                        }}
+                        <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
+                    {{/images}}
+                    </span>
+                </div>
+                {{/contents}}
+            </div>
+            
+            <div class="previews">
+                {{#previews}}
+                <div class="likes">
+                    Likes:<br />
+                    <ol>
+                        {{#likes}}
+                        <li>
+                            {{> user-mini}}
+                        </li>
+                        {{/likes}}
+                    </ol>
+                </div>
+                
+                <div class="todos">
+                    TODOs:<br />
+                    <ol>
+                        {{#todos}}
+                        <li>
+                            {{> user-mini}}
+                        </li>
+                        {{/todos}}
+                    </ol>
+                </div>
+                
+                <div class="credits">
+                    Credits:<br />
+                    <ol>
+                        {{#credits}}
+                        <li>
+                            {{> stamp-mini}}
+                        </li>
+                        {{/credits}}
+                    </ol>
+                </div>
+                
+                <div class="comments">
+                    Comments:<br />
+                    <ol>
+                        {{#comments}}
+                        <li>
+                            {{> comment}}
+                        </li>
+                        {{/comments}}
+                    </ol>
+                </div>
+                {{/previews}}
+            </div>
+        </div>
+    </div>
+    <div class="bottom-wave"></div>
+</div>
+

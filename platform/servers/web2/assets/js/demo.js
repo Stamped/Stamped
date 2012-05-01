@@ -6,24 +6,78 @@
 (function() {
     $(document).ready(function() {
         var client = new StampedClient();
-        client.init();
+        var screen_name = STAMPED_PRELOAD.user.screen_name;
+        console.debug("Stamped profile page for screen_name '" + screen_name + "'");
         
-        var screen_name = "travis";
+        $(".stamp-gallery-nav a").each(function() {
+            var href = $(this).attr('href');
+            var limit_re = /([?&])limit=[\d]+/;
+            var limit = "limit=10";
+            
+            if (href.match(limit_re)) {
+                href = href.replace(limit_re, "$1" + limit);
+            } else if ('?' in href) {
+                href = href + "&" + limit;
+            } else {
+                href = href + "?" + limit;
+            }
+            
+            $(this).attr('href', href);
+        });
+        
+        var $container = $(".stamp-gallery .stamps");
+        //$(document).emoji();
+        //$container.emoji();
+        
+        $container.isotope({
+            itemSelector    : '.stamp-gallery-item', 
+            layoutMode      : "masonry", 
+            masonry         : {
+                columnWidth: 300
+            }
+        });
+        
+        // TODO: customize loading image
+        $container.infinitescroll({
+            debug           : STAMPED_PRELOAD.DEBUG, 
+            bufferPx        : 200, 
+            
+            navSelector     : "div.stamp-gallery-nav", 
+            nextSelector    : "div.stamp-gallery-nav a:last", 
+            itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+            
+            loading         : {
+                finishedMsg : "No more stamps to load.", 
+                msgText     : "<em>Loading more stamps...</em>", 
+                img         : "/assets/img/loading.gif", 
+                selector    : "div.stamp-gallery-loading"
+            }
+        }, function(new_elements) {
+            var elements = $(new_elements);
+            
+            $(elements).emoji();
+            $container.isotope('appended', elements);
+        });
+        
+        return;
         
         var userP = client.get_user_by_screen_name(screen_name);
+        
         userP.done(function (user) {
-            var user_model = new client.User(user);
-            user_model.validate(user_model.attributes);
+            var stampsP = client.get_user_stamps_by_screen_name(screen_name);
             
-            //alert(user_model.idAttribute());
-            $("#data").append("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + JSON.stringify(user_model.toJSON(), null, 4) + "</code></pre>");
-            
-            /*var stampsP = client.get_user_stamps_by_screen_name(screen_name);
             stampsP.done(function (stamps) {
-                //console.debug(stamps);
-                stamps = JSON.stringify(stamps, null, 4);
-                $("#data").html("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + stamps + "</code></pre>");
-            });*/
+                $("#data2").hide();
+                var stamps_view = new client.StampsGalleryView({
+                    model : stamps, 
+                    el : $("#data2")
+                });
+                
+                $("#data").hide('slow', function() {
+                    stamps_view.render();
+                    $("#data2").show('slow');
+                });
+            });
         });
     });
 })();

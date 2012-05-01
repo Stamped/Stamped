@@ -49,18 +49,29 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.failedPunishment = 20
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
+        """
+            (might be named enrichedEntityWithSources)
+        enrichEntity takes a entity schema object (defined in api/Schemas.py), an output dict of decorations that is
+            opaque to this class - only group objects and sources have an understanding of the decorations format
+            the group method syncDecorations() handles all propagation of source local decorations to the output decoration dict
+          returns a bool value indicating whether the entity was enriched
+        """
         self.setNow(timestamp)
         if max_iterations == None:
             max_iterations = self.__default_max_iterations
         modified_total = False
         failedSources = set()
         logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
+        # We will loop through all sources multiple times, because as data is enriched, previous unresolvable sources
+        # may become resolvable and can enrich in turn.  If no fields are modified by any source in a given iteration,
+        # then there's no reason to loop again
         for i in range(max_iterations):
             modified = False
             for source in self.__sources:
                 if entity.kind == 'search' or entity.kind in source.kinds:
                     if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types.value).intersection(source.types)) == 0:
                         continue
+                    # check if a source failed, and if so, whether it has cooled down for reuse
                     if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
                         groups = source.getGroups(entity)
                         targetGroups = set()
@@ -68,15 +79,16 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             if self.shouldEnrich(group, source.sourceName, entity, self.now):
                                 targetGroups.add(group)
                         if len(targetGroups) > 0:
+                            #  We have groups that are eligible for enrichment.  We'll modify a deep-copy of the entity
                             copy = buildEntity(entity.value)
-                            """
-                            timestamps - { GROUP - timestamp }
-                            empty, single-use timestamps map for specifying failed attempts, 
-                            assignment regardless of current value,
-                            and stale data (rare)
-                            """
-                            timestamps = {}
-                            localDecorations = {}
+                            # timestamps - { GROUP - timestamp }
+                            # empty, single-use timestamps map for specifying failed attempts,
+                            # assignment regardless of current value,
+                            # and stale data (rare)
+                            # output dictionaries for source.enrichEntity for optional special cases
+                            # timestamps is used for specifying stale data, failed lookups, and UNOBSERVABLE changes (same value)
+                            timestamps = {} # { GROUP : TIMESTAMP ... } optional
+                            localDecorations = {} # opaque decorations, for group object based extensions (i.e. Menus)
                             logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
                             try:
                                 enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
@@ -145,6 +157,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 return True
                             try:
                                 currentTimestamp = currentTimestamp.replace(tzinfo=None)
+                                # if data is stale...
                                 if self.now - currentTimestamp > currentMaxAge:
                                     return True
                             except Exception as e:

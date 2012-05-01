@@ -65,7 +65,11 @@ urlpatterns = patterns('',
     (r'v0/account/linked/facebook/update.json',     'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/facebook/followers.json',  'v0.functions.account.alertFollowersFromFacebook'),
     (r'v0/account/linked/facebook/remove.json',     'v0.functions.account.removeFacebook'),
-    
+    (r'v0/account/linked/netflix/update.json',      'v0.functions.account.linked_accounts'),
+    (r'v0/account/linked/netflix/remove.json',      'v0.functions.account.removeNetflix'),
+    (r'v0/account/linked/netflix/queueadd.json',    'v0.functions.account.addToNetflixQueue'),
+    (r'v0/account/linked/netflix/queueremove.json', 'v0.functions.account.removeFromNetflixQueue'),
+
     ### USERS
     (r'v0/users/show.json',                         'v0.functions.users.show'),
     (r'v0/users/lookup.json',                       'v0.functions.users.lookup'),
@@ -128,6 +132,7 @@ urlpatterns = patterns('',
     (r'v0/collections/credit.json',                 'v0.functions.collections.credit'),
     (r'v0/collections/friends.json',                'v0.functions.collections.friends'),
     (r'v0/collections/suggested.json',              'v0.functions.collections.suggested'),
+    (r'v0/collections/consumption.json',            'v0.functions.collections.consumption'),
     
     ### FAVORITES
     (r'v0/favorites/create.json',                   'v0.functions.favorites.create'),

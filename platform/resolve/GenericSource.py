@@ -405,6 +405,9 @@ class GenericSource(BasicSource):
         return self.sourceName
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
+        """
+
+        """
         proxy = None
         if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:

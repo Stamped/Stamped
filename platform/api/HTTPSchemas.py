@@ -278,6 +278,9 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
+        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_token          = SchemaElement(basestring)
+        self.netflix_secret         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'LinkedAccounts':
@@ -286,11 +289,15 @@ class HTTPLinkedAccounts(Schema):
             schema.facebook_id          = self.facebook_id
             schema.facebook_name        = self.facebook_name
             schema.facebook_screen_name = self.facebook_screen_name
+            schema.netflix_id           = self.netflix_id
         elif schema.__class__.__name__ == 'TwitterAuthSchema':
             schema.twitter_key          = self.twitter_key
             schema.twitter_secret       = self.twitter_secret
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
+        elif schema.__class__.__name__ == 'NetflixAuthSchema':
+            schema.netflix.token        = self.netflix_token
+            schema.netflix.secret       = self.netflix_secret
         else:
             raise NotImplementedError(type(schema))
         return schema
@@ -299,6 +306,7 @@ class HTTPAvailableLinkedAccounts(Schema):
     def setSchema(self):
         self.twitter                = SchemaElement(bool)
         self.facebook               = SchemaElement(bool)
+        self.netflix                = SchemaElement(bool)
 
 class HTTPAccountChangePassword(Schema):
     def setSchema(self):
@@ -1275,6 +1283,7 @@ class HTTPActionSource(Schema):
         self.source_id              = SchemaElement(basestring)
         self.source_data            = SchemaElement(basestring)
         self.endpoint               = SchemaElement(basestring)
+        self.endpoint_data          = SchemaElement(basestring)
         self.link                   = SchemaElement(basestring)
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
@@ -1617,7 +1626,7 @@ class HTTPStamp(Schema):
         self.num_likes          = SchemaElement(int)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
-
+    
     @lazyProperty
     def _user_regex(self):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
@@ -1921,6 +1930,25 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
         else:
             raise NotImplementedError
         
+        return schema
+
+class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+
+        #you, friends, friends of friends, everyone
+
+        self.scope              = SchemaElement(basestring)
+
+
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'ConsumptionSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+
         return schema
 
 class HTTPStampedBySlice(HTTPGenericCollectionSlice):

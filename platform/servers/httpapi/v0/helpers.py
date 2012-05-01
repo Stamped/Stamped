@@ -15,7 +15,7 @@ import libs.ec2_utils
 from pprint                         import pformat
 from errors                         import *
 from HTTPSchemas                    import *
-from api.MongoStampedAPI            import MongoStampedAPI
+from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
 
 from django.views.decorators.http   import require_http_methods
@@ -47,7 +47,7 @@ t1 = time.time()
 
 # TODO (travis): use single global stamped API instance
 # e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
-stampedAPI  = MongoStampedAPI()
+stampedAPI  = globalMongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
 t2 = time.time()
@@ -110,7 +110,7 @@ def handleHTTPRequest(requires_auth=True,
         assert callable(fn)
         
         @wraps(fn)
-        def handleHTTPRequest(request, *args, **kwargs):
+        def wrapper(request, *args, **kwargs):
             try:
                 origin = ""
                 
@@ -256,7 +256,7 @@ def handleHTTPRequest(requires_auth=True,
                 except:
                     pass
         
-        return handleHTTPRequest
+        return wrapper
     return decorator
 
 def checkClient(request):
@@ -424,6 +424,9 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         raise StampedHTTPError("invalid_form", 400)
 
 def transformOutput(value, **kwargs):
+    """
+    Serialize object to json and return it as an HttpResponse object
+    """
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
     

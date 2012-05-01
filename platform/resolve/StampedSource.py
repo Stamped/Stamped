@@ -8,7 +8,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'StampedSource', 'EntitySearchAll' ]
+__all__ = [ 'StampedSource',
+            'EntityProxyArtist', 'EntityProxyAlbum', 'EntityProxyTrack', 'EntityProxyMovie', 'EntityProxyTV',
+            'EntityProxyBook', 'EntityProxyPlace', 'EntityProxyApp', 'EntitySearchAll']
 
 import Globals
 from logs import report
@@ -31,7 +33,7 @@ except:
     raise
 
 
-class _EntityObject(object):
+class _EntityProxyObject(object):
     """
     Abstract superclass (mixin) for Entity based objects.
 
@@ -74,12 +76,12 @@ class _EntityObject(object):
         return pformat( self.entity.value )
 
 
-class EntityArtist(_EntityObject, ResolverPerson):
+class EntityProxyArtist(_EntityProxyObject, ResolverPerson):
     """
     Entity artist proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverPerson.__init__(self, types=entity.types)
 
     @lazyProperty
@@ -97,12 +99,12 @@ class EntityArtist(_EntityObject, ResolverPerson):
             return []
 
 
-class EntityAlbum(_EntityObject, ResolverMediaCollection):
+class EntityProxyAlbum(_EntityProxyObject, ResolverMediaCollection):
     """
     Entity album proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverMediaCollection.__init__(self, types=entity.types)
 
     @lazyProperty
@@ -120,12 +122,12 @@ class EntityAlbum(_EntityObject, ResolverMediaCollection):
             return []
 
 
-class EntityTrack(_EntityObject, ResolverMediaItem):
+class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
     """
     Entity track proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
     @lazyProperty
@@ -150,12 +152,12 @@ class EntityTrack(_EntityObject, ResolverMediaItem):
             return -1
 
 
-class EntityMovie(_EntityObject, ResolverMediaItem):
+class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     """
     Entity movie proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
     @lazyProperty 
@@ -194,12 +196,12 @@ class EntityMovie(_EntityObject, ResolverMediaItem):
             return None
 
 
-class EntityTV(_EntityObject, ResolverMediaItem):
+class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
     """
     Entity tv proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverMediaCollection.__init__(self, types=entity.types)
 
     @lazyProperty 
@@ -231,12 +233,12 @@ class EntityTV(_EntityObject, ResolverMediaItem):
             return None
 
 
-class EntityBook(_EntityObject, ResolverMediaItem):
+class EntityProxyBook(_EntityProxyObject, ResolverMediaItem):
     """
     Entity book proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
     @lazyProperty 
@@ -274,10 +276,10 @@ class EntityBook(_EntityObject, ResolverMediaItem):
         except:
             return ''
 
-class EntityPlace(_EntityObject, ResolverPlace):
+class EntityProxyPlace(_EntityProxyObject, ResolverPlace):
 
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverPlace.__init__(self, types=entity.types)
 
     @lazyProperty
@@ -302,12 +304,12 @@ class EntityPlace(_EntityObject, ResolverPlace):
             return ''
 
 
-class EntityApp(_EntityObject, ResolverSoftware):
+class EntityProxyApp(_EntityProxyObject, ResolverSoftware):
     """
     Entity app proxy
     """
     def __init__(self, entity):
-        _EntityObject.__init__(self, entity)
+        _EntityProxyObject.__init__(self, entity)
         ResolverSoftware.__init__(self, types=entity.types)
 
     @lazyProperty
@@ -369,7 +371,7 @@ class StampedSource(GenericSource):
         should an entity be deficient in some way, StampedSource may be
         able to safely enrich it.
         """
-        return EntityArtist(entity)
+        return EntityProxyArtist(entity)
 
     def albumFromEntity(self, entity):
         """
@@ -381,7 +383,7 @@ class StampedSource(GenericSource):
         should an entity be deficient in some way, StampedSource may be
         able to safely enrich it.
         """
-        return EntityAlbum(entity)
+        return EntityProxyAlbum(entity)
 
     def trackFromEntity(self, entity):
         """
@@ -393,7 +395,7 @@ class StampedSource(GenericSource):
         should an entity be deficient in some way, StampedSource may be
         able to safely enrich it.
         """
-        return EntityTrack(entity)
+        return EntityProxyTrack(entity)
 
     def movieFromEntity(self, entity):
         """
@@ -405,7 +407,7 @@ class StampedSource(GenericSource):
         should an entity be deficient in some way, StampedSource may be
         able to safely enrich it.
         """
-        return EntityMovie(entity)
+        return EntityProxyMovie(entity)
 
     def tvFromEntity(self, entity):
         """
@@ -417,18 +419,18 @@ class StampedSource(GenericSource):
         should an entity be deficient in some way, StampedSource may be
         able to safely enrich it.
         """
-        return EntityTV(entity)
+        return EntityProxyTV(entity)
 
     def bookFromEntity(self, entity):
         """
         """
-        return EntityBook(entity)
+        return EntityProxyBook(entity)
 
     def placeFromEntity(self, entity):
-        return EntityPlace(entity)
+        return EntityProxyPlace(entity)
 
     def appFromEntity(self, entity):
-        return EntityApp(entity)
+        return EntityProxyApp(entity)
 
     def proxyFromEntity(self, entity):
         """

@@ -2,6 +2,7 @@
 
 """
 """
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -18,7 +19,10 @@ try:
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
+    from pprint                     import pformat
+    from datetime                   import datetime
     from Resolver                   import *
+    from ResolverObject             import *
 except:
     report()
     raise
@@ -40,10 +44,10 @@ class _NetflixObject(object):
 
     def __init__(self, titleObj):
         self.__key = str(titleObj['id'])
-        self.__titleObj = titleObj
+        self._titleObj = titleObj
 
     @property
-    def key(selfself):
+    def key(self):
         return self.__key
 
     @property
@@ -56,66 +60,131 @@ class _NetflixObject(object):
 
     @lazyProperty
     def name(self):
-        return self.__titleObj['title']
+        return self._titleObj['title']['regular']
 
+    @lazyProperty
+    def cast(self):
+        try:
+            cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
+            for entry in cast:
+                print("\nCAST MEMBER: %s" % entry['title'])
+            return [
+                {
+                'name':         entry['title'],
+                'source':       self.source,
+                }
+            for entry in cast
+            ]
+        except Exception:
+            return []
 
-#    @abstractproperty
-#    def info(self):
-#        pass
+    @lazyProperty
+    def images(self):
+        try:
+            return [ self._titleObj['box_art']['large'] ]
+        except Exception:
+            return []
 
-#    def __repr__(self):
-#        return pformat(self.info)
+    # Netflix only returns the release year.  Since the API can't distinguish exact dates from years, this is
+    #  excluded.  Also, the dateWeight function is only checking for exact matches anyway.
+#    @lazyProperty
+#    def release_date(self):
+#        try:
+#            return datetime(self._titleObj['release_year'], 1, 1)
+#        except KeyError:
+#            return None
+
+    @lazyProperty
+    def url(self):
+        try:
+            webpage = filter(lambda link :  link['title'] ==  u'web page',  self._titleObj['category'])[0]
+            return webpage['href']
+        except KeyError:
+            return None
+
 
     def __repr__(self):
-        return "<%s %s %s>" % (self.source, self.type, self.name)
+#        return "<%s %s %s>" % (self.source, self.type, self.name)
+        return pformat( self._titleObj )
 
-
-class _NetflixMovie(_NetflixObject, ResolverMediaItem):
+class NetflixMovie(_NetflixObject, ResolverMediaItem):
     """
     Netflix movie proxy
     """
     def __init__(self, titleObj):
         _NetflixObject.__init__(self, titleObj)
-        ResolveMediaItem.__init__(self, types=['movie'])
+        ResolverMediaItem.__init__(self, types=['movie'])
 
     @lazyProperty
     def popularity(self):
         try:
-            return self.__titleObj['average_rating']
+            return self._titleObj['average_rating']
         except KeyError:
             return None
 
     @lazyProperty
-    def cast(self):
+    def directors(self):
         try:
-            cast = filter(lambda link : 'cast' in link['href'], self.__titleObj['link'])[0]['people']['link']
-            return [
-                {
+            directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
+            # api returns either a dict or a list of dicts depending on len > 1
+            if isinstance(directors, list):
+                for dir in directors:
+                    print("\n" + dir['title'])
+                return [
+                    {
                     'name':         entry['title'],
                     'source':       self.source,
-                }
-                    for entry in cast
-            ]
+                    }
+                        for entry in directors
+                ]
+            else:
+                return [
+                    {
+                    'name':         directors['title'],
+                    'source':       self.source
+                    }
+                ]
         except Exception:
-            return None
+            return []
 
     @lazyProperty
-    def release_date(self):
+    def length(self):
         try:
-            string = self.__titleObj['release_year']
+            return self._titleObj['runtime']
         except KeyError:
             return None
 
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            rating = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._titleObj['category'])[0]
+            return rating['label']
+        except KeyError:
+            return None
+
+#    @lazyProperty
+#    def directors(self):
+#        try:
+#            return [ { 'name' : self._titleObj['']}]
+#        except:
+#            return
 
 
-class _NetflixTVShow(_NetflixObject, ResolverMediaCollection):
+class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
     """
     Netflix tv show proxy
     """
     def __init__(self, titleObj):
         _NetflixObject.__init__(self, titleObj)
-        ResolverMediaItem.__init__(self, types=['tv'])
+        ResolverMediaCollection.__init__(self, types=['tv'])
 
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            rating = filter(lambda link : '/tv_ratings' in link['scheme'],  self._titleObj['category'])[0]
+            return rating['label']
+        except KeyError:
+            return None
 
 
 
@@ -132,15 +201,15 @@ class NetflixSource(GenericSource):
         GenericSource.__init__(self, 'netflix',
             groups=[
                 'release_date',
+                'desc',
                 'directors',
                 'cast',
-                'desc',
                 'mpaa_rating',
                 'genres',
-                'tracks',
-                'publishers',
+                'directors',
                 'images',
-                'length'
+                'length',
+                'url'
             ],
             kinds=[
                 'media_item',
@@ -168,13 +237,14 @@ class NetflixSource(GenericSource):
             return self.movieSource(query)
         if query.isType('tv'):
             return self.tvSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
+        #if query.kind == 'search':
+        #    return self.searchAllSource(query)
 
     def __genericSourceGen(self, query, filter):
         def gen():
             try:
-                results = self.__netflix.title_search(query.name)['catalog_titles']
+                results = self.__netflix.searchTitles(query.name)
+
                 for title in results['catalog_title']:
                     if (filter(title)):
                         yield title
@@ -183,10 +253,11 @@ class NetflixSource(GenericSource):
                 result_counter = results['results_per_page']
 
                 # return all remaining results through separate page calls to the api
-                while (result_counter < num_results):
-                    results = self.__netflix.title_search(query, start_index=result_counter)['catalog_titles']
+                while result_counter < num_results:
+                    results = self.__netflix.searchTitles(query, start_index=result_counter)
                     result_counter += results['results_per_page']
-                    # 'catalog_title'value  is the actual dict of values for a given result.  It's a weird structure.
+
+                    # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
                     for title in results['catalog_title']:
                         yield title
             except GeneratorExit:
@@ -195,20 +266,23 @@ class NetflixSource(GenericSource):
 
     def movieSource(self, query):
         def filter(title):
-            return title['id'].contains('/movies/')
+            return title['id'].find('/movies/') != -1
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixMovie)
 
     def tvSource(self, query):
         def filter(title):
-            return title['id'].contains('/series/')
+            return title['id'].find('/series/') != -1
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixTVShow)
 
 
-    def searchAllSource(self, query):
-        def gen():
-            try:
-                results = self.__netflix.movie_search
-            except GeneratorExit:
-                    pass
+#    def searchAllSource(self, query):
+#        def gen():
+#            try:
+#                results = self.__netflix.movie_search
+#            except GeneratorExit:
+#                    pass
+
+if __name__ == '__main__':
+    demo(NetflixSource(), 'Inception')
