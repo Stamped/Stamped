@@ -25,7 +25,7 @@ static STStampFactory* _sharedInstance;
 }
 
 -(id)init {
-  self = [super self];
+  self = [super init];
   if (self) {
     _cache = [[NSCache alloc] init];
   }

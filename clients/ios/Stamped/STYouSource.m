@@ -29,9 +29,10 @@
 
 - (void)selectedLastCell {
   if (!self.slice.query) {
-     UINavigationController* controller = [Util sharedNavigationController];
-     [controller pushViewController:[[[STEntitySearchController alloc] initWithCategory:self.slice.category andQuery:self.slice.query] autorelease]
-     animated:YES];
+    UINavigationController* controller = [Util sharedNavigationController];
+    [controller pushViewController:[[[STEntitySearchController alloc] initWithCategory:self.slice.category 
+                                                                              andQuery:self.slice.query] autorelease]
+                          animated:YES];
   }
   else {
     [self.delegate shouldSetScopeTo:STStampedAPIScopeFriends];
@@ -42,7 +43,7 @@
   [self selectedLastCell];
 }
 
-- (NSString*)user {
+- (NSString*)userID {
   return [AccountManager sharedManager].currentUser.userID;
 }
 

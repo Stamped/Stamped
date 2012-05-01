@@ -10,10 +10,13 @@
 #import "STUser.h"
 #import "STComment.h"
 
+@protocol STStamp;
+
 @protocol STPreviews <NSObject>
 
 @property (nonatomic, readonly, copy) NSArray<STUser>* todos;
 @property (nonatomic, readonly, copy) NSArray<STUser>* likes;
 @property (nonatomic, readonly, copy) NSArray<STComment>* comments;
+@property (nonatomic, readonly, copy) NSArray<STStamp>* credits;
 
 @end

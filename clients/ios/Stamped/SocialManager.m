@@ -143,8 +143,8 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (id)init {
   self = [super init];
   if (self) {
-    self.accountStore = [[ACAccountStore alloc] init];
-    self.facebookClient = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
+    self.accountStore = [[[ACAccountStore alloc] init] autorelease];
+    self.facebookClient = [[[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil] autorelease];
     self.twitterClient = [RKClient clientWithBaseURL:kTwitterBaseURI];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(checkForEndlessSignIn:)
@@ -457,7 +457,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
               NSString* identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kiOS5TwitterAccountIdentifier];
               ACAccount* account = [accountStore_ accountWithIdentifier:identifier];
               NSString* userID = [account valueForKeyPath:@"properties.user_id"];
-              NSString* responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+              NSString* responseStr = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
               NSDictionary* responseDictionary = [NSURL ab_parseURLQueryString:responseStr];
               [self requestStampedLinkTwitter:account.username
                                        userID:userID 
@@ -747,7 +747,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
             if (responseData == nil) {
               NSLog(@"Error occurred in Step 2 of Twitter reverse Auth");
             } else {
-              NSString* responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+              NSString* responseStr = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
               NSDictionary* responseDictionary = [NSURL ab_parseURLQueryString:responseStr];
               [self sendStampedTwitterFriendsRequestWithToken:[responseDictionary objectForKey:@"oauth_token"]
                                                        secret:[responseDictionary objectForKey:@"oauth_token_secret"]];

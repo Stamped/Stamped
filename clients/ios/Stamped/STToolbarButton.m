@@ -41,27 +41,30 @@
 
 - (id)initWithNormalOffImage:(UIImage*)normalOffImage offText:(NSString*)offText andOnText:(NSString*)onText
 {
-    self = [super initWithFrame:CGRectMake(0, 0, 52, 48)];
-    if (self) {
-      _normalOffImage = [normalOffImage retain];
-      //self.backgroundColor = [UIColor redColor];
-      CGRect imageFrame = CGRectMake(0, 0, 52, 48);
-      _imageView = [[UIImageView alloc] initWithImage:normalOffImage];
-      _imageView.frame = [Util centeredAndBounded:_imageView.frame.size inFrame:imageFrame];
-      [self addSubview:_imageView];
-      UIFont* font = [UIFont stampedBoldFontWithSize:14];
-      UIColor* color = [UIColor stampedGrayColor];
-      CGRect textFrame = CGRectMake(0, 25, 52, 25);
-      _offTextView = [[Util viewWithText:offText font:font color:color mode:UILineBreakModeClip andMaxSize:textFrame.size] retain];
-      _onTextView = [[Util viewWithText:onText font:font color:color mode:UILineBreakModeClip andMaxSize:textFrame.size] retain];
-      _onTextView.hidden = YES;
-      _offTextView.frame = [Util centeredAndBounded:_offTextView.frame.size inFrame:textFrame];
-      _onTextView.frame = [Util centeredAndBounded:_onTextView.frame.size inFrame:textFrame];
-      [self addSubview:_offTextView];
-      [self addSubview:_onTextView];
-      [self setTarget:self withSelector:@selector(defaultHandler:)];
-    }
-    return self;
+  CGRect imageFrame = CGRectMake(0, 0, 52, 56);
+  self = [super initWithFrame:imageFrame];
+  if (self) {
+    _normalOffImage = [normalOffImage retain];
+    //self.backgroundColor = [UIColor redColor];
+    _imageView = [[UIImageView alloc] initWithImage:normalOffImage];
+    _imageView.frame = [Util centeredAndBounded:_imageView.frame.size inFrame:imageFrame];
+    [self addSubview:_imageView];
+    /*
+
+    UIFont* font = [UIFont stampedBoldFontWithSize:14];
+    UIColor* color = [UIColor stampedGrayColor];  
+     CGRect textFrame = CGRectMake(0, 33, 52, 25);
+    _offTextView = [[Util viewWithText:offText font:font color:color mode:UILineBreakModeClip andMaxSize:textFrame.size] retain];
+    _onTextView = [[Util viewWithText:onText font:font color:color mode:UILineBreakModeClip andMaxSize:textFrame.size] retain];
+    _onTextView.hidden = YES;
+    _offTextView.frame = [Util centeredAndBounded:_offTextView.frame.size inFrame:textFrame];
+    _onTextView.frame = [Util centeredAndBounded:_onTextView.frame.size inFrame:textFrame];
+    [self addSubview:_offTextView];
+    [self addSubview:_onTextView];
+     */
+    [self setTarget:self withSelector:@selector(defaultHandler:)];
+  }
+  return self;
 }
 
 - (void)dealloc
@@ -83,8 +86,8 @@
 
 
 - (void)updateLook {
-  self.onTextView.hidden = !self.on;
-  self.offTextView.hidden = self.on;
+  //self.onTextView.hidden = !self.on;
+ // self.offTextView.hidden = self.on;
   if (self.on) {
     if (self.touched) {
       self.imageView.image = self.touchedOnImage;
@@ -125,7 +128,7 @@
   //TODO fix for cancellation
   //UITouch* touch = [touches anyObject];
   //if (CGRectContainsPoint(self.frame, [touch locationInView:self])) {
-    [self.target performSelector:self.selector withObject:self];
+  [self.target performSelector:self.selector withObject:self];
   //}
 }
 

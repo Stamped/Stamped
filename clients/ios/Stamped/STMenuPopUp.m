@@ -37,7 +37,7 @@
 }
 
 - (void)attributionButton:(id)object {
-  STSimpleSource* source = [[STSimpleSource alloc] init];
+  STSimpleSource* source = [[[STSimpleSource alloc] init] autorelease];
   source.link = object;
   [[STActionManager sharedActionManager] didChooseSource:source forAction:nil withContext:[STActionContext context]];
 }

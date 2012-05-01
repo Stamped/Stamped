@@ -134,7 +134,7 @@
 - (void)viewAllClicked:(id)nothing {
   STTableViewController* controller = [[[STTableViewController alloc] initWithHeaderHeight:0] autorelease];
   [controller view];
-  STStampedBySource* source = [[STStampedBySource alloc] init];
+  STStampedBySource* source = [[[STStampedBySource alloc] init] autorelease];
   STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
   if (self.scope == STStampedAPIScopeFriends) {
     slice.group = @"friends";
@@ -150,6 +150,7 @@
   slice.entityID = self.entityID;
   source.slice = slice;
   source.table = controller.tableView;
+  [controller retainObject:source];
   [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
                                      
@@ -162,6 +163,7 @@
   self = [super initWithDelegate:delegate andFrame:CGRectMake(15, 0, 290, 0)];
   if (self) {
     NSMutableArray* array = [NSMutableArray array];
+    //TODO determine hasImages purpose or remove
     BOOL hasImages = NO;
     if (stampedBy.friends.count.integerValue) {
       STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.friends 

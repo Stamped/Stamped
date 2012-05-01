@@ -51,9 +51,16 @@
   [_tableView release];
 }
 
+- (UITableView *)tableView {
+  [self view];
+  return _tableView;
+}
+
 - (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   NSIndexPath* path = [self.tableView indexPathForSelectedRow];
   if (path) {
+    NSLog(@"deselect");
     [self.tableView deselectRowAtIndexPath:path animated:YES];
   }
 }

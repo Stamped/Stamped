@@ -16,11 +16,11 @@
 
 - (id)initWithStamp:(id<STStamp>)stamp
 {
-  self = [super initWithStamp:stamp normalOffImage:[UIImage imageNamed:@"toolbar_likeButton"] offText:@"Like" andOnText:@"Liked"];
+  self = [super initWithStamp:stamp normalOffImage:[UIImage imageNamed:@"sDetailBar_btn_like"] offText:@"Like" andOnText:@"Liked"];
   if (self) {
-    self.normalOnImage = [UIImage imageNamed:@"toolbar_likeButton_selected"];
-    self.touchedOffImage = [UIImage imageNamed:@"toolbar_likeButton_highlighted"];
-    self.touchedOnImage = [UIImage imageNamed:@"toolbar_likeButton_highlighted"];
+    self.normalOnImage = [UIImage imageNamed:@"sDetailBar_btn_like_selected"];
+    self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_like_active"];
+    self.touchedOnImage = [UIImage imageNamed:@"sDetailBar_btn_like_active"];
     self.on = [[self.stamp isLiked] boolValue];
   }
   return self;

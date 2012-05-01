@@ -205,6 +205,7 @@ static STRdio* _sharedInstance;
 @synthesize rdioId = _rdioId;
 
 + (void)dispatchWithID:(NSString*)rdioID {
+  // TODO MEMORY_LEAK
   STRdioPlaylistHelper* helper = [[STRdioPlaylistHelper alloc] initWithID:rdioID];
   NSMutableDictionary *params = [NSMutableDictionary dictionary];
   NSString* userKey = [[STRdio sharedRdio].rdio.user objectForKey:@"key"];

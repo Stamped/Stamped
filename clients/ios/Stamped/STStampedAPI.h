@@ -28,6 +28,8 @@
 #import "STEntitySearchSection.h"
 #import "STActivity.h"
 #import "STStampNew.h"
+#import "STCancellation.h"
+#import "STTypes.h"
 
 typedef enum {
   STStampedAPIScopeYou = 0,
@@ -36,6 +38,10 @@ typedef enum {
   STStampedAPIScopeEveryone
 } STStampedAPIScope;
 
+typedef enum {
+  STStampedAPIErrorUnavailable,
+} STStampedAPIError;
+
 @interface STStampedAPI : NSObject
 
 //TODO modifify calls to returns cancellable NSOperations that have already been disbatched and autoreleased
@@ -43,27 +49,37 @@ typedef enum {
 
 //TODO upgrade all deprecated error-less methods
 
++ (NSString*)errorDomain;
+
 - (id<STUser>)currentUser;
 
-- (void)stampForStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>))block;
+- (STCancellation*)stampForStampID:(NSString*)stampID 
+                       andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 
-- (void)stampsForInboxSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+- (STCancellation*)stampsForInboxSlice:(STGenericCollectionSlice*)slice 
+                           andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (void)stampsForUserSlice:(STUserCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+- (STCancellation*)stampsForUserSlice:(STUserCollectionSlice*)slice 
+                          andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (void)stampsForFriendsSlice:(STFriendsSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+- (STCancellation*)stampsForFriendsSlice:(STFriendsSlice*)slice 
+                             andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (void)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice andCallback:(void(^)(NSArray<STStamp>*, NSError*))block;
+- (STCancellation*)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice 
+                               andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (void)stampedByForStampedBySlice:(STStampedBySlice*)slice andCallback:(void(^)(id<STStampedBy>, NSError*))block;
+- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
+                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
 
 - (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block;
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
 
-- (void)entityForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntity>))block;
+- (STCancellation*)entityForEntityID:(NSString*)entityID 
+                         andCallback:(void(^)(id<STEntity> entity, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityDetailForEntityID:(NSString*)entityID andCallback:(void(^)(id<STEntityDetail> detail, NSError* error))block;
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
+                               andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
 
 - (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
                             andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error))block;
@@ -81,7 +97,8 @@ typedef enum {
 
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
-- (void)userDetailsForUserIDs:(NSArray*)userIDs andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error))block;
+- (STCancellation*)userDetailsForUserIDs:(NSArray*)userIDs 
+                             andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error, STCancellation* cancellation))block;
 
 - (void)isFriendForUserID:(NSString*)userID andCallback:(void(^)(BOOL isFriend, NSError* error))block;
 
@@ -91,7 +108,8 @@ typedef enum {
                       withBlurb:(NSString*)blurb 
                     andCallback:(void(^)(id<STComment> comment, NSError* error))block;
 
-- (void)menuForEntityID:(NSString*)entityID andCallback:(void(^)(id<STMenu>))block;
+- (STCancellation*)menuForEntityID:(NSString*)entityID 
+                       andCallback:(void(^)(id<STMenu> menu, NSError* error, STCancellation* cancellation))block;
 
 - (void)likeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
 

@@ -8,7 +8,7 @@
 
 #import "STProfileViewController.h"
 #import "STStampedAPI.h"
-#import "STStampCell.h"
+#import "STLegacyStampCell.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
 #import "STUserSource.h"
@@ -39,7 +39,7 @@
 @synthesize source = source_;
 @synthesize header = header_;
 
-static const NSInteger _headerHeight = 85;
+static const NSInteger _headerHeight = 95;
 
 - (id)initWithUserID:(NSString*)userID 
 {
@@ -69,6 +69,15 @@ static const NSInteger _headerHeight = 85;
 {
   [super viewDidUnload];
   self.header = nil;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self.source resumeOperations];
+}
+
+- (void)cancelPendingRequests {
+  [self.source cancelPendingOperations];
 }
 
 - (void)setSource:(STProfileSource *)source {
@@ -113,10 +122,10 @@ static const NSInteger _headerHeight = 85;
           string = @"Follow";
           action = @selector(followButtonClicked:);
         }
-        UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:string
+        UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:string
                                                                         style:UIBarButtonItemStylePlain
                                                                        target:self
-                                                                       action:action];
+                                                                       action:action] autorelease];
         self.navigationItem.rightBarButtonItem = rightButton;
       }];
     }
@@ -165,7 +174,7 @@ static const NSInteger _headerHeight = 85;
                                     font:[UIFont stampedFontWithSize:12]
                                    color:[UIColor stampedGrayColor]
                                     mode:UILineBreakModeWordWrap
-                              andMaxSize:CGSizeMake(textMaxWidth, 60)];
+                              andMaxSize:CGSizeMake(textMaxWidth, 20)];
     [Util reframeView:bioView withDeltas:CGRectMake(textOffset, CGRectGetMaxY(screenName.frame), 0, 0)];
     [self.header addSubview:bioView];
   }

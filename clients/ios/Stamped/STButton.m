@@ -27,6 +27,7 @@
 @synthesize action = action_;
 @synthesize enabled = enabled_;
 @synthesize touched = touched_;
+@synthesize message = message_;
 
 - (id)initWithFrame:(CGRect)frame 
          normalView:(UIView*)normalView 
@@ -52,6 +53,7 @@
 {
   [normalView_ release];
   [activeView_ release];
+  [message_ release];
   [super dealloc];
 }
 
@@ -70,6 +72,7 @@
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"touch");
   self.touched = YES;
 }
 
@@ -82,7 +85,11 @@
   //TODO fix for cancellation
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(CGRectMake(0, 0, self.frame.size.width, self.frame.size.height), [touch locationInView:self])) {
-    [self.target performSelector:self.action withObject:self];
+    id message = self.message;
+    if (!message) {
+      message = self;
+    }
+    [self.target performSelector:self.action withObject:message];
   }
 }
 

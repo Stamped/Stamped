@@ -26,11 +26,16 @@
 }
 
 - (void)loadView {
+  UIView* view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:NO]] autorelease];
   UIScrollView* scroller = [[[UIScrollView alloc] initWithFrame:[Util standardFrameWithNavigationBar:NO]] autorelease];
-  scroller.backgroundColor = [UIColor colorWithWhite:.3 alpha:1];
+  //scroller.backgroundColor = [UIColor colorWithWhite:.3 alpha:1];
   scroller.contentSize = CGSizeMake(scroller.frame.size.width, scroller.frame.size.height+1);
   [scroller addSubview:[STRootMenuView sharedInstance]];
-  self.view = scroller;
+  scroller.scrollsToTop = NO;
+  UIImageView* backgroundImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"menu_background"]] autorelease];
+  [view addSubview:backgroundImage];
+  [view addSubview:scroller];
+  self.view = view;
 }
 
 - (void)viewDidLoad

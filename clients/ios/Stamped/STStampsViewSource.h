@@ -22,10 +22,16 @@
 @interface STStampsViewSource : NSObject <UITableViewDataSource, UITableViewDelegate>
 
 - (void)reloadStampedData;
-- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block;
+- (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
+                                   andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 - (void)selectedNoStampsCell;
 - (void)selectedLastCell;
+- (void)cancelPendingOperations;
+- (void)resumeOperations;
+- (void)reduceStampCache;
+- (id<STStamp>)stampForIndexPath:(NSIndexPath*)path;
 
+@property (nonatomic, readwrite, assign) BOOL showSearchBar;
 @property (nonatomic, readwrite, assign) NSInteger mainSection;
 @property (nonatomic, readwrite, retain) STGenericCollectionSlice* slice;
 @property (nonatomic, readwrite, retain) UITableView* table;

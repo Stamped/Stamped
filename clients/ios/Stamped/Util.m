@@ -15,6 +15,9 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STActionMenuFactory.h"
 #import "STAppDelegate.h"
+#import "STImageCache.h"
+#import "STButton.h"
+#import "STActionPair.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -346,7 +349,7 @@ static Rdio* _rdio;
   if (CGRectIsNull(frame)) {
     frame = CGRectMake(0, 0, image.size.width, image.size.height);
   }
-  UIImageView* imageView = [[UIImageView alloc] initWithFrame:frame];
+  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:frame] autorelease];
   imageView.image = image;
   //[imageView autorelease];
   return imageView;
@@ -471,6 +474,7 @@ static Rdio* _rdio;
 }
 
 + (void)globalLoadingLock {
+  NSLog(@"GlobalLoadingLock");
   UIWindow* window = [[UIApplication sharedApplication] keyWindow];
   UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] 
                                             initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
@@ -498,6 +502,7 @@ static Rdio* _rdio;
 }
 
 + (void)globalLoadingUnlock {
+  NSLog(@"GlobalLoadingUnlock");
   UIWindow* window = [[UIApplication sharedApplication] keyWindow];
   [[window.subviews lastObject] removeFromSuperview];
   window.userInteractionEnabled = YES;
@@ -651,7 +656,7 @@ static Rdio* _rdio;
 }
 
 + (void)confirmWithMessage:(NSString*)message action:(NSString*)action destructive:(BOOL)destructive withBlock:(void(^)(BOOL))block {
-  STConfirmationDelegate* delegate = [[STConfirmationDelegate alloc] init];
+  STConfirmationDelegate* delegate = [[[STConfirmationDelegate alloc] init] autorelease];
   delegate.block = block;
   UIActionSheet* sheet;
   if (destructive) {
@@ -673,7 +678,7 @@ static Rdio* _rdio;
 }
 
 + (void)warnWithMessage:(NSString*)message andBlock:(void(^)(void))block {
-  STWarningDelegate* delegate = [[STWarningDelegate alloc] init];
+  STWarningDelegate* delegate = [[[STWarningDelegate alloc] init] autorelease];
   delegate.block = block;
   UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:message
                                                       delegate:delegate
@@ -688,13 +693,13 @@ static Rdio* _rdio;
               message:(NSString*)message 
               choices:(NSArray*)strings 
              andBlock:(void(^)(NSString* string))block {
-  STUtilMenuDelegate* delegate = [[STUtilMenuDelegate alloc] init];
+  STUtilMenuDelegate* delegate = [[[STUtilMenuDelegate alloc] init] autorelease];
   delegate.block = block;
   UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:title
-                                                  message:message 
-                                                 delegate:delegate 
-                                        cancelButtonTitle:@"Cancel" 
-                                        otherButtonTitles: nil] autorelease];
+                                                   message:message 
+                                                  delegate:delegate 
+                                         cancelButtonTitle:@"Cancel" 
+                                         otherButtonTitles: nil] autorelease];
   for (NSString* string in strings) {
     [alert addButtonWithTitle:string];
   }
@@ -741,16 +746,65 @@ static Rdio* _rdio;
 }
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
-  STImageView* imageView = [[[STImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
-  imageView.imageURL = [Util profileImageURLForUser:user withSize:size];
-  imageView.layer.borderWidth = 1;
+  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+  imageView.layer.borderWidth = 1.5;
+  imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
   imageView.layer.borderColor = [UIColor whiteColor].CGColor;
-  imageView.layer.shadowOffset = CGSizeMake(0,1);
-  imageView.layer.shadowOpacity = .1;
+  imageView.layer.shadowOffset = CGSizeMake(0,2);
+  imageView.layer.shadowOpacity = .3;
   imageView.layer.shadowRadius = 2;
+  UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+  if (cachedImage) {
+    imageView.image = cachedImage;
+  }
+  else {
+    [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+      imageView.image = image;
+    }];
+  }
   return imageView;
 }
 
+/*
++ (UIView*)profileImageViewForUser:(id<STUser>)user 
+                              size:(STProfileImageSize)size 
+                         andAction:(id<STAction>)action 
+                       withContext:(STActionContext*)context {
+  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+  imageView.layer.borderWidth = 1.5;
+  imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
+  imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+  imageView.layer.shadowOffset = CGSizeMake(0,2);
+  imageView.layer.shadowOpacity = .3;
+  imageView.layer.shadowRadius = 2;
+  imageView.clipsToBounds = YES;
+  UIView* activeView = [[[UIView alloc] initWithFrame:imageView.frame] autorelease];
+  activeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:.3 alpha:.3];
+  
+  UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+  if (cachedImage) {
+    imageView.image = cachedImage;
+    STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
+    STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
+                                            normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
+                                            activeView:activeView
+                                                target:pair andAction:@selector(executeActionWithArg:)];
+    [imageView addSubview:button];
+  }
+  else {
+    [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+      imageView.image = image;
+      STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
+      STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
+                                              normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
+                                              activeView:activeView
+                                                  target:pair andAction:@selector(executeActionWithArg:)];
+      [imageView addSubview:button];
+    }];
+  }
+  return imageView;
+}
+*/
 + (UIView*)badgeViewForGenre:(NSString*)genre {
   UIView* result = nil;
   NSString* imagePath = nil;
@@ -813,12 +867,35 @@ static Rdio* _rdio;
   return dictionary;
 }
 
-+ (NSString*)largeProfileImageURLWithUser:(id<STUserDetail>)userDetail {
++ (NSString*)largeProfileImageURLWithUser:(id<STUser>)userDetail {
   if (userDetail.imageURL)
     return userDetail.imageURL;
   return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", userDetail.screenName.lowercaseString];
 }
 
++ (NSArray*)categories {
+  NSArray* categories = [NSArray arrayWithObjects:
+                         @"food",
+                         @"book",
+                         @"music",
+                         @"film",
+                         @"other",
+                         nil];
+  return categories;
+}
+
++ (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail {
+  NSString* imagePath = nil;
+  if (entityDetail.images && [entityDetail.images count] > 0) {
+    id<STImage> image = [entityDetail.images objectAtIndex:0];
+    imagePath = image.image;
+  }
+  return imagePath;
+}
+
++ (CGFloat)lineHeightForFont:(UIFont*)font {
+  return [@"Tp" sizeWithFont:font].height;
+}
 
 @end
 
@@ -879,6 +956,15 @@ static Rdio* _rdio;
 
 @synthesize block = _block;
 
+- (id)init
+{
+  self = [super init];
+  if (self) {
+    [self retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_block release];
@@ -905,6 +991,15 @@ static Rdio* _rdio;
 
 @synthesize block = _block;
 
+- (id)init
+{
+  self = [super init];
+  if (self) {
+    [self retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_block release];
@@ -930,6 +1025,15 @@ static Rdio* _rdio;
 @implementation STUtilMenuDelegate
 
 @synthesize block = _block;
+
+- (id)init
+{
+  self = [super init];
+  if (self) {
+    [self retain];
+  }
+  return self;
+}
 
 - (void)dealloc
 {

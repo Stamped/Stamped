@@ -18,6 +18,7 @@
 #import "STDebugViewController.h"
 #import "ECSlidingViewController.h"
 #import "STRootViewController.h"
+#import "STIWantToViewController.h"
 
 @interface STRootMenuView ()
 
@@ -179,6 +180,7 @@ static STRootMenuView* _sharedInstance;
     [self appendChildView:stampedLabel];
     NSDictionary* navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [STInboxViewController sharedInstance], @"Stamps",
+                                [[[STIWantToViewController alloc] init] autorelease], @"I Want to...",
                                 [[[STUniversalNewsController alloc] init] autorelease], @"News",
                                 [STTodoViewController sharedInstance], @"To-Do",
                                 [[[STDebugViewController alloc] init] autorelease], @"Debug",
@@ -186,7 +188,7 @@ static STRootMenuView* _sharedInstance;
                                 //[[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
                                 [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
                                 nil];
-    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"News", @"To-Do", @"Debug", @"Settings", nil];
+    NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"I Want to...", @"News", @"To-Do", @"Debug", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
       UIViewController* controller = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];

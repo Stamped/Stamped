@@ -218,6 +218,8 @@ static STInboxViewController* _sharedInstance;
 {
   _toolbar = [[STToolbarView alloc] init];
   [super viewDidLoad];
+  self.scrollView.scrollsToTop = NO;
+  self.tableView.scrollsToTop = YES;
   UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 4, 320, 40)] autorelease];
   _queryField = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
   _queryField.placeholder = @"Search for stamps";
@@ -254,6 +256,7 @@ static STInboxViewController* _sharedInstance;
   _slider = [[STScopeSlider alloc] initWithFrame:CGRectMake(45, 15, 230, 23)];
   _slider.delegate = self;
   [_toolbar addSubview:_slider];
+  /*
   UIButton* mapButton = [[[UIButton alloc] initWithFrame:CGRectMake(275, 10, 34, 30)] autorelease];
   [mapButton setImage:[UIImage imageNamed:@"nav_map_button"] forState:UIControlStateNormal];
   [mapButton addTarget:self action:@selector(mapButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
@@ -263,7 +266,21 @@ static STInboxViewController* _sharedInstance;
   _categoryButton.categoryView = [[[STInboxCategoryFilterView alloc] initWithInboxController:self] autorelease];
   [_categoryButton addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
   [_toolbar addSubview:_categoryButton];
+   */
   [self updateSource];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  for (STStampsViewSource* source in [self.inboxSources allValues]) {
+    [source cancelPendingOperations];
+  }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  STStampsViewSource* source = [self.inboxSources objectForKey:[NSNumber numberWithInt:self.scope]];
+  [source resumeOperations];
 }
 
 - (void)updateCategoryImage {
@@ -331,7 +348,7 @@ static STInboxViewController* _sharedInstance;
 }
 
 - (void)updateSource {
-  STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
+  STGenericCollectionSlice* slice = [[[[STGenericCollectionSlice alloc] init] autorelease] autorelease];
   [slice retain];
   slice.offset = [NSNumber numberWithInt:0];
   slice.limit = [NSNumber numberWithInt:NSIntegerMax];
@@ -343,6 +360,7 @@ static STInboxViewController* _sharedInstance;
   }
   for (STStampsViewSource* old in [self.inboxSources allValues]) {
     old.table = nil;
+    [old cancelPendingOperations];
   }
   STStampsViewSource* source = [self.inboxSources objectForKey:[NSNumber numberWithInt:self.scope]];
   source.table = self.tableView;

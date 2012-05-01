@@ -11,7 +11,6 @@
 
 @interface STCacheModelSource ()
 
-@property (nonatomic, readonly, copy) NSString* mainKey;
 @property (nonatomic, readonly, retain) NSCache* cache;
 
 @end
@@ -19,17 +18,29 @@
 @implementation STCacheModelSource
 
 @synthesize delegate = _delegate;
-@synthesize mainKey = _mainKey;
 @synthesize cache = _cache;
+@dynamic maximumCost;
 
-- (id)initWithMainKey:(NSString*)key andDelegate:(id<STCacheModelSourceDelegate>)delegate {
++ (NSString*)errorDomain {
+  return @"STCacheModelSource";
+}
+
+- (id)initWithDelegate:(id<STCacheModelSourceDelegate>)delegate {
   self = [super init];
   if (self) {
-    _mainKey = [key copy];
     _cache = [[NSCache alloc] init];
+    [_cache setTotalCostLimit:NSIntegerMax];
     _delegate = delegate;
   }
   return self;
+}
+
+- (void)setMaximumCost:(NSInteger)maximumCost {
+  [self.cache setTotalCostLimit:maximumCost];
+}
+
+- (NSInteger)maximumCost {
+  return self.cache.totalCostLimit;
 }
 
 - (void)setObject:(id)object forKey:(NSString*)key {
@@ -40,42 +51,59 @@
   [_cache removeObjectForKey:key];
 }
 
-- (void)cacheWithKey:(NSString*)key callback:(void(^)(id))block {
-  [self fetchWithKey:key callback:block];
+- (STCancellation*)cacheWithKey:(NSString*)key callback:(void(^)(id, NSError*, STCancellation*))block {
+  return [self fetchWithKey:key callback:block];
 }
 
-- (void)updateWithKey:(NSString*)key callback:(void(^)(id))block {
+- (STCancellation*)updateWithKey:(NSString*)key callback:(void(^)(id, NSError*, STCancellation*))block {
   id object = [self.cache objectForKey:key];
   id<STCacheModelSourceDelegate> delegate = self.delegate;
-  [Util executeAsync:^{
-    if (delegate) {
-      [delegate objectForCache:self withKey:key andCurrentObject:object withCallback:^(id result) {
-        if (result) {
-          [self.cache setObject:result forKey:key];
-        }
-        [Util executeOnMainThread:^{
-          block(result);
-        }];
-      }];
-    }
-    else {
-      [Util executeOnMainThread:^{
-        block(nil);
-      }];
-    }
-  }];
-}
-
-- (void)fetchWithKey:(NSString*)key callback:(void(^)(id))block {
-  id object = [self.cache objectForKey:key];
-  if (object) {
-    [Util executeOnMainThread:^{
-      block(object);
-    }];
+  if (delegate) {
+    STCancellation* cancellation = [delegate objectForCache:self 
+                                                    withKey:key 
+                                           andCurrentObject:object 
+                                               withCallback:^(id model, NSInteger cost, NSError* error, STCancellation* cancellation2) {
+                                                 if (model) {
+                                                   [self.cache setObject:model forKey:key cost:cost];
+                                                 }
+                                                 if (!cancellation2.cancelled) {
+                                                   block(model, error, cancellation2);
+                                                 }
+                                               }];
+    return cancellation;
   }
   else {
-    [self updateWithKey:key callback:block];
+    STCancellation* cancellation = [STCancellation cancellation];
+    [Util executeOnMainThread:^{
+      if (!cancellation.cancelled) {
+        block(nil, [NSError errorWithDomain:[STCacheModelSource errorDomain] 
+                                       code:STCacheModelSourceErrorNoDelegate 
+                                   userInfo:[NSDictionary dictionary]], cancellation);
+      }
+    }];
+    return cancellation;
   }
 }
+
+- (STCancellation*)fetchWithKey:(NSString*)key callback:(void(^)(id model, NSError* error, STCancellation* cancellation))block {
+  id object = [self.cache objectForKey:key];
+  if (object) {
+    STCancellation* cancellation = [STCancellation cancellation];
+    [Util executeOnMainThread:^{
+      if (!cancellation.cancelled) {
+        block(object, nil, cancellation);
+      }
+    }];
+    return cancellation;
+  }
+  else {
+    return [self updateWithKey:key callback:block];
+  }
+}
+
+- (id)cachedValueForKey:(NSString*)key {
+  return [self.cache objectForKey:key];
+}
+
 
 @end

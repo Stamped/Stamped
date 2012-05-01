@@ -180,6 +180,7 @@
       CTRunGetPositions(run, thisGlyphRange, &position);
       
       // Add it to the textPath.
+      //TODO MEMORY_LEAK
       CGPathRef path = CTFontCreatePathForGlyph(runFont, glyph, NULL);
       CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
       CGPathAddPath(textPath, &transform, path);

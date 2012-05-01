@@ -84,8 +84,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   // Override point for customization after application launch.
   self.window.backgroundColor = [UIColor whiteColor];
   _navigationController = [[STRootViewController alloc] init];
-  //[self.window setRootViewController:_navigationController];
+  [self.window setRootViewController:_navigationController];
   ECSlidingViewController* slider = [ECSlidingViewController sharedInstance];
+  NSLog(@"Slider:%f,%f vs %f",slider.view.frame.size.height, slider.view.frame.origin.y, self.window.frame.size.height);
   slider.topViewController = _navigationController;
   [self.window setRootViewController:slider];
   [self.window makeKeyAndVisible];

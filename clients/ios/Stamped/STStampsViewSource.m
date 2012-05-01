@@ -7,7 +7,7 @@
 //
 
 #import "STStampsViewSource.h"
-#import "STStampCell.h"
+#import "STLegacyStampCell.h"
 #import "STStampedAPI.h"
 #import "Util.h"
 #import "STStampedActions.h"
@@ -15,6 +15,9 @@
 #import "UIColor+Stamped.h"
 #import "UIFont+Stamped.h"
 #import "STRippleBar.h"
+#import "STPreviewsView.h"
+#import "STStampCell.h"
+#import "STLazyList.h"
 
 static const NSInteger _batchSize = 20;
 
@@ -26,6 +29,8 @@ static const NSInteger _batchSize = 20;
 @property (nonatomic, readwrite, assign) BOOL noMoreStamps;
 @property (nonatomic, readwrite, assign) BOOL waiting;
 @property (nonatomic, readwrite, assign) NSInteger generation;
+@property (nonatomic, readonly, retain) NSMutableSet* cancellations;
+@property (nonatomic, readwrite, assign) NSInteger firstStampOffset;
 
 - (void)populateStamps;
 - (BOOL)shouldLoadMore;
@@ -34,6 +39,8 @@ static const NSInteger _batchSize = 20;
 
 @implementation STStampsViewSource
 
+@synthesize firstStampOffset = firstStampOffset_;
+@synthesize showSearchBar = showSearchBar_;
 @synthesize mainSection = mainSection_;
 @synthesize slice = _slice;
 @synthesize stamps = _stamps;
@@ -48,6 +55,7 @@ static const NSInteger _batchSize = 20;
 @synthesize noStampsText = _noStampsText;
 @synthesize flareSet = _flareSet;
 @synthesize delegate = _delegate;
+@synthesize cancellations = cancellations_;
 
 - (id)init
 {
@@ -56,6 +64,7 @@ static const NSInteger _batchSize = 20;
     _loadingText = @"Loading...";
     _lastCellText = @"No more stamps";
     _noStampsText = @"No stamps available";
+    cancellations_ = [[NSMutableSet alloc] init];
   }
   return self;
 }
@@ -71,6 +80,10 @@ static const NSInteger _batchSize = 20;
   [super dealloc];
 }
 
+- (void)setShowSearchBar:(BOOL)showSearchBar {
+  
+}
+
 - (void)setSlice:(STGenericCollectionSlice *)slice {
   [_slice autorelease];
   _slice = [slice retain];
@@ -80,7 +93,7 @@ static const NSInteger _batchSize = 20;
   if (slice.offset == nil) {
     slice.offset = [NSNumber numberWithInteger:0];
   }
-  self.stamps = [[NSMutableArray array] retain];
+  self.stamps = [NSMutableArray array];
   self.offset = slice.offset.integerValue;
   self.maxRow = 0;
   self.noMoreStamps = NO;
@@ -98,7 +111,8 @@ static const NSInteger _batchSize = 20;
     self.offset += curBatch;
     self.waiting = YES;
     NSInteger thisGeneration = self.generation;
-    void (^callback)(NSArray<STStamp>*, NSError*) = ^(NSArray<STStamp>* stamps, NSError* error) {
+    void (^callback)(NSArray<STStamp>*, NSError*, STCancellation* cancellation) = ^(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation) {
+      [self.cancellations removeObject:cancellation];
       if (thisGeneration == self.generation) {
         [self.stamps addObjectsFromArray:stamps];
         self.waiting = NO;
@@ -115,12 +129,14 @@ static const NSInteger _batchSize = 20;
         NSLog(@"ignoring old request");
       }
     };
-    [self makeStampedAPICallWithSlice:curSlice andCallback:callback];
+    STCancellation* cancellation = [self makeStampedAPICallWithSlice:curSlice andCallback:callback];
+    [self.cancellations addObject:cancellation];
   }
 }
 
-- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block {
-  [[STStampedAPI sharedInstance] stampsForInboxSlice:slice andCallback:block];
+- (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
+                                   andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+  return [[STStampedAPI sharedInstance] stampsForInboxSlice:slice andCallback:block];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -133,7 +149,7 @@ static const NSInteger _batchSize = 20;
   else {
     NSInteger result = 0;
     if (self.stamps) {
-      result = [self.stamps count];
+      result = [self.stamps count] + self.firstStampOffset;
     }
     return result;
   }
@@ -163,45 +179,39 @@ static const NSInteger _batchSize = 20;
     return cell;
   }
   else {
-    STStampCell* cell = [[[STStampCell alloc] initWithReuseIdentifier:@"testing"] autorelease];
-    cell.stamp = [self.stamps objectAtIndex:indexPath.row];
-    if ([self.flareSet containsObject:cell.stamp.stampID]) {
-      STRippleBar* top = [[[STRippleBar alloc] initWithFrame:CGRectMake(0, 2, 320, 3.5)
-                                             andPrimaryColor:cell.stamp.user.primaryColor 
-                                           andSecondaryColor:cell.stamp.user.secondaryColor 
-                                                       isTop:YES] autorelease];
-      STRippleBar* bottom = [[[STRippleBar alloc] initWithFrame:CGRectMake(0, tableView.rowHeight-(top.frame.size.height+2), 320, 3.5)
-                                                andPrimaryColor:cell.stamp.user.primaryColor 
-                                              andSecondaryColor:cell.stamp.user.secondaryColor 
-                                                          isTop:NO] autorelease];
-      [cell addSubview:top];
-      [cell addSubview:bottom];
-      if (cell.stamp.badges.count) {
-        id<STBadge> badge = [cell.stamp.badges objectAtIndex:0];
-        UIView* badgeView = [Util badgeViewForGenre:badge.genre];
-        if (badgeView) {
-          badgeView.frame = [Util centeredAndBounded:badgeView.frame.size inFrame:CGRectMake(15, 50, 40, 40)];
-          [cell addSubview:badgeView];
-        }
-        else {
-          NSLog(@"Unsupported badge genre:%@",badge.genre);
-        }
-      }
+    if (indexPath.row >= self.firstStampOffset) {
+      id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
+      STStampCell* cell = [[[STStampCell alloc] initWithStamp:stamp] autorelease];
+      self.maxRow = MAX(self.maxRow, indexPath.row);
+      [self populateStamps];
+      return cell;
     }
-    self.maxRow = MAX(self.maxRow, indexPath.row);
-    [self populateStamps];
-    return cell;
+    else {
+      NSAssert(NO,@"Not implemented yet");
+      return nil;
+    }
   }
 }
 
+- (id<STStamp>)stampForIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.section == self.mainSection) {
+    if (indexPath.row >= self.firstStampOffset) {
+      id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
+      return stamp;
+    }
+  }
+  return nil;
+}
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.section == self.mainSection) {
-    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
-    STActionContext* context = [STActionContext context];
-    context.stamp = stamp;
-    id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
-    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    if (indexPath.row >= self.firstStampOffset) {
+      id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
+      STActionContext* context = [STActionContext context];
+      context.stamp = stamp;
+      id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
+      [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    }
   }
   else if (indexPath.section > self.mainSection) {
     if (!self.shouldLoadMore && !self.waiting) { 
@@ -219,12 +229,32 @@ static const NSInteger _batchSize = 20;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-  return 96;
+  if (indexPath.section == self.mainSection) {
+    if (indexPath.row >= self.firstStampOffset) {
+      id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
+      return [STStampCell heightForStamp:stamp];
+    }
+    else {
+      return 40;
+    }
+  }
+  else {
+    return [STStampCell heightForStamp:nil];
+  }
+  /*
+   CGFloat defaultHeight = 96;
+   if (indexPath.section == self.mainSection) {
+   id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+   defaultHeight += [STPreviewsView previewHeightForStamp:stamp andMaxRows:1];
+   }
+   return defaultHeight;
+   */
 }
 
 - (void)reloadStampedData {
-  self.slice = self.slice;
-  [self.table reloadData];
+  [self cancelPendingOperations];
+  [self.stamps removeAllObjects];
+  [self resumeOperations];
 }
 
 - (BOOL)shouldLoadMore {
@@ -249,6 +279,15 @@ static const NSInteger _batchSize = 20;
   }
 }
 
+- (void)cancelPendingOperations {
+  NSLog(@"CancelPendingOperations");
+  for (STCancellation* cancellation in self.cancellations) {
+    [cancellation cancel];
+  }
+  [self.cancellations removeAllObjects];
+  self.waiting = NO;
+}
+
 - (void)selectedNoStampsCell {
   
 }
@@ -257,5 +296,15 @@ static const NSInteger _batchSize = 20;
   
 }
 
+- (void)resumeOperations {
+  [self populateStamps];
+}
+
+- (void)reduceStampCache {
+  [self cancelPendingOperations];
+  if (self.stamps.count > _batchSize) {
+    [self.stamps removeObjectsInRange:NSMakeRange(_batchSize, self.stamps.count - _batchSize)];
+  }
+}
 
 @end

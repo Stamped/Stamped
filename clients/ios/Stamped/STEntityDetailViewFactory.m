@@ -118,32 +118,41 @@
     //TODO fix synchronousWrapper collapse bug
     if (self.entityDetail.galleries.count && !self.context.stamp) {
       id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
-      UIView* wrapper = [[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
+      UIView* wrapper = [[[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
                                                           entityDetail:self.entityDetail 
-                                                              andFrame:CGRectMake(0, 0, 320, 200)];
+                                                              andFrame:CGRectMake(0, 0, 320, 200)] autorelease];
       [view appendChildView:wrapper];
     }
     STStampedBySlice* slice = [STStampedBySlice standardSliceWithEntityID:self.entityDetail.entityID];
-    [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error) {
-      if (stampedBy) {
-        NSSet* blacklist = [NSSet set];
-        if (self.context.stamp) {
-          blacklist = [NSSet setWithObject:self.context.stamp.user.userID];
+    STViewFactoryBlock factory = ^(STViewCreatorCallback callback) {
+      [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation) {
+        if (stampedBy) {
+          NSSet* blacklist = [NSSet set];
+          if (self.context.stamp) {
+            blacklist = [NSSet setWithObject:self.context.stamp.user.userID];
+          }
+          callback(^(id<STViewDelegate> delegate) {
+            return [[[STStampedByView alloc] initWithStampedBy:stampedBy 
+                                                     blacklist:blacklist 
+                                                      entityID:self.entityDetail.entityID
+                                                   andDelegate:delegate] autorelease];
+          });
         }
-        STViewContainer* stampedByContainer = [[[STViewContainer alloc] initWithDelegate:view andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
-        STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy 
-                                                                           blacklist:blacklist 
-                                                                            entityID:self.entityDetail.entityID
-                                                                         andDelegate:stampedByContainer] autorelease];
-        [stampedByContainer appendChildView:stampedByView];
-        [Util reframeView:stampedByContainer withDeltas:CGRectMake(0, 0, 0, 10)];
-        CGFloat height = stampedByContainer.frame.size.height;
-        stampedByContainer.clipsToBounds = YES;
-        [Util reframeView:stampedByContainer withDeltas:CGRectMake(0, 0, 0, -height)];
-        [view appendChildView:stampedByContainer];
-        [view childView:stampedByContainer shouldChangeHeightBy:height overDuration:.25];
-      }
-    }];
+        else {
+          [Util warnWithMessage:@"Stamped by failed to load" andBlock:nil];
+          callback(^(id<STViewDelegate> delegate) {
+            return [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 10)] autorelease];
+          });
+        }
+      }];
+      
+    };
+    
+    STSynchronousWrapper* stampedByWrapper = [[[STSynchronousWrapper alloc] initWithDelegate:view
+                                                                                      frame:CGRectMake(0, 0, 320, 150)
+                                                                               factoryBlock:factory
+                                                                              andCompletion:nil] autorelease];
+    [view appendChildView:stampedByWrapper];    
     return view;
   }
   else {

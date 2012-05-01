@@ -123,16 +123,6 @@ static STActionManager* _singleton;
       [sourceObject didChooseSource:source forAction:action withContext:context];
     }
   }
-  else if ([source.source isEqualToString:@"menu"]) {
-    [Util globalLoadingLock];
-    [[STStampedAPI sharedInstance] menuForEntityID:@"4e4c6fdd26f05a2b75000a75" andCallback:^(id<STMenu> menu) {
-      [Util globalLoadingUnlock];
-      if (menu && context.entityDetail) {
-        UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
-        [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
-      }
-    }];
-  }
   
   if (!handled && source.link) {
     handled = TRUE;

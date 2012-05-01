@@ -15,6 +15,7 @@
 #import "STStamp.h"
 #import "STEntity.h"
 #import "STUserDetail.h"
+#import "STActionContext.h"
 
 @class User;
 @class Entity;
@@ -66,6 +67,7 @@ extern NSString* const kKeychainTwitterToken;
 + (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
 + (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
 + (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
+
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;
 + (UIView*)tapViewWithFrame:(CGRect)frame andCallback:(STCallback)callback;
 
@@ -138,6 +140,12 @@ extern NSString* const kKeychainTwitterToken;
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size;
 
+/*
++ (UIView*)profileImageViewForUser:(id<STUser>)user 
+                              size:(STProfileImageSize)size 
+                         andAction:(id<STAction>)action 
+                       withContext:(STActionContext*)context;
+*/
 + (UIView*)badgeViewForGenre:(NSString*)genre;
 
 + (CGRect)fullscreenFrame;
@@ -150,6 +158,12 @@ extern NSString* const kKeychainTwitterToken;
 
 + (NSMutableDictionary*)sparseDictionaryForObject:(id)object andKeyPaths:(NSArray*)keyPaths;
 
-+ (NSString*)largeProfileImageURLWithUser:(id<STUserDetail>)userDetail;
++ (NSString*)largeProfileImageURLWithUser:(id<STUser>)user;
+
++ (NSArray*)categories;
+
++ (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail;
+
++ (CGFloat)lineHeightForFont:(UIFont*)font;
 
 @end

@@ -67,6 +67,12 @@
 }
 
 + (RKObjectMapping*)mapping {
+  RKObjectMapping* mapping = [STSimpleStamp mappingWithoutPreview];
+  [mapping mapRelationship:@"previews" withMapping:[STSimplePreviews mapping]];
+  return mapping;
+}
+
++ (RKObjectMapping*)mappingWithoutPreview {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleStamp class]];
   
   [mapping mapKeyPathsToAttributes: 
@@ -88,7 +94,6 @@
   
   [mapping mapRelationship:@"entity" withMapping:[STSimpleEntity mapping]];
   [mapping mapRelationship:@"user" withMapping:[STSimpleUser mapping]];
-  [mapping mapRelationship:@"previews" withMapping:[STSimplePreviews mapping]];
   [mapping mapRelationship:@"mentions" withMapping:[STSimpleMention mapping]];
   [mapping mapKeyPath:@"credit" toRelationship:@"credits" withMapping:[STSimpleCredit mapping]];
   [mapping mapRelationship:@"badges" withMapping:[STSimpleBadge mapping]];

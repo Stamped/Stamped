@@ -54,8 +54,7 @@ static STStampedActions* _sharedInstance;
     if ([action isEqualToString:@"stamped_view_entity"] && source.sourceID != nil) {
       handled = YES;
       if (flag) {
-        EntityDetailViewController* detailViewController = [[EntityDetailViewController alloc] initWithEntityID:source.sourceID] ;
-        //detailViewController.referringStamp = stamp_;
+        EntityDetailViewController* detailViewController = [[[EntityDetailViewController alloc] initWithEntityID:source.sourceID] autorelease] ;
         [[Util sharedNavigationController] pushViewController:detailViewController animated:YES];
       }
     }
@@ -71,14 +70,14 @@ static STStampedActions* _sharedInstance;
         handled = YES;
         if (flag) {
           [Util globalLoadingLock];
-          [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp) {
+          [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
             [Util globalLoadingUnlock];
             if (stamp) {
               [[Util sharedNavigationController] pushViewController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
                                                            animated:YES];
             }
             else {
-              [Util warnWithMessage:[NSString stringWithFormat:@"Stamp loading failed for stamp %@!", source.sourceID, nil] andBlock:nil];
+              [Util warnWithMessage:[NSString stringWithFormat:@"Stamp loading failed for stamp %@!\n%@", source.sourceID, error] andBlock:nil];
             }
           }];
         }
@@ -90,6 +89,8 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
       UIViewController* controller = nil;
       if (context.user) {
+        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
+        controller = profileViewController;
       }
       else {
         STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
@@ -122,13 +123,38 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_todo_stamp"] && source.sourceID != nil) {
       handled = YES;
       if (flag) {
-        [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp) {
-          [[STStampedAPI sharedInstance] todoWithStampID:stamp.stampID entityID:stamp.entity.entityID andCallback:^(id<STTodo> todo, NSError* error) {
+        [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
+          if (stamp) {
+            [[STStampedAPI sharedInstance] todoWithStampID:stamp.stampID entityID:stamp.entity.entityID andCallback:^(id<STTodo> todo, NSError* error2) {
+              if (context.completionBlock) {
+                context.completionBlock(todo, error2);
+              }
+            }];
+          }
+          else {
             if (context.completionBlock) {
-              context.completionBlock(todo, error);
+              context.completionBlock(nil, error);
+            }
+          }
+        }];
+      }
+    }
+    else if ([action isEqualToString:@"stamped_untodo_stamp"] && source.sourceID != nil) {
+      handled = YES;
+      if (flag) {
+        void (^block)(id<STStamp>, NSError*, STCancellation*) = ^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
+          [[STStampedAPI sharedInstance] untodoWithEntityID:stamp.entity.entityID andCallback:^(BOOL success, NSError * error) {
+            if (context.completionBlock) {
+              context.completionBlock([NSNumber numberWithBool:success], error);
             }
           }];
-        }];
+        };
+        if (context.stamp) {
+          block(context.stamp, nil, [STCancellation cancellation]);
+        }
+        else {
+          [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:block];
+        }
       }
     }
     else if ([action isEqualToString:@"stamped_delete_stamp"] && source.sourceID != nil) {
@@ -142,18 +168,26 @@ static STStampedActions* _sharedInstance;
         }];
       }
     }
-    else if ([action isEqualToString:@"menu"] && source.sourceID != nil) {
+    else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
       handled = YES;
       if (flag) {
         [Util globalLoadingLock];
-        [[STStampedAPI sharedInstance] menuForEntityID:source.sourceID andCallback:^(id<STMenu> menu) {
+        [[STStampedAPI sharedInstance] menuForEntityID:source.sourceID andCallback:^(id<STMenu> menu, NSError* error, STCancellation* cancellation) {
           [Util globalLoadingUnlock];
-          if (menu && context.entityDetail) {
+          NSAssert(context.entityDetail != nil, @"Context was modified after action was chosen"); 
+          if (menu) {
             UIView* popUp = [[[STMenuPopUp alloc] initWithEntityDetail:context.entityDetail andMenu:menu] autorelease];
             [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithRed:0 green:0 blue:0 alpha:.75]];
+            if (context.completionBlock) {
+              context.completionBlock(menu, nil);
+            }
           }
           else {
-            [Util warnWithMessage:@"Menu loading failed." andBlock:nil];
+            [Util warnWithMessage:[NSString stringWithFormat:@"Menu loading failed.\n%@", error] andBlock:^{
+              if (context.completionBlock) {
+                context.completionBlock(nil, error); 
+              }
+            }];
           }
         }];
       }
