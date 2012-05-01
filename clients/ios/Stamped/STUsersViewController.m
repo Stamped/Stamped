@@ -11,64 +11,68 @@
 #import "STStampedAPI.h"
 #import "STStampedActions.h"
 #import "Util.h"
+#import "STGenericTableDelegate.h"
+#import "STUserDetailLazyList.h"
+#import "STUserCellFactory.h"
+#import "STStampedActions.h"
+#import "STActionManager.h"
 
-@interface STUsersViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface STUsersViewController ()
 
-@property (nonatomic, readonly, copy) NSArray* userIDs;
-@property (nonatomic, readonly, retain) NSMutableArray* userDetails;
-@property (nonatomic, readwrite, assign) BOOL failed;
+@property (nonatomic, readonly, retain) STGenericTableDelegate* tableDelegate;
 
 @end
 
 @implementation STUsersViewController
 
-@synthesize userIDs = userIDs_;
-@synthesize userDetails = userDetails_;
-@synthesize failed = failed_;
+@synthesize tableDelegate = tableDelegate_;
 
 - (id)initWithUserIDs:(NSArray*)userIDs
 {
   self = [super initWithHeaderHeight:0];
   if (self) {
-    userIDs_ = [userIDs retain];
-    userDetails_ = [[NSMutableArray alloc] init];
+    tableDelegate_ = [[STGenericTableDelegate alloc] init];
+    tableDelegate_.pageSize = 32;
+    tableDelegate_.preloadBufferSize = 64;
+    tableDelegate_.lazyList = [[[STUserDetailLazyList alloc] initWithUserIDs:userIDs] autorelease];
+    tableDelegate_.tableViewCellFactory = [STUserCellFactory sharedInstance];
+    __block STUsersViewController* weak = self;
+    tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
+      [weak.tableView reloadData];
+    };
+    tableDelegate_.selectedCallback = ^(STGenericTableDelegate* tableDelegate, UITableView* tableView, NSIndexPath* path) {
+      id<STUserDetail> userDetail = [tableDelegate_.lazyList objectAtIndex:path.row];
+      if (userDetail) {
+        STActionContext* context = [STActionContext context];
+        context.user = userDetail;
+        id<STAction> action = [STStampedActions actionViewUser:userDetail.userID withOutputContext:context];
+        [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+      }
+    };
   }
   return self;
 }
 
 - (void)dealloc
 {
-  [userIDs_ release];
-  [userDetails_ release];
+  [tableDelegate_ release];
   [super dealloc];
-}
-
-- (void)populateUsers {
-  NSInteger remaining = self.userIDs.count - self.userDetails.count;
-  if (remaining > 0 && !self.failed) {
-    NSRange range = NSMakeRange(self.userDetails.count, MIN(20,remaining));
-    NSArray* batch = [self.userIDs subarrayWithRange:range];
-    [[STStampedAPI sharedInstance] userDetailsForUserIDs:batch andCallback:^(NSArray<STUserDetail> *userDetails, NSError *error) {
-      if (userDetails) {
-        [self.userDetails addObjectsFromArray:userDetails];
-        [self.tableView reloadData];
-        [self populateUsers];
-      }
-      else {
-        self.failed = YES;
-        [Util warnWithMessage:@"user lookup failed!" andBlock:nil];
-      }
-    }];
-  }
 }
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  self.tableView.rowHeight = 52;
-  self.tableView.delegate = self;
-  self.tableView.dataSource = self;
-  [self populateUsers];
+  self.tableView.delegate = self.tableDelegate;
+  self.tableView.dataSource = self.tableDelegate;
+}
+
+- (void)reloadStampedData {
+  [self.tableDelegate reloadStampedData];
+}
+
+- (void)cancelPendingRequests {
+  [super cancelPendingRequests];
+  [self.tableDelegate cancelPendingRequests];
 }
 
 - (void)viewDidUnload
@@ -76,26 +80,5 @@
   [super viewDidUnload];
   // Release any retained subviews of the main view.
 }
-
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if (self.userDetails) {
-    return self.userDetails.count;
-  }
-  return 0;
-}
-
-- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  id<STUserDetail> userDetail = [self.userDetails objectAtIndex:indexPath.row];
-  STUserCell* cell = [[[STUserCell alloc] initWithReuseIdentifier:@"Todo"] autorelease];
-  cell.user = userDetail;
-  return cell;
-}
-
-- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  id<STUserDetail> userDetail = [self.userDetails objectAtIndex:indexPath.row];
-  [[STStampedActions sharedInstance] viewUserWithUserID:userDetail.userID];
-}
-
 
 @end

@@ -150,7 +150,7 @@ static const CGFloat _captionHeight = 25;
       captionView.frame = [Util centeredAndBounded:captionView.frame.size inFrame:bounds];
       [self addSubview:captionView];
     }
-    UIImageView* view = [[UIImageView alloc] initWithFrame:imageFrame];
+    UIImageView* view = [[[UIImageView alloc] initWithFrame:imageFrame] autorelease];
     view.image = image;
     view.backgroundColor = [UIColor clearColor];
     [self addSubview:view];

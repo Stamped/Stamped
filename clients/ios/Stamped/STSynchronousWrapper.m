@@ -75,7 +75,7 @@
 
 
 - (void)handleCallback:(STViewCreator)creator {
-  UIView* child;
+  UIView* child = nil;
   if (creator) {
     child = creator(self);
   }

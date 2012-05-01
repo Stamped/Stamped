@@ -17,5 +17,6 @@
           andAction:(SEL)selector;
 
 @property (nonatomic, readwrite, assign) BOOL enabled;
+@property (nonatomic, readwrite, retain) id message;
 
 @end

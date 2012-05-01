@@ -96,6 +96,7 @@ static int _count = 0;
       }];
     }
   }
+  //TODO analyse underflow special case implementation
   if (self.contentSize.height + delta < self.frame.size.height) {
     delta = self.frame.size.height - self.contentSize.height;
   }
@@ -106,7 +107,7 @@ static int _count = 0;
   }];
 }
 
-
+//TODO analyse or deprecate
 - (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation {
   CGFloat seconds = 0;
   if (animation) {

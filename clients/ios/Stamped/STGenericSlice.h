@@ -21,4 +21,6 @@
 
 - (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset;
 
+@property (nonatomic, readonly, assign) NSInteger end;
+
 @end

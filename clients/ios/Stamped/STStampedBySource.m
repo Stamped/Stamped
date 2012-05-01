@@ -17,12 +17,14 @@
   [super setSlice:slice];
 }
 
-- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block {
-  [[STStampedAPI sharedInstance] stampedByForStampedBySlice:(STStampedBySlice*)slice andCallback:^(id<STStampedBy> stampedBy, NSError* error) {\
+- (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
+                                   andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+  return [[STStampedAPI sharedInstance] stampedByForStampedBySlice:(STStampedBySlice*)slice 
+                                                       andCallback:^(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation) {
     id<STStampedByGroup> group = stampedBy.friends;
     if (!group) group = stampedBy.friendsOfFriends;
     if (!group) group = stampedBy.everyone;
-    block(group.stamps, error);
+    block(group.stamps, error, cancellation);
   }];
 }
 

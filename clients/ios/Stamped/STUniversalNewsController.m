@@ -26,10 +26,9 @@
 @synthesize newsItems = newsItems_;
 @synthesize scope = scope_;
 
-- (void)setScope:(STStampedAPIScope)scope {
-  scope_ = scope;
+- (void)updateToggleButton {
   NSString* text;
-  if (scope == STStampedAPIScopeYou) {
+  if (scope_ == STStampedAPIScopeYou) {
     text = @"Friends";
   }
   else {
@@ -40,13 +39,19 @@
                                                                   target:self
                                                                   action:@selector(toggleButtonClicked:)] autorelease];
   self.navigationItem.rightBarButtonItem = rightButton;
+}
+
+- (void)setScope:(STStampedAPIScope)scope {
+  scope_ = scope;
+  [self updateToggleButton];
   [self reloadStampedData];
 }
 
 - (id)init {
   self = [super initWithHeaderHeight:0];
   if (self) {
-    self.scope = STStampedAPIScopeFriends;
+    scope_ = STStampedAPIScopeFriends;
+    [self updateToggleButton];
   }
   return self;
 }
@@ -73,6 +78,7 @@
                                                                             style:UIBarButtonItemStyleDone
                                                                            target:self 
                                                                            action:@selector(backButtonClicked:)] autorelease];
+  [self reloadStampedData];
 }
 
 - (void)viewDidUnload
@@ -89,7 +95,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
-  return [STActivityCell heightForCellWithActivity:activity andScope:STStampedAPIScopeFriends];
+  return [STActivityCell heightForCellWithActivity:activity andScope:self.scope];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -98,7 +104,7 @@
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
-  return [[[STActivityCell alloc] initWithActivity:activity andScope:STStampedAPIScopeFriends] autorelease];
+  return [[[STActivityCell alloc] initWithActivity:activity andScope:self.scope] autorelease];
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {

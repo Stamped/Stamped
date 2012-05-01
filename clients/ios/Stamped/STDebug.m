@@ -45,7 +45,7 @@ static STDebug* _sharedInstance;
 }
 
 - (void)log:(id)object {
-  [self.logs addObject:[[STDebugDatum alloc] initWithObject:object]];
+  [self.logs addObject:[[[STDebugDatum alloc] initWithObject:object] autorelease]];
 }
 
 + (void)log:(id)object {

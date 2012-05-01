@@ -2,25 +2,17 @@
 //  STStampCell.h
 //  Stamped
 //
-//  Created by Landon Judkins on 4/5/12.
+//  Created by Landon Judkins on 4/27/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 #import "STStamp.h"
-#import "STPageControl.h"
 
-@interface STStampCell : UITableViewCell <UIScrollViewDelegate> {
-@private
-  UIView* stacksBackgroundView_;
-  BOOL stackExpanded_;
-  UIButton* stackCollapseButton_;
-  UIScrollView* userImageScrollView_;
-  STPageControl* pageControl_;
-}
+@interface STStampCell : UITableViewCell
 
-- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
+- (id)initWithStamp:(id<STStamp>)stamp;
 
-@property (nonatomic, readwrite, retain) id<STStamp> stamp;
++ (CGFloat)heightForStamp:(id<STStamp>)stamp;
 
 @end

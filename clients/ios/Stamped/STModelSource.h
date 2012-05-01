@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STCancellation.h"
 
 @protocol STModelSource <NSObject>
 
-- (void)cacheWithKey:(NSString*)key callback:(void(^)(id))block;
-- (void)updateWithKey:(NSString*)key callback:(void(^)(id))block;
-- (void)fetchWithKey:(NSString*)key callback:(void(^)(id))block;
+- (STCancellation*)cacheWithKey:(NSString*)key callback:(void(^)(id model, NSError* error, STCancellation* cancellation))block;
+- (STCancellation*)updateWithKey:(NSString*)key callback:(void(^)(id model, NSError* error, STCancellation* cancellation))block;
+- (STCancellation*)fetchWithKey:(NSString*)key callback:(void(^)(id model, NSError* error, STCancellation* cancellation))block;
+- (id)cachedValueForKey:(NSString*)key;
 
 @end

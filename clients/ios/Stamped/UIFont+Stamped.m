@@ -22,6 +22,10 @@
   return [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:size];
 }
 
++ (UIFont*)stampedTitleFontLightWithSize:(CGFloat)size {
+  return [UIFont fontWithName:@"TitlingGothicFBComp-Light" size:size];
+}
+
 + (UIFont*)stampedBoldFontWithSize:(CGFloat)size {
   return [UIFont fontWithName:@"Helvetica-Bold" size:size];
 }

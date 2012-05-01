@@ -30,15 +30,33 @@ def profile(request, schema, **kwargs):
     prev_url   = None
     next_url   = None
     
+    # TODO: enforce stricter validity checking on offset and limit
+    
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
-    if schema.screen_name == 'travis' and schema.offset == 0 and schema.limit == len(__stamps):
-        user   = __user
-        stamps = __stamps
+    if schema.screen_name == 'travis' and schema.offset + schema.limit <= len(__stamps):
+        user      = __user
+        stamps    = __stamps[schema.offset : schema.offset + schema.limit]
+        user_id   = user['user_id']
+        #friends   = __friends
+        #followers = __followers
+        
+        friends   = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
+        followers = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
+        
+        utils.log("FRIENDS: %d" % len(friends))
+        pprint.pprint(friends)
+        
+        utils.log("FOLLOWERS: %d" % len(friends))
+        pprint.pprint(followers)
     else:
-        user   = stampedAPIProxy.getUser(screen_name=schema.screen_name)
-        stamps = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        user      = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        stamps    = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        user_id   = user['user_id']
+        
+        friends   = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
+        followers = stampedAPIProxy.getFollowers(user_idser.user_id, screen_name=schema.screen_name)
     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
@@ -53,6 +71,9 @@ def profile(request, schema, **kwargs):
     return stamped_render(request, 'demo.html', {
         'user'      : user, 
         'stamps'    : stamps, 
+        
+        'friends'   : friends, 
+        'followers' : followers, 
         
         'prev_url'  : prev_url, 
         'next_url'  : next_url, 

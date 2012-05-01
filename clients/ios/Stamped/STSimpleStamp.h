@@ -10,7 +10,7 @@
 #import "STStamp.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleStamp : NSObject
+@interface STSimpleStamp : NSObject <STStamp>
 
 @property (nonatomic, readwrite, copy) NSString* blurb;
 @property (nonatomic, readwrite, copy) NSDate* created;
@@ -35,5 +35,6 @@
 @property (nonatomic, readwrite, copy) NSArray<STContentItem>* contents;
 
 + (RKObjectMapping*)mapping;
++ (RKObjectMapping*)mappingWithoutPreview;
 
 @end

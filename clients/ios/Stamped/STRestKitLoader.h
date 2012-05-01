@@ -8,25 +8,26 @@
 
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
+#import "STCancellation.h"
 
 @interface STRestKitLoader : NSObject
 
-- (void)loadWithPath:(NSString*)path 
-                post:(BOOL)post
-              params:(NSDictionary*)params 
-             mapping:(RKObjectMapping*)mapping 
-         andCallback:(void(^)(NSArray*,NSError*))block;
+- (STCancellation*)loadWithPath:(NSString*)path 
+                           post:(BOOL)post
+                         params:(NSDictionary*)params 
+                        mapping:(RKObjectMapping*)mapping 
+                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block;
 
-- (void)loadOneWithPath:(NSString*)path
-                   post:(BOOL)post
-                 params:(NSDictionary*)params 
-                mapping:(RKObjectMapping*)mapping 
-            andCallback:(void(^)(id,NSError*))block;
+- (STCancellation*)loadOneWithPath:(NSString*)path
+                              post:(BOOL)post
+                            params:(NSDictionary*)params 
+                           mapping:(RKObjectMapping*)mapping 
+                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block;
 
-- (void)booleanWithPath:(NSString*)path
-                   post:(BOOL)post
-                 params:(NSDictionary*)params
-            andCallback:(void(^)(BOOL boolean, NSError* error))block;
+- (STCancellation*)booleanWithPath:(NSString*)path
+                              post:(BOOL)post
+                            params:(NSDictionary*)params
+                       andCallback:(void(^)(BOOL boolean, NSError* error, STCancellation* cancellation))block;
 
 + (STRestKitLoader*)sharedInstance;
 

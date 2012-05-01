@@ -101,6 +101,7 @@
     [view appendChildView:button];
   }
   [scroller addSubview:view];
+  scroller.scrollsToTop = NO;
   self.view = scroller;
 }
 

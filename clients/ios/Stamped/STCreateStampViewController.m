@@ -103,7 +103,7 @@
     
     views[i] = view;
   }
-  STButton* button = [[STButton alloc] initWithFrame:buttonFrame normalView:views[0] activeView:views[1] target:self andAction:@selector(stampButtonPressed:)];
+  STButton* button = [[[STButton alloc] initWithFrame:buttonFrame normalView:views[0] activeView:views[1] target:self andAction:@selector(stampButtonPressed:)] autorelease];
   button.frame = [Util centeredAndBounded:button.frame.size inFrame:toolbar.frame];
   [toolbar addSubview:button];
   return toolbar;

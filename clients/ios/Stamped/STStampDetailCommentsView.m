@@ -21,6 +21,7 @@
 #import "STStampedAPI.h"
 #import "STRippleBar.h"
 #import "STProfileViewController.h"
+#import "STPreviewsView.h"
 
 static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
@@ -57,8 +58,8 @@ static const CGFloat _imagePaddingY = _imagePaddingX;
 - (id)initWithUser:(id<STUser>)user andProfileImageSize:(STProfileImageSize)size {
   self = [super initWithFrame:CGRectMake(0, 0, _totalWidth, size + 2 * _imagePaddingY)];
   if (self) {
-    STImageView* imageView = [[[STImageView alloc] initWithFrame:CGRectMake(_imagePaddingX, _imagePaddingY, size, size)] autorelease];
-    imageView.imageURL = [Util profileImageURLForUser:user withSize:STProfileImageSize31];
+    UIView* imageView = [Util profileImageViewForUser:user withSize:size];
+    [Util reframeView:imageView withDeltas:CGRectMake(_imagePaddingX, _imagePaddingY, 0, 0)];
     [self addSubview:imageView];
     UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:user];
     [self addSubview:imageButton];
@@ -196,6 +197,13 @@ andProfileImageSize:(STProfileImageSize)size {
   id<STContentItem> item = [stamp.contents objectAtIndex:index];
   self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:ProfileImageSize46];
   if (self) {
+    CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
+    if ( previewHeight > 0 && index == 0) {
+      STPreviewsView* view = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:2] autorelease];
+      [Util reframeView:view withDeltas:CGRectMake(60, self.frame.size.height, 0, 0)];
+      [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, previewHeight)];
+      [self addSubview:view];
+    }
     //TODO likes, credited, border
   }
   return self;
@@ -279,7 +287,7 @@ andProfileImageSize:(STProfileImageSize)size {
   if (self) {
     STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
     [self appendChildView:topBar];
-    UIView* blurbView = [[STStampDetailBlurbView alloc] initWithStamp:stamp andIndex:index];
+    UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp andIndex:index] autorelease];
     [self appendChildView:blurbView];
     if (index == 0) {
       NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;

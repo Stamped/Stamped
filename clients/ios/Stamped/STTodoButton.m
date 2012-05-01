@@ -16,11 +16,11 @@
 
 - (id)initWithStamp:(id<STStamp>)stamp
 {
-  self = [super initWithStamp:stamp normalOffImage:[UIImage imageNamed:@"toolbar_todoButton"] offText:@"To-Do" andOnText:@"To-Do'd"];
+  self = [super initWithStamp:stamp normalOffImage:[UIImage imageNamed:@"sDetailBar_btn_todo"] offText:@"To-Do" andOnText:@"To-Do'd"];
   if (self) {
-    self.normalOnImage = [UIImage imageNamed:@"toolbar_todoButton_selected"];
-    self.touchedOffImage = [UIImage imageNamed:@"toolbar_todoButton_highlighted"];
-    self.touchedOnImage = [UIImage imageNamed:@"toolbar_todoButton_highlighted"];
+    self.normalOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_selected"];
+    self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
+    self.touchedOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
     self.on = [[self.stamp isTodod] boolValue];
   }
   return self;
@@ -36,6 +36,7 @@
         [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
       }
     }];
+    context.stamp = self.stamp;
     id<STAction> action;
     if (self.stamp.isTodod.boolValue) {
       action = [STStampedActions actionUntodoStamp:self.stamp.stampID withOutputContext:context];

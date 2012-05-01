@@ -153,9 +153,10 @@ static BOOL _addedStampButton = NO;
   }
   if (self.entityID) {
     [self.loadingView startAnimating];
-    [[STStampedAPI sharedInstance] entityDetailForEntityID:self.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
-      self.entityDetail = detail;
-    }];
+    [[STStampedAPI sharedInstance] entityDetailForEntityID:self.entityID 
+                                               andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+                                                 self.entityDetail = detail;
+                                               }];
   }
   else if (self.searchID) {
     [self.loadingView startAnimating];

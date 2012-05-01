@@ -27,11 +27,13 @@
   STUserCollectionSlice* friendsSlice = [[[STUserCollectionSlice alloc] init] autorelease];
   [friendsSlice importDictionaryParams:[slice asDictionaryParams]];
   friendsSlice.userID = self.userID;
+  NSLog(@"userID:%@",self.userID);
   [super setSlice:friendsSlice];
 }
 
-- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block {
-  [[STStampedAPI sharedInstance] stampsForUserSlice:(id)slice andCallback:block];
+- (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
+                                   andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+  return [[STStampedAPI sharedInstance] stampsForUserSlice:(id)slice andCallback:block];
 }
 
 - (NSString *)lastCellText {

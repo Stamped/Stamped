@@ -99,10 +99,11 @@ const static NSInteger _histogramHeight = 100;
 - (void)clickedBar:(STUserCollectionSlice*)slice {
   STTableViewController* controller = [[[STTableViewController alloc] initWithHeaderHeight:0] autorelease];
   [controller view];
-  STUserSource* source = [[STUserSource alloc] init];
+  STUserSource* source = [[[STUserSource alloc] init] autorelease];
   source.userID = slice.userID;
   source.slice = slice;
   source.table = controller.tableView;
+  [controller retainObject:source];
   [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
@@ -271,7 +272,10 @@ return self;
 }
 
 - (void)followersButtonPressed:(id)button {
+  [self cancelPendingOperations];
+  [Util globalLoadingLock];
   [[STStampedAPI sharedInstance] followerIDsForUserID:self.userDetail.userID andCallback:^(NSArray *followerIDs, NSError *error) {
+    [Util globalLoadingUnlock];
     if (followerIDs) {
       STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:followerIDs] autorelease];
       [[Util sharedNavigationController] pushViewController:controller animated:YES];
@@ -280,7 +284,10 @@ return self;
 }
 
 - (void)friendsButtonPressed:(id)button {
+  [self cancelPendingOperations];
+  [Util globalLoadingLock];
   [[STStampedAPI sharedInstance] friendIDsForUserID:self.userDetail.userID andCallback:^(NSArray *friendIDs, NSError *error) {
+    [Util globalLoadingUnlock];
     if (friendIDs) {
       STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:friendIDs] autorelease];
       [[Util sharedNavigationController] pushViewController:controller animated:YES];

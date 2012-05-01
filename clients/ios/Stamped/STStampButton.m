@@ -25,11 +25,11 @@
 @synthesize entity = _entity;
 
 - (id)initWithEntity:(id<STEntity>)entity andUser:(id<STUser>)user {
-  self = [super initWithNormalOffImage:[UIImage imageNamed:@"toolbar_stampButton"] offText:@"Stamp" andOnText:@"Stamped"];
+  self = [super initWithNormalOffImage:[UIImage imageNamed:@"sDetailBar_btn_restamp"] offText:@"Stamp" andOnText:@"Stamped"];
   if (self) {
-    self.touchedOffImage = [UIImage imageNamed:@"toolbar_stampButton_highlighted"];
-    self.normalOnImage = [UIImage imageNamed:@"toolbar_stampButton_highlighted"];
-    self.normalOffImage = [UIImage imageNamed:@"toolbar_stampButton"];
+    self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_restamp_active"];
+    self.touchedOnImage= [UIImage imageNamed:@"sDetailBar_btn_restamp_active"];
+    self.normalOffImage = [UIImage imageNamed:@"sDetailBar_btn_restamp"];
     _user = [user retain];
     _entity = [entity retain];
   }

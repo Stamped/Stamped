@@ -11,76 +11,132 @@
 #import "AccountManager.h"
 #import "STDebug.h"
 
-@interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate>
+@interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate, STCancellationDelegate>
 
-@property (nonatomic, copy) void(^callback)(NSArray*,NSError*);
+- (id)initWithCallback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block;
+
+@property (nonatomic, readonly, copy) void(^callback)(NSArray*,NSError*,STCancellation*);
+@property (nonatomic, readonly, retain) STCancellation* cancellation;
 
 @end
 
 @implementation STRestKitLoaderHelper
 
-@synthesize callback = _callback;
+@synthesize callback = callback_;
+@synthesize cancellation = cancellation_;
+
+- (id)initWithCallback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block
+{
+  self = [super init];
+  if (self) {
+    [self retain];
+    callback_ = [block copy];
+    cancellation_ = [[STCancellation cancellationWithDelegate:self] retain];
+  }
+  return self;
+}
 
 - (void)dealloc {
-  [_callback release];
+  [callback_ release];
+  [cancellation_ release];
   [super dealloc];
+}
+
+- (void)cancellationWasCancelled:(STCancellation *)cancellation {
+  NSLog(@"Cancelled operation");
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [self autorelease];
 }
 
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  NSAssert1(!self.cancellation.cancelled, @"should have cancelled loader %@", self);
   [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request with %d:\n%@\n%@ ", objectLoader.response.statusCode, objectLoader.URL, objectLoader.params]];
-  if ([objectLoader.response isUnauthorized])
-    [[AccountManager sharedManager] refreshToken];
-  [Util executeOnMainThread:^{
-    self.callback(nil, error);
-    [self autorelease];
-  }];
+  if ([self.cancellation finish]) {
+    if ([objectLoader.response isUnauthorized])
+      [[AccountManager sharedManager] refreshToken];
+    [Util executeOnMainThread:^{
+      self.callback(nil, error, self.cancellation);
+      [self autorelease];
+    }];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [Util executeOnMainThread:^{
-    self.callback(objects, nil);
-    [self autorelease];
-  }];
+  NSAssert1(!self.cancellation.cancelled, @"should have cancelled loader %@", self);
+  if ([self.cancellation finish]) {
+    [Util executeOnMainThread:^{
+      self.callback(objects, nil, self.cancellation);
+      [self autorelease];
+    }];
+  }
 }
 
 @end
 
-@interface STRestKitLoaderBooleanHelper : NSObject <RKRequestDelegate>
+@interface STRestKitLoaderBooleanHelper : NSObject <RKRequestDelegate, STCancellationDelegate>
 
-@property (nonatomic, copy) void(^callback)(BOOL,NSError*);
+- (id)initWithCallback:(void(^)(BOOL result, NSError* error, STCancellation* cancellation))block;
+
+@property (nonatomic, readonly, copy) void(^callback)(BOOL result, NSError* error, STCancellation* cancellation);
+@property (nonatomic, readonly, retain) STCancellation* cancellation;
+
 
 @end
 
 @implementation STRestKitLoaderBooleanHelper
 
-@synthesize callback = _callback;
+@synthesize callback = callback_;
+@synthesize cancellation = cancellation_;
+
+- (id)initWithCallback:(void(^)(BOOL result, NSError* error, STCancellation* cancellation))block {
+  self = [super init];
+  if (self) {
+    [self retain];
+    callback_ = [block copy];
+    cancellation_ = [[STCancellation cancellationWithDelegate:self] retain];
+  }
+  return self;
+}
 
 - (void)dealloc {
-  [_callback release];
+  [callback_ release];
+  [cancellation_ release];
   [super dealloc];
+}
+
+- (void)cancellationWasCancelled:(STCancellation *)cancellation {
+  NSLog(@"Cancelled operation");
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [self autorelease];
 }
 
 #pragma mark - RKRequestDelegate methods
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  NSAssert1(!self.cancellation.cancelled, @"should have cancelled loader %@", self);
   [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request:\n%@\n%@ ", request.URL, request.params]];
-  //TODO handle bad token
-  //if ()
-  //  [[AccountManager sharedManager] refreshToken];
-  [Util executeOnMainThread:^{
-    self.callback(NO, error);
-    [self autorelease];
-  }];
+  if ([self.cancellation finish]) {
+    //TODO handle bad token
+    //if ()
+    //  [[AccountManager sharedManager] refreshToken];
+    [Util executeOnMainThread:^{
+      self.callback(NO, error, self.cancellation);
+      [self autorelease];
+    }];
+  }
 }
 
 - (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
-  [Util executeOnMainThread:^{
-    BOOL result = [response.bodyAsString isEqualToString:@"true"];
-    self.callback(result, nil);
-    [self autorelease];
-  }];
+  NSAssert1(!self.cancellation.cancelled, @"should have cancelled loader %@", self);
+  if ([self.cancellation finish]) {
+    [Util executeOnMainThread:^{
+      BOOL result = [response.bodyAsString isEqualToString:@"true"];
+      self.callback(result, nil, self.cancellation);
+      [self autorelease];
+    }];
+  }
 }
 
 @end
@@ -97,65 +153,74 @@ static STRestKitLoader* _sharedInstance;
   return _sharedInstance;
 }
 
-- (void)loadWithPath:(NSString*)path 
-                post:(BOOL)post
-              params:(NSDictionary*)params 
-             mapping:(RKObjectMapping*)mapping 
-         andCallback:(void(^)(NSArray*,NSError*))block {
-  
+- (STCancellation*)loadWithPath:(NSString*)path 
+                           post:(BOOL)post
+                         params:(NSDictionary*)params 
+                        mapping:(RKObjectMapping*)mapping 
+                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
   RKClient* client = [RKClient sharedClient];
   if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable ) {
+    STCancellation* cancellation = [STCancellation cancellation];
     [Util executeOnMainThread:^{
-      block(nil,nil);
+      if (!cancellation.cancelled) {
+        block(nil, nil, cancellation);
+        cancellation.delegate = nil;
+      }
     }];
-    return;
+    return cancellation;
   }
-
-  STRestKitLoaderHelper* helper = [[STRestKitLoaderHelper alloc] init];
-  helper.callback = block;
-
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path
-                                                                    delegate:helper];
-  if (post) {
-    objectLoader.method = RKRequestMethodPOST;
+  else {
+    STRestKitLoaderHelper* helper = [[[STRestKitLoaderHelper alloc] initWithCallback:block] autorelease];    
+    RKObjectManager* objectManager = [RKObjectManager sharedManager];
+    RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path
+                                                                      delegate:helper];
+    if (post) {
+      objectLoader.method = RKRequestMethodPOST;
+    }
+    
+    objectLoader.objectMapping = mapping;
+    
+    objectLoader.params = [[params copy] autorelease];
+    
+    [objectLoader send];
+    STCancellation* can = [[helper.cancellation retain] autorelease];
+    can.decoration = [NSString stringWithFormat:@"RestKit:%@ %@", objectLoader.resourcePath, objectLoader.params];
+    return can;
   }
-  
-  objectLoader.objectMapping = mapping;
-
-  objectLoader.params = [params copy];
-
-  [objectLoader send];
 }
 
-
-- (void)loadOneWithPath:(NSString*)path 
-                   post:(BOOL)post
-                 params:(NSDictionary*)params 
-                mapping:(RKObjectMapping*)mapping 
-            andCallback:(void(^)(id,NSError*))block {
-  [self loadWithPath:path post:post params:params mapping:mapping andCallback:^(NSArray* array, NSError* error) {
+- (STCancellation*)loadOneWithPath:(NSString*)path
+                              post:(BOOL)post
+                            params:(NSDictionary*)params 
+                           mapping:(RKObjectMapping*)mapping 
+                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block {
+  return [self loadWithPath:path 
+                       post:post 
+                     params:params 
+                    mapping:mapping 
+                andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
     id result = nil;
     if (array && [array count] > 0) {
       result = [array objectAtIndex:0];
     }
-    block(result, error);
+    block(result, error, cancellation);
   }];
 }
 
-- (void)booleanWithPath:(NSString*)path
-                   post:(BOOL)post
-                 params:(NSDictionary*)params
-            andCallback:(void(^)(BOOL boolean, NSError* error))block {
-  STRestKitLoaderBooleanHelper* helper = [[STRestKitLoaderBooleanHelper alloc] init];
-  helper.callback = block;
+- (STCancellation*)booleanWithPath:(NSString*)path
+                              post:(BOOL)post
+                            params:(NSDictionary*)params
+                       andCallback:(void(^)(BOOL boolean, NSError* error, STCancellation* cancellation))block {
+  STRestKitLoaderBooleanHelper* helper = [[[STRestKitLoaderBooleanHelper alloc] initWithCallback:block] autorelease];
   
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:path delegate:helper]; 
   if (post) {
     request.method = RKRequestMethodPOST;
   }
-  request.params = params;
+  request.params = [[params copy] autorelease];
   [request send];
+  
+  return [[helper.cancellation retain] autorelease];
 }
 
 @end

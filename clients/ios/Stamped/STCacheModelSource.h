@@ -9,21 +9,31 @@
 #import <Foundation/Foundation.h>
 #import "STModelSource.h"
 
+typedef enum {
+  STCacheModelSourceErrorNoDelegate,
+} STCacheModelSourceError;
+
 @class STCacheModelSource;
 
 @protocol STCacheModelSourceDelegate <NSObject>
-
-- (void)objectForCache:(STCacheModelSource*)cache withKey:(NSString*)key andCurrentObject:(id)object withCallback:(void(^)(id))block;
-
+@required
+- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
+                          withKey:(NSString*)key 
+                 andCurrentObject:(id)object 
+                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block;
 @end
 
 @interface STCacheModelSource : NSObject <STModelSource>
 
 @property (nonatomic, readwrite, assign) id<STCacheModelSourceDelegate> delegate;
+@property (nonatomic, readwrite, assign) NSInteger maximumCost;
 
-- (id)initWithMainKey:(NSString*)key andDelegate:(id<STCacheModelSourceDelegate>)delegate;
+- (id)initWithDelegate:(id<STCacheModelSourceDelegate>)delegate;
 
 - (void)setObject:(id)object forKey:(NSString*)key;
 - (void)removeObjectForKey:(NSString*)key;
+
+
++ (NSString*)errorDomain;
 
 @end

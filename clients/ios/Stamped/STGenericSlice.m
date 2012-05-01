@@ -70,7 +70,7 @@
 }
 
 - (id)resizedSliceWithLimit:(NSNumber*)limit andOffset:(NSNumber*)offset {
-  STGenericSlice* copy = [[[self class] alloc] init];
+  STGenericSlice* copy = [[[[self class] alloc] init] autorelease];
   copy.limit = limit;
   copy.offset = offset;
   copy.sort = self.sort;
@@ -79,6 +79,15 @@
   copy.since = self.since;
   copy.before = self.before;
   return copy;
+}
+
+- (NSInteger)end {
+  if (self.limit) {
+    return self.offset.integerValue + self.limit.integerValue;
+  }
+  else {
+    return NSIntegerMax;
+  }
 }
 
 @end

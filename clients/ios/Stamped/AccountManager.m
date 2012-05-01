@@ -113,16 +113,13 @@ static AccountManager* sharedAccountManager_ = nil;
   // TODO(auth): Cancel requests from shared queue as well.
   [oAuthRequestQueue_ cancelAllRequests];
 
-  self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
+  self.firstRunViewController = [[[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil] autorelease];
   firstRunViewController_.delegate = self;
 
-  self.navController = [[UINavigationController alloc] initWithRootViewController:self.firstRunViewController];
+  self.navController = [[[UINavigationController alloc] initWithRootViewController:self.firstRunViewController] autorelease];
   self.navController.navigationBarHidden = YES;
 
   [[Util sharedNavigationController] presentModalViewController:self.navController animated:NO];
-
-  [self.navController release];
-  [self.firstRunViewController release];
 }
 
 - (void)authenticate {

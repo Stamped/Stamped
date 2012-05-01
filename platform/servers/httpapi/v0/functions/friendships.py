@@ -28,26 +28,28 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPUserRelationship)
 @require_http_methods(["GET"])
 def check(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.checkFriendship(authUserId, schema)
+    result = stampedAPI.checkFriendship(authUserId, http_schema)
     
     return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False, 
+                   http_schema=HTTPUserId)
 @require_http_methods(["GET"])
 def friends(request, authUserId, http_schema, **kwargs):
     userIds = stampedAPI.getFriends(http_schema)
     output  = { 'user_ids' : userIds }
-
+    
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False, 
+                   http_schema=HTTPUserId)
 @require_http_methods(["GET"])
 def followers(request, authUserId, http_schema, **kwargs):
     userIds = stampedAPI.getFollowers(http_schema)
     output  = { 'user_ids': userIds }
-
+    
     return transformOutput(output)
 
 

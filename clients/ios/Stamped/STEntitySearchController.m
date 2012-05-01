@@ -75,7 +75,7 @@
     }
     category_ = [category retain];
     initialQuery_ = [query retain];
-    STEntitySuggested* suggested = [[STEntitySuggested alloc] init];
+    STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
     suggested.category = category;
     CLLocationManager* locationManager = [[CLLocationManager alloc] init];
     locationManager.delegate = self; 
@@ -204,7 +204,7 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  id<STEntitySearchResult> result;
+  id<STEntitySearchResult> result = nil;
   if (self.searchResults) {
     result = [self.searchResults objectAtIndex:indexPath.row];
   }
@@ -221,7 +221,7 @@
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  id<STEntitySearchResult> result;
+  id<STEntitySearchResult> result = nil;
   if (self.searchResults) {
     result = [self.searchResults objectAtIndex:indexPath.row];
   }

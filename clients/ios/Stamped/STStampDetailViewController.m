@@ -73,14 +73,14 @@
                               [UIColor colorWithWhite:.2 alpha:.85],
                               nil] 
                     vertical:YES];
-    UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"toolbar_todoButton"]] autorelease];
-    UIImageView* imageView2 = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"toolbar_todoButton"]] autorelease];
+    UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more"]] autorelease];
+    UIImageView* imageView2 = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more_active"]] autorelease];
     expandButton_ = [[STButton alloc] initWithFrame:imageView.frame 
                                          normalView:imageView 
                                          activeView:imageView2 
                                              target:self 
                                           andAction:@selector(toggleToolbar:)];
-    [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width - 0), 0, 0, 0)];
+    [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 10), 10, 0, 0)];
     
     
     buttons_ = [[NSMutableArray arrayWithObjects:
@@ -90,22 +90,24 @@
                  [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
                  [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
                  nil] retain];
-    CGFloat buttonSpacing = 50;
-    buttonContainer_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetMinX(expandButton_.frame)+50, frame.size.height-10)];
+    CGFloat buttonSpacing = 60;
+    buttonContainer_ = [[UIView alloc] initWithFrame:CGRectMake(0, -3, CGRectGetMinX(expandButton_.frame)+50, frame.size.height-7)];
     for (NSInteger i = 0; i < buttons_.count; i++) {
       UIView* button = [buttons_ objectAtIndex:i];
-      [Util reframeView:button withDeltas:CGRectMake(-5 + (i * buttonSpacing), 0, 0, 0)];
+      [Util reframeView:button withDeltas:CGRectMake(-5 + (i * buttonSpacing), -4, 0, 0)];
       [buttonContainer_ addSubview:button];
     }
-    buttonContainer_.clipsToBounds = YES;
+    buttonContainer_.clipsToBounds = NO;
     [self addSubview:buttonContainer_];
     self.clipsToBounds = YES;
+    [Util reframeView:expandButton_ withDeltas:CGRectMake(3, -3, 0, 0)];
     [self addSubview:expandButton_];
+    [self toggleToolbar:nil];
   }
   return self;
 }
 
-- (void)toggleToolbar:(id)button {
+- (void)toggleToolbar:(id)notImportant {
   CGFloat delta = 155;
   CGFloat deltaSpacing = 15;
   CGFloat duration = .5;
@@ -157,6 +159,7 @@
 
 @property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
 @property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
+@property (nonatomic, readwrite, retain) STCancellation* entityDetailCancellation;
 
 @end
 
@@ -166,6 +169,7 @@
 @synthesize commentsView = _commentsView;
 @synthesize stamp = _stamp;
 @synthesize toolbar = _toolbar;
+@synthesize entityDetailCancellation = entityDetailCancellation_;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
   self = [super init];
@@ -173,6 +177,16 @@
     _stamp = [stamp retain];
   }
   return self;
+}
+
+- (void)dealloc
+{
+  [_headerView release];
+  [_commentsView release];
+  [_stamp release];
+  [_toolbar release];
+  [entityDetailCancellation_ release];
+  [super dealloc];
 }
 
 - (void)viewDidLoad {
@@ -201,43 +215,36 @@
     [views addObject:[[[STStampButton alloc] initWithStamp:self.stamp] autorelease]];
   }
   else {
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
+    UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:@"Delete"
                                                                     style:UIBarButtonItemStylePlain
                                                                    target:self
-                                                                   action:@selector(_deleteStampButtonPressed:)];
+                                                                   action:@selector(_deleteStampButtonPressed:)] autorelease];
     self.navigationItem.rightBarButtonItem = rightButton;
   }
   //[toolbar packViews:views];
   UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view andStamp:self.stamp] autorelease];
   [self.view addSubview:newToolbar];
   
-  [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError* error) {
-    STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
-    [self.scrollView appendChildView:wrapper];
-    self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
-    UIView* padding = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 50)] autorelease];
-    [self.scrollView appendChildView:padding];
-  }];
+  self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID 
+                                                                             andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+                                                                               
+                                                                               STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
+                                                                               [self.scrollView appendChildView:wrapper];
+                                                                               self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
+                                                                               UIView* padding = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 60)] autorelease];
+                                                                               [self.scrollView appendChildView:padding];
+                                                                             }];
+  
+  
 }
 
 - (void)viewDidUnload {
-  [_toolbar release];
-  [_headerView release];
 }
 
-- (void)dealloc {
-  [_stamp release];
-  [super dealloc];
+- (void)cancelPendingRequests {
+  [self.entityDetailCancellation cancel];
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-  NSLog(@"viewWillDisappear");
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
-}
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];

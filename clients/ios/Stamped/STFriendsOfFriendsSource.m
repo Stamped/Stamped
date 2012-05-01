@@ -20,8 +20,9 @@
   [super setSlice:friendsSlice];
 }
 
-- (void)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice andCallback:(void (^)(NSArray<STStamp>*, NSError*))block {
-  [[STStampedAPI sharedInstance] stampsForFriendsSlice:(id)slice andCallback:block];
+- (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
+                                   andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+  return [[STStampedAPI sharedInstance] stampsForFriendsSlice:(id)slice andCallback:block];
 }
 
 - (NSString *)lastCellText {

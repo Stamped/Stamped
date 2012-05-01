@@ -12,6 +12,8 @@
 #import "Util.h"
 #import "STDebug.h"
 
+//TODO deprecate
+
 typedef void (^STEntityDetailFactoryCallback)(id<STEntityDetail>);
 
 static STEntityDetailFactory* _sharedFactory = nil;

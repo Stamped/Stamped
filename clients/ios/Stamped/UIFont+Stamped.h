@@ -16,6 +16,7 @@
 + (UIFont*)stampedSubtitleFont;
 
 + (UIFont*)stampedTitleFontWithSize:(CGFloat)size;
++ (UIFont*)stampedTitleFontLightWithSize:(CGFloat)size;
 + (UIFont*)stampedBoldFontWithSize:(CGFloat)size;
 + (UIFont*)stampedFontWithSize:(CGFloat)size;
 

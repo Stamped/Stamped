@@ -207,7 +207,7 @@
 - (void)updateImage {
   UIImage* background = [UIImage imageNamed:@"scope_drag_outer"];
   UIGraphicsBeginImageContextWithOptions(background.size, NO, 0.0);
-  [background drawInRect:CGRectMake(0, 0, background.size.width, background.size.height)];
+  //[background drawInRect:CGRectMake(0, 0, background.size.width, background.size.height)];
   UIImage* inner = nil;
   switch (granularity_) {
     case STStampedAPIScopeYou:

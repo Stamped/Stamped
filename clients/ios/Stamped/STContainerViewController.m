@@ -30,6 +30,7 @@ static const CGFloat kReloadHeight = 60.0;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
 @property (nonatomic, readwrite, assign) BOOL loadedToolbar;
+@property (nonatomic, readonly, retain) NSMutableArray* retainedObjects;
 
 - (void)userPulledToReload;
 - (void)reloadData;
@@ -50,14 +51,34 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize spinnerView = _spinnerView;
 @synthesize toolbar = toolbar_;
 @synthesize loadedToolbar = loadedToolbar_;
+@synthesize autoCancelDisabled = autoCancelDisabled_;
+@synthesize retainedObjects = retainedObjects_;
 @dynamic headerOffset;
 
 - (id)init
 {
   self = [super init];
   if (self) {
+    retainedObjects_ = [[NSMutableArray alloc] init];
   }
   return self;
+}
+
+- (void)dealloc
+{
+  [_scrollView release];
+  [_shelfView release];
+  [_reloadLabel release];
+  [_lastUpdatedLabel release];
+  [_arrowImageView release];
+  [_spinnerView release];
+  [toolbar_ release];
+  [retainedObjects_ release];
+  [super dealloc];
+}
+
+- (void)retainObject:(id)object {
+  [self.retainedObjects addObject:object];
 }
 
 - (void)loadView {
@@ -68,13 +89,12 @@ static const CGFloat kReloadHeight = 60.0;
   [super viewDidLoad];
   UIView* toolbar = self.toolbar;
   NSLog(@"loaded:%@",toolbar);
-  CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height : 0;
+  CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height - 1: 0;
   STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, self.view.frame.size.height - toolbarHeight)] autorelease];
   CGFloat bottomPadding = 0;
   UIImageView* shelfBackground = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_background"]] autorelease];
   _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, 320, 360)];
   [_shelfView addSubview:shelfBackground];
-  
   
   _arrowImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
   _arrowImageView.frame = CGRectMake(60, CGRectGetMaxY(_shelfView.bounds) - 58 - bottomPadding, 18, 40);
@@ -122,6 +142,12 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)viewWillUnload {
   NSLog(@"warning SHOULD IMPLEMENT");
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  if (!self.autoCancelDisabled) {
+    [self cancelPendingRequests];
+  }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -257,11 +283,18 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)reloadStampedData {
+  if (!self.autoCancelDisabled) {
+    [self cancelPendingRequests];
+  }
   for (id view in self.view.subviews) {
     if ([view respondsToSelector:@selector(reloadStampedData)]) {
       [view reloadStampedData];
     }
   }
+}
+
+- (void)cancelPendingRequests {
+  
 }
 
 #pragma mark - UITextFieldDelegate Methods.

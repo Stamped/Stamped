@@ -69,9 +69,10 @@
     STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
     slice.entityID = self.stamp.entity.entityID;
     slice.limit = [NSNumber numberWithInteger:10];
-    [[STStampedAPI alloc] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error) {
-      [self handleStampedBy:stampedBy withError:error];
-    }];
+    [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice 
+                                         andCallback:^(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation) {
+                                           [self handleStampedBy:stampedBy withError:error];
+                                         }];
   }
   else {
     [Util warnWithMessage:@"Created post stamp with no stamp; CreateStamp bug" andBlock:^{
@@ -248,7 +249,7 @@
       histogram.layer.cornerRadius = 3;
       histogram.layer.borderColor = [UIColor colorWithWhite:0 alpha:.05].CGColor;
       histogram.layer.borderWidth = 1;
-
+      
       NSArray* colors = [NSArray arrayWithObjects:
                          (id)[UIColor colorWithWhite:.95 alpha:1].CGColor,
                          (id)[UIColor colorWithWhite:.8 alpha:1].CGColor,

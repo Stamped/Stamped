@@ -7,7 +7,7 @@
 //
 
 #import "STStampsView.h"
-#import "STStampCell.h"
+#import "STLegacyStampCell.h"
 #import "STStampedAPI.h"
 #import "Util.h"
 #import "STStampedActions.h"
@@ -84,7 +84,7 @@ static const NSInteger _batchSize = 20;
     self.offset += curBatch;
     self.waiting = YES;
     NSInteger thisGeneration = self.generation;
-    void (^callback)(NSArray<STStamp>*, NSError*) = ^(NSArray<STStamp>* stamps, NSError* error) {
+    void (^callback)(NSArray<STStamp>*, NSError*, STCancellation*) = ^(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation) {
       if (thisGeneration == self.generation) {
         [self.stamps addObjectsFromArray:stamps];
         self.waiting = NO;
@@ -132,7 +132,7 @@ static const NSInteger _batchSize = 20;
     return cell;
   }
   else {
-    STStampCell* cell = [[[STStampCell alloc] initWithReuseIdentifier:@"testing"] autorelease];
+    STLegacyStampCell* cell = [[[STLegacyStampCell alloc] initWithReuseIdentifier:@"testing"] autorelease];
     cell.stamp = [self.stamps objectAtIndex:indexPath.row];
     self.maxRow = MAX(self.maxRow, indexPath.row);
     [self populateStamps];

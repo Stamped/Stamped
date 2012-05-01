@@ -73,7 +73,7 @@
 + (void)displayConfirmationWithTitle:(NSString*)title subtitle:(NSString*)subtitle andIconImage:(UIImage*)image {
   dispatch_async(dispatch_get_main_queue(), ^{
     @autoreleasepool {
-      UIView* view = [[STConfirmationView alloc] initWithTille:title subtitle:subtitle andIconImage:image];
+      UIView* view = [[[STConfirmationView alloc] initWithTille:title subtitle:subtitle andIconImage:image] autorelease];
       view.frame = [Util centeredAndBounded:view.frame.size inFrame:[UIApplication sharedApplication].keyWindow.frame];
       [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor clearColor]];
       //[view release];

@@ -37,7 +37,7 @@
 
 - (void)reloadStampedData {
   if (self.stamp) {
-    [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID andCallback:^(id<STStamp> stamp) {
+    [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
       self.stamp = stamp;
     }];
   }

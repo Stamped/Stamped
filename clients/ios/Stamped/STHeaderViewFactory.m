@@ -172,7 +172,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
       CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude, longitude);
       MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
       MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
-      MKMapView* mapView = [[MKMapView alloc] initWithFrame:CGRectMake(15,CGRectGetMaxY(view.frame), 290, 120)];
+      MKMapView* mapView = [[[MKMapView alloc] initWithFrame:CGRectMake(15,CGRectGetMaxY(view.frame), 290, 120)] autorelease];
       mapView.userInteractionEnabled = NO;
       [view addSubview:mapView];
       frame = view.frame;

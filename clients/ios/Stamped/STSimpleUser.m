@@ -48,7 +48,7 @@
 }
 
 + (STSimpleUser*)userFromLegacyUser:(User*)legacyUser {
-  STSimpleUser* user = [[STSimpleUser alloc] init];
+  STSimpleUser* user = [[[STSimpleUser alloc] init] autorelease];
   user.userID = legacyUser.userID;
   user.screenName = legacyUser.screenName;
   user.primaryColor = legacyUser.primaryColor;

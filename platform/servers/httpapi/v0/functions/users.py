@@ -17,7 +17,8 @@ def show(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.exportSparse())
 
 
-@handleHTTPRequest(http_schema=HTTPUserIds)
+@handleHTTPRequest(requires_auth=False, 
+                   http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.getUsers(http_schema.user_ids.value, 

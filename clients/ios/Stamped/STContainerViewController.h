@@ -21,12 +21,16 @@
 - (void)reloadData;
 
 - (void)reloadStampedData;
+- (void)cancelPendingRequests;
 
 - (UIView*)loadToolbar;
 
 - (void)unloadToolbar;
 
+- (void)retainObject:(id)object;
+
 @property (nonatomic, readonly, retain) UIView* toolbar;
 @property (nonatomic, readonly, assign) CGFloat headerOffset;
+@property (nonatomic, readonly, assign) BOOL autoCancelDisabled;
 
 @end
