@@ -762,6 +762,9 @@ resort.
         self.setIsSet(True)
     
     def importData(self, data, overflow=None):
+        """
+        when overflow is true, we ignore any extra attributes not defined in the target
+        """
         if data == None: # or len(data) == 0:
             return
         

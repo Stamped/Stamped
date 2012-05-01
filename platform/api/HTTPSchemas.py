@@ -1931,6 +1931,25 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
         
         return schema
 
+class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
+    def setSchema(self):
+        HTTPGenericCollectionSlice.setSchema(self)
+
+        #you, friends, friends of friends, everyone
+
+        self.scope              = SchemaElement(basestring)
+
+
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'ConsumptionSlice':
+            data = self._convertData(self.exportSparse())
+            schema.importData(data)
+        else:
+            raise NotImplementedError
+
+        return schema
+
 class HTTPStampedBySlice(HTTPGenericCollectionSlice):
     def setSchema(self):
         HTTPGenericCollectionSlice.setSchema(self)

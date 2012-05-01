@@ -8,6 +8,9 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 def transform_stamps(stamps):
+    """
+    Convert stamps to HTTPStamp or HTTPDeletedStamps and return as json-formatted HttpResponse
+    """
     result = []
     for stamp in stamps:
         try:
@@ -55,3 +58,30 @@ def suggested(request, authUserId, schema, **kwargs):
     
     return transform_stamps(stamps)
 
+@handleHTTPRequest(http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
+@require_http_methods(["GET"])
+def consumption(request, authUserId, schema, **kwargs):
+    print('\nHIT CONSUMPTION\n')
+    stamps = None
+    if schema.scope == 'you':
+        userCollSlice = schema.exportSchema(UserCollectionSlice())
+        userCollSlice['user_id'] = authUserId
+        stamps = stampedAPI.getUserStamps(authUserId, userCollSlice)
+    elif schema.scope == 'friends':
+        stamps = stampedAPI.getInboxStamps(authUserId, schema)
+    elif schema.scope == 'fof':
+        friendsSlice = schema.exportSchema(FriendsSlice())
+        friendsSlice.distance = 2
+        stamps = stampedAPI.getFriendsStamps(authUserId, friendsSlice)
+    elif schema.scope == 'everyone':
+        stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
+    else:
+        raise NotImplementedError('Consumption call with undefined scope %s' % schema.scope)
+    if stamps is None:
+        raise Exception('consumption() expected list of stamps, received None')
+
+    import pprint
+    for stamp in stamps:
+        pprint.pprint(stamp.entity)
+
+    return transform_stamps(stamps)

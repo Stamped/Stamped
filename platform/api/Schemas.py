@@ -596,6 +596,13 @@ class FriendsSlice(GenericCollectionSlice):
         self.distance           = SchemaElement(int,  default=2)
         self.inclusive          = SchemaElement(bool, default=True)
 
+class ConsumptionSlice(GenericCollectionSlice):
+    def setSchema(self):
+        GenericCollectionSlice.setSchema(self)
+
+        self.scope              = SchemaElement(basestring)
+
+
 class ViewportSchema(Schema):
     def setSchema(self):
         self.upperLeft          = CoordinatesSchema()
