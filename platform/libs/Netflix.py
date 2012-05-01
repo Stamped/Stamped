@@ -448,12 +448,12 @@ class Netflix(object):
         self.__secret=secret
         self.__consumer = oauth.OAuthConsumer(self.__key, self.__secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__cpsLimiter = RateLimiter(cps=4)          # 4 requests per second for all requests
+        self.__cpsLimiter = RateLimiter(cps=4, max_wait=15)          # 4 requests per second for all requests
         self.__cpdLimiter = RateLimiter(cpd=5000)
 
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared
-        self.__blacklist = dict({USER_ID: 4})
+        self.__blacklist = dict()#dict({USER_ID: 4})
         self.__blacklistClearDate = datetime.datetime.now()
         self.__blacklistLifespan = datetime.timedelta(days=2)
         self.__blacklistThreshold = 5
@@ -474,7 +474,7 @@ class Netflix(object):
             logs.info(text)
             msg = {}
             msg['to'] = 'dev@stamped.com'
-            msg['from'] = 'Stamped <mikebot@stamped.com>'
+            msg['from'] = 'Stamped <noreply@stamped.com>'
             msg['subject'] = 'Netflix blacklist threshold reached'
             msg['body'] = text
             utils.sendEmail(msg)
@@ -484,7 +484,7 @@ class Netflix(object):
     def __isUserBlacklisted(self, user_id):
         return self.__blacklist.get(user_id, 0) >= self.__blacklistThreshold
 
-    def __get(self, service, user_id=None, token=None, **parameters):
+    def __http(self, verb, service, user_id=None, token=None, **parameters):
         """
         Makes a request to the Netflix API
         """
@@ -506,25 +506,40 @@ class Netflix(object):
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,
-            token=token)
+            token=token,
+            http_method=verb)
+
         oauthRequest.sign_request(  self.__signature_method_hmac_sha1, self.__consumer, token)
         print oauthRequest.to_url()
 
-        # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
-        if user_id is None:
-            with self.__cpdLimiter:
-                connection.request('GET', oauthRequest.to_url())
+        headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
+        body = oauthRequest.to_postdata() if verb == 'POST' else None
+        url = url if verb == 'POST' else oauthRequest.to_url()
+
+        with self.__cpsLimiter:
+            # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
+            if user_id is None:
+                with self.__cpdLimiter:
+                    connection.request(verb, url, body, headers)
+                    response = connection.getresponse()
+            else:
+                connection.request(verb, url, body, headers)
                 response = connection.getresponse()
-        else:
-            connection.request('GET', oauthRequest.to_url())
-            response = connection.getresponse()
-            # if the response is a 401 or 403, blacklist the user until the day expires
-            if response.status in (401,403):
-                if self.__addToBlacklistCount(user_id):
-                    return None
+                # if the response is a 401 or 403, blacklist the user until the day expires
+                if response.status in (401,403):
+                    if self.__addToBlacklistCount(user_id):
+                        return None
 
         return json.loads(response.read())
 
+    def __get(self, service, user_id=None, token=None, **parameters):
+        return self.__http('GET', service, user_id, token, **parameters)
+
+    def __post(self, service, user_id=None, token=None, **parameters):
+        return self.__http('POST', service, user_id, token, **parameters)
+
+    def __delete(self, service, user_id=None, token=None, **parameters):
+        return self.__http('DELETE', service, user_id, token, **parameters)
 
     def __asList(self, elmt):
         if isinstance(elmt, list):
@@ -605,11 +620,32 @@ class Netflix(object):
     def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
         pass
 
-    def addToQueue(self, auth, netflix_id):
+    def addToQueue(self, user_id, user_token, user_secret, netflix_id):
         """
         Returns a boolean (synchronously) if the operation succeeded
         """
-        pass
+        token = oauth.OAuthToken(user_token, user_secret)
+
+        getresponse = self.__get(
+            'queues/instant',
+            title_ref               = netflix_id,
+            #position                = 1,
+            user_id                 = user_id,
+            token                   = token,
+        )
+        etag = getresponse["queue"]["etag"]
+        print (getresponse)
+
+        results = self.__post(
+            'queues/instant',
+            title_ref               = netflix_id,
+            position                = 1,
+            etag                    = etag,
+            user_id                 = user_id,
+            token                   = token,
+        )
+        print (results)
+        return results
 
     def titlesByUserRating(self, rating, auth, start, count):
         """
@@ -634,8 +670,11 @@ def globalNetflix():
     return __globalNetflix
 
 USER_ID = 'BQAJAAEDEOSopz8_plL6unZkMNWPF0swuckE11EpXgKKIiGokw4c7bE5zMk2-HgDEBW6XUAs9ULWh3MSZJfAPT0tby6iNSqb'
-OAUTH_TOKEN = 'BQAJAAEDEDW6MSemF_qImLX_3ucOFJUwiQ85hWfQHBGAQ2SUxwgy-mOBi5orZHnm20lbcbdfoxQYgPa9c6J17-plbv0404Yc'
-OAUTH_TOKEN_SECRET = 'ct4gCH2AWjm6'
+OAUTH_TOKEN = 'BQAJAAEDEEA_ABseWJmlwCbPcFoxztwwARmaMLeLXt1TYXxQ_F-zSETr2voXtq6DNeSIqjLtt2fax66UyvP5IPs-gxET3CUX'
+OAUTH_TOKEN_SECRET = 'K28wcUY4YjAM'
+HOPE_FLOATS_ID = 'http://api.netflix.com/catalog/titles/movies/11819509'
+GHOSTBUSTERS2_ID = 'http://api.netflix.com/catalog/titles/movies/541027'
+BIGLEB_ID = 'http://api.netflix.com/catalog/titles/movies/1181532'
 
 def demo(method, **params):
     import pprint
@@ -647,9 +686,13 @@ def demo(method, **params):
 #        token_info['oauth_token'].encode('ascii'),
 #        token_info['oauth_token_secret'].encode('ascii'),
 #    )
-    result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+
+    #result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
+    #result = netflix.searchTitles("hope floats")
 
 #    result = netflix.get('https://api-user.netflix.com/oauth/login', token=token, application_name='Stamped')
+    #pprint.pprint(result)
     pprint.pprint(result)
 
 if __name__ == '__main__':

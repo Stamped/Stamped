@@ -237,8 +237,8 @@ class NetflixSource(GenericSource):
             return self.movieSource(query)
         if query.isType('tv'):
             return self.tvSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
+        #if query.kind == 'search':
+        #    return self.searchAllSource(query)
 
     def __genericSourceGen(self, query, filter):
         def gen():

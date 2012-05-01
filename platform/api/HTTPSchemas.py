@@ -1283,6 +1283,7 @@ class HTTPActionSource(Schema):
         self.source_id              = SchemaElement(basestring)
         self.source_data            = SchemaElement(basestring)
         self.endpoint               = SchemaElement(basestring)
+        self.endpoint_data          = SchemaElement(basestring)
         self.link                   = SchemaElement(basestring)
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
