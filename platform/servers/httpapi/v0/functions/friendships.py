@@ -28,7 +28,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPUserRelationship)
 @require_http_methods(["GET"])
 def check(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.checkFriendship(authUserId, schema)
+    result = stampedAPI.checkFriendship(authUserId, http_schema)
     
     return transformOutput(result)
 
