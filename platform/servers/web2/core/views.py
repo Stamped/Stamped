@@ -9,30 +9,53 @@ import Globals
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
+from Schemas        import *
 from helpers        import *
 
-@stamped_view
+@stamped_view()
 def index(request):
     autoplay_video = bool(request.GET.get('video', False))
     
-    return stamped_render(request, 'index.html', locals())
+    return stamped_render(request, 'index.html', {
+        'autoplay_video' : autoplay_video, 
+    })
 
-@stamped_view
+@stamped_view()
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view
-def profile(request, screen_name, **kwargs):
-    if screen_name == 'travis':
+@stamped_view(schema=HTTPUserCollectionSlice)
+def profile(request, schema, **kwargs):
+    url_format = "/{screen_name}"
+    prev_url   = None
+    next_url   = None
+    
+    schema.offset = schema.offset or 0
+    schema.limit  = schema.limit  or 25
+    
+    if schema.screen_name == 'travis' and schema.offset == 0 and schema.limit == len(__stamps):
         user   = __user
         stamps = __stamps
     else:
-        user   = stampedAPIProxy.getUser(screen_name=screen_name)
-        stamps = stampedAPIProxy.getUserStamps(user_id=user['user_id'])
+        user   = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        stamps = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+    
+    if schema.offset > 0:
+        prev_url = format_url(url_format, schema, {
+            'offset' : max(0, schema.offset - schema.limit), 
+        })
+    
+    if len(stamps) >= schema.limit:
+        next_url = format_url(url_format, schema, {
+            'offset' : schema.offset + len(stamps), 
+        })
     
     return stamped_render(request, 'demo.html', {
         'user'      : user, 
         'stamps'    : stamps, 
+        
+        'prev_url'  : prev_url, 
+        'next_url'  : next_url, 
     })
 
 __user = \
@@ -2011,6 +2034,9 @@ __stamps = \
                 u'privacy': False,
                 u'screen_name': u'travis',
                 u'user_id': u'4e57048dccc2175fca000005'}},
+]
+
+"""
      {u'contents': [{u'blurb': u"Awesome, old-school Italian spot in the heart of Providence that's perfect for a nice night out on the town. Love the ambiance and food.",
                      u'created': u'2011-11-22 00:39:42.551000'}],
       u'created': u'2011-11-22 00:39:42.551000',
@@ -3459,4 +3485,5 @@ __stamps = \
                 u'privacy': False,
                 u'screen_name': u'travis',
                 u'user_id': u'4e57048dccc2175fca000005'}}]
+"""
 

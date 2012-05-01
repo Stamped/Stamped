@@ -6,8 +6,8 @@
 <div class="stamp-gallery-item">
     <div class="top-wave"></div>
     <div class="content">
-        <div class="stamp-category-{{entity.category}}">
-            <div class="title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
+        <div class="stamp-category-{{#entity}}{{category}}{{/entity}}">
+            <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
             <div class="personal-stamp-logo"></div>
             <div class="icon replaced"></div>
             {{#entity}}<div class="subtitle">{{subtitle}}</div>{{/entity}}
