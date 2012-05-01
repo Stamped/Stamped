@@ -9,7 +9,6 @@ import re
 import oauth as oauth
 import httplib
 import time
-import simplejson
 import json
 import utils
 import logs
@@ -80,7 +79,7 @@ class NetflixUser(object):
         
         requestUrl = '/users/%s' % (accessToken.key)
         
-        info = simplejson.loads( self.client._getResource( requestUrl, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, token=accessToken ) )
         self.data = info['user']
         return self.data
         
@@ -101,7 +100,7 @@ class NetflixUser(object):
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url,token=accessToken ))
+            info = json.loads(self.client._getResource( url,token=accessToken ))
         except :
             return []
         else:
@@ -122,7 +121,7 @@ class NetflixUser(object):
                 urls.append(discInfo['id'])
         parameters = { 'title_refs': ','.join(urls) }
         
-        info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         
         ret = {}
         for title in info['ratings']['ratings_item']:
@@ -158,7 +157,7 @@ class NetflixUser(object):
             requestUrl = '/users/%s/rental_history/%s' % (accessToken.key,type)
         
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+            info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         except:
             return {}
             
@@ -175,7 +174,7 @@ class NetflixCatalog(object):
            parameters['start_index'] = startIndex
        if maxResults:
            parameters['max_results'] = maxResults
-       info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+       info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
 
        return info['catalog_titles']['catalog_title']
 
@@ -187,8 +186,8 @@ class NetflixCatalog(object):
        if maxResults:
            parameters['max_results'] = maxResults
 
-       info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
-       print simplejson.dumps(info)
+       info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
+       print json.dumps(info)
        return info['autocomplete']['autocomplete_item']
     
     def getTitle(self, url):
@@ -205,7 +204,7 @@ class NetflixCatalog(object):
            parameters['max_results'] = maxResults
 
        try:
-           info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+           info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
        except:
            return []
 
@@ -214,7 +213,7 @@ class NetflixCatalog(object):
     def getPerson(self,url):
         requestUrl = url
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl ))
+            info = json.loads( self.client._getResource( requestUrl ))
         except:
             return {}
         return info       
@@ -238,7 +237,7 @@ class NetflixUserQueue(object):
         
         requestUrl = '/users/%s/queues' % (self.user.accessToken.key)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -257,7 +256,7 @@ class NetflixUserQueue(object):
 
         requestUrl = '/users/%s/queues/%s/available' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -276,7 +275,7 @@ class NetflixUserQueue(object):
 
         requestUrl = '/users/%s/queues/%s/saved' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -299,7 +298,7 @@ class NetflixUserQueue(object):
 
         if not self.tag:
             response = self.client._getResource( requestUrl, token=accessToken )
-            response = simplejson.loads(response)
+            response = json.loads(response)
             self.tag = response["queue"]["etag"]
         parameters['etag'] = self.tag
         response = self.client._postResource( requestUrl, token=accessToken, parameters=parameters )
@@ -317,7 +316,7 @@ class NetflixUserQueue(object):
         requestUrl = '/users/%s/queues/disc' % (accessToken.key)
         response = self.client._getResource( requestUrl, token=accessToken,parameters=queueparams )
         print "Response is " + response
-        response = simplejson.loads(response)
+        response = json.loads(response)
         titles = response["queue"]["queue_item"]
         
         for disc in titles:
@@ -348,7 +347,7 @@ class NetflixDisc(object):
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url ))
+            info = json.loads(self.client._getResource( url ))
         except :
             return []
         else:
