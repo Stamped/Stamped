@@ -169,7 +169,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     return transformOutput(result.exportSparse())
 
 
-@handleHTTPRequest
+@handleHTTPRequest()
 @require_http_methods(["POST"])
 def completeAction(request):
     authUserId, authClientId = checkOAuth(request)
