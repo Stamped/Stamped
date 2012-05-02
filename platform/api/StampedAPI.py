@@ -1446,9 +1446,6 @@ class StampedAPI(AStampedAPI):
         userId      = kwargs.pop('user_id', None)
         stampId     = kwargs.pop('stamp_id', None)
 
-        import pprint
-        logs.info(pprint.pformat('\n HIT completeAction %s' % kwargs))
-
         actions = set([
             # 'link',
             # 'phone',
@@ -1476,8 +1473,6 @@ class StampedAPI(AStampedAPI):
                                   userId        = authUserId, 
                                   friendId      = stamp.user.user_id, 
                                   stampId       = stamp.stamp_id)
-
-        logs.info('\nEXITING completeAction')
 
         return True
 

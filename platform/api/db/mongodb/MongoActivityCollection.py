@@ -97,6 +97,8 @@ class MongoActivityCollection(AActivityDB):
         alerts          = []
         sentTo          = set()
 
+        logs.info('\n ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+
         try:
             objects = objects.value
         except Exception:
@@ -165,6 +167,9 @@ class MongoActivityCollection(AActivityDB):
                 continue
             
             self.activity_links_collection.addActivityLink(activityId, recipientId)
+
+
+            logs.info('\nSENDING ALERT TO %s' % (recipientId))
 
             sentTo.add(recipientId)
 
