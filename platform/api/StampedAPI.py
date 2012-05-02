@@ -1561,7 +1561,9 @@ class StampedAPI(AStampedAPI):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
-        nofilter    = kwargs.pop('nofilter', False)    #returns all stamps regardless of errors
+
+        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        origLen = len(stampData)
 
         singleStamp = False
         if not isinstance(stampData, list):
@@ -1644,8 +1646,7 @@ class StampedAPI(AStampedAPI):
             if userIds[stamp.user_id] == 1:
                 msg = 'Unable to match user_id %s for stamp id %s' % (stamp.user_id, stamp.stamp_id)
                 logs.warning(msg)
-                if not nofilter:
-                    continue
+                continue
             else:
                 stamp.user = userIds[stamp.user_id]
             
@@ -1653,8 +1654,7 @@ class StampedAPI(AStampedAPI):
             if entityIds[stamp.entity_id] == 1:
                 msg = 'Unable to match entity_id %s for stamp_id %s' % (stamp.entity_id, stamp.stamp_id)
                 logs.warning(msg)
-                if not nofilter:
-                    continue
+                continue
             else:
                 stamp.entity = entityIds[stamp.entity_id]
             
@@ -1710,8 +1710,7 @@ class StampedAPI(AStampedAPI):
             stamp.previews.credits = []
             for credit in creditIds[stamp.stamp_id]:
                 assert userIds[credit.user.user_id] != 1
-                if not nofilter:
-                    assert entityIds[credit.entity.entity_id] != 1
+                assert entityIds[credit.entity.entity_id] != 1
                 credit.user = userIds[credit.user.user_id]
                 credit.entity = entityIds[credit.entity.entity_id]
                 stamp.previews.credits.append(credit)
@@ -1729,7 +1728,11 @@ class StampedAPI(AStampedAPI):
         
         if singleStamp == True:
             return stamps[0]
-        
+
+        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        while len(stamps) < origLen:
+            stamps.append(stamps[len(stamps)-1])
+
         return stamps
     
     def getStampBadges(self, stamp):
