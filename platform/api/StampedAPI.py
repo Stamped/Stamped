@@ -764,11 +764,15 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
 
     @API_CALL
-    def addToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+    def addToNetflixInstant(self, authUserId, netflixId):
         """
          Asynchronously add an entity to the user's netflix queue
         """
         account   = self._accountDB.getAccount(authUserId)
+
+        if account.netflix_user_id != None and account.netflix_token != None and account.netflix_secret != None:
+            return True
+
 
 #        # Only send alert once (when the user initially connects to Twitter)
 #        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
@@ -802,7 +806,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def removeToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
 
         account   = self._accountDB.getAccount(authUserId)
 
@@ -1441,6 +1445,8 @@ class StampedAPI(AStampedAPI):
         entityId    = kwargs.pop('entity_id', None)
         userId      = kwargs.pop('user_id', None)
         stampId     = kwargs.pop('stamp_id', None)
+
+        
 
         actions = set([
             # 'link',

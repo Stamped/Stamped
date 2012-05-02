@@ -114,7 +114,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         ]
 
         valid_netflix = [
-            'netflix_id'
+            'netflix_user_id',
             'netflix_token',
             'netflix_secret',
         ]
@@ -162,6 +162,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 'linked_accounts.twitter.twitter_id': 1,
                 'linked_accounts.twitter.twitter_screen_name': 1,
                 'linked_accounts.twitter.twitter_token': 1,
+            }
+
+        if linkedAccount == 'netflix':
+            fields = {
+                'linked_accounts.netflix.netflix_user_id': 1,
+                'linked_accounts.netflix.netflix_token': 1,
+                'linked_accounts.netflix.netflix_secret': 1,
             }
 
         self._collection.update(

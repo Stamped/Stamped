@@ -507,6 +507,11 @@ class HTTPFindFacebookUser(Schema):
     def setSchema(self):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
         self.facebook_token     = SchemaElement(basestring)
+
+class HTTPNetflixId(Schema):
+    def setSchema(self):
+        self.netflix_id         = SchemaElement(basestring)
+
         
 
 # ####### #
@@ -861,12 +866,11 @@ class HTTPEntity(Schema):
                 entity.sources.netflix_is_instant_available is not None and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
-                logs.info ( '\n ADDING NETFLIX SOURCE \n')
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = '/linked/netflix/queueadd'
+                source.endpoint         = '/linked/netflix/addinstant'
                 source.endpoint_data    = entity.sources.netflix_id
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -876,8 +880,6 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-            else:
-                logs.info ('\n NOT ADDING NETFLIX SOURCE\nnetflix_id: %s   is_instant_available: %s' % (entity.sources.netflix_id, entity.sources.netflix_is_instant_available))
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 

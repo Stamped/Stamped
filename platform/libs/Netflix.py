@@ -514,6 +514,7 @@ class Netflix(object):
         headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
         body = oauthRequest.to_postdata() if verb == 'POST' else None
         url = url if verb == 'POST' else oauthRequest.to_url()
+        logs.info(url)
 
         with self.__cpsLimiter:
             # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
