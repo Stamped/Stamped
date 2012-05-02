@@ -169,6 +169,8 @@ class NetflixGroup(AKindTypeGroup):
 
         self.addField(['netflix_id'])
         self.addField(['netflix_url'])
+        self.addField(['netflix_is_instant_available'])
+        self.addField(['netflix_instant_available_until'])
 
 class RdioGroup(AKindTypeGroup):
     

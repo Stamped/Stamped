@@ -46,6 +46,19 @@ class _NetflixObject(object):
         self.__key = str(titleObj['id'])
         self._titleObj = titleObj
 
+    def _asList(self, elmt):
+        if isinstance(elmt, list):
+            return elmt
+        elif elmt == None:
+            return []
+        return [elmt]
+
+    def _getFromLinks(self, key, search, returnKey):
+        for item in self._asList(self._titleObj['link']):
+            if item[key].find(search) != -1:
+                return item[returnKey]
+        return None
+
     @property
     def key(self):
         return self.__key
@@ -57,6 +70,29 @@ class _NetflixObject(object):
     @lazyProperty
     def netflix(self):
         return globalNetflix()
+
+    @lazyProperty
+    def is_instant_available(self):
+        try:
+            formats = self._getFromLinks('href', 'format_availability', 'delivery_formats')
+            for availableType in self._asList(formats['availability']):
+                if availableType['category']['term'] == 'instant':
+                    return True
+            return False
+        except Exception:
+            return False
+
+    @lazyProperty
+    def instant_available_until(self):
+        try:
+            formats = self._getFromLinks('href', 'format_availability', 'delivery_formats')
+            for availableType in self._asList(formats['availability']):
+                if availableType['category']['term'] == 'instant':
+                    return datetime.fromtimestamp(availableType['available_until'])
+            return None
+        except Exception as e:
+            return None
+
 
     @lazyProperty
     def name(self):
@@ -84,6 +120,7 @@ class _NetflixObject(object):
             return [ self._titleObj['box_art']['large'] ]
         except Exception:
             return []
+
 
     # Netflix only returns the release year.  Since the API can't distinguish exact dates from years, this is
     #  excluded.  Also, the dateWeight function is only checking for exact matches anyway.
@@ -209,7 +246,7 @@ class NetflixSource(GenericSource):
                 'directors',
                 'images',
                 'length',
-                'url'
+                'url',
             ],
             kinds=[
                 'media_item',
@@ -231,6 +268,13 @@ class NetflixSource(GenericSource):
 #            return
 #        except KeyError:
 #            raise
+
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        entity.netflix_is_instant_available = proxy.is_instant_available
+        entity.netflix_instant_available_until = proxy.instant_available_until
+        return True
+
 
     def matchSource(self, query):
         if query.isType('movie'):

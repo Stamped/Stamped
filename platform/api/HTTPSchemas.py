@@ -659,6 +659,8 @@ class HTTPEntity(Schema):
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
 
+        logs.info("\n HIT importEntity ######")
+
         subcategory             = self._formatSubcategory(self.subcategory)
         
         # Restaurant / Bar
@@ -848,6 +850,36 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+
+            # Actions: Add to Netflix Instant Queue
+
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                logs.info ( '\n ADDING NETFLIX SOURCE \n')
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = '/linked/netflix/queueadd'
+                source.endpoint_data    = entity.sources.netflix_id
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+            else:
+                logs.info ('\n NOT ADDING NETFLIX SOURCE\nnetflix_id: %s   is_instant_available: %s' % (entity.sources.netflix_id, entity.sources.netflix_is_instant_available))
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
