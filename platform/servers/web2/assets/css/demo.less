@@ -36,6 +36,8 @@
     width: 30%;
     margin: 1em .7em 0 6px;
     
+    text-align: center;
+    
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
         height: 8px;
@@ -65,17 +67,43 @@
             margin: .2em 0 .2em .2em;
         }
         
-        .stamp-contents, .likes, .todos, .credits, .comments {
+        .stamp-contents, .previews {
             font-size: 80%;
+            text-align: left;
         }
         
         .stamped-content {
             margin: .2em 0 1em;
         }
         
+        .blurb {
+            display: inline;
+            text-align: left;
+            text-indent: 23px;
+            quotes: "\201C" "\201D";
+        }
+        
+        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; }
+        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; }
+        
+        /*
+        div.blurb {
+            background: url(/assets/img/blockquoteopen.png) left top no-repeat;
+            text-indent: 23px;
+            
+            span {
+                display: block;
+                background: url(/assets/img/blockquoteclose.png) bottom right no-repeat;
+            }
+        }*/
+        
         .subtitle-line {
+            position: relative;
+            display: block;
+            margin: 0 0 -20px;
+            top: -4px;
+            
             .icon {
-                margin: 0 .2em 0 0;
                 display: inline-block;
             }
             .subtitle {
@@ -83,8 +111,15 @@
                 font-size: 80%;
                 position: relative;
                 top: -2px;
+                left: .75em;
             }
         }
+        
+        /* TODO: the following should work, but there are some float clearing issues with floated images */
+        /*
+        .previews {
+            display: none;
+        }*/
     }
 }
 

@@ -11,8 +11,8 @@
             <div class="personal-stamp-logo"></div>
             
             <p class="subtitle-line">
-                <div class="icon"></div>{{#entity}}<div class="subtitle">{{subtitle}}</div>{{/entity}}
-            </div>
+                <span class="icon"></span>{{#entity}}<span class="subtitle">{{subtitle}}</span>{{/entity}}
+            </p>
             
             {{#entity}}
             {{#image}}
@@ -25,34 +25,18 @@
             <div class="stamp-contents">
                 {{#contents}}
                 <div class="stamped-content">
-                    <p class="blurb">{{blurb}}</p>
-                    
-                    {{!
-                    <span class="blurb-references">
-                    {{#blurb-references}}
-                        <span class="blurb-reference">
-                            <span class="indices">
-                                {{#indices}}
-                                    <span class="index">
-                                        {{.}}
-                                    </span>
-                                {{/indices}}
-                                
-                                {{! TODO: Action }}
-                            <span class="/indices">
-                        </span>
-                    {{/blurb-references}}
-                    </span>
-                    }}
-                    
-                    <div class="images">
-                    {{#images}}
-                        {{! TODO: here would be a perfect example of Handlebars relative 
-                            paths being handy; e.g., using entity.title as the alt text.
-                        }}
-                        <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
-                    {{/images}}
-                    </div>
+                    <div>
+                        <p class="blurb">{{blurb}}</p>
+                        
+                        <div class="images">
+                        {{#images}}
+                            {{! TODO: here would be a perfect example of Handlebars relative 
+                                paths being handy; e.g., using entity.title as the alt text.
+                            }}
+                            <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
+                        {{/images}}
+                        </div>
+                    </p>
                 </div>
                 {{/contents}}
             </div>
