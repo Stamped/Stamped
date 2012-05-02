@@ -1,3 +1,7 @@
 
+TODO:
+    * replace previews in stamp-gallery-items with real images...
+    * fix blockquotes (line-spacing is messed up on multiple lines...)
+    * find feasible approach to color scheme constants
     * figure out why font-faces aren't loading on chrome
 

@@ -51,12 +51,12 @@ class StampedAPIProxy(object):
         if self._local:
             raise NotImplementedError
         else:
-            ids = self._handle_get("friendships/friends.json", params)
+            response = self._handle_get("friendships/friends.json", params)
             
-            if len(ids) > 0:
+            if 'user_ids' in response and len(response['user_ids']) > 0:
                 # TODO: this only returns max 100 at a time
-                return self._handle_get("/users/show.json", {
-                    'user_ids' : ",".join(ids), 
+                return self._handle_post("users/lookup.json", {
+                    'user_ids' : ",".join(response['user_ids']), 
                 });
             else:
                 return []
@@ -65,12 +65,12 @@ class StampedAPIProxy(object):
         if self._local:
             raise NotImplementedError
         else:
-            ids = self._handle_get("friendships/followers.json", params)
+            response = self._handle_get("friendships/followers.json", params)
             
-            if len(ids) > 0:
+            if 'user_ids' in response and len(response['user_ids']) > 0:
                 # TODO: this only returns max 100 at a time
-                return self._handle_get("/users/show.json", {
-                    'user_ids' : ",".join(ids), 
+                return self._handle_post("users/lookup.json", {
+                    'user_ids' : ",".join(response['user_ids']), 
                 });
             else:
                 return []
