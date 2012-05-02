@@ -1561,7 +1561,8 @@ class StampedAPI(AStampedAPI):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
-        
+        nofilter    = kwargs.pop('nofilter', False)    #returns all stamps regardless of errors
+
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
@@ -1643,7 +1644,8 @@ class StampedAPI(AStampedAPI):
             if userIds[stamp.user_id] == 1:
                 msg = 'Unable to match user_id %s for stamp id %s' % (stamp.user_id, stamp.stamp_id)
                 logs.warning(msg)
-                continue
+                if not nofilter:
+                    continue
             else:
                 stamp.user = userIds[stamp.user_id]
             
@@ -1651,7 +1653,8 @@ class StampedAPI(AStampedAPI):
             if entityIds[stamp.entity_id] == 1:
                 msg = 'Unable to match entity_id %s for stamp_id %s' % (stamp.entity_id, stamp.stamp_id)
                 logs.warning(msg)
-                continue
+                if not nofilter:
+                    continue
             else:
                 stamp.entity = entityIds[stamp.entity_id]
             
@@ -2701,7 +2704,7 @@ class StampedAPI(AStampedAPI):
                     commentPreviews[comment.stamp_id] = []
                 
                 commentPreviews[comment.stamp_id].append(comment)
-        
+
         # Add user object and preview to stamps
         stamps = []
         for stamp in stampData:
@@ -2711,14 +2714,14 @@ class StampedAPI(AStampedAPI):
             stamps.append(stamp)
         
         if enrich:
-            stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        
+            stamps = self._enrichStampObjects(stamps, authUserId=authUserId, nofilter=True)
+
         return stamps
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
-        
+
         # TODO: deprecate with new clients going forward
         genericCollectionSlice.deleted = True
         
@@ -3018,7 +3021,7 @@ class StampedAPI(AStampedAPI):
         body                    = None
         group                   = False
         groupRange              = None
-        requireReceipient       = False
+        requireRecipient       = False
         unique                  = False
 
         objects = ActivityObjectIds()
@@ -3049,7 +3052,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'reply':
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.comment_ids     = [ kwargs['commentId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
 
         elif verb == 'mention':
             recipientIds = kwargs.pop('recipientIds', [])
@@ -3064,21 +3067,21 @@ class StampedAPI(AStampedAPI):
             objects.stamp_ids       = [ kwargs['stampId'] ]
             if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
 
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
             unique                  = True
 
         elif verb.startswith('friend_'):
             body                    = kwargs.pop('body', None)
-            requireReceipient       = True
+            requireRecipient       = True
             unique                  = True
 
         elif verb.startswith('action_'):
             objects.stamp_ids       = [ kwargs['stampId'] ]
-            requireReceipient       = True 
+            requireRecipient        = True
             unique                  = True
 
         else:
@@ -3094,7 +3097,7 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
-        if requireReceipient and len(recipientIds) == 0:
+        if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")
 
         # Save activity
