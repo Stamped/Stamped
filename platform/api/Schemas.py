@@ -407,6 +407,7 @@ class Comment(Schema):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.restamp_id         = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring, required=True)
+        self.blurb_formatted    = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 

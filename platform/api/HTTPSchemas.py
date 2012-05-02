@@ -182,19 +182,18 @@ def _initialize_blurb_html(content):
     
     # assumes non-overlapping blurb references
     for reference in content.blurb_references:
-        indices = reference.indices
-        action  = reference.action
+        action = reference.action
         
         if action.type == 'stamped_view_screen_name':
             repl_pre  = "<a class='screen-name' href=\"%s\">" % (action.sources[0].source_id)
             repl_post = "</a>"
         
-        data.append((indices, repl_pre, repl_post))
+        data.append((reference.indices, repl_pre, repl_post))
     
     html = [ ]
     last = 0
     
-    for repl in data:
+    for repl in sorted(data):
         indices, repl_pre, repl_post = repl
         
         html.append(blurb[last:indices[0]])
@@ -206,6 +205,36 @@ def _initialize_blurb_html(content):
     
     html.append(blurb[last:])
     content.blurb_formatted = "".join(html)
+
+def _initialize_comment_html(comment):
+    blurb = comment.blurb
+    data  = []
+    
+    #self.screen_name        = SchemaElement(basestring, required=True)
+    #self.user_id            = SchemaElement(basestring)
+    #self.indices            = SchemaList(SchemaElement(int))
+    
+    for mention in comment.mentions:
+        repl_pre  = "<a class='screen-name' href=\"%s\">" % (mention.screen_name)
+        repl_post = "</a>"
+        
+        data.append((mention.indices, repl_pre, repl_post))
+    
+    html = [ ]
+    last = 0
+    
+    for repl in sorted(data):
+        indices, repl_pre, repl_post = repl
+        
+        html.append(blurb[last:indices[0]])
+        html.append(repl_pre)
+        html.append(blurb[indices[0]:indices[1]])
+        html.append(repl_post)
+        
+        last = indices[1]
+    
+    html.append(blurb[last:])
+    cmoment.blurb_formatted = "".join(html)
 
 
 # ######### #
@@ -1771,32 +1800,33 @@ class HTTPStamp(Schema):
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, url_title)
-
+            
             if schema.__class__.__name__ == 'Stamp':
                 for comment in schema.previews.comments:
                     comment = HTTPComment().importSchema(comment)
+                    _initialize_comment_html(comment)
+                    
                     self.previews.comments.append(comment)
                 
                 for user in schema.previews.todos:
                     user    = HTTPUserMini().importSchema(user).exportSparse()
                     self.previews.todos.append(user)
-
+                
                 for user in schema.previews.likes:
                     user    = HTTPUserMini().importSchema(user).exportSparse()
                     self.previews.likes.append(user)
-
+                
                 for credit in schema.previews.credits:
                     credit  = HTTPStamp().importSchema(credit).minimize().exportSparse()
                     self.previews.credits.append(credit)
-
+                
                 self.is_liked = False
                 if schema.is_liked:
                     self.is_liked = True
-
+                
                 self.is_fav = False
                 if schema.is_fav:
                     self.is_fav = True
-
         else:
             logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
@@ -2208,7 +2238,9 @@ class HTTPActivity(Schema):
                 self.objects.entities.append(HTTPEntityMini().importSchema(entity).value)
 
             for comment in schema.objects.comments:
-                self.objects.comments.append(HTTPComment().importSchema(comment).value)
+                comment = HTTPComment().importSchema(comment).value
+                _initialize_comment_html(comment)
+                self.objects.comments.append(comment)
 
 
             def _buildStampAction(stamp):
