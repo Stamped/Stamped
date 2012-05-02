@@ -177,7 +177,7 @@ def _cleanImageURL(url):
     return url
 
 def _initialize_blurb_html(content):
-    blurb = content.blurb.value
+    blurb = content.blurb
     data  = []
     
     # assumes non-overlapping blurb references
