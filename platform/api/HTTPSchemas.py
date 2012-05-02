@@ -176,6 +176,38 @@ def _cleanImageURL(url):
 
     return url
 
+def _initialize_blurb_html(content):
+    blurb = content.blurb.value
+    data  = []
+    
+    # assumes non-overlapping blurb references
+    for reference in content.blurb_references:
+        indices = reference.indices
+        action  = reference.action
+        
+        if action.type == 'stamped_view_screen_name':
+            repl_pre  = "<a class='screen-name' href=\"%s\">" % (action.sources[0].source_id)
+            repl_post = "</a>"
+        
+        data.append((indices, repl_pre, repl_post))
+    
+    html = [ ]
+    last = 0
+    
+    for repl in data:
+        indices, repl_pre, repl_post = repl
+        
+        html.append(blurb[last:indices[0]])
+        html.append(repl_pre)
+        html.append(blurb[indices[0]:indices[1]])
+        html.append(repl_post)
+        
+        last = indices[1]
+    
+    html.append(blurb[last:])
+    content.blurb_formatted = "".join(html)
+
+
 # ######### #
 # OAuth 2.0 #
 # ######### #
@@ -1629,6 +1661,7 @@ class HTTPStampContent(Schema):
     def setSchema(self):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
+        self.blurb_formatted    = SchemaElement(basestring)
         self.images             = SchemaList(ImageSchema())
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
@@ -1694,22 +1727,22 @@ class HTTPStamp(Schema):
                 item.blurb      = content.blurb 
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
-
+                
                 for screenName in self._user_regex.finditer(content.blurb):
                     source              = HTTPActionSource()
                     source.name         = 'View profile'
                     source.source       = 'stamped'
                     source.source_id    = screenName.groups()[0]
-
+                    
                     action              = HTTPAction()
                     action.type         = 'stamped_view_screen_name'
                     action.name         = 'View profile'
                     action.sources      = [ source ]
-
+                    
                     reference           = HTTPTextReference()
                     reference.indices   = [ screenName.start(), screenName.end() ]
                     reference.action    = action
-
+                    
                     item.blurb_references.append(reference)
                 
                 for image in content.images:
@@ -1719,6 +1752,8 @@ class HTTPStamp(Schema):
                     img.height  = image.height 
                     
                     item.images.append(img)
+                
+                _initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)

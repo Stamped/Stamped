@@ -47,23 +47,38 @@
                     <!-- TODO: FOLLOW button -->
                 </div>
                 
-                <div class="profile-section">
-                    <div class="floatleft profile-section2">
-                        <p class="number">{{user.num_friends}}</p>
-                        <p>following</p>
+                <div class="profile-sections">
+                    <ol class="profile-nav">
+                        <li><a href="#" class="up-arrow replaced">UP</a></li>
+                        <li><a href="#" class="down-arrow replaced">DOWN</a></li>
+                    </ol>
+                    
+                    <!-- # followers and # friends -->
+                    <div class="profile-section">
+                        <div class="floatleft profile-section2">
+                            <p class="number">{{user.num_friends}}</p>
+                            <p>following</p>
+                            
+                            {% with users=friends %}
+                                {% custom_template "user-gallery" %}
+                            {% endwith %}
+                        </div>
                         
-                        {% with users=friends %}
-                            {% custom_template "user-gallery" %}
-                        {% endwith %}
+                        <div class="floatleft profile-section1">
+                            <p class="number">{{user.num_followers}}</p>
+                            <p>followers</p>
+                            
+                            {% with users=followers %}
+                                {% custom_template "user-gallery" %}
+                            {% endwith %}
+                        </div>
                     </div>
                     
-                    <div class="floatleft profile-section1">
-                        <p class="number">{{user.num_followers}}</p>
-                        <p>followers</p>
-                        
-                        {% with users=followers %}
-                            {% custom_template "user-gallery" %}
-                        {% endwith %}
+                    <!-- stamp distribution -->
+                    <div class="profile-section">
+                        {% for vertical in user.distribution %}
+                            
+                        {% endfor %}
                     </div>
                 </div>
             </div>

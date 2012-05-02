@@ -1,7 +1,15 @@
 
 TODO:
     * replace previews in stamp-gallery-items with real images...
+    
+    * how to handle blurb references?
+    
     * fix blockquotes (line-spacing is messed up on multiple lines...)
+    
     * find feasible approach to color scheme constants
+    
     * figure out why font-faces aren't loading on chrome
+        * how to debug.. must be tools out there to help with this?
+
+    * when stamp images don't load, they still display a border
 

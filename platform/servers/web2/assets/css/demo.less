@@ -79,12 +79,11 @@
         .blurb {
             display: inline;
             text-align: left;
-            text-indent: 23px;
             quotes: "\201C" "\201D";
         }
         
-        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; }
-        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; }
+        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
         
         /*
         div.blurb {
@@ -100,7 +99,7 @@
         .subtitle-line {
             position: relative;
             display: block;
-            margin: 0 0 -20px;
+            margin: 0 0 -.5em;
             top: -4px;
             
             .icon {
@@ -126,5 +125,50 @@
 .stamp-gallery-loading {
     text-align: center;
     margin: 0 auto;
+}
+
+.profile-nav {
+    list-style: none;
+    text-decoration: none;
+    
+    position: absolute;
+    top: 0;
+    right: 0;
+    
+    a:focus {
+        text-decoration: none;
+        border: 0 none;
+        outline: none;
+    }
+    
+    a.up-arrow {
+        background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
+        width:  21px;
+        height: 21px;
+        margin: 0 0 .8em;
+        
+        &:hover {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
+        }
+        
+        &:active {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
+        }
+    }
+    
+    a.down-arrow {
+        background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
+        
+        width:  21px;
+        height: 21px;
+        
+        &:hover {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
+        }
+        
+        &:active {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
+        }
+    }
 }
 

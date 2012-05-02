@@ -610,6 +610,7 @@ if (typeof(StampedClient) == "undefined") {
                 return new Schema(arguments, 
                     new SchemaElement('blurb',              { 'type' : "string" }), 
                     new SchemaList('blurb_references',      new TextReference().schema()), 
+                    new SchemaElement('blurb_formatted',    { 'type' : "string" }), 
                     new SchemaList('images',                new Image().schema()), 
                     new SchemaElement('created',            { 'type' : "string" }), 
                     new SchemaElement('modified',           { 'type' : "string" })
