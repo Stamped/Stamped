@@ -34,7 +34,7 @@
     border: 
     float: left;
     width: 30%;
-    margin: 1em 1em 0 0;
+    margin: 1em .7em 0 6px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -50,11 +50,40 @@
     
     .content {
         margin: 0 auth;
+        padding: .2em .5em;
         
         .stamp-contents .images img {
             border: 1px solid;
             max-width: 128px;
             height: auto;
+        }
+        
+        .stamp-contents .images {
+            float: right;
+            width: 128px;
+            height: auto;
+            margin: .2em 0 .2em .2em;
+        }
+        
+        .stamp-contents, .likes, .todos, .credits, .comments {
+            font-size: 80%;
+        }
+        
+        .stamped-content {
+            margin: .2em 0 1em;
+        }
+        
+        .subtitle-line {
+            .icon {
+                margin: 0 .2em 0 0;
+                display: inline-block;
+            }
+            .subtitle {
+                display: inline-block;
+                font-size: 80%;
+                position: relative;
+                top: -2px;
+            }
         }
     }
 }
