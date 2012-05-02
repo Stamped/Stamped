@@ -175,7 +175,8 @@ def completeAction(request, http_schema, **kwargs):
     authUserId, authClientId = checkOAuth(request)
     
     #schema      = parseRequest(HTTPActionComplete(), request)
+    logs.info('http_schema.value: %s' % http_schema.value)
     result      = stampedAPI.completeAction(authUserId, http_schema.value)
-    
+
     return transformOutput(result)
 
