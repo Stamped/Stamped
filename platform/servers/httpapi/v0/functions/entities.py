@@ -169,9 +169,9 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     return transformOutput(result.exportSparse())
 
 
-@handleHTTPRequest()
+@handleHTTPRequest(http_schema=HTTPActionEntity)
 @require_http_methods(["POST"])
-def completeAction(request):
+def completeAction(request, http_schema, **kwargs):
     authUserId, authClientId = checkOAuth(request)
     
     schema      = parseRequest(HTTPActionComplete(), request)
