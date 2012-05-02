@@ -120,6 +120,7 @@ class LinkedAccounts(Schema):
         self.itunes             = SchemaElement(basestring)
         self.twitter            = TwitterAccountSchema()
         self.facebook           = FacebookAccountSchema()
+        self.netflix            = NetflixAccountSchema()
 
 class TwitterAccountSchema(Schema):
     def setSchema(self):
@@ -145,7 +146,9 @@ class FacebookAuthSchema(Schema):
 
 class NetflixAccountSchema(Schema):
     def setSchema(self):
-        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_user_id        = SchemaElement(basestring)
+        self.netflix_token          = SchemaElement(basestring)
+        self.netflix_secret         = SchemaElement(basestring)
 
 class NetflixAuthSchema(Schema):
     def setSchema(self):
