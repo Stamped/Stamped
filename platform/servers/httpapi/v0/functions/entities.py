@@ -174,8 +174,8 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 def completeAction(request, http_schema, **kwargs):
     authUserId, authClientId = checkOAuth(request)
     
-    schema      = parseRequest(HTTPActionComplete(), request)
-    result      = stampedAPI.completeAction(authUserId, schema.value)
-
+    #schema      = parseRequest(HTTPActionComplete(), request)
+    result      = stampedAPI.completeAction(authUserId, http_schema.value)
+    
     return transformOutput(result)
 
