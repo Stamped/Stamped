@@ -16,10 +16,25 @@
 }
 
 .stamp-gallery-item {
-    background: url(/assets/img/main-noise.png) left top repeat;
+    /*background: url(/assets/img/main-noise.png) left top repeat;*/
+    @inner: #FEFEFE;
+    
+    /*.box-shadow(10px, 0, 4px, -7px, rgba(0, 0, 0, 0.35));*/
+    
+    @shadow: rgba(125,125,125,0.15);
+    @args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;
+    
+    -webkit-box-shadow: @args;
+    -moz-box-shadow: @args;
+    -ms-box-shadow: @args;
+    -o-box-shadow: @args;
+    box-shadow: @args;
+    
+    background: @inner;
+    border: 
     float: left;
-    width: 28%;
-    margin: 1em;
+    width: 30%;
+    margin: 1em 1em 0 0;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;

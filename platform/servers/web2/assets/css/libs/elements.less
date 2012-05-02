@@ -36,6 +36,14 @@
                                      rgb(@stop,@stop,@stop) 100%);
 }
 
+.linear-gradient(@start: left, @c0, @c1, @c2) {
+    background: @c0;
+    background: -webkit-linear-gradient(@start, @c0, @c1, @c2);
+    background: -moz-linear-gradient(@start, @c0, @c1, @c2);
+    background: -ms-linear-gradient(@start, @c0, @c1, @c2);
+    background: -o-linear-gradient(@start, @c0, @c1, @c2);
+}
+
 .bordered(@top-color: #EEE, @right-color: #EEE, @bottom-color: #EEE, @left-color: #EEE) {
     border-top: solid 1px @top-color;
     border-left: solid 1px @left-color;
@@ -116,6 +124,14 @@
 }
 
 .box-shadow(@x: 0, @y: 0, @blur: 1px, @color: #000) {
+    -webkit-box-shadow: @arguments;
+    -moz-box-shadow: @arguments;
+    -ms-box-shadow: @arguments;
+    -o-box-shadow: @arguments;
+    box-shadow: @arguments;
+}
+
+.box-shadow(@x: 0, @y: 0, @blur: 1px, @spread: 0, @color: #000) {
     -webkit-box-shadow: @arguments;
     -moz-box-shadow: @arguments;
     -ms-box-shadow: @arguments;
