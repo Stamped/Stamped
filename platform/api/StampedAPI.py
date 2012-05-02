@@ -1710,7 +1710,7 @@ class StampedAPI(AStampedAPI):
             stamp.previews.credits = []
             for credit in creditIds[stamp.stamp_id]:
                 assert userIds[credit.user.user_id] != 1
-                if not nofilters:
+                if not nofilter:
                     assert entityIds[credit.entity.entity_id] != 1
                 credit.user = userIds[credit.user.user_id]
                 credit.entity = entityIds[credit.entity.entity_id]
