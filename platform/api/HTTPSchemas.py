@@ -210,17 +210,13 @@ def _initialize_comment_html(comment):
     blurb = comment.blurb
     data  = []
     
-    #self.screen_name        = SchemaElement(basestring, required=True)
-    #self.user_id            = SchemaElement(basestring)
-    #self.indices            = SchemaList(SchemaElement(int))
-    
     for mention in comment.mentions:
         repl_pre  = "<a class='screen-name' href=\"%s\">" % (mention.screen_name)
         repl_post = "</a>"
         
         data.append((mention.indices, repl_pre, repl_post))
     
-    html = [ ]
+    html = []
     last = 0
     
     for repl in sorted(data):
@@ -234,7 +230,7 @@ def _initialize_comment_html(comment):
         last = indices[1]
     
     html.append(blurb[last:])
-    cmoment.blurb_formatted = "".join(html)
+    comment.blurb_formatted = "".join(html)
 
 
 # ######### #
@@ -2217,72 +2213,71 @@ class HTTPActivity(Schema):
             data        = schema.value
             data.pop('subjects', None)
             data.pop('objects', None)
-
+            
             self.importData(data, overflow=True)
-
+            
             self.created = schema.timestamp.created
-
+            
             if self.icon is not None:
                 self.icon = _getIconURL(self.icon)
-
+            
             for user in schema.subjects:
                 self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
-
+            
             for user in schema.objects.users:
                 self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
-
+            
             for stamp in schema.objects.stamps:
                 self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
-
+            
             for entity in schema.objects.entities:
                 self.objects.entities.append(HTTPEntityMini().importSchema(entity).value)
-
+            
             for comment in schema.objects.comments:
                 comment = HTTPComment().importSchema(comment).value
                 _initialize_comment_html(comment)
+                
                 self.objects.comments.append(comment)
-
-
+            
             def _buildStampAction(stamp):
                 source              = HTTPActionSource()
                 source.name         = 'View "%s"' % stamp.entity.title
                 source.source       = 'stamped'
                 source.source_id    = stamp.stamp_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_stamp'
                 action.name         = 'View "%s"' % stamp.entity.title
                 action.sources      = [ source ]
-
+                
                 return action
-
+            
             def _buildEntityAction(entity):
                 source              = HTTPActionSource()
                 source.name         = 'View "%s"' % entity.title
                 source.source       = 'stamped'
                 source.source_id    = entity.entity_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_entity'
                 action.name         = 'View "%s"' % entity.title
                 action.sources      = [ source ]
-
+                
                 return action
-
+            
             def _buildUserAction(user):
                 source              = HTTPActionSource()
                 source.name         = 'View profile'
                 source.source       = 'stamped'
                 source.source_id    = user.user_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_user'
                 action.name         = 'View profile'
                 action.sources      = [ source ]
-
+                
                 return action
-
-
+            
             def _formatUserObjects(users, required=True, offset=0):
                 if len(users) == 0:
                     if required:
@@ -2436,9 +2431,7 @@ class HTTPActivity(Schema):
                     return text, refs
 
                 raise Exception("Too many stamps! \n%s" % stamps)
-
-
-
+            
             if self.verb == 'follow':
                 if len(self.subjects) == 1:
                     verb = 'is now following'
@@ -2446,7 +2439,9 @@ class HTTPActivity(Schema):
                 else:
                     verb = 'are now following'
                     self.image = _getIconURL('news_follow')
+                
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
+                
                 if schema.personal:
                     self.body = '%s %s you.' % (subjects, verb)
                     self.body_references = subjectReferences
@@ -2455,10 +2450,12 @@ class HTTPActivity(Schema):
                     userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                     self.body = '%s %s %s.' % (subjects, verb, userObjects)
                     self.body_references = subjectReferences + userObjectReferences
+                
                 self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'restamp':
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
+                
                 if schema.personal:
                     self.body = '%s gave you credit.' % (subjects)
                     self.body_references = subjectReferences
@@ -2470,6 +2467,7 @@ class HTTPActivity(Schema):
                     self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
                     self.body_references = subjectReferences + userObjectReferences
                     self.image = self.subjects[0].image_url
+                
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'like':
@@ -2480,11 +2478,13 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, stampObjects)
                 self.body_references = subjectReferences + stampObjectReferences
+                
                 if not schema.personal:
                     stampUsers = map(lambda x: x['user'], self.objects.stamps)
                     stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                     self.footer = 'via %s' % stampUserObjects
                     self.footer_references = stampUserReferences
+                
                 if schema.personal and self.benefit is not None:
                     self.image = _getIconURL('news_benefit_1')
                 elif len(self.subjects) == 1:
@@ -2492,8 +2492,9 @@ class HTTPActivity(Schema):
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_like')
+                
                 self.action = _buildStampAction(self.objects.stamps[0])
-
+            
             elif self.verb == 'todo':
                 self.icon = _getIconURL('news_todo')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -2502,16 +2503,18 @@ class HTTPActivity(Schema):
                 entityObjects, entityObjectReferences = _formatEntityObjects(self.objects.entities, offset=offset)
                 self.body = '%s %s %s as a to-do.' % (subjects, verb, entityObjects)
                 self.body_references = subjectReferences + entityObjectReferences
+                
                 if len(self.subjects) == 1:
                     self.image = self.subjects[0].image_url 
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_todo')
+                
                 if len(self.objects.stamps) > 0:
                     self.action = _buildStampAction(self.objects.stamps[0])
                 else:
                     self.action = _buildEntityAction(self.objects.entities[0])
-
+            
             elif self.verb == 'comment':
                 verb = 'Comment on'
                 offset = len(verb) + 1
@@ -2544,12 +2547,14 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
                 self.header_references = stampObjectReferences
+                
                 if commentObjects is not None:
                     self.body = '%s' % commentObjects
                     self.body_references = commentObjectReferences
                 else:
                     self.body = '%s' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
+                
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
@@ -2571,25 +2576,28 @@ class HTTPActivity(Schema):
                 }
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 verbs = ('completed', '')
+                
                 if self.verb[7:] in actionMapping.keys():
                     verbs = actionMapping[self.verb[7:]]
+                
                 offset = len(subjects) + len(verbs[0]) + 2
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                
                 if len(verbs[1]) > 0:
                     self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
                 else:
                     self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+                
                 self.body_references = subjectReferences + stampObjectReferences
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
-
+            
             else:
                 raise Exception("Uncrecognized verb: %s" % self.verb)
-
-
-
+        
         else:
             raise NotImplementedError
+        
         return self
 
 class HTTPTextReference(Schema):
