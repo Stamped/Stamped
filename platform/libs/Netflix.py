@@ -13,6 +13,7 @@ import json
 import utils
 import logs
 
+from errors                 import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 from urlparse           import urlparse
@@ -528,9 +529,14 @@ class Netflix(object):
                 # if the response is a 401 or 403, blacklist the user until the day expires
                 if response.status in (401,403):
                     if self.__addToBlacklistCount(user_id):
-                        return None
+                        logs.warning('Too many 401/403 responses.  User added to blacklist')
 
-        return json.loads(response.read())
+        if response.status == 200:
+            return json.loads(response.read())
+        else:
+            failData = json.loads(response.read())['status']
+            raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
+                           (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
     def get(self, service, user_id=None, token=None, **parameters):
         return self.__get(service, user_id, token, **parameters)
@@ -586,7 +592,7 @@ class Netflix(object):
 
     def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
         """
-        Returns a list of (date, {netflix_id:<ID>}) tuples for the user identified by auth
+        Returns a list of netflix ids for the user identified by auth
         """
         token = oauth.OAuthToken(user_token, user_secret)
         results = self.__get(
@@ -595,6 +601,11 @@ class Netflix(object):
                             start_index             = start,
                             max_results             = count,
                         )
+        queue = []
+        for item in self.__asList(results.get('queue', None).get('queue_item', None)):
+            netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
+            queue.append(netflix_id)
+
         return results.get('queue', None)
 
     def getRentalHistory(self, user_id, user_token, user_secret, start=0, count=100):
@@ -637,7 +648,6 @@ class Netflix(object):
         Returns a boolean (synchronously) if the operation succeeded
         """
         token = oauth.OAuthToken(user_token, user_secret)
-
         getresponse = self.__get(
             'queues/instant',
             title_ref               = netflix_id,
@@ -646,9 +656,8 @@ class Netflix(object):
             token                   = token,
         )
         etag = getresponse["queue"]["etag"]
-        print (getresponse)
 
-        results = self.__post(
+        return self.__post(
             'queues/instant',
             title_ref               = netflix_id,
             position                = 1,
@@ -656,8 +665,6 @@ class Netflix(object):
             user_id                 = user_id,
             token                   = token,
         )
-        print (results)
-        return results
 
     def titlesByUserRating(self, rating, auth, start, count):
         """
@@ -684,9 +691,11 @@ def globalNetflix():
 USER_ID = 'BQAJAAEDEOSopz8_plL6unZkMNWPF0swuckE11EpXgKKIiGokw4c7bE5zMk2-HgDEBW6XUAs9ULWh3MSZJfAPT0tby6iNSqb'
 OAUTH_TOKEN = 'BQAJAAEDEEA_ABseWJmlwCbPcFoxztwwARmaMLeLXt1TYXxQ_F-zSETr2voXtq6DNeSIqjLtt2fax66UyvP5IPs-gxET3CUX'
 OAUTH_TOKEN_SECRET = 'K28wcUY4YjAM'
+
 HOPE_FLOATS_ID = 'http://api.netflix.com/catalog/titles/movies/11819509'
 GHOSTBUSTERS2_ID = 'http://api.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api.netflix.com/catalog/titles/movies/1181532'
+INCEPTION_ID = 'http://api.netflix.com/catalog/titles/movies/70131314'
 
 def demo(method, **params):
     import pprint
@@ -700,8 +709,9 @@ def demo(method, **params):
 #    )
 
     #result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-    #result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
-    result = netflix.searchTitles("inception")
+    #result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, INCEPTION_ID)
+    result = netflix.getInstantQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    #result = netflix.searchTitles("inception")
 
 #    result = netflix.getTitleDetails(BIGLEB_ID)
 #    result = netflix.get('http://api.netflix.com/catalog/titles/movies/1181532/format_availability')

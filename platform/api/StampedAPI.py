@@ -52,6 +52,8 @@ try:
     from TMDBSource             import TMDBSource
     from TheTVDBSource          import TheTVDBSource
     from StampedSource          import StampedSource
+
+    from Netflix                import *
 except Exception:
     report()
     raise
@@ -640,7 +642,6 @@ class StampedAPI(AStampedAPI):
         twitterAuth     = kwargs.pop('twitterAuth', None)
         facebook        = kwargs.pop('facebook', None)
         facebookAuth    = kwargs.pop('facebookAuth', None)
-        netflix         = kwargs.pop('netflix', None)
         netflixAuth     = kwargs.pop('netflixAuth', None)
         
         self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
@@ -770,8 +771,17 @@ class StampedAPI(AStampedAPI):
         """
         account   = self._accountDB.getAccount(authUserId)
 
+        # TODO return HTTPAction to invoke sign in if credentials are unavailable
+
         if account.netflix_user_id != None and account.netflix_token != None and account.netflix_secret != None:
-            return True
+            return
+
+        netflix = globalNetflix()
+        result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
+
+
+        # TODO check results
+
 
 
 #        # Only send alert once (when the user initially connects to Twitter)
@@ -1562,7 +1572,7 @@ class StampedAPI(AStampedAPI):
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
 
-        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        ### HACK UNTIL PAGING ISSUE IS RESOLVED
         origLen = len(stampData)
 
         singleStamp = False
@@ -1729,7 +1739,7 @@ class StampedAPI(AStampedAPI):
         if singleStamp == True:
             return stamps[0]
 
-        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        ### HACK UNTIL PAGING ISSUE IS RESOLVED
         while len(stamps) < origLen:
             stamps.append(stamps[len(stamps)-1])
 

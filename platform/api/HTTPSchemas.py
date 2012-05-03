@@ -65,6 +65,20 @@ def _profileImageURL(screenName, cache=None):
     
     return url
 
+def _initialize_image_sizes(dest):
+    get_image_url = lambda d: dest.image_url.replace('.jpg', '-%dx%d.jpg' % (d, d))
+    
+    dest.image_url_31  = get_image_url(31)
+    dest.image_url_37  = get_image_url(37)
+    dest.image_url_46  = get_image_url(46)
+    dest.image_url_55  = get_image_url(55)
+    dest.image_url_62  = get_image_url(62)
+    dest.image_url_72  = get_image_url(72)
+    dest.image_url_74  = get_image_url(74)
+    dest.image_url_92  = get_image_url(92)
+    dest.image_url_110 = get_image_url(110)
+    dest.image_url_144 = get_image_url(144)
+
 def _formatURL(url):
     try:
         return url.split('://')[-1].split('/')[0].split('www.')[-1]
@@ -421,7 +435,24 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        self.image_url          = SchemaElement(basestring)
+        
+        # TODO (travis 5/3/12): how to best surface multiple image resolutions to clients?
+        # NOTE: this is a reoccurring pattern that we should find a cleaner, platform-wide 
+        # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
+        # then, I'm inlining the available profile image sizes so as not to bake that logic 
+        # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image_url          = SchemaElement(basestring) # original (historically 500x500)
+        self.image_url_31       = SchemaElement(basestring)
+        self.image_url_37       = SchemaElement(basestring)
+        self.image_url_46       = SchemaElement(basestring)
+        self.image_url_55       = SchemaElement(basestring)
+        self.image_url_62       = SchemaElement(basestring)
+        self.image_url_72       = SchemaElement(basestring)
+        self.image_url_74       = SchemaElement(basestring)
+        self.image_url_92       = SchemaElement(basestring)
+        self.image_url_110      = SchemaElement(basestring)
+        self.image_url_144      = SchemaElement(basestring)
+        
         self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
@@ -448,9 +479,10 @@ class HTTPUser(Schema):
             self.num_credits_given  = stats.pop('num_credits_given', 0)
             self.num_likes          = stats.pop('num_likes', 0)
             self.num_likes_given    = stats.pop('num_likes_given', 0)
-
+            
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
-
+            _initialize_image_sizes(self)
+            
             if 'distribution' in stats:
                 data = {}
                 for item in stats['distribution']:
@@ -494,12 +526,29 @@ class HTTPUserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        self.image_url          = SchemaElement(basestring)
-
+        
+        # TODO (travis 5/3/12): how to best surface multiple image resolutions to clients?
+        # NOTE: this is a reoccurring pattern that we should find a cleaner, platform-wide 
+        # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
+        # then, I'm inlining the available profile image sizes so as not to bake that logic 
+        # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image_url          = SchemaElement(basestring) # original (historically 500x500)
+        self.image_url_31       = SchemaElement(basestring)
+        self.image_url_37       = SchemaElement(basestring)
+        self.image_url_46       = SchemaElement(basestring)
+        self.image_url_55       = SchemaElement(basestring)
+        self.image_url_62       = SchemaElement(basestring)
+        self.image_url_72       = SchemaElement(basestring)
+        self.image_url_74       = SchemaElement(basestring)
+        self.image_url_92       = SchemaElement(basestring)
+        self.image_url_110      = SchemaElement(basestring)
+        self.image_url_144      = SchemaElement(basestring)
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            _initialize_image_sizes(self)
         else:
             raise NotImplementedError(type(schema))
         return self
@@ -601,6 +650,35 @@ class HTTPClientLogsEntry(Schema):
         self.favorite_id        = SchemaElement(basestring)
         self.comment_id         = SchemaElement(basestring)
         self.activity_id        = SchemaElement(basestring)
+
+
+# ################# #
+# Endpoint Response #
+# ################# #
+
+class HTTPEndpointResponse(Schema):
+    def setSchema(self):
+        self.action         = HTTPEndpointAction()
+
+    def setAction(self, actionType, name, sources, **kwargs):
+        if len(sources) > 0:
+            action          = HTTPAction()
+            action.type     = actionType
+            action.name     = name
+            action.sources  = sources
+
+            item            = HTTPEndpointAction()
+            item.action     = action
+            item.name       = name
+
+            self.action = item
+
+# HTTPEndpointResponse Components
+
+class HTTPEndpointAction(Schema):
+    def setSchema(self):
+        self.action                 = HTTPAction()
+        self.name                   = SchemaElement(basestring, required=True)
 
 
 # ######## #
@@ -872,6 +950,43 @@ class HTTPEntity(Schema):
 
             self._addAction(actionType, 'Buy now', sources, icon=actionIcon)
 
+        # TV
+        elif entity.kind == 'media_collection' and entity.isType('tv'):
+
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
+            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
+            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
+            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = '/linked/netflix/addinstant'
+                source.endpoint_data    = entity.sources.netflix_id
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
+
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
 
@@ -905,7 +1020,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -933,8 +1048,8 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = '/linked/netflix/addinstant'
-                source.endpoint_data    = entity.sources.netflix_id
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
                     action      = actionType,
@@ -1069,7 +1184,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -1204,7 +1319,7 @@ class HTTPEntity(Schema):
                             source.name                 = 'Listen on iTunes'
                             source.source               = 'itunes'
                             source.source_id            = song.sources.itunes_id
-                            source.source_data          = song.sources.itunes_preview
+                            source.source_data          = { 'preview_url': song.sources.itunes_preview }
                             source.icon                 = _getIconURL('src_itunes', client=client)
                             sources.append(source)
 
@@ -1378,13 +1493,13 @@ class HTTPActionSource(Schema):
         self.name                   = SchemaElement(basestring, required=True)
         self.source                 = SchemaElement(basestring, required=True)
         self.source_id              = SchemaElement(basestring)
-        self.source_data            = SchemaElement(basestring)
+        self.source_data            = SchemaElement(dict)
         self.endpoint               = SchemaElement(basestring)
-        self.endpoint_data          = SchemaElement(basestring)
+        self.endpoint_data          = SchemaElement(dict)
         self.link                   = SchemaElement(basestring)
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
-        self.completion_data        = SchemaElement(basestring) # dictionary?
+        self.completion_data        = SchemaElement(dict) # dictionary?
 
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
@@ -2441,7 +2556,7 @@ class HTTPActivity(Schema):
             if self.verb == 'follow':
                 if len(self.subjects) == 1:
                     verb = 'is now following'
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     verb = 'are now following'
                     self.image = _getIconURL('news_follow')
@@ -2494,7 +2609,7 @@ class HTTPActivity(Schema):
                 if schema.personal and self.benefit is not None:
                     self.image = _getIconURL('news_benefit_1')
                 elif len(self.subjects) == 1:
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_like')
@@ -2511,7 +2626,7 @@ class HTTPActivity(Schema):
                 self.body_references = subjectReferences + entityObjectReferences
                 
                 if len(self.subjects) == 1:
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_todo')
@@ -2530,7 +2645,7 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'reply':
@@ -2542,7 +2657,7 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'mention':
@@ -2561,12 +2676,12 @@ class HTTPActivity(Schema):
                     self.body = '%s' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
                 
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb.startswith('friend_'):
                 self.icon = _getIconURL('news_friend')
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildUserAction(self.subjects[0])
 
             elif self.verb.startswith('action_'):

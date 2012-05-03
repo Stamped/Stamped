@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from httpapi.v0.helpers import *
+import time
 
 def transform_stamps(stamps):
     """
@@ -26,42 +27,55 @@ def transform_stamps(stamps):
 @handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
 @require_http_methods(["GET"])
 def inbox(request, authUserId, schema, **kwargs):
+    before = time.time()
     stamps = stampedAPI.getInboxStamps(authUserId, schema)
-    
+    logs.info('api.getInboxStamps() duration: %d seconds' % (time.time()-before))
     return transform_stamps(stamps)
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
 @require_http_methods(["GET"])
 def user(request, authUserId, schema, **kwargs):
+    before = time.time()
     stamps = stampedAPI.getUserStamps(authUserId, schema)
-    
+    logs.info('api.getUserStamps() duration: %d seconds' % (time.time()-before))
     return transform_stamps(stamps)
 
 @handleHTTPRequest(http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
 @require_http_methods(["GET"])
 def credit(request, authUserId, schema, **kwargs):
+    before = time.time()
     stamps = stampedAPI.getCreditedStamps(authUserId, schema)
-    
+    logs.info('api.getCreditedStamps() duration: %d seconds' % (time.time()-before))
+
     return transform_stamps(stamps)
 
 @handleHTTPRequest(http_schema=HTTPFriendsSlice, schema=FriendsSlice)
 @require_http_methods(["GET"])
 def friends(request, authUserId, schema, **kwargs):
+    import datetime
+    #before = time.time()
+    before = datetime.datetime.now()
     stamps = stampedAPI.getFriendsStamps(authUserId, schema)
-    
+    after = datetime.datetime.now()
+    dur = after - before
+    seconds = dur.microseconds // 1000000
+    micros = dur.microseconds   % 1000000
+    logs.info('api.getFriendsStamps() duration: %d.%d' % (seconds, micros))
+
     return transform_stamps(stamps)
 
 @handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
+    before = time.time()
     stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
+    logs.info('api.getSuggestedStamps() duration: %d seconds' % (time.time()-before))
     
     return transform_stamps(stamps)
 
 @handleHTTPRequest(http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
 @require_http_methods(["GET"])
 def consumption(request, authUserId, schema, **kwargs):
-    print('\nHIT CONSUMPTION\n')
     stamps = None
     if schema.scope == 'you':
         userCollSlice = schema.exportSchema(UserCollectionSlice())
@@ -79,9 +93,10 @@ def consumption(request, authUserId, schema, **kwargs):
         raise NotImplementedError('Consumption call with undefined scope %s' % schema.scope)
     if stamps is None:
         raise Exception('consumption() expected list of stamps, received None')
-
+    
     import pprint
     for stamp in stamps:
         pprint.pprint(stamp.entity)
-
+    
     return transform_stamps(stamps)
+

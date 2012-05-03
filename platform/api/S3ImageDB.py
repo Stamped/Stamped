@@ -73,6 +73,11 @@ class S3ImageDB(AImageDB):
     
     @property
     def profileImageSizes(self):
+        # NOTE (travis 5/3/12):  the specifics of where these images are 
+        # referenced throughout the stamped platform are deprecated, but 
+        # the available image sizes that we will continue to support has 
+        # not changed.
+        
         return {
             # shown in user's profile
             '144x144': (144, 144), # 2x
