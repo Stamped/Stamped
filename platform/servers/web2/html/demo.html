@@ -78,9 +78,14 @@
                         <!--<p class="stamp-category-{{vertical.category}}">
                             <span class="icon"></span>-->
                         
-                        <ul>
+                        <ul class="user-category-distribution clearfix">
                         {% for vertical in user.distribution %}
-                            <li><img src="{{vertical.icon}}" /><span>{{vertical.name}} - {{vertical.count}}</span></li>
+                            <li>
+                                <img src="{{vertical.icon}}" />
+                                <div class="bargraph">
+                                    <div class="value"></div>
+                                </div>
+                            </li>
                         {% endfor %}
                         </ul>
                     </div>
