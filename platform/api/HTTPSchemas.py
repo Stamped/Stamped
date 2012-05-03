@@ -540,6 +540,35 @@ class HTTPClientLogsEntry(Schema):
         self.activity_id        = SchemaElement(basestring)
 
 
+# ################# #
+# Endpoint Response #
+# ################# #
+
+class HTTPEndpointResponse(Schema):
+    def setSchema(self):
+        self.action
+
+    def _setAction(self, actionType, name, sources, **kwargs):
+        if len(sources) > 0:
+            action          = HTTPAction()
+            action.type     = actionType
+            action.name     = name
+            action.sources  = sources
+
+            item            = HTTPEndpointAction()
+            item.action     = action
+            item.name       = name
+
+            self.action = item
+
+# HTTPEndpointResponse Components
+
+class HTTPEndpointAction(Schema):
+    def setSchema(self):
+        self.action                 = HTTPAction(required=True)
+        self.name                   = SchemaElement(basestring, required=True)
+
+
 # ######## #
 # Entities #
 # ######## #
@@ -808,6 +837,33 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Buy now', sources, icon=actionIcon)
+
+        # TV
+        elif entity.kind == 'media_collection' and entity.isType('tv'):
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = '/linked/netflix/addinstant'
+                source.endpoint_data    = entity.sources.netflix_id
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
