@@ -1780,7 +1780,7 @@ class HTTPStamp(Schema):
                     
                     item.images.append(img)
                 
-                _initialize_blurb_html(item)
+                #_initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
