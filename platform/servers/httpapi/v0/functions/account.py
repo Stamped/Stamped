@@ -209,7 +209,7 @@ def removeTwitter(request, authUserId, **kwargs):
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     logs.info('\n### ATTEMPTING TO ADD TO NETFLIX with netflix_id: %s' % http_schema.netflix_id)
     try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+        result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
         if e.code == 401:
             response = HTTPEndpointResponse()
