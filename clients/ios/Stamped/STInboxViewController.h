@@ -2,17 +2,13 @@
 //  STInboxViewController.h
 //  Stamped
 //
-//  Created by Landon Judkins on 4/5/12.
+//  Created by Landon Judkins on 5/2/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STContainerViewController.h"
 #import "STTableViewController.h"
+#import "STLazyList.h"
 
 @interface STInboxViewController : STTableViewController
-
-- (void)newStampCreated:(id<STStamp>)stamp;
-
-+ (STInboxViewController*)sharedInstance;
 
 @end

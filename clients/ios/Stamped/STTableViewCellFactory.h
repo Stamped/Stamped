@@ -15,8 +15,6 @@
 @required
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView data:(id)data andStyle:(NSString*)style;
 - (CGFloat)cellHeightForTableView:(UITableView*)tableView data:(id)data andStyle:(NSString*)style;
-
-@optional
 - (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style;
 - (STCancellation*)prepareForData:(id)data 
                          andStyle:(NSString*)style 

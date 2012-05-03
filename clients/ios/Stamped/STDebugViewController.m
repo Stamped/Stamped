@@ -14,6 +14,7 @@
 #import "STDebugDatumViewController.h"
 #import "Util.h"
 #import "ECSlidingViewController.h"
+#import "STConfiguration.h"
 
 @interface STDebugCell : UITableViewCell
 
@@ -47,15 +48,19 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    // Custom initialization
+  }
+  return self;
 }
 
 - (void)backButtonClicked:(id)button {
   [self.slidingViewController anchorTopViewTo:ECRight];
+}
+
+- (void)rightButtonClicked:(id)button {
+  [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
 }
 
 - (void)viewDidLoad
@@ -67,6 +72,10 @@
                                                                             style:UIBarButtonItemStyleDone
                                                                            target:self 
                                                                            action:@selector(backButtonClicked:)] autorelease];
+  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Configuration"
+                                                                             style:UIBarButtonItemStyleDone
+                                                                            target:self 
+                                                                            action:@selector(rightButtonClicked:)] autorelease];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -75,8 +84,8 @@
 
 - (void)viewDidUnload
 {
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
+  [super viewDidUnload];
+  // Release any retained subviews of the main view.
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return [STDebug sharedInstance].logCount;
@@ -93,7 +102,8 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];
-  [[Util sharedNavigationController] pushViewController:[[[STDebugDatumViewController alloc] initWithDatum:datum] autorelease] animated:YES];
+  NSString* string = [NSString stringWithFormat:@"%@\n%@", datum.object, datum.created];
+  [[Util sharedNavigationController] pushViewController:[[[STDebugDatumViewController alloc] initWithString:string] autorelease] animated:YES];
 }
 
 - (void)reloadStampedData {

@@ -23,6 +23,11 @@
 #import "STSimpleEntitySearchSection.h"
 #import "STSimpleActivity.h"
 #import "STSimpleEntityDetail.h"
+#import "STDebug.h"
+#import "STYouStampsList.h"
+#import "STFriendsStampsList.h"
+#import "STFriendsOfFriendsStampsList.h"
+#import "STEveryoneStampsList.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -520,6 +525,45 @@ static STStampedAPI* _sharedInstance;
                                                  }];
   }
   NSAssert2(NO, @"unknown cache (%@) asked for key %@", cache, key);
+  return nil;
+}
+
+- (void)handleCompletionWithSource:(id<STSource>)source action:(NSString*)action andContext:(STActionContext*)context {
+  
+  if (source.completionEndpoint) {
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    if (source.completionData) {
+      [params addEntriesFromDictionary:source.completionData];
+    }
+    [[STRestKitLoader sharedInstance] loadOneWithPath:@"/actions/complete.json"
+                                                 post:YES 
+                                               params:params mapping:[STSimpleTodo mapping]
+                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                            [STDebug log:[NSString stringWithFormat:@"Callback %@ for endpoint %@.\n%@:%@:%@\n%@",
+                                                          result ? @"succeeded" : @"failed",
+                                                          source.completionEndpoint,
+                                                          action,
+                                                          source.source,
+                                                          source.sourceID,
+                                                          params]];
+                                          }];
+  }
+}
+
+- (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope {
+  if (scope == STStampedAPIScopeYou) {
+    return [STYouStampsList sharedInstance];
+  }
+  else if (scope == STStampedAPIScopeFriends) {
+    return [STFriendsStampsList sharedInstance];
+  }
+  else if (scope == STStampedAPIScopeFriendsOfFriends) {
+    return [STFriendsOfFriendsStampsList sharedInstance];
+  }
+  else if (scope == STStampedAPIScopeEveryone) {
+    return [STEveryoneStampsList sharedInstance];
+  }
+  NSAssert1(NO, @"Bad scope value: %", scope);
   return nil;
 }
 

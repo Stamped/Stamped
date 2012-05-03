@@ -41,7 +41,7 @@
     
     // Title
     CGPoint titleOrigin = CGPointMake(69, 27);
-    UIFont* titleFont = [UIFont stampedTitleFontLightWithSize:29];
+    UIFont* titleFont = [UIFont stampedTitleLightFont];
     UIView* titleView = [Util viewWithText:stamp.entity.title
                                       font:titleFont
                                      color:[UIColor stampedBlackColor]
@@ -112,6 +112,10 @@
   [super setSelected:selected animated:animated];
   
   // Configure the view for the selected state
+}
+
++ (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
+  return [STCancellation dispatchNoopCancellationWithCallback:block];
 }
 
 @end

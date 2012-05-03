@@ -18,6 +18,8 @@
 #import "STImageCache.h"
 #import "STButton.h"
 #import "STActionPair.h"
+#import "UIFont+Stamped.h"
+#import "ECSlidingViewController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -72,6 +74,15 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 @end
 
+@interface STUtilTextInputDelegate : NSObject <UIAlertViewDelegate, UITextFieldDelegate>
+
+- (id)initWithTextField:(UITextField*)textField;
+
+@property (nonatomic, readwrite, copy) void(^block)(NSString*);
+@property (nonatomic, readonly, retain) UITextField* textField;
+
+@end
+
 static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
@@ -82,12 +93,25 @@ static Rdio* _rdio;
   _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47" andSecret:@"xJSZwBZxFp" delegate:nil];
 }
 
-
-+ (void)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb {
-  [Util splitHexString:hexString toRed:rgb green:rgb+1 blue:rgb+2];
++ (NSString*)floatToHex:(CGFloat)value {
+  if (value > 1 || value < 0) return nil;
+  int close = MIN(255,(int)(value * 255));
+  if (close < 16) {
+    return [NSString stringWithFormat:@"0%x",close];
+  }
+  else {
+    return [NSString stringWithFormat:@"%x",close];
+  }
 }
 
-+ (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {
++ (BOOL)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb {
+  return [Util splitHexString:hexString toRed:rgb green:rgb+1 blue:rgb+2];
+}
+
++ (BOOL)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {
+  if (hexString.length != 6) {
+    return NO;
+  }
   NSRange range;
   range.location = 0;  
   range.length = 2;
@@ -98,13 +122,16 @@ static Rdio* _rdio;
   NSString* bString = [hexString substringWithRange:range];
   
   unsigned int r, g, b;
-  [[NSScanner scannerWithString:rString] scanHexInt:&r];
-  [[NSScanner scannerWithString:gString] scanHexInt:&g];
-  [[NSScanner scannerWithString:bString] scanHexInt:&b];
+  BOOL success = [[NSScanner scannerWithString:rString] scanHexInt:&r];
+  success = success && [[NSScanner scannerWithString:gString] scanHexInt:&g];
+  success = success && [[NSScanner scannerWithString:bString] scanHexInt:&b];
   
-  *red = r / 255.0f;
-  *green = g / 255.0f;
-  *blue = b / 255.0f;
+  if (success) {
+    *red = r / 255.0f;
+    *green = g / 255.0f;
+    *blue = b / 255.0f;
+  }
+  return success;
 }
 
 + (UIImage*)gradientImage:(UIImage*)img
@@ -897,6 +924,38 @@ static Rdio* _rdio;
   return [@"Tp" sizeWithFont:font].height;
 }
 
++ (void)textInputWithDefault:(NSString*)string andCallback:(void (^)(NSString* value))block {
+  UITextField *passwordField = [[UITextField alloc] initWithFrame:CGRectMake(16,83,252,25)];
+  STUtilTextInputDelegate* delegate = [[[STUtilTextInputDelegate alloc] initWithTextField:passwordField] autorelease];
+  delegate.block = block;
+  UIAlertView *passwordAlert = [[UIAlertView alloc] initWithTitle:@"Enter Value" message:@"\n\n\n"
+                                                         delegate:delegate cancelButtonTitle:NSLocalizedString(@"Cancel",nil) otherButtonTitles:NSLocalizedString(@"OK",nil), nil];
+  
+  passwordField.font = [UIFont systemFontOfSize:18];
+  passwordField.backgroundColor = [UIColor whiteColor];
+  passwordField.keyboardAppearance = UIKeyboardAppearanceAlert;
+  passwordField.delegate = delegate;
+  passwordField.text = string;
+  passwordField.font = [UIFont stampedFontWithSize:14];
+  [passwordField becomeFirstResponder];
+  [passwordAlert addSubview:passwordField];
+  
+  [passwordAlert show];
+  [passwordAlert release];
+  [passwordField release];
+}
+
++ (void)_homeButtonClicked:(id)button {
+  [[ECSlidingViewController sharedInstance] anchorTopViewTo:ECRight];
+}
+
++ (void)addHomeButtonToController:(UIViewController*)controller {
+  controller.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
+                                                                            style:UIBarButtonItemStyleDone
+                                                                           target:self 
+                                                                           action:@selector(_homeButtonClicked:)] autorelease];
+}
+
 @end
 
 @implementation STPopUpView
@@ -1053,4 +1112,44 @@ static Rdio* _rdio;
   }
 }
 
+@end
+
+@implementation STUtilTextInputDelegate
+
+@synthesize block = _block;
+@synthesize textField = textField_;
+
+- (id)initWithTextField:(UITextField*)textField
+{
+  self = [super init];
+  if (self) {
+    [self retain];
+    textField_ = [textField retain];
+  }
+  return self;
+}
+
+- (void)dealloc
+{
+  [textField_ release];
+  [_block release];
+  [super dealloc];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  [self autorelease];
+  if (self.block) {
+    if (buttonIndex == -1 || buttonIndex == alertView.cancelButtonIndex) {
+      self.block(nil);
+    }
+    else {
+      self.block(self.textField.text);
+    }
+  }
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  return YES;
+}
 @end

@@ -13,7 +13,7 @@
 
 - (id)initWithRange:(NSRange)range;
 
-@property (nonatomic, readonly, assign) NSRange range;
+@property (nonatomic, readwrite, assign) NSRange range;
 @property (nonatomic, readwrite, retain) STCancellation* cancellation;
 @property (nonatomic, readwrite, retain) NSArray* results;
 

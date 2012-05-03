@@ -74,7 +74,9 @@ static const CGFloat kReloadHeight = 60.0;
   [_spinnerView release];
   [toolbar_ release];
   [retainedObjects_ release];
+  NSLog(@"logging release: %@",self);
   [super dealloc];
+  NSLog(@"finished");
 }
 
 - (void)retainObject:(id)object {

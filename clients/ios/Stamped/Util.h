@@ -39,8 +39,9 @@ extern NSString* const kTwitterScope;
 extern NSString* const kKeychainTwitterToken;
 
 @interface Util : NSObject
-+ (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
-+ (void)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb;
++ (NSString*)floatToHex:(CGFloat)value;
++ (BOOL)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
++ (BOOL)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb;
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
 + (UIImage*)gradientImage:(UIImage*)img
            withPrimaryRed:(CGFloat)pRed
@@ -165,5 +166,9 @@ extern NSString* const kKeychainTwitterToken;
 + (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail;
 
 + (CGFloat)lineHeightForFont:(UIFont*)font;
+
++ (void)textInputWithDefault:(NSString*)string andCallback:(void (^)(NSString* value))block;
+
++ (void)addHomeButtonToController:(UIViewController*)controller;
 
 @end

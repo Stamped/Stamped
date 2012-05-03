@@ -11,6 +11,6 @@
 
 @interface STDebugDatumViewController : STContainerViewController
 
-- (id)initWithDatum:(STDebugDatum*)datum;
+- (id)initWithString:(NSString*)string;
 
 @end
