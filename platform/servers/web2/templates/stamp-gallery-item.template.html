@@ -5,7 +5,7 @@
 
 <div class="stamp-gallery-item">
     <div class="top-wave"></div>
-    <div class="content">
+    <div class="content clearfix">
         <div class="stamp-category-{{#entity}}{{category}}{{/entity}}">
             <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
             <div class="personal-stamp-logo"></div>
@@ -41,53 +41,49 @@
                 {{/contents}}
             </div>
             
+            {{#previews}}
             <div class="previews">
-                {{#previews}}
-                <div class="likes">
-                    Likes:<br />
-                    <ol>
-                        {{#likes}}
-                        <li>
-                            {{> user-mini}}
-                        </li>
-                        {{/likes}}
-                    </ol>
+                {{#likes}}
+                <div class="profile-image-small like">
+                    <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                        <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                        <div class="like"></div>
+                    </a>
                 </div>
+                {{/likes}}
                 
-                <div class="todos">
-                    Todos:<br />
-                    <ol>
-                        {{#todos}}
-                        <li>
-                            {{> user-mini}}
-                        </li>
-                        {{/todos}}
-                    </ol>
+                {{#todos}}
+                <div class="profile-image-small todo">
+                    <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                        <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                        <div class="todo"></div>
+                    </a>
                 </div>
+                {{/todos}}
                 
-                <div class="credits">
-                    Credits:<br />
-                    <ol>
-                        {{#credits}}
-                        <li>
-                            {{> stamp-mini}}
-                        </li>
-                        {{/credits}}
-                    </ol>
+                {{#credits}}
+                <div class="profile-image-small credit">
+                    {{#user}}
+                    <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                        <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                        <div class="credit"></div>
+                    </a>
+                    {{/user}}
                 </div>
+                {{/credits}}
                 
-                <div class="comments">
-                    Comments:<br />
-                    <ol>
-                        {{#comments}}
-                        <li>
-                            {{> comment}}
-                        </li>
-                        {{/comments}}
-                    </ol>
+                {{#comments}}
+                <div class="profile-image-small comment">
+                    {{#user}}
+                    <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                        <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                        <div class="comment"></div>
+                    </a>
+                    {{/user}}
                 </div>
-                {{/previews}}
+                {{/comments}}
             </div>
+            {{/previews}}
         </div>
     </div>
     <div class="bottom-wave"></div>

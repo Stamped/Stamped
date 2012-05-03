@@ -65,6 +65,20 @@ def _profileImageURL(screenName, cache=None):
     
     return url
 
+def _initialize_image_sizes(dest):
+    get_image_url = lambda d: dest.image_url.replace('.jpg', '-%dx%d.jpg' % (d, d))
+    
+    dest.image_url_31  = get_image_url(31)
+    dest.image_url_37  = get_image_url(37)
+    dest.image_url_46  = get_image_url(46)
+    dest.image_url_55  = get_image_url(55)
+    dest.image_url_62  = get_image_url(62)
+    dest.image_url_72  = get_image_url(72)
+    dest.image_url_74  = get_image_url(74)
+    dest.image_url_92  = get_image_url(92)
+    dest.image_url_110 = get_image_url(110)
+    dest.image_url_144 = get_image_url(144)
+
 def _formatURL(url):
     try:
         return url.split('://')[-1].split('/')[0].split('www.')[-1]
@@ -415,7 +429,24 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        self.image_url          = SchemaElement(basestring)
+        
+        # TODO (travis 5/3/12): how to best surface multiple image resolutions to clients?
+        # NOTE: this is a reoccurring pattern that we should find a cleaner, platform-wide 
+        # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
+        # then, I'm inlining the available profile image sizes so as not to bake that logic 
+        # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image_url          = SchemaElement(basestring) # original (historically 500x500)
+        self.image_url_31       = SchemaElement(basestring)
+        self.image_url_37       = SchemaElement(basestring)
+        self.image_url_46       = SchemaElement(basestring)
+        self.image_url_55       = SchemaElement(basestring)
+        self.image_url_62       = SchemaElement(basestring)
+        self.image_url_72       = SchemaElement(basestring)
+        self.image_url_74       = SchemaElement(basestring)
+        self.image_url_92       = SchemaElement(basestring)
+        self.image_url_110      = SchemaElement(basestring)
+        self.image_url_144      = SchemaElement(basestring)
+        
         self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
@@ -442,9 +473,10 @@ class HTTPUser(Schema):
             self.num_credits_given  = stats.pop('num_credits_given', 0)
             self.num_likes          = stats.pop('num_likes', 0)
             self.num_likes_given    = stats.pop('num_likes_given', 0)
-
+            
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
-
+            _initialize_image_sizes(self)
+            
             if 'distribution' in stats:
                 data = {}
                 for item in stats['distribution']:
@@ -494,6 +526,7 @@ class HTTPUserMini(Schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)
             self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            _initialize_image_sizes(self)
         else:
             raise NotImplementedError(type(schema))
         return self
@@ -2435,7 +2468,7 @@ class HTTPActivity(Schema):
             if self.verb == 'follow':
                 if len(self.subjects) == 1:
                     verb = 'is now following'
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     verb = 'are now following'
                     self.image = _getIconURL('news_follow')
@@ -2488,7 +2521,7 @@ class HTTPActivity(Schema):
                 if schema.personal and self.benefit is not None:
                     self.image = _getIconURL('news_benefit_1')
                 elif len(self.subjects) == 1:
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_like')
@@ -2505,7 +2538,7 @@ class HTTPActivity(Schema):
                 self.body_references = subjectReferences + entityObjectReferences
                 
                 if len(self.subjects) == 1:
-                    self.image = self.subjects[0].image_url 
+                    self.image = self.subjects[0].image_url
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_todo')
@@ -2524,7 +2557,7 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'reply':
@@ -2536,7 +2569,7 @@ class HTTPActivity(Schema):
                 self.header_references = stampObjectReferences
                 self.body = '%s' % commentObjects
                 self.body_references = commentObjectReferences
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'mention':
@@ -2555,12 +2588,12 @@ class HTTPActivity(Schema):
                     self.body = '%s' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
                 
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb.startswith('friend_'):
                 self.icon = _getIconURL('news_friend')
-                self.image = self.subjects[0].image_url 
+                self.image = self.subjects[0].image_url
                 self.action = _buildUserAction(self.subjects[0])
 
             elif self.verb.startswith('action_'):
