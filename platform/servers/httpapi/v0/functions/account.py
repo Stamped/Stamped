@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 from errors             import *
-from HTTPSchemas        import HTTPEndpointResponse
+from HTTPSchemas        import *
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
@@ -212,6 +212,8 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
         result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
         if e.code == 401:
+            response = HTTPEndpointResponse()
+            response._setAction()
             # return login endpoint action
             pass
         else:
@@ -219,7 +221,6 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
 
     logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
 
-    client = stampedAuth.getClientDetails(authClientId)
     response = HTTPEndpointResponse()
     #TODO throw status codes on error
     #TODO return an HTTPAction
