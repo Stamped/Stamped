@@ -15,28 +15,28 @@
 
 @interface STDebugDatumViewController () <UITextViewDelegate, MFMailComposeViewControllerDelegate>
 
-@property (nonatomic, readonly, retain) STDebugDatum* datum;
+@property (nonatomic, readonly, retain) NSString* string;
 @property (nonatomic, readonly, retain) UITextView* textView;
 
 @end
 
 @implementation STDebugDatumViewController
 
-@synthesize datum = datum_;
+@synthesize string = string_;
 @synthesize textView = textView_;
 
-- (id)initWithDatum:(STDebugDatum*)datum
+- (id)initWithString:(NSString*)string
 {
   self = [super init];
   if (self) {
-    datum_ = [datum retain];
+    string_ = [string retain];
   }
   return self;
 }
 
 - (void)dealloc
 {
-  [datum_ release];
+  [string_ release];
   [super dealloc];
 }
 
@@ -48,7 +48,7 @@
                                                            padding, 
                                                            self.scrollView.frame.size.width - 2 * padding, 
                                                            self.scrollView.frame.size.height - 2 * padding- 80)];
-  textView_.text = [NSString stringWithFormat:@"%@\n%@", self.datum.object, self.datum.created];
+  textView_.text = self.string;
   textView_.layer.borderWidth = 2;
   textView_.layer.borderColor = [UIColor colorWithWhite:.7 alpha:1].CGColor;
   UIView* accessoryView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease];
@@ -114,7 +114,7 @@
   MFMailComposeViewController* controller = [[MFMailComposeViewController alloc] init];
   controller.mailComposeDelegate = self;
   [controller setToRecipients:[NSArray arrayWithObject:@"dev@stamped.com"]];
-  [controller setSubject:[NSString stringWithFormat:@"Bug report from %@ (%@)", 
+  [controller setSubject:[NSString stringWithFormat:@"Report from %@ (%@)", 
                           [AccountManager sharedManager].currentUser.name,
                           [AccountManager sharedManager].currentUser.screenName]];
   [controller setMessageBody:self.textView.text isHTML:NO]; 

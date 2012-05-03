@@ -7,31 +7,44 @@
 //
 
 #import "UIFont+Stamped.h"
+#import "STConfiguration.h"
 
 @implementation UIFont(Stamped)
 
 + (UIFont*)stampedTitleFont {
-  return [UIFont stampedTitleFontWithSize:30];
+  return [STConfiguration value:@"UIFont.stampedTitleFont"];
+}
+
++ (UIFont*)stampedTitleLightFont {
+  return [STConfiguration value:@"UIFont.stampedTitleLightFont"];
+}
+
++ (UIFont*)stampedFont {
+  return [STConfiguration value:@"UIFont.stampedFont"];
+}
+
++ (UIFont*)stampedBoldFont {
+  return [STConfiguration value:@"UIFont.stampedBoldFont"];
 }
 
 + (UIFont*)stampedSubtitleFont {
-  return [UIFont stampedFontWithSize:12];
+  return [STConfiguration value:@"UIFont.stampedSubtitleFont"];
 }
 
 + (UIFont*)stampedTitleFontWithSize:(CGFloat)size {
-  return [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:size];
+  return [[UIFont stampedTitleFont] fontWithSize:size];
 }
 
-+ (UIFont*)stampedTitleFontLightWithSize:(CGFloat)size {
-  return [UIFont fontWithName:@"TitlingGothicFBComp-Light" size:size];
++ (UIFont*)stampedTitleLightFontWithSize:(CGFloat)size {
+  return [[UIFont stampedTitleLightFont] fontWithSize:size];
 }
 
 + (UIFont*)stampedBoldFontWithSize:(CGFloat)size {
-  return [UIFont fontWithName:@"Helvetica-Bold" size:size];
+  return [[UIFont stampedBoldFont] fontWithSize:size];
 }
 
 + (UIFont*)stampedFontWithSize:(CGFloat)size {
-  return [UIFont fontWithName:@"Helvetica" size:size];
+  return [[UIFont stampedFont] fontWithSize:size];
 }
 
 @end

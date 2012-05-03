@@ -7,39 +7,46 @@
 //
 
 #import "UIColor+Stamped.h"
+#import "STConfiguration.h"
 
 @implementation UIColor (Stamped)
 
 + (UIColor*)stampedBlackColor {
-  return [UIColor colorWithWhite:0.15 alpha:1.0];
+  return [STConfiguration value:@"UIColor.stampedBlackColor"];
 }
 
 + (UIColor*)stampedDarkGrayColor {
-  return [UIColor colorWithWhite:0.35 alpha:1.0];  
+  return [STConfiguration value:@"UIColor.stampedDarkGrayColor"];
 }
 
 + (UIColor*)stampedGrayColor {
-  return [UIColor colorWithWhite:0.6 alpha:1.0];
+  return [STConfiguration value:@"UIColor.stampedGrayColor"];
 }
 
 + (UIColor*)stampedLightGrayColor {
-  return [UIColor colorWithWhite:0.75 alpha:1.0];
+  return [STConfiguration value:@"UIColor.stampedLightGrayColor"];
 }
 
 + (UIColor*)stampedLinkColor {
-  return [UIColor colorWithRed:.2 green:.2 blue:.7 alpha:1];
+  return [STConfiguration value:@"UIColor.stampedLinkColor"];
 }
 
 + (NSArray*)stampedLightGradient {
-  return [NSArray arrayWithObjects:[UIColor colorWithWhite:.99 alpha:1], [UIColor colorWithWhite:.90 alpha:1], nil];
+  return [NSArray arrayWithObjects:[STConfiguration value:@"UIColor.stampedLightGradientStart"], 
+          [STConfiguration value:@"UIColor.stampedLightGradientEnd"],
+          nil];
 }
 
 + (NSArray*)stampedGradient {
-  return [NSArray arrayWithObjects:[UIColor colorWithWhite:.95 alpha:1], [UIColor colorWithWhite:.85 alpha:1], nil];
+  return [NSArray arrayWithObjects:[STConfiguration value:@"UIColor.stampedGradientStart"], 
+          [STConfiguration value:@"UIColor.stampedGradientEnd"],
+          nil];
 }
 
 + (NSArray*)stampedDarkGradient {
-  return [NSArray arrayWithObjects:[UIColor colorWithWhite:.85 alpha:1], [UIColor colorWithWhite:.7 alpha:1], nil];
+  return [NSArray arrayWithObjects:[STConfiguration value:@"UIColor.stampedDarkGradientStart"], 
+          [STConfiguration value:@"UIColor.stampedDarkGradientEnd"],
+          nil];
 }
 
 @end

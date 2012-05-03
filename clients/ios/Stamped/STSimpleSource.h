@@ -17,6 +17,10 @@
 @property (nonatomic, readwrite, retain) NSString* sourceID;
 @property (nonatomic, readwrite, retain) NSString* link;
 @property (nonatomic, readwrite, retain) NSString* icon;
+@property (nonatomic, readwrite, copy) NSString* endpoint;
+@property (nonatomic, readwrite, copy) NSString* endpointData;
+@property (nonatomic, readwrite, copy) NSString* completionEndpoint;
+@property (nonatomic, readwrite, copy) NSDictionary* completionData;
 
 + (RKObjectMapping*)mapping;
 + (STSimpleSource*)sourceWithSource:(NSString*)source andSourceID:(NSString*)sourceID;

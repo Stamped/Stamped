@@ -191,6 +191,7 @@ def _cleanImageURL(url):
     return url
 
 def _initialize_blurb_html(content):
+    """
     blurb = content.blurb
     data  = []
     
@@ -219,8 +220,11 @@ def _initialize_blurb_html(content):
     
     html.append(blurb[last:])
     content.blurb_formatted = "".join(html)
+    """
+    pass
 
 def _initialize_comment_html(comment):
+    """
     blurb = comment.blurb
     data  = []
     
@@ -245,6 +249,8 @@ def _initialize_comment_html(comment):
     
     html.append(blurb[last:])
     comment.blurb_formatted = "".join(html)
+    """
+    pass
 
 
 # ######### #
@@ -630,6 +636,35 @@ class HTTPClientLogsEntry(Schema):
         self.activity_id        = SchemaElement(basestring)
 
 
+# ################# #
+# Endpoint Response #
+# ################# #
+
+class HTTPEndpointResponse(Schema):
+    def setSchema(self):
+        self.action         = HTTPEndpointAction()
+
+    def _setAction(self, actionType, name, sources, **kwargs):
+        if len(sources) > 0:
+            action          = HTTPAction()
+            action.type     = actionType
+            action.name     = name
+            action.sources  = sources
+
+            item            = HTTPEndpointAction()
+            item.action     = action
+            item.name       = name
+
+            self.action = item
+
+# HTTPEndpointResponse Components
+
+class HTTPEndpointAction(Schema):
+    def setSchema(self):
+        self.action                 = HTTPAction()
+        self.name                   = SchemaElement(basestring, required=True)
+
+
 # ######## #
 # Entities #
 # ######## #
@@ -899,6 +934,43 @@ class HTTPEntity(Schema):
 
             self._addAction(actionType, 'Buy now', sources, icon=actionIcon)
 
+        # TV
+        elif entity.kind == 'media_collection' and entity.isType('tv'):
+
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
+            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
+            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
+            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = '/linked/netflix/addinstant'
+                source.endpoint_data    = entity.sources.netflix_id
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
+
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
 
@@ -932,7 +1004,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -1096,7 +1168,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -1231,7 +1303,7 @@ class HTTPEntity(Schema):
                             source.name                 = 'Listen on iTunes'
                             source.source               = 'itunes'
                             source.source_id            = song.sources.itunes_id
-                            source.source_data          = song.sources.itunes_preview
+                            source.source_data          = { 'preview_url': song.sources.itunes_preview }
                             source.icon                 = _getIconURL('src_itunes', client=client)
                             sources.append(source)
 
@@ -1405,13 +1477,13 @@ class HTTPActionSource(Schema):
         self.name                   = SchemaElement(basestring, required=True)
         self.source                 = SchemaElement(basestring, required=True)
         self.source_id              = SchemaElement(basestring)
-        self.source_data            = SchemaElement(basestring)
+        self.source_data            = SchemaElement(dict)
         self.endpoint               = SchemaElement(basestring)
-        self.endpoint_data          = SchemaElement(basestring)
+        self.endpoint_data          = SchemaElement(dict)
         self.link                   = SchemaElement(basestring)
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
-        self.completion_data        = SchemaElement(basestring) # dictionary?
+        self.completion_data        = SchemaElement(dict) # dictionary?
 
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
@@ -1813,7 +1885,7 @@ class HTTPStamp(Schema):
                     
                     item.images.append(img)
                 
-                _initialize_blurb_html(item)
+                #_initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
@@ -1833,7 +1905,7 @@ class HTTPStamp(Schema):
             if schema.__class__.__name__ == 'Stamp':
                 for comment in schema.previews.comments:
                     comment = HTTPComment().importSchema(comment)
-                    _initialize_comment_html(comment)
+                    #_initialize_comment_html(comment)
                     
                     self.previews.comments.append(comment)
                 

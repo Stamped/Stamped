@@ -13,10 +13,13 @@
 
 
 + (UIFont*)stampedTitleFont;
++ (UIFont*)stampedTitleLightFont;
++ (UIFont*)stampedFont;
++ (UIFont*)stampedBoldFont;
 + (UIFont*)stampedSubtitleFont;
 
 + (UIFont*)stampedTitleFontWithSize:(CGFloat)size;
-+ (UIFont*)stampedTitleFontLightWithSize:(CGFloat)size;
++ (UIFont*)stampedTitleLightFontWithSize:(CGFloat)size;
 + (UIFont*)stampedBoldFontWithSize:(CGFloat)size;
 + (UIFont*)stampedFontWithSize:(CGFloat)size;
 

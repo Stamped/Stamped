@@ -9,6 +9,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from httpapi.v0.helpers import *
+from errors             import *
+from HTTPSchemas        import HTTPEndpointResponse
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
@@ -205,15 +207,35 @@ def removeTwitter(request, authUserId, **kwargs):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    logs.info('\n### ATTEMPTING TO ADD TO NETFLIX with netflix_id: %s' % http_schema.netflix_id)
+    try:
+        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    except StampedHTTPError as e:
+        if e.code == 401:
+            # return login endpoint action
+            pass
+        else:
+            raise e
+
+    logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
+
+    client = stampedAuth.getClientDetails(authClientId)
+    response = HTTPEndpointResponse()
     #TODO throw status codes on error
     #TODO return an HTTPAction
-    return transformOutput(True)
+    return transformOutput(response.exportSparse())
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    try:
+        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    except StampedHTTPError as e:
+        if e.code == 401:
+            #redirect to sign in
+            raise e
+        else:
+            raise e
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(True)

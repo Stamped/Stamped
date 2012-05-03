@@ -16,6 +16,7 @@
 #import "STStampedActions.h"
 #import "STSimpleAction.h"
 #import "STStampedAPI.h"
+#import "STRestKitLoader.h"
 
 @interface STActionManager () <STViewDelegate>
 
@@ -111,7 +112,9 @@ static STActionManager* _singleton;
 - (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
   BOOL handled = FALSE;
   //if (flag) {
-    NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
+  NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
+  NSLog(@"%@", source.completionData);
+
   //}
   id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
   if (sourceObject != nil && 
@@ -121,12 +124,14 @@ static STActionManager* _singleton;
     handled = TRUE;
     if (flag) {
       [sourceObject didChooseSource:source forAction:action withContext:context];
+      [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
     }
   }
   
   if (!handled && source.link) {
     handled = TRUE;
     if (flag) {
+      [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
       [[UIApplication sharedApplication] openURL:[NSURL URLWithString:source.link]];
     }
   }

@@ -67,6 +67,9 @@ static STStampCellFactory* _sharedInstance;
     if ([style isEqualToString:STCellStyleConsumption]) {
       return [STConsumptionCell prepareForStamp:data withCallback:block];
     }
+    else {
+      return [STStampCell prepareForStamp:data withCallback:block];
+    }
   }
   return [STCancellation dispatchNoopCancellationWithCallback:block];
 }

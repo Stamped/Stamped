@@ -32,4 +32,14 @@ static STErrorCellFactory* _sharedInstance;
   return 100;
 }
 
+- (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style {
+  return 100;
+}
+
+- (STCancellation*)prepareForData:(id)data 
+                         andStyle:(NSString*)style 
+                     withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
+  return [STCancellation dispatchNoopCancellationWithCallback:block];
+}
+
 @end

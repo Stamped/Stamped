@@ -30,6 +30,8 @@
 #import "STStampNew.h"
 #import "STCancellation.h"
 #import "STTypes.h"
+#import "STActionContext.h"
+#import "STLazyList.h"
 
 typedef enum {
   STStampedAPIScopeYou = 0,
@@ -52,6 +54,8 @@ typedef enum {
 + (NSString*)errorDomain;
 
 - (id<STUser>)currentUser;
+
+- (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
@@ -133,6 +137,8 @@ typedef enum {
 - (void)removeFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
 - (void)friendIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* friendIDs, NSError* error))block;
+
+- (void)handleCompletionWithSource:(id<STSource>)source action:(NSString*)action andContext:(STActionContext*)context;
 
 + (STStampedAPI*)sharedInstance;
 
