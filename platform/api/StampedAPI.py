@@ -776,6 +776,7 @@ class StampedAPI(AStampedAPI):
         if account.netflix_user_id != None and account.netflix_token != None and account.netflix_secret != None:
             return
 
+        netflix = globalNetflix()
         result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
 
 
