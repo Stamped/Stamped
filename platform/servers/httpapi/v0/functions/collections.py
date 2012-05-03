@@ -52,9 +52,15 @@ def credit(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPFriendsSlice, schema=FriendsSlice)
 @require_http_methods(["GET"])
 def friends(request, authUserId, schema, **kwargs):
-    before = time.time()
+    import datetime
+    #before = time.time()
+    before = datetime.datetime.now()
     stamps = stampedAPI.getFriendsStamps(authUserId, schema)
-    logs.info('api.getFriendsStamps() duration: %d seconds' % (time.time()-before))
+    after = datetime.datetime.now()
+    dur = after - before
+    seconds = dur.microseconds // 1000000
+    micros = dur.microseconds   % 1000000
+    logs.info('api.getFriendsStamps() duration: %d.%d' % (seconds, micros))
 
     return transform_stamps(stamps)
 
