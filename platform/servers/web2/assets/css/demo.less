@@ -114,11 +114,48 @@
             }
         }
         
-        /* TODO: the following should work, but there are some float clearing issues with floated images */
-        /*
         .previews {
-            display: none;
-        }*/
+            .profile-image-small {
+                display: inline-block;
+                float: none;
+                
+                position: relative;
+                margin: 0 4px 4px 0;
+                
+                .preview-image(@width, @height, @icon) {
+                    background: @icon no-repeat;
+                    
+                    position: absolute;
+                    bottom: -(@height / 2);
+                    right:  -(@width  / 2);
+                    
+                    display: block;
+                    width:  @width;
+                    height: @height;
+                    z-index: 100;
+                }
+                
+                .like {
+                    .preview-image(20px, 22px, url(/assets/img/like_icon.png));
+                }
+                
+                .todo {
+                    .preview-image(36px, 36px, url(/assets/img/todo_icon.png));
+                }
+                
+                .credit {
+                    .preview-image(20px, 22px, url(/assets/img/like_icon.png));
+                }
+                
+                .comment {
+                    .preview-image(36px, 36px, url(/assets/img/comment_icon.png));
+                }
+            }
+            
+            div.comment {
+                display: none;
+            }
+        }
     }
 }
 
@@ -177,6 +214,7 @@
     }
 }
 
+/* TODO: fix height issues */
 ul.user-category-distribution {
     list-style: none;
     text-decoration: none;

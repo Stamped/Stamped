@@ -3,6 +3,7 @@ TODO:
     * replace previews in stamp-gallery-items with real elements
     
     * implement user stamp category distribution
+        * TODO: figure out bargraph height issue
     
     * implement google maps stamp-gallery view
     
@@ -16,4 +17,10 @@ TODO:
         * how to debug.. must be tools out there to help with this?
     
     * when stamp images don't load, they still display a border
+
+POLISH:
+    * link profile image to lightboxed full-resolution version
+
+OPTIMIZE:
+    * profile images we're downloading are 500x500 even for small previews -- wasteful!
 
