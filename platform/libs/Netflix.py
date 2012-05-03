@@ -643,10 +643,7 @@ class Netflix(object):
     def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
         pass
 
-    def addToQueue(self, user_id, user_token, user_secret, netflix_id):
-        """
-        Returns a boolean (synchronously) if the operation succeeded
-        """
+    def getETag(self, user_id, user_token, user_secret):
         token = oauth.OAuthToken(user_token, user_secret)
         getresponse = self.__get(
             'queues/instant',
@@ -655,8 +652,14 @@ class Netflix(object):
             user_id                 = user_id,
             token                   = token,
         )
-        etag = getresponse["queue"]["etag"]
+        return getresponse["queue"]["etag"]
 
+    def addToQueue(self, user_id, user_token, user_secret, netflix_id):
+        """
+        Returns a boolean (synchronously) if the operation succeeded
+        """
+        etag = getETag(user_id, user_token, user_secret)
+        token = oauth.OAuthToken(user_token, user_secret)
         return self.__post(
             'queues/instant',
             title_ref               = netflix_id,
@@ -677,6 +680,60 @@ class Netflix(object):
         Returns a list of {netflix_id:<ID>}s
         """
         pass
+
+    def getLoginUrl(self):
+        #request the oauth token and secret
+        token_info = self.__get('oauth/request_token')
+        token = oauth.OAuthToken(
+            token_info['oauth_token'].encode('ascii'),
+            token_info['oauth_token_secret'].encode('ascii'),
+        )
+        token.set_callback('https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json?secret=%s'
+                % token_info['oauth_token_secret'].encode('ascii'))
+
+        oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
+            http_url = 'https://api-user.netflix.com/oauth/login',
+            parameters = { 'application_name': 'Stamped' },
+            token = token,
+            http_method = 'GET')
+
+        url = oauthRequest.to_url()
+        return (token_info['oauth_token_secret'], url)
+
+    def requestUserAuth(self, oauth_token, secret):
+        token = oauth.OAuthToken(
+            oauth_token,
+            secret,
+        )
+
+        result = self.__get(
+           'oauth/access_token',
+            token                   = token,
+            parameters              = { 'application_name': 'Stamped' },
+        )
+        return result
+
+#    http://api.netflix.com/oauth/access_token?
+#    oauth_consumer_key=YourConsumerKey&\
+#    oauth_signature_method=HMAC-SHA1&\
+#    oauth_timestamp=timestamp&\
+#    oauth_token=YourAuthorizedToken&\
+#    oauth_nonce=nonce&\
+#    oauth_version=1.0&\
+#    oauth_signature=YourSignature
+        #oauthRequest.sign_request(  self.__signature_method_hmac_sha1, self.__consumer, token)
+
+#        results = self.__get(
+#            'https://api-user.netflix.com/oauth/login',
+#            application_name        = 'Stamped',
+#            token                   = token,
+#        )
+
+#        https://api-user.netflix.com/oauth/login?
+#        application_name=Your+Application+Name&
+#        oauth_callback=http%3A%2F%2Fyourserver.com%2Fyourpage&\
+#        oauth_consumer_key=YourConsumerKey&\
+#        oauth_token=YourToken
 
 __globalNetflix = None
 
@@ -710,7 +767,11 @@ def demo(method, **params):
 
     #result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     #result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, INCEPTION_ID)
-    result = netflix.getInstantQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+
+    #url = netflix.getLoginUrl()
+    response = netflix.requestUserAuth('wym773u9f5sn3j5hrp4pzctd', 'AJ8ZuZZYCRn5')
+    #result = netflix.getInstantQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+
     #result = netflix.searchTitles("inception")
 
 #    result = netflix.getTitleDetails(BIGLEB_ID)

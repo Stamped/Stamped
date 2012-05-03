@@ -624,6 +624,10 @@ class HTTPNetflixId(Schema):
     def setSchema(self):
         self.netflix_id         = SchemaElement(basestring)
 
+class HTTPNetflixAuthResponse(Schema):
+    def setSchema(self):
+        self.oauth_token        = SchemaElement(basestring)
+        self.secret             = SchemaElement(basestring)
         
 
 # ####### #
@@ -660,12 +664,12 @@ class HTTPEndpointResponse(Schema):
     def setSchema(self):
         self.action         = HTTPEndpointAction()
 
-    def setAction(self, actionType, name, sources, **kwargs):
+    def setAction(self, actionType, name, source, **kwargs):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
             action.name     = name
-            action.sources  = sources
+            action.sources  = source
 
             item            = HTTPEndpointAction()
             item.action     = action
@@ -974,7 +978,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = '/linked/netflix/addinstant'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
                 source.endpoint_data    = entity.sources.netflix_id
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
