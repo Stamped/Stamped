@@ -971,7 +971,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Watch on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -1135,7 +1135,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                source.source_data  = entity.sources.itunes_preview
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if entity.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.itunes_url)
@@ -1270,7 +1270,7 @@ class HTTPEntity(Schema):
                             source.name                 = 'Listen on iTunes'
                             source.source               = 'itunes'
                             source.source_id            = song.sources.itunes_id
-                            source.source_data          = song.sources.itunes_preview
+                            source.source_data          = { 'preview_url': song.sources.itunes_preview }
                             source.icon                 = _getIconURL('src_itunes', client=client)
                             sources.append(source)
 
