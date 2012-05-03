@@ -103,6 +103,8 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+  NSInteger prepareCount = 0 + self.preloadBufferSize;
+  [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
   return 1;
 }
 
@@ -123,6 +125,7 @@
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  NSLog(@"Selected Cell: %d inRow: %d", indexPath.row, indexPath.section);
   if (self.selectedCallback) {
     self.selectedCallback(self, tableView, indexPath);
   }

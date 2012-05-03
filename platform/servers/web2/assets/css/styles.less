@@ -138,7 +138,7 @@ TODO:
     .linear-gradient(left, @outer, @inner, @outer);
     
     .innerbg {
-        /*background: url(/assets/img/noise.jpg) left top repeat;*/
+        background: transparent url(/assets/img/noisemask.png) left top repeat;
         
         .profile-header-pre {
             .user-gradient(135deg);
@@ -241,7 +241,11 @@ TODO:
 }
 
 .profile-section {
+    display: none;
     
+    &.profile-section-default {
+        display: block;
+    }
 }
 
 .profile-section0 {
@@ -257,6 +261,11 @@ TODO:
         font-family: "StampedButtonFont", helvetica, sans-serif;
         color: #000;
     }
+}
+
+.profile-section3 {
+    .floatright;
+    width: 45%;
 }
 
 .bold {

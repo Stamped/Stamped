@@ -15,6 +15,10 @@
 @synthesize sourceID = sourceID_;
 @synthesize link = link_;
 @synthesize icon = icon_;
+@synthesize endpoint = endpoint_;
+@synthesize endpointData = endpointData_;
+@synthesize completionEndpoint = completionEndpoint_;
+@synthesize completionData = completionData_;
 
 
 - (void)dealloc {
@@ -23,6 +27,10 @@
   self.sourceID = nil;
   self.link = nil;
   self.icon = nil;
+  [endpoint_ release];
+  [endpointData_ release];
+  [completionEndpoint_ release];
+  [completionData_ release];
   [super dealloc];
 }
 
@@ -34,10 +42,14 @@
    @"source",
    @"link",
    @"icon",
+   @"endpoint",
    nil];
   
   [mapping mapKeyPathsToAttributes:
    @"source_id",@"sourceID",
+   @"endpoint_data", @"endpointData",
+   @"completion_endpoint", @"completionEndpoint",
+   @"completion_data", @"completionData",
    nil];
   
   return mapping;

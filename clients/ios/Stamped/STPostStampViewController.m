@@ -14,7 +14,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STRippleViewContainer.h"
 #import "STRippleBar.h"
-#import "STInboxViewController.h"
+#import "STLegacyInboxViewController.h"
 #import "STStampedByView.h"
 #import "STSimpleStampedBy.h"
 #import "STStampedActions.h"
@@ -172,7 +172,7 @@
                                                                    andDelegate:self.scrollView] autorelease];
   [Util reframeView:stampedByView withDeltas:CGRectMake(0, 5, 0, 0)];
   [self.scrollView appendChildView:stampedByView];
-  [[STInboxViewController sharedInstance] newStampCreated:self.stamp];
+  [[STLegacyInboxViewController sharedInstance] newStampCreated:self.stamp];
 }
 
 - (void)handleUserDetail:(id<STUserDetail>)userDetail withError:(NSError*)error {

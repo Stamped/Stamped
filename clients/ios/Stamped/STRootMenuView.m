@@ -11,7 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
-#import "STInboxViewController.h"
+#import "STLegacyInboxViewController.h"
 #import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
@@ -19,6 +19,8 @@
 #import "ECSlidingViewController.h"
 #import "STRootViewController.h"
 #import "STIWantToViewController.h"
+#import "STInboxViewController.h"
+#import "STConfiguration.h"
 
 @interface STRootMenuView ()
 
@@ -90,24 +92,32 @@
 
 @interface STRootMenuViewCell : STARootMenuViewCell
 
-- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller;
+- (id)initWithTitle:(NSString*)title andControllerKey:(NSString*)controllerKey;
 
 
-@property (nonatomic, readonly, retain) UIViewController* controller;
+@property (nonatomic, readonly, retain) NSString* controllerKey;
 
 @end
 
 @implementation STRootMenuViewCell
 
-@synthesize controller = _controller;
+@synthesize controllerKey = controllerKey_;
 
-- (id)initWithTitle:(NSString*)title andController:(UIViewController*)controller {
+- (id)initWithTitle:(NSString*)title andControllerKey:(NSString*)controllerKey {
   self = [super initWithTitle:title];
   if (self) {
-    _controller = [controller retain];
+    controllerKey_ = [controllerKey retain];
   }
   return self;
 }
+
+- (void)dealloc
+{
+  [controllerKey_ release];
+  [super dealloc];
+}
+
+static id _oldControllers = nil;
 
 - (void)clicked:(id)message {
   /*
@@ -125,17 +135,22 @@
     [[STRootMenuView sharedInstance] toggle];
   }
    */
-  NSLog(@"testing");
   ECSlidingViewController* slider = [ECSlidingViewController sharedInstance];
+  [_oldControllers release];
+  _oldControllers = [[[Util sharedNavigationController] viewControllers] retain];
   [slider anchorTopViewOffScreenTo:ECRight animations:nil onComplete:^{
-    [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObject:self.controller] animated:NO];
+    UIViewController* controller = [[[STConfiguration value:self.controllerKey] alloc] init];
+    [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObject:controller] animated:NO];
     [slider resetTopView];
+    [Util executeOnMainThread:^{
+      [controller autorelease];
+    }];
   }];
 }
 
 - (BOOL)selected {
   UINavigationController* sharedController = [Util sharedNavigationController];
-  return sharedController.topViewController == self.controller;
+  return sharedController.topViewController.class == [STConfiguration value:self.controllerKey];
 }
 
 @end
@@ -179,20 +194,18 @@ static STRootMenuView* _sharedInstance;
     stampedLabel.frame = CGRectMake(20, 0, 320, 50);
     [self appendChildView:stampedLabel];
     NSDictionary* navigators = [NSDictionary dictionaryWithObjectsAndKeys:
-                                [STInboxViewController sharedInstance], @"Stamps",
-                                [[[STIWantToViewController alloc] init] autorelease], @"I Want to...",
-                                [[[STUniversalNewsController alloc] init] autorelease], @"News",
-                                [STTodoViewController sharedInstance], @"To-Do",
-                                [[[STDebugViewController alloc] init] autorelease], @"Debug",
-                                //[[[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil] autorelease], @"To-Do",
-                                //[[[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil] autorelease], @"People",
-                                [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:nil] autorelease], @"Settings",
+                                @"Root.inbox", @"Stamps",
+                                @"Root.iWantTo", @"I Want to...",
+                                @"Root.news", @"News",
+                                @"Root.todo", @"To-Do",
+                                @"Root.debug", @"Debug",
+                                @"Root.settings", @"Settings",
                                 nil];
     NSArray* navigatorOrder = [NSArray arrayWithObjects:@"Stamps", @"I Want to...", @"News", @"To-Do", @"Debug", @"Settings", nil];
     for (NSString* key in navigatorOrder) {
-      UIViewController* controller = [navigators objectForKey:key];
+      NSString* controllerKey = [navigators objectForKey:key];
       [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];
-      [self appendChildView:[[[STRootMenuViewCell alloc] initWithTitle:key andController:controller] autorelease]];
+      [self appendChildView:[[[STRootMenuViewCell alloc] initWithTitle:key andControllerKey:controllerKey] autorelease]];
     }
     [self appendChildView:[[[STRootMenuViewBar alloc] init] autorelease]];
     CGRect frame = self.frame;

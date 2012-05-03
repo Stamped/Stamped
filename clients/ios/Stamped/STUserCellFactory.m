@@ -42,4 +42,14 @@ static id _sharedInstance;
   }
 }
 
+- (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style {
+  return 52;
+}
+
+- (STCancellation*)prepareForData:(id)data 
+                         andStyle:(NSString*)style 
+                     withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
+  return [STCancellation dispatchNoopCancellationWithCallback:block];
+}
+
 @end

@@ -15,6 +15,9 @@
 @property (nonatomic, readonly, retain) NSString* sourceID;
 @property (nonatomic, readonly, retain) NSString* link;
 @property (nonatomic, readonly, retain) NSString* icon;
-//Endpoint
+@property (nonatomic, readonly, copy) NSString* endpoint;
+@property (nonatomic, readonly, copy) NSString* endpointData;
+@property (nonatomic, readonly, copy) NSString* completionEndpoint;
+@property (nonatomic, readonly, copy) NSDictionary* completionData;
 
 @end

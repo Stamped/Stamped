@@ -11,7 +11,7 @@
 #import "BWQuincyManager.h"
 #import <RestKit/RestKit.h>
 #import "STRootMenuView.h"
-#import "STInboxViewController.h"
+#import "STLegacyInboxViewController.h"
 #import "OAuthToken.h"
 #import "DetailedEntity.h"
 #import "User.h"
@@ -28,6 +28,16 @@
 #import "ECSlidingViewController.h"
 #import "STLeftMenuViewController.h"
 #import "STRightMenuViewController.h"
+#import "STConfiguration.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "STLegacyInboxViewController.h"
+#import "STInboxViewController.h"
+#import "STIWantToViewController.h"
+#import "STUniversalNewsController.h"
+#import "STTodoViewController.h"
+#import "STDebugViewController.h"
+#import "SettingsViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -40,6 +50,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @interface STAppDelegate ()
 
 - (void)performRestKitMappings;
+- (void)addConfigurations;
 
 @end
 
@@ -78,6 +89,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #endif
   RKLogConfigureByName("RestKit*", RKLogLevelError);
   RKLogSetAppLoggingLevel(RKLogLevelError);
+  [self addConfigurations];
   [self customizeAppearance];
   [self performRestKitMappings];
   self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
@@ -93,7 +105,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   slider.underLeftViewController = [[[STLeftMenuViewController alloc] init] autorelease];
   slider.underRightViewController = [[[STRightMenuViewController alloc] init] autorelease];
   [[AccountManager sharedManager] authenticate];
-  [_navigationController pushViewController:[STInboxViewController sharedInstance] animated:NO];
+  [_navigationController pushViewController:[STLegacyInboxViewController sharedInstance] animated:NO];
   STLog(@"Finished Loading application");
   return YES;
 }
@@ -168,7 +180,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;
-  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
+  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 3;
   
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
@@ -342,5 +354,49 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                         barMetrics:UIBarMetricsDefault];
 }
 
+- (void)addConfigurations {
+  
+  //Root Menu
+  NSDictionary* inboxChoices = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [STInboxViewController class], @"New Inbox",
+                                [STLegacyInboxViewController class], @"Old Inbox",
+                                nil];
+  [STConfiguration addChoices:inboxChoices originalKey:@"Old Inbox" forKey:@"Root.inbox"];
+  [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
+  [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
+  [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
+  [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
+  [STConfiguration addValue:[SettingsViewController class] forKey:@"Root.settings"];
+                          
+  //UIColor
+  
+  [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:35] forKey:@"UIFont.stampedTitleFont" inSection:@"UIFont"];
+  [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:29] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
+  
+  CGFloat fontSize = 12;
+  [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
+  [STConfiguration addFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
+  [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
+  
+  //UIColor
+  
+  [STConfiguration addColor:[UIColor colorWithRed:.15 green:.15 blue:0.15 alpha:1.0] forKey:@"UIColor.stampedBlackColor" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.35 green:.35 blue:0.35 alpha:1.0] forKey:@"UIColor.stampedDarkGrayColor" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.6 green:.6 blue:0.6 alpha:1.0] forKey:@"UIColor.stampedGrayColor" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.75 green:.75 blue:0.75 alpha:1.0] forKey:@"UIColor.stampedLightGrayColor" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.2 green:.2 blue:.7 alpha:1] forKey:@"UIColor.stampedLinkColor" inSection:@"UIColor"];
+  
+  [STConfiguration addColor:[UIColor colorWithRed:.99 green:.99 blue:.99 alpha:1] forKey:@"UIColor.stampedLightGradientStart" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.90 green:.90 blue:.90 alpha:1] forKey:@"UIColor.stampedLightGradientEnd" inSection:@"UIColor"];
+  
+  [STConfiguration addColor:[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:1] forKey:@"UIColor.stampedGradientStart" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1] forKey:@"UIColor.stampedGradientEnd" inSection:@"UIColor"];
+  
+  [STConfiguration addColor:[UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1] forKey:@"UIColor.stampedDarkGradientStart" inSection:@"UIColor"];
+  [STConfiguration addColor:[UIColor colorWithRed:.7 green:.7 blue:.7 alpha:1] forKey:@"UIColor.stampedDarkGradientEnd" inSection:@"UIColor"];
+  
+  // Comments
+  [STConfiguration addFont:[UIFont stampedBoldFontWithSize:12] forKey:@"Comments.font"];
+}
 
 @end

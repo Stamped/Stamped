@@ -32,7 +32,6 @@
                 
                 <div class="profile-image-large floatleft">
                     <img src="{{user.image_url}}" />
-                    
                 </div>
                 
                 <div class="floatleft profile-section0">
@@ -47,23 +46,48 @@
                     <!-- TODO: FOLLOW button -->
                 </div>
                 
-                <div class="profile-section">
-                    <div class="floatleft profile-section2">
-                        <p class="number">{{user.num_friends}}</p>
-                        <p>following</p>
+                <div class="profile-sections">
+                    <ol class="profile-nav">
+                        <li><a href="#" class="up-arrow"></a></li>
+                        <li><a href="#" class="down-arrow"></a></li>
+                    </ol>
+                    
+                    <!-- # followers and # friends -->
+                    <div class="profile-section profile-section-default">
+                        <div class="floatleft profile-section2">
+                            <p class="number">{{user.num_friends}}</p>
+                            <p>following</p>
+                            
+                            {% with users=friends %}
+                                {% custom_template "user-gallery" %}
+                            {% endwith %}
+                        </div>
                         
-                        {% with users=friends %}
-                            {% custom_template "user-gallery" %}
-                        {% endwith %}
+                        <div class="floatleft profile-section1">
+                            <p class="number">{{user.num_followers}}</p>
+                            <p>followers</p>
+                            
+                            {% with users=followers %}
+                                {% custom_template "user-gallery" %}
+                            {% endwith %}
+                        </div>
                     </div>
                     
-                    <div class="floatleft profile-section1">
-                        <p class="number">{{user.num_followers}}</p>
-                        <p>followers</p>
+                    <!-- stamp distribution -->
+                    <div class="profile-section profile-section3">
+                        <!--<p class="stamp-category-{{vertical.category}}">
+                            <span class="icon"></span>-->
                         
-                        {% with users=followers %}
-                            {% custom_template "user-gallery" %}
-                        {% endwith %}
+                        <ul class="user-category-distribution clearfix">
+                        {% for vertical in user.distribution %}
+                            <li>
+                                <img src="{{vertical.icon}}" />
+                                <div class="bargraph">
+                                    <div class="value"></div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>

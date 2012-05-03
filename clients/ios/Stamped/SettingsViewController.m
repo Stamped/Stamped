@@ -31,6 +31,10 @@
   return self;
 }
 
+- (id)init {
+  return [self initWithNibName:@"SettingsViewController" bundle:nil];
+}
+
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
