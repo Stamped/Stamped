@@ -12,6 +12,7 @@
 
 @synthesize name = name_;
 @synthesize source = source_;
+@synthesize sourceData = sourceData_;
 @synthesize sourceID = sourceID_;
 @synthesize link = link_;
 @synthesize icon = icon_;
@@ -27,6 +28,7 @@
   self.sourceID = nil;
   self.link = nil;
   self.icon = nil;
+  [sourceData_ release];
   [endpoint_ release];
   [endpointData_ release];
   [completionEndpoint_ release];
@@ -47,6 +49,7 @@
   
   [mapping mapKeyPathsToAttributes:
    @"source_id",@"sourceID",
+   @"source_data", @"sourceData",
    @"endpoint_data", @"endpointData",
    @"completion_endpoint", @"completionEndpoint",
    @"completion_data", @"completionData",

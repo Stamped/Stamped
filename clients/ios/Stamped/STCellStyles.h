@@ -10,6 +10,7 @@
 
 extern NSString * const STCellStyleConsumption;
 extern NSString * const STCellStyleInbox;
+extern NSString * const STCellStyleStampedBy;
 
 @interface STCellStyles : NSObject
 

@@ -10,13 +10,14 @@
 
 @protocol STSource <NSObject>
 
-@property (nonatomic, readonly, retain) NSString* name;
-@property (nonatomic, readonly, retain) NSString* source;
-@property (nonatomic, readonly, retain) NSString* sourceID;
-@property (nonatomic, readonly, retain) NSString* link;
-@property (nonatomic, readonly, retain) NSString* icon;
+@property (nonatomic, readonly, copy) NSString* name;
+@property (nonatomic, readonly, copy) NSString* source;
+@property (nonatomic, readonly, copy) NSDictionary* sourceData;
+@property (nonatomic, readonly, copy) NSString* sourceID;
+@property (nonatomic, readonly, copy) NSString* link;
+@property (nonatomic, readonly, copy) NSString* icon;
 @property (nonatomic, readonly, copy) NSString* endpoint;
-@property (nonatomic, readonly, copy) NSString* endpointData;
+@property (nonatomic, readonly, copy) NSDictionary* endpointData;
 @property (nonatomic, readonly, copy) NSString* completionEndpoint;
 @property (nonatomic, readonly, copy) NSDictionary* completionData;
 

@@ -105,7 +105,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   slider.underLeftViewController = [[[STLeftMenuViewController alloc] init] autorelease];
   slider.underRightViewController = [[[STRightMenuViewController alloc] init] autorelease];
   [[AccountManager sharedManager] authenticate];
-  [_navigationController pushViewController:[STLegacyInboxViewController sharedInstance] animated:NO];
+  [_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
   STLog(@"Finished Loading application");
   return YES;
 }
@@ -361,7 +361,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                 [STInboxViewController class], @"New Inbox",
                                 [STLegacyInboxViewController class], @"Old Inbox",
                                 nil];
-  [STConfiguration addChoices:inboxChoices originalKey:@"Old Inbox" forKey:@"Root.inbox"];
+  [STConfiguration addChoices:inboxChoices originalKey:@"New Inbox" forKey:@"Root.inbox"];
   [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
   [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
   [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];

@@ -18,7 +18,7 @@
 #import "STStampsViewSource.h"
 #import "STStampedBySource.h"
 
-@interface STStampedByCell : STViewContainer
+@interface STStampedByViewCell : STViewContainer
 
 - (id)initWithStampedByGroup:(id<STStampedByGroup>)group 
                imagesEnabled:(BOOL)imagesEnabled 
@@ -34,7 +34,7 @@
 
 @end
 
-@implementation STStampedByCell
+@implementation STStampedByViewCell
 
 @synthesize hasImages = _hasImages;
 @synthesize group = group_;
@@ -166,7 +166,7 @@
     //TODO determine hasImages purpose or remove
     BOOL hasImages = NO;
     if (stampedBy.friends.count.integerValue) {
-      STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.friends 
+      STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.friends 
                                                                imagesEnabled:YES
                                                                        scope:STStampedAPIScopeFriends
                                                                       blacklist:blacklist 
@@ -176,7 +176,7 @@
       hasImages = hasImages | child.hasImages;
     }
     if (stampedBy.friendsOfFriends.count.integerValue) {
-      STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.friendsOfFriends
+      STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.friendsOfFriends
                                                           imagesEnabled:!hasImages
                                                                   scope:STStampedAPIScopeFriendsOfFriends
                                                                       blacklist:blacklist
@@ -187,7 +187,7 @@
 
     }
     if (stampedBy.everyone.count.integerValue) {
-      STStampedByCell* child = [[[STStampedByCell alloc] initWithStampedByGroup:stampedBy.everyone
+      STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.everyone
                                                           imagesEnabled:!hasImages
                                                                   scope:STStampedAPIScopeEveryone
                                                                       blacklist:blacklist
@@ -206,7 +206,7 @@
       [self appendChildView:header];
       BOOL first = YES;
       UIImage* image = [UIImage imageNamed:@"eDetailBox_line"];
-      for (STStampedByCell* cell in array) {
+      for (STStampedByViewCell* cell in array) {
         if (!first) {
           UIView* bar = [[[UIImageView alloc] initWithImage:image] autorelease];
           [Util reframeView:bar withDeltas:CGRectMake(1, 0, 0, 0)];

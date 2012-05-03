@@ -20,6 +20,7 @@
 #import "STStampedAPI.h"
 #import "STPostStampViewController.h"
 #import "STLegacyInboxViewController.h"
+#import "STConfiguration.h"
 
 @interface STCreateStampViewController () <UITextViewDelegate>
 
@@ -52,7 +53,8 @@
   [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error) {
     if (stamp) {
       STPostStampViewController* controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
-      [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObjects:[STLegacyInboxViewController sharedInstance], controller, nil]
+      UIViewController* inbox = [[[[STConfiguration value:@"Root.inbox"] alloc] init] autorelease];
+      [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObjects:inbox, controller, nil]
                                                    animated:YES];
     }
     else {

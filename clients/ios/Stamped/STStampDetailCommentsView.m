@@ -189,14 +189,30 @@ andProfileImageSize:(STProfileImageSize)size {
 
 - (id)initWithStamp:(id<STStamp>)stamp andIndex:(NSInteger)index;
 
+@property (nonatomic, readonly, copy) NSString* imageURL;
+
 @end
 
 @implementation STStampDetailBlurbView
+
+@synthesize imageURL = imageURL_;
 
 - (id)initWithStamp:(id<STStamp>)stamp andIndex:(NSInteger)index {
   id<STContentItem> item = [stamp.contents objectAtIndex:index];
   self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:ProfileImageSize46];
   if (self) {
+    if (item.images) {
+      id<STImage> image = [item.images objectAtIndex:0];
+      if (image.width && image.height && image.image) {
+        CGSize imageSize = CGSizeMake(image.width.integerValue * [Util legacyImageScale], image.height.integerValue * [Util legacyImageScale]);
+        UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.image]
+                                          andFrame:CGRectMake(0, 0, imageSize.width, imageSize.height)];
+        imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, MIN(200,imageSize.height))];
+        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, imageView.frame.size.height + 10)];
+        [self addSubview:imageView];
+        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageClicked:)]];
+      }
+    }
     CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
     if ( previewHeight > 0 && index == 0) {
       STPreviewsView* view = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:2] autorelease];
@@ -207,6 +223,18 @@ andProfileImageSize:(STProfileImageSize)size {
     //TODO likes, credited, border
   }
   return self;
+}
+
+- (void)imageClicked:(id)notImportant {
+  if (self.imageURL) {
+    
+  }
+}
+
+- (void)dealloc
+{
+  [imageURL_ release];
+  [super dealloc];
 }
 
 @end
@@ -279,7 +307,7 @@ andProfileImageSize:(STProfileImageSize)size {
 @synthesize addCommentView = _addCommentView;
 @synthesize commentViews = _commentViews;
 
-- (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index andDelegate:(id<STViewDelegate>)delegate
+- (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index style:(STStampDetailCommentsViewStyle)style andDelegate:(id<STViewDelegate>)delegate
 {
   CGFloat width = _totalWidth;
   CGFloat padding_x = 5;

@@ -57,6 +57,11 @@
   [super dealloc];
 }
 
+- (void)considerGrowingWithRow:(NSInteger)row {
+  NSInteger prepareCount = row + self.preloadBufferSize;
+  [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
+}
+
 - (void)cancelAndClearPreparations {
   for (STCancellation* cancellation in self.prepareCancellations) {
     [cancellation cancel];

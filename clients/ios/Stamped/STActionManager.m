@@ -25,6 +25,7 @@
 
 @property (nonatomic, readonly, retain) NSOperationQueue* operationQueue;
 @property (nonatomic, readonly, retain) NSMutableDictionary* sources;
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
 @end
 
@@ -33,6 +34,7 @@
 @synthesize operationQueue = _operationQueue;
 @synthesize sources = _sources;
 @synthesize actionsLocked = _actionsLocked;
+@synthesize stamp = stamp_;
 
 static STActionManager* _singleton;
 
@@ -60,7 +62,12 @@ static STActionManager* _singleton;
 {
   [_operationQueue release];
   [_sources release];
+  [stamp_ release];
   [super dealloc];
+}
+
+- (void)setStampContext:(id<STStamp>)stamp {
+  self.stamp = stamp;
 }
 
 - (BOOL)canHandleAction:(id<STAction>)action withContext:(STActionContext *)context{
@@ -77,6 +84,9 @@ static STActionManager* _singleton;
 }
 
 - (BOOL)didChooseAction:(id<STAction>)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
+  if (!context.stamp) {
+    context.stamp = self.stamp;
+  }
   NSMutableArray* validSources = [NSMutableArray array];
   if (action.sources) {
     for (id<STSource> source in action.sources) {
@@ -110,6 +120,9 @@ static STActionManager* _singleton;
 }
 
 - (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
+  if (!context.stamp) {
+    context.stamp = self.stamp;
+  }
   BOOL handled = FALSE;
   //if (flag) {
   NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
@@ -127,7 +140,12 @@ static STActionManager* _singleton;
       [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
     }
   }
-  
+  if (!handled && source.endpoint) {
+    handled = [[STStampedAPI sharedInstance] canHandleSource:source forAction:action withContext:context];
+    if (handled && flag) {
+      [[STStampedAPI sharedInstance] didChooseSource:source forAction:action withContext:context];
+    }
+  }
   if (!handled && source.link) {
     handled = TRUE;
     if (flag) {

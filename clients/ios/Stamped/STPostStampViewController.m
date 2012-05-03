@@ -172,7 +172,10 @@
                                                                    andDelegate:self.scrollView] autorelease];
   [Util reframeView:stampedByView withDeltas:CGRectMake(0, 5, 0, 0)];
   [self.scrollView appendChildView:stampedByView];
-  [[STLegacyInboxViewController sharedInstance] newStampCreated:self.stamp];
+  
+  //Update inbox
+  //[[STLegacyInboxViewController sharedInstance] newStampCreated:self.stamp];
+  [[[STStampedAPI sharedInstance] globalListByScope:STStampedAPIScopeFriends] reload];
 }
 
 - (void)handleUserDetail:(id<STUserDetail>)userDetail withError:(NSError*)error {

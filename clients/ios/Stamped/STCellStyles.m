@@ -10,6 +10,7 @@
 
 NSString * const STCellStyleConsumption = @"consumption";
 NSString * const STCellStyleInbox = @"inbox";
+NSString * const STCellStyleStampedBy = @"stampedBy";
 
 @implementation STCellStyles
 

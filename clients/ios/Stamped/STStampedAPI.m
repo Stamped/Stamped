@@ -28,6 +28,8 @@
 #import "STFriendsStampsList.h"
 #import "STFriendsOfFriendsStampsList.h"
 #import "STEveryoneStampsList.h"
+#import "STSimpleEndpointResponse.h"
+#import "STActionManager.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -535,6 +537,9 @@ static STStampedAPI* _sharedInstance;
     if (source.completionData) {
       [params addEntriesFromDictionary:source.completionData];
     }
+    if (context.stamp && ![params objectForKey:@"stamp_id"]) {
+      [params setObject:context.stamp.stampID forKey:@"stamp_id"];
+    }
     [[STRestKitLoader sharedInstance] loadOneWithPath:@"/actions/complete.json"
                                                  post:YES 
                                                params:params mapping:[STSimpleTodo mapping]
@@ -565,6 +570,48 @@ static STStampedAPI* _sharedInstance;
   }
   NSAssert1(NO, @"Bad scope value: %", scope);
   return nil;
+}
+
+- (void)handleEndpointCallback:(id)result withError:(NSError*)error andCancellation:(STCancellation*)cancellation {
+  if (result) {
+    id<STEndpointResponse> response = result;
+    if (response.action) {
+      [[STActionManager sharedActionManager] didChooseAction:response.action withContext:[STActionContext context]];
+    }
+  }
+}
+
+- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context execute:(BOOL)flag {
+  BOOL handled = NO;
+  if (source.endpoint) {
+    handled = YES;
+    if (flag) {
+      NSMutableDictionary* params = [NSMutableDictionary dictionary];
+      if (source.endpointData) {
+        [params addEntriesFromDictionary:source.endpointData];
+      }
+      [[STRestKitLoader sharedInstance] loadOneWithURL:source.endpoint
+                                                  post:YES
+                                                params:params
+                                               mapping:[STSimpleEndpointResponse mapping]
+                                           andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                             if (error) {
+                                               [STDebug log:[NSString stringWithFormat:@"Callback error for action %@ and endpoint %@ with data %@",
+                                                             action, source.source, params]];
+                                             }
+                                             [self handleEndpointCallback:result withError:error andCancellation:cancellation];
+                                           }];
+    }
+  }
+  return handled;
+}
+
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
+  return [self didChooseSource:source forAction:action withContext:context execute:NO];
+}
+
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
+  [self didChooseSource:source forAction:action withContext:context execute:YES];
 }
 
 @end
