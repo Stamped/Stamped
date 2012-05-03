@@ -1800,7 +1800,7 @@ class HTTPStamp(Schema):
             if schema.__class__.__name__ == 'Stamp':
                 for comment in schema.previews.comments:
                     comment = HTTPComment().importSchema(comment)
-                    _initialize_comment_html(comment)
+                    #_initialize_comment_html(comment)
                     
                     self.previews.comments.append(comment)
                 
