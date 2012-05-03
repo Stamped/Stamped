@@ -58,9 +58,7 @@ def friends(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.getFriendsStamps(authUserId, schema)
     after = datetime.datetime.now()
     dur = after - before
-    seconds = dur.microseconds // 1000000
-    micros = dur.microseconds   % 1000000
-    logs.info('api.getFriendsStamps() duration: %d.%d' % (seconds, micros))
+    logs.info('api.getFriendsStamps() duration: %d.%d' % (dur.seconds, dur.micros))
 
     return transform_stamps(stamps)
 
