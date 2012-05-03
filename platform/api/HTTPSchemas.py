@@ -526,8 +526,24 @@ class HTTPUserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        self.image_url          = SchemaElement(basestring)
-
+        
+        # TODO (travis 5/3/12): how to best surface multiple image resolutions to clients?
+        # NOTE: this is a reoccurring pattern that we should find a cleaner, platform-wide 
+        # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
+        # then, I'm inlining the available profile image sizes so as not to bake that logic 
+        # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image_url          = SchemaElement(basestring) # original (historically 500x500)
+        self.image_url_31       = SchemaElement(basestring)
+        self.image_url_37       = SchemaElement(basestring)
+        self.image_url_46       = SchemaElement(basestring)
+        self.image_url_55       = SchemaElement(basestring)
+        self.image_url_62       = SchemaElement(basestring)
+        self.image_url_72       = SchemaElement(basestring)
+        self.image_url_74       = SchemaElement(basestring)
+        self.image_url_92       = SchemaElement(basestring)
+        self.image_url_110      = SchemaElement(basestring)
+        self.image_url_144      = SchemaElement(basestring)
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)

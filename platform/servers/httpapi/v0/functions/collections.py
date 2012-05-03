@@ -64,7 +64,7 @@ def suggested(request, authUserId, schema, **kwargs):
     before = time.time()
     stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
     logs.info('api.getSuggestedStamps() duration: %d seconds' % (time.time()-before))
-
+    
     return transform_stamps(stamps)
 
 @handleHTTPRequest(http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
@@ -87,9 +87,10 @@ def consumption(request, authUserId, schema, **kwargs):
         raise NotImplementedError('Consumption call with undefined scope %s' % schema.scope)
     if stamps is None:
         raise Exception('consumption() expected list of stamps, received None')
-
+    
     import pprint
     for stamp in stamps:
         pprint.pprint(stamp.entity)
-
+    
     return transform_stamps(stamps)
+
