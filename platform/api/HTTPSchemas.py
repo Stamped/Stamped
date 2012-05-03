@@ -609,7 +609,7 @@ class HTTPClientLogsEntry(Schema):
 
 class HTTPEndpointResponse(Schema):
     def setSchema(self):
-        self.action
+        self.action         = HTTPEndpointAction()
 
     def _setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
@@ -628,7 +628,7 @@ class HTTPEndpointResponse(Schema):
 
 class HTTPEndpointAction(Schema):
     def setSchema(self):
-        self.action                 = HTTPAction(required=True)
+        self.action                 = HTTPAction()
         self.name                   = SchemaElement(basestring, required=True)
 
 
@@ -1444,13 +1444,13 @@ class HTTPActionSource(Schema):
         self.name                   = SchemaElement(basestring, required=True)
         self.source                 = SchemaElement(basestring, required=True)
         self.source_id              = SchemaElement(basestring)
-        self.source_data            = SchemaElement(basestring)
+        self.source_data            = SchemaElement(dict)
         self.endpoint               = SchemaElement(basestring)
-        self.endpoint_data          = SchemaElement(basestring)
+        self.endpoint_data          = SchemaElement(dict)
         self.link                   = SchemaElement(basestring)
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
-        self.completion_data        = SchemaElement(basestring) # dictionary?
+        self.completion_data        = SchemaElement(dict) # dictionary?
 
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT

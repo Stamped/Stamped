@@ -63,7 +63,7 @@ def friends(request, authUserId, schema, **kwargs):
 def suggested(request, authUserId, schema, **kwargs):
     before = time.time()
     stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
-    logs.inf('api.getSuggestedStamps() duration: %d seconds' % (time.time()-before))
+    logs.info('api.getSuggestedStamps() duration: %d seconds' % (time.time()-before))
 
     return transform_stamps(stamps)
 

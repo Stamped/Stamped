@@ -656,7 +656,6 @@ class Netflix(object):
             token                   = token,
         )
         etag = getresponse["queue"]["etag"]
-        print (getresponse)
 
         return self.__post(
             'queues/instant',
