@@ -1048,7 +1048,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'http://dev.stamped.com/v0/account/linked/netflix/addinstant'
+                source.endpoint         = 'http://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
