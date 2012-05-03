@@ -72,7 +72,6 @@
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  NSLog(@"touch");
   self.touched = YES;
 }
 
@@ -95,6 +94,15 @@
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
   
+}
+
++ (STButton*)buttonWithNormalImage:(UIImage*)normalImage
+                       activeImage:(UIImage*)activeImage 
+                            target:(id)target 
+                         andAction:(SEL)selector {
+  UIImageView* normalView = [[[UIImageView alloc] initWithImage:normalImage] autorelease];
+  UIImageView* activeView = [[[UIImageView alloc] initWithImage:activeImage] autorelease];
+  return [[[STButton alloc] initWithFrame:normalView.frame normalView:normalView activeView:activeView target:target andAction:selector] autorelease];
 }
 
 @end

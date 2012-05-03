@@ -16,6 +16,11 @@
              target:(id)target 
           andAction:(SEL)selector;
 
++ (STButton*)buttonWithNormalImage:(UIImage*)normalImage
+                       activeImage:(UIImage*)activeImage 
+                            target:(id)target 
+                         andAction:(SEL)selector;
+
 @property (nonatomic, readwrite, assign) BOOL enabled;
 @property (nonatomic, readwrite, retain) id message;
 

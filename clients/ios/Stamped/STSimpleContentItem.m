@@ -7,18 +7,21 @@
 //
 
 #import "STSimpleContentItem.h"
+#import "STSimpleImage.h"
 
 @implementation STSimpleContentItem
 
 @synthesize modified = modified_;
 @synthesize blurb = blurb_;
 @synthesize created = created_;
+@synthesize images = images_;
 
 - (void)dealloc
 {
   [modified_ release];
   [blurb_ release];
   [created_ release];
+  [images_ release];
   [super dealloc];
 }
 
@@ -30,6 +33,8 @@
    @"blurb",
    @"created",
    nil];
+  
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
   
   return mapping;
 }

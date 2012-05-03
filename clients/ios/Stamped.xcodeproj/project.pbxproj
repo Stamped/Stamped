@@ -129,6 +129,12 @@
 		635D1C4D1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
 		635D1C4E1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
 		635D1C4F1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
+		635D1C561552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
+		635D1C571552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
+		635D1C581552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
+		635D1C5C1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
+		635D1C5D1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
+		635D1C5E1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
 		635EAAC715234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC815234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
 		635EAAC915234D5800D0378D /* STActionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 635EAAC615234D5800D0378D /* STActionManager.m */; };
@@ -3004,6 +3010,11 @@
 		635D1C471551B99500103D1A /* STFriendsOfFriendsStampsList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STFriendsOfFriendsStampsList.m; sourceTree = "<group>"; };
 		635D1C4B1551BB7200103D1A /* STEveryoneStampsList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEveryoneStampsList.h; sourceTree = "<group>"; };
 		635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEveryoneStampsList.m; sourceTree = "<group>"; };
+		635D1C541552E0FF00103D1A /* STStampedByCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedByCell.h; sourceTree = "<group>"; };
+		635D1C551552E0FF00103D1A /* STStampedByCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedByCell.m; sourceTree = "<group>"; };
+		635D1C59155315D600103D1A /* STEndpointResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEndpointResponse.h; sourceTree = "<group>"; };
+		635D1C5A1553164400103D1A /* STSimpleEndpointResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEndpointResponse.h; sourceTree = "<group>"; };
+		635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEndpointResponse.m; sourceTree = "<group>"; };
 		635EAAC515234D5800D0378D /* STActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionManager.h; sourceTree = "<group>"; };
 		635EAAC615234D5800D0378D /* STActionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionManager.m; sourceTree = "<group>"; };
 		635EAACF15238D5F00D0378D /* STConfirmationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConfirmationView.h; sourceTree = "<group>"; };
@@ -4472,6 +4483,7 @@
 				63BA7A5B154746E700EE95DA /* STPreviews.h */,
 				63C983F6154C9191000180DC /* STTableDelegate.h */,
 				63C983F7154C9789000180DC /* STTableViewCellFactory.h */,
+				635D1C59155315D600103D1A /* STEndpointResponse.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -4566,6 +4578,8 @@
 				63BA7A571547415400EE95DA /* STSimpleContentItem.m */,
 				63BA7A5C1547478D00EE95DA /* STSimplePreviews.h */,
 				63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */,
+				635D1C5A1553164400103D1A /* STSimpleEndpointResponse.h */,
+				635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -4954,6 +4968,8 @@
 				6333E6FD154DF58F0019B450 /* STLoadingCell.m */,
 				6333E710154ED1D10019B450 /* STConsumptionCell.h */,
 				6333E711154ED1D20019B450 /* STConsumptionCell.m */,
+				635D1C541552E0FF00103D1A /* STStampedByCell.h */,
+				635D1C551552E0FF00103D1A /* STStampedByCell.m */,
 			);
 			name = "View Components";
 			sourceTree = "<group>";
@@ -8640,6 +8656,8 @@
 				635D1C451551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C4A1551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4F1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
+				635D1C581552E10000103D1A /* STStampedByCell.m in Sources */,
+				635D1C5E1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8899,6 +8917,8 @@
 				635D1C441551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C491551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4E1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
+				635D1C571552E10000103D1A /* STStampedByCell.m in Sources */,
+				635D1C5D1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9158,6 +9178,8 @@
 				635D1C431551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C481551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4D1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
+				635D1C561552E10000103D1A /* STStampedByCell.m in Sources */,
+				635D1C5C1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

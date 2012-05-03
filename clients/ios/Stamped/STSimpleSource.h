@@ -12,13 +12,14 @@
 
 @interface STSimpleSource : NSObject<STSource>
 
-@property (nonatomic, readwrite, retain) NSString* name;
-@property (nonatomic, readwrite, retain) NSString* source;
-@property (nonatomic, readwrite, retain) NSString* sourceID;
-@property (nonatomic, readwrite, retain) NSString* link;
-@property (nonatomic, readwrite, retain) NSString* icon;
+@property (nonatomic, readwrite, copy) NSString* name;
+@property (nonatomic, readwrite, copy) NSString* source;
+@property (nonatomic, readwrite, copy) NSDictionary* sourceData;
+@property (nonatomic, readwrite, copy) NSString* sourceID;
+@property (nonatomic, readwrite, copy) NSString* link;
+@property (nonatomic, readwrite, copy) NSString* icon;
 @property (nonatomic, readwrite, copy) NSString* endpoint;
-@property (nonatomic, readwrite, copy) NSString* endpointData;
+@property (nonatomic, readwrite, copy) NSDictionary* endpointData;
 @property (nonatomic, readwrite, copy) NSString* completionEndpoint;
 @property (nonatomic, readwrite, copy) NSDictionary* completionData;
 
