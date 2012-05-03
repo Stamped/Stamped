@@ -611,7 +611,7 @@ class HTTPEndpointResponse(Schema):
     def setSchema(self):
         self.action         = HTTPEndpointAction()
 
-    def _setAction(self, actionType, name, sources, **kwargs):
+    def setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
@@ -1000,7 +1000,7 @@ class HTTPEntity(Schema):
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = '/linked/netflix/addinstant'
-                source.endpoint_data    = entity.sources.netflix_id
+                source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
                     action      = actionType,
