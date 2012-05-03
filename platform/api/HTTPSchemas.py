@@ -177,6 +177,7 @@ def _cleanImageURL(url):
     return url
 
 def _initialize_blurb_html(content):
+    """
     blurb = content.blurb
     data  = []
     
@@ -205,8 +206,11 @@ def _initialize_blurb_html(content):
     
     html.append(blurb[last:])
     content.blurb_formatted = "".join(html)
+    """
+    pass
 
 def _initialize_comment_html(comment):
+    """
     blurb = comment.blurb
     data  = []
     
@@ -231,6 +235,8 @@ def _initialize_comment_html(comment):
     
     html.append(blurb[last:])
     comment.blurb_formatted = "".join(html)
+    """
+    pass
 
 
 # ######### #
