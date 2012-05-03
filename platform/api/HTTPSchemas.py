@@ -903,6 +903,18 @@ class HTTPEntity(Schema):
 
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
+
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
+            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
+            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
+            self._addMetadata('Cast', '\n'.join(
+                unicode(i['title'] + ' as ' + i['character']) if 'character' in i else unicode(i['title'])
+                for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
