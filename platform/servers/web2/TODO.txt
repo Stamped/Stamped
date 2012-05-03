@@ -1,8 +1,12 @@
 
 TODO:
-    * replace previews in stamp-gallery-items with real images...
+    * replace previews in stamp-gallery-items with real elements
     
-    * how to handle blurb references?
+    * implement user stamp category distribution
+    
+    * implement google maps stamp-gallery view
+    
+    * debug blurb and comment references via blurb_formatted
     
     * fix blockquotes (line-spacing is messed up on multiple lines...)
     
@@ -10,6 +14,6 @@ TODO:
     
     * figure out why font-faces aren't loading on chrome
         * how to debug.. must be tools out there to help with this?
-
+    
     * when stamp images don't load, they still display a border
 

@@ -135,17 +135,22 @@
     top: 0;
     right: 0;
     
+    a {
+        display: block;
+    }
+    
     a:focus {
         text-decoration: none;
         border: 0 none;
         outline: none;
     }
     
+    /* TODO: 20x19 version */
     a.up-arrow {
         background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
         width:  21px;
         height: 21px;
-        margin: 0 0 .8em;
+        margin: 0 0 .5em;
         
         &:hover {
             background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;

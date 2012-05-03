@@ -59,6 +59,16 @@
             $container.isotope('appended', elements);
         });
         
+        $('.profile-nav a').each(function () {
+            $(this).click(function() {
+                $(this).parents(".profile-sections").each(function() {
+                    $(this).find(".profile-section").slideToggle('fast', function() {
+                        
+                    });
+                });
+            });
+        });
+        
         return;
         
         var userP = client.get_user_by_screen_name(screen_name);

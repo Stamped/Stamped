@@ -32,7 +32,6 @@
                 
                 <div class="profile-image-large floatleft">
                     <img src="{{user.image_url}}" />
-                    
                 </div>
                 
                 <div class="floatleft profile-section0">
@@ -49,12 +48,12 @@
                 
                 <div class="profile-sections">
                     <ol class="profile-nav">
-                        <li><a href="#" class="up-arrow replaced">UP</a></li>
-                        <li><a href="#" class="down-arrow replaced">DOWN</a></li>
+                        <li><a href="#" class="up-arrow"></a></li>
+                        <li><a href="#" class="down-arrow"></a></li>
                     </ol>
                     
                     <!-- # followers and # friends -->
-                    <div class="profile-section">
+                    <div class="profile-section profile-section-default">
                         <div class="floatleft profile-section2">
                             <p class="number">{{user.num_friends}}</p>
                             <p>following</p>
@@ -75,10 +74,15 @@
                     </div>
                     
                     <!-- stamp distribution -->
-                    <div class="profile-section">
+                    <div class="profile-section profile-section3">
+                        <!--<p class="stamp-category-{{vertical.category}}">
+                            <span class="icon"></span>-->
+                        
+                        <ul>
                         {% for vertical in user.distribution %}
-                            
+                            <li><img src="{{vertical.icon}}" /><span>{{vertical.name}} - {{vertical.count}}</span></li>
                         {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>

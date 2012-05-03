@@ -35,9 +35,9 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
-    schema.limit = 100
+    #schema.limit = 100
     
-    if False: #schema.screen_name == 'travis' and schema.offset + schema.limit <= len(__stamps):
+    if schema.screen_name == 'travis' and schema.offset + schema.limit <= len(__stamps):
         user      = __user
         stamps    = __stamps[schema.offset : schema.offset + schema.limit]
         user_id   = user['user_id']
@@ -55,8 +55,8 @@ def profile(request, schema, **kwargs):
     def _is_static_profile_image(url):
         return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
     
-    utils.log("STAMPS:")
-    pprint.pprint(stamps)
+    #utils.log("STAMPS:")
+    #pprint.pprint(stamps)
     
     # ensure friends and followers are randomly shuffled s.t. different users will 
     # appear every page refresh, with preferential treatment always going to users 
