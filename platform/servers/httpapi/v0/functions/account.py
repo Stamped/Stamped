@@ -202,6 +202,23 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
+@handleHTTPRequest(http_schema=HTTPNetflixId)
+@require_http_methods(["POST"])
+def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    #TODO throw status codes on error
+    #TODO return an HTTPAction
+    return transformOutput(True)
+
+@handleHTTPRequest(http_schema=HTTPNetflixId)
+@require_http_methods(["POST"])
+def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+    #TODO throw status codes on error
+    #TODO return an HTTPAction
+    return transformOutput(True)
+
+
 
 @handleHTTPRequest(http_schema=HTTPAccountChangePassword, 
                    parse_request_kwargs={'obfuscate':['old_password', 'new_password']})

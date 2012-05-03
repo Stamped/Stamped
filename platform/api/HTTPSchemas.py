@@ -176,6 +176,63 @@ def _cleanImageURL(url):
 
     return url
 
+def _initialize_blurb_html(content):
+    blurb = content.blurb
+    data  = []
+    
+    # assumes non-overlapping blurb references
+    for reference in content.blurb_references:
+        action = reference.action
+        
+        if action.type == 'stamped_view_screen_name':
+            repl_pre  = "<a class='screen-name' href=\"%s\">" % (action.sources[0].source_id)
+            repl_post = "</a>"
+        
+        data.append((reference.indices, repl_pre, repl_post))
+    
+    html = [ ]
+    last = 0
+    
+    for repl in sorted(data):
+        indices, repl_pre, repl_post = repl
+        
+        html.append(blurb[last:indices[0]])
+        html.append(repl_pre)
+        html.append(blurb[indices[0]:indices[1]])
+        html.append(repl_post)
+        
+        last = indices[1]
+    
+    html.append(blurb[last:])
+    content.blurb_formatted = "".join(html)
+
+def _initialize_comment_html(comment):
+    blurb = comment.blurb
+    data  = []
+    
+    for mention in comment.mentions:
+        repl_pre  = "<a class='screen-name' href=\"%s\">" % (mention.screen_name)
+        repl_post = "</a>"
+        
+        data.append((mention.indices, repl_pre, repl_post))
+    
+    html = []
+    last = 0
+    
+    for repl in sorted(data):
+        indices, repl_pre, repl_post = repl
+        
+        html.append(blurb[last:indices[0]])
+        html.append(repl_pre)
+        html.append(blurb[indices[0]:indices[1]])
+        html.append(repl_post)
+        
+        last = indices[1]
+    
+    html.append(blurb[last:])
+    comment.blurb_formatted = "".join(html)
+
+
 # ######### #
 # OAuth 2.0 #
 # ######### #
@@ -507,6 +564,11 @@ class HTTPFindFacebookUser(Schema):
     def setSchema(self):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
         self.facebook_token     = SchemaElement(basestring)
+
+class HTTPNetflixId(Schema):
+    def setSchema(self):
+        self.netflix_id         = SchemaElement(basestring)
+
         
 
 # ####### #
@@ -658,6 +720,8 @@ class HTTPEntity(Schema):
         
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
+
+        logs.info("\n HIT importEntity ######")
 
         subcategory             = self._formatSubcategory(self.subcategory)
         
@@ -848,6 +912,33 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+
+            # Actions: Add to Netflix Instant Queue
+
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = '/linked/netflix/addinstant'
+                source.endpoint_data    = entity.sources.netflix_id
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
@@ -1597,6 +1688,7 @@ class HTTPStampContent(Schema):
     def setSchema(self):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
+        self.blurb_formatted    = SchemaElement(basestring)
         self.images             = SchemaList(ImageSchema())
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
@@ -1662,22 +1754,22 @@ class HTTPStamp(Schema):
                 item.blurb      = content.blurb 
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
-
+                
                 for screenName in self._user_regex.finditer(content.blurb):
                     source              = HTTPActionSource()
                     source.name         = 'View profile'
                     source.source       = 'stamped'
                     source.source_id    = screenName.groups()[0]
-
+                    
                     action              = HTTPAction()
                     action.type         = 'stamped_view_screen_name'
                     action.name         = 'View profile'
                     action.sources      = [ source ]
-
+                    
                     reference           = HTTPTextReference()
                     reference.indices   = [ screenName.start(), screenName.end() ]
                     reference.action    = action
-
+                    
                     item.blurb_references.append(reference)
                 
                 for image in content.images:
@@ -1687,6 +1779,8 @@ class HTTPStamp(Schema):
                     img.height  = image.height 
                     
                     item.images.append(img)
+                
+                _initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
@@ -1702,32 +1796,33 @@ class HTTPStamp(Schema):
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, url_title)
-
+            
             if schema.__class__.__name__ == 'Stamp':
                 for comment in schema.previews.comments:
                     comment = HTTPComment().importSchema(comment)
+                    _initialize_comment_html(comment)
+                    
                     self.previews.comments.append(comment)
                 
                 for user in schema.previews.todos:
                     user    = HTTPUserMini().importSchema(user).exportSparse()
                     self.previews.todos.append(user)
-
+                
                 for user in schema.previews.likes:
                     user    = HTTPUserMini().importSchema(user).exportSparse()
                     self.previews.likes.append(user)
-
+                
                 for credit in schema.previews.credits:
                     credit  = HTTPStamp().importSchema(credit).minimize().exportSparse()
                     self.previews.credits.append(credit)
-
+                
                 self.is_liked = False
                 if schema.is_liked:
                     self.is_liked = True
-
+                
                 self.is_fav = False
                 if schema.is_fav:
                     self.is_fav = True
-
         else:
             logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
             raise NotImplementedError
@@ -2118,70 +2213,71 @@ class HTTPActivity(Schema):
             data        = schema.value
             data.pop('subjects', None)
             data.pop('objects', None)
-
+            
             self.importData(data, overflow=True)
-
+            
             self.created = schema.timestamp.created
-
+            
             if self.icon is not None:
                 self.icon = _getIconURL(self.icon)
-
+            
             for user in schema.subjects:
                 self.subjects.append(HTTPUserMini().importSchema(UserMini(user)).value)
-
+            
             for user in schema.objects.users:
                 self.objects.users.append(HTTPUserMini().importSchema(UserMini(user)).value)
-
+            
             for stamp in schema.objects.stamps:
                 self.objects.stamps.append(HTTPStamp().importSchema(stamp).value)
-
+            
             for entity in schema.objects.entities:
                 self.objects.entities.append(HTTPEntityMini().importSchema(entity).value)
-
+            
             for comment in schema.objects.comments:
-                self.objects.comments.append(HTTPComment().importSchema(comment).value)
-
-
+                comment = HTTPComment().importSchema(comment).value
+                _initialize_comment_html(comment)
+                
+                self.objects.comments.append(comment)
+            
             def _buildStampAction(stamp):
                 source              = HTTPActionSource()
                 source.name         = 'View "%s"' % stamp.entity.title
                 source.source       = 'stamped'
                 source.source_id    = stamp.stamp_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_stamp'
                 action.name         = 'View "%s"' % stamp.entity.title
                 action.sources      = [ source ]
-
+                
                 return action
-
+            
             def _buildEntityAction(entity):
                 source              = HTTPActionSource()
                 source.name         = 'View "%s"' % entity.title
                 source.source       = 'stamped'
                 source.source_id    = entity.entity_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_entity'
                 action.name         = 'View "%s"' % entity.title
                 action.sources      = [ source ]
-
+                
                 return action
-
+            
             def _buildUserAction(user):
                 source              = HTTPActionSource()
                 source.name         = 'View profile'
                 source.source       = 'stamped'
                 source.source_id    = user.user_id
-
+                
                 action              = HTTPAction()
                 action.type         = 'stamped_view_user'
                 action.name         = 'View profile'
                 action.sources      = [ source ]
-
+                
                 return action
-
-
+            
             def _formatUserObjects(users, required=True, offset=0):
                 if len(users) == 0:
                     if required:
@@ -2335,9 +2431,7 @@ class HTTPActivity(Schema):
                     return text, refs
 
                 raise Exception("Too many stamps! \n%s" % stamps)
-
-
-
+            
             if self.verb == 'follow':
                 if len(self.subjects) == 1:
                     verb = 'is now following'
@@ -2345,7 +2439,9 @@ class HTTPActivity(Schema):
                 else:
                     verb = 'are now following'
                     self.image = _getIconURL('news_follow')
+                
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
+                
                 if schema.personal:
                     self.body = '%s %s you.' % (subjects, verb)
                     self.body_references = subjectReferences
@@ -2354,10 +2450,12 @@ class HTTPActivity(Schema):
                     userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                     self.body = '%s %s %s.' % (subjects, verb, userObjects)
                     self.body_references = subjectReferences + userObjectReferences
+                
                 self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'restamp':
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
+                
                 if schema.personal:
                     self.body = '%s gave you credit.' % (subjects)
                     self.body_references = subjectReferences
@@ -2369,6 +2467,7 @@ class HTTPActivity(Schema):
                     self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
                     self.body_references = subjectReferences + userObjectReferences
                     self.image = self.subjects[0].image_url
+                
                 self.action = _buildStampAction(self.objects.stamps[0])
 
             elif self.verb == 'like':
@@ -2379,11 +2478,13 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, stampObjects)
                 self.body_references = subjectReferences + stampObjectReferences
+                
                 if not schema.personal:
                     stampUsers = map(lambda x: x['user'], self.objects.stamps)
                     stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                     self.footer = 'via %s' % stampUserObjects
                     self.footer_references = stampUserReferences
+                
                 if schema.personal and self.benefit is not None:
                     self.image = _getIconURL('news_benefit_1')
                 elif len(self.subjects) == 1:
@@ -2391,8 +2492,9 @@ class HTTPActivity(Schema):
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_like')
+                
                 self.action = _buildStampAction(self.objects.stamps[0])
-
+            
             elif self.verb == 'todo':
                 self.icon = _getIconURL('news_todo')
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -2401,16 +2503,18 @@ class HTTPActivity(Schema):
                 entityObjects, entityObjectReferences = _formatEntityObjects(self.objects.entities, offset=offset)
                 self.body = '%s %s %s as a to-do.' % (subjects, verb, entityObjects)
                 self.body_references = subjectReferences + entityObjectReferences
+                
                 if len(self.subjects) == 1:
                     self.image = self.subjects[0].image_url 
                 else:
                     ### TODO: What should this image be?
                     self.image = _getIconURL('news_todo')
+                
                 if len(self.objects.stamps) > 0:
                     self.action = _buildStampAction(self.objects.stamps[0])
                 else:
                     self.action = _buildEntityAction(self.objects.entities[0])
-
+            
             elif self.verb == 'comment':
                 verb = 'Comment on'
                 offset = len(verb) + 1
@@ -2443,12 +2547,14 @@ class HTTPActivity(Schema):
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
                 self.header = 'Mention on %s' % self.objects.stamps[0].entity.title 
                 self.header_references = stampObjectReferences
+                
                 if commentObjects is not None:
                     self.body = '%s' % commentObjects
                     self.body_references = commentObjectReferences
                 else:
                     self.body = '%s' % stampBlurbObjects
                     self.body_references = stampBlurbObjectReferences
+                
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
 
@@ -2470,25 +2576,28 @@ class HTTPActivity(Schema):
                 }
                 subjects, subjectReferences = _formatUserObjects(self.subjects)
                 verbs = ('completed', '')
+                
                 if self.verb[7:] in actionMapping.keys():
                     verbs = actionMapping[self.verb[7:]]
+                
                 offset = len(subjects) + len(verbs[0]) + 2
                 stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
+                
                 if len(verbs[1]) > 0:
                     self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
                 else:
                     self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+                
                 self.body_references = subjectReferences + stampObjectReferences
                 self.image = self.subjects[0].image_url 
                 self.action = _buildStampAction(self.objects.stamps[0])
-
+            
             else:
                 raise Exception("Uncrecognized verb: %s" % self.verb)
-
-
-
+        
         else:
             raise NotImplementedError
+        
         return self
 
 class HTTPTextReference(Schema):

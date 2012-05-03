@@ -120,6 +120,7 @@ class LinkedAccounts(Schema):
         self.itunes             = SchemaElement(basestring)
         self.twitter            = TwitterAccountSchema()
         self.facebook           = FacebookAccountSchema()
+        self.netflix            = NetflixAccountSchema()
 
 class TwitterAccountSchema(Schema):
     def setSchema(self):
@@ -145,7 +146,9 @@ class FacebookAuthSchema(Schema):
 
 class NetflixAccountSchema(Schema):
     def setSchema(self):
-        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_user_id        = SchemaElement(basestring)
+        self.netflix_token          = SchemaElement(basestring)
+        self.netflix_secret         = SchemaElement(basestring)
 
 class NetflixAuthSchema(Schema):
     def setSchema(self):
@@ -404,6 +407,7 @@ class Comment(Schema):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.restamp_id         = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring, required=True)
+        self.blurb_formatted    = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 
@@ -838,6 +842,8 @@ class EntitySourcesSchema(Schema):
         self.netflix_id                     = SchemaElement(basestring)
         self.netflix_url                    = SchemaElement(basestring)
         self.netflix_source                 = SchemaElement(basestring)
+        self.netflix_is_instant_available   = SchemaElement(bool)
+        self.netflix_instant_available_until= SchemaElement(datetime)
         self.netflix_timestamp              = SchemaElement(datetime)
 
         self.singleplatform_id              = SchemaElement(basestring)

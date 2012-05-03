@@ -21,6 +21,7 @@ try:
     from AmazonSource           import AmazonSource
     from StampedSource          import StampedSource
     from TheTVDBSource          import TheTVDBSource
+    from NetflixSource          import NetflixSource
 except:
     report()
     raise
@@ -37,6 +38,7 @@ allSources = [
     SpotifySource,
     AmazonSource,
     TheTVDBSource,
+    NetflixSource,
     StampedSource,
 ]
 

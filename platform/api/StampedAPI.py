@@ -764,11 +764,15 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
 
     @API_CALL
-    def addToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+    def addToNetflixInstant(self, authUserId, netflixId):
         """
          Asynchronously add an entity to the user's netflix queue
         """
         account   = self._accountDB.getAccount(authUserId)
+
+        if account.netflix_user_id != None and account.netflix_token != None and account.netflix_secret != None:
+            return True
+
 
 #        # Only send alert once (when the user initially connects to Twitter)
 #        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
@@ -802,7 +806,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def removeToNetflixQueue(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
+    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
 
         account   = self._accountDB.getAccount(authUserId)
 
@@ -1557,7 +1561,10 @@ class StampedAPI(AStampedAPI):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
-        
+
+        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        origLen = len(stampData)
+
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
@@ -1721,7 +1728,11 @@ class StampedAPI(AStampedAPI):
         
         if singleStamp == True:
             return stamps[0]
-        
+
+        #HACK UNTIL PAGING ISSUE IS RESOLVED
+        while len(stamps) < origLen:
+            stamps.append(stamps[len(stamps)-1])
+
         return stamps
     
     def getStampBadges(self, stamp):
@@ -2697,7 +2708,7 @@ class StampedAPI(AStampedAPI):
                     commentPreviews[comment.stamp_id] = []
                 
                 commentPreviews[comment.stamp_id].append(comment)
-        
+
         # Add user object and preview to stamps
         stamps = []
         for stamp in stampData:
@@ -2707,14 +2718,14 @@ class StampedAPI(AStampedAPI):
             stamps.append(stamp)
         
         if enrich:
-            stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        
+            stamps = self._enrichStampObjects(stamps, authUserId=authUserId, nofilter=True)
+
         return stamps
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
-        
+
         # TODO: deprecate with new clients going forward
         genericCollectionSlice.deleted = True
         
@@ -3014,7 +3025,7 @@ class StampedAPI(AStampedAPI):
         body                    = None
         group                   = False
         groupRange              = None
-        requireReceipient       = False
+        requireRecipient       = False
         unique                  = False
 
         objects = ActivityObjectIds()
@@ -3045,7 +3056,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'reply':
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.comment_ids     = [ kwargs['commentId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
 
         elif verb == 'mention':
             recipientIds = kwargs.pop('recipientIds', [])
@@ -3060,21 +3071,21 @@ class StampedAPI(AStampedAPI):
             objects.stamp_ids       = [ kwargs['stampId'] ]
             if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
 
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
-            requireReceipient       = True
+            requireRecipient       = True
             unique                  = True
 
         elif verb.startswith('friend_'):
             body                    = kwargs.pop('body', None)
-            requireReceipient       = True
+            requireRecipient       = True
             unique                  = True
 
         elif verb.startswith('action_'):
             objects.stamp_ids       = [ kwargs['stampId'] ]
-            requireReceipient       = True 
+            requireRecipient        = True
             unique                  = True
 
         else:
@@ -3090,7 +3101,7 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
-        if requireReceipient and len(recipientIds) == 0:
+        if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")
 
         # Save activity

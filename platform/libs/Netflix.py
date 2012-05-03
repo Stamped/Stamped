@@ -9,12 +9,11 @@ import re
 import oauth as oauth
 import httplib
 import time
-import simplejson
 import json
-import datetime
 import utils
 import logs
 
+from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 from urlparse           import urlparse
 from xml.dom.minidom    import parseString
@@ -80,7 +79,7 @@ class NetflixUser(object):
         
         requestUrl = '/users/%s' % (accessToken.key)
         
-        info = simplejson.loads( self.client._getResource( requestUrl, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, token=accessToken ) )
         self.data = info['user']
         return self.data
         
@@ -101,7 +100,7 @@ class NetflixUser(object):
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url,token=accessToken ))
+            info = json.loads(self.client._getResource( url,token=accessToken ))
         except :
             return []
         else:
@@ -122,7 +121,7 @@ class NetflixUser(object):
                 urls.append(discInfo['id'])
         parameters = { 'title_refs': ','.join(urls) }
         
-        info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+        info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         
         ret = {}
         for title in info['ratings']['ratings_item']:
@@ -158,7 +157,7 @@ class NetflixUser(object):
             requestUrl = '/users/%s/rental_history/%s' % (accessToken.key,type)
         
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
+            info = json.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         except:
             return {}
             
@@ -175,7 +174,7 @@ class NetflixCatalog(object):
            parameters['start_index'] = startIndex
        if maxResults:
            parameters['max_results'] = maxResults
-       info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+       info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
 
        return info['catalog_titles']['catalog_title']
 
@@ -187,8 +186,8 @@ class NetflixCatalog(object):
        if maxResults:
            parameters['max_results'] = maxResults
 
-       info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
-       print simplejson.dumps(info)
+       info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
+       print json.dumps(info)
        return info['autocomplete']['autocomplete_item']
     
     def getTitle(self, url):
@@ -205,7 +204,7 @@ class NetflixCatalog(object):
            parameters['max_results'] = maxResults
 
        try:
-           info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
+           info = json.loads( self.client._getResource( requestUrl, parameters=parameters))
        except:
            return []
 
@@ -214,7 +213,7 @@ class NetflixCatalog(object):
     def getPerson(self,url):
         requestUrl = url
         try:
-            info = simplejson.loads( self.client._getResource( requestUrl ))
+            info = json.loads( self.client._getResource( requestUrl ))
         except:
             return {}
         return info       
@@ -238,7 +237,7 @@ class NetflixUserQueue(object):
         
         requestUrl = '/users/%s/queues' % (self.user.accessToken.key)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -257,7 +256,7 @@ class NetflixUserQueue(object):
 
         requestUrl = '/users/%s/queues/%s/available' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -276,7 +275,7 @@ class NetflixUserQueue(object):
 
         requestUrl = '/users/%s/queues/%s/saved' % (self.user.accessToken.key,type)
         try:
-            info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
+            info = json.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
         except :
             return []
         else:
@@ -299,7 +298,7 @@ class NetflixUserQueue(object):
 
         if not self.tag:
             response = self.client._getResource( requestUrl, token=accessToken )
-            response = simplejson.loads(response)
+            response = json.loads(response)
             self.tag = response["queue"]["etag"]
         parameters['etag'] = self.tag
         response = self.client._postResource( requestUrl, token=accessToken, parameters=parameters )
@@ -317,7 +316,7 @@ class NetflixUserQueue(object):
         requestUrl = '/users/%s/queues/disc' % (accessToken.key)
         response = self.client._getResource( requestUrl, token=accessToken,parameters=queueparams )
         print "Response is " + response
-        response = simplejson.loads(response)
+        response = json.loads(response)
         titles = response["queue"]["queue_item"]
         
         for disc in titles:
@@ -348,7 +347,7 @@ class NetflixDisc(object):
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
         try:
-            info = simplejson.loads(self.client._getResource( url ))
+            info = json.loads(self.client._getResource( url ))
         except :
             return []
         else:
@@ -454,14 +453,14 @@ class Netflix(object):
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared
         self.__blacklist = dict()#dict({USER_ID: 4})
-        self.__blacklistClearDate = datetime.datetime.now()
-        self.__blacklistLifespan = datetime.timedelta(days=2)
+        self.__blacklistClearDate = datetime.now()
+        self.__blacklistLifespan = timedelta(days=2)
         self.__blacklistThreshold = 5
 
     def __checkBlacklistExpiration(self):
-        if (datetime.datetime.now() - self.__blacklistClearDate) > self.__blacklistLifespan:
+        if (datetime.now() - self.__blacklistClearDate) > self.__blacklistLifespan:
             self.__blacklist.clear()
-            self.__blacklistClearDate = datetime.datetime.now()
+            self.__blacklistClearDate = datetime.now()
 
     def __addToBlacklistCount(self, user_id):
         """
@@ -515,6 +514,7 @@ class Netflix(object):
         headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
         body = oauthRequest.to_postdata() if verb == 'POST' else None
         url = url if verb == 'POST' else oauthRequest.to_url()
+        logs.info(url)
 
         with self.__cpsLimiter:
             # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
@@ -531,6 +531,9 @@ class Netflix(object):
                         return None
 
         return json.loads(response.read())
+
+    def get(self, service, user_id=None, token=None, **parameters):
+        return self.__get(service, user_id, token, **parameters)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
@@ -564,12 +567,21 @@ class Netflix(object):
         returns the json result as a dict
         """
         results = self.__get(
-                        'catalog/titles',
+                        service         = 'catalog/titles',
                         term            = title,
                         start_index     = start,
                         max_results     = count,
-                        expand          ='synopsis,cast,directors'
+                        expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
+        return results.get('catalog_titles', None)
+
+    def getTitleDetails(self, netflix_id):
+        results = self.__get(
+            service         = netflix_id,
+            expand          ='synopsis,cast,directors'
+        )
+        import pprint
+        pprint.pprint (results)
         return results.get('catalog_titles', None)
 
     def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
@@ -601,7 +613,7 @@ class Netflix(object):
             return None
         recent = []
         for item in self.__asList(results['rental_history']['rental_history_item']):
-            date = datetime.datetime.fromtimestamp(item['watched_date'])
+            date = datetime.fromtimestamp(item['watched_date'])
             netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
             if netflix_id is not None:
                 recent.append( (date, {'netflix_id': netflix_id}) )
@@ -688,8 +700,13 @@ def demo(method, **params):
 #    )
 
     #result = netflix.getRentalHistory(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-    result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
-    #result = netflix.searchTitles("hope floats")
+    #result = netflix.addToQueue(USER_ID, OAUTH_TOKEN, OAUTH_TOKEN_SECRET, HOPE_FLOATS_ID)
+    result = netflix.searchTitles("inception")
+
+#    result = netflix.getTitleDetails(BIGLEB_ID)
+#    result = netflix.get('http://api.netflix.com/catalog/titles/movies/1181532/format_availability')
+
+#    result = netflix.__get('http://api.netflix.com/catalog/titles/movies/1181532/format_availability')
 
 #    result = netflix.get('https://api-user.netflix.com/oauth/login', token=token, application_name='Stamped')
     #pprint.pprint(result)

@@ -707,6 +707,18 @@ def sampleCDF(cdf, item_func=lambda i: i):
     
     return i - 1
 
+def shuffle(array):
+    l = len(array)
+    o = range(l)
+    a = range(l)
+    
+    for i in xrange(l):
+        j = a.pop(random.randint(0, len(a) - 1))
+        
+        o[j] = array[i]
+    
+    return o
+
 def sendEmail(msg, **kwargs):
     if not validate_email(msg['to']):
         msg = "Invalid email address"

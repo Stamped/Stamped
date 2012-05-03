@@ -73,48 +73,178 @@ header, footer, .fixedwidth {
     margin: 0 auto;
     padding: 0;
     border: 0 none;
+    position: relative;
+}
+
+/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+
+@color: color(`window.colors.baseColor`);
+@darkcolor: darken(@color, 10%);
+
+TODO: 
+    * color scheme constants
+        * options:
+            * modify CSS onload via javascript
+                * downside: requires javascript
+            * separate generic styles from templated, customized styles generated server-side
+                * styles.css and custom.css?variables... (version should be one optional variable)
+                * generate and *cache* custom.css stylesheets w/ long TTL
+                * downside: harder to take advantage of CDN caching?
+            * attempt to inline style on page to override !important colors?
+                * downside: wouldn't easily support static operations
+                * NOTE: static stylesheet absolutely CANNOT contain JS logic like below!
+                    * this implies that it is better suited elsewhere!!
+
+<meta property="og:image" content="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
+
+*/
+
+@user_primary:   #004ab2;
+@user_secondary: #0057d1;
+
+@l0: hue(hsl(lightness(@user_primary), 0, 0));
+@l1: hue(hsl(lightness(@user_secondary), 0, 0));
+
+@user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
+@user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
+
+@primary:   lighten(@user_light, 25%);
+@secondary: darken( @user_dark,  10%);
+
+.user-logo {
+    width:  195px;
+    height: 195px;
+    position: absolute;
+    top: -125px;
+    left: -125px;
+    z-index: 101;
+}
+
+.user-gradient(@angle: 135deg) {
+    width:  100%;
+    margin: 0;
+    
+    background: -webkit-linear-gradient(@angle, @primary, @secondary);
+    background: -moz-linear-gradient(@angle, @primary, @secondary);
+    background: -o-linear-gradient(@angle, @primary, @secondary);
+    background: linear-gradient(@angle, @primary, @secondary);
 }
 
 .profile-header {
-    background: url(/assets/img/main-noise.png) left top repeat;
-    /*background: url(/assets/img/noisegradient.png) left top repeat;*/
+    @outer: #E5E5E5;
+    @inner: #FEFEFE;
+    @shadow: rgba(50,50,50,0.35);
     
-    .profile-header-pre {
-        background: url(/assets/img/main-topcap.png) left top repeat-x;
-        width: 100%;
-        height: 8px;
-        margin: 0;
-    }
+    .linear-gradient(left, @outer, @inner, @outer);
     
-    .profile-header-body {
-        padding: 34px 0;
+    .innerbg {
+        background: transparent url(/assets/img/noisemask.png) left top repeat;
         
-        .floatleft {
-            margin: 0 24px 0 0;
+        .profile-header-pre {
+            .user-gradient(135deg);
+            
+            .box-shadow(0, 3px, 3px, @shadow);
         }
         
-        p {
-            margin: 0;
+        .profile-header-body {
+            padding: 34px 0;
+            
+            .floatleft {
+                margin: 0 24px 0 0;
+            }
+            
+            p {
+                margin: 0;
+            }
         }
-    }
-    
-    .profile-header-post {
-        background: url(/assets/img/main-botcap.png) left top repeat-x;
-        width: 100%;
-        height: 8px;
-        margin: 0;
+        
+        .profile-header-post {
+            .user-gradient(135deg);
+            .box-shadow(0, -3px, 3px, @shadow);
+            
+            height: 16px;
+            
+            .inset-stamp {
+                background: url(/assets/img/insetstamp.png) center top no-repeat;
+                text-align: center;
+                position: relative;
+                top: -75px;
+                
+                width: 167px;
+                min-height: 75px;
+                z-index: 100;
+                
+                margin: 0 auto;
+                padding: 20px 20px 0;
+                
+                .number {
+                    font-family: "StampedButtonFont", helvetica, sans-serif;
+                    color: @user_dark;
+                    font-weight: bold;
+                }
+            }
+        }
     }
 }
 
-.profile-image {
+.ribbon-top {
+    background: url(/assets/img/ribbon-top.png) left top repeat-x;
+    height: 16px;
+}
+
+.ribbon-bottom {
+    background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
+    height: 16px;
+}
+
+.profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
     img {
-        max-width: 128px;
-        height: auto;
-        border: 4px solid #fff;
+        width:  @size;
+        height: @size;
         
-        .box-shadow(2px, 2px, 1px, rgba(0, 0, 0, 0.15));
+        border: @border solid #fff;
+        .box-shadow(@border / 2, @border / 2, @border / 4, rgba(0, 0, 0, 0.15));
+    }
+}
+
+.profile-image-large {
+    .profile-image(128px, 4px);
+}
+
+.profile-image-small {
+    .profile-image(24px,  2px);
+}
+
+.user-gallery {
+    .user-gallery-item {
+        margin: 0 4px 4px 0;
+    }
+    
+    :nth-child(10) {
+        background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+        width:  24px;
+        height: 24px;
+        
+        border: 2px solid #fff;
+        .box-shadow(1px, 1px, .5px, rgba(0, 0, 0, 0.15));
+        
+        img {
+            display: none;
+        }
+    }
+    
+    :nth-child(n+11) {
+        display: none;
+    }
+}
+
+.profile-section {
+    display: none;
+    
+    &.profile-section-default {
+        display: block;
     }
 }
 
@@ -133,7 +263,13 @@ header, footer, .fixedwidth {
     }
 }
 
-.user {
+.profile-section3 {
+    .floatright;
+    width: 45%;
+}
+
+.bold {
+    color: #333;
     font-weight: bold;
 }
 

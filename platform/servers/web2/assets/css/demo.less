@@ -16,10 +16,27 @@
 }
 
 .stamp-gallery-item {
-    background: url(/assets/img/main-noise.png) left top repeat;
+    /*background: url(/assets/img/main-noise.png) left top repeat;*/
+    @inner: #FEFEFE;
+    
+    /*.box-shadow(10px, 0, 4px, -7px, rgba(0, 0, 0, 0.35));*/
+    
+    @shadow: rgba(125,125,125,0.15);
+    @args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;
+    
+    -webkit-box-shadow: @args;
+    -moz-box-shadow: @args;
+    -ms-box-shadow: @args;
+    -o-box-shadow: @args;
+    box-shadow: @args;
+    
+    background: @inner;
+    border: 
     float: left;
-    width: 28%;
-    margin: 1em;
+    width: 30%;
+    margin: 1em .7em 0 6px;
+    
+    text-align: center;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -35,17 +52,160 @@
     
     .content {
         margin: 0 auth;
+        padding: .2em .5em;
         
         .stamp-contents .images img {
             border: 1px solid;
             max-width: 128px;
             height: auto;
         }
+        
+        .stamp-contents .images {
+            float: right;
+            width: 128px;
+            height: auto;
+            margin: .2em 0 .2em .2em;
+        }
+        
+        .stamp-contents, .previews {
+            font-size: 80%;
+            text-align: left;
+        }
+        
+        .stamped-content {
+            margin: .2em 0 1em;
+        }
+        
+        .blurb {
+            display: inline;
+            text-align: left;
+            quotes: "\201C" "\201D";
+        }
+        
+        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
+        
+        /*
+        div.blurb {
+            background: url(/assets/img/blockquoteopen.png) left top no-repeat;
+            text-indent: 23px;
+            
+            span {
+                display: block;
+                background: url(/assets/img/blockquoteclose.png) bottom right no-repeat;
+            }
+        }*/
+        
+        .subtitle-line {
+            position: relative;
+            display: block;
+            margin: 0 0 -.5em;
+            top: -4px;
+            
+            .icon {
+                display: inline-block;
+            }
+            .subtitle {
+                display: inline-block;
+                font-size: 80%;
+                position: relative;
+                top: -2px;
+                left: .75em;
+            }
+        }
+        
+        /* TODO: the following should work, but there are some float clearing issues with floated images */
+        /*
+        .previews {
+            display: none;
+        }*/
     }
 }
 
 .stamp-gallery-loading {
     text-align: center;
     margin: 0 auto;
+}
+
+.profile-nav {
+    list-style: none;
+    text-decoration: none;
+    
+    position: absolute;
+    top: 0;
+    right: 0;
+    
+    a {
+        display: block;
+    }
+    
+    a:focus {
+        text-decoration: none;
+        border: 0 none;
+        outline: none;
+    }
+    
+    /* TODO: 20x19 version */
+    a.up-arrow {
+        background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
+        width:  21px;
+        height: 21px;
+        margin: 0 0 .5em;
+        
+        &:hover {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
+        }
+        
+        &:active {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
+        }
+    }
+    
+    a.down-arrow {
+        background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
+        
+        width:  21px;
+        height: 21px;
+        
+        &:hover {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
+        }
+        
+        &:active {
+            background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
+        }
+    }
+}
+
+ul.user-category-distribution {
+    list-style: none;
+    text-decoration: none;
+    
+    li {
+        float: left;
+        width: 10%;
+        margin: 0 4% 0 0;
+        
+        img {
+            margin: 0 auto;
+            display: block;
+            
+            width: 12px;
+            height: 12px;
+        }
+        
+        .bargraph {
+            display: block;
+            background: #e5e5e5;
+            border: 1px solid #d4d4d4;
+            width: 100%;
+            height: 100%;
+            
+            .rounded(2px);
+            .value {
+                /*.linear-gradient(left, @outer, @inner, @outer);*/
+            }
+        }
+    }
 }
 

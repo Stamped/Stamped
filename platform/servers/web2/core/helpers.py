@@ -47,6 +47,34 @@ class StampedAPIProxy(object):
         else:
             return self._handle_get("collections/user.json", params)
     
+    def getFriends(self, **params):
+        if self._local:
+            raise NotImplementedError
+        else:
+            response = self._handle_get("friendships/friends.json", params)
+            
+            if 'user_ids' in response and len(response['user_ids']) > 0:
+                # TODO: this only returns max 100 at a time
+                return self._handle_post("users/lookup.json", {
+                    'user_ids' : ",".join(response['user_ids']), 
+                });
+            else:
+                return []
+    
+    def getFollowers(self, **params):
+        if self._local:
+            raise NotImplementedError
+        else:
+            response = self._handle_get("friendships/followers.json", params)
+            
+            if 'user_ids' in response and len(response['user_ids']) > 0:
+                # TODO: this only returns max 100 at a time
+                return self._handle_post("users/lookup.json", {
+                    'user_ids' : ",".join(response['user_ids']), 
+                });
+            else:
+                return []
+    
     def _handle_local_get(self, func, params):
         pass
     
