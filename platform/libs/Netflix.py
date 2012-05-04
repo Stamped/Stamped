@@ -640,7 +640,7 @@ class Netflix(object):
         )
         return results
 
-    def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
+    def getViewingHistory(self, user_id, user_token, user_secret, netflix_id, start=0, count=100):
         pass
 
     def getETag(self, user_id, user_token, user_secret):
@@ -658,7 +658,7 @@ class Netflix(object):
         """
         Returns a boolean (synchronously) if the operation succeeded
         """
-        etag = self.getETag(user_id, user_token, user_secret)
+        etag = self.getETag(user_id, user_token, user_secret, netflix_id)
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__post(
             'queues/instant',
