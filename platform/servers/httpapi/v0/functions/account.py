@@ -213,7 +213,7 @@ def createNetflixLoginResponse():
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
-    source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json'
+    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
     return transformOutput(response.exportSparse())
