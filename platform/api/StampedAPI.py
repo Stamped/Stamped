@@ -3040,6 +3040,8 @@ class StampedAPI(AStampedAPI):
 
         objects = ActivityObjectIds()
 
+        logs.info('\n### ADDING ACTIVITY verb: %s   userId: %s' % (verb, userId))
+
         if verb == 'follow':
             objects.user_ids        = [ kwargs['friendId'] ] 
             group                   = True
@@ -3111,8 +3113,8 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
-        if userId in recipientIds:
-            recipientIds.remove(userId)
+#        if userId in recipientIds:
+#            recipientIds.remove(userId)
 
         if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")

@@ -1579,8 +1579,6 @@ class HTTPEntityMini(Schema):
             self.category           = schema.category
             self.subcategory        = schema.subcategory
             self.images             = schema.images
-            from pprint import pformat
-            logs.info(pformat('schema.images:\n%s\nself.images:\n%s' % (schema.images, self.images)))
 
             try:
                 if 'coordinates' in schema.value:
