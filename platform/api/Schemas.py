@@ -661,7 +661,7 @@ class BasicEntity(Schema):
         self.types_source                   = SchemaElement(basestring)
         self.types_timestamp                = SchemaElement(datetime)
         
-        self.images                         = SchemaList(ImageSchema()) 
+        self.images                         = SchemaList(ImageSchema())
         self.images_source                  = SchemaElement(basestring)
         self.images_timestamp               = SchemaElement(datetime)
         
@@ -721,6 +721,7 @@ class BasicEntity(Schema):
             'title',
             'types',
             'sources',
+            'images',
         ])
         for arg in args:
             attributes.add(arg)
@@ -1294,6 +1295,7 @@ class BasicEntityMini(BasicEntity):
         self.types                          = SchemaList(SchemaElement(basestring))
         self.sources                        = EntitySourcesSchema()
         self.coordinates                    = CoordinatesSchema()
+        self.images                         = SchemaList(ImageSchema())
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):
