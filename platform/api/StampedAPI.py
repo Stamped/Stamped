@@ -773,7 +773,7 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s'
+        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
                     (account.netflix_user_id, account.netflix_token, account.netflix_secret))
 
         if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret != None:
