@@ -61,8 +61,51 @@
         
         $('.profile-nav a').each(function () {
             $(this).click(function() {
-                $(this).parents(".profile-sections").each(function() {
-                    $(this).find(".profile-section").slideToggle('fast', function() {
+                var link = $(this);
+                
+                link.parents(".profile-sections").each(function() {
+                    var elems = $(this).find(".profile-section");
+                    /*var to_hide = -1;
+                    
+                    $(elems).each(function (i, elem) {
+                        if ($(elem).is(":visible")) {
+                            to_hide = i;
+                            return false;
+                        }
+                    });
+                    
+                    var offset  = (link.hasClass("up-arrow") ? -1 : 1);
+                    var to_show = (to_hide + offset) % elems.length;
+                    
+                    var elem_to_hide = $(elems[to_hide]);
+                    var elem_to_show = $(elems[to_show]);
+                    
+                    elem_to_hide.css("height: 100%; opacity: 1;");
+                    elem_to_show.css("height: 0; opacity: 0;");
+                    elem_to_show.show();
+                    
+                    elem_to_hide.animate({
+                        opacity  : 0, 
+                        height   : 0
+                    }, {
+                        queue    : false, 
+                        duration : 2000, 
+                        easing   : 'swing', 
+                    });
+                    
+                    elem_to_show.animate({
+                        opacity  : 1, 
+                        height   : "100%"
+                    }, {
+                        queue    : false, 
+                        duration : 2000, 
+                        easing   : 'swing', 
+                        complete : function() {
+                            elem_to_hide.hide();
+                        }
+                    });*/
+                    
+                    $(elems).slideToggle('fast', function() {
                         
                     });
                 });

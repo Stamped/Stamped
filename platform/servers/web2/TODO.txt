@@ -1,6 +1,6 @@
 
 TODO:
-    * replace previews in stamp-gallery-items with real elements
+    * replace credit in stamp-gallery-items with real elements
     
     * implement user stamp category distribution
         * TODO: figure out bargraph height issue
@@ -19,8 +19,13 @@ TODO:
     * when stamp images don't load, they still display a border
 
 POLISH:
+    * fix profile header nav animation
     * link profile image to lightboxed full-resolution version
+    * link stamp image to lightboxed full-resolution version
 
 OPTIMIZE:
-    * profile images we're downloading are 500x500 even for small previews -- wasteful!
+    * 
+
+OLD:
+    * profile images we're downloading are 500x500 even for small previews -- wasteful
 
