@@ -3040,6 +3040,8 @@ class StampedAPI(AStampedAPI):
 
         objects = ActivityObjectIds()
 
+        logs.info('\n### ADDING ACTIVITY verb: %s   userId: %s' % (verb, userId))
+
         if verb == 'follow':
             objects.user_ids        = [ kwargs['friendId'] ] 
             group                   = True
@@ -3214,6 +3216,8 @@ class StampedAPI(AStampedAPI):
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
+
+        logs.info('len(activityData): %d  ' % len(activityData))
 
         activity = []
         for item in activityData:
