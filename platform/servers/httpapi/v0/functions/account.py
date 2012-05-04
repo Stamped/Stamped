@@ -233,7 +233,17 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     logs.info('\n### request auth result: %s' % result)
-    #TODO populate user account information with credentials
+
+    netflixAuth = NetflixAuthSchema()
+    netflixAuth.netflix_token       = result['oauth_token']
+    netflixAuth.netflix_secret      = result['oauth_token_secret']
+    netflixAuth.netflix_user_id     = result['user_id']
+
+    logs.info('\nnetflixAuth %s' % netflixAuth)
+
+    data = { 'netflixAuth' : netflixAuth }
+    stampedAPI.updateLinkedAccounts()
+
     return createNetflixLoginResponse()
 
 

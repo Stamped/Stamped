@@ -355,7 +355,7 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
-        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_user_id             = SchemaElement(basestring)
         self.netflix_token          = SchemaElement(basestring)
         self.netflix_secret         = SchemaElement(basestring)
 
@@ -373,6 +373,7 @@ class HTTPLinkedAccounts(Schema):
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
         elif schema.__class__.__name__ == 'NetflixAuthSchema':
+            schema.netflix.user_id      = self.netflix_user_id
             schema.netflix.token        = self.netflix_token
             schema.netflix.secret       = self.netflix_secret
         else:
