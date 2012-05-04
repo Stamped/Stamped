@@ -3111,6 +3111,9 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
+        if userId in recipientIds:
+            recipientIds.remove(userId)
+
         if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")
 
