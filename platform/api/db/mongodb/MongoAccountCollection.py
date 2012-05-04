@@ -136,7 +136,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Netflix
         if netflix is not None:
             for k, v in netflix.value.iteritems():
-                if k in valid_netflix and v is not none:
+                if k in valid_netflix and v is not None:
                     field['linked_accounts.netflix.%s' % k] = v
             
         if len(fields) > 0:
