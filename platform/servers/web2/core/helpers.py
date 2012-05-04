@@ -32,7 +32,7 @@ STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETT
 class StampedAPIProxy(object):
     
     def __init__(self):
-        self._local = utils.is_ec2()
+        self._local = (not IS_PROD)
         self.api = globalMongoStampedAPI()
     
     def getUser(self, **params):
