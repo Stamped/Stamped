@@ -97,12 +97,6 @@ TODO:
                 * NOTE: static stylesheet would need to use less runtime in order to utilize javascript
                     * this implies that it is better suited elsewhere!
 */
-/*
-********** ********** ********** ********** ********** ********** ********** **********
-TODO: don't use this technique or extend less.js -- too much overhead; just separate 
-definitions manually for now?
-********** ********** ********** ********** ********** ********** ********** **********
-*/
 .user-logo {
   width: 195px;
   height: 195px;
@@ -125,12 +119,6 @@ definitions manually for now?
 
 }
 .profile-header .innerbg .profile-header-pre {
-  width: 100%;
-  margin: 0;
-  background: -webkit-linear-gradient(135deg, #529aff, #00357f);
-  background: -moz-linear-gradient(135deg, #529aff, #00357f);
-  background: -o-linear-gradient(135deg, #529aff, #00357f);
-  background: linear-gradient(135deg, #529aff, #00357f);
   -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -147,12 +135,6 @@ definitions manually for now?
   margin: 0;
 }
 .profile-header .innerbg .profile-header-post {
-  width: 100%;
-  margin: 0;
-  background: -webkit-linear-gradient(135deg, #529aff, #00357f);
-  background: -moz-linear-gradient(135deg, #529aff, #00357f);
-  background: -o-linear-gradient(135deg, #529aff, #00357f);
-  background: linear-gradient(135deg, #529aff, #00357f);
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -173,7 +155,6 @@ definitions manually for now?
 }
 .profile-header .innerbg .profile-header-post .inset-stamp .number {
   font-family: "StampedEntityFont", helvetica, sans-serif;
-  color: #004ab2;
   font-size: 2em;
   letter-spacing: .05em;
   margin: 0 0 -0.25em;

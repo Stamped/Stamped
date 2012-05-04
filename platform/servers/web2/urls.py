@@ -4,15 +4,16 @@ import settings
 
 urlpatterns = patterns('',
     # blog
-    url(r'^blog$',                          'core.views.blog'), 
+    url(r'^blog$',                              'core.views.blog'), 
     
     # index
-    url(r'^index$',                         'core.views.index'), 
-    url(r'^index\.html?$',                  'core.views.index'), 
-    url(r'^/?$',                            'core.views.index'), 
+    url(r'^index$',                             'core.views.index'), 
+    url(r'^index\.html?$',                      'core.views.index'), 
+    url(r'^/?$',                                'core.views.index'), 
     
     # profile
-    url(r'^(?P<screen_name>[\w-]{1,20})',   'core.views.profile'), 
+    url(r'^(?P<screen_name>[\w-]{1,20})\/map$', 'core.views.map'), 
+    url(r'^(?P<screen_name>[\w-]{1,20})\/?$',   'core.views.profile'), 
 )
 
 # static assets

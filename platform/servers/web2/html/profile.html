@@ -13,7 +13,11 @@
 {% block head %}
     {{ block.super }}
     
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/demo.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
+    
+    <style>
+        {% custom_css "profile" %}
+    </style>
 {% endblock head %}
 
 {% block main %}
@@ -104,11 +108,17 @@
         </div>
     </div>
     
-    <div id="data" class="fixedwidth">
-        {% custom_template "stamp-gallery" %}
+    {% block pre_profile_main_content %}
+    <div id="main-content" class="fixedwidth">
+        {% endblock pre_profile_main_content %}
+        
+        {% block profile_main_content %}
+            {% custom_template "stamp-gallery" %}
+        {% endblock profile_main_content %}
+        
+        {% block post_profile_main_content %}
     </div>
-    
-    <div id="data2"></div>
+    {% endblock post_profile_main_content %}
 {% endblock main %}
 
 {% block scripts %}
@@ -119,7 +129,7 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
     <script src="{{ STATIC_URL }}js/client.js"></script>
-    <script src="{{ STATIC_URL }}js/demo.js"></script>
+    <script src="{{ STATIC_URL }}js/profile.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}
