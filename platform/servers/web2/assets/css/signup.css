@@ -1,0 +1,72 @@
+/* signup.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+.signup form {
+  position: relative;
+  width: 450px;
+  height: 77px;
+  background: url(/assets/img/textinput-sprite.png) left top no-repeat;
+}
+.signup p {
+  margin-bottom: 5px;
+  margin-left: 8px;
+}
+.signup input {
+  width: 340px;
+  height: 40px;
+  border: 0;
+  position: absolute;
+  left: 30px;
+  top: 15px;
+  *top: 25px;
+  /* IE7 */
+
+  color: #cccccc;
+  outline: none;
+  background: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -o-border-radius: 0px;
+  border-radius: 0px;
+}
+.mobile-iphone .signup input {
+  top: 12px;
+}
+.signup button {
+  background: url(/assets/img/submitbutton-sprite.png) left top no-repeat;
+  width: 57px;
+  height: 44px;
+  border: 0;
+  position: absolute;
+  right: 14px;
+  top: 12px;
+}
+.signup .active {
+  background-position: left -80px;
+}
+.signup .active input {
+  color: #666;
+}
+.validated button {
+  background-position: left -44px;
+}
+.validated input {
+  color: #666;
+}
+.thanks {
+  background: url(/assets/img/whoa-thanks.png) left top no-repeat;
+  width: 170px;
+  height: 29px;
+  clear: both;
+  display: none;
+}

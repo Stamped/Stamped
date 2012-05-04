@@ -1,0 +1,398 @@
+@import "libs/h5bp.min.css";
+/* styles.less - Main Stamped.com Stylesheet
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/*---------------------------------------------------
+    LESS Elements 0.6
+    ---------------------------------------------------
+    A set of useful LESS mixins by Dmitry Fadeyev
+    Special thanks for mixin suggestions to:
+      Kris Van Herzeele,
+      Benoit Adam,
+      Portenart Emile-Victor,
+      Ryan Faerman
+
+    More info at: http://lesselements.com
+-----------------------------------------------------*/
+@font-face {
+  font-family: "StampedEntityFont";
+  src: local("☺"), url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
+}
+@font-face {
+  font-family: "StampedScreenNameFont";
+  src: local("☺"), url(/assets/fonts/TitlingGothicFBComp-Reg.otf) format("opentype");
+}
+/*
+@font-face {
+    font-family: "StampedButtonFont";
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
+}*/
+body,
+html {
+  width: 100%;
+  height: 100%;
+}
+body {
+  background: #fff;
+  font-family: 'arial', sans-serif;
+  color: #666;
+  font-size: 1em;
+}
+a,
+a:visited {
+  color: #3366cc;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.replaced {
+  display: block;
+  text-indent: -9999em;
+  overflow: hidden;
+}
+.fullwidth {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.floatleft {
+  float: left;
+}
+.floatright {
+  float: right;
+}
+header,
+footer,
+.fixedwidth {
+  width: 940px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0 none;
+  position: relative;
+}
+/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+
+@color: color(`window.colors.baseColor`);
+@darkcolor: darken(@color, 10%);
+
+TODO: 
+    * color scheme constants
+        * options:
+            * modify CSS onload via javascript
+                * downside: requires javascript
+            * separate generic styles from templated, customized styles generated server-side
+                * styles.css and custom.css?variables... (version should be one optional variable)
+                * generate and *cache* custom.css stylesheets w/ long TTL
+                * downside: harder to take advantage of CDN caching?
+            * attempt to inline style on page to override !important colors?
+                * downside: wouldn't easily support static operations
+                * NOTE: static stylesheet absolutely CANNOT contain JS logic like below!
+                    * this implies that it is better suited elsewhere!!
+
+<meta property="og:image" content="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
+
+*/
+.user-logo {
+  width: 195px;
+  height: 195px;
+  position: absolute;
+  top: -125px;
+  left: -125px;
+  z-index: 101;
+}
+.profile-header {
+  background: #e5e5e5;
+  background: -webkit-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
+  background: -moz-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
+  background: -ms-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
+  background: -o-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
+}
+.profile-header .innerbg {
+  /* TODO: get this mask working; kind of want blend-mode multiply... */
+
+  /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+
+}
+.profile-header .innerbg .profile-header-pre {
+  width: 100%;
+  margin: 0;
+  background: -webkit-linear-gradient(135deg, #529aff, #00357f);
+  background: -moz-linear-gradient(135deg, #529aff, #00357f);
+  background: -o-linear-gradient(135deg, #529aff, #00357f);
+  background: linear-gradient(135deg, #529aff, #00357f);
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+}
+.profile-header .innerbg .profile-header-body {
+  padding: 34px 0;
+}
+.profile-header .innerbg .profile-header-body .floatleft {
+  margin: 0 24px 0 0;
+}
+.profile-header .innerbg .profile-header-body p {
+  margin: 0;
+}
+.profile-header .innerbg .profile-header-post {
+  width: 100%;
+  margin: 0;
+  background: -webkit-linear-gradient(135deg, #529aff, #00357f);
+  background: -moz-linear-gradient(135deg, #529aff, #00357f);
+  background: -o-linear-gradient(135deg, #529aff, #00357f);
+  background: linear-gradient(135deg, #529aff, #00357f);
+  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  height: 16px;
+}
+.profile-header .innerbg .profile-header-post .inset-stamp {
+  background: url(/assets/img/insetstamp.png) center top no-repeat;
+  text-align: center;
+  position: relative;
+  top: -75px;
+  width: 167px;
+  min-height: 75px;
+  z-index: 100;
+  margin: 0 auto;
+  padding: 18px 20px 0;
+}
+.profile-header .innerbg .profile-header-post .inset-stamp .number {
+  font-family: "StampedEntityFont", helvetica, sans-serif;
+  color: #004ab2;
+  font-size: 2em;
+  letter-spacing: .05em;
+  margin: 0 0 -0.25em;
+}
+.profile-header .innerbg .profile-header-post .inset-stamp p {
+  margin: 0 0 .5em;
+  color: #000;
+}
+.ribbon-top {
+  background: url(/assets/img/ribbon-top.png) left top repeat-x;
+  height: 16px;
+}
+.ribbon-bottom {
+  background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
+  height: 16px;
+}
+.profile-image-large {
+  float: left;
+}
+.profile-image-large img {
+  width: 128px;
+  height: 128px;
+  border: 4px solid #ffffff;
+  -webkit-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-small {
+  float: left;
+}
+.profile-image-small img {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.user-gallery .user-gallery-item {
+  margin: 0 4px 4px 0;
+}
+.user-gallery :nth-child(10) {
+  background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.user-gallery :nth-child(10) img {
+  display: none;
+}
+.user-gallery :nth-child(n+11) {
+  display: none;
+}
+.profile-section {
+  display: none;
+}
+.profile-section.profile-section-default {
+  display: block;
+}
+.profile-section0 {
+  float: left;
+  width: 35%;
+}
+.profile-section1,
+.profile-section2 {
+  float: right;
+  width: 18%;
+}
+.profile-section1 .number,
+.profile-section2 .number {
+  font-family: "StampedEntityFont", helvetica, sans-serif;
+  font-size: 2em;
+  letter-spacing: .05em;
+  color: #000;
+}
+.profile-section3 {
+  float: right;
+  width: 45%;
+}
+.bold {
+  color: #333;
+  font-weight: bold;
+}
+.italics {
+  font-style: italic;
+}
+.shadow {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #000;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  display: none;
+  filter: alpha(opacity=65);
+}
+.brand {
+  background: url(/assets/img/stamped-logo.png) left top no-repeat;
+  width: 180px;
+  height: 180px;
+  margin: -180px auto 0;
+  float: none;
+  position: relative;
+  bottom: -197px;
+}
+.card {
+  margin: 45px auto 0;
+  padding: 0;
+  width: 940px;
+  background: none repeat scroll 0 0 #FFFFFF;
+  border: 0 none;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15) #000000;
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15) #000000;
+  -ms-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15) #000000;
+  -o-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15) #000000;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15) #000000;
+}
+.card .inner {
+  clear: both;
+  padding: 175px 20px .3em;
+}
+.card .top-wave {
+  background: url(/assets/img/main-topcap.png) left top no-repeat;
+  height: 8px;
+  margin: 0;
+}
+.card .bottom-wave {
+  background: url(/assets/img/main-botcap.png) left top no-repeat;
+  height: 8px;
+  margin: 0;
+}
+footer {
+  margin: 30px 0;
+  padding-bottom: 30px;
+  position: relative;
+  font-size: 12px;
+  color: #999;
+}
+footer a {
+  color: #7a9ccc;
+  margin-left: 0px;
+  margin-right: 15px;
+  font-weight: bold;
+  display: inline-block;
+}
+footer .copyright,
+footer .copyright {
+  float: right;
+}
+footer .copyright a,
+footer .copyright a {
+  color: #999;
+  font-weight: normal;
+  margin-right: 10px;
+}
+.smalldisplay .iphone {
+  margin-top: -60px;
+  position: relative;
+}
+.talldisplay .iphone {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -470px;
+  margin-top: -405px;
+}
+.stamp-category-book .icon {
+  background: url(/assets/img/entity-type-book.png) no-repeat;
+  width: 19px;
+  height: 15px;
+}
+.stamp-category-film .icon {
+  background: url(/assets/img/entity-type-film.png) no-repeat;
+  width: 15px;
+  height: 15px;
+}
+.stamp-category-food .icon {
+  background: url(/assets/img/entity-type-food.png) no-repeat;
+  width: 21px;
+  height: 15px;
+}
+.stamp-category-music .icon {
+  background: url(/assets/img/entity-type-music.png) no-repeat;
+  width: 15px;
+  height: 15px;
+}
+.stamp-category-other .icon,
+.stamp-category- .icon {
+  background: url(/assets/img/entity-type-other.png) no-repeat;
+  width: 12px;
+  height: 15px;
+}
+.screen-name {
+  text-transform: lowercase;
+  font-family: "StampedScreenNameFont", helvetica, sans-serif;
+  letter-spacing: .05em;
+}
+.pronounced-title a,
+a.pronounced-title {
+  color: #000;
+}
+.pronounced-title {
+  font-family: "StampedEntityFont", helvetica, sans-serif;
+  font-size: 2em;
+  letter-spacing: .025em;
+  /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
+
+}
+.large {
+  font-size: 2.2em;
+}
