@@ -303,11 +303,7 @@ BOLD_COLOR		= \033[1m
 REVERSE_COLOR	= \033[7m
 END_COLOR		= \033[0m
 
-ifeq ($(OS),osx)
-	CECHO		= echo
-else # not osx
-	CECHO		= echo -e
-endif
+CECHO			= echo
 
 define DEFINE_COLOR
    FR_COLOR_$1 = \033[3$$($1)m

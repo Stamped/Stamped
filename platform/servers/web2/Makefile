@@ -32,8 +32,8 @@ ALL_TARGETS					= $(TEMPLATE_DEST) $(LESS_CSS_TARGETS)
 
 define ADD_TARGET_PATTERN
 $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
-	@$$(CECHO) "lessc '$$(BOLD_COLOR)$$(FR_COLOR_RED)$$<$$(END_COLOR)' > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
-	@lessc $$< > $$@
+	@$$(CECHO) "$(LESS_CSS_PROG) '$$(BOLD_COLOR)$$(FR_COLOR_RED)$$<$$(END_COLOR)' > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
+	@$(LESS_CSS_PROG) $$< > $$@
 	@echo
 endef
 
