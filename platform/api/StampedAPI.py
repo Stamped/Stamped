@@ -3217,7 +3217,7 @@ class StampedAPI(AStampedAPI):
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
 
-        info.logs('len(activityData): %d  ' % len(activityData))
+        logs.info('len(activityData): %d  ' % len(activityData))
 
         activity = []
         for item in activityData:
