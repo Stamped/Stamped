@@ -355,7 +355,7 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
-        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_user_id             = SchemaElement(basestring)
         self.netflix_token          = SchemaElement(basestring)
         self.netflix_secret         = SchemaElement(basestring)
 
@@ -373,6 +373,7 @@ class HTTPLinkedAccounts(Schema):
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
         elif schema.__class__.__name__ == 'NetflixAuthSchema':
+            schema.netflix.user_id      = self.netflix_user_id
             schema.netflix.token        = self.netflix_token
             schema.netflix.secret       = self.netflix_secret
         else:
@@ -626,6 +627,7 @@ class HTTPNetflixId(Schema):
 
 class HTTPNetflixAuthResponse(Schema):
     def setSchema(self):
+        self.stamped_oauth_token= SchemaElement(basestring)
         self.oauth_token        = SchemaElement(basestring)
         self.secret             = SchemaElement(basestring)
         self.oauth_verifier     = SchemaElement(basestring)
@@ -965,7 +967,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
                 source.endpoint_data    = entity.sources.netflix_id
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -1039,7 +1041,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(

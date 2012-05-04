@@ -531,10 +531,11 @@ class Netflix(object):
                     if self.__addToBlacklistCount(user_id):
                         logs.warning('Too many 401/403 responses.  User added to blacklist')
 
-        if response.status == 200:
+        if response.status >= 300:
             return json.loads(response.read())
         else:
             failData = json.loads(response.read())['status']
+            logs.info('failData: %s' % failData)
             raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
                            (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
@@ -643,7 +644,7 @@ class Netflix(object):
     def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
         pass
 
-    def getETag(self, user_id, user_token, user_secret):
+    def getETag(self, user_id, user_token, user_secret, netflix_id):
         token = oauth.OAuthToken(user_token, user_secret)
         getresponse = self.__get(
             'queues/instant',
@@ -658,7 +659,7 @@ class Netflix(object):
         """
         Returns a boolean (synchronously) if the operation succeeded
         """
-        etag = getETag(user_id, user_token, user_secret)
+        etag = self.getETag(user_id, user_token, user_secret, netflix_id)
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__post(
             'queues/instant',
@@ -681,15 +682,15 @@ class Netflix(object):
         """
         pass
 
-    def getLoginUrl(self):
+    def getLoginUrl(self, authUserId):
         #request the oauth token and secret
         token_info = self.__get('oauth/request_token')
         token = oauth.OAuthToken(
             token_info['oauth_token'].encode('ascii'),
             token_info['oauth_token_secret'].encode('ascii'),
         )
-        token.set_callback('https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json?secret=%s'
-                % token_info['oauth_token_secret'].encode('ascii'))
+        token.set_callback('https://dev.stamped.com/v0/account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s'
+                % (token_info['oauth_token_secret'].encode('ascii'), authUserId))
 
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url = 'https://api-user.netflix.com/oauth/login',

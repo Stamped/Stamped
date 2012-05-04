@@ -644,7 +644,7 @@ class StampedAPI(AStampedAPI):
         facebookAuth    = kwargs.pop('facebookAuth', None)
         netflixAuth     = kwargs.pop('netflixAuth', None)
         
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook, netflix=netflixAuth)
         
         # Alert Facebook asynchronously
         if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
@@ -773,12 +773,17 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret != None:
+        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
+                    (account.netflix_user_id, account.netflix_token, account.netflix_secret))
+
+        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret == None:
+            logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
+        logs.info('About to add to Queue')
         result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-
+        logs.info('successfully added to queue')
 
         # TODO check results
 
@@ -3216,8 +3221,6 @@ class StampedAPI(AStampedAPI):
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
-
-        logs.info('len(activityData): %d  ' % len(activityData))
 
         activity = []
         for item in activityData:
