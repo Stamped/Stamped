@@ -1569,6 +1569,7 @@ class HTTPEntityMini(Schema):
         self.category               = SchemaElement(basestring, required=True)
         self.subcategory            = SchemaElement(basestring, required=True)
         self.coordinates            = SchemaElement(basestring)
+        self.images                 = SchemaList(ImageSchema())
 
     def importSchema(self, schema):
         if isinstance(schema, BasicEntity):
@@ -1576,7 +1577,8 @@ class HTTPEntityMini(Schema):
             self.title              = schema.title 
             self.subtitle           = schema.subtitle
             self.category           = schema.category
-            self.subcategory        = schema.subcategory 
+            self.subcategory        = schema.subcategory
+            self.images             = schema.images
 
             try:
                 if 'coordinates' in schema.value:
