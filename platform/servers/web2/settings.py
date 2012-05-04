@@ -6,7 +6,7 @@ import os
 import libs.ec2_utils
 
 IS_PROD         = libs.ec2_utils.is_prod_stack()
-DEBUG           = (not utils.is_ec2())
+DEBUG           = (not IS_PROD)
 TEMPLATE_DEBUG  = DEBUG
 PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
