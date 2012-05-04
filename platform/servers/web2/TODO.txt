@@ -1,11 +1,9 @@
 
 TODO:
-    * replace credit in stamp-gallery-items with real elements
+    * implement google maps stamp-gallery view
     
     * implement user stamp category distribution
         * TODO: figure out bargraph height issue
-    
-    * implement google maps stamp-gallery view
     
     * debug blurb and comment references via blurb_formatted
     
@@ -28,4 +26,5 @@ OPTIMIZE:
 
 OLD:
     * profile images we're downloading are 500x500 even for small previews -- wasteful
+    * replace credit in stamp-gallery-items with real elements
 

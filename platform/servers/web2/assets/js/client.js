@@ -71,8 +71,9 @@ if (typeof(StampedClient) == "undefined") {
         
         this.get_user_stamps_by_id = function(user_id) {
             // TODO: support genericslice params
+            // TODO: support HTTPGenericSlice params as schema which may be validated
             
-            //return _get_user_stamps({ 'user_id' : user_id }, params);
+            //return that.get_user_stamps({ 'user_id' : user_id });
             return _get("/collections/user.json", {
                 'user_id' : user_id
             }).pipe(function (data) {
@@ -86,6 +87,15 @@ if (typeof(StampedClient) == "undefined") {
             }).pipe(function (data) {
                 return new Stamps(data);
             });
+        };
+        
+        this.get_user_stamps = function(options) {
+            // TODO: validate options
+            
+            return _get("/collections/user.json", options)
+                .pipe(function (data) {
+                    return new Stamps(data);
+                });
         };
         
         /* ------------------------------------------------------------------
@@ -163,7 +173,7 @@ if (typeof(StampedClient) == "undefined") {
         };
         
         var _verify_auth = function() {
-            if (!that.is_authorized_user) {
+            if (!that.is_authorized_user()) {
                 var func = arguments.callee.caller.name || "authorized function";
                 
                 _throw(func + " requires authorization; please login first.");
