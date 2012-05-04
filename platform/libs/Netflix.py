@@ -531,11 +531,11 @@ class Netflix(object):
                     if self.__addToBlacklistCount(user_id):
                         logs.warning('Too many 401/403 responses.  User added to blacklist')
 
-        if response.status >= 300:
+        if response.status < 300:
             return json.loads(response.read())
         else:
             failData = json.loads(response.read())['status']
-            logs.info('failData: %s' % failData)
+            logs.info('Failed with status code %d' % response.status)
             raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
                            (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
