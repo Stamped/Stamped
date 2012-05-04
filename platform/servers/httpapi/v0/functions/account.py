@@ -207,7 +207,7 @@ def removeTwitter(request, authUserId, **kwargs):
 
 def createNetflixLoginResponse():
     netflix = globalNetflix()
-    url = netflix.getLoginUrl()
+    secret, url = netflix.getLoginUrl()
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
