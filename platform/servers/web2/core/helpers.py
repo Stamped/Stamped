@@ -32,23 +32,23 @@ STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETT
 class StampedAPIProxy(object):
     
     def __init__(self):
-        self._local = (not IS_PROD)
+        self._prod = IS_PROD
         self.api = globalMongoStampedAPI()
     
     def getUser(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("users/show.json", params)
     
     def getUserStamps(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("collections/user.json", params)
     
     def getFriends(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/friends.json", params)
