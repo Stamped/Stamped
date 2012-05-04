@@ -82,8 +82,9 @@ header, footer, .fixedwidth {
 @color: color(`window.colors.baseColor`);
 @darkcolor: darken(@color, 10%);
 
-TODO: 
-    * color scheme constants
+TODO:
+    * dynamic color scheme constants (e.g., constants that change per page)
+        * like a uniform variable in a shader language
         * options:
             * modify CSS onload via javascript
                 * downside: requires javascript
@@ -91,14 +92,23 @@ TODO:
                 * styles.css and custom.css?variables... (version should be one optional variable)
                 * generate and *cache* custom.css stylesheets w/ long TTL
                 * downside: harder to take advantage of CDN caching?
+                * NOTE: possibly wouldn't need to reference custom.css directly; could be inlined on page
             * attempt to inline style on page to override !important colors?
                 * downside: wouldn't easily support static operations
-                * NOTE: static stylesheet absolutely CANNOT contain JS logic like below!
-                    * this implies that it is better suited elsewhere!!
-
-<meta property="og:image" content="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
-
+                * NOTE: static stylesheet would need to use less runtime in order to utilize javascript
+                    * this implies that it is better suited elsewhere!
 */
+
+/*@
+
+
+
+********** ********** ********** ********** ********** ********** ********** **********
+TODO: don't use this technique or extend less.js -- too much overhead; just separate 
+definitions manually for now?
+********** ********** ********** ********** ********** ********** ********** **********
+
+
 
 @user_primary:   #004ab2;
 @user_secondary: #0057d1;
@@ -112,15 +122,6 @@ TODO:
 @primary:   lighten(@user_light, 25%);
 @secondary: darken( @user_dark,  10%);
 
-.user-logo {
-    width:  195px;
-    height: 195px;
-    position: absolute;
-    top: -125px;
-    left: -125px;
-    z-index: 101;
-}
-
 .user-gradient(@angle: 135deg) {
     width:  100%;
     margin: 0;
@@ -129,6 +130,17 @@ TODO:
     background: -moz-linear-gradient(@angle, @primary, @secondary);
     background: -o-linear-gradient(@angle, @primary, @secondary);
     background: linear-gradient(@angle, @primary, @secondary);
+}
+
+@*/
+
+.user-logo {
+    width:  195px;
+    height: 195px;
+    position: absolute;
+    top: -125px;
+    left: -125px;
+    z-index: 101;
 }
 
 .profile-header {
@@ -143,7 +155,7 @@ TODO:
         /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
         
         .profile-header-pre {
-            .user-gradient(135deg);
+            /*@ .user-gradient(135deg); @*/
             
             .box-shadow(0, 3px, 3px, 0, @shadow);
         }
@@ -181,7 +193,8 @@ TODO:
                 
                 .number {
                     font-family: "StampedEntityFont", helvetica, sans-serif;
-                    color: @user_dark;
+                    /*@ color: @user_dark; @*/
+                    
                     font-size: 2em;
                     letter-spacing: .05em;
                     margin: 0 0 -.25em;
