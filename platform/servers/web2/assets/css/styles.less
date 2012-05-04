@@ -21,11 +21,12 @@
          url("/assets/fonts/TitlingGothicFBComp-Reg.otf") format("opentype");
 }
 
+/*
 @font-face {
     font-family: "StampedButtonFont";
     src: local("☺"),
          url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
-}
+}*/
 
 body, html {
     width:  100%;
@@ -138,12 +139,13 @@ TODO:
     .linear-gradient(left, @outer, @inner, @outer);
     
     .innerbg {
-        background: transparent url(/assets/img/noisemask.png) left top repeat;
+        /* TODO: get this mask working; kind of want blend-mode multiply... */
+        /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
         
         .profile-header-pre {
             .user-gradient(135deg);
             
-            .box-shadow(0, 3px, 3px, @shadow);
+            .box-shadow(0, 3px, 3px, 0, @shadow);
         }
         
         .profile-header-body {
@@ -160,7 +162,7 @@ TODO:
         
         .profile-header-post {
             .user-gradient(135deg);
-            .box-shadow(0, -3px, 3px, @shadow);
+            .box-shadow(0, -3px, 3px, 0, @shadow);
             
             height: 16px;
             
@@ -175,12 +177,19 @@ TODO:
                 z-index: 100;
                 
                 margin: 0 auto;
-                padding: 20px 20px 0;
+                padding: 18px 20px 0;
                 
                 .number {
-                    font-family: "StampedButtonFont", helvetica, sans-serif;
+                    font-family: "StampedEntityFont", helvetica, sans-serif;
                     color: @user_dark;
-                    font-weight: bold;
+                    font-size: 2em;
+                    letter-spacing: .05em;
+                    margin: 0 0 -.25em;
+                }
+                
+                p {
+                    margin: 0 0 .5em;
+                    color: #000;
                 }
             }
         }
@@ -197,6 +206,11 @@ TODO:
     height: 16px;
 }
 
+.profile-image-border(@size) {
+    border: @size solid #fff;
+    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+}
+
 .profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
@@ -204,8 +218,7 @@ TODO:
         width:  @size;
         height: @size;
         
-        border: @border solid #fff;
-        .box-shadow(@border / 2, @border / 2, @border / 4, rgba(0, 0, 0, 0.15));
+        .profile-image-border(@border);
     }
 }
 
@@ -227,8 +240,7 @@ TODO:
         width:  24px;
         height: 24px;
         
-        border: 2px solid #fff;
-        .box-shadow(1px, 1px, .5px, rgba(0, 0, 0, 0.15));
+        .profile-image-border(2px);
         
         img {
             display: none;
@@ -258,7 +270,9 @@ TODO:
     width: 18%;
     
     .number {
-        font-family: "StampedButtonFont", helvetica, sans-serif;
+        font-family: "StampedEntityFont", helvetica, sans-serif;
+        font-size: 2em;
+        letter-spacing: .05em;
         color: #000;
     }
 }

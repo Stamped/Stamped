@@ -26,8 +26,9 @@
                 {{#contents}}
                 <div class="stamped-content">
                     <div>
-                        <p class="blurb">{{blurb}}</p>
+                        {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
                         
+                        <!--
                         <div class="images">
                         {{#images}}
                             {{! TODO: here would be a perfect example of Handlebars relative 
@@ -36,6 +37,7 @@
                             <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
                         {{/images}}
                         </div>
+                        -->
                     </div>
                 </div>
                 {{/contents}}
@@ -66,7 +68,9 @@
                     {{#user}}
                     <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
                         <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
-                        <div class="credit"></div>
+                        <div class="credit">
+                            <img src="http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-credit-18x18.png" />
+                        </div>
                     </a>
                     {{/user}}
                 </div>
@@ -86,6 +90,6 @@
             {{/previews}}
         </div>
     </div>
-    <div class="bottom-wave"></div>
+    <div class="bottom-wave">&nbsp;</div>
 </div>
 
