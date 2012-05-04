@@ -658,7 +658,7 @@ class Netflix(object):
         """
         Returns a boolean (synchronously) if the operation succeeded
         """
-        etag = getETag(user_id, user_token, user_secret)
+        etag = self.getETag(user_id, user_token, user_secret)
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__post(
             'queues/instant',
