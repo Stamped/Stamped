@@ -241,8 +241,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     logs.info('\nnetflixAuth %s' % netflixAuth)
 
-    data = { 'netflixAuth' : netflixAuth }
-    stampedAPI.updateLinkedAccounts()
+    stampedAPI.updateLinkedAccounts(authUserId, netflixAuth=netflixAuth)
 
     return createNetflixLoginResponse()
 
