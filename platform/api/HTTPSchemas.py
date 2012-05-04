@@ -668,7 +668,6 @@ class HTTPEndpointResponse(Schema):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
-            action.name     = name
             action.sources  = sources
 
             self.action = action
