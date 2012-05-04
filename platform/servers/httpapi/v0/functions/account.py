@@ -224,7 +224,8 @@ def netflixLogin(request, authUserId, http_schema, **kwargs):
     logs.info('\n### HIT netflixLogin')
     return createNetflixLoginResponse()
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
+                   parse_request_kwargs={'allow_oauth_token': True})
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     logs.info('\n### HIT netflixLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
