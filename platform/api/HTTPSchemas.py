@@ -662,28 +662,15 @@ class HTTPClientLogsEntry(Schema):
 
 class HTTPEndpointResponse(Schema):
     def setSchema(self):
-        self.action         = HTTPEndpointAction()
+        self.action         = HTTPAction()
 
     def setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
-            action.name     = name
             action.sources  = sources
 
-            item            = HTTPEndpointAction()
-            item.action     = action
-            item.name       = name
-
-            self.action = item
-
-# HTTPEndpointResponse Components
-
-class HTTPEndpointAction(Schema):
-    def setSchema(self):
-        self.action                 = HTTPAction()
-        self.name                   = SchemaElement(basestring, required=True)
-
+            self.action = action
 
 # ######## #
 # Entities #
