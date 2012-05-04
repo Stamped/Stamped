@@ -965,7 +965,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
                 source.endpoint_data    = entity.sources.netflix_id
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -1039,7 +1039,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(

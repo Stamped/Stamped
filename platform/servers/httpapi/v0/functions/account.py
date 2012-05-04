@@ -213,7 +213,7 @@ def createNetflixLoginResponse():
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
-    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json'
+    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
     return transformOutput(response.exportSparse())
@@ -227,7 +227,7 @@ def netflixLogin(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
-    logs.info('\n### HIT netflixLoginCallback oauth_token: %s   secret: %s' % (http_schema.oauth_token, http_schema.secret))
+    logs.info('\n### HIT netflixLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
     netflix = globalNetflix()
 
     result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
