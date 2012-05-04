@@ -644,7 +644,7 @@ class StampedAPI(AStampedAPI):
         facebookAuth    = kwargs.pop('facebookAuth', None)
         netflixAuth     = kwargs.pop('netflixAuth', None)
         
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook, netflix=netflixAuth)
         
         # Alert Facebook asynchronously
         if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
