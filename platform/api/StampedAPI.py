@@ -3113,8 +3113,8 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
 
-#        if userId in recipientIds:
-#            recipientIds.remove(userId)
+        if userId in recipientIds:
+            recipientIds.remove(userId)
 
         if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")
@@ -3216,6 +3216,8 @@ class StampedAPI(AStampedAPI):
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
+
+        info.logs('len(activityData): %d  ' % len(activityData))
 
         activity = []
         for item in activityData:
