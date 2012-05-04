@@ -39,12 +39,10 @@
 ||__|||__|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/__\|/__\|/__\|
 
-                                      
+
 
 TODO:
     * implement google maps stamp-gallery view
-    
-    * find feasible approach to color scheme constants
     
     * implement user stamp category distribution
         * TODO: figure out bargraph height issue
@@ -69,4 +67,5 @@ OPTIMIZE:
 OLD:
     * profile images we're downloading are 500x500 even for small previews -- wasteful
     * replace credit in stamp-gallery-items with real elements
+    * find feasible approach to color scheme constants
 

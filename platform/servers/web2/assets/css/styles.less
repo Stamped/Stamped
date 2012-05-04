@@ -99,35 +99,6 @@ TODO:
                     * this implies that it is better suited elsewhere!
 */
 
-/*
-********** ********** ********** ********** ********** ********** ********** **********
-TODO: don't use this technique or extend less.js -- too much overhead; just separate 
-definitions manually for now?
-********** ********** ********** ********** ********** ********** ********** **********
-*/
-
-@user_primary:   #004ab2;
-@user_secondary: #0057d1;
-
-@l0: hue(hsl(lightness(@user_primary), 0, 0));
-@l1: hue(hsl(lightness(@user_secondary), 0, 0));
-
-@user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
-@user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
-
-@primary:   lighten(@user_light, 25%);
-@secondary: darken( @user_dark,  10%);
-
-.user-gradient(@angle: 135deg) {
-    width:  100%;
-    margin: 0;
-    
-    background: -webkit-linear-gradient(@angle, @primary, @secondary);
-    background: -moz-linear-gradient(@angle, @primary, @secondary);
-    background: -o-linear-gradient(@angle, @primary, @secondary);
-    background: linear-gradient(@angle, @primary, @secondary);
-}
-
 .user-logo {
     width:  195px;
     height: 195px;
@@ -149,8 +120,6 @@ definitions manually for now?
         /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
         
         .profile-header-pre {
-            .user-gradient(135deg);
-            
             .box-shadow(0, 3px, 3px, 0, @shadow);
         }
         
@@ -167,7 +136,6 @@ definitions manually for now?
         }
         
         .profile-header-post {
-            .user-gradient(135deg);
             .box-shadow(0, -3px, 3px, 0, @shadow);
             
             height: 16px;
@@ -187,7 +155,6 @@ definitions manually for now?
                 
                 .number {
                     font-family: "StampedEntityFont", helvetica, sans-serif;
-                    color: @user_dark;
                     
                     font-size: 2em;
                     letter-spacing: .05em;
