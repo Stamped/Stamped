@@ -62,7 +62,7 @@ class StampedAPIProxy(object):
                 return []
     
     def getFollowers(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/followers.json", params)
