@@ -664,12 +664,12 @@ class HTTPEndpointResponse(Schema):
     def setSchema(self):
         self.action         = HTTPEndpointAction()
 
-    def setAction(self, actionType, name, source, **kwargs):
+    def setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
             action.name     = name
-            action.sources  = source
+            action.sources  = sources
 
             item            = HTTPEndpointAction()
             item.action     = action
