@@ -248,6 +248,8 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
             # return login endpoint action
         else:
             raise e
+    if result == None:
+        return createNetflixLoginResponse()
 
     logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
 
