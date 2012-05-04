@@ -662,7 +662,7 @@ class HTTPClientLogsEntry(Schema):
 
 class HTTPEndpointResponse(Schema):
     def setSchema(self):
-        self.action         = HTTPEndpointAction()
+        self.action         = HTTPAction()
 
     def setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
