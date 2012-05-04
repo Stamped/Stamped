@@ -773,6 +773,9 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
+        from pprint import pformat
+        logs.info(pformat('account: %s' % account))
+
         if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret != None:
             return None
 
