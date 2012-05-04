@@ -205,9 +205,9 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
-def createNetflixLoginResponse():
+def createNetflixLoginResponse(authUserId):
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl()
+    secret, url = netflix.getLoginUrl(authUserId)
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
@@ -222,7 +222,7 @@ def createNetflixLoginResponse():
 @require_http_methods(["GET"])
 def netflixLogin(request, authUserId, http_schema, **kwargs):
     logs.info('\n### HIT netflixLogin')
-    return createNetflixLoginResponse()
+    return createNetflixLoginResponse(authUserId)
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
                    parse_request_kwargs={'allow_oauth_token': True})
@@ -241,9 +241,9 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     logs.info('\nnetflixAuth %s' % netflixAuth)
 
-    stampedAPI.updateLinkedAccounts(authUserId, netflixAuth=netflixAuth)
+    stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
 
-    return createNetflixLoginResponse()
+    return createNetflixLoginResponse(authUserId)
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
@@ -254,12 +254,12 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
         if e.code == 401:
-            return createNetflixLoginResponse()
+            return createNetflixLoginResponse(authUserId)
             # return login endpoint action
         else:
             raise e
     if result == None:
-        return createNetflixLoginResponse()
+        return createNetflixLoginResponse(authUserId)
 
     logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
 

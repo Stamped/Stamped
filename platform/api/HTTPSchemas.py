@@ -627,6 +627,7 @@ class HTTPNetflixId(Schema):
 
 class HTTPNetflixAuthResponse(Schema):
     def setSchema(self):
+        self.stamped_oauth_token= SchemaElement(basestring)
         self.oauth_token        = SchemaElement(basestring)
         self.secret             = SchemaElement(basestring)
         self.oauth_verifier     = SchemaElement(basestring)
