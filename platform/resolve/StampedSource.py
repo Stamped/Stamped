@@ -14,6 +14,7 @@ __all__ = [ 'StampedSource',
 
 import Globals
 from logs import report
+import re
 
 try:
     import logs
@@ -151,6 +152,24 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
         except Exception:
             return -1
 
+def _fixCast(cast):
+    newcast = []
+    for item in cast:
+        name = item.get('title', None)
+        character = item.get('character', None)
+        if name is None:
+            continue
+        m = re.match(r'(.+) as (.+)', name)
+        if m is not None:
+            name = m.group(1)
+            character = m.group(2)
+        newitem = {}
+        newitem['name'] = name
+        if character is not None:
+            newitem['character'] = character
+        newcast.append(newitem)
+    return newcast
+
 
 class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     """
@@ -163,7 +182,7 @@ class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     @lazyProperty 
     def cast(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity['cast'])#[ { 'name' : item['title'] } for item in self.entity['cast'] ]
         except Exception:
             return []
 
@@ -207,7 +226,7 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
     @lazyProperty 
     def cast(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity['cast'])# [ { 'name' : item['title'] } for item in self.entity['cast'] ]
         except Exception:
             return []
 
