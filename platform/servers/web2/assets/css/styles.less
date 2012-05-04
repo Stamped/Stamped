@@ -99,16 +99,12 @@ TODO:
                     * this implies that it is better suited elsewhere!
 */
 
-/*@
-
-
-
+/*
 ********** ********** ********** ********** ********** ********** ********** **********
 TODO: don't use this technique or extend less.js -- too much overhead; just separate 
 definitions manually for now?
 ********** ********** ********** ********** ********** ********** ********** **********
-
-
+*/
 
 @user_primary:   #004ab2;
 @user_secondary: #0057d1;
@@ -132,8 +128,6 @@ definitions manually for now?
     background: linear-gradient(@angle, @primary, @secondary);
 }
 
-@*/
-
 .user-logo {
     width:  195px;
     height: 195px;
@@ -155,7 +149,7 @@ definitions manually for now?
         /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
         
         .profile-header-pre {
-            /*@ .user-gradient(135deg); @*/
+            .user-gradient(135deg);
             
             .box-shadow(0, 3px, 3px, 0, @shadow);
         }
@@ -193,7 +187,7 @@ definitions manually for now?
                 
                 .number {
                     font-family: "StampedEntityFont", helvetica, sans-serif;
-                    /*@ color: @user_dark; @*/
+                    color: @user_dark;
                     
                     font-size: 2em;
                     letter-spacing: .05em;
