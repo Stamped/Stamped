@@ -535,6 +535,7 @@ class Netflix(object):
             return json.loads(response.read())
         else:
             failData = json.loads(response.read())['status']
+            logs.info('failData: %s' % failData)
             raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
                            (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
