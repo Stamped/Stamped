@@ -24,5 +24,6 @@
 + (id<STAction>)actionTodoStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionUntodoStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionDeleteStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context;
 
 @end

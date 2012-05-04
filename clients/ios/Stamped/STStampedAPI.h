@@ -140,6 +140,10 @@ typedef enum {
 
 - (void)handleCompletionWithSource:(id<STSource>)source action:(NSString*)action andContext:(STActionContext*)context;
 
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
+
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
+
 + (STStampedAPI*)sharedInstance;
 
 @end

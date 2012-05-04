@@ -78,6 +78,8 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color;
 
++ (CGFloat)legacyImageScale;
+
 + (CGFloat)imageScale;
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;

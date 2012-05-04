@@ -363,7 +363,7 @@ static Rdio* _rdio;
   NSData* data = [[NSData alloc] initWithContentsOfURL:url];
   UIImage* image = [UIImage imageWithData:data];
   if (CGRectIsNull(frame)) {
-    frame = CGRectMake(0, 0, image.size.width * [Util imageScale], image.size.height * [Util imageScale]);
+    frame = CGRectMake(0, 0, image.size.width * [Util legacyImageScale], image.size.height * [Util legacyImageScale]);
   }
   UIImageView* imageView = [[UIImageView alloc] initWithFrame:frame];
   imageView.image = image;
@@ -464,8 +464,12 @@ static Rdio* _rdio;
   }
 }
 
-+ (CGFloat)imageScale {
++ (CGFloat)legacyImageScale {
   return .5;
+}
+
++ (CGFloat)imageScale {
+  return 2.0;
 }
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message {

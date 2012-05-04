@@ -242,7 +242,7 @@
       shouldShrink = YES;
     }
     if (shouldShrink) {
-      CGSize newSize = [Util size:imageView.frame.size withScale:[Util imageScale]];
+      CGSize newSize = [Util size:imageView.frame.size withScale:[Util legacyImageScale]];
       imageView.frame = CGRectMake(0, 0, newSize.width, newSize.height);
     }
     imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:imageBounds];

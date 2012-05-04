@@ -202,7 +202,10 @@
   _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
   [self.scrollView appendChildView:_headerView];
   for (NSInteger i = 0; i < self.stamp.contents.count; i++) {
-    _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp index:i andDelegate:self.scrollView];
+    _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp 
+                                                               index:i 
+                                                               style:STStampDetailCommentsViewStyleNormal 
+                                                         andDelegate:self.scrollView];
     _commentsView.addCommentView.delegate = self;
     [self.scrollView appendChildView:_commentsView];
   }
@@ -255,7 +258,12 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  //stampPhotoView_.imageURL = stamp_.imageURL;
+  [[STActionManager sharedActionManager] setStampContext:self.stamp];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [[STActionManager sharedActionManager] setStampContext:nil];
+  [super viewWillDisappear:animated];
 }
 
 - (void)_deleteStampButtonPressed:(id)caller {

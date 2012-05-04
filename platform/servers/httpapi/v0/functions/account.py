@@ -10,7 +10,8 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 from errors             import *
-from HTTPSchemas        import HTTPEndpointResponse
+from HTTPSchemas        import *
+from Netflix            import *
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
@@ -204,22 +205,54 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
+def createNetflixLoginResponse():
+    netflix = globalNetflix()
+    url = netflix.getLoginUrl()
+
+    response                = HTTPEndpointResponse()
+    source                  = HTTPActionSource()
+    source.source           = 'netflix'
+    source.link             = url
+    source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/loginCallback.json'
+    response.setAction('netflix_login', 'Login to Netflix', [source])
+
+    return transformOutput(response.exportSparse())
+
+@handleHTTPRequest()
+@require_http_methods(["GET"])
+def netflixLogin(request, authUserId, http_schema, **kwargs):
+    logs.info('\n### HIT netflixLogin')
+    return createNetflixLoginResponse()
+
+@handleHTTPRequest(http_schema=HTTPNetflixAuthResponse)
+@require_http_methods(["GET"])
+def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
+    logs.info('\n### HIT netflixLoginCallback oauth_token: %s   secret: %s' % (http_schema.oauth_token, http_schema.secret))
+    netflix = globalNetflix()
+
+    result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+    logs.info('\n### request auth result: %s' % result)
+    #TODO populate user account information with credentials
+    return createNetflixLoginResponse()
+
+
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     logs.info('\n### ATTEMPTING TO ADD TO NETFLIX with netflix_id: %s' % http_schema.netflix_id)
     try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
+        result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
         if e.code == 401:
+            return createNetflixLoginResponse()
             # return login endpoint action
-            pass
         else:
             raise e
+    if result == None:
+        return createNetflixLoginResponse()
 
     logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
 
-    client = stampedAuth.getClientDetails(authClientId)
     response = HTTPEndpointResponse()
     #TODO throw status codes on error
     #TODO return an HTTPAction
@@ -239,6 +272,8 @@ def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(True)
+
+
 
 
 

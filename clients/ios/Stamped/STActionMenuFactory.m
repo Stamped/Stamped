@@ -110,7 +110,7 @@
                     cell.frame = CGRectMake(0, 0, width, cellHeight);
                     UIImageView* icon = [[UIImageView alloc] init];
                     icon.image = iconImage;
-                    icon.frame = [Util centeredAndBounded:[Util size:iconImage.size withScale:[Util imageScale]] inFrame:CGRectMake(0, 0, cellHeight, cellHeight)];
+                    icon.frame = [Util centeredAndBounded:[Util size:iconImage.size withScale:[Util legacyImageScale]] inFrame:CGRectMake(0, 0, cellHeight, cellHeight)];
                     id<STSource> source = [sources objectAtIndex:i];
                     cell.action = action.type;
                     cell.source = source;

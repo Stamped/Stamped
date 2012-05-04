@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STImage.h"
 
 @protocol STContentItem <NSObject>
 
 @property (nonatomic, readonly, copy) NSDate* modified;
 @property (nonatomic, readonly, copy) NSString* blurb;
 @property (nonatomic, readonly, copy) NSDate* created;
+@property (nonatomic, readonly, copy) NSArray<STImage>* images;
 
 @end

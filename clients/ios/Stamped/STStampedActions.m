@@ -15,6 +15,7 @@
 #import "STMenuPopUp.h"
 #import "STActionManager.h"
 #import "STProfileViewController.h"
+#import "ShowImageViewController.h"
 
 @interface STStampedActions ()
 
@@ -168,6 +169,14 @@ static STStampedActions* _sharedInstance;
         }];
       }
     }
+    else if ([action isEqualToString:@"stamped_view_image"] && source.sourceID != nil) {
+      handled = YES;
+      if (flag) {
+        ShowImageViewController* controller = [[[ShowImageViewController alloc] init] autorelease];
+        controller.imageURL = source.sourceID;
+        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+      }
+    }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
       handled = YES;
       if (flag) {
@@ -247,6 +256,11 @@ static STStampedActions* _sharedInstance;
 + (id<STAction>)actionDeleteStamp:(NSString*)stampID withOutputContext:(STActionContext*)context {
   return [STSimpleAction actionWithType:@"stamped_delete_stamp" 
                               andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:stampID]];
+}
+
++ (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context {
+  return [STSimpleAction actionWithType:@"stamped_view_image" 
+                              andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:imageURL]];
 }
 
 @end

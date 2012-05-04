@@ -14,6 +14,8 @@
 
 + (STActionManager*)sharedActionManager;
 
+- (void)setStampContext:(id<STStamp>)stamp;
+
 @property (nonatomic, readwrite, assign) id actionsLocked;
 
 @end
