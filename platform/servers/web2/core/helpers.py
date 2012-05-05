@@ -322,12 +322,14 @@ def format_url(url_format, schema, diff = None):
     
     for chunk in formatter.parse(url_format):
         variable = chunk[1]
+        value = ""
         
-        if variable in data:
-            value = data[variable]
-            del data[variable]
-        else:
-            value = schema[variable]
+        if variable is not None:
+            if variable in data:
+                value = data[variable]
+                del data[variable]
+            else:
+                value = schema[variable]
         
         url += "%s%s" % (chunk[0], value)
     
