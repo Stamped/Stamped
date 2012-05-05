@@ -600,6 +600,7 @@ class ConsumptionSlice(GenericCollectionSlice):
         GenericCollectionSlice.setSchema(self)
 
         self.scope              = SchemaElement(basestring)
+        self.filter             = SchemaElement(basestring)
 
 
 class ViewportSchema(Schema):

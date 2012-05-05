@@ -154,20 +154,36 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
 
 def _fixCast(cast):
     newcast = []
-    for item in cast:
-        name = item.get('title', None)
-        character = item.get('character', None)
-        if name is None:
-            continue
-        m = re.match(r'(.+) as (.+)', name)
-        if m is not None:
-            name = m.group(1)
-            character = m.group(2)
-        newitem = {}
-        newitem['name'] = name
-        if character is not None:
-            newitem['character'] = character
-        newcast.append(newitem)
+    import pprint
+    pprint.pprint('fixCast  cast: %s' % cast)
+    try:
+        # if it's just a string, construct a list of dictionaries with 'title' keys
+        if isinstance(cast, basestring):
+            print('converting cast from string')
+            names = cast.split(',')
+            cast = list()
+            for name in names:
+                cast.append( {'title': name} )
+            print('converted cast: %s' % cast)
+        for item in [c.value for c in cast]:
+            print('item: %s   type: %s' % (item, type(item)))
+            name = item.get('title', None)
+            character = item.get('character', None)
+            print('passed gets')
+            if name is None:
+                continue
+            m = re.match(r'(.+) as (.+)', name)
+            if m is not None:
+                name = m.group(1)
+                character = m.group(2)
+            newitem = dict()
+            newitem['name'] = name
+            if character is not None:
+                newitem['character'] = character
+            newcast.append(newitem)
+    except Exception as e:
+        print('ERROR: %s' % e)
+    pprint.pprint('newcast: %s' % newcast)
     return newcast
 
 
