@@ -45,6 +45,7 @@
             var lat     = parseFloat(coords[0]);
             var lng     = parseFloat(coords[1]);
             var pos     = new google.maps.LatLng(lat, lng);
+            var title   = stamp['entity']['title'];
             
             var marker  = new google.maps.Marker({
                 position    : pos, 
@@ -52,8 +53,26 @@
                 shadow      : shadow, 
                 icon        : image, 
                 shape       : null, 
-                title       : stamp['entity']['title'], 
+                title       : title, 
                 zIndex      : 1
+            });
+            
+            var info = "<div class='marker'><p class='pronounced-title'>" + title + "</p>";
+            
+            for (var i = 0; i < stamp['contents'].length; ++i) {
+                var content = stamp['contents'][i];
+                var blurb = content['blurb'];
+                
+                info += "<p>" + blurb + "</p>";
+            }
+            info += "</div>";
+            
+            var infowindow = new google.maps.InfoWindow({
+                content: info
+            });
+            
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(map, marker);
             });
         });
         

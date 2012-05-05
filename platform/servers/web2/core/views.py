@@ -98,7 +98,7 @@ def profile(request, schema, **kwargs):
         
         'prev_url'  : prev_url, 
         'next_url'  : next_url, 
-    }, preload=[ 'user' ])
+    }, preload=[ 'user', 'stamps' ])
 
 @stamped_view(schema=HTTPUserCollectionSlice)
 def map(request, schema, **kwargs):
