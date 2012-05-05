@@ -40,6 +40,8 @@
         //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         var stamps = STAMPED_PRELOAD.stamps;
         
+        var infowindow = new google.maps.InfoWindow({ });
+        
         $.each(stamps, function(i, stamp) {
             var coords  = (stamp['entity']['coordinates']).split(",");
             var lat     = parseFloat(coords[0]);
@@ -67,11 +69,8 @@
             }
             info += "</div>";
             
-            var infowindow = new google.maps.InfoWindow({
-                content: info
-            });
-            
             google.maps.event.addListener(marker, 'click', function() {
+                infowindow.setContent(info);
                 infowindow.open(map, marker);
             });
         });
