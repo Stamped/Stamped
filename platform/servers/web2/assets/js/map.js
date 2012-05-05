@@ -36,14 +36,25 @@
                                                  new google.maps.Point(0,0),
                                                  new google.maps.Point(2, 17));
         
-        var marker  = new google.maps.Marker({
-            position    : center,
-            map         : map,
-            shadow      : shadow,
-            icon        : image,
-            shape       : null,
-            title       : 'TEST',
-            zIndex      : 1
+        var client = new StampedClient();
+        //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
+        var stamps = STAMPED_PRELOAD.stamps;
+        
+        $.each(stamps, function(i, stamp) {
+            var coords  = (stamp['entity']['coordinates']).split(",");
+            var lat     = parseFloat(coords[0]);
+            var lng     = parseFloat(coords[1]);
+            var pos     = new google.maps.LatLng(lat, lng);
+            
+            var marker  = new google.maps.Marker({
+                position    : pos, 
+                map         : map, 
+                shadow      : shadow, 
+                icon        : image, 
+                shape       : null, 
+                title       : stamp['entity']['title'], 
+                zIndex      : 1
+            });
         });
         
         var resize_map = function() {

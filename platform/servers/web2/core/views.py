@@ -174,5 +174,5 @@ def map(request, schema, **kwargs):
         
         'prev_url'  : prev_url, 
         'next_url'  : next_url, 
-    }, preload=[ 'user' ])
+    }, preload=[ 'user', 'stamps' ])
 

@@ -684,7 +684,7 @@ if (typeof(StampedClient) == "undefined") {
             }
         });
         
-        var Stamps = AStampedCollection.extend({
+        var Stamps = this.Stamps = AStampedCollection.extend({
             model : Stamp
         });
         
