@@ -264,6 +264,12 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
 
     response = HTTPEndpointResponse()
+
+    source                  = HTTPActionSource()
+    source.source           = 'netflix_confirm'
+    source.source_data      = 'We have added this item to your Netflix Queue.'
+    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
+    response.setAction('netflix_login', 'Login to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(response.exportSparse())

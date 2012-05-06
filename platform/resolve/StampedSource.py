@@ -166,10 +166,8 @@ def _fixCast(cast):
                 cast.append( {'title': name} )
             print('converted cast: %s' % cast)
         for item in [c.value for c in cast]:
-            print('item: %s   type: %s' % (item, type(item)))
             name = item.get('title', None)
             character = item.get('character', None)
-            print('passed gets')
             if name is None:
                 continue
             m = re.match(r'(.+) as (.+)', name)
