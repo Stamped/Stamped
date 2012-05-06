@@ -329,4 +329,4 @@ class NetflixSource(GenericSource):
 #                    pass
 
 if __name__ == '__main__':
-    demo(NetflixSource(), 'glee')
+    demo(NetflixSource(), 'arrested development')

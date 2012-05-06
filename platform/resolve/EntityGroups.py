@@ -164,6 +164,7 @@ class NetflixGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'netflix')
         self.addKind('media_item')
+        self.addKind('media_collection')
         self.addType('movie')
         self.addType('tv')
 
