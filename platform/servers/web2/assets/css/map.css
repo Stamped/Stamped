@@ -36,3 +36,57 @@ footer {
   width: 100%;
   height: 100%;
 }
+.stamp-map .stamp-map-canvas .marker {
+  /*.box-shadow(10px, 0, 4px, -7px, rgba(0, 0, 0, 0.35));*/
+
+  /*@args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;*/
+
+  /*@args: 0 0 16px 0 @shadow;
+            
+            -webkit-box-shadow: @args;
+            -moz-box-shadow: @args;
+            -ms-box-shadow: @args;
+            -o-box-shadow: @args;
+            box-shadow: @args;*/
+
+  background: transparent;
+  padding: 0;
+  /*
+            .top-wave {
+                background: url(/assets/img/main-topcap.png) left top repeat-x;
+                height: 8px;
+                margin: 0;
+            }
+            
+            .bottom-wave {
+                background: url(/assets/img/main-botcap.png) left top repeat-x;
+                height: 8px;
+                margin: 0;
+            }*/
+
+}
+.stamp-map .stamp-map-canvas .marker .top-wave {
+  background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+.stamp-map .stamp-map-canvas .marker .bottom-wave {
+  background: url(/assets/img/ribbon-top.png) left top repeat-x;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+.stamp-map .stamp-map-canvas .marker .marker-content {
+  background: #FEFEFE;
+  display: block;
+  padding: 0 .5em;
+  margin: 0;
+}
+.stamp-map .stamp-map-canvas .marker .marker-content p.pronounced-title {
+  text-align: center;
+}
+.stamp-map .stamp-map-canvas .marker .marker-content p,
+.stamp-map .stamp-map-canvas .marker .marker-content p.pronounced-title {
+  margin: 0;
+}

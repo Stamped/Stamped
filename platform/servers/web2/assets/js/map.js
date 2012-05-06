@@ -37,10 +37,30 @@
                                                  new google.maps.Point(2, 17));
         
         var client = new StampedClient();
-        //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         var stamps = STAMPED_PRELOAD.stamps;
+        //var popup  = new google.maps.InfoWindow({ });
+        //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         
-        var infowindow = new google.maps.InfoWindow({ });
+        var text   = document.createElement("div");
+        text.style.cssText = "border: 1px solid black; margin-top: 8px; background: yellow; padding: 5px;";
+        text.innerHTML = "City Hall, Sechelt<br>British Columbia<br>Canada";
+        
+        var popup  = new InfoBox({
+             content: text, 
+             disableAutoPan: false, 
+             maxWidth: 0, 
+             pixelOffset: new google.maps.Size(-140, 0), 
+             zIndex: null, 
+             boxStyle: {
+                 width: "280px"
+             }, 
+             closeBoxMargin: "10px 2px 2px 2px", 
+             closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 
+             infoBoxClearance: new google.maps.Size(1, 1), 
+             isHidden: false, 
+             pane: "floatPane", 
+             enableEventPropagation: false
+        });
         
         $.each(stamps, function(i, stamp) {
             var coords  = (stamp['entity']['coordinates']).split(",");
@@ -59,19 +79,19 @@
                 zIndex      : 1
             });
             
-            var info = "<div class='marker'><p class='pronounced-title'>" + title + "</p>";
+            var info = "<div class='marker'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
             
             for (var i = 0; i < stamp['contents'].length; ++i) {
                 var content = stamp['contents'][i];
-                var blurb = content['blurb'];
+                var blurb   = content['blurb'];
                 
                 info += "<p>" + blurb + "</p>";
             }
-            info += "</div>";
+            info += "</div><div class='bottom-wave'></div></div>";
             
             google.maps.event.addListener(marker, 'click', function() {
-                infowindow.setContent(info);
-                infowindow.open(map, marker);
+                popup.setContent(info);
+                popup.open(map, marker);
             });
         });
         
@@ -89,13 +109,4 @@
         window.addEventListener('resize', resize_map, false);
     });
 })();
-
-/*
-  var infowindow = new google.maps.InfoWindow({
-      content: contentString
-  });
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.open(map, marker);
-  });
-*/
 
