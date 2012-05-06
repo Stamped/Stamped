@@ -129,6 +129,9 @@ def map(request, schema, **kwargs):
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
+    # TODO: bake this into stampedAPIProxy request
+    stamps = filter(lambda s: 'coordinates' in s['entity'], stamps)
+    
     def _is_static_profile_image(url):
         return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
     
@@ -155,6 +158,8 @@ def map(request, schema, **kwargs):
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
     
+    utils.log("STAMPS: %s" % len(stamps))
+     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
             'offset' : max(0, schema.offset - schema.limit), 
@@ -174,5 +179,5 @@ def map(request, schema, **kwargs):
         
         'prev_url'  : prev_url, 
         'next_url'  : next_url, 
-    }, preload=[ 'user' ])
+    }, preload=[ 'user', 'stamps' ])
 

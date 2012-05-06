@@ -55,6 +55,8 @@ TODO:
         * how to debug.. must be tools out there to help with this?
     
     * when stamp images don't load, they still display a border
+    
+    * Integrate stamping with Facebook OpenGraph posting
 
 POLISH:
     * fix profile header nav animation

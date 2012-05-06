@@ -1,0 +1,38 @@
+/* map.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+html,
+body {
+  overflow-y: hidden;
+}
+footer {
+  display: none;
+}
+.stamp-map {
+  position: relative;
+  margin: 10px 0 0;
+  -webkit-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
+  -moz-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
+  -ms-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
+  -o-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
+}
+.stamp-map .stamp-map-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

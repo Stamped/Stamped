@@ -1,0 +1,26 @@
+{% extends "profile.html" %}
+{% load stamped_tags %}
+{% load ssi from future %}
+
+
+{% block head %}
+    {{ block.super }}
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
+{% endblock head %}
+
+{% block pre_profile_main_content %}
+    <div id="main-content" class="fixedwidth">
+{% endblock pre_profile_main_content %}
+
+{% block profile_main_content %}
+    {% custom_template "stamp-map" %}
+{% endblock profile_main_content %}
+
+{% block scripts %}
+    {{ block.super }}
+     
+    <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
+    <script src="{{ STATIC_URL }}js/map.js"></script>
+{% endblock scripts %}
+

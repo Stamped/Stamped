@@ -1,63 +1,13 @@
-/* demo.js
+/* profile.js
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
 (function() {
     $(document).ready(function() {
-        var client = new StampedClient();
-        var screen_name = STAMPED_PRELOAD.user.screen_name;
-        console.debug("Stamped profile page for screen_name '" + screen_name + "'");
-        
-        $(".stamp-gallery-nav a").each(function() {
-            var href = $(this).attr('href');
-            var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
-            
-            if (href.match(limit_re)) {
-                href = href.replace(limit_re, "$1" + limit);
-            } else if ('?' in href) {
-                href = href + "&" + limit;
-            } else {
-                href = href + "?" + limit;
-            }
-            
-            $(this).attr('href', href);
-        });
-        
-        var $container = $(".stamp-gallery .stamps");
-        //$(document).emoji();
-        //$container.emoji();
-        
-        $container.isotope({
-            itemSelector    : '.stamp-gallery-item', 
-            layoutMode      : "masonry", 
-            masonry         : {
-                columnWidth: 300
-            }
-        });
-        
-        // TODO: customize loading image
-        $container.infinitescroll({
-            debug           : STAMPED_PRELOAD.DEBUG, 
-            bufferPx        : 200, 
-            
-            navSelector     : "div.stamp-gallery-nav", 
-            nextSelector    : "div.stamp-gallery-nav a:last", 
-            itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
-            
-            loading         : {
-                finishedMsg : "No more stamps to load.", 
-                msgText     : "<em>Loading more stamps...</em>", 
-                img         : "/assets/img/loading.gif", 
-                selector    : "div.stamp-gallery-loading"
-            }
-        }, function(new_elements) {
-            var elements = $(new_elements);
-            
-            $(elements).emoji();
-            $container.isotope('appended', elements);
-        });
+        // ---------------------------------------------------------------------
+        // initialize profile header navigation
+        // ---------------------------------------------------------------------
         
         $('.profile-nav a').each(function () {
             $(this).click(function() {
@@ -112,7 +62,66 @@
             });
         });
         
+        $(".stamp-gallery-nav a").each(function() {
+            var href = $(this).attr('href');
+            var limit_re = /([?&])limit=[\d]+/;
+            var limit = "limit=10";
+            
+            if (href.match(limit_re)) {
+                href = href.replace(limit_re, "$1" + limit);
+            } else if ('?' in href) {
+                href = href + "&" + limit;
+            } else {
+                href = href + "?" + limit;
+            }
+            
+            $(this).attr('href', href);
+        });
+        
+        // ---------------------------------------------------------------------
+        // initialize stamp-gallery isotope / masonry layout and infinite scroll
+        // ---------------------------------------------------------------------
+        
+        var $container = $(".stamp-gallery .stamps");
+        //$(document).emoji();
+        //$container.emoji();
+        
+        $container.isotope({
+            itemSelector    : '.stamp-gallery-item', 
+            layoutMode      : "masonry", 
+            masonry         : {
+                columnWidth: 300
+            }
+        });
+        
+        // TODO: customize loading image
+        $container.infinitescroll({
+            debug           : STAMPED_PRELOAD.DEBUG, 
+            bufferPx        : 200, 
+            
+            navSelector     : "div.stamp-gallery-nav", 
+            nextSelector    : "div.stamp-gallery-nav a:last", 
+            itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+            
+            loading         : {
+                finishedMsg : "No more stamps to load.", 
+                msgText     : "<em>Loading more stamps...</em>", 
+                img         : "/assets/img/loading.gif", 
+                selector    : "div.stamp-gallery-loading"
+            }
+        }, function(new_elements) {
+            var elements = $(new_elements);
+            
+            $(elements).emoji();
+            $container.isotope('appended', elements);
+        });
+
+        
         return;
+        
+        var client = new StampedClient();
+        var screen_name = STAMPED_PRELOAD.user.screen_name;
+        console.debug("Stamped profile page for screen_name '" + screen_name + "'");
         
         var userP = client.get_user_by_screen_name(screen_name);
         

@@ -1,0 +1,54 @@
+/* profile.less.template
+ * 
+ * NOTE: this is a Mustache templated LESS CSS file, which expects to be rendered 
+ * via a Mustache interpreter with specific context variable dependencies, the 
+ * results of which are normal LESS CSS text. This LESS CSS text is then converted 
+ * to standard CSS via the lessc compiler.
+ * 
+ * Within Stamped, the resulting CSS is embedded inline on a templated Django page 
+ * via a Stamped-specific Django template extension. This extension essentially 
+ * renders this template using pystache (python Mustache interpreter) w.r.t. the 
+ * current Django templating context, and then converts the resulting LESS CSS 
+ * into standard CSS.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+{{#user}}
+@user_primary:   #{{color_primary}};   /* #004ab2 */
+@user_secondary: #{{color_secondary}}; /* #0057d1 */
+{{/user}}
+
+@l0: hue(hsl(lightness(@user_primary), 0, 0));
+@l1: hue(hsl(lightness(@user_secondary), 0, 0));
+
+@user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
+@user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
+
+@primary:   lighten(@user_light, 25%);
+@secondary: darken( @user_dark,  10%);
+
+.user-gradient(@angle: 135deg) {
+    width:  100%;
+    margin: 0;
+    
+    background: -webkit-linear-gradient(@angle, @primary, @secondary);
+    background: -moz-linear-gradient(@angle, @primary, @secondary);
+    background: -o-linear-gradient(@angle, @primary, @secondary);
+    background: linear-gradient(@angle, @primary, @secondary);
+}
+
+.profile-header {
+    .profile-header-pre {
+        .user-gradient(135deg);
+    }
+    
+    .profile-header-post {
+        .user-gradient(135deg);
+        
+        .inset-stamp .number {
+            color: @user_dark;
+        }
+    }
+}
+
