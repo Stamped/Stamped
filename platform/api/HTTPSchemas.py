@@ -955,6 +955,8 @@ class HTTPEntity(Schema):
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
+
+
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
@@ -968,7 +970,7 @@ class HTTPEntity(Schema):
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
-                source.endpoint_data    = entity.sources.netflix_id
+                source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
                     action      = actionType,
