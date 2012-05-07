@@ -5,6 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+from errors import StampedHTTPError
 from httpapi.v0.helpers import *
 import time
 
@@ -88,9 +89,9 @@ def consumption(request, authUserId, schema, **kwargs):
     elif schema.scope == 'everyone':
         stamps = stampedAPI.getSuggestedStamps(authUserId, schema)
     else:
-        raise NotImplementedError('Consumption call with undefined scope %s' % schema.scope)
+        raise StampedHTTPError('Consumption call with undefined scope %s' % schema.scope, 400)
     if stamps is None:
-        raise Exception('consumption() expected list of stamps, received None')
+        raise StampedHTTPError('consumption() expected list of stamps, received None', 500)
     
     import pprint
     for stamp in stamps:
