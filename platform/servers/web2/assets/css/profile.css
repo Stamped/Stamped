@@ -5,18 +5,16 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
-/*---------------------------------------------------
-    LESS Elements 0.6
-    ---------------------------------------------------
-    A set of useful LESS mixins by Dmitry Fadeyev
-    Special thanks for mixin suggestions to:
-      Kris Van Herzeele,
-      Benoit Adam,
-      Portenart Emile-Victor,
-      Ryan Faerman
-
-    More info at: http://lesselements.com
------------------------------------------------------*/
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
 /**** Isotope Filtering ****/
 .isotope-item {
   z-index: 2;
@@ -125,23 +123,6 @@
   max-width: 128px;
   height: auto;
 }
-.stamp-gallery-item .content .blurb {
-  display: inline;
-  text-align: left;
-  quotes: "\201C" "\201D";
-}
-.stamp-gallery-item .content .blurb:before {
-  content: open-quote;
-  font-size: 200%;
-  font-weight: bold;
-  padding-right: .2em;
-}
-.stamp-gallery-item .content .blurb:after {
-  content: close-quote;
-  font-size: 200%;
-  font-weight: bold;
-  padding-left: .2em;
-}
 .stamp-gallery-item .content .subtitle-line {
   position: relative;
   display: block;
@@ -234,6 +215,23 @@
   -ms-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
+}
+.blurb {
+  display: inline;
+  text-align: left;
+  quotes: "\201C" "\201D";
+}
+.blurb:before {
+  content: open-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-right: .2em;
+}
+.blurb:after {
+  content: close-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-left: .2em;
 }
 .stamp-gallery-loading {
   text-align: center;

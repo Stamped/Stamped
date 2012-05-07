@@ -28,18 +28,6 @@ footer {
         height: 100%;
         
         .marker {
-            /*.box-shadow(10px, 0, 4px, -7px, rgba(0, 0, 0, 0.35));*/
-            
-            @shadow: rgba(125,125,125,0.15);
-            /*@args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;*/
-            /*@args: 0 0 16px 0 @shadow;
-            
-            -webkit-box-shadow: @args;
-            -moz-box-shadow: @args;
-            -ms-box-shadow: @args;
-            -o-box-shadow: @args;
-            box-shadow: @args;*/
-            
             background: transparent;
             
             .top-wave {
@@ -57,28 +45,24 @@ footer {
             }
             
             padding: 0;
-            /*
-            .top-wave {
-                background: url(/assets/img/main-topcap.png) left top repeat-x;
-                height: 8px;
-                margin: 0;
-            }
-            
-            .bottom-wave {
-                background: url(/assets/img/main-botcap.png) left top repeat-x;
-                height: 8px;
-                margin: 0;
-            }*/
             
             .marker-content {
                 background: #FEFEFE;
                 
                 p.pronounced-title {
                     text-align: center;
+                    color: #000;
                 }
                 
                 p, p.pronounced-title {
                     margin: 0;
+                }
+                
+                p.blurb {
+                    font-size: 80%;
+                }
+                p.blurb:hover {
+                    cursor: text;
                 }
                 
                 display: block;

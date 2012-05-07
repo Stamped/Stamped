@@ -38,15 +38,10 @@
         
         var client = new StampedClient();
         var stamps = STAMPED_PRELOAD.stamps;
-        //var popup  = new google.maps.InfoWindow({ });
         //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         
-        var text   = document.createElement("div");
-        text.style.cssText = "border: 1px solid black; margin-top: 8px; background: yellow; padding: 5px;";
-        text.innerHTML = "City Hall, Sechelt<br>British Columbia<br>Canada";
-        
+        //var popup  = new google.maps.InfoWindow({ });
         var popup  = new InfoBox({
-             content: text, 
              disableAutoPan: false, 
              maxWidth: 0, 
              pixelOffset: new google.maps.Size(-140, 0), 
@@ -54,7 +49,7 @@
              boxStyle: {
                  width: "280px"
              }, 
-             closeBoxMargin: "10px 2px 2px 2px", 
+             closeBoxMargin: "16px 6px 2px 2px", 
              closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 
              infoBoxClearance: new google.maps.Size(1, 1), 
              isHidden: false, 
@@ -62,38 +57,60 @@
              enableEventPropagation: false
         });
         
-        $.each(stamps, function(i, stamp) {
-            var coords  = (stamp['entity']['coordinates']).split(",");
-            var lat     = parseFloat(coords[0]);
-            var lng     = parseFloat(coords[1]);
-            var pos     = new google.maps.LatLng(lat, lng);
-            var title   = stamp['entity']['title'];
+        if (stamps.length > 0) {
+            var coords0     = (stamps[0]['entity']['coordinates']).split(",");
+            var lat0        = parseFloat(coords0[0]);
+            var lng0        = parseFloat(coords0[1]);
+            var pos0        = new google.maps.LatLng(lat0, lng0);
+            var bounds      = new google.maps.LatLngBounds(pos0, pos0);
             
-            var marker  = new google.maps.Marker({
-                position    : pos, 
-                map         : map, 
-                shadow      : shadow, 
-                icon        : image, 
-                shape       : null, 
-                title       : title, 
-                zIndex      : 1
-            });
+            var markers     = []
             
-            var info = "<div class='marker'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
-            
-            for (var i = 0; i < stamp['contents'].length; ++i) {
-                var content = stamp['contents'][i];
-                var blurb   = content['blurb'];
+            $.each(stamps, function(i, stamp) {
+                var coords  = (stamp['entity']['coordinates']).split(",");
+                var lat     = parseFloat(coords[0]);
+                var lng     = parseFloat(coords[1]);
+                var pos     = new google.maps.LatLng(lat, lng);
+                var title   = stamp['entity']['title'];
                 
-                info += "<p>" + blurb + "</p>";
-            }
-            info += "</div><div class='bottom-wave'></div></div>";
-            
-            google.maps.event.addListener(marker, 'click', function() {
-                popup.setContent(info);
-                popup.open(map, marker);
+                var marker  = new google.maps.Marker({
+                    position    : pos, 
+                    map         : map, 
+                    shadow      : shadow, 
+                    icon        : image, 
+                    shape       : null, 
+                    title       : title, 
+                    zIndex      : 1
+                });
+                
+                //console.debug("lat: " + lat + "; lng: " + lng);
+                bounds.extend(pos);
+                markers.push(marker);
+                
+                var info = "<div class='marker'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                
+                for (var i = 0; i < stamp['contents'].length; ++i) {
+                    var content = stamp['contents'][i];
+                    var blurb   = content['blurb'];
+                    
+                    info += "<p class='blurb'>" + blurb + "</p>";
+                }
+                info += "</div><div class='bottom-wave'></div></div>";
+                
+                google.maps.event.addListener(marker, 'click', function() {
+                    popup.setContent(info);
+                    popup.open(map, marker);
+                });
+                
+                google.maps.event.addListener(map, 'click', function() {
+                    popup.close();
+                });
             });
-        });
+            
+            var clusterer   = new MarkerClusterer(map, markers, {
+                gridSize : 3
+            });
+        }
         
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
@@ -101,6 +118,9 @@
             var height = (window.innerHeight - header_height - margin) + 'px';
             
             $canvas.height(height);
+            
+            map.fitBounds(bounds);
+            map.setCenter(bounds.getCenter());
         };
         
         resize_map();

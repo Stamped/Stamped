@@ -78,15 +78,6 @@
             }
         }
         
-        .blurb {
-            display: inline;
-            text-align: left;
-            quotes: "\201C" "\201D";
-        }
-        
-        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
-        
         /*
         div.blurb {
             background: url(/assets/img/blockquoteopen.png) left top no-repeat;
@@ -191,6 +182,15 @@
         }
     }
 }
+
+.blurb {
+    display: inline;
+    text-align: left;
+    quotes: "\201C" "\201D";
+}
+
+.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
 
 .stamp-gallery-loading {
     text-align: center;
