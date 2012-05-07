@@ -42,19 +42,20 @@
         
         //var popup  = new google.maps.InfoWindow({ });
         var popup  = new InfoBox({
-             disableAutoPan: false, 
-             maxWidth: 0, 
-             pixelOffset: new google.maps.Size(-140, 0), 
-             zIndex: null, 
-             boxStyle: {
-                 width: "280px"
-             }, 
-             closeBoxMargin: "16px 6px 2px 2px", 
-             closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 
-             infoBoxClearance: new google.maps.Size(1, 1), 
-             isHidden: false, 
-             pane: "floatPane", 
-             enableEventPropagation: false
+            disableAutoPan: false, 
+            maxWidth: 0, 
+            pixelOffset: new google.maps.Size(-140, -25), 
+            zIndex: null, 
+            boxStyle: {
+                width: "280px"
+            }, 
+            closeBoxMargin: "16px 6px 2px 2px", 
+            closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 
+            infoBoxClearance: new google.maps.Size(2, 2), 
+            isHidden: false, 
+            pane: "floatPane", 
+            enableEventPropagation: false, 
+            alignBottom: true
         });
         
         if (stamps.length > 0) {
@@ -93,27 +94,41 @@
                     var content = stamp['contents'][i];
                     var blurb   = content['blurb'];
                     
-                    info += "<p class='blurb'>" + blurb + "</p>";
+                    if (blurb.length > 0) {
+                        info += "<p class='blurb'>" + blurb + "</p>";
+                    }
                 }
+                
                 info += "</div><div class='bottom-wave'></div></div>";
                 
-                google.maps.event.addListener(marker, 'click', function() {
-                    popup.setContent(info);
-                    popup.open(map, marker);
-                    this.stop();
-                });
-                
                 var close_popup = function() {
-                    popup.close();
+                    if (!!popup.selected) {
+                        popup.close();
+                        popup.selected = null;
+                    }
                 };
+                
+                google.maps.event.addListener(marker, 'click', function(event) {
+                    if (popup.selected === marker) {
+                        close_popup();
+                    } else {
+                        popup.setContent(info);
+                        popup.open(map, marker);
+                        popup.selected = marker;
+                    }
+                    
+                    event.stop();
+                });
                 
                 google.maps.event.addListener(map, 'click',        close_popup);
                 google.maps.event.addListener(map, 'zoom_changed', close_popup);
             });
             
-            var clusterer   = new MarkerClusterer(map, markers, {
-                gridSize : 3
-            });
+            if (stamps.length > 2) {
+                var clusterer = new MarkerClusterer(map, markers, {
+                    gridSize : 3
+                });
+            }
         }
         
         var resize_map = function() {
