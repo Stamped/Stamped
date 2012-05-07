@@ -52,6 +52,7 @@ class InstagramPlace(ResolverPlace):
 #            gallery_item['thumb_height']        = item['images']['thumbnail']['height']
 #            gallery_item['thumb_width']         = item['images']['thumbnail']['width']
             gallery_item['caption']             = item['caption']['text']
+            gallery_item['source']              = 'instagram'
             gallery.append(gallery_item)
         #construct a list of dicts containing 'url' and 'caption'
         return gallery

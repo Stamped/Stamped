@@ -255,6 +255,7 @@ class GenericSource(BasicSource):
                 img.caption     = image['caption']
                 img.height      = image['height']
                 img.width       = image['width']
+                img.source      = image['source']
                 gallery.append(img)
             if len(gallery) > 0:
                 entity.gallery = gallery

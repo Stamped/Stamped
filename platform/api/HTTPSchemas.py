@@ -911,6 +911,14 @@ class HTTPEntity(Schema):
                     item = HTTPEntityGalleryItem()
                     item.image = image.image
                     item.caption = image.caption
+                    source              = HTTPActionSource()
+                    source.source_id    = item.image
+                    source.source       = 'stamped'
+                    source.link         = item.image
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_image'
+                    action.sources.append(source)
+                    item.action     = action
                     gallery.data.append(item)
                 self.galleries.append(gallery)
 
