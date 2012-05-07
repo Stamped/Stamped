@@ -123,22 +123,6 @@
   max-width: 128px;
   height: auto;
 }
-.stamp-gallery-item .content .subtitle-line {
-  position: relative;
-  display: block;
-  margin: 0 0 -0.5em;
-  top: -4px;
-}
-.stamp-gallery-item .content .subtitle-line .icon {
-  display: inline-block;
-}
-.stamp-gallery-item .content .subtitle-line .subtitle {
-  display: inline-block;
-  font-size: 80%;
-  position: relative;
-  top: -2px;
-  left: .75em;
-}
 .stamp-gallery-item .content .previews {
   /*div.comment {
                 display: none;
@@ -232,6 +216,25 @@
   font-size: 200%;
   font-weight: bold;
   padding-left: .2em;
+}
+/* TODO: properly center subtitle-line */
+.subtitle-line {
+  text-align: center;
+  position: relative;
+  display: block;
+  margin: 0 0 -0.5em;
+  top: -4px;
+}
+.subtitle-line .icon {
+  display: inline-block;
+  position: relative;
+}
+.subtitle-line .subtitle {
+  display: inline-block;
+  font-size: 80%;
+  position: relative;
+  top: -2px;
+  left: .75em;
 }
 .stamp-gallery-loading {
   text-align: center;

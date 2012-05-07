@@ -88,7 +88,14 @@
                 bounds.extend(pos);
                 markers.push(marker);
                 
-                var info = "<div class='marker'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                
+                info += "<p class='subtitle-line'>" + 
+                            "<span class='icon'></span>" + 
+                            "<span class='subtitle'>" + 
+                                stamp['entity']['subtitle'] + 
+                            "</span>" + 
+                        "</p>";
                 
                 for (var i = 0; i < stamp['contents'].length; ++i) {
                     var content = stamp['contents'][i];
