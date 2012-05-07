@@ -78,15 +78,6 @@
             }
         }
         
-        .blurb {
-            display: inline;
-            text-align: left;
-            quotes: "\201C" "\201D";
-        }
-        
-        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
-        
         /*
         div.blurb {
             background: url(/assets/img/blockquoteopen.png) left top no-repeat;
@@ -97,24 +88,6 @@
                 background: url(/assets/img/blockquoteclose.png) bottom right no-repeat;
             }
         }*/
-        
-        .subtitle-line {
-            position: relative;
-            display: block;
-            margin: 0 0 -.5em;
-            top: -4px;
-            
-            .icon {
-                display: inline-block;
-            }
-            .subtitle {
-                display: inline-block;
-                font-size: 80%;
-                position: relative;
-                top: -2px;
-                left: .75em;
-            }
-        }
         
         .previews {
             .profile-image-small {
@@ -188,6 +161,36 @@
             /*div.comment {
                 display: none;
             }*/
+        }
+    }
+}
+
+.blurb {
+    display: inline;
+    text-align: left;
+    quotes: "\201C" "\201D";
+}
+
+.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
+
+/* TODO: properly center subtitle-line */
+.subtitle-line {
+    text-align: center;
+    position: relative;
+    display: block;
+    margin: 0 0 -.5em;
+    top: -4px;
+    
+    .subtitle {
+        position: relative;
+        display: block;
+        font-size: 80%;
+        margin: -2px 0 0;
+        
+        .icon {
+            display: inline-block;
+            position: relative;
         }
     }
 }

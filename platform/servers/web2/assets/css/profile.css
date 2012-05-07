@@ -5,18 +5,16 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
-/*---------------------------------------------------
-    LESS Elements 0.6
-    ---------------------------------------------------
-    A set of useful LESS mixins by Dmitry Fadeyev
-    Special thanks for mixin suggestions to:
-      Kris Van Herzeele,
-      Benoit Adam,
-      Portenart Emile-Victor,
-      Ryan Faerman
-
-    More info at: http://lesselements.com
------------------------------------------------------*/
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
 /**** Isotope Filtering ****/
 .isotope-item {
   z-index: 2;
@@ -125,39 +123,6 @@
   max-width: 128px;
   height: auto;
 }
-.stamp-gallery-item .content .blurb {
-  display: inline;
-  text-align: left;
-  quotes: "\201C" "\201D";
-}
-.stamp-gallery-item .content .blurb:before {
-  content: open-quote;
-  font-size: 200%;
-  font-weight: bold;
-  padding-right: .2em;
-}
-.stamp-gallery-item .content .blurb:after {
-  content: close-quote;
-  font-size: 200%;
-  font-weight: bold;
-  padding-left: .2em;
-}
-.stamp-gallery-item .content .subtitle-line {
-  position: relative;
-  display: block;
-  margin: 0 0 -0.5em;
-  top: -4px;
-}
-.stamp-gallery-item .content .subtitle-line .icon {
-  display: inline-block;
-}
-.stamp-gallery-item .content .subtitle-line .subtitle {
-  display: inline-block;
-  font-size: 80%;
-  position: relative;
-  top: -2px;
-  left: .75em;
-}
 .stamp-gallery-item .content .previews {
   /*div.comment {
                 display: none;
@@ -234,6 +199,41 @@
   -ms-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
+}
+.blurb {
+  display: inline;
+  text-align: left;
+  quotes: "\201C" "\201D";
+}
+.blurb:before {
+  content: open-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-right: .2em;
+}
+.blurb:after {
+  content: close-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-left: .2em;
+}
+/* TODO: properly center subtitle-line */
+.subtitle-line {
+  text-align: center;
+  position: relative;
+  display: block;
+  margin: 0 0 -0.5em;
+  top: -4px;
+}
+.subtitle-line .subtitle {
+  position: relative;
+  display: block;
+  font-size: 80%;
+  margin: -2px 0 0;
+}
+.subtitle-line .subtitle .icon {
+  display: inline-block;
+  position: relative;
 }
 .stamp-gallery-loading {
   text-align: center;
