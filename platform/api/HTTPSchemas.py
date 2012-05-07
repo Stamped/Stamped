@@ -818,6 +818,17 @@ class HTTPEntity(Schema):
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
+            # Image Gallery
+
+            if entity.gallery is not None and len(entity.gallery) > 0:
+                gallery = HTTPEntityGallery()
+                for image in entity.gallery:
+                    item = HTTPEntityGalleryItem()
+                    item.image = image.image
+                    item.caption = image.caption
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
+
             # Actions: Reservation
 
             actionType  = 'reserve'
@@ -891,6 +902,17 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
             self._addMetadata('Description', entity.desc, key='desc')
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
+
+            # Image gallery
+
+            if entity.gallery is not None and len(entity.gallery) > 0:
+                gallery = HTTPEntityGallery()
+                for image in entity.gallery:
+                    item = HTTPEntityGalleryItem()
+                    item.image = image.image
+                    item.caption = image.caption
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
 
             # Actions: Call
 

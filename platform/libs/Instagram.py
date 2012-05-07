@@ -43,8 +43,17 @@ class Instagram(object):
         self.__consumer = oauth.OAuthConsumer(self.__client_id, self.__client_secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
-    def place_search(self, **kwargs):
-        return self.__instagram('locations/search', **kwargs)
+    #def place_search(self, **kwargs):
+    #    return self.__instagram('locations/search', **kwargs)
+
+    def place_search(self, foursquare_id):
+        return self.__instagram('locations/search', foursquare_v2_id=foursquare_id)
+
+    def place_recent_media(self, instagram_id):
+        return self.__instagram('locations/%s/media/recent' % instagram_id)
+
+#    def place_recent_media(self, **kwargs):
+#        return self.
 
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
@@ -67,7 +76,7 @@ class Instagram(object):
         req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
         response = urllib2.urlopen(req).read()
         data = json.loads(response)
-        return response
+        return data
 
 
 __globalInstagram = None
@@ -82,8 +91,12 @@ def globalInstagram():
 
 def demo(method, **params):
     instagram = Instagram()
+    place = instagram.place_search(foursquare_id='4d1bb4017e10a35d5737f982')
+    recent_media = instagram.place_recent_media(place['data'][0]['id'])
+    pprint(recent_media)
+
     if method == 'place_search':
-        pprint(instagram.place_search(lat='48.858844', lng='2.294351'))
+        pprint(instagram.place_search(foursquare_id='4d1bb4017e10a35d5737f982'))#lat='48.858844', lng='2.294351'))
 
 if __name__ == '__main__':
     import sys

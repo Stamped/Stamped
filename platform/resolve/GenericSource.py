@@ -247,6 +247,18 @@ class GenericSource(BasicSource):
                     if v is not None:
                         entity['address_%s' % k] = v
                 timestamps['address'] = controller.now
+
+            gallery = []
+            for image in proxy.gallery:
+                img = ImageSchema()
+                img.image = image['url']
+                img.caption     = image['caption']
+                img.height      = image['height']
+                img.width       = image['width']
+                gallery.append(img)
+            if len(gallery) > 0:
+                entity.gallery = gallery
+                timestamps['gallery'] = controller.now
         
         ### Person
         if entity.kind == 'person' and proxy.kind == 'person':

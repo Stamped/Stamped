@@ -126,6 +126,13 @@ class FoursquareGroup(APlaceGroup):
         self.addField(['foursquare_id'])
         self.addField(['foursquare_url'])
 
+class InstagramGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'instagram')
+        self.addField(['instagram_id'])
+
+
 class OpenTableGroup(APlaceGroup):
 
     def __init__(self):
@@ -270,6 +277,12 @@ class SiteGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'site')
+        self.addNameField()
+
+class GalleryGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'gallery')
         self.addNameField()
 
 class PriceRangeGroup(ARestaurantGroup):
@@ -455,6 +468,7 @@ allGroups = [
     FactualGroup,
     SinglePlatformGroup,
     FoursquareGroup,
+    InstagramGroup,
     GooglePlacesGroup,
     TMDBGroup,
     RdioGroup,
@@ -477,6 +491,7 @@ allGroups = [
     CoordinatesGroup,
     PhoneGroup,
     SiteGroup,
+    GalleryGroup,
     PriceRangeGroup,
     CuisineGroup,
     MenuGroup,
