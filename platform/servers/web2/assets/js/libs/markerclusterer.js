@@ -278,9 +278,8 @@ ClusterIcon.prototype.show = function () {
         var radius = 80 + 10 * Math.max(0, num_markers - 6);
         var x = radius * Math.cos(offset);
         var y = radius * Math.sin(offset);
-        var style = "";
+        var style = "top: " + y + "px; left: " + x + "px;";
         
-        style = "top: " + y + "px; left: " + x + "px;";
         /*if (x > 0) {
             style += "left: " + x + "px; "
         } else {
