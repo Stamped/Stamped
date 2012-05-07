@@ -100,11 +100,15 @@
                 google.maps.event.addListener(marker, 'click', function() {
                     popup.setContent(info);
                     popup.open(map, marker);
+                    this.stop();
                 });
                 
-                google.maps.event.addListener(map, 'click', function() {
+                var close_popup = function() {
                     popup.close();
-                });
+                };
+                
+                google.maps.event.addListener(map, 'click',        close_popup);
+                google.maps.event.addListener(map, 'zoom_changed', close_popup);
             });
             
             var clusterer   = new MarkerClusterer(map, markers, {
