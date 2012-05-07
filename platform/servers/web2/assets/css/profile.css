@@ -225,16 +225,15 @@
   margin: 0 0 -0.5em;
   top: -4px;
 }
-.subtitle-line .icon {
-  display: inline-block;
-  position: relative;
-}
 .subtitle-line .subtitle {
-  display: inline-block;
-  font-size: 80%;
   position: relative;
-  top: -2px;
-  left: .75em;
+  display: block;
+  font-size: 80%;
+  margin: -2px 0 0;
+}
+.subtitle-line .subtitle .icon {
+  display: inline-block;
+  position: relative;
 }
 .stamp-gallery-loading {
   text-align: center;

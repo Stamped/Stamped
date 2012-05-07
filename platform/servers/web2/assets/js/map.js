@@ -133,7 +133,7 @@
             
             if (stamps.length > 2) {
                 var clusterer = new MarkerClusterer(map, markers, {
-                    gridSize : 3
+                    gridSize : 10, 
                 });
             }
         }

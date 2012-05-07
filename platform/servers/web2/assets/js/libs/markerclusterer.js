@@ -142,20 +142,62 @@ ClusterIcon.prototype.onAdd = function () {
       }
     }
   });
-
-  google.maps.event.addDomListener(this.div_, "mouseover", function () {
+  
+  var $div_ = $(this.div_);
+  
+  $div_.mouseenter(function(e) {
     var mc = cClusterIcon.cluster_.getMarkerClusterer();
+    
     /**
      * This event is fired when the mouse moves over a cluster marker.
      * @name MarkerClusterer#mouseover
      * @param {Cluster} c The cluster that the mouse moved over.
      * @event
      */
-    google.maps.event.trigger(mc, "mouseover", cClusterIcon.cluster_);
+    google.maps.event.trigger(mc, "mouseenter", cClusterIcon.cluster_);
+    
+    var $previews = $(cClusterIcon.div_).find('.marker-preview');
+    $previews.show();
+    
+    $.each($previews, function(i, preview) {
+        var $preview = $(preview);
+        
+        if ($preview.attr('pos-top') === undefined) {
+            var pos = $preview.position();
+            
+            $preview.attr('pos-top',  "" + pos.top);
+            $preview.attr('pos-left', "" + pos.left);
+            console.debug("top: " + pos.top + "; left: " + pos.left);
+        }
+        
+        var t = parseFloat($preview.attr('pos-top'));
+        var l = parseFloat($preview.attr('pos-left'));
+        
+        $preview.stop(true, false);
+        $preview.css({
+            opacity : 0, 
+            top     : 0, 
+            left    : 0
+        });
+        
+        $preview.animate({
+            opacity : 100, 
+            top     : t, 
+            left    : l
+        }, {
+            duration : 1000, 
+            specialEasing : {
+                opacity : 'easeInOutQuint', 
+                top     : 'easeOutBounce', 
+                left    : 'easeOutBounce'
+            }
+        });
+    });
   });
-
-  google.maps.event.addDomListener(this.div_, "mouseout", function () {
+  
+  $div_.mouseleave(function (e) {
     var mc = cClusterIcon.cluster_.getMarkerClusterer();
+    
     /**
      * This event is fired when the mouse moves out of a cluster marker.
      * @name MarkerClusterer#mouseout
@@ -163,6 +205,25 @@ ClusterIcon.prototype.onAdd = function () {
      * @event
      */
     google.maps.event.trigger(mc, "mouseout", cClusterIcon.cluster_);
+    
+    var $previews = $(cClusterIcon.div_).find('.marker-preview');
+    //$previews.hide();
+    
+    $previews.stop(true, false);
+    $previews.animate({
+        opacity : 0, 
+        top     : 0, 
+        left    : 0
+    }, {
+        duration : 1000, 
+        specialEasing : {
+            opacity : 'easeOutQuint', 
+            top     : 'easeOutBounce', 
+            left    : 'easeOutBounce'
+        }, 
+        complete : function() {
+        }
+    });
   });
 };
 
@@ -210,11 +271,47 @@ ClusterIcon.prototype.show = function () {
   if (this.div_) {
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.cssText = this.createCss(pos);
-    if (this.cluster_.printable_) {
+    
+    var markers = this.cluster_.getMarkers();
+    var preview = "";
+    var num_markers = markers.length;
+    
+    $.each(markers, function(i, marker) {
+        var offset = 360 * (i / num_markers) * Math.PI / 180;
+        var radius = 80 + 10 * Math.max(0, num_markers - 6);
+        var x = radius * Math.cos(offset);
+        var y = radius * Math.sin(offset);
+        var style = "";
+        
+        style = "top: " + y + "px; left: " + x + "px;";
+        /*if (x > 0) {
+            style += "left: " + x + "px; "
+        } else {
+            style += "right: " + x + "px; "
+        }
+        
+        if (y > 0) {
+            style += "bottom: " + x + "px; "
+        } else {
+            style += "top: " + x + "px; "
+        }*/
+        
+        preview += "<div class='marker-preview' style='" + style + "'>" + 
+                        "<span>" + 
+                            marker.title + 
+                        "</span>" + 
+                   "</div>";
+    });
+    
+    if (this.cluster_.printable_ || true) {
       // (Would like to use "width: inherit;" below, but doesn't work with MSIE)
-      this.div_.innerHTML = "<img src='" + this.url_ + "'><div style='position: absolute; top: 0px; left: 0px; width: " + this.width_ + "px;'>" + this.sums_.text + "</div>";
+      this.div_.innerHTML = "<img src='" + this.url_ + "'>" + 
+                            "<div style='position: absolute; top: 0px; left: 0px; width: " + this.width_ + "px;'>" + 
+                                preview + 
+                                this.sums_.text + 
+                            "</div>";
     } else {
-      this.div_.innerHTML = this.sums_.text;
+      this.div_.innerHTML = preview + this.sums_.text;
     }
     this.div_.title = this.cluster_.getMarkerClusterer().getTitle();
     this.div_.style.display = "";
