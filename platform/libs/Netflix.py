@@ -539,9 +539,6 @@ class Netflix(object):
             raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
                            (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
-    def get(self, service, user_id=None, token=None, **parameters):
-        return self.__get(service, user_id, token, **parameters)
-
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -558,7 +555,7 @@ class Netflix(object):
             return []
         return [elmt]
 
-    def getFromLinks(self, links, key, search, returnKey):
+    def _getFromLinks(self, links, key, search, returnKey):
         """
         Search a netflix 'link' list of dicts for a given substring in a given key.  If it is found, provide the value
          of the returnKey in that dict
@@ -604,7 +601,7 @@ class Netflix(object):
                         )
         queue = []
         for item in self.__asList(results.get('queue', None).get('queue_item', None)):
-            netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
+            netflix_id = self._getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
             queue.append(netflix_id)
 
         return results.get('queue', None)
@@ -626,7 +623,7 @@ class Netflix(object):
         recent = []
         for item in self.__asList(results['rental_history']['rental_history_item']):
             date = datetime.fromtimestamp(item['watched_date'])
-            netflix_id = self.getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
+            netflix_id = self._getFromLinks(self.__asList(item['link']), 'rel', 'catalog/title', 'href')
             if netflix_id is not None:
                 recent.append( (date, {'netflix_id': netflix_id}) )
         return recent
@@ -649,7 +646,6 @@ class Netflix(object):
         getresponse = self.__get(
             'queues/instant',
             title_ref               = netflix_id,
-            #position                = 1,
             user_id                 = user_id,
             token                   = token,
         )
@@ -713,28 +709,6 @@ class Netflix(object):
             parameters              = { 'application_name': 'Stamped' },
         )
         return result
-
-#    http://api.netflix.com/oauth/access_token?
-#    oauth_consumer_key=YourConsumerKey&\
-#    oauth_signature_method=HMAC-SHA1&\
-#    oauth_timestamp=timestamp&\
-#    oauth_token=YourAuthorizedToken&\
-#    oauth_nonce=nonce&\
-#    oauth_version=1.0&\
-#    oauth_signature=YourSignature
-        #oauthRequest.sign_request(  self.__signature_method_hmac_sha1, self.__consumer, token)
-
-#        results = self.__get(
-#            'https://api-user.netflix.com/oauth/login',
-#            application_name        = 'Stamped',
-#            token                   = token,
-#        )
-
-#        https://api-user.netflix.com/oauth/login?
-#        application_name=Your+Application+Name&
-#        oauth_callback=http%3A%2F%2Fyourserver.com%2Fyourpage&\
-#        oauth_consumer_key=YourConsumerKey&\
-#        oauth_token=YourToken
 
 __globalNetflix = None
 

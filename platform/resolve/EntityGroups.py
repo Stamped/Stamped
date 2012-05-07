@@ -119,6 +119,13 @@ class FactualGroup(APlaceGroup):
         APlaceGroup.__init__(self, 'factual')
         self.addField(['factual_id'])
 
+class FoursquareGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'foursquare')
+        self.addField(['foursquare_id'])
+        self.addField(['foursquare_url'])
+
 class OpenTableGroup(APlaceGroup):
 
     def __init__(self):
@@ -447,6 +454,7 @@ class SKUNumberGroup(ABookGroup):
 allGroups = [
     FactualGroup,
     SinglePlatformGroup,
+    FoursquareGroup,
     GooglePlacesGroup,
     TMDBGroup,
     RdioGroup,

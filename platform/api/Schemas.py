@@ -848,6 +848,11 @@ class EntitySourcesSchema(Schema):
         self.singleplatform_source          = SchemaElement(basestring)
         self.singleplatform_timestamp       = SchemaElement(datetime)
 
+        self.foursquare_id                  = SchemaElement(basestring)
+        self.foursquare_url                 = SchemaElement(basestring)
+        self.foursquare_source              = SchemaElement(basestring)
+        self.foursquare_timestamp           = SchemaElement(datetime)
+
         self.factual_id                     = SchemaElement(basestring)
         self.factual_url                    = SchemaElement(basestring)
         self.factual_source                 = SchemaElement(basestring)
