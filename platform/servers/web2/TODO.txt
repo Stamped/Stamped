@@ -45,8 +45,8 @@ TODO:
     * play around with different footer options
         * NOTE: make sure it looks good on maps ala (http://www.yelp.com/map/elite-barber-shop-manhattan)
     
-    * implement google maps stamp-gallery view
-        * customize infowindow to not look like shit
+    * maps
+        * animate pin click and/or hover?
     
     * implement user stamp category distribution
         * TODO: figure out bargraph height issue
@@ -74,4 +74,5 @@ OLD:
     * profile images we're downloading are 500x500 even for small previews -- wasteful
     * replace credit in stamp-gallery-items with real elements
     * find feasible approach to color scheme constants
+    * customize infowindow to not look like shit
 

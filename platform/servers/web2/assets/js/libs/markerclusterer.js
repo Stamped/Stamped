@@ -219,8 +219,6 @@ ClusterIcon.prototype.onAdd = function () {
             opacity : 'easeOutCubic', 
             top     : 'easeOutBounce', 
             left    : 'easeOutBounce'
-        }, 
-        complete : function() {
         }
     });
   });
