@@ -67,6 +67,16 @@
             
             var markers     = []
             
+            var close_popup = function() {
+                if (!!popup.selected) {
+                    popup.close();
+                    popup.selected = null;
+                }
+            };
+            
+            google.maps.event.addListener(map, 'click',        close_popup);
+            google.maps.event.addListener(map, 'zoom_changed', close_popup);
+            
             $.each(stamps, function(i, stamp) {
                 var coords  = (stamp['entity']['coordinates']).split(",");
                 var lat     = parseFloat(coords[0]);
@@ -108,14 +118,7 @@
                 
                 info += "</div><div class='bottom-wave'></div></div>";
                 
-                var close_popup = function() {
-                    if (!!popup.selected) {
-                        popup.close();
-                        popup.selected = null;
-                    }
-                };
-                
-                google.maps.event.addListener(marker, 'click', function(event) {
+                var open_popup = function(e) {
                     if (popup.selected === marker) {
                         close_popup();
                     } else {
@@ -124,11 +127,10 @@
                         popup.selected = marker;
                     }
                     
-                    event.stop();
-                });
+                    e.stop();
+                }
                 
-                google.maps.event.addListener(map, 'click',        close_popup);
-                google.maps.event.addListener(map, 'zoom_changed', close_popup);
+                google.maps.event.addListener(marker, 'click', open_popup);
             });
             
             if (stamps.length > 2) {

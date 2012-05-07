@@ -167,27 +167,28 @@ ClusterIcon.prototype.onAdd = function () {
             
             $preview.attr('pos-top',  "" + pos.top);
             $preview.attr('pos-left', "" + pos.left);
-            console.debug("top: " + pos.top + "; left: " + pos.left);
         }
         
         var t = parseFloat($preview.attr('pos-top'));
         var l = parseFloat($preview.attr('pos-left'));
         
-        $preview.stop(true, false);
-        $preview.css({
-            opacity : 0, 
-            top     : 0, 
-            left    : 0
-        });
+        console.debug('opacity: ' + $preview.css('opacity'));
+        if ($preview.css('opacity') >= .99) {
+            $preview.css({
+                opacity : 0, 
+                top     : 0, 
+                left    : 0
+            });
+        }
         
-        $preview.animate({
-            opacity : 100, 
+        $preview.stop(true, false).animate({
+            opacity : 1, 
             top     : t, 
             left    : l
         }, {
             duration : 1000, 
             specialEasing : {
-                opacity : 'easeInOutQuint', 
+                opacity : 'easeOutQuint', 
                 top     : 'easeOutBounce', 
                 left    : 'easeOutBounce'
             }
@@ -204,20 +205,18 @@ ClusterIcon.prototype.onAdd = function () {
      * @param {Cluster} c The cluster that the mouse moved out of.
      * @event
      */
-    google.maps.event.trigger(mc, "mouseout", cClusterIcon.cluster_);
+    google.maps.event.trigger(mc, "mouseleave", cClusterIcon.cluster_);
     
     var $previews = $(cClusterIcon.div_).find('.marker-preview');
-    //$previews.hide();
     
-    $previews.stop(true, false);
-    $previews.animate({
+    $previews.stop(true, false).animate({
         opacity : 0, 
         top     : 0, 
         left    : 0
     }, {
         duration : 1000, 
         specialEasing : {
-            opacity : 'easeOutQuint', 
+            opacity : 'easeOutCubic', 
             top     : 'easeOutBounce', 
             left    : 'easeOutBounce'
         }, 
