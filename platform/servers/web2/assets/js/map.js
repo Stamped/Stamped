@@ -7,7 +7,6 @@
     $(document).ready(function() {
         var canvas  = $(".stamp-map .stamp-map-canvas")[0];
         var $canvas = $(canvas);
-        $canvas.css("width: 100%; height: 100%; background: red;");
         
         // TODO: load in preloaded stamps
         
@@ -77,6 +76,7 @@
             google.maps.event.addListener(map, 'click',        close_popup);
             google.maps.event.addListener(map, 'zoom_changed', close_popup);
             
+            // for each stamp, initialize a marker and add it to the map
             $.each(stamps, function(i, stamp) {
                 var coords  = (stamp['entity']['coordinates']).split(",");
                 var lat     = parseFloat(coords[0]);
@@ -98,6 +98,7 @@
                 bounds.extend(pos);
                 markers.push(marker);
                 
+                // create the html content for the popup InfoBox
                 var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
                 
                 info += "<p class='subtitle-line'>" + 
@@ -107,6 +108,8 @@
                             "</span>" + 
                         "</p>";
                 
+                // stamps may have more than one blurb associated with them, so add each one
+                // in turn to this marker's InfoBox content
                 for (var i = 0; i < stamp['contents'].length; ++i) {
                     var content = stamp['contents'][i];
                     var blurb   = content['blurb'];
@@ -119,6 +122,7 @@
                 info += "</div><div class='bottom-wave'></div></div>";
                 
                 var open_popup = function(e) {
+                    // guard to only display a single marker InfoBox at a time
                     if (popup.selected === marker) {
                         close_popup();
                     } else {
@@ -133,14 +137,19 @@
                 google.maps.event.addListener(marker, 'click', open_popup);
             });
             
-            if (stamps.length > 2) {
-                var clusterer = new MarkerClusterer(map, markers, {
-                    gridSize : 20, 
-                    minimumClusterSize : 3
+            var minimumClusterSize = 3;
+            var gridSize = 20;
+            
+            // only enable marker clustering if there are enough stamps
+            if (stamps.length > minimumClusterSize) {
+                new MarkerClusterer(map, markers, {
+                    minimumClusterSize : minimumClusterSize, 
+                    gridSize : gridSize
                 });
             }
         }
         
+        // resize map to fit viewport without scrolling page and also reset map bounds
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
             var margin = 0;

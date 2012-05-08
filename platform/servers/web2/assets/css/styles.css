@@ -55,6 +55,10 @@ body {
   font-size: 1em;
 }
 a,
+a:focus {
+  outline: 0;
+}
+a,
 a:visited {
   color: #3366cc;
   text-decoration: none;
@@ -87,7 +91,104 @@ footer,
   border: 0 none;
   position: relative;
 }
-/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+header {
+  /* TODO: use slight background gradient instead of flat color */
+
+}
+header p {
+  float: right;
+  clear: both;
+  margin: 0.5em 0.5em 0.25em 0;
+}
+header p .desc {
+  font-size: 90%;
+}
+header p.join span.desc {
+  color: #438fed;
+}
+header p.join a.button {
+  color: #fff;
+  background: #3b84eb;
+  -webkit-box-shadow: 0 0 4px 0 #3b84eb;
+  -moz-box-shadow: 0 0 4px 0 #3b84eb;
+  -ms-box-shadow: 0 0 4px 0 #3b84eb;
+  -o-box-shadow: 0 0 4px 0 #3b84eb;
+  box-shadow: 0 0 4px 0 #3b84eb;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+header p.join a.button:hover {
+  text-decoration: none;
+  background: #69a1f0;
+  -webkit-box-shadow: 0 0 4px 0 #1769dc;
+  -moz-box-shadow: 0 0 4px 0 #1769dc;
+  -ms-box-shadow: 0 0 4px 0 #1769dc;
+  -o-box-shadow: 0 0 4px 0 #1769dc;
+  box-shadow: 0 0 4px 0 #1769dc;
+}
+header p.join a.button:active {
+  text-decoration: none;
+  background: #0f4897;
+  -webkit-box-shadow: 0 0 4px 0 #0f4897;
+  -moz-box-shadow: 0 0 4px 0 #0f4897;
+  -ms-box-shadow: 0 0 4px 0 #0f4897;
+  -o-box-shadow: 0 0 4px 0 #0f4897;
+  box-shadow: 0 0 4px 0 #0f4897;
+}
+header p.sign-in span.desc {
+  color: #bbb;
+}
+header p.sign-in a.button {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 4px 0 #eeeeee;
+  -moz-box-shadow: 0 0 4px 0 #eeeeee;
+  -ms-box-shadow: 0 0 4px 0 #eeeeee;
+  -o-box-shadow: 0 0 4px 0 #eeeeee;
+  box-shadow: 0 0 4px 0 #eeeeee;
+  border: 1px solid #666;
+  background: #FEFEFE;
+  color: #666;
+}
+header p.sign-in a.button:hover {
+  color: #fff;
+  border-color: #69a1f0;
+  background: #69a1f0;
+  text-decoration: none;
+  -webkit-box-shadow: 0 0 4px 0 #1769dc;
+  -moz-box-shadow: 0 0 4px 0 #1769dc;
+  -ms-box-shadow: 0 0 4px 0 #1769dc;
+  -o-box-shadow: 0 0 4px 0 #1769dc;
+  box-shadow: 0 0 4px 0 #1769dc;
+}
+header p.sign-in a.button:active {
+  color: #fff;
+  border-color: #0f4897;
+  background: #0f4897;
+  text-decoration: none;
+  -webkit-box-shadow: 0 0 4px 0 #0f4897;
+  -moz-box-shadow: 0 0 4px 0 #0f4897;
+  -ms-box-shadow: 0 0 4px 0 #0f4897;
+  -o-box-shadow: 0 0 4px 0 #0f4897;
+  box-shadow: 0 0 4px 0 #0f4897;
+}
+header a.button {
+  font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+  letter-spacing: .1em;
+  text-align: center;
+  margin-left: .5em;
+  display: inline-block;
+  width: 5em;
+}
+/*
 
 @color: color(`window.colors.baseColor`);
 @darkcolor: darken(@color, 10%);
@@ -221,6 +322,11 @@ TODO:
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  /*&:hover {
+            @base: #3b84eb;
+            background: lighten(@base, 10%);
+        }*/
+
 }
 .user-gallery :nth-child(10) img {
   display: none;

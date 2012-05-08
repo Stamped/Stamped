@@ -42,27 +42,34 @@
 
 
 TODO:
+    * audit box-shadow usage and replace w/ more efficient image-border where appropriate
+    * generate stamp collage images
+    * get full stamp inset image from anthony
+    
     * play around with different footer options
         * NOTE: make sure it looks good on maps ala (http://www.yelp.com/map/elite-barber-shop-manhattan)
     
     * maps
         * animate pin click and/or hover?
+        * customize google maps style
+        * customize google maps UI controls
+        * need a way to pop back once you jump into a stack
+        * animation for when you click on a marker cluster
     
     * implement user stamp category distribution
         * TODO: figure out bargraph height issue
     
     * debug blurb and comment references via blurb_formatted
     
-    * fix blockquotes (line-spacing is messed up on multiple lines...)
-    
     * figure out why font-faces aren't loading on chrome
         * how to debug.. must be tools out there to help with this?
-    
-    * when stamp images don't load, they still display a border
     
     * Integrate stamping with Facebook OpenGraph posting
 
 POLISH:
+    * debug iOS emoji support in user-inputted content (e.g, blurbs, titles, etc.)
+    * fix blockquotes (line-spacing is messed up on multiple lines...)
+    * when stamp images don't load, they still display a border
     * fix profile header nav animation
     * link profile image to lightboxed full-resolution version
     * link stamp image to lightboxed full-resolution version

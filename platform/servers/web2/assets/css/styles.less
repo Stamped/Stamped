@@ -54,6 +54,10 @@ body {
     font-size: 1em;
 }
 
+a, a:focus {
+    outline: 0;
+}
+
 a, a:visited {
     color: #3366cc;
     text-decoration: none;
@@ -91,7 +95,102 @@ header, footer, .fixedwidth {
     position: relative;
 }
 
-/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+header {
+    p {
+        float: right;
+        clear: both;
+        
+        margin: 0.5em 0.5em 0.25em 0;
+        
+        .desc {
+            font-size: 90%;
+        }
+    }
+    
+    @base: #3b84eb;
+    
+    /* TODO: use slight background gradient instead of flat color */
+    
+    p.join {
+        span.desc {
+            color: #438fed;
+        }
+        
+        a.button {
+            color: #fff;
+            background: @base;
+            .box-shadow(0, 0, 4px, 0, @base);
+            .rounded(2px);
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                text-decoration: none;
+                background: @c0;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                
+                text-decoration: none;
+                background: @c1;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    p.sign-in {
+        span.desc {
+            color: #bbb;
+        }
+        
+        a.button {
+            .rounded(4px);
+            .box-shadow(0, 0, 4px, 0, #eee);
+            border: 1px solid #666;
+            background: #FEFEFE;
+            color: #666;
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                color: #fff;
+                border-color: @c0;
+                
+                background: @c0;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                color: #fff;
+                border-color: @c1;
+                
+                background: @c1;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    a.button {
+        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+        letter-spacing: .1em;
+        text-align: center;
+        
+        margin-left: .5em;
+        display: inline-block;
+        width: 5em;
+    }
+}
+
+/*
 
 @color: color(`window.colors.baseColor`);
 @darkcolor: darken(@color, 10%);
@@ -233,6 +332,11 @@ TODO:
         img {
             display: none;
         }
+        
+        /*&:hover {
+            @base: #3b84eb;
+            background: lighten(@base, 10%);
+        }*/
     }
     
     :nth-child(n+11) {

@@ -43,16 +43,18 @@
         {% endblock pre_body %}
         
         {% block pre_header %}
-        <header>
+        <header class="clearfix">
             {% endblock pre_header %}
             
             {% block header %}
-            <div class="clearfix">
-                <p style="float: right;"><i>TODO</i> <b>HEADER</b> <i>TODO</i></p>
-                <p style="float: right;"><i>TODO</i> <b>HEADER</b> <i>TODO</i></p>
-                <p style="float: right;"><i>TODO</i> <b>HEADER</b> <i>TODO</i></p>
-                <p style="float: right;"><i>TODO</i> <b>HEADER</b> <i>TODO</i></p>
-            </div>
+            <p class="join">
+                <span class='desc'>Put your stamp of approval on the world.</span>
+                <a class='button' href='#'>JOIN</a>
+            </p>
+            <p class="sign-in">
+                <span class='desc'>Already stamping?</span>
+                <a class='button' href='#'>SIGN IN</a>
+            </p>
             {% endblock header %}
             
             {% block post_header %}
