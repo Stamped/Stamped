@@ -79,7 +79,10 @@ class MongoActivityCollection(AActivityDB):
 
         activity = self.activity_items_collection.getActivityForUsers(userIds, **params)
 
-        return activity 
+        return activity
+
+    def getUnreadActivityCount(self, userId, timestamp):
+        return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
         subject         = kwargs.pop('subject', None)
