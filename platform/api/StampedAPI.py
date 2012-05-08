@@ -3243,7 +3243,8 @@ class StampedAPI(AStampedAPI):
             
         
         # Reset activity count
-        self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+        if personal:
+            self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
         
         return activity
 
