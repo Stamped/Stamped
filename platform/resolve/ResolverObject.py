@@ -154,6 +154,10 @@ class ResolverPlace(ResolverObject):
         return []
 
     @property
+    def gallery(self):  #expects list of dicts with 'url' and 'caption'
+        return []
+
+    @property
     def phone(self):
         return None
 

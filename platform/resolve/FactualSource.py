@@ -176,6 +176,7 @@ class FactualSource(GenericSource):
                 'alcohol_flag',
                 'opentable_nickname',
                 'opentable',
+                'foursquare',
             ],
             kinds=[
                 'place',
@@ -290,6 +291,11 @@ class FactualSource(GenericSource):
                 singleplatform_id = self.__factual.singleplatform(factual_id)
                 entity['singleplatform_id'] = singleplatform_id
                 timestamps['singleplatform'] = controller.now
+
+            if controller.shouldEnrich('foursquare', self.sourceName, entity):
+                foursquare_id = self.__factual.foursquare(factual_id)
+                entity['foursquare_id'] = foursquare_id
+                timestamps['foursquare'] = controller.now
 
             # all further enrichments require place/restaurant data so return if not present
             data = self.__factual.data(factual_id,entity=entity)

@@ -408,7 +408,7 @@ class Factual(object):
                 if crosswalk_age > self.__max_crosswalk_age:
                     should_crosswalk = True
             if should_crosswalk:
-                data = self.crosswalk_id(factual_id,namespaces=['singleplatform'])
+                data = self.crosswalk_id(factual_id,namespaces=['singleplatform', 'foursquare'])
                 if data is not None:
                     for datum in data:
                         namespace = datum['namespace']
@@ -416,6 +416,9 @@ class Factual(object):
                         if namespace == 'singleplatform':
                             entity.singleplatform_id = namespace_id
                             entity.singleplatform_timestamp = datetime.utcnow()
+                        elif namespace == 'foursquare':
+                            entity.foursquare_id = namespace_id
+                            entity.foursquare_timestamp = datetime.utcnow()
                 entity.factual_crosswalk = datetime.utcnow()
                 result = True
         return result
@@ -495,7 +498,35 @@ class Factual(object):
             return sp_id
         else:
             return None
-    
+
+    def factual_from_foursquare(self, foursquare_id):
+        """
+        Get the factual_id (if any) associated with the given foursquare ID.
+
+        Convenience method for crosswalk lookup from a foursquare ID.
+        """
+        crosswalk_result = self.crosswalk_external('foursquare',foursquare_id,'foursquare')
+        if crosswalk_result:
+            return crosswalk_result['factual_id']
+        else:
+            return None
+
+    def foursquare(self, factual_id):
+        """
+        Get foursquare id from factual_id
+
+        Convenience method for crosswalk lookup for foursquare
+        """
+        foursquare_info = self.crosswalk_id(factual_id,namespace='foursquare')
+        sp_id = None
+        if foursquare_info and 'namespace_id' in foursquare_info[0]:
+            sp_id = foursquare_info[0]['namespace_id']
+        if sp_id:
+            return sp_id
+        else:
+            return None
+
+
     def data(self, factual_id, entity=None):
         """
         Generate Factual data for given factual_id.

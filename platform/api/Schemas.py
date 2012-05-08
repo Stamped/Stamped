@@ -71,6 +71,7 @@ class CoordinatesSchema(Schema):
 class ImageSchema(Schema):
     def setSchema(self):
         self.image                          = SchemaElement(basestring) # url
+        self.caption                        = SchemaElement(basestring)
         self.width                          = SchemaElement(int)
         self.height                         = SchemaElement(int)
         self.source                         = SchemaElement(basestring)
@@ -848,6 +849,15 @@ class EntitySourcesSchema(Schema):
         self.singleplatform_source          = SchemaElement(basestring)
         self.singleplatform_timestamp       = SchemaElement(datetime)
 
+        self.foursquare_id                  = SchemaElement(basestring)
+        self.foursquare_url                 = SchemaElement(basestring)
+        self.foursquare_source              = SchemaElement(basestring)
+        self.foursquare_timestamp           = SchemaElement(datetime)
+
+        self.instagram_id                   = SchemaElement(basestring)
+        self.instagram_source               = SchemaElement(basestring)
+        self.instagram_timestamp            = SchemaElement(datetime)
+
         self.factual_id                     = SchemaElement(basestring)
         self.factual_url                    = SchemaElement(basestring)
         self.factual_source                 = SchemaElement(basestring)
@@ -902,6 +912,10 @@ class PlaceEntity(BasicEntity):
         self.neighborhood                   = SchemaElement(basestring)
         self.neighborhood_source            = SchemaElement(basestring)
         self.neighborhood_timestamp         = SchemaElement(datetime)
+
+        self.gallery                        = SchemaList(ImageSchema())
+        self.gallery_source                 = SchemaElement(basestring)
+        self.gallery_timestamp              = SchemaElement(datetime)
         
         self.hours                          = TimesSchema()
         self.hours_source                   = SchemaElement(basestring)

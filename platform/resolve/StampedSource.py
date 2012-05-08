@@ -901,11 +901,12 @@ class StampedSource(GenericSource):
             'opentable'         : 'sources.opentable_id', 
             'tmdb'              : 'sources.tmdb_id', 
             'factual'           : 'sources.factual_id', 
-            'singleplatform'    : 'sources.singleplatform_id', 
+            'singleplatform'    : 'sources.singleplatform_id',
+            'foursquare'        : 'sources.foursquare_id',
             'fandango'          : 'sources.fandango_id', 
             'googleplaces'      : 'sources.googleplaces_id', 
             'itunes'            : 'sources.itunes_id', 
-            'netflix'           : 'sources.netflix.nid', 
+            'netflix'           : 'sources.netflix_id',
             'thetvdb'           : 'sources.thetvdb.thetvdb_id', 
         }
         
