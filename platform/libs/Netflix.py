@@ -105,7 +105,8 @@ class Netflix(object):
 
         headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
         body = oauthRequest.to_postdata() if verb == 'POST' else None
-        url = url if verb == 'POST' else oauthRequest.to_url()
+        if verb != 'POST':
+            url = oauthRequest.to_url()
         logs.info(url)
 
         with self.__cpsLimiter:
@@ -220,6 +221,9 @@ class Netflix(object):
         return recent
 
     def getRecommendations(self, user_id, user_token, user_secret, start=0, count=100):
+        """
+        Returns a list of netflix_ids
+        """
         token = oauth.OAuthToken(user_token, user_secret)
         results = self.__get(
             'users/' + user_id + '/recommendations',
@@ -227,7 +231,8 @@ class Netflix(object):
             start_index             = start,
             max_results             = count,
         )
-        return results
+        recs = self.__asList(results['recommendations']['recommendation'])
+        return [self._getFromLinks(self.__asList(x['link']), 'rel', 'catalog/title', 'href') for x in recs]
 
     def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
         pass
@@ -276,12 +281,6 @@ class Netflix(object):
                 continue
             ratings.append( ( self._getFromLinks(self.__asList(x['link']), 'rel', 'catalog/title', 'href') , x['user_rating']) )
         return ratings
-
-    def titlesByUserRating(self, rating, auth, start, count):
-        """
-        Returns a list of {netflix_id:<ID>}s
-        """
-        pass
 
     def getLoginUrl(self, authUserId):
         #request the oauth token and secret
@@ -333,11 +332,16 @@ GHOSTBUSTERS2_ID = 'http://api.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api.netflix.com/catalog/titles/movies/1181532'
 INCEPTION_ID = 'http://api.netflix.com/catalog/titles/movies/70131314'
 
-def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, title='ghostbusters'):
+def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
     from pprint import pprint
     netflix = Netflix()
 
-    if 'searchTitles' in methods:         pprint( netflix.searchTitles(netflix_id) )
+    netflix_id = BIGLEB_ID
+    title = 'ghostbusters'
+    if 'netflix_id' in params:  netflix_id  = params['netflix_id']
+    if 'title' in params:       title       = params['title']
+
+    if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
