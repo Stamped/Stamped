@@ -19,15 +19,23 @@ class MongoActivityLinkCollection(AMongoCollection):
                                         primary_key='link_id', 
                                         obj=ActivityLink, 
                                         overflow=True)
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('timestamp.modified', pymongo.ASCENDING)])
     
     ### PUBLIC
 
-    def addActivityLink(self, activityId, userId):
-        item                = ActivityLink()
-        item.activity_id    = activityId 
-        item.user_id        = userId
-        item.created        = datetime.utcnow()
-        return self._addObject(item)
+    def saveActivityLink(self, activityId, userId):
+        now = datetime.utcnow()
+        query = {'activity_id': activityId, 'user_id': userId}
+        if self._collection.find(query).count() > 0:
+            item = self._collection.update(query, { '$set' : { 'timestamp.modified' : now } }, safe=True )
+        else:
+            item                = ActivityLink()
+            item.activity_id    = activityId 
+            item.user_id        = userId
+            item.created        = now
+            item.modified       = now
+            self._addObject(item)
 
     def removeActivityLink(self, activityId):
         try:
@@ -67,13 +75,13 @@ class MongoActivityLinkCollection(AMongoCollection):
 
         query = { 'user_id' : userId }
         if since is not None and before is not None:
-            query['timestamp.created'] = { '$gte' : since, '$lte' : before }
+            query['timestamp.modified'] = { '$gte' : since, '$lte' : before }
         elif since is not None:
-            query['timestamp.created'] = { '$gte' : since }
+            query['timestamp.modified'] = { '$gte' : since }
         elif before is not None:
-            query['timestamp.created'] = { '$lte' : before }
+            query['timestamp.modified'] = { '$lte' : before }
 
-        documents = self._collection.find(query).sort('timestamp.created', pymongo.DESCENDING).limit(limit)
+        documents = self._collection.find(query).sort('timestamp.modified', pymongo.DESCENDING).limit(limit)
 
         return [ document['activity_id'] for document in documents ]
 
@@ -83,11 +91,11 @@ class MongoActivityLinkCollection(AMongoCollection):
 
         query = { 'user_id' : userId }
         if since is not None and before is not None:
-            query['timestamp.created'] = { '$gte' : since, '$lte' : before }
+            query['timestamp.modified'] = { '$gte' : since, '$lte' : before }
         elif since is not None:
-            query['timestamp.created'] = { '$gte' : since }
+            query['timestamp.modified'] = { '$gte' : since }
         elif before is not None:
-            query['timestamp.created'] = { '$lte' : before }
+            query['timestamp.modified'] = { '$lte' : before }
 
         return self._collection.find(query).count()
         
