@@ -1525,9 +1525,6 @@ class Resolver(object):
             except ValueError:
                 print("test %s failed with ValueError" % name)
                 raise
-            except Exception as e:
-                print("Exception %s" % e.message)
-                raise
             similarities[name] = comparison
             if name in mins and comparison < mins[name]:
                 success = False

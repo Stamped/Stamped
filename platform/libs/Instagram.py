@@ -42,6 +42,7 @@ class Instagram(object):
         self.__client_secret=client_secret
         self.__consumer = oauth.OAuthConsumer(self.__client_id, self.__client_secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
+        self.__limiter = RateLimiter(cps=10)
 
     #def place_search(self, **kwargs):
     #    return self.__instagram('locations/search', **kwargs)
@@ -73,8 +74,9 @@ class Instagram(object):
         url += '?%s' % '&'.join(pairs)
         logs.info(url)
 
-        req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
-        response = urllib2.urlopen(req).read()
+        with self.__limiter:
+            req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
+            response = urllib2.urlopen(req).read()
         data = json.loads(response)
         return data
 
@@ -89,24 +91,22 @@ def globalInstagram():
 
     return __globalInstagram
 
-def demo(method, **params):
+def demo(foursquare_id, **params):
     instagram = Instagram()
-    place = instagram.place_search(foursquare_id='4d1bb4017e10a35d5737f982')
+    place = instagram.place_search(foursquare_id)
     recent_media = instagram.place_recent_media(place['data'][0]['id'])
     pprint(recent_media)
 
-    if method == 'place_search':
-        pprint(instagram.place_search(foursquare_id='4d1bb4017e10a35d5737f982'))#lat='48.858844', lng='2.294351'))
 
 if __name__ == '__main__':
     import sys
-    method = 'place_search'
-    params = {'term':'Fort Tryon Park'}
+    params = {}
+    foursquare_id = '4d1bb4017e10a35d5737f982'
     if len(sys.argv) > 1:
-        method = sys.argv[1]
+        foursquare_id = sys.argv[1]
     if len(sys.argv) > 2:
         params = {}
         for arg in sys.argv[2:]:
             pair = arg.split('=')
             params[pair[0]] = pair[1]
-    demo(method, **params)
+    demo(foursquare_id, **params)

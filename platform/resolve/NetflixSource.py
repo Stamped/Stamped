@@ -33,13 +33,9 @@ except:
 
 class _NetflixObject(object):
     """
-    Abstract superclass (mixin) for Spotify objects.
+    Abstract superclass for Netflix objects.
 
-    _SpotifyObjects must be instantiated with their valid spotify_id.
-
-    Attributes:
-
-    spotify - an instance of Spotify (API wrapper)
+    _NetflixObjects must be instantiated with the json-dict structure returned by the api for a catalog_title
     """
 
     def __init__(self, titleObj):
