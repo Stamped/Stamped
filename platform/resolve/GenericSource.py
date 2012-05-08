@@ -217,7 +217,9 @@ class GenericSource(BasicSource):
         images = []
         for image in proxy.images:
             img = ImageSchema()
-            img.image = image
+            size = ImageSizeSchema()
+            size.url = image
+            img.sizes.append(size)
             images.append(img)
         if len(images) > 0:
             entity.images = images
@@ -250,12 +252,13 @@ class GenericSource(BasicSource):
 
             gallery = []
             for image in proxy.gallery:
-                img = ImageSchema()
-                img.image = image['url']
+                img             = ImageSchema()
                 img.caption     = image['caption']
-                img.height      = image['height']
-                img.width       = image['width']
-                img.source      = image['source']
+                size            = ImageSizeSchema()
+                size.url        = image['url']
+                size.height     = image['height']
+                size.width      = image['width']
+                img.sizes.append(size)
                 gallery.append(img)
             if len(gallery) > 0:
                 entity.gallery = gallery
@@ -399,7 +402,9 @@ class GenericSource(BasicSource):
             screenshots = []
             for screenshot in proxy.screenshots:
                 img = ImageSchema()
-                img.image = screenshot
+                size = ImageSizeSchema()
+                size.url = screenshot
+                img.sizes.append(size)
                 screenshots.append(img)
             if len(screenshots) > 0:
                 entity.screenshots = screenshots

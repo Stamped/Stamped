@@ -70,11 +70,14 @@ class CoordinatesSchema(Schema):
 
 class ImageSchema(Schema):
     def setSchema(self):
-        self.image                          = SchemaElement(basestring) # url
+        self.sizes                          = SchemaList(ImageSizeSchema()) # url
         self.caption                        = SchemaElement(basestring)
+
+class ImageSizeSchema(Schema):
+    def setSchema(self):
+        self.url                            = SchemaElement(basestring) # url
         self.width                          = SchemaElement(int)
         self.height                         = SchemaElement(int)
-        self.source                         = SchemaElement(basestring)
 
 class TimestampSchema(Schema):
     def setSchema(self):

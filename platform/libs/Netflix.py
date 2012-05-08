@@ -10,7 +10,7 @@ import json
 import utils
 import logs
 
-from errors                 import StampedHTTPError
+from errors             import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 

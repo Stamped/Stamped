@@ -1849,8 +1849,10 @@ class StampedAPI(AStampedAPI):
             
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            image.width     = imageWidth
-            image.height    = imageHeight
+            size            = ImageSizeSchema()
+            size.width      = imageWidth
+            size.height     = imageHeight
+            image.sizes.append(size)
             content.images  = [ image ]
 
             imageExists     = True

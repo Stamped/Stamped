@@ -93,7 +93,7 @@ class Fandango(object):
                     # fandango gives us low resolution 69x103 versions of the image, so hackily up the 
                     # resolution before saving the entity :)
                     image  = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
-                    images = [ ImageSchema({ 'image' : image }) ]
+                    images = [ ImageSchema({ 'sizes': [ImageSizeSchema({'url' : image }),] }) ]
                     
                     _set_entity(entity, "images", images)
                     break

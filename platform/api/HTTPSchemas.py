@@ -758,10 +758,15 @@ class HTTPEntity(Schema):
     
     def _addImages(self, images):
         for image in images:
-            if image.image is not None:
-                item = ImageSchema()
-                item.image = _cleanImageURL(image.image)
-                self.images.append(item)
+            if len(image.sizes) == 0:
+                continue
+            newimg = ImageSchema()
+            for size in image.sizes:
+                if size.url is not None:
+                    newsize = ImageSizeSchema()
+                    newsize.url = _cleanImageURL(size.url)
+                    newimg.sizes.append(newsize)
+            self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
         try:

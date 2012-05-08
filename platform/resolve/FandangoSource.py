@@ -20,6 +20,7 @@ try:
     from urllib2                    import HTTPError
     from datetime                   import datetime
     from Resolver                   import *
+    from ResolverObject             import *
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
 except:
@@ -53,7 +54,7 @@ class _FandangoObject(object):
         return "%s %s %s" % (self.name, self.source, self.date)
 
 
-class FandangoMovie(_FandangoObject, ResolverMovie):
+class FandangoMovie(_FandangoObject, ResolverMediaItem):
     """
     Fandango movie wrapper
     """

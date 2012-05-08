@@ -300,8 +300,9 @@ if newType == 'app':
     screenshots = media.pop('screenshots', [])
     for screenshot in screenshots:
         imageSchema = ImageSchema()
-        imageSchema.image = screenshot 
-        imageSchema.source = 'itunes'
+        imageSizeSchema = ImageSizeSchema()
+        imageSizeSchema.url = screenshot
+        imageSchema.sizes.append(imageSizeSchema)
         new.screenshots.append(imageSchema)
     if len(screenshots) > 0:
         new.screenshots_source = media.pop('screenshots_source', 'seed')
