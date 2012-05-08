@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import math, os, sys, urllib2, utils
+import colorsys, math, os, sys, urllib2, utils
 
 from StringIO       import StringIO
 from PIL            import Image, ImageFilter
@@ -39,6 +39,7 @@ class ImageCollage(object):
         pool.join()
         
         sizes  = [
+            (940, 256), 
             (512, 128), 
             (256, 64), 
         ]
@@ -74,7 +75,6 @@ class ImageCollage(object):
         num_cols  = size_map[num_tiles][0]
         num_rows  = size_map[num_tiles][1]
         
-        num_blurs = 0
         #num_cols  = 5
         #num_rows  = math.ceil(((float) num_tiles) / num_cols)
         
@@ -84,6 +84,48 @@ class ImageCollage(object):
             
             canvas    = Image.new("RGB", size)
             cell_size = (size[0] / num_cols, size[1] / num_rows)
+            
+            # TODO: revisit tile layout algorithm ala http://www.csc.liv.ac.uk/~epa/surveyhtml.html#toc.2.1
+            
+            '''
+            offsets = []
+            indices = []
+            
+            for i in xrange(num_rows):
+                for j in xrange(num_cols):
+                    indices.append(len(offsets))
+                    offsets.append((i, j))
+            
+            indices = utils.shuffle(indices)
+            
+            for index in indices:
+                i, j = offsets[index]
+                
+                y0 = i * cell_size[1]
+                x0 = j * cell_size[0]
+                
+                # wrap around if necessary to fill last row
+                index = (i * num_cols + j) % num_tiles
+                tile  = tiles[index]
+                
+                if tile.size[0] / cell_size[0] < tile.size[1] / cell_size[1]:
+                    width  = cell_size[0]
+                    height = (width * tile.size[1]) / tile.size[0]
+                    
+                    if height > cell_size[1]:
+                        height = int((height + cell_size[1]) * (2.0 / 3.0));
+                else:
+                    height = cell_size[1]
+                    width  = (height * tile.size[0]) / tile.size[1]
+                    
+                    if width > cell_size[0]:
+                        width = int((width + cell_size[0]) * (2.0 / 3.0));
+                
+                cell   = tile.resize((width, height), Image.ANTIALIAS)
+                
+                canvas.paste(cell, (x0, y0))
+                #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
+            '''
             
             for i in xrange(num_rows):
                 y0 = i * cell_size[1]
@@ -114,37 +156,53 @@ class ImageCollage(object):
                     #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
             
             utils.log("blurring collage '%s'" % filename)
-            '''
-            kernel = [ 1,  4,  7,  4,  1, \
-                       4, 20, 33, 20,  4, \
-                       7, 33, 55, 33,  7, \
-                       4, 20, 33, 20,  4, \
-                       1,  4,  7,  4,  1]
             
-            """
-            kernel = []
+            num_blurs = 3
+            pad       = 8
             
-            for a in xrange(5):
-                for b in xrange(5):
-                    x = (a - 2)
-                    y = (b - 2)
+            canvas2 = Image.new("RGB", (size[0] + pad * 2, size[1] + pad * 2), (255, 255, 255, 0))
+            canvas2.paste(canvas, (pad, pad))
+            
+            width, height = canvas2.size
+            
+            # TODO: revisit image filter
+            for y in xrange(height):
+                for x in xrange(width):
+                    r, g, b = canvas2.getpixel((x, y))
                     
-                    if (x == 0 and y == 0):
-                        d = 1
-                    else:
-                        d = 1.0 / math.sqrt((x * x) + (y * y))
+                    r /= 255.0
+                    g /= 255.0
+                    b /= 255.0
                     
-                    kernel.append(d)
-            
-            """
-            k = ImageFilter.Kernel((5, 5), kernel)
+                    h, l, s = colorsys.rgb_to_hls(r, g, b)
+                    r, g, b = colorsys.hls_to_rgb(h, min(1.0, l * 1.2), s * 0.6)
+                    
+                    r = int(r * 255.0)
+                    g = int(g * 255.0)
+                    b = int(b * 255.0)
+                    
+                    canvas2.putpixel((x, y), (r, g, b))
             
             for i in xrange(num_blurs):
-                canvas = canvas.filter(k)
-            '''
+                canvas2 = canvas2.filter(ImageFilter.BLUR)
             
-            for i in xrange(num_blurs):
-                canvas = canvas.filter(ImageFilter.BLUR)
+            offset0 = pad + 2
+            offset1 = pad - 2
+            canvas  = canvas2.crop((offset0, offset0, size[0] + offset1, size[1] + offset1))
+            
+            '''
+            def dodge(a, b, alpha):
+                return min(int(a*255/(256-b*alpha)), 255)
+            
+            width, height = canvas.size
+            alpha = 1.5;
+            
+            for x in xrange(width):
+                for y in xrange(height):
+                    a = canvas.getpixel((x, y))
+                    b = canvas.getpixel((x, y))
+                    canvas.putpixel((x, y), dodge(a, b, alpha))
+            '''
             
             canvas.save(filename, 'JPEG')
     
