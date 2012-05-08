@@ -829,7 +829,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
                     item = HTTPEntityGalleryItem()
-                    item.image = image.image
+                    item.image = image
                     item.caption = image.caption
                     gallery.data.append(item)
                 self.galleries.append(gallery)
@@ -914,8 +914,8 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
                     item = HTTPEntityGalleryItem()
-                    item.image = image.image
-                    item.caption = image.caption
+                    item.image          = image
+                    item.caption        = image.caption
                     source              = HTTPActionSource()
                     source.source_id    = item.image
                     source.source       = 'stamped'
@@ -1568,7 +1568,7 @@ class HTTPEntityGallery(Schema):
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
-        self.image                  = SchemaElement(basestring, required=True)
+        self.image                  = SchemaElement(ImageSchema(), required=True)
         self.action                 = HTTPAction()
         self.caption                = SchemaElement(basestring)
         self.height                 = SchemaElement(int)
