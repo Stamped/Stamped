@@ -117,7 +117,7 @@ class Account(Schema):
         self.linked_accounts    = LinkedAccounts()
         self.devices            = DevicesSchema()
         self.stats              = UserStatsSchema()
-        self.timestamp          = TimestampSchema()
+        self.timestamp          = UserTimestampSchema()
         self.alerts             = AccountAlerts()
 
 class LinkedAccounts(Schema):
@@ -198,7 +198,7 @@ class User(Schema):
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
         self.stats              = UserStatsSchema()
-        self.timestamp          = TimestampSchema(required=True)
+        self.timestamp          = UserTimestampSchema(required=True)
         self.identifier         = SchemaElement(basestring)
     
     def exportSchema(self, schema):
@@ -215,7 +215,7 @@ class UserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
-        self.timestamp          = TimestampSchema()
+        self.timestamp          = UserTimestampSchema()
 
 class UserTiny(Schema):
     def setSchema(self):
