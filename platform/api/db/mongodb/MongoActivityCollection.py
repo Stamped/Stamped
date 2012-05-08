@@ -219,7 +219,8 @@ class MongoActivityCollection(AActivityDB):
             self._removeSubject(activityIds, userId)
     
     def removeActivityForStamp(self, stampId):
-        activityIds = self.activity_items_collection.getActivityIds(stampId=stampId)
+        objects     = { 'stamp_ids' : [ stampId ] }
+        activityIds = self.activity_items_collection.getActivityIds(objects=objects)
         self._removeActivityIds(activityIds)
     
     def removeUserActivity(self, userId):
