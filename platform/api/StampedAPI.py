@@ -3253,9 +3253,10 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getUnreadActivityCount(self, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName({'user_id': authUserId})
-        if user.stats.num_unread_news is None:
+        count = self._activityDB.getUnreadActivityCount(authUserId, user.timestamp.activity)
+        if count is None:
             return 0
-        return user.stats.num_unread_news
+        return count
 
     
     """
