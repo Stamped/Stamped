@@ -97,6 +97,9 @@ class MongoActivityItemCollection(AMongoCollection):
         if since is not None:
             query['timestamp.created'] = { '$gte' : since }
 
+        if len(query.keys()) == 0:
+            raise Exception("No params provided!")
+
         documents = self._collection.find(query, fields={'_id' : 1})
 
         result = []

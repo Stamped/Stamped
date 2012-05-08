@@ -3243,9 +3243,20 @@ class StampedAPI(AStampedAPI):
             
         
         # Reset activity count
-        self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+        if personal:
+            self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
+            ### DEPRECATED
+            self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
         
         return activity
+
+    @API_CALL
+    def getUnreadActivityCount(self, authUserId, **kwargs):
+        user = self._getUserFromIdOrScreenName({'user_id': authUserId})
+        if user.stats.num_unread_news is None:
+            return 0
+        return user.stats.num_unread_news
+
     
     """
     #     # ###### #     # #     #

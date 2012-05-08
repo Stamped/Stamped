@@ -76,4 +76,18 @@ class MongoActivityLinkCollection(AMongoCollection):
         documents = self._collection.find(query).sort('timestamp.created', pymongo.DESCENDING).limit(limit)
 
         return [ document['activity_id'] for document in documents ]
+
+    def countActivityIdsForUser(self, userId, **kwargs):
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+
+        query = { 'user_id' : userId }
+        if since is not None and before is not None:
+            query['timestamp.created'] = { '$gte' : since, '$lte' : before }
+        elif since is not None:
+            query['timestamp.created'] = { '$gte' : since }
+        elif before is not None:
+            query['timestamp.created'] = { '$lte' : before }
+
+        return self._collection.find(query).count()
         

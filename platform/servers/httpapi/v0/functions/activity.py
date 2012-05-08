@@ -31,3 +31,9 @@ def friends(request, authUserId, data, **kwargs):
     
     return transformOutput(result)
 
+@handleHTTPRequest()
+@require_http_methods(["GET"])
+def unread(request, authUserId, **kwargs):
+    count   = stampedAPI.getUnreadActivityCount(authUserId)
+    return transformOutput({'num_unread': count})
+

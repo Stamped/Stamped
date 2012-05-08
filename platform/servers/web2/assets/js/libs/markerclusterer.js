@@ -1,5 +1,5 @@
 /*jslint browser: true, confusion: true, sloppy: true, vars: true, nomen: false, plusplus: false, indent: 2 */
-/*global window,google */
+/*global window,google,$ */
 
 /**
  * @name MarkerClustererPlus for Google Maps V3
@@ -172,7 +172,7 @@ ClusterIcon.prototype.onAdd = function () {
         var t = parseFloat($preview.attr('pos-top'));
         var l = parseFloat($preview.attr('pos-left'));
         
-        console.debug('opacity: ' + $preview.css('opacity'));
+        //console.debug('opacity: ' + $preview.css('opacity'));
         if ($preview.css('opacity') >= .99) {
             $preview.css({
                 opacity : 0, 
@@ -273,6 +273,7 @@ ClusterIcon.prototype.show = function () {
     var preview = "";
     var num_markers = markers.length;
     
+    // add hidden preview markers arranged in a circle around this cluster's icon
     $.each(markers, function(i, marker) {
         var offset = 360 * (i / num_markers) * Math.PI / 180;
         var radius = 80 + 10 * Math.max(0, num_markers - 6);

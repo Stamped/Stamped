@@ -172,7 +172,7 @@
 }
 
 .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
+.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
 
 /* TODO: properly center subtitle-line */
 .subtitle-line {
@@ -182,16 +182,21 @@
     margin: 0 0 -.5em;
     top: -4px;
     
+    p {
+        margin: 0;
+        padding: 0;
+    }
+    
     .subtitle {
-        position: relative;
-        display: block;
+        display: inline;
         font-size: 80%;
-        margin: -2px 0 0;
-        
-        .icon {
-            display: inline-block;
-            position: relative;
-        }
+        position: relative;
+        top: -2px;
+    }
+    
+    .icon {
+        display: inline-block;
+        margin: 0 4px 0 0;
     }
 }
 

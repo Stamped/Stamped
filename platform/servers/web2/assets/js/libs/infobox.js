@@ -392,10 +392,10 @@ InfoBox.prototype.setBoxStyle_ = function () {
 
     // Fix up opacity style for benefit of MSIE:
     //
-    if (typeof this.div_.style.opacity !== "undefined" && this.div_.style.opacity !== "") {
+    /*if (typeof this.div_.style.opacity !== "undefined" && this.div_.style.opacity !== "") {
 
       this.div_.style.filter = "alpha(opacity=" + (this.div_.style.opacity * 100) + ")";
-    }
+    }*/
 
     // Apply required styles:
     //
@@ -686,10 +686,11 @@ InfoBox.prototype.getZIndex = function () {
  * Shows the InfoBox.
  */
 InfoBox.prototype.show = function () {
-
   this.isHidden_ = false;
+  
   if (this.div_) {
-    this.div_.style.visibility = "visible";
+    var $div = $(this.div_);
+    $div.css('visibility', 'visible');
   }
 };
 
@@ -697,10 +698,11 @@ InfoBox.prototype.show = function () {
  * Hides the InfoBox.
  */
 InfoBox.prototype.hide = function () {
-
   this.isHidden_ = true;
+  
   if (this.div_) {
-    this.div_.style.visibility = "hidden";
+     var $div = $(this.div_);
+     $div.css('visibility', 'hidden');
   }
 };
 
@@ -713,58 +715,103 @@ InfoBox.prototype.hide = function () {
  * @param {MVCObject} [anchor]
  */
 InfoBox.prototype.open = function (map, anchor) {
-
   var me = this;
 
   if (anchor) {
-
     this.position_ = anchor.getPosition();
+    
     this.moveListener_ = google.maps.event.addListener(anchor, "position_changed", function () {
       me.setPosition(this.getPosition());
     });
   }
-
+  
   this.setMap(map);
-
+  /*var d = $.Deferred();
+  
   if (this.div_) {
-
+    var $div = $(this.div_);
+    var css = {
+        visibility : 'visible'
+    }
+    
+    if ($div.css('opacity') >= .99) {
+        css['opacity'] = 0;
+    }
+    
+    $div.css(css);
     this.panBox_();
+    
+    $div.stop(true, false).animate({
+        opacity : 1, 
+    }, {
+        duration : 1000, 
+        specialEasing : {
+            opacity : 'swing'
+        }, 
+        complete : function() {
+            d.resolve();
+        }
+    });
+  } else {
+      d.resolve();
   }
+  
+  return d.promise();*/
 };
 
 /**
  * Removes the InfoBox from the map.
  */
 InfoBox.prototype.close = function () {
-
   var i;
 
   if (this.closeListener_) {
-
     google.maps.event.removeListener(this.closeListener_);
+    
     this.closeListener_ = null;
   }
 
   if (this.eventListeners_) {
-    
     for (i = 0; i < this.eventListeners_.length; i++) {
-
       google.maps.event.removeListener(this.eventListeners_[i]);
     }
+    
     this.eventListeners_ = null;
   }
 
   if (this.moveListener_) {
-
     google.maps.event.removeListener(this.moveListener_);
+    
     this.moveListener_ = null;
   }
 
   if (this.contextListener_) {
-
     google.maps.event.removeListener(this.contextListener_);
+    
     this.contextListener_ = null;
   }
-
+  
   this.setMap(null);
+  /*var d = $.Deferred();
+  if (this.div_) {
+    var $div = $(this.div_);
+    var that = this;
+    
+    $div.stop(true, false).animate({
+        opacity : 0, 
+    }, {
+        duration : 1000, 
+        specialEasing : {
+            opacity : 'swing'
+        }, 
+        complete : function() {
+            that.setMap(null);
+            d.resolve();
+        }
+    });
+  } else {
+      d.resolve();
+  }
+  
+  return d.promise();*/
 };

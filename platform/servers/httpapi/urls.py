@@ -145,6 +145,7 @@ urlpatterns = patterns('',
     ### ACTIVITY
     (r'v0/activity/show.json',                      'v0.functions.activity.show'),
     (r'v0/activity/friends.json',                   'v0.functions.activity.friends'),
+    (r'v0/activity/unread.json',                    'v0.functions.activity.unread'),
     
     ### PING
     (r'v0/temp/ping.json',                          'v0.functions.ping.ping'),

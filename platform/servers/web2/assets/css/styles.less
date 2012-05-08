@@ -54,6 +54,10 @@ body {
     font-size: 1em;
 }
 
+a, a:focus {
+    outline: 0;
+}
+
 a, a:visited {
     color: #3366cc;
     text-decoration: none;
@@ -91,7 +95,102 @@ header, footer, .fixedwidth {
     position: relative;
 }
 
-/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+header {
+    p {
+        float: right;
+        clear: both;
+        
+        margin: 0.5em 0.5em 0.25em 0;
+        
+        .desc {
+            font-size: 90%;
+        }
+    }
+    
+    @base: #3b84eb;
+    
+    /* TODO: use slight background gradient instead of flat color */
+    
+    p.join {
+        span.desc {
+            color: #438fed;
+        }
+        
+        a.button {
+            color: #fff;
+            background: @base;
+            .box-shadow(0, 0, 4px, 0, @base);
+            .rounded(2px);
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                text-decoration: none;
+                background: @c0;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                
+                text-decoration: none;
+                background: @c1;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    p.sign-in {
+        span.desc {
+            color: #bbb;
+        }
+        
+        a.button {
+            .rounded(4px);
+            .box-shadow(0, 0, 4px, 0, #eee);
+            border: 1px solid #666;
+            background: #FEFEFE;
+            color: #666;
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                color: #fff;
+                border-color: @c0;
+                
+                background: @c0;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                color: #fff;
+                border-color: @c1;
+                
+                background: @c1;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    a.button {
+        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+        letter-spacing: .1em;
+        text-align: center;
+        
+        margin-left: .5em;
+        display: inline-block;
+        width: 5em;
+    }
+}
+
+/*
 
 @color: color(`window.colors.baseColor`);
 @darkcolor: darken(@color, 10%);
@@ -122,62 +221,71 @@ TODO:
     z-index: 101;
 }
 
-.profile-header {
-    @outer: #E5E5E5;
-    @inner: #FEFEFE;
-    @shadow: rgba(50,50,50,0.35);
+.profile-header-wrapper {
+    .fullwidth;
     
-    .linear-gradient(left, @outer, @inner, @outer);
-    
-    .innerbg {
-        /* TODO: get this mask working; kind of want blend-mode multiply... */
-        /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+    .profile-header {
+        @outer: #E5E5E5;
+        @inner: #FEFEFE;
+        @shadow: rgba(50,50,50,0.35);
         
-        .profile-header-pre {
-            .box-shadow(0, 3px, 3px, 0, @shadow);
-        }
+        .linear-gradient(left, @outer, @inner, @outer);
+        background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
+        background-size: 100%;
         
-        .profile-header-body {
-            padding: 34px 0;
+        .innerbg {
+            /* darken the background */
+            background-color: rgba(0, 0, 0, 0.246094);
             
-            .floatleft {
-                margin: 0 24px 0 0;
+            /* TODO: get this mask working; kind of want blend-mode multiply... */
+            /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+            
+            .profile-header-pre {
+                .box-shadow(0, 3px, 3px, 0, @shadow);
             }
             
-            p {
-                margin: 0;
-            }
-        }
-        
-        .profile-header-post {
-            .box-shadow(0, -3px, 3px, 0, @shadow);
-            
-            height: 16px;
-            
-            .inset-stamp {
-                background: url(/assets/img/insetstamp.png) center top no-repeat;
-                text-align: center;
-                position: relative;
-                top: -75px;
+            .profile-header-body {
+                padding: 34px 0;
                 
-                width: 167px;
-                min-height: 75px;
-                z-index: 100;
-                
-                margin: 0 auto;
-                padding: 18px 20px 0;
-                
-                .number {
-                    font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
-                    
-                    font-size: 2em;
-                    letter-spacing: .05em;
-                    margin: 0 0 -.25em;
+                .floatleft {
+                    margin: 0 24px 0 0;
                 }
                 
                 p {
-                    margin: 0 0 .5em;
-                    color: #000;
+                    margin: 0;
+                }
+            }
+            
+            .profile-header-post {
+                .box-shadow(0, -3px, 3px, 0, @shadow);
+                
+                height: 16px;
+                
+                .inset-stamp {
+                    background: url(/assets/img/insetstamp.png) center top no-repeat;
+                    text-align: center;
+                    position: relative;
+                    top: -75px;
+                    
+                    width: 167px;
+                    min-height: 75px;
+                    z-index: 100;
+                    
+                    margin: 0 auto;
+                    padding: 18px 20px 0;
+                    
+                    .number {
+                        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+                        
+                        font-size: 2em;
+                        letter-spacing: .05em;
+                        margin: 0 0 -.25em;
+                    }
+                    
+                    p {
+                        margin: 0 0 .5em;
+                        color: #000;
+                    }
                 }
             }
         }
@@ -233,6 +341,11 @@ TODO:
         img {
             display: none;
         }
+        
+        /*&:hover {
+            @base: #3b84eb;
+            background: lighten(@base, 10%);
+        }*/
     }
     
     :nth-child(n+11) {

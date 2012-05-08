@@ -10,9 +10,14 @@
             <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
             <div class="personal-stamp-logo"></div>
             
-            <p class="subtitle-line">
-                <span class="icon"></span>{{#entity}}<span class="subtitle">{{subtitle}}</span>{{/entity}}
-            </p>
+            <div class="subtitle-line">
+                <p>
+                    <span class="icon"></span>
+                    {{#entity}}
+                    <span class="subtitle">{{subtitle}}</span>
+                    {{/entity}}
+                </p>
+            </div>
             
             {{#entity}}
             {{#image}}

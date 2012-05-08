@@ -82,6 +82,10 @@ class TimestampSchema(Schema):
         self.modified                       = SchemaElement(datetime)
         self.image_cache                    = SchemaElement(datetime)
 
+class UserTimestampSchema(TimestampSchema):
+    def setSchema(self):
+        TimestampSchema.setSchema(self)
+        self.activity                       = SchemaElement(datetime)
 
 # ####### #
 # Account #
