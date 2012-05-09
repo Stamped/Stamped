@@ -1414,7 +1414,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
-                    print('\nalbum loop')
+                    info.logs('\nalbum loop')
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
@@ -1441,7 +1441,7 @@ class HTTPEntity(Schema):
                         logs.info(e.message)
                         pass
                 if len(gallery.images) > 0:
-                    print('\nadding gallery')
+                    info.logs('\nadding gallery with %d images' % len(gallery.images))
                     self.galleries.append(gallery)
 
         elif entity.kind == 'software' and entity.isType('app'):
