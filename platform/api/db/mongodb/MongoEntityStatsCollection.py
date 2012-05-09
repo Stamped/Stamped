@@ -23,16 +23,16 @@ class MongoEntityStatsCollection(AMongoCollection):
     
     ### PUBLIC
     
-    def addEntityStats(self, stat):
-        return self._addObject(stat)
+    def addEntityStats(self, stats):
+        return self._addObject(stats)
     
     def getEntityStats(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
     
-    def updateEntityStats(self, stat):
-        return self.update(stat)
+    def updateEntityStats(self, stats):
+        return self.update(stats)
     
     def removeEntityStats(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
@@ -45,24 +45,10 @@ class MongoEntityStatsCollection(AMongoCollection):
         )
         return True
 
-    def addToPopular(self, entityId, stampId):
+    def setPopular(self, entityId, userIds):
         self._collection.update(
             { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$addToSet' : { 'popular_stamps' : stampId } }
-        )
-        return True
-
-    def removeFromPopular(self, entityId, stampId):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$pull' : { 'popular_stamps' : stampId } }
-        )
-        return True
-
-    def setPopular(self, entityId, stampIds):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'popular_stamps' : stampIds } }
+            { '$set' : { 'popular_users' : userIds } }
         )
         return True
 

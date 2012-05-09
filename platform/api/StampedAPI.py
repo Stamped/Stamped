@@ -1491,20 +1491,58 @@ class StampedAPI(AStampedAPI):
 
         return True
 
+    @API_CALL
+    def entityStampedBy(self, entityId, authUserId=None, limit=10):
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+        except StampedUnavailableError:
+            stats = self.updateEntityStatsAsync(entityId)
+
+        popularUserIds = map(str, stats.popular_users[:limit])
+        popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
+        popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
+
+        result = {}
+        result['all_preview']   = self._enrichStampObjects(popularStamps)
+        result['all_count']     = stats.num_stamps
+
+        if authUserId is None:
+            return result
+
+        friendUserIds   = self._friendshipDB.getFriends(user['user_id'])
+        friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+
+        result['friend_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
+        result['friend_count']      = len(friendStamps)
+
+        fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
+        fofOverlap = set(fofUserIds).intersection(map(str, stats.popular_users))
+        fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
+
+        result['fof_preview']   = self._enrichStampObjects(fofStamps[:limit])
+        result['fof_count']     = len(fofStamps)
+
+        return result
+
+
     def updateEntityStatsAsync(self, entityId):
-        numStamps   = self._stampDB.countStampsForEntity(entityId)
-        popular     = self._stampDB.getPopularStampIdsForEntity(entityId)
+        numStamps = self._stampDB.countStampsForEntity(entityId)
+        popularUserIds = self._stampDB.getPopularityForEntity(entityId)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
+            stats.num_stamps = numStamps
+            stats.popular_users = popularUserIds
             self._entityStatsDB.updateNumStamps(entityId, numStamps)
-            self._entityStatsDB.setPopular(entityId, popular)
+            self._entityStatsDB.setPopular(entityId, popularUserIds)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
             stats.num_stamps = numStamps
-            stats.popular_stamps = popular
+            stats.popular_users = popularUserIds
             self._entityStatsDB.addEntityStats(stats)
+        return stats
+
 
 
 
