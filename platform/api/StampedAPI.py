@@ -1509,7 +1509,7 @@ class StampedAPI(AStampedAPI):
         if authUserId is None:
             return result
 
-        friendUserIds   = self._friendshipDB.getFriends(user['user_id'])
+        friendUserIds   = self._friendshipDB.getFriends(authUserId)
         friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
         result['friend_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
