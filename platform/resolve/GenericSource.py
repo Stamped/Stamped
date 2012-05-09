@@ -432,6 +432,7 @@ class GenericSource(BasicSource):
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
                 results = self.resolver.resolve(query, self.matchSource(query))
+                logs.info('### Finished resolve')
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:
@@ -441,7 +442,8 @@ class GenericSource(BasicSource):
                         proxy = best[1]
             except ValueError:
                 pass
-        
+
+        logs.info('### BEFORE ENRICH ENTITYWITHPROXY')
         source_id = entity[self.idField]
         if source_id is not None:
             try:
