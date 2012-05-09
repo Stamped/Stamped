@@ -72,7 +72,6 @@ class ImageSchema(Schema):
     def setSchema(self):
         self.sizes                          = SchemaList(ImageSizeSchema())
         self.caption                        = SchemaElement(basestring)
-        self.action                         = HTTPAction()
 
 class ImageSizeSchema(Schema):
     def setSchema(self):
