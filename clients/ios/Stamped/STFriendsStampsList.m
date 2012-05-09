@@ -25,6 +25,7 @@ static id _sharedInstance;
 - (void)setupSlice {
   STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
   self.genericSlice = slice;
+  self.genericSlice.sort = [STConfiguration value:@"Root.inboxSort"];
 }
 
 - (void)reload {

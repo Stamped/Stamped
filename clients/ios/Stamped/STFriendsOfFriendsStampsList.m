@@ -26,7 +26,8 @@ static id _sharedInstance;
   STFriendsSlice* friendsSlice = [[[STFriendsSlice alloc] init] autorelease];
   friendsSlice.distance = [NSNumber numberWithInt:2];
   friendsSlice.inclusive = [NSNumber numberWithBool:NO];
-   self.genericSlice = friendsSlice;
+  self.genericSlice = friendsSlice;
+  self.genericSlice.sort = [STConfiguration value:@"Root.inboxSort"];
 }
 
 - (id)init {

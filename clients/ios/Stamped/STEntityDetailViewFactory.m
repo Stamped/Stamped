@@ -117,6 +117,7 @@
   if (loadedSomething) {
     //TODO fix synchronousWrapper collapse bug
     if (self.entityDetail.galleries.count && !self.context.stamp) {
+      NSLog(@"\n\n\nGallery Attempt\n\n\n");
       id<STEntityDetailComponentFactory> factory = [[[STGalleryViewFactory alloc] init] autorelease];
       UIView* wrapper = [[[STSynchronousWrapper alloc] initWithDelegate:view componentFactory:factory 
                                                           entityDetail:self.entityDetail 

@@ -84,7 +84,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
       id<STImageList> imageList = [entity.images objectAtIndex:0];
       if (imageList.sizes.count > 0) {
         id<STImage> firstImage = [imageList.sizes objectAtIndex:0];
-        imagePath = firstImage.image;
+        imagePath = firstImage.url;
       }
     }
     UIView* imageView = nil;

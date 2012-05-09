@@ -923,7 +923,7 @@ static Rdio* _rdio;
     id<STImageList> imageList = [entityDetail.images objectAtIndex:0];
     if (imageList.sizes.count > 0) {
       id<STImage> image = [imageList.sizes objectAtIndex:0];
-      imagePath = image.image;
+      imagePath = image.url;
     }
   }
   return imagePath;
@@ -1026,6 +1026,15 @@ static Rdio* _rdio;
   NSNumberFormatter* f = [[[NSNumberFormatter alloc] init] autorelease];
   [f setNumberStyle:NSNumberFormatterDecimalStyle];
   return [f numberFromString:string];
+}
+
++ (void)appendView:(UIView*)child toParentView:(UIView*)parent {
+  CGFloat height = parent.frame.size.height;
+  [Util reframeView:child withDeltas:CGRectMake(0, height, 0, 0)];
+  CGRect parentFrame = parent.frame;
+  parentFrame.size.height = CGRectGetMaxY(child.frame);
+  parent.frame = parentFrame;
+  [parent addSubview:child];
 }
 
 @end

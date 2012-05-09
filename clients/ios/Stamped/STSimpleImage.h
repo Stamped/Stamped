@@ -12,7 +12,7 @@
 
 @interface STSimpleImage : NSObject <STImage>
 
-@property (nonatomic, readwrite, copy) NSString* image;
+@property (nonatomic, readwrite, copy) NSString* url;
 @property (nonatomic, readwrite, copy) NSNumber* width;
 @property (nonatomic, readwrite, copy) NSNumber* height;
 @property (nonatomic, readwrite, copy) NSString* source;

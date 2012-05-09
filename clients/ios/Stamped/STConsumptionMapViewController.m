@@ -192,6 +192,12 @@ NSInteger zoom;
 
 - (void)dealloc
 {
+  // Release any retained subviews of the main view.
+  consumptionToolbar_.slider.delegate = nil;
+  searchField_.delegate = nil;
+  [searchField_ release];
+  mapView_.delegate = nil;
+  [mapView_ release];
   [caches_ release];
   [consumptionToolbar_ release];
   [subcategory_ release];
@@ -232,13 +238,15 @@ NSInteger zoom;
   mapView_.showsUserLocation = YES;
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+  for (STCancellation* cancellation in self.cancellations) {
+    [cancellation cancel];
+  }
+}
+
 - (void)viewDidUnload
 {
   [super viewDidUnload];
-  // Release any retained subviews of the main view.
-  [searchField_ release];
-  searchField_ = nil;
-  [mapView_ release];
 }
 
 - (UIView *)loadToolbar {
@@ -474,6 +482,7 @@ NSInteger zoom;
   for (STCancellation* c in self.cancellations) {
     [c cancel];
   }
+  [self.cancellations removeAllObjects];
   STCancellation* cancellation = [cache stampsForRegion:self.mapView.region
                                             andCallback:^(NSArray<STStamp> *stamps, NSError *error, STCancellation *cancellation2) {
                                               [self.cancellations removeObject:cancellation2];

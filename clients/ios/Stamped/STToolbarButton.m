@@ -104,7 +104,7 @@
       self.imageView.image = self.normalOffImage;
     }
   }
-  //[self setNeedsDisplay];
+  [self setNeedsDisplay];
 }
 
 - (void)setOn:(BOOL)on {
