@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STMapViewController.h"
+#import "STLegacyMapViewController.h"
 
 #import "AccountManager.h"
 #import "Entity.h"
@@ -31,7 +31,7 @@ static NSString* const kFavoritesPath = @"/favorites/show.json";
 static NSString* const kFriendsPath = @"/collections/friends.json";
 static NSString* const kSuggestedPath = @"/collections/suggested.json";
 
-@interface STMapViewController ()
+@interface STLegacyMapViewController ()
 - (void)mapDisclosureTapped:(id)sender;
 - (void)overlayTapped:(UIGestureRecognizer*)recognizer;
 - (void)addAnnotationForEntity:(Entity*)entity;
@@ -64,7 +64,7 @@ static NSString* const kSuggestedPath = @"/collections/suggested.json";
 @property (nonatomic, assign) BOOL alertShown;
 @end
 
-@implementation STMapViewController
+@implementation STLegacyMapViewController
 
 @synthesize alertShown = alertShown_;
 @synthesize userStampsCache = userStampsCache_;

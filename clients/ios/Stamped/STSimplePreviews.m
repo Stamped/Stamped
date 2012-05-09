@@ -38,4 +38,13 @@
   return mapping;
 }
 
++ (STSimplePreviews*)previewsWithPreviews:(id<STPreviews>)previews {
+  STSimplePreviews* copy = [[[STSimplePreviews alloc] init] autorelease];
+  copy.comments = previews.comments;
+  copy.likes = previews.likes;
+  copy.todos = previews.todos;
+  copy.credits = previews.credits;
+  return copy;
+}
+
 @end

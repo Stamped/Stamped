@@ -19,6 +19,8 @@
 @property (nonatomic, readwrite, retain) NSString* subcategory;
 @property (nonatomic, readwrite, retain) NSString* coordinates;
 
+@property (nonatomic, readwrite, copy) NSArray<STImage>* images;
+
 + (RKObjectMapping*)mapping;
 
 @end

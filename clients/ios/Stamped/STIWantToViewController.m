@@ -14,7 +14,9 @@
 #import "STConsumptionViewController.h"
 #import "STButton.h"
 #import "ECSlidingViewController.h"
-#import "STMapViewController.h"
+#import "STLegacyMapViewController.h"
+#import "STConfiguration.h"
+#import "STConsumptionMapViewController.h"
 
 @interface STIWantToViewController ()
 
@@ -30,17 +32,11 @@
   return self;
 }
 
-- (void)backButtonClicked:(id)button {
-  [self.slidingViewController anchorTopViewTo:ECRight];
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self 
-                                                                           action:@selector(backButtonClicked:)] autorelease];
+  [Util addHomeButtonToController:self withBadge:YES];
+  [Util addCreateStampButtonToController:self];
   CGRect scrollFrame = self.scrollView.frame;
   CGFloat sidePadding = 5;
   CGFloat topPadding = 10;
@@ -103,7 +99,7 @@
   UIViewController* controller = nil;
   if (category) {
     if ([category isEqualToString:@"food"]) {
-      controller = [[[STMapViewController alloc] init] autorelease];
+      controller = [[[STConsumptionMapViewController alloc] init] autorelease];
     }
     else {
       controller = [[[STConsumptionViewController alloc] initWithCategory:category] autorelease];
@@ -115,6 +111,11 @@
   else {
     [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];
   }
+}
+
++ (void)setupConfigurations {
+  [STConsumptionViewController setupConfigurations];
+  [STConsumptionMapViewController setupConfigurations];
 }
 
 @end

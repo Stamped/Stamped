@@ -35,7 +35,6 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.controller.view.frame, [touch locationInView:self])) {
-    NSLog(@"hadfsklafdklfdslk");
     [super touchesBegan:touches withEvent:event];
   }
   else {
@@ -46,7 +45,6 @@
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.controller.view.frame, [touch locationInView:self])) {
-    NSLog(@"hadfsklafdklfdslk");
     [super touchesCancelled:touches withEvent:event];
   }
   else {
@@ -57,7 +55,6 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.controller.view.frame, [touch locationInView:self])) {
-    NSLog(@"hadfsklafdklfdslk");
     [super touchesEnded:touches withEvent:event];
   }
   else {
@@ -70,7 +67,6 @@
   [super touchesMoved:touches withEvent:event];
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.controller.view.frame, [touch locationInView:self])) {
-    NSLog(@"hadfsklafdklfdslk");
   }
   else {
     [[STRootMenuView sharedInstance] touchesMoved:touches withEvent:event];

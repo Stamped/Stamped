@@ -13,6 +13,14 @@
 #import "STDebugDatumViewController.h"
 #import "STDebug.h"
 
+@interface STConfigurationSectionController : STTableViewController <UITableViewDataSource, UITableViewDelegate>
+
+- (id)initWithSection:(NSString*)section;
+
+@property (nonatomic, readonly, copy) NSString* section;
+
+@end
+
 @implementation STConfigurationItem
 
 @synthesize section = section_;
@@ -47,6 +55,7 @@
   //UITableViewCellStyle style = self.description ? UITableViewCellStyleSubtitle : UITableViewCellStyleValue1;
   UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"TODO"] autorelease];
   cell.textLabel.text = self.key;
+  cell.textLabel.font = [UIFont stampedFontWithSize:12];
   cell.detailTextLabel.text = self.displayValue;
   if (self.modified) {
     cell.detailTextLabel.textColor = [UIColor redColor];
@@ -191,6 +200,10 @@
   [self.tableView reloadData];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [self.tableView reloadData];
+}
+
 @end
 
 
@@ -269,39 +282,48 @@ static STConfiguration* _sharedInstance;
   return controller;
 }
 
-- (STConfigurationItem*)itemForIndexPath:(NSIndexPath*)indexPath {
-  NSString* section = [self.orderedSections objectAtIndex:indexPath.section];
+- (STConfigurationItem*)itemForSection:(NSString*)section andIndex:(NSInteger)index {
   NSArray* sectionArray = [self.sections objectForKey:section];
-  return [self.objects objectForKey:[sectionArray objectAtIndex:indexPath.row]];
+  return [self.objects objectForKey:[sectionArray objectAtIndex:index]];  
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  NSString* sectionString = [self.orderedSections objectAtIndex:section];
-  NSArray* sectionArray = [self.sections objectForKey:sectionString];
-  return sectionArray.count;
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
   return self.orderedSections.count;
 }
 
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+  return 1;
+}
+
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  STConfigurationItem* item = [self itemForIndexPath:indexPath];
-  return [item tableViewCellWithTableView:tableView];
+  NSString* section = [self.orderedSections objectAtIndex:indexPath.row];
+  
+  UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"TODO"] autorelease];
+  cell.textLabel.text = section;
+  NSArray* items = [self.sections objectForKey:section];
+  NSInteger modified = 0;
+  for (NSString* itemName in items) {
+    STConfigurationItem* item = [self.objects objectForKey:itemName];
+    if (item.modified) {
+      modified++;
+    }
+  }
+  if (modified > 0) {
+    cell.textLabel.textColor = [UIColor redColor];
+  }
+  cell.detailTextLabel.text = [NSString stringWithFormat:@"%d items; %d modified", items.count, modified];
+  return cell;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  STConfigurationItem* item = [self itemForIndexPath:indexPath];
-  [item wasSelectedInTableView:tableView atIndexPath:indexPath];
+  NSString* section = [self.orderedSections objectAtIndex:indexPath.row];
+  
+  STTableViewController* controller = [[[STConfigurationSectionController alloc] initWithSection:section] autorelease];
+  [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-  STConfigurationItem* item = [self itemForIndexPath:indexPath];
-  return [item tableViewCellHeightWithTableView:tableView];
-}
-
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-  return [self.orderedSections objectAtIndex:section];
+  return 45;
 }
 
 + (void)addValue:(id)value forKey:(NSString*)key inSection:(NSString*)section {
@@ -414,6 +436,28 @@ static STConfiguration* _sharedInstance;
   [[STConfiguration sharedInstance] addConfigurationItem:item];
 }
 
++ (void)addPoint:(NSValue*)point forKey:(NSString*)key inSection:(NSString*)section {
+  id (^fromString)(NSString*) = ^(NSString* string) {
+    NSArray* comps = [string componentsSeparatedByString:@","];
+    if (comps.count == 2) {
+      NSNumber* x = [Util numberFromString:[comps objectAtIndex:0]];
+      NSNumber* y = [Util numberFromString:[comps objectAtIndex:1]];
+      if (x && y) {
+        return [NSValue valueWithCGPoint:CGPointMake(x.floatValue, y.floatValue)];
+      }
+    }
+    return (id) nil;
+  };
+  NSString* (^toString)(id) = ^(id value) {
+    CGPoint point = [value CGPointValue];
+    return [NSString stringWithFormat:@"%.1f,%.1f", point.x, point.y];
+  };
+  STConfigurationStringItem* item = [[[STConfigurationStringItem alloc] initWithValue:point key:key andSection:section] autorelease];
+  item.fromString = fromString;
+  item.toString = toString;
+  [[STConfiguration sharedInstance] addConfigurationItem:item];
+}
+
 + (void)addValue:(id)value forKey:(NSString*)key {
   [self addValue:value forKey:key inSection:[self sectionForKey:key]];
 }
@@ -440,6 +484,10 @@ static STConfiguration* _sharedInstance;
 
 + (void)addChoices:(NSDictionary*)choices originalKey:(NSString*)originalKey forKey:(NSString*)key {
   [self addChoices:choices originalKey:originalKey forKey:key inSection:[self sectionForKey:key]];
+}
+
++ (void)addPoint:(NSValue*)point forKey:(NSString*)key {
+  [self addPoint:point forKey:key inSection:[self sectionForKey:key]];
 }
 
 + (id)value:(NSString*)key {
@@ -480,8 +528,67 @@ static STConfiguration* _sharedInstance;
   }
 }
 
+- (void)resetValuesInSection:(NSString*)section {
+  for (NSString* key in self.modifiedKeys) {
+    STConfigurationItem* item = [self.objects objectForKey:key];
+    if ([item.section isEqualToString:section]) {
+      item.value = item.originalValue;
+    }
+  }
+}
+
 + (BOOL)flag:(NSString*)key {
   return [[STConfiguration value:key] boolValue];
+}
+
+@end
+
+@implementation STConfigurationSectionController
+
+@synthesize section = section_;
+
+- (id)initWithSection:(NSString*)section {
+  self = [super initWithHeaderHeight:0];
+  if (self) {
+    section_ = [section copy];
+  }
+  return self;
+}
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  self.tableView.delegate = self;
+  self.tableView.dataSource = self;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+  NSArray* items = [[STConfiguration sharedInstance].sections objectForKey:self.section]; 
+  return items.count;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+  return 1;
+}
+
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+  STConfigurationItem* item = [[STConfiguration sharedInstance] itemForSection:self.section andIndex:indexPath.row];
+  return [item tableViewCellWithTableView:tableView];
+}
+
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  STConfigurationItem* item = [[STConfiguration sharedInstance] itemForSection:self.section andIndex:indexPath.row];
+  [item wasSelectedInTableView:tableView atIndexPath:indexPath];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  STConfigurationItem* item = [[STConfiguration sharedInstance] itemForSection:self.section andIndex:indexPath.row];
+  return [item tableViewCellHeightWithTableView:tableView];
+}
+
+- (void)reloadStampedData {
+  [super reloadStampedData];
+  [[STConfiguration sharedInstance] resetValuesInSection:self.section];
+  [self.tableView reloadData];
 }
 
 @end

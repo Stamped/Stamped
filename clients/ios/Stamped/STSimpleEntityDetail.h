@@ -23,7 +23,6 @@
 @property (nonatomic, readwrite, retain) NSString* addressCountry;
 @property (nonatomic, readwrite, retain) NSString* neighborhood;
 
-@property (nonatomic, readwrite, retain) NSArray<STImage>* images;
 @property (nonatomic, readwrite, retain) NSArray<STActionItem>* actions;
 @property (nonatomic, readwrite, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readwrite, retain) NSArray<STGallery>* galleries;

@@ -63,6 +63,8 @@
 
 + (void)addChoices:(NSDictionary*)choices originalKey:(NSString*)originalKey forKey:(NSString*)key inSection:(NSString*)section;
 
++ (void)addPoint:(NSValue*)point forKey:(NSString*)key inSection:(NSString*)section;
+
 + (void)addValue:(id)value forKey:(NSString*)key;
 
 + (void)addFont:(UIFont*)font forKey:(NSString*)key;
@@ -74,6 +76,8 @@
 + (void)addColor:(UIColor*)color forKey:(NSString*)key;
 
 + (void)addFlag:(BOOL)flag forKey:(NSString*)key;
+
++ (void)addPoint:(NSValue*)point forKey:(NSString*)key;
 
 + (void)addChoices:(NSDictionary*)choices originalKey:(NSString*)originalKey forKey:(NSString*)key;
 

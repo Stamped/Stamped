@@ -8,6 +8,7 @@
 
 #import "STEveryoneStampsList.h"
 #import "STStampedAPI.h"
+#import "STConfiguration.h"
 
 @implementation STEveryoneStampsList
 
@@ -23,6 +24,13 @@ static id _sharedInstance;
 
 - (void)setupSlice {
   self.genericSlice = [[[STGenericCollectionSlice alloc] init] autorelease];
+}
+
+- (void)reload {
+  if (self == [STEveryoneStampsList sharedInstance]) {
+    self.genericSlice.sort = [STConfiguration value:@"Root.inboxSort"];
+  }
+  [super reload];
 }
 
 - (id)init {

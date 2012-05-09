@@ -31,4 +31,6 @@
 
 + (STCancellation*)dispatchNoopCancellationWithCallback:(void (^)(NSError* error, STCancellation* cancellation))block;
 
++ (STCancellation*)loadImages:(NSArray*)urls withCallback:(void (^)(NSError* error, STCancellation* cancellation))block;
+
 @end

@@ -8,6 +8,17 @@
 
 #import "STCancellation.h"
 #import "Util.h"
+#import "STImageCache.h"
+
+@interface STCancellationImageGroup : NSObject <STCancellationDelegate>
+
+- (id)initWithImages:(NSArray*)urls withCallback:(void (^)(NSError* error, STCancellation* cancellation))callback;
+
+@property (nonatomic, readonly, retain) STCancellation* cancellation;
+@property (nonatomic, readonly, retain) NSMutableArray* imageCancellations;
+@property (nonatomic, readwrite, assign) NSInteger count;
+
+@end
 
 @implementation STCancellation
 
@@ -85,6 +96,78 @@
   }];
   cancellation.decoration = @"no-op";
   return cancellation;
+}
+
++ (STCancellation*)loadImages:(NSArray*)urls withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
+  if (urls.count == 0) return [STCancellation dispatchNoopCancellationWithCallback:block];
+  return [[[STCancellationImageGroup alloc] initWithImages:urls withCallback:block] autorelease].cancellation;
+}
+
+@end
+
+@implementation STCancellationImageGroup
+
+@synthesize cancellation = cancellation_;
+@synthesize imageCancellations = imageCancellations_;
+@synthesize count = count_;
+
+- (void)cancelAll {
+  for (STCancellation* cancellation in self.imageCancellations) {
+    [cancellation cancel];
+  }
+}
+
+- (id)initWithImages:(NSArray*)urls withCallback:(void (^)(NSError* error, STCancellation* cancellation))callback {
+  self = [super init];
+  if (self) {
+    // will be retained until all blocks are discarded (aka. done)
+    cancellation_ = [[STCancellation cancellationWithDelegate:self] retain];
+    imageCancellations_ = [[NSMutableArray alloc] init];
+    for (NSString* url in urls) {
+      UIImage* cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
+      if (!cachedImage) {
+        STCancellation* imageCancellation = [[STImageCache sharedInstance] imageForImageURL:url andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+          if (image) {
+            self.count++;
+            if (self.count == self.imageCancellations.count) {
+              if ([self.cancellation finish] && callback) {
+                callback(nil, cancellation_);
+              }
+            }
+          }
+          else {
+            [self cancelAll];
+            if ([self.cancellation finish] && callback) {
+              callback(error, cancellation_);
+            }
+          }
+        }];
+        [imageCancellations_ addObject:imageCancellation];
+      }
+    }
+    if (imageCancellations_.count == 0) {
+      [Util executeOnMainThread:^{
+        if ([self.cancellation finish] && callback) {
+          callback(nil, cancellation_);
+        }
+      }];
+    }
+  }
+  return self;
+}
+
+- (void)dealloc
+{
+  cancellation_.delegate = nil;
+  [cancellation_ release];
+  
+  [imageCancellations_ release];
+  [super dealloc];
+}
+
+- (void)cancellationWasCancelled:(STCancellation *)cancellation {
+  NSAssert1(cancellation == self.cancellation, @"Unknown cancellation object %@", cancellation);
+  [self cancelAll];
 }
 
 @end

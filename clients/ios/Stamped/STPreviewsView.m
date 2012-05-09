@@ -66,28 +66,34 @@ static const NSInteger _cellsPerRow = 7;
 
 @synthesize items = items_;
 
-+ (NSInteger)totalItemsForStamp:(id<STStamp>)stamp {
-  if (stamp.previews) {
-    id<STPreviews> previews = stamp.previews;
++ (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
+  if (previews) {
     return previews.credits.count + previews.likes.count + previews.todos.count + previews.comments.count;
   }
   return 0;
 }
 
-+ (NSInteger)totalRowsForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return MIN(maxRows,[STPreviewsView totalItemsForStamp:stamp] / _cellsPerRow);
++ (NSInteger)totalRowsForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
+  NSInteger itemsCount = [STPreviewsView totalItemsForPreviews:previews];
+  NSInteger rows = itemsCount / _cellsPerRow;
+  rows += itemsCount % _cellsPerRow ? 1 : 0;
+  return MIN(maxRows,rows);
 }
 
-- (id)initWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows
+- (id)initWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
+  return [self initWithPreviews:stamp.previews andMaxRows:maxRows];
+}
+
+- (id)initWithPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows
 {
   self = [super initWithFrame:CGRectZero];
   if (self) {
-    NSInteger total = [STPreviewsView totalItemsForStamp:stamp];
+    //TODO remove duplication
+    NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
     if (total > 0) {
-      id<STPreviews> previews = stamp.previews;
-      NSInteger numberOfRows = [STPreviewsView totalRowsForStamp:stamp andMaxRows:maxRows];
+      NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
       CGFloat height = numberOfRows * _cellHeight;
-      self.frame = CGRectMake(0, 0, _cellWidth * _cellsPerRow, height);
+      self.frame = CGRectMake(0, 0, _cellWidth * MIN(_cellsPerRow, total), height);
       NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
       BOOL continuedFlag = NO;
       if (limit < total) {
@@ -151,7 +157,7 @@ static const NSInteger _cellsPerRow = 7;
         NSInteger row = i / _cellsPerRow;
         CGFloat xOffset = col * _cellWidth;
         CGFloat yOffset = row * _cellHeight;
-        if (i == limit - 1) {
+        if (i == limit - 1 && continuedFlag) {
           UIView* box = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, yOffset, 31, 31)] autorelease];
           box.backgroundColor = [UIColor colorWithWhite:.85 alpha:1];
           box.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -183,7 +189,7 @@ static const NSInteger _cellsPerRow = 7;
         CGFloat xOffset = col * _cellWidth;
         CGFloat yOffset = row * _cellHeight;
         CGFloat padding = 5;
-        if (i == limit - 1) {
+        if (i == limit - 1 && continuedFlag) {
         }
         else {
           STPreviewsViewItem* item = [items_ objectAtIndex:i];
@@ -193,10 +199,10 @@ static const NSInteger _cellsPerRow = 7;
           activeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:.3 alpha:.3];
           activeView.layer.cornerRadius = padding;
           STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                                  normalView:[[[UIView alloc] initWithFrame:viewFrame] autorelease]
-                                                  activeView:activeView
-                                                      target:item.pair
-                                                   andAction:@selector(executeActionWithArg:)] autorelease];
+                                                   normalView:[[[UIView alloc] initWithFrame:viewFrame] autorelease]
+                                                   activeView:activeView
+                                                       target:item.pair
+                                                    andAction:@selector(executeActionWithArg:)] autorelease];
           [self addSubview:button];
         }
       }
@@ -211,12 +217,64 @@ static const NSInteger _cellsPerRow = 7;
   [super dealloc];
 }
 
-- (void)previewClicked:(STPreviewsViewItem*)item {
-  //[[STActionManager sharedActionManager] didChooseAction:item.action withContext:item.context];
++ (CGFloat)previewHeightForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
+  return [STPreviewsView previewHeightForPreviews:stamp.previews andMaxRows:maxRows];
 }
 
-+ (CGFloat)previewHeightForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView totalRowsForStamp:stamp andMaxRows:maxRows] * _cellHeight;
++ (CGFloat)previewHeightForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
+  return [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows] * _cellHeight;
+}
+
++ (NSArray*)imagesForPreviewWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
+  return [STPreviewsView imagesForPreviewWithPreviews:stamp.previews andMaxRows:maxRows];
+}
+
++ (NSArray*)imagesForPreviewWithPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
+  NSMutableArray* images = [NSMutableArray array];
+  NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
+  if (total > 0) {
+    NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
+    NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
+    BOOL continuedFlag = NO;
+    if (limit < total) {
+      // TODO add support for continued button
+      continuedFlag = YES;
+    }
+    
+    for (id<STStamp> credit in previews.credits) {
+      if (images.count < limit) {
+        [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+      }
+      else {
+        break;
+      }
+    }
+    for (id<STUser> like in previews.likes) {
+      if (images.count < limit) {
+        [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+      }
+      else {
+        break;
+      }
+    }
+    for (id<STUser> todo in previews.todos) {
+      if (images.count < limit) {
+        [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+      }
+      else {
+        break;
+      }
+    }
+    for (id<STComment> comment in previews.comments) {
+      if (images.count < limit) {
+        [images addObject:[Util profileImageURLForUser:comment.user withSize:STProfileImageSize31]];
+      }
+      else {
+        break;
+      }
+    }
+  }
+  return images;
 }
 
 @end

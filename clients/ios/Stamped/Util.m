@@ -20,6 +20,7 @@
 #import "STActionPair.h"
 #import "UIFont+Stamped.h"
 #import "ECSlidingViewController.h"
+#import "STStampedAPI.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -797,45 +798,45 @@ static Rdio* _rdio;
 }
 
 /*
-+ (UIView*)profileImageViewForUser:(id<STUser>)user 
-                              size:(STProfileImageSize)size 
-                         andAction:(id<STAction>)action 
-                       withContext:(STActionContext*)context {
-  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
-  imageView.layer.borderWidth = 1.5;
-  imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
-  imageView.layer.borderColor = [UIColor whiteColor].CGColor;
-  imageView.layer.shadowOffset = CGSizeMake(0,2);
-  imageView.layer.shadowOpacity = .3;
-  imageView.layer.shadowRadius = 2;
-  imageView.clipsToBounds = YES;
-  UIView* activeView = [[[UIView alloc] initWithFrame:imageView.frame] autorelease];
-  activeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:.3 alpha:.3];
-  
-  UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
-  if (cachedImage) {
-    imageView.image = cachedImage;
-    STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
-    STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
-                                            normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
-                                            activeView:activeView
-                                                target:pair andAction:@selector(executeActionWithArg:)];
-    [imageView addSubview:button];
-  }
-  else {
-    [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-      imageView.image = image;
-      STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
-      STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
-                                              normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
-                                              activeView:activeView
-                                                  target:pair andAction:@selector(executeActionWithArg:)];
-      [imageView addSubview:button];
-    }];
-  }
-  return imageView;
-}
-*/
+ + (UIView*)profileImageViewForUser:(id<STUser>)user 
+ size:(STProfileImageSize)size 
+ andAction:(id<STAction>)action 
+ withContext:(STActionContext*)context {
+ UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+ imageView.layer.borderWidth = 1.5;
+ imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
+ imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+ imageView.layer.shadowOffset = CGSizeMake(0,2);
+ imageView.layer.shadowOpacity = .3;
+ imageView.layer.shadowRadius = 2;
+ imageView.clipsToBounds = YES;
+ UIView* activeView = [[[UIView alloc] initWithFrame:imageView.frame] autorelease];
+ activeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:.3 alpha:.3];
+ 
+ UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+ if (cachedImage) {
+ imageView.image = cachedImage;
+ STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
+ STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
+ normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
+ activeView:activeView
+ target:pair andAction:@selector(executeActionWithArg:)];
+ [imageView addSubview:button];
+ }
+ else {
+ [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+ imageView.image = image;
+ STActionPair* pair = [[STActionPair actionPairWithAction:action andContext:context] retain];
+ STButton* button = [[STButton alloc] initWithFrame:imageView.frame 
+ normalView:[[[UIView alloc] initWithFrame:imageView.frame] autorelease]
+ activeView:activeView
+ target:pair andAction:@selector(executeActionWithArg:)];
+ [imageView addSubview:button];
+ }];
+ }
+ return imageView;
+ }
+ */
 + (UIView*)badgeViewForGenre:(NSString*)genre {
   UIView* result = nil;
   NSString* imagePath = nil;
@@ -953,11 +954,62 @@ static Rdio* _rdio;
   [[ECSlidingViewController sharedInstance] anchorTopViewTo:ECRight];
 }
 
-+ (void)addHomeButtonToController:(UIViewController*)controller {
-  controller.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self 
-                                                                           action:@selector(_homeButtonClicked:)] autorelease];
++ (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag {
+  UIImage* normalImage = [UIImage imageNamed:@"nav_btn_menu"];
+  UIImage* activeImage = [Util gradientImage:[UIImage imageNamed:@"nav_btn_menu"] withPrimaryColor:@"99AACC" secondary:@"CCDDFF"];
+  STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(_homeButtonClicked:)];
+  if (flag) {
+    [Util addUnreadBadgeToView:button origin:CGPointMake(button.frame.size.width - 20 * .5, -20 * .3)];
+  }
+  controller.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+}
+
++ (STCancellation*)addUnreadBadgeToView:(UIView*)view origin:(CGPoint)origin {
+  return [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
+    if (count && count.numberUnread.integerValue >0) {
+      UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
+      UIView* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue]
+                                    font:[UIFont stampedFontWithSize:12]
+                                   color:[UIColor whiteColor]
+                                    mode:UILineBreakModeTailTruncation
+                              andMaxSize:countView.frame.size];
+      label.frame = [Util centeredAndBounded:label.frame.size inFrame:countView.frame];
+      [countView addSubview:label];
+      [Util reframeView:countView withDeltas:CGRectMake(origin.x, origin.y, 0, 0)];
+      countView.layer.borderWidth = 1;
+      countView.layer.borderColor = [UIColor whiteColor].CGColor;
+      countView.layer.cornerRadius = countView.frame.size.width / 2;
+      [Util addGradientToLayer:countView.layer
+                    withColors:[NSArray arrayWithObjects:
+                                [UIColor colorWithRed:226/255.0 green:92/255.0 blue:65/255.0 alpha:1],
+                                [UIColor colorWithRed:182/255.0 green:48/255.0 blue:22/255.0 alpha:1],
+                                nil]
+                      vertical:YES];
+      
+      [view addSubview:countView];
+    }
+  }];
+}
+
++ (void)_createStampButtonClicked:(id)notImportant {
+  [[ECSlidingViewController sharedInstance] anchorTopViewTo:ECLeft];
+}
+
++ (void)addCreateStampButtonToController:(UIViewController*)controller {
+  id<STUser> user = [STStampedAPI sharedInstance].currentUser;
+  UIImage* baseImage = [UIImage imageNamed:@"nav_btn_createStamp_color"];
+  UIImage* normalImage = [Util gradientImage:baseImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
+  UIImage* activeImage = [Util whiteMaskedImageUsingImage:baseImage];
+  STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(_createStampButtonClicked:)];
+  [button addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_btn_createStamp_overlay"]] autorelease]];
+  //button.backgroundColor = [UIColor blackColor];
+  controller.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+}
+
++ (NSNumber*)numberFromString:(NSString*)string {
+  NSNumberFormatter* f = [[[NSNumberFormatter alloc] init] autorelease];
+  [f setNumberStyle:NSNumberFormatterDecimalStyle];
+  return [f numberFromString:string];
 }
 
 @end

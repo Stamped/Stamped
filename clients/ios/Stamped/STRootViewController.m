@@ -36,9 +36,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
   [self setValue:[[[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease] forKey:@"navigationBar"];
 }
+
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+  [self.navigationBar addGestureRecognizer:self.slidingViewController.panGesture];
   //[self.view addGestureRecognizer:self.slidingViewController.panGesture];
   [self.slidingViewController setAnchorRightRevealAmount:260.0f];
   [self.slidingViewController setAnchorLeftRevealAmount:70.0f];
@@ -46,7 +48,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [self.view removeGestureRecognizer:self.slidingViewController.panGesture];
+  [self.navigationBar removeGestureRecognizer:self.slidingViewController.panGesture];
 }
 
 - (void)viewDidUnload

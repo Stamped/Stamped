@@ -30,6 +30,7 @@
 #import "STEveryoneStampsList.h"
 #import "STSimpleEndpointResponse.h"
 #import "STActionManager.h"
+#import "STSimpleActivityCount.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -62,6 +63,7 @@
 @property (nonatomic, readonly, retain) STCacheModelSource* menuCache;
 @property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
 @property (nonatomic, readonly, retain) STCacheModelSource* entityDetailCache;
+@property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
 
@@ -72,6 +74,7 @@
 @synthesize menuCache = _menuCache;
 @synthesize stampCache = _stampCache;
 @synthesize entityDetailCache = entityDetailCache_;
+@synthesize lastCount = lastCount_;
 
 static STStampedAPI* _sharedInstance;
 
@@ -103,6 +106,7 @@ static STStampedAPI* _sharedInstance;
   [_menuCache release];
   [_stampCache release];
   [entityDetailCache_ release];
+  [lastCount_ release];
   [super dealloc];
 }
 
@@ -168,6 +172,11 @@ static STStampedAPI* _sharedInstance;
   return [self stampsForSlice:slice withPath:@"/collections/suggested.json" andCallback:block];
 }
 
+- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
+                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+  return [self stampsForSlice:slice withPath:@"/collections/consumption.json" andCallback:block];
+}
+
 - (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
                                   andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block {
   NSString* path = @"/entities/stamped_by.json";
@@ -200,6 +209,8 @@ static STStampedAPI* _sharedInstance;
                                             mapping:[STSimpleStamp mapping]
                                         andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
                                           if (stamp) {
+                                            [[self globalListByScope:STStampedAPIScopeYou] reload];
+                                            [[self globalListByScope:STStampedAPIScopeFriends] reload];
                                             [self.stampCache removeObjectForKey:stampID];
                                           }
                                           block(stamp != nil, error);
@@ -275,7 +286,7 @@ static STStampedAPI* _sharedInstance;
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
   NSString* path = @"/activity/show.json";
-  
+  self.lastCount = nil;
   [[STRestKitLoader sharedInstance] loadWithPath:path 
                                             post:NO
                                           params:slice.asDictionaryParams
@@ -555,6 +566,32 @@ static STStampedAPI* _sharedInstance;
   }
 }
 
+- (STCancellation*)unreadCountWithCallback:(void(^)(id<STActivityCount>, NSError*, STCancellation*))block {
+  id<STActivityCount> cached = self.lastCount;
+  if (cached) {
+    STCancellation* cancellation = [STCancellation cancellation];
+    [Util executeOnMainThread:^{
+      if (!cancellation.cancelled) {
+        block(cached, nil, cancellation);
+      }
+    }];
+    return cancellation;
+  }
+  else {
+    NSString* path = @"/activity/unread.json";
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:NO
+                                                      params:[NSDictionary dictionary]
+                                                     mapping:[STSimpleActivityCount mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                   if (result) {
+                                                     //self.lastCount = result;
+                                                   }
+                                                   block(result, error, cancellation);
+                                                 }];
+  }
+}
+
 - (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope {
   if (scope == STStampedAPIScopeYou) {
     return [STYouStampsList sharedInstance];
@@ -612,6 +649,21 @@ static STStampedAPI* _sharedInstance;
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
   [self didChooseSource:source forAction:action withContext:context execute:YES];
+}
+
+- (NSString*)stringForScope:(STStampedAPIScope)scope {
+  if (scope == STStampedAPIScopeYou) {
+    return @"you";
+  }
+  else if (scope == STStampedAPIScopeFriends) {
+    return @"friends";
+  }
+  else if (scope == STStampedAPIScopeFriendsOfFriends) {
+    return @"fof";
+  }
+  else {
+    return @"everyone";
+  }
 }
 
 @end

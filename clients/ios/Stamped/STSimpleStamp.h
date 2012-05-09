@@ -37,4 +37,6 @@
 + (RKObjectMapping*)mapping;
 + (RKObjectMapping*)mappingWithoutPreview;
 
++ (STSimpleStamp*)stampWithStamp:(id<STStamp>)stamp;
+
 @end
