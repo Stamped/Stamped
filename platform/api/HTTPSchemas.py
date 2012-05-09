@@ -771,8 +771,7 @@ class HTTPEntity(Schema):
             newimg = HTTPImageSchema()
             for size in image.sizes:
                 if size.url is not None:
-                    newsize = HTTPImageSizeSchema()
-                    newsize.url = _cleanImageURL(size.url)
+                    newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
             self.images.append(newimg)
 
@@ -1955,9 +1954,11 @@ class HTTPStamp(Schema):
                 
                 for image in content.images:
                     img = HTTPImageSchema()
-                    img.image   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                    img.width   = image.width 
-                    img.height  = image.height 
+                    size = HTTPImageSizeSchema()
+                    size.url   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    size.width   = image.width
+                    size.height  = image.height
+                    img.sizes.append(size)
                     
                     item.images.append(img)
                 
