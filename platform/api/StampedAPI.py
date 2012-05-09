@@ -122,6 +122,7 @@ class StampedAPI(AStampedAPI):
     def API_CALL(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            logs.info('### StampedAPI wrapper')
             # time every API call
             t1 = time.time()
             error = False
