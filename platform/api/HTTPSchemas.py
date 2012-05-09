@@ -922,9 +922,9 @@ class HTTPEntity(Schema):
                     item = HTTPImageSchema()
                     item.importSchema(image)
                     source              = HTTPActionSource()
-                    source.source_id    = item.image
+                    source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
-                    source.link         = item.image
+                    source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
