@@ -554,10 +554,8 @@ class HTTPUserMini(Schema):
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
-            from pprint import pformat
-            logs.info(pformat(schema.value))
             self.importData(schema.exportSparse(), overflow=True)
-            base_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
             
             _initialize_image_sizes(self)
         else:
