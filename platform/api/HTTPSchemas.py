@@ -1862,7 +1862,7 @@ class HTTPStamp(Schema):
         self.user               = HTTPUserMini(required=True)
         self.contents           = SchemaList(HTTPStampContent())
         self.credit             = SchemaList(CreditSchema())
-        self.previews           = HTTPStampPreviews()\
+        self.previews           = HTTPStampPreviews()
         self.badges             = SchemaList(HTTPBadge())
         self.via                = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
