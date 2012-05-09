@@ -40,6 +40,9 @@ def parseCommandLine():
     
     parser.add_option("-u", "--user-id", dest="user_id", 
         default=None, type="string", help="Filter results on user id")
+
+    parser.add_option("-i", "--request-id", dest="request_id",
+        default=None, type="string", help="Filter on request id")
     
     parser.add_option("-m", "--method", dest="method", 
         default=None, type="string", help="Request method (POST, GET, or ASYNC)")
@@ -66,6 +69,7 @@ def main():
     options     = options.__dict__
     
     user_id     = options.pop('user_id', None)
+    request_id  = options.pop('request_id', None)
     limit       = options.pop('limit', 10)
     errors      = options.pop('show_errors', False)
     path        = options.pop('path', False)
@@ -81,7 +85,7 @@ def main():
     else:
         levels = ['info', 'warning', 'error', 'critical']
     
-    logs = MongoLogsCollection().getLogs(userId=user_id, limit=limit, errors=errors, \
+    logs = MongoLogsCollection().getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
                                             path=path, severity=severity, method=method)
     for i in xrange(len(logs)):
         print 
