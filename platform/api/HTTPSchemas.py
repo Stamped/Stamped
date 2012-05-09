@@ -1954,12 +1954,7 @@ class HTTPStamp(Schema):
                 
                 for image in content.images:
                     img = HTTPImageSchema()
-                    size = HTTPImageSizeSchema()
-                    size.url   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                    size.width   = image.width
-                    size.height  = image.height
-                    img.sizes.append(size)
-                    
+                    img.importSchema(image)
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
