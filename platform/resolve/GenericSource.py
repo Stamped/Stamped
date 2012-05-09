@@ -429,8 +429,10 @@ class GenericSource(BasicSource):
         proxy = None
         if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
+                logs.info('### before proxyFromEntity')
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
+                logs.info('### Before resolve')
                 results = self.resolver.resolve(query, self.matchSource(query))
                 logs.info('### Finished resolve')
                 if len(results) != 0:
