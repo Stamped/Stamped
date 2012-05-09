@@ -5,23 +5,28 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
+import libs.ec2_utils
 
 from errors             import *
 from schema             import *
-from utils              import lazyProperty
 from api.Schemas        import *
+from Entity             import *
+
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
-from Entity             import *
 from datetime           import datetime, date, timedelta
+
 
 # ####### #
 # PRIVATE #
 # ####### #
 
-### WARNING: COMPLETION ENDPOINT HARDCODED TO DEV!
-COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
+if libs.ec2_utils.is_prod_stack():
+    COMPLETION_ENDPOINT = 'https://api.stamped.com/v0/actions/complete.json'
+else:
+    COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
 
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
@@ -29,6 +34,7 @@ AMAZON_TOKEN    = 'stamped01-20'
 
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
 non_numeric_re  = re.compile('\D')
+mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -78,10 +84,17 @@ def _initialize_image_sizes(dest):
     dest.image_url_92  = get_image_url(92)
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
-
+    
     dest.image.sizes.append(ImageSizeSchema({'url': dest.image_url }))
-    for pix in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
-        dest.image.sizes.append( ImageSizeSchema({'url': get_image_url(pix), 'height': pix, 'width': pix}) )
+    
+    for size in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
+        image = ImageSizeSchema({
+            'url'    : get_image_url(size), 
+            'height' : size, 
+            'width'  : size
+        })
+        
+        dest.image.sizes.append(image)
 
 def _formatURL(url):
     try:
@@ -195,6 +208,7 @@ def _cleanImageURL(url):
     return url
 
 def _initialize_blurb_html(content):
+    # TODO: debug
     """
     blurb = content.blurb
     data  = []
@@ -228,6 +242,7 @@ def _initialize_blurb_html(content):
     pass
 
 def _initialize_comment_html(comment):
+    # TODO: debug
     """
     blurb = comment.blurb
     data  = []
@@ -765,14 +780,18 @@ class HTTPEntity(Schema):
             self.metadata.append(item)
     
     def _addImages(self, images):
+        logs.info('\n### calling addImages')
         for image in images:
+            logs.info('\n### iterating through images.  sizes: %d' % len(image.sizes))
             if len(image.sizes) == 0:
                 continue
             newimg = HTTPImageSchema()
             for size in image.sizes:
+                logs.info('\n### iteraring through sizes.  size.url %s' % size.url)
                 if size.url is not None:
                     newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
+            logs.info('\n### adding image')
             self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
@@ -837,7 +856,7 @@ class HTTPEntity(Schema):
                 for image in entity.gallery:
                     item = HTTPImageSchema()
                     item.importSchema(image)
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Reservation
@@ -922,14 +941,14 @@ class HTTPEntity(Schema):
                     item = HTTPImageSchema()
                     item.importSchema(image)
                     source              = HTTPActionSource()
-                    source.source_id    = item.image
+                    source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
-                    source.link         = item.image
+                    source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
                     item.action     = action
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Call
@@ -1411,15 +1430,16 @@ class HTTPEntity(Schema):
             # Albums
 
             if entity.isType('artist') and len(entity.albums) > 0:
+                from pprint import pformat
+
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
-                    print('\nalbum loop')
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
                         ### TODO: Add placeholder if image doesn't exist
-                        size.url        = _cleanImageURL(album.images[0]['image'])
+                        size.url        = _cleanImageURL(album.images[0].sizes[0].url)
                         item.caption    = album.title
                         item.sizes.append(size)
 
@@ -1436,12 +1456,11 @@ class HTTPEntity(Schema):
 
                             item.action         = action
 
-                        gallery.data.append(item)
+                        gallery.images.append(item)
                     except Exception as e:
-                        log.info(e.message)
+                        logs.info(e.message)
                         pass
-                if len(gallery.data) > 0:
-                    print('\nadding gallery')
+                if len(gallery.images) > 0:
                     self.galleries.append(gallery)
 
         elif entity.kind == 'software' and entity.isType('app'):
@@ -1486,7 +1505,7 @@ class HTTPEntity(Schema):
                 for screenshot in entity.screenshots:
                     item = HTTPImageSchema()
                     item.importSchema(screenshot)
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
 
@@ -1567,7 +1586,7 @@ class HTTPActionSource(Schema):
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
         self.completion_data        = SchemaElement(dict) # dictionary?
-
+    
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
         self.completion_data        = HTTPActionCompletionData(kwargs, overflow=True)
@@ -1599,7 +1618,7 @@ class HTTPEntityMetadataItem(Schema):
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
-        self.data                   = SchemaList(HTTPImageSchema(), required=True)
+        self.images                 = SchemaList(HTTPImageSchema(), required=True)
         self.name                   = SchemaElement(basestring)
         self.layout                 = SchemaElement(basestring) # 'list' or None
 
@@ -1901,10 +1920,6 @@ class HTTPStamp(Schema):
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
     
-    @lazyProperty
-    def _user_regex(self):
-        return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
-    
     def importSchema(self, schema):
         if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
             data                = schema.exportSparse()
@@ -1937,7 +1952,7 @@ class HTTPStamp(Schema):
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
                 
-                for screenName in self._user_regex.finditer(content.blurb):
+                for screenName in mention_re.finditer(content.blurb):
                     source              = HTTPActionSource()
                     source.name         = 'View profile'
                     source.source       = 'stamped'

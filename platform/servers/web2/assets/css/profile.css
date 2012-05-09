@@ -56,6 +56,9 @@
   -o-transition-duration: 0s;
   transition-duration: 0s;
 }
+#main-content {
+  position: relative;
+}
 .stamp-gallery {
   position: relative;
   width: 100%;
@@ -91,17 +94,6 @@
   display: block;
   margin: 0 auto;
   padding: .2em .5em;
-  /*
-        div.blurb {
-            background: url(/assets/img/blockquoteopen.png) left top no-repeat;
-            text-indent: 23px;
-            
-            span {
-                display: block;
-                background: url(/assets/img/blockquoteclose.png) bottom right no-repeat;
-            }
-        }*/
-
 }
 .stamp-gallery-item .content .stamp-contents {
   font-size: 80%;
@@ -122,12 +114,6 @@
   display: inline-block;
   max-width: 128px;
   height: auto;
-}
-.stamp-gallery-item .content .previews {
-  /*div.comment {
-                display: none;
-            }*/
-
 }
 .stamp-gallery-item .content .previews .profile-image-small {
   display: inline-block;
@@ -173,8 +159,6 @@
   bottom: -4.666666666666667px;
   right: -4.666666666666667px;
   display: block;
-  /*width:  30px;*/
-
   width: 18px;
   height: 18px;
   z-index: 101;
@@ -315,7 +299,4 @@ ul.user-category-distribution li .bargraph {
 ul.user-category-distribution li .bargraph .value {
   /*.linear-gradient(left, @outer, @inner, @outer);*/
 
-}
-#main-content {
-  position: relative;
 }

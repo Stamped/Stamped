@@ -1594,6 +1594,201 @@ class StampedAPI(AStampedAPI):
         
         return None
     
+    def _enrichStampObjectsNew(self, stampData, **kwargs):
+        authUserId  = kwargs.pop('authUserId', None)
+        entityIds   = kwargs.pop('entityIds', {})
+        userIds     = kwargs.pop('userIds', {})
+
+        ### HACK UNTIL PAGING ISSUE IS RESOLVED
+        origLen = len(stampData)
+
+        singleStamp = False
+        if not isinstance(stampData, list):
+            singleStamp = True
+            stampData   = [stampData]
+
+        stampIds = {} 
+        for stamp in stampData:
+            stampIds[stamp.stamp_id] = stamp
+
+        stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
+
+        """
+        ENTITIES 
+
+        Enrich the underlying entity object for all stamps
+        """
+        allEntityIds = set()
+
+        for stamp in stampData:
+            allEntityIds.add(stamp.entity_id)
+
+        # Enrich missing entity ids
+        missingEntityIds = allEntityIds.difference(set(entityIds.keys()))
+        entities = self._entityDB.getEntities(list(missingEntityIds))
+
+        for entity in entities:
+            entityIds[entity.entity_id] = entity
+
+        """ 
+        STAMPS 
+
+        Enrich the underlying stamp objects for credit received 
+        """
+        underlyingStampIds      = {}
+        allUnderlyingStampIds   = set()
+
+        for stat in stats:
+            for credit in stat.preview_credits:
+                allUnderlyingStampIds.add(credit)
+
+        # Enrich underlying stamp ids
+        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
+
+        for stamp in underlyingStamps:
+            underlyingStampIds[stamp.stamp_id] = stamp
+
+
+        """
+        USERS 
+
+        Enrich the underlying user objects. This includes:
+        - Stamp owner
+        - Likes
+        - To-Dos
+        - Credit received (restamps)
+        - Credit given
+        - Comments 
+        """
+        allUserIds    = set()
+
+        for stamp in stampData:
+            # Stamp owner
+            allUserIds.add(stamp.user_id)
+            
+            # Credit given
+            for credit in stamp.credit:
+                allUserIds.add(credit.user_id)
+            
+            # Comments
+            for comment in stamp.previews.comments:
+                allUserIds.add(comment.user_id)
+
+        for stat in stats:
+            # Likes
+            for like in stat.preview_likes:
+                allUserIds.add(like)
+
+            # To-Dos
+            for todo in stat.preview_todos:
+                allUserIds.add(todo)
+
+        for stampId, stamp in underlyingStampIds.iteritems():
+            # Credit received
+            allUserIds.add(stamp.user_id)
+
+        # Enrich missing user ids
+        missingUserIds = allUserIds.difference(set(userIds.keys()))
+        users = self._userDB.lookupUsers(list(missingUserIds))
+
+        for user in users:
+            userIds[user.user_id] = user
+
+        
+        if authUserId:
+            ### TODO: Intelligent matching with stampId
+            # Favorites
+            favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
+            
+            ### TODO: Intelligent matching with stampId
+            # Likes
+            likes = self._stampDB.getUserLikes(authUserId)
+
+
+        stamps = []
+        for stamp in stampData:
+            try:
+                stamp.entity = entityIds[stamp.entity.entity_id]
+                stamp.user = userIds[stamp.user.user_id]
+
+                # Credit
+                credits = []
+                for credit in stamp.credit:
+                    user = userIds[credit.user_id]
+                    item                    = CreditSchema()
+                    item.user_id            = credit.user_id
+                    item.stamp_id           = credit.stamp_id
+                    item.screen_name        = user['screen_name']
+                    item.color_primary      = user['color_primary']
+                    item.color_secondary    = user['color_secondary']
+                    item.privacy            = user['privacy']
+                    credits.append(item)
+                stamp.credit = credits
+
+                # Previews
+                try:
+                    for stat in stats:
+                        if stat.stamp_id == stamp.stamp_id:
+                            break 
+                    else:
+                        stat = None
+
+                    if stat is not None:
+                        # Likes
+                        stamp.previews.likes = []
+                        for like in stat.preview_likes:
+                            stamp.previews.likes.append(userIds[like])
+                        
+                        # Todos
+                        stamp.previews.todos = []
+                        for todo in stat.preview_todos:
+                            stamp.previews.todos.append(userIds[todo])
+
+                        # Credits
+                        stamp.previews.credits = []
+                        for credit in stat.preview_credits:
+                            credit = underlyingStampIds[credit]
+                            credit.user = userIds[credit.user.user_id]
+                            credit.entity = entityIds[stamp.entity.entity_id]
+                            stamp.previews.credits.append(credit)
+
+                        # Comments
+                        comments = []
+                        for comment in stamp.previews.comments:
+                            comment.user = userIds[comment.user.user_id]
+                            comments.append(comment)
+                        stamp.previews.comments = comments
+
+                    else:
+                        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+                except KeyError, e:
+                    logs.warning("Key error: %s" % e)
+                    continue
+
+                # User-specific attributes
+                if authUserId:
+                    # Mark as favorited
+                    if stamp.entity_id in favorites:
+                        stamp.is_fav = True
+                    
+                    # Mark as liked
+                    if stamp.stamp_id in likes:
+                        stamp.is_liked = True
+
+                stamps.append(stamp)
+
+            except KeyError, e:
+                logs.warning("Fatal key error: %s" % e)
+                continue 
+            except Exception:
+                raise
+
+        ### HACK UNTIL PAGING ISSUE IS RESOLVED
+        while len(stamps) < origLen:
+            stamps.append(stamps[len(stamps)-1])
+
+        return stamps
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
