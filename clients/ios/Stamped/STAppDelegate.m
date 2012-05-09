@@ -38,6 +38,7 @@
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
 #import "SettingsViewController.h"
+#import "STStampCell.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -155,7 +156,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationProtectedDataWillBecomeUnavailable:(UIApplication *)application {
-  
 }
 
 - (void)applicationSignificantTimeChange:(UIApplication *)application {
@@ -367,11 +367,17 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
   [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
   [STConfiguration addValue:[SettingsViewController class] forKey:@"Root.settings"];
+  NSDictionary* choices = [NSDictionary dictionaryWithObjectsAndKeys:
+                           @"created", @"Created",
+                           @"modified", @"Modified",
+                           @"stamped", @"Stamped",
+                           nil];
+  [STConfiguration addChoices:choices originalKey:@"Created" forKey:@"Root.inboxSort"];
                           
   //UIColor
   
   [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:35] forKey:@"UIFont.stampedTitleFont" inSection:@"UIFont"];
-  [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:29] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
+  [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:35] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
   
   CGFloat fontSize = 12;
   [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
@@ -397,6 +403,12 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   // Comments
   [STConfiguration addFont:[UIFont stampedBoldFontWithSize:12] forKey:@"Comments.font"];
+  
+  //I Want to
+  [STIWantToViewController setupConfigurations];
+  
+  //Stamp Cell
+  [STStampCell setupConfigurations];
 }
 
 @end

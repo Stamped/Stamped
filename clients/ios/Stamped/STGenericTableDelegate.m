@@ -8,6 +8,7 @@
 
 #import "STGenericTableDelegate.h"
 #import "STLoadingCell.h"
+#import "Util.h"
 
 @interface STGenericTableDelegate () <STLazyListDelegate>
 
@@ -15,6 +16,7 @@
 
 @property (nonatomic, readwrite, assign) BOOL endReached;
 @property (nonatomic, readwrite, retain) NSMutableArray* prepareCancellations;
+@property (nonatomic, readwrite, assign) BOOL failed;
 
 @end
 
@@ -31,6 +33,7 @@
 @synthesize endReached = endReached_;
 @synthesize autoPrepareDisabled = autoPrepareDisabled_;
 @synthesize prepareCancellations = prepareCancellations_;
+@synthesize failed = failed_;
 
 - (id)init
 {
@@ -58,8 +61,13 @@
 }
 
 - (void)considerGrowingWithRow:(NSInteger)row {
-  NSInteger prepareCount = row + self.preloadBufferSize;
-  [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
+  if (!self.failed) {
+    NSInteger prepareCount = row + self.preloadBufferSize;
+    NSInteger max = [self roundUpToPageBoundary:prepareCount];
+    for (NSInteger i = self.pageSize; i <= max; i += self.pageSize) {
+      [self.lazyList prepareRange:NSMakeRange(0, i)];
+    }
+  }
 }
 
 - (void)cancelAndClearPreparations {
@@ -89,9 +97,10 @@
   [lazyList_ removeDelegate:self];
   [lazyList_ autorelease];
   [self cancelAndClearPreparations];
+  self.endReached = NO;
   lazyList_ = [lazyList retain];
   [lazyList_ addDelegate:self];
-  [lazyList_ prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:self.preloadBufferSize])];
+  [self considerGrowingWithRow:0];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -114,8 +123,7 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  NSInteger prepareCount = indexPath.row + self.preloadBufferSize;
-  [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
+  [self considerGrowingWithRow:indexPath.row];
   if (self.tableViewCellFactory) {
     if (indexPath.row < self.lazyList.count) {
       return [self.tableViewCellFactory cellForTableView:tableView data:[self.lazyList objectAtIndex:indexPath.row] andStyle:self.style];
@@ -153,6 +161,7 @@
 }
 
 - (void)reloadStampedData {
+  self.failed = NO;
   if (self.lazyList) {
     [self cancelAndClearPreparations];
     [self.lazyList reload];
@@ -172,7 +181,7 @@
 - (void)lazyListDidGrow:(id<STLazyList>)lazyList {
   NSLog(@"did grow");
   if (self.tableShouldReloadCallback) {
-      [self continuePreparations];
+    [self continuePreparations];
     self.tableShouldReloadCallback(self);
   }
 }
@@ -203,7 +212,11 @@
 - (void)lazyListDidFail:(id<STLazyList>)lazyList {
   NSLog(@"did fail");
   if (self.tableShouldReloadCallback) {
+    self.failed = YES;
+    self.endReached = YES;
+    [self cancelPendingRequests];
     self.tableShouldReloadCallback(self);
+    [Util warnWithMessage:@"Loading failed, see log" andBlock:nil];
   }
 }
 

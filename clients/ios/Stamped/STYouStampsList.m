@@ -9,6 +9,7 @@
 #import "STYouStampsList.h"
 #import "STUserCollectionSlice.h"
 #import "STStampedAPI.h"
+#import "STConfiguration.h"
 
 @implementation STYouStampsList
 
@@ -26,6 +27,13 @@ static id _sharedInstance;
   STUserCollectionSlice* slice = [[[STUserCollectionSlice alloc] init] autorelease];
   slice.userID = [[STStampedAPI sharedInstance] currentUser].userID;
   self.genericSlice = slice;
+}
+
+- (void)reload {
+  if (self == [STYouStampsList sharedInstance]) {
+    self.genericSlice.sort = [STConfiguration value:@"Root.inboxSort"];
+  }
+  [super reload];
 }
 
 - (id)init {

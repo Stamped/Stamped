@@ -12,4 +12,6 @@
 
 - (id)initWithCategory:(NSString*)category;
 
++ (void)setupConfigurations;
+
 @end

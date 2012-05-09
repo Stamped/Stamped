@@ -53,6 +53,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize loadedToolbar = loadedToolbar_;
 @synthesize autoCancelDisabled = autoCancelDisabled_;
 @synthesize retainedObjects = retainedObjects_;
+@synthesize navigationBarHidden = navigationBarHidden_;
 @dynamic headerOffset;
 
 - (id)init
@@ -74,9 +75,7 @@ static const CGFloat kReloadHeight = 60.0;
   [_spinnerView release];
   [toolbar_ release];
   [retainedObjects_ release];
-  NSLog(@"logging release: %@",self);
   [super dealloc];
-  NSLog(@"finished");
 }
 
 - (void)retainObject:(id)object {
@@ -84,7 +83,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)loadView {
-  self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:YES]] autorelease];
+  self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:!self.navigationBarHidden]] autorelease];
 }
 
 - (void)viewDidLoad {
@@ -129,9 +128,7 @@ static const CGFloat kReloadHeight = 60.0;
   
   _scrollView = container;
   container.delegate = self;
-  NSLog(@"before%f",container.frame.size.height);
   [container appendChildView:_shelfView];
-  NSLog(@"after%f",container.frame.size.height);
   [container setScrollDelegate:self];
   UIImageView* backgroundImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"gradient_background"]] autorelease];
   [self.view addSubview:backgroundImage];
@@ -146,9 +143,20 @@ static const CGFloat kReloadHeight = 60.0;
   NSLog(@"warning SHOULD IMPLEMENT");
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  if (self.navigationBarHidden) {
+    [[Util sharedNavigationController] setNavigationBarHidden:YES];
+  }
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
   if (!self.autoCancelDisabled) {
     [self cancelPendingRequests];
+  }
+  if (self.navigationBarHidden) {
+    [[Util sharedNavigationController] setNavigationBarHidden:NO];
   }
 }
 

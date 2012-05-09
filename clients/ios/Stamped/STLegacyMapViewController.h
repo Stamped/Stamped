@@ -26,7 +26,7 @@ typedef enum {
 @class STToolbar;
 @class User;
 
-@interface STMapViewController : UIViewController <MKMapViewDelegate,
+@interface STLegacyMapViewController : UIViewController <MKMapViewDelegate,
                                                    UITextFieldDelegate,
                                                    NSFetchedResultsControllerDelegate,
                                                    UIAlertViewDelegate,

@@ -24,10 +24,11 @@
 #import "STTableDelegator.h"
 #import "STSingleViewSource.h"
 #import "STSearchField.h"
+#import "STEveryoneStampsList.h"
 
 @interface STInboxViewController () <STScopeSliderDelegate>
 
-+ (void)setScope:(STStampedAPIScope)scope withInstance:(STInboxViewController*)instance;
+- (void)setScope:(STStampedAPIScope)scope withInstance:(STInboxViewController*)instance;
 
 @property (nonatomic, readonly, retain) STScopeSlider* slider;
 @property (nonatomic, readonly, retain) STGenericTableDelegate* tableDelegate;
@@ -66,8 +67,8 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
     [tableDelegator_ appendTableDelegate:searchSource];
     
     tableDelegate_ = [[STGenericTableDelegate alloc] init];
-    tableDelegate_.preloadBufferSize = 50;
-    tableDelegate_.pageSize = 30;
+    tableDelegate_.preloadBufferSize = 30;
+    tableDelegate_.pageSize = 10;
     __block STInboxViewController* weakSelf = self;
     tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
       [weakSelf.tableView reloadData];
@@ -96,32 +97,21 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
   [super dealloc];
 }
 
-- (void)createStampButtonClicked:(id)notImportant {
-  [self.slidingViewController anchorTopViewTo:ECLeft];
-}
-
 - (void)viewDidLoad
 {
   toolbar_ = [[STToolbarView alloc] init];
   [super viewDidLoad];
   slider_ = [[STScopeSlider alloc] initWithFrame:CGRectMake(45, 15, 230, 23)];
+  [slider_ setGranularity:_scope animated:NO];
   slider_.delegate = self;
   [toolbar_ addSubview:slider_];
   tableDelegate_.lazyList = [STFriendsStampsList sharedInstance];
   tableDelegate_.tableViewCellFactory = [STGenericCellFactory sharedInstance];
   self.tableView.delegate = tableDelegator_;
   self.tableView.dataSource = tableDelegator_;
-  [STInboxViewController setScope:_scope withInstance:self];
-  [Util addHomeButtonToController:self];
-  
-  id<STUser> user = [STStampedAPI sharedInstance].currentUser;
-  UIImage* baseImage = [UIImage imageNamed:@"nav_btn_createStamp_color"];
-  UIImage* normalImage = [Util gradientImage:baseImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
-  UIImage* activeImage = [Util whiteMaskedImageUsingImage:baseImage];
-  STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(createStampButtonClicked:)];
-  [button addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_btn_createStamp_overlay"]] autorelease]];
-  //button.backgroundColor = [UIColor blackColor];
-  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+  [self setScope:_scope withInstance:self];
+  [Util addHomeButtonToController:self withBadge:YES];
+  [Util addCreateStampButtonToController:self];
 }
 
 - (void)viewDidUnload
@@ -133,8 +123,13 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
   slider_ = nil;
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self.tableView reloadData];
+}
+
 - (void)scopeSlider:(STScopeSlider*)slider didChangeGranularity:(STStampedAPIScope)granularity {
-  [STInboxViewController setScope:granularity withInstance:self];
+  [self setScope:granularity withInstance:self];
 }
 
 - (void)reloadStampedData {
@@ -142,7 +137,7 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
   [super reloadStampedData];
 }
 
-+ (void)setScope:(STStampedAPIScope)scope withInstance:(STInboxViewController*)instance {
+- (void)setScope:(STStampedAPIScope)scope withInstance:(STInboxViewController*)instance {
   _scope = scope;
   [instance.tableDelegate.lazyList cancelPendingRequests];
   id<STLazyList> lazyList = nil;
@@ -151,10 +146,37 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
       STUserStampsSliceList* userList = [[[STUserStampsSliceList alloc] init] autorelease];
       STUserCollectionSlice* userSlice = [[[STUserCollectionSlice alloc] init] autorelease];
       userSlice.userID = [[STStampedAPI sharedInstance].currentUser userID];
+      userSlice.query = instance.query;
+      userSlice.sort = @"relevance";
       userList.genericSlice = userSlice;
       lazyList = userList;
     }
-    lazyList = 
+    else if (scope == STStampedAPIScopeFriends) {
+      STFriendsStampsList* stampsList = [[[STFriendsStampsList alloc] init] autorelease];
+      STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
+      slice.query = instance.query;
+      slice.sort = @"relevance";
+      stampsList.genericSlice = slice;
+      lazyList = stampsList;
+    }
+    else if (scope == STStampedAPIScopeFriendsOfFriends) {
+      STFriendsOfFriendsStampsList* stampsList = [[[STFriendsOfFriendsStampsList alloc] init] autorelease];
+      STFriendsSlice* slice = [[[STFriendsSlice alloc] init] autorelease];
+      slice.distance = [NSNumber numberWithInteger:2];
+      slice.inclusive = [NSNumber numberWithBool:NO];
+      slice.query = instance.query;
+      slice.sort = @"relevance";
+      stampsList.genericSlice = slice;
+      lazyList = stampsList;
+    }
+    else {
+      STEveryoneStampsList* list = [[[STEveryoneStampsList alloc] init] autorelease];
+      STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
+      slice.query = instance.query;
+      slice.sort = @"relevance";
+      list.genericSlice = slice;
+      lazyList = list;
+    }
   }
   else {
     lazyList = [[STStampedAPI sharedInstance] globalListByScope:scope];
@@ -182,7 +204,7 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
 - (void)textFieldDidEndEditing:(UITextField *)textField {
   //Override collapsing behavior
   self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
-  [STInboxViewController setScope:_scope withInstance:self];
+  [self setScope:_scope withInstance:self];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {

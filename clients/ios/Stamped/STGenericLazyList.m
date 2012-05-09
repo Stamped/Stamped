@@ -51,6 +51,7 @@
 @property (nonatomic, readonly, retain) NSMutableDictionary* delegates;
 @property (nonatomic, readonly, retain) NSMutableArray* pending;
 @property (nonatomic, readwrite, assign) BOOL reachedMax;
+@property (nonatomic, readwrite, assign) BOOL failed;
 
 @end
 
@@ -60,6 +61,7 @@
 @synthesize delegates = delegates_;
 @synthesize pending = pending_;
 @synthesize reachedMax = reachedMax_;
+@synthesize failed = failed_;
 
 static const NSInteger _batchSize = 20;
 
@@ -83,21 +85,23 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)growToCount:(NSInteger)count {
-  NSLog(@"GrowTOCount:%d",count);
-  if (self.count < count && !self.reachedMax) {
-    NSInteger pendingCount = self.count;
-    for (STGenericLazyListPending* pendingObject in self.pending) {
-      pendingCount = MAX(pendingCount, pendingObject.range.location + pendingObject.range.length);
-    }
-    if (pendingCount < count) {
-      NSRange range = NSMakeRange(pendingCount, count - pendingCount);
-      NSLog(@"RequestingRange:%d,%d",range.location, range.length);
-      STGenericLazyListPending* pendingObject = [[[STGenericLazyListPending alloc] initWithRange:range] autorelease];
-      STCancellation* cancellation = [self fetchWithRange:range andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation2) {
-        [self handlePending:pendingObject withResults:results andError:error];
-      }];
-      pendingObject.cancellation = cancellation;
-      [self.pending addObject:pendingObject];
+  if (!self.failed) {
+    NSLog(@"GrowTOCount:%d",count);
+    if (self.count < count && !self.reachedMax) {
+      NSInteger pendingCount = self.count;
+      for (STGenericLazyListPending* pendingObject in self.pending) {
+        pendingCount = MAX(pendingCount, pendingObject.range.location + pendingObject.range.length);
+      }
+      if (pendingCount < count) {
+        NSRange range = NSMakeRange(pendingCount, count - pendingCount);
+        NSLog(@"RequestingRange:%d,%d",range.location, range.length);
+        STGenericLazyListPending* pendingObject = [[[STGenericLazyListPending alloc] initWithRange:range] autorelease];
+        STCancellation* cancellation = [self fetchWithRange:range andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation2) {
+          [self handlePending:pendingObject withResults:results andError:error];
+        }];
+        pendingObject.cancellation = cancellation;
+        [self.pending addObject:pendingObject];
+      }
     }
   }
 }
@@ -142,6 +146,7 @@ static const NSInteger _batchSize = 20;
   }
   else {
     [self cancelPendingRequests];
+    self.failed = YES;
     [self notifyDelegates:@selector(lazyListDidFail:)];
   }
 }
@@ -172,6 +177,8 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)reload {
+  self.failed = NO;
+  self.reachedMax = NO;
   NSInteger count = self.count;
   [self cancelPendingRequests];
   [self notifyDelegates:@selector(lazyListWillReload:)];

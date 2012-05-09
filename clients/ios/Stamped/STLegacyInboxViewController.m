@@ -13,7 +13,7 @@
 #import "UIColor+Stamped.h"
 #import "Util.h"
 #import "STRootMenuView.h"
-#import "STMapViewController.h"
+#import "STLegacyMapViewController.h"
 #import "STScopeSlider.h"
 #import "STToolbarView.h"
 #import "STStampsViewSource.h"
@@ -314,7 +314,7 @@ static STLegacyInboxViewController* _sharedInstance;
 
 - (void)mapButtonClicked:(id)button {
   UINavigationController* controller = [Util sharedNavigationController];
-  [controller pushViewController:[[[STMapViewController alloc] init] autorelease] animated:YES];
+  [controller pushViewController:[[[STLegacyMapViewController alloc] init] autorelease] animated:YES];
 }
 
 

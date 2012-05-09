@@ -1,14 +1,14 @@
 //
-//  STIWantToViewController.h
+//  STConsumptionMapViewController.h
 //  Stamped
 //
-//  Created by Landon Judkins on 4/28/12.
+//  Created by Landon Judkins on 5/7/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
 #import "STContainerViewController.h"
 
-@interface STIWantToViewController : STContainerViewController
+@interface STConsumptionMapViewController : STContainerViewController
 
 + (void)setupConfigurations;
 

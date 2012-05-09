@@ -68,6 +68,7 @@ static STStampCellFactory* _sharedInstance;
       return [STConsumptionCell prepareForStamp:data withCallback:block];
     }
     else {
+      NSLog(@"\n\n\nPreparing\n\n\n");
       return [STStampCell prepareForStamp:data withCallback:block];
     }
   }

@@ -26,8 +26,8 @@
     self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
     self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
     self.layer.shadowOpacity = 1;
-    self.layer.borderWidth = 1;
-    self.layer.borderColor = [UIColor colorWithWhite:73.0/255 alpha:1].CGColor;
+    //self.layer.borderWidth = 1;
+    //self.layer.borderColor = [UIColor colorWithWhite:73.0/255 alpha:1].CGColor;
     self.layer.shadowOffset = CGSizeMake(0, -1);
   }
   return self;
