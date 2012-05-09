@@ -2986,8 +2986,8 @@ class StampedAPI(AStampedAPI):
                               friendId      = favorite.stamp.user_id, 
                               stampId       = stampId)
 
-        # Update stamp stats
-        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
         
         return favorite
     
