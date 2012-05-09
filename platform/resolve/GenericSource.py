@@ -32,6 +32,7 @@ except Exception:
 
 
 def generatorSource(generator, constructor=None, unique=False, tolerant=False):
+    logs.info('### GENERATORSOURCE')
     if constructor is None:
         constructor = lambda x: x
     results = []
@@ -72,6 +73,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
 
 def listSource(items, **kwargs):
     def gen():
+        logs.info('### LISTSOURCE')
         try:
             for item in items:
                 yield item
