@@ -443,7 +443,7 @@ class GenericSource(BasicSource):
             except ValueError:
                 pass
 
-        logs.info('### BEFORE ENRICH ENTITYWITHPROXY')
+        logs.info('### BEFORE enrichEntityWithEntityProxy')
         source_id = entity[self.idField]
         if source_id is not None:
             try:
@@ -452,6 +452,7 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e
+        logs.info('### AFTER enrichEntityWithEntityProxy')
         
         return True
 
