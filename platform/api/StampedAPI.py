@@ -1510,14 +1510,14 @@ class StampedAPI(AStampedAPI):
         if authUserId is None:
             return result
 
-        friendUserIds   = self._friendshipDB.getFriends(user['user_id'])
+        friendUserIds   = self._friendshipDB.getFriends(authUserId)
         friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
         result['friend_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
         result['friend_count']      = len(friendStamps)
 
         fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
-        fofOverlap = set(fofUserIds).intersection(map(str, stats.popular_users))
+        fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
         fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
 
         result['fof_preview']   = self._enrichStampObjects(fofStamps[:limit])
