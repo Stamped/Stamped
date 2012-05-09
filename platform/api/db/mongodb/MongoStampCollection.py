@@ -250,6 +250,16 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         except Exception:
             return None
     
+    def getStampsFromUsersForEntity(self, userIds, entityId):
+        try:
+            documents = self._collection.find({
+                'user.user_id' : { '$in' : userIds }, 
+                'entity.entity_id' : entityId,
+            })
+            return map(self._convertFromMongo, documents)
+        except Exception:
+            return []
+    
     def getStampsSliceForEntity(self, entityId, genericCollectionSlice, userIds=None):
         query = {'entity.entity_id': entityId}
 
@@ -276,13 +286,15 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         except Exception:
             return []
 
-    def getPopularStampIdsForEntity(self, entityId, limit=1000):
+    def getPopularityForEntity(self, entityId, limit=1000):
         ### TODO: Stub! Make this better
         try:
             query       = { 'entity.entity_id' : entityId }
             sort        = [ ('stats.num_likes', pymongo.DESCENDING), ('$natural', pymongo.ASCENDING) ]
-            documents   = self._collection.find(query, fields=['_id']).sort(sort).limit(limit)
-            return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+            documents   = self._collection.find(query, fields=['_id', 'user.user_id']).sort(sort).limit(limit)
+            # stampIds    = map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+            userIds     = map(lambda x: x['user.user_id'], documents)
+            return userIds
         except Exception:
             return []
     
