@@ -836,9 +836,8 @@ class HTTPEntity(Schema):
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
-                    item = HTTPEntityGalleryItem()
-                    item.image = image
-                    item.caption = image.caption
+                    item = HTTPImageSchema()
+                    item.importSchema(image)
                     gallery.data.append(item)
                 self.galleries.append(gallery)
 
@@ -921,9 +920,8 @@ class HTTPEntity(Schema):
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
-                    item = HTTPEntityGalleryItem()
-                    item.image          = image
-                    item.caption        = image.caption
+                    item = HTTPImageSchema()
+                    item.importSchema(image)
                     source              = HTTPActionSource()
                     source.source_id    = item.image
                     source.source       = 'stamped'
@@ -1418,10 +1416,12 @@ class HTTPEntity(Schema):
                 gallery.layout = 'list'
                 for album in entity.albums:
                     try:
-                        item            = HTTPEntityGalleryItem()
+                        item            = HTTPImageSchema()
+                        size            = HTTPImageSizeSchema()
                         ### TODO: Add placeholder if image doesn't exist
-                        item.image      = _cleanImageURL(album.images[0]['image'])
-                        item.caption    = album.title 
+                        size.url        = _cleanImageURL(album.images[0]['image'])
+                        item.caption    = album.title
+                        item.sizes.append(size)
 
                         if album.entity_id is not None:
                             source              = HTTPActionSource()
@@ -1482,8 +1482,9 @@ class HTTPEntity(Schema):
             if entity.screenshots is not None and len(entity.screenshots) > 0:
                 gallery = HTTPEntityGallery()
                 for screenshot in entity.screenshots:
-                    item = HTTPEntityGalleryItem()
-                    item.image = screenshot.image
+                    item = HTTPImageSchema()
+                    size = HTTPImageSizeSchema({'url': screenshot.image})
+                    item.sizes.append(size)
                     gallery.data.append(item)
                 self.galleries.append(gallery)
 
@@ -1597,7 +1598,7 @@ class HTTPEntityMetadataItem(Schema):
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
-        self.data                   = SchemaList(HTTPEntityGalleryItem(), required=True)
+        self.data                   = SchemaList(HTTPImageSchema(), required=True)
         self.name                   = SchemaElement(basestring)
         self.layout                 = SchemaElement(basestring) # 'list' or None
 
@@ -1953,7 +1954,7 @@ class HTTPStamp(Schema):
                     item.blurb_references.append(reference)
                 
                 for image in content.images:
-                    img = HTTPEntityGalleryItem()
+                    img = HTTPImageSchema()
                     img.image   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     img.width   = image.width 
                     img.height  = image.height 
