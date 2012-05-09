@@ -1438,7 +1438,7 @@ class HTTPEntity(Schema):
 
                         gallery.data.append(item)
                     except Exception as e:
-                        log.info(e.message)
+                        logs.info(e.message)
                         pass
                 if len(gallery.data) > 0:
                     print('\nadding gallery')
