@@ -782,7 +782,7 @@ class HTTPEntity(Schema):
     def _addImages(self, images):
         logs.info('\n### calling addImages')
         for image in images:
-            logs.info('\n### iterating through images')
+            logs.info('\n### iterating through images.  sizes: %d' % len(image.sizes))
             if len(image.sizes) == 0:
                 continue
             newimg = HTTPImageSchema()
