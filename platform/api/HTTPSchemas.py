@@ -85,7 +85,7 @@ def _initialize_image_sizes(dest):
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
     
-    dest.image.sizes.append(ImageSizeSchema({'url': image_url }))
+    dest.image.sizes.append(ImageSizeSchema({'url': dest.image_url }))
     
     for size in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
         image = ImageSizeSchema({
