@@ -1411,6 +1411,8 @@ class HTTPEntity(Schema):
             # Albums
 
             if entity.isType('artist') and len(entity.albums) > 0:
+                from pprint import pprint
+                pprint(album.images[0])
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
