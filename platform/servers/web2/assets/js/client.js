@@ -4,7 +4,7 @@
  */
 
 /*jslint plusplus: false */
-/*global window, navigator, document, jQuery, setTimeout, opera, Backbone, Mustache, _ */
+/*global jQuery, $, Backbone, Mustache, _, Persist */
 
 if (typeof(StampedClient) == "undefined") {
     
@@ -20,6 +20,8 @@ if (typeof(StampedClient) == "undefined") {
         var _token = null;
         var _user  = null;
         
+        var _store = new Persist.Store('stamped');
+        
         /* ------------------------------------------------------------------
          * Public API Functions
          * ------------------------------------------------------------------ */
@@ -33,30 +35,39 @@ if (typeof(StampedClient) == "undefined") {
                 client_id     : client_id, 
                 client_secret : client_secret, 
             }).pipe(function (data) {
-                _user  = new User(data['user']);
-                _token = data['token'];
+                var user  = data['user'];
+                var token = data['token'];
+                
+                _save_local('user',  user);
+                _save_local('token', token);
+                
+                _user  = new User(user);
+                _token = token;
                 
                 return _user;
             });
         };
         
         this.is_authorized_user  = function() {
-            return !!_token;
+            return _get_auth().pipe(function(d) {
+                return !!d['_token'];
+            });
         };
         
         this.get_authorized_user = function() {
-            _verify_auth();
-            
-            return _user;
+            return _get_auth().pipe(function(d) {
+                return new User(d['_user']);
+            });
         };
         
         /* USERS */
         
         this.get_user_by_id = function(user_id) {
-            return _get("/users/show.json", { 'user_id' : user_id })
-                .pipe(function (data) {
-                    return new User(data);
-                });
+            return _get("/users/show.json", {
+                'user_id' : user_id
+            }).pipe(function (data) {
+                return new User(data);
+            });
         };
         
         this.get_user_by_screen_name = function(screen_name) {
@@ -106,6 +117,16 @@ if (typeof(StampedClient) == "undefined") {
             return (typeof v != "undefined" && v != null);
         };
          
+        var _is_truthy = function(v, def) {
+            if (typeof v !== 'undefined') {
+                return !!v;
+            } else if (typeof def !== 'undefined') {
+                return !!def;
+            } else {
+                return true;
+            }
+        }
+        
         var _get = function(uri, params) {
             return _ajax("GET", uri, params);
         };
@@ -117,8 +138,8 @@ if (typeof(StampedClient) == "undefined") {
         var _ajax = function(type, uri, params) {
             var url = stamped_api_url_base + uri;
             
-            window.log("StampedClient - " + type + ": " + url, this);
-            window.log(params, this);
+            log("StampedClient - " + type + ": " + url, this);
+            log(params, this);
             
             // TODO: augment params with auth token if required or available
             // TODO: handle oauth-related token renewal special-case
@@ -167,17 +188,55 @@ if (typeof(StampedClient) == "undefined") {
         var _throw = function(msg) {
             console.debug(msg);
             // TODO: if (DEBUG)
-            debugger;
+            //debugger;
             
             throw msg;
         };
         
+        var _get_auth = function() {
+            //var d = $.Deferred();
+            return _get_local('token').pipe(function(token) {
+                return _get_local('user').pipe(function(user) {
+                    return {
+                        'user'  : new User(user), 
+                        'token' : token
+                    };
+                });
+            });
+        };
+        
         var _verify_auth = function() {
-            if (!that.is_authorized_user()) {
+            if (!!_token) {
                 var func = arguments.callee.caller.name || "authorized function";
                 
                 _throw(func + " requires authorization; please login first.");
             }
+        };
+        
+        var _get_local = function(key, parse) {
+            var d = $.Deferred();
+            
+            _store.get('user', function(ok, value) {
+                if (ok) {
+                    if (_is_truthy(parse)) {
+                        value = JSON.parse(value);
+                    }
+                    
+                    d.resolve(value);
+                } else {
+                    d.reject();
+                }
+            });
+            
+            return d.promise();
+        };
+        
+        var _save_local = function(key, value, stringify) {
+            if (_is_truthy(stringify)) {
+                value = JSON.stringify(value);
+            }
+            
+            _store[key] = value;
         };
         
         /* ------------------------------------------------------------------
@@ -519,7 +578,8 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('website',            { 'type' : "string", }), 
                     new SchemaElement('location',           { 'type' : "string", }), 
                     new SchemaElement('privacy',            { 'type' : "boolean", 'required' : true }), 
-                    new SchemaElement('image_url',          { 'type' : "string", 'default'  : _get_static_asset_url('/img/default.jpg') }), 
+                    new SchemaElement('image',              new ), 
+                    new MultiScaleImage('image',            { }).schema(), 
                     new SchemaElement('identifier',         { 'type' : "string", }), 
                     new SchemaElement('num_stamps',         { 'type' : "number", 'default'  : 0 }), 
                     new SchemaElement('num_stamps_left',    { 'type' : "number", 'default'  : 100 }), 
@@ -576,10 +636,18 @@ if (typeof(StampedClient) == "undefined") {
         var Image = AStampedModel.extend({
             _get_schema : function() {
                 return new Schema(arguments, 
-                    new SchemaElement('image',              { 'type' : "string" }), 
+                    new SchemaElement('url',                { 'type' : "string", 'required' : true }), 
                     new SchemaElement('width',              { 'type' : "number" }), 
-                    new SchemaElement('height',             { 'type' : "number" }), 
-                    new SchemaElement('source',             { 'type' : "string" })
+                    new SchemaElement('height',             { 'type' : "number" })
+                );
+            }
+        });
+        
+        var MultiScaleImage = AStampedModel.extend({
+            _get_schema : function() {
+                return new Schema(arguments, 
+                    new SchemaList('sizes',                 new Image().schema()), 
+                    new SchemaElement('caption',            { 'type' : "number" })
                 );
             }
         });
@@ -621,7 +689,7 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('blurb',              { 'type' : "string" }), 
                     new SchemaList('blurb_references',      new TextReference().schema()), 
                     new SchemaElement('blurb_formatted',    { 'type' : "string" }), 
-                    new SchemaList('images',                new Image().schema()), 
+                    new SchemaList('images',                new MultiScaleImage().schema()), 
                     new SchemaElement('created',            { 'type' : "string" }), 
                     new SchemaElement('modified',           { 'type' : "string" })
                 );
@@ -696,7 +764,8 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('subtitle',           { 'type' : "string", 'required' : true }), 
                     new SchemaElement('category',           { 'type' : "string", 'required' : true }), 
                     new SchemaElement('subcategory',        { 'type' : "string", 'required' : true }), 
-                    new SchemaElement('coordinates',        { 'type' : "string" })
+                    new SchemaElement('coordinates',        { 'type' : "string" }), 
+                    new SchemaList('images',                new MultiScaleImage().schema())
                 );
             }
         });

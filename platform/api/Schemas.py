@@ -70,7 +70,7 @@ class CoordinatesSchema(Schema):
 
 class ImageSchema(Schema):
     def setSchema(self):
-        self.sizes                          = SchemaList(ImageSizeSchema()) # url
+        self.sizes                          = SchemaList(ImageSizeSchema())
         self.caption                        = SchemaElement(basestring)
 
 class ImageSizeSchema(Schema):

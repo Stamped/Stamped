@@ -506,6 +506,7 @@ class HTTPUser(Schema):
                     self.distribution.append(d)
         else:
             raise NotImplementedError(type(schema))
+        
         return self
 
 class HTTPCategoryDistribution(Schema):
@@ -548,7 +549,8 @@ class HTTPUserMini(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)
-            self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            base_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            
             _initialize_image_sizes(self)
         else:
             raise NotImplementedError(type(schema))
