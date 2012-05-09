@@ -283,6 +283,17 @@ class StampStatsSchema(Schema):
         self.stamp_num          = SchemaElement(int)
         self.num_blurbs         = SchemaElement(int)
 
+class StampStats(Schema):
+    def setSchema(self):
+        self.num_todos          = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.num_credit         = SchemaElement(int)
+        self.num_comments       = SchemaElement(int)
+        self.preview_todos      = SchemaList(SchemaElement(basestring)) # UserIds
+        self.preview_likes      = SchemaList(SchemaElement(basestring)) # UserIds
+        self.preview_credits    = SchemaList(SchemaElement(basestring)) # StampIds
+        self.preview_comments   = SchemaList(SchemaElement(basestring)) # CommentIds
+
 class EntityStats(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
