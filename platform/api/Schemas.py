@@ -287,7 +287,6 @@ class EntityStats(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.num_stamps         = SchemaElement(int)
-        # self.popular_stamps     = SchemaList(SchemaElement(basestring))
         self.popular_users      = SchemaList(SchemaElement(basestring))
 
 
