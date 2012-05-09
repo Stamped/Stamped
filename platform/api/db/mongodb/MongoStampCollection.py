@@ -293,7 +293,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             sort        = [ ('stats.num_likes', pymongo.DESCENDING), ('$natural', pymongo.ASCENDING) ]
             documents   = self._collection.find(query, fields=['_id', 'user.user_id']).sort(sort).limit(limit)
             # stampIds    = map(lambda x: self._getStringFromObjectId(x['_id']), documents)
-            userIds     = map(lambda x: x['user.user_id'], documents)
+            userIds     = map(lambda x: x['user']['user_id'], documents)
             return userIds
         except Exception:
             return []
