@@ -57,12 +57,13 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def getCommentIds(self, stampId):
         return self.stamp_comments_collection.getStampCommentIds(stampId)
     
-    def getCommentsForStamp(self, stampId):
+    def getCommentsForStamp(self, stampId, limit=0):
+        ### TODO: Add paging
         documentIds = []
         for documentId in self.getCommentIds(stampId):
             documentIds.append(self._getObjectIdFromString(documentId))
         comments = []
-        for document in self._getMongoDocumentsFromIds(documentIds):
+        for document in self._getMongoDocumentsFromIds(documentIds, limit=limit):
             comments.append(self._convertFromMongo(document))
         return comments
     
