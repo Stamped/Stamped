@@ -446,7 +446,7 @@ class HTTPUser(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = SchemaElement(ImageSchema())
+        self.image              = SchemaList(ImageSchema())
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
