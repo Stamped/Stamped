@@ -14,6 +14,7 @@ from api.Schemas        import *
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
 from Entity             import *
+from Schema             import ImageSchema
 from datetime           import datetime, date, timedelta
 
 # ####### #
