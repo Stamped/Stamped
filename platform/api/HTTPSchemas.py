@@ -79,9 +79,9 @@ def _initialize_image_sizes(dest):
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
 
-    self.image.sizes.append(ImageSizeSchema({'url': image_url }))
+    dest.image.sizes.append(ImageSizeSchema({'url': image_url }))
     for pix in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
-        self.image.sizes.append( ImageSizeSchema({'url': get_image_url(pix), 'height': pix, 'width': pix}) )
+        dest.image.sizes.append( ImageSizeSchema({'url': get_image_url(pix), 'height': pix, 'width': pix}) )
 
 def _formatURL(url):
     try:
