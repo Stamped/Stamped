@@ -1851,7 +1851,7 @@ class HTTPStampContent(Schema):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
         self.blurb_formatted    = SchemaElement(basestring)
-        self.images             = ImageSchema()
+        self.images             = SchemaList(ImageSchema())
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
 
