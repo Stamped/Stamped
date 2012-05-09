@@ -214,6 +214,7 @@ class GenericSource(BasicSource):
         setAttribute('email',           'email')
         setAttribute('url',             'site')
 
+        logs.info('\n### about to enrich images and len(proxy.images) = %d' % len(proxy.images))
         images = []
         for image in proxy.images:
             logs.info('\n### iterating over image %s' % image)
