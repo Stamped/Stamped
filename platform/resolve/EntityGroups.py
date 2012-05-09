@@ -440,6 +440,12 @@ class ImagesGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
+class ScreenshotsGroup(ASoftwareGroup):
+
+    def __init__(self):
+        ASoftwareGroup.__init__(self, 'screenshots')
+        self.addNameField()
+
 class AuthorsGroup(ABookGroup):
 
     def __init__(self):
@@ -504,6 +510,7 @@ allGroups = [
     MPAARatingGroup,
     ArtistsGroup,
     GenresGroup,
+    ScreenshotsGroup,
     AuthorsGroup,
     PublishersGroup,
     ISBNGroup,

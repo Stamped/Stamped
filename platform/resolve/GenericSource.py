@@ -401,7 +401,6 @@ class GenericSource(BasicSource):
 
             screenshots = []
             for screenshot in proxy.screenshots:
-                print('\niterating through screenshots')
                 img = ImageSchema()
                 size = ImageSizeSchema()
                 size.url = screenshot
