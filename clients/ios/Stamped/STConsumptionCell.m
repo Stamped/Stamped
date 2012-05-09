@@ -18,6 +18,8 @@
 #import "STImageCache.h"
 #import "STDebug.h"
 #import "STPreviewsView.h"
+#import "STSimplePreviews.h"
+#import "STSimpleStamp.h"
 
 @interface STConsumptionCellPreparation : NSObject <STCancellationDelegate>
 
@@ -28,6 +30,22 @@
 @property (nonatomic, readwrite, retain) STCancellation* cancellation;
 @property (nonatomic, readwrite, retain) STCancellation* detailCancellation;
 @property (nonatomic, readwrite, retain) STCancellation* imageCancellation;
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
+
+@end
+
+@interface STConsumptionCell ()
+
+- (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error;
+
++ (id<STPreviews>)adjustedPreviewsForStamp:(id<STStamp>)stamp;
+@property (nonatomic, readonly, retain) id<STStamp> stamp;
+@property (nonatomic, readonly, retain) UIActivityIndicatorView* activityView;
+@property (nonatomic, readonly, retain) id<STEntityDetail> entityDetail;
+@property (nonatomic, readonly, retain) STCancellation* entityDetailCancellation;
+@property (nonatomic, readwrite, retain) STCancellation* entityImageCancellation;
+@property (nonatomic, readonly, assign) CGFloat imageHeight;
+@property (nonatomic, readonly, assign) CGFloat imageYOffset;
 
 @end
 
@@ -37,6 +55,7 @@
 @synthesize detailCancellation = detailCancellation_;
 @synthesize imageCancellation = imageCancellation_;
 @synthesize block = block_;
+@synthesize stamp = stamp_;
 
 - (id)initWithStamp:(id<STStamp>)stamp andCallback:(void(^)(NSError*, STCancellation*))block
 {
@@ -49,6 +68,7 @@
                                                                          andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
                                                                            [self handleDetail:detail withError:error];
                                                                          }];
+    self.stamp = stamp;
   }
   return self;
 }
@@ -61,31 +81,28 @@
   [detailCancellation_ release];
   [imageCancellation_ cancel];
   [imageCancellation_ release];
+  [stamp_ release];
   self.block = nil;
   [super dealloc];
 }
 
 - (void)handleDetail:(id<STEntityDetail>)detail withError:(NSError*)error {
   NSAssert1(!self.cancellation.cancelled, @"Should not have received detail if cancelled: %@", detail.title);
-  BOOL finish = YES;
+  NSMutableArray* images = [NSMutableArray array];
   if (detail) {
     NSString* url = [Util entityImageURLForEntityDetail:detail];
     if (url) {
-      finish = NO;
-      self.imageCancellation = [[STImageCache sharedInstance] imageForImageURL:url andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-        if (self.block) {
-          self.cancellation.delegate = nil;
-          self.block(error, self.cancellation);
-          [self autorelease];
-        }
-      }];
+      [images addObject:url];
     }
   }
-  if (finish && self.block) {
-    self.cancellation.delegate = nil;
-    self.block(error, self.cancellation);
-    [self autorelease];
-  }
+  [images addObjectsFromArray:[STPreviewsView imagesForPreviewWithPreviews:[STConsumptionCell adjustedPreviewsForStamp:self.stamp] andMaxRows:1]];
+  self.imageCancellation = [STCancellation loadImages:images withCallback:^(NSError *error, STCancellation *cancellation) {
+    if (self.block) {
+      self.cancellation.delegate = nil;
+      self.block(error, self.cancellation);
+      [self autorelease];
+    }
+  }];
 }
 
 - (void)cancellationWasCancelled:(STCancellation*)cancellation {
@@ -96,20 +113,6 @@
 
 @end
 
-@interface STConsumptionCell ()
-
-- (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error;
-
-@property (nonatomic, readonly, retain) id<STStamp> stamp;
-@property (nonatomic, readonly, retain) UIActivityIndicatorView* activityView;
-@property (nonatomic, readonly, retain) id<STEntityDetail> entityDetail;
-@property (nonatomic, readonly, retain) STCancellation* entityDetailCancellation;
-@property (nonatomic, readwrite, retain) STCancellation* entityImageCancellation;
-@property (nonatomic, readonly, assign) CGFloat imageHeight;
-@property (nonatomic, readonly, assign) CGFloat imageYOffset;
-
-@end
-
 @implementation STConsumptionCell
 
 @synthesize stamp = stamp_;
@@ -117,6 +120,16 @@
 @synthesize entityDetail = entityDetail_;
 @synthesize entityDetailCancellation = entityDetailCancellation_;
 @synthesize entityImageCancellation = entityImageCancellation_;
+
++ (id<STPreviews>)adjustedPreviewsForStamp:(id<STStamp>)stamp {
+  STSimplePreviews* previews = [STSimplePreviews previewsWithPreviews:stamp.previews];
+  NSMutableArray<STStamp>* credits = [NSMutableArray arrayWithObject:stamp];
+  if (previews.credits) {
+    [credits addObjectsFromArray:previews.credits];
+  }
+  previews.credits = credits;
+  return previews;
+}
 
 - (id)initWithStamp:(id<STStamp>)stamp {
   self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"];
@@ -169,15 +182,13 @@
     [self addSubview:rightButton];
     
     CGFloat imageMax = self.imageHeight + self.imageYOffset;
-    CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:1];
-    CGFloat textYOffset = imageMax + 15;
-    if (previewHeight > 0) {
-      CGRect previewFrame = CGRectMake(0, imageMax+12, 320, previewHeight);
-      STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:1] autorelease];
-      previewsView.frame = [Util centeredAndBounded:previewsView.frame.size inFrame:previewFrame];
-      [self addSubview:previewsView];
-      textYOffset = CGRectGetMaxY(previewsView.frame) + 5;
-    }
+    STSimplePreviews* previews = [STConsumptionCell adjustedPreviewsForStamp:stamp];
+    CGFloat previewHeight = [STPreviewsView previewHeightForPreviews:previews andMaxRows:1];
+    CGRect previewFrame = CGRectMake(0, imageMax+12, 320, previewHeight);
+    STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithPreviews:previews andMaxRows:1] autorelease];
+    previewsView.frame = [Util centeredAndBounded:previewsView.frame.size inFrame:previewFrame];
+    [self addSubview:previewsView];
+    CGFloat textYOffset = CGRectGetMaxY(previewsView.frame) + 5;
     
     CGFloat maxTextWidth = 300;
     CGFloat maxTitleWidth = 200;
@@ -257,14 +268,65 @@
                                                        0,
                                                        0)];
     [self addSubview:stampImage];
+    if (self.entityDetail.actions.count > 0 && [self.stamp.entity.category isEqualToString:@"music"]) {
+      id<STActionItem> actionItem = [self.entityDetail.actions objectAtIndex:0];
+      id<STAction> action = [actionItem action];
+      if (action) {
+        STActionContext* context = [STActionContext context];
+        context.stamp = self.stamp;
+        context.entity = self.entityDetail;
+        if ([[STActionManager sharedActionManager] canHandleAction:action withContext:context]) {
+          UIView* buttonViews[2];
+          CGRect buttonFrame = CGRectMake(0, 0, 60, 60);
+          for (NSInteger i = 0; i < 2; i++) {
+            UIView* view = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
+            view.layer.cornerRadius = view.frame.size.width / 2;
+            view.layer.borderWidth = 2;
+            view.layer.borderColor = [UIColor colorWithWhite:.1 alpha:.4].CGColor;
+            UIColor* backgroundColor;
+            if (i == 0) {
+              backgroundColor = [UIColor colorWithWhite:1 alpha:.7];
+            }
+            else {
+              backgroundColor = [UIColor colorWithWhite:.7 alpha:.7];
+            }
+            view.backgroundColor = backgroundColor;
+            buttonViews[i] = view;
+          }
+          STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
+                                                   normalView:buttonViews[0]
+                                                   activeView:buttonViews[1]
+                                                       target:self
+                                                    andAction:@selector(actionButtonClicked:)] autorelease];
+          button.message = action;
+          UIImageView* playView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_play_button"]] autorelease];
+          playView.frame = [Util centeredAndBounded:playView.frame.size inFrame:button.frame];
+          [Util reframeView:playView withDeltas:CGRectMake(4, 0, 0, 0)];
+          [button addSubview:playView];
+          button.frame = [Util centeredAndBounded:button.frame.size inFrame:imageView.frame];
+          [self addSubview:button];
+        }
+      }
+    }
   }
   else {
     [STDebug log:@"Failed to load entity image"];
   }
 }
 
+- (void)actionButtonClicked:(id<STAction>)action {
+  
+  STActionContext* context = [STActionContext context];
+  context.stamp = self.stamp;
+  context.entity = self.entityDetail;
+  context.entityDetail = self.entityDetail;
+  [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
 - (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error {
   [self.activityView stopAnimating];
+  NSLog(@"array:%@",entityDetail.images);
+  entityDetail_ = [entityDetail retain];
   if ([Util entityImageURLForEntityDetail:entityDetail]) {
     self.entityImageCancellation = [[STImageCache sharedInstance] entityImageForEntityDetail:entityDetail andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
       [self handleImage:image withError:error];

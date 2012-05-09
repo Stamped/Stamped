@@ -32,6 +32,8 @@
 #import "STTypes.h"
 #import "STActionContext.h"
 #import "STLazyList.h"
+#import "STConsumptionSlice.h"
+#import "STActivityCount.h"
 
 typedef enum {
   STStampedAPIScopeYou = 0,
@@ -71,6 +73,9 @@ typedef enum {
 
 - (STCancellation*)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice 
                                andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
+                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
                                   andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
@@ -140,9 +145,13 @@ typedef enum {
 
 - (void)handleCompletionWithSource:(id<STSource>)source action:(NSString*)action andContext:(STActionContext*)context;
 
+- (STCancellation*)unreadCountWithCallback:(void(^)(id<STActivityCount> count, NSError* error, STCancellation* cancellation))block;
+
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
+
+- (NSString*)stringForScope:(STStampedAPIScope)scope;
 
 + (STStampedAPI*)sharedInstance;
 

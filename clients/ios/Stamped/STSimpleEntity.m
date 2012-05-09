@@ -7,6 +7,7 @@
 //
 
 #import "STSimpleEntity.h"
+#import "STSimpleImage.h"
 
 @implementation STSimpleEntity
 
@@ -17,6 +18,8 @@
 @synthesize subcategory = _subcategory;
 @synthesize coordinates = _coordinates;
 
+@synthesize images = images_;
+
 - (void)dealloc
 {
   [_entityID release];
@@ -25,6 +28,7 @@
   [_category release];
   [_subcategory release];
   [_coordinates release];
+  [images_ release];
   [super dealloc];
 }
 
@@ -42,6 +46,8 @@
    @"subcategory",
    @"coordinates",
    nil];
+  
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
   
   return mapping;
 }

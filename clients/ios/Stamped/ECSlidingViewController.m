@@ -189,7 +189,7 @@ static ECSlidingViewController* _sharedInstance;
   self.shouldAllowUserInteractionsWhenAnchored = NO;
   self.resetTapGesture = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resetTopView)] autorelease];
   self.panGesture = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(updateTopViewHorizontalCenterWithRecognizer:)] autorelease];
-  self.panGesture.minimumNumberOfTouches = 2;
+  self.panGesture.minimumNumberOfTouches = 1;
   self.resetTapGesture.enabled = NO;
   self.resetStrategy = ECTapping | ECPanning;
   

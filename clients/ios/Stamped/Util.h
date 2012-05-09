@@ -16,6 +16,7 @@
 #import "STEntity.h"
 #import "STUserDetail.h"
 #import "STActionContext.h"
+#import "STCancellation.h"
 
 @class User;
 @class Entity;
@@ -171,6 +172,12 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)textInputWithDefault:(NSString*)string andCallback:(void (^)(NSString* value))block;
 
-+ (void)addHomeButtonToController:(UIViewController*)controller;
++ (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag;
+
++ (STCancellation*)addUnreadBadgeToView:(UIView*)view origin:(CGPoint)origin;
+
++ (void)addCreateStampButtonToController:(UIViewController*)controller;
+
++ (NSNumber*)numberFromString:(NSString*)string;
 
 @end

@@ -42,8 +42,10 @@
       target_ = target;
       action_ = selector;
       enabled_ = YES;
+      touched_ = NO;
       [self addSubview:normalView];
       [self addSubview:activeView];
+      normalView.hidden = NO;
       activeView.hidden = YES;
     }
     return self;
@@ -72,14 +74,17 @@
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"touchesBegan");
   self.touched = YES;
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {  
+  NSLog(@"touchesCancelled");
   self.touched = NO;
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"touchesEnded");
   self.touched = NO;
   //TODO fix for cancellation
   UITouch* touch = [touches anyObject];

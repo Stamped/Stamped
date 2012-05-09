@@ -144,9 +144,13 @@ static STRdio* _sharedInstance;
       handled = TRUE;
       if (flag) {
         NSLog(@"playing song:%@",context.entityDetail);
-        [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
-                     dismissible:NO 
-                  withBackground:[UIColor colorWithWhite:0 alpha:.3]];
+        [self ensureLoginWithCompletionBlock:^{
+          if (self.loggedIn) {
+            [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
+                         dismissible:NO 
+                      withBackground:[UIColor colorWithWhite:0 alpha:.3]];
+          }
+        }];
         //[self startPlayback:source.sourceID];
       }
     }

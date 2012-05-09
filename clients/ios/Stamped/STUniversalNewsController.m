@@ -13,6 +13,7 @@
 #import "STActionManager.h"
 #import "ECSlidingViewController.h"
 #import "STActivityCell.h"
+#import "Util.h"
 
 @interface STUniversalNewsController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -74,10 +75,7 @@
   [super viewDidLoad];
   self.tableView.delegate = self;
   self.tableView.dataSource = self;
-  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self 
-                                                                           action:@selector(backButtonClicked:)] autorelease];
+  [Util addHomeButtonToController:self withBadge:NO];
   [self reloadStampedData];
 }
 

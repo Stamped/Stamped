@@ -71,6 +71,10 @@
                                      color:[UIColor stampedLightGrayColor]
                                       mode:UILineBreakModeClip
                                 andMaxSize:CGSizeMake(320, 50)];
+    if ([title isEqualToString:@"News"]) {
+      titleView.clipsToBounds = NO;
+      [Util addUnreadBadgeToView:titleView origin:CGPointMake(titleView.frame.size.width, 0)];
+    }
     CGRect titleFrame = [Util centeredAndBounded:titleView.frame.size inFrame:self.frame];
     titleFrame.origin.x = 20;
     titleView.frame = titleFrame;

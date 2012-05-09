@@ -32,5 +32,6 @@
 @property (nonatomic, readonly, retain) UIView* toolbar;
 @property (nonatomic, readonly, assign) CGFloat headerOffset;
 @property (nonatomic, readonly, assign) BOOL autoCancelDisabled;
+@property (nonatomic, readonly, assign) BOOL navigationBarHidden;
 
 @end

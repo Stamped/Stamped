@@ -8,6 +8,7 @@
 
 #import "STFriendsOfFriendsStampsList.h"
 #import "STStampedAPI.h"
+#import "STConfiguration.h"
 
 @implementation STFriendsOfFriendsStampsList
 
@@ -34,6 +35,13 @@ static id _sharedInstance;
     [self setupSlice];
   }
   return self;
+}
+
+- (void)reload {
+  if (self == [STFriendsOfFriendsStampsList sharedInstance]) {
+    self.genericSlice.sort = [STConfiguration value:@"Root.inboxSort"];
+  }
+  [super reload];
 }
 
 - (STCancellation*)makeStampedAPICallWithSlice:(STGenericSlice*)slice 

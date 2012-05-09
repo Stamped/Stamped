@@ -19,4 +19,6 @@
 
 + (RKObjectMapping*)mapping;
 
++ (STSimplePreviews*)previewsWithPreviews:(id<STPreviews>)previews;
+
 @end

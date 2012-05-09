@@ -18,4 +18,6 @@
 
 + (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError* error, STCancellation* cancellation))block;
 
++ (void)setupConfigurations;
+
 @end

@@ -29,7 +29,6 @@
 @synthesize addressCountry = _addressCountry;
 @synthesize neighborhood = _neighborhood;
 
-@synthesize images = _images;
 @synthesize actions = _actions;
 @synthesize metadata = _metadata;
 @synthesize galleries = _galleries;
@@ -46,7 +45,6 @@
   [_addressCountry release];
   [_neighborhood release];
   
-  [_images release];
   [_actions release];
   [_metadata release];
   [_galleries release];

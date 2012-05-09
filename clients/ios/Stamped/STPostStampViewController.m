@@ -176,6 +176,7 @@
   //Update inbox
   //[[STLegacyInboxViewController sharedInstance] newStampCreated:self.stamp];
   [[[STStampedAPI sharedInstance] globalListByScope:STStampedAPIScopeFriends] reload];
+  [[[STStampedAPI sharedInstance] globalListByScope:STStampedAPIScopeYou] reload];
 }
 
 - (void)handleUserDetail:(id<STUserDetail>)userDetail withError:(NSError*)error {

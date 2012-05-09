@@ -101,4 +101,29 @@
   return mapping;
 }
 
++ (STSimpleStamp*)stampWithStamp:(id<STStamp>)stamp {
+  STSimpleStamp* copy = [[[STSimpleStamp alloc] init] autorelease];
+  copy.blurb = stamp.blurb;
+  copy.created = stamp.created;
+  copy.deleted = stamp.deleted;
+  copy.imageDimensions = stamp.imageDimensions;
+  copy.imageURL = stamp.imageURL;
+  copy.isTodod = stamp.isTodod;
+  copy.isLiked = stamp.isLiked;
+  copy.modified = stamp.modified;
+  copy.numComments = stamp.numComments;
+  copy.numLikes = stamp.numLikes;
+  copy.stampID = stamp.stampID;
+  copy.URL = stamp.URL;
+  copy.via = stamp.via;
+  copy.entity = stamp.entity;
+  copy.user = stamp.user;
+  copy.previews = stamp.previews;
+  copy.mentions = stamp.mentions;
+  copy.credits = stamp.credits;
+  copy.badges = stamp.badges;
+  copy.contents = stamp.contents;
+  return copy;
+}
+
 @end
