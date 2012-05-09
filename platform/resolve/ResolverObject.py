@@ -154,6 +154,10 @@ class ResolverPlace(ResolverObject):
         return []
 
     @property
+    def gallery(self):  #expects list of dicts with 'url' and 'caption'
+        return []
+
+    @property
     def phone(self):
         return None
 
@@ -177,9 +181,10 @@ class ResolverPlace(ResolverObject):
     def related_terms(self):
         l = [ self.name ]
         l.extend([ i for i in self.types ])
-        
+
         for k,v in self.address.items():
-            l.append(v)
+            if v is not None:
+                l.append(v)
         
         return [ v for v in l if v != '' ]
 

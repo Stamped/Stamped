@@ -355,7 +355,7 @@ class HTTPLinkedAccounts(Schema):
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
         self.facebook_token         = SchemaElement(basestring)
-        self.netflix_id             = SchemaElement(basestring)
+        self.netflix_user_id             = SchemaElement(basestring)
         self.netflix_token          = SchemaElement(basestring)
         self.netflix_secret         = SchemaElement(basestring)
 
@@ -373,6 +373,7 @@ class HTTPLinkedAccounts(Schema):
         elif schema.__class__.__name__ == 'FacebookAuthSchema':
             schema.facebook_token       = self.facebook_token
         elif schema.__class__.__name__ == 'NetflixAuthSchema':
+            schema.netflix.user_id      = self.netflix_user_id
             schema.netflix.token        = self.netflix_token
             schema.netflix.secret       = self.netflix_secret
         else:
@@ -624,7 +625,12 @@ class HTTPNetflixId(Schema):
     def setSchema(self):
         self.netflix_id         = SchemaElement(basestring)
 
-        
+class HTTPNetflixAuthResponse(Schema):
+    def setSchema(self):
+        self.stamped_oauth_token= SchemaElement(basestring)
+        self.oauth_token        = SchemaElement(basestring)
+        self.secret             = SchemaElement(basestring)
+        self.oauth_verifier     = SchemaElement(basestring)
 
 # ####### #
 # Invites #
@@ -658,28 +664,15 @@ class HTTPClientLogsEntry(Schema):
 
 class HTTPEndpointResponse(Schema):
     def setSchema(self):
-        self.action         = HTTPEndpointAction()
+        self.action         = HTTPAction()
 
     def setAction(self, actionType, name, sources, **kwargs):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
-            action.name     = name
             action.sources  = sources
 
-            item            = HTTPEndpointAction()
-            item.action     = action
-            item.name       = name
-
-            self.action = item
-
-# HTTPEndpointResponse Components
-
-class HTTPEndpointAction(Schema):
-    def setSchema(self):
-        self.action                 = HTTPAction()
-        self.name                   = SchemaElement(basestring, required=True)
-
+            self.action = action
 
 # ######## #
 # Entities #
@@ -765,10 +758,15 @@ class HTTPEntity(Schema):
     
     def _addImages(self, images):
         for image in images:
-            if image.image is not None:
-                item = ImageSchema()
-                item.image = _cleanImageURL(image.image)
-                self.images.append(item)
+            if len(image.sizes) == 0:
+                continue
+            newimg = ImageSchema()
+            for size in image.sizes:
+                if size.url is not None:
+                    newsize = ImageSizeSchema()
+                    newsize.url = _cleanImageURL(size.url)
+                    newimg.sizes.append(newsize)
+            self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
         try:
@@ -824,6 +822,17 @@ class HTTPEntity(Schema):
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
+
+            # Image Gallery
+
+            if entity.gallery is not None and len(entity.gallery) > 0:
+                gallery = HTTPEntityGallery()
+                for image in entity.gallery:
+                    item = HTTPEntityGalleryItem()
+                    item.image = image
+                    item.caption = image.caption
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
 
             # Actions: Reservation
 
@@ -899,6 +908,25 @@ class HTTPEntity(Schema):
             self._addMetadata('Description', entity.desc, key='desc')
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
+            # Image gallery
+
+            if entity.gallery is not None and len(entity.gallery) > 0:
+                gallery = HTTPEntityGallery()
+                for image in entity.gallery:
+                    item = HTTPEntityGalleryItem()
+                    item.image          = image
+                    item.caption        = image.caption
+                    source              = HTTPActionSource()
+                    source.source_id    = item.image
+                    source.source       = 'stamped'
+                    source.link         = item.image
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_image'
+                    action.sources.append(source)
+                    item.action     = action
+                    gallery.data.append(item)
+                self.galleries.append(gallery)
+
             # Actions: Call
 
             actionType  = 'phone'
@@ -962,6 +990,8 @@ class HTTPEntity(Schema):
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
+
+
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
@@ -974,8 +1004,8 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = '/linked/netflix/addinstant'
-                source.endpoint_data    = entity.sources.netflix_id
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
                     action      = actionType,
@@ -1048,7 +1078,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/addinstant.json'
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -1538,7 +1568,7 @@ class HTTPEntityGallery(Schema):
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
-        self.image                  = SchemaElement(basestring, required=True)
+        self.image                  = SchemaElement(ImageSchema(), required=True)
         self.action                 = HTTPAction()
         self.caption                = SchemaElement(basestring)
         self.height                 = SchemaElement(int)
@@ -1578,6 +1608,7 @@ class HTTPEntityMini(Schema):
         self.category               = SchemaElement(basestring, required=True)
         self.subcategory            = SchemaElement(basestring, required=True)
         self.coordinates            = SchemaElement(basestring)
+        self.images                 = SchemaList(ImageSchema())
 
     def importSchema(self, schema):
         if isinstance(schema, BasicEntity):
@@ -1585,7 +1616,8 @@ class HTTPEntityMini(Schema):
             self.title              = schema.title 
             self.subtitle           = schema.subtitle
             self.category           = schema.category
-            self.subcategory        = schema.subcategory 
+            self.subcategory        = schema.subcategory
+            self.images             = schema.images
 
             try:
                 if 'coordinates' in schema.value:

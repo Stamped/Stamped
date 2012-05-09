@@ -644,7 +644,7 @@ class StampedAPI(AStampedAPI):
         facebookAuth    = kwargs.pop('facebookAuth', None)
         netflixAuth     = kwargs.pop('netflixAuth', None)
         
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook)
+        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook, netflix=netflixAuth)
         
         # Alert Facebook asynchronously
         if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
@@ -773,12 +773,17 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        if account.netflix_user_id != None and account.netflix_token != None and account.netflix_secret != None:
-            return
+        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
+                    (account.netflix_user_id, account.netflix_token, account.netflix_secret))
+
+        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret == None:
+            logs.info('Returning because of missing account credentials')
+            return None
 
         netflix = globalNetflix()
+        logs.info('About to add to Queue')
         result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-
+        logs.info('successfully added to queue')
 
         # TODO check results
 
@@ -1844,8 +1849,10 @@ class StampedAPI(AStampedAPI):
             
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            image.width     = imageWidth
-            image.height    = imageHeight
+            size            = ImageSizeSchema()
+            size.width      = imageWidth
+            size.height     = imageHeight
+            image.sizes.append(size)
             content.images  = [ image ]
 
             imageExists     = True
@@ -3040,6 +3047,8 @@ class StampedAPI(AStampedAPI):
 
         objects = ActivityObjectIds()
 
+        logs.info('\n### ADDING ACTIVITY verb: %s   userId: %s' % (verb, userId))
+
         if verb == 'follow':
             objects.user_ids        = [ kwargs['friendId'] ] 
             group                   = True
@@ -3110,6 +3119,9 @@ class StampedAPI(AStampedAPI):
 
         if len(recipientIds) == 0 and friendId is not None:
             recipientIds = [ friendId ]
+
+        if userId in recipientIds:
+            recipientIds.remove(userId)
 
         if requireRecipient and len(recipientIds) == 0:
             raise Exception("Missing recipient")
@@ -3233,9 +3245,22 @@ class StampedAPI(AStampedAPI):
             
         
         # Reset activity count
-        self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+        if personal:
+            self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
+            ### DEPRECATED
+            self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
         
         return activity
+
+    @API_CALL
+    def getUnreadActivityCount(self, authUserId, **kwargs):
+        ### TODO: Cache this in user.num_unread_news
+        user = self._getUserFromIdOrScreenName({'user_id': authUserId})
+        count = self._activityDB.getUnreadActivityCount(authUserId, user.timestamp.activity)
+        if count is None:
+            return 0
+        return count
+
     
     """
     #     # ###### #     # #     #

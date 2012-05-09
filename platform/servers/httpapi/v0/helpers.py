@@ -336,8 +336,9 @@ def parseRequest(schema, request, **kwargs):
         # Build the dict because django sucks
         for k, v in rawData.iteritems():
             data[k] = v
-        
-        data.pop('oauth_token',   None)
+
+        if not kwargs.get('allow_oauth_token', False):
+            data.pop('oauth_token',   None)
         data.pop('client_id',     None)
         data.pop('client_secret', None)
         
@@ -391,8 +392,9 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
             
             data[fileName] = f.read()
             logs.attachment(fileName, f.size)
-        
-        data.pop('oauth_token', None)
+
+        if not kwargs.get('allow_oauth_token', False):
+            data.pop('oauth_token',   None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
         

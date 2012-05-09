@@ -65,10 +65,13 @@ urlpatterns = patterns('',
     (r'v0/account/linked/facebook/update.json',     'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/facebook/followers.json',  'v0.functions.account.alertFollowersFromFacebook'),
     (r'v0/account/linked/facebook/remove.json',     'v0.functions.account.removeFacebook'),
+    (r'v0/account/linked/netflix/login.json',       'v0.functions.account.netflixLogin'),
+    (r'v0/account/linked/netflix/login_callback.json','v0.functions.account.netflixLoginCallback'),
     (r'v0/account/linked/netflix/update.json',      'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/netflix/remove.json',      'v0.functions.account.removeNetflix'),
-    (r'v0/account/linked/netflix/addinstant.json',   'v0.functions.account.addToNetflixInstant'),
-    (r'v0/account/linked/netflix/removeinstant.json','v0.functions.account.removeFromNetflixInstant'),
+    (r'v0/account/linked/netflix/add_instant.json',   'v0.functions.account.addToNetflixInstant'),
+    (r'v0/account/linked/netflix/remove_instant.json','v0.functions.account.removeFromNetflixInstant'),
+    (r'v0/account/linked/instagram/login_callback.json', 'v0.functions.accounts.instagramLogin'),
 
     ### USERS
     (r'v0/users/show.json',                         'v0.functions.users.show'),
@@ -142,6 +145,7 @@ urlpatterns = patterns('',
     ### ACTIVITY
     (r'v0/activity/show.json',                      'v0.functions.activity.show'),
     (r'v0/activity/friends.json',                   'v0.functions.activity.friends'),
+    (r'v0/activity/unread.json',                    'v0.functions.activity.unread'),
     
     ### PING
     (r'v0/temp/ping.json',                          'v0.functions.ping.ping'),

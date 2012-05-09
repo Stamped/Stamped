@@ -70,10 +70,14 @@ class CoordinatesSchema(Schema):
 
 class ImageSchema(Schema):
     def setSchema(self):
-        self.image                          = SchemaElement(basestring) # url
+        self.sizes                          = SchemaList(ImageSizeSchema()) # url
+        self.caption                        = SchemaElement(basestring)
+
+class ImageSizeSchema(Schema):
+    def setSchema(self):
+        self.url                            = SchemaElement(basestring) # url
         self.width                          = SchemaElement(int)
         self.height                         = SchemaElement(int)
-        self.source                         = SchemaElement(basestring)
 
 class TimestampSchema(Schema):
     def setSchema(self):
@@ -81,6 +85,10 @@ class TimestampSchema(Schema):
         self.modified                       = SchemaElement(datetime)
         self.image_cache                    = SchemaElement(datetime)
 
+class UserTimestampSchema(TimestampSchema):
+    def setSchema(self):
+        TimestampSchema.setSchema(self)
+        self.activity                       = SchemaElement(datetime)
 
 # ####### #
 # Account #
@@ -112,7 +120,7 @@ class Account(Schema):
         self.linked_accounts    = LinkedAccounts()
         self.devices            = DevicesSchema()
         self.stats              = UserStatsSchema()
-        self.timestamp          = TimestampSchema()
+        self.timestamp          = UserTimestampSchema()
         self.alerts             = AccountAlerts()
 
 class LinkedAccounts(Schema):
@@ -120,7 +128,7 @@ class LinkedAccounts(Schema):
         self.itunes             = SchemaElement(basestring)
         self.twitter            = TwitterAccountSchema()
         self.facebook           = FacebookAccountSchema()
-        self.netflix            = NetflixAccountSchema()
+        self.netflix            = NetflixAuthSchema()       # netflix is the first where we keep auth tokens in db
 
 class TwitterAccountSchema(Schema):
     def setSchema(self):
@@ -144,14 +152,9 @@ class FacebookAuthSchema(Schema):
     def setSchema(self):
         self.facebook_token         = SchemaElement(basestring)
 
-class NetflixAccountSchema(Schema):
-    def setSchema(self):
-        self.netflix_user_id        = SchemaElement(basestring)
-        self.netflix_token          = SchemaElement(basestring)
-        self.netflix_secret         = SchemaElement(basestring)
-
 class NetflixAuthSchema(Schema):
     def setSchema(self):
+        self.netflix_user_id        = SchemaElement(basestring)
         self.netflix_token          = SchemaElement(basestring)
         self.netflix_secret         = SchemaElement(basestring)
 
@@ -198,7 +201,7 @@ class User(Schema):
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
         self.stats              = UserStatsSchema()
-        self.timestamp          = TimestampSchema(required=True)
+        self.timestamp          = UserTimestampSchema(required=True)
         self.identifier         = SchemaElement(basestring)
     
     def exportSchema(self, schema):
@@ -215,7 +218,7 @@ class UserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
-        self.timestamp          = TimestampSchema()
+        self.timestamp          = UserTimestampSchema()
 
 class UserTiny(Schema):
     def setSchema(self):
@@ -605,6 +608,7 @@ class ConsumptionSlice(GenericCollectionSlice):
         GenericCollectionSlice.setSchema(self)
 
         self.scope              = SchemaElement(basestring)
+        self.filter             = SchemaElement(basestring)
 
 
 class ViewportSchema(Schema):
@@ -661,7 +665,7 @@ class BasicEntity(Schema):
         self.types_source                   = SchemaElement(basestring)
         self.types_timestamp                = SchemaElement(datetime)
         
-        self.images                         = SchemaList(ImageSchema()) 
+        self.images                         = SchemaList(ImageSchema())
         self.images_source                  = SchemaElement(basestring)
         self.images_timestamp               = SchemaElement(datetime)
         
@@ -721,6 +725,7 @@ class BasicEntity(Schema):
             'title',
             'types',
             'sources',
+            'images',
         ])
         for arg in args:
             attributes.add(arg)
@@ -851,6 +856,15 @@ class EntitySourcesSchema(Schema):
         self.singleplatform_source          = SchemaElement(basestring)
         self.singleplatform_timestamp       = SchemaElement(datetime)
 
+        self.foursquare_id                  = SchemaElement(basestring)
+        self.foursquare_url                 = SchemaElement(basestring)
+        self.foursquare_source              = SchemaElement(basestring)
+        self.foursquare_timestamp           = SchemaElement(datetime)
+
+        self.instagram_id                   = SchemaElement(basestring)
+        self.instagram_source               = SchemaElement(basestring)
+        self.instagram_timestamp            = SchemaElement(datetime)
+
         self.factual_id                     = SchemaElement(basestring)
         self.factual_url                    = SchemaElement(basestring)
         self.factual_source                 = SchemaElement(basestring)
@@ -905,6 +919,10 @@ class PlaceEntity(BasicEntity):
         self.neighborhood                   = SchemaElement(basestring)
         self.neighborhood_source            = SchemaElement(basestring)
         self.neighborhood_timestamp         = SchemaElement(datetime)
+
+        self.gallery                        = SchemaList(ImageSchema())
+        self.gallery_source                 = SchemaElement(basestring)
+        self.gallery_timestamp              = SchemaElement(datetime)
         
         self.hours                          = TimesSchema()
         self.hours_source                   = SchemaElement(basestring)
@@ -1294,6 +1312,7 @@ class BasicEntityMini(BasicEntity):
         self.types                          = SchemaList(SchemaElement(basestring))
         self.sources                        = EntitySourcesSchema()
         self.coordinates                    = CoordinatesSchema()
+        self.images                         = SchemaList(ImageSchema())
 
 class PlaceEntityMini(BasicEntityMini):
     def setSchema(self):

@@ -1,4 +1,4 @@
-/* demo.less
+/* profile.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -31,7 +31,6 @@
     box-shadow: @args;
     
     background: @inner;
-    border: 
     float: left;
     width: 30%;
     margin: 1em .7em 0 6px;
@@ -51,39 +50,33 @@
     }
     
     .content {
-        margin: 0 auth;
+        display: block;
+        margin: 0 auto;
         padding: .2em .5em;
         
-        .stamp-contents .images img {
-            border: 1px solid;
-            max-width: 128px;
-            height: auto;
-        }
-        
-        .stamp-contents .images {
-            float: right;
-            width: 128px;
-            height: auto;
-            margin: .2em 0 .2em .2em;
-        }
-        
-        .stamp-contents, .previews {
+        .stamp-contents {
             font-size: 80%;
             text-align: left;
+            
+            .stamped-content {
+                margin: .2em 0 1em;
+                
+                .images {
+                    float: right;
+                    display: block;
+                    width:  128px;
+                    height: auto;
+                    margin: .2em 0 .2em .2em;
+                    
+                    img {
+                        border: 1px solid;
+                        display: inline-block;
+                        max-width: 128px;
+                        height: auto;
+                    }
+                }
+            }
         }
-        
-        .stamped-content {
-            margin: .2em 0 1em;
-        }
-        
-        .blurb {
-            display: inline;
-            text-align: left;
-            quotes: "\201C" "\201D";
-        }
-        
-        .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-        .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left: .2em; }
         
         /*
         div.blurb {
@@ -96,38 +89,24 @@
             }
         }*/
         
-        .subtitle-line {
-            position: relative;
-            display: block;
-            margin: 0 0 -.5em;
-            top: -4px;
-            
-            .icon {
-                display: inline-block;
-            }
-            .subtitle {
-                display: inline-block;
-                font-size: 80%;
-                position: relative;
-                top: -2px;
-                left: .75em;
-            }
-        }
-        
         .previews {
             .profile-image-small {
                 display: inline-block;
                 float: none;
                 
                 position: relative;
-                margin: 0 4px 4px 0;
+                margin: 0 2px 4px 0;
                 
-                .preview-image(@width, @height, @icon) {
-                    background: @icon no-repeat;
+                @width:  14px;
+                @height: 14px;
+                
+                .preview-image(@bgleft, @bgtop) {
+                    background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
+                    background-position: @bgleft, @bgtop;
                     
                     position: absolute;
-                    bottom: -(@height / 2);
-                    right:  -(@width  / 2);
+                    bottom: -(@height / 3);
+                    right:  -(@width  / 3);
                     
                     display: block;
                     width:  @width;
@@ -136,26 +115,88 @@
                 }
                 
                 .like {
-                    .preview-image(20px, 22px, url(/assets/img/like_icon.png));
+                    .preview-image(0, 0);
                 }
                 
                 .todo {
-                    .preview-image(36px, 36px, url(/assets/img/todo_icon.png));
-                }
-                
-                .credit {
-                    .preview-image(20px, 22px, url(/assets/img/like_icon.png));
+                    .preview-image(-16px, 0);
                 }
                 
                 .comment {
-                    .preview-image(36px, 36px, url(/assets/img/comment_icon.png));
+                    .preview-image(-32px, 0);
+                }
+                
+                .credit {
+                    position: absolute;
+                    bottom: -(@height / 3);
+                    right:  -(@width  / 3);
+                    
+                    display: block;
+                    /*width:  30px;*/
+                    width: 18px;
+                    height: 18px;
+                    z-index: 101;
+                    
+                    img {
+                        background: none;
+                        border: 0 none;
+                        
+                        -webkit-box-shadow: none;
+                        -moz-box-shadow: none;
+                        -ms-box-shadow: none;
+                        -o-box-shadow: none;
+                        box-shadow: none;
+                        
+                        display: block;
+                        width:  18px;
+                        height: 18px;
+                    }
+                }
+                
+                .like img, .todo img, .comment img {
+                    .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
                 }
             }
             
-            div.comment {
+            /*div.comment {
                 display: none;
-            }
+            }*/
         }
+    }
+}
+
+.blurb {
+    display: inline;
+    text-align: left;
+    quotes: "\201C" "\201D";
+}
+
+.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
+
+/* TODO: properly center subtitle-line */
+.subtitle-line {
+    text-align: center;
+    position: relative;
+    display: block;
+    margin: 0 0 -.5em;
+    top: -4px;
+    
+    p {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .subtitle {
+        display: inline;
+        font-size: 80%;
+        position: relative;
+        top: -2px;
+    }
+    
+    .icon {
+        display: inline-block;
+        margin: 0 4px 0 0;
     }
 }
 
@@ -245,5 +286,9 @@ ul.user-category-distribution {
             }
         }
     }
+}
+
+#main-content {
+    position: relative;
 }
 

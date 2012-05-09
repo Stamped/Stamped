@@ -10,22 +10,37 @@
 @import "libs/elements.less";
 
 @font-face {
-    font-family: "StampedEntityFont";
+    font-family: "StampedEntityFallbackFont";
     src: local("☺"),
-         url("/assets/fonts/TitlingGothicFBComp-Light.otf") format("opentype");
+         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
 }
 
 @font-face {
     font-family: "StampedScreenNameFont";
     src: local("☺"),
-         url("/assets/fonts/TitlingGothicFBComp-Reg.otf") format("opentype");
+         url(/assets/fonts/TitlingGothicFBComp-Reg.otf) format("opentype");
 }
 
+@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
+/*@import "http://pls.webtype.com/v.css?ct=10157&r=2592&p=1948&h=dQ9Z7h0SmDXhdQOSL1LjdQ%3d%3d";
+
+@font-face {
+    font-family: "StampedEntityFont";
+    font-style:  normal;
+    font-weight: normal;
+    
+    src: local("☺"), 
+         url("http://wac.1ac1.edgecastcdn.net/001AC1/webtype/ff/3/ac420a8b-8858-40c1-b708-3b2674e85e29") format("woff"), 
+         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
+}*/
+
+
+/*
 @font-face {
     font-family: "StampedButtonFont";
     src: local("☺"),
          url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
-}
+}*/
 
 body, html {
     width:  100%;
@@ -37,6 +52,10 @@ body {
     font-family: 'arial', sans-serif;
     color: #666;
     font-size: 1em;
+}
+
+a, a:focus {
+    outline: 0;
 }
 
 a, a:visited {
@@ -76,13 +95,109 @@ header, footer, .fixedwidth {
     position: relative;
 }
 
-/* If you want to parse a JavaScript string as a hex color, you may use the color function:
+header {
+    p {
+        float: right;
+        clear: both;
+        
+        margin: 0.5em 0.5em 0.25em 0;
+        
+        .desc {
+            font-size: 90%;
+        }
+    }
+    
+    @base: #3b84eb;
+    
+    /* TODO: use slight background gradient instead of flat color */
+    
+    p.join {
+        span.desc {
+            color: #438fed;
+        }
+        
+        a.button {
+            color: #fff;
+            background: @base;
+            .box-shadow(0, 0, 4px, 0, @base);
+            .rounded(2px);
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                text-decoration: none;
+                background: @c0;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                
+                text-decoration: none;
+                background: @c1;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    p.sign-in {
+        span.desc {
+            color: #bbb;
+        }
+        
+        a.button {
+            .rounded(4px);
+            .box-shadow(0, 0, 4px, 0, #eee);
+            border: 1px solid #666;
+            background: #FEFEFE;
+            color: #666;
+            
+            &:hover {
+                @c0: lighten(@base, 10%);
+                @c1: darken(@base,  10%);
+                
+                color: #fff;
+                border-color: @c0;
+                
+                background: @c0;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+            
+            &:active {
+                @c0: lighten(@base, 5%);
+                @c1: darken(@base,  25%);
+                color: #fff;
+                border-color: @c1;
+                
+                background: @c1;
+                text-decoration: none;
+                .box-shadow(0, 0, 4px, 0, @c1);
+            }
+        }
+    }
+    
+    a.button {
+        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+        letter-spacing: .1em;
+        text-align: center;
+        
+        margin-left: .5em;
+        display: inline-block;
+        width: 5em;
+    }
+}
+
+/*
 
 @color: color(`window.colors.baseColor`);
 @darkcolor: darken(@color, 10%);
 
-TODO: 
-    * color scheme constants
+TODO:
+    * dynamic color scheme constants (e.g., constants that change per page)
+        * like a uniform variable in a shader language
         * options:
             * modify CSS onload via javascript
                 * downside: requires javascript
@@ -90,26 +205,12 @@ TODO:
                 * styles.css and custom.css?variables... (version should be one optional variable)
                 * generate and *cache* custom.css stylesheets w/ long TTL
                 * downside: harder to take advantage of CDN caching?
+                * NOTE: possibly wouldn't need to reference custom.css directly; could be inlined on page
             * attempt to inline style on page to override !important colors?
                 * downside: wouldn't easily support static operations
-                * NOTE: static stylesheet absolutely CANNOT contain JS logic like below!
-                    * this implies that it is better suited elsewhere!!
-
-<meta property="og:image" content="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png" />
-
+                * NOTE: static stylesheet would need to use less runtime in order to utilize javascript
+                    * this implies that it is better suited elsewhere!
 */
-
-@user_primary:   #004ab2;
-@user_secondary: #0057d1;
-
-@l0: hue(hsl(lightness(@user_primary), 0, 0));
-@l1: hue(hsl(lightness(@user_secondary), 0, 0));
-
-@user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
-@user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
-
-@primary:   lighten(@user_light, 25%);
-@secondary: darken( @user_dark,  10%);
 
 .user-logo {
     width:  195px;
@@ -120,67 +221,71 @@ TODO:
     z-index: 101;
 }
 
-.user-gradient(@angle: 135deg) {
-    width:  100%;
-    margin: 0;
+.profile-header-wrapper {
+    .fullwidth;
     
-    background: -webkit-linear-gradient(@angle, @primary, @secondary);
-    background: -moz-linear-gradient(@angle, @primary, @secondary);
-    background: -o-linear-gradient(@angle, @primary, @secondary);
-    background: linear-gradient(@angle, @primary, @secondary);
-}
-
-.profile-header {
-    @outer: #E5E5E5;
-    @inner: #FEFEFE;
-    @shadow: rgba(50,50,50,0.35);
-    
-    .linear-gradient(left, @outer, @inner, @outer);
-    
-    .innerbg {
-        background: transparent url(/assets/img/noisemask.png) left top repeat;
+    .profile-header {
+        @outer: #E5E5E5;
+        @inner: #FEFEFE;
+        @shadow: rgba(50,50,50,0.35);
         
-        .profile-header-pre {
-            .user-gradient(135deg);
-            
-            .box-shadow(0, 3px, 3px, @shadow);
-        }
+        .linear-gradient(left, @outer, @inner, @outer);
+        background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
+        background-size: 100%;
         
-        .profile-header-body {
-            padding: 34px 0;
+        .innerbg {
+            /* darken the background */
+            background-color: rgba(0, 0, 0, 0.246094);
             
-            .floatleft {
-                margin: 0 24px 0 0;
+            /* TODO: get this mask working; kind of want blend-mode multiply... */
+            /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+            
+            .profile-header-pre {
+                .box-shadow(0, 3px, 3px, 0, @shadow);
             }
             
-            p {
-                margin: 0;
+            .profile-header-body {
+                padding: 34px 0;
+                
+                .floatleft {
+                    margin: 0 24px 0 0;
+                }
+                
+                p {
+                    margin: 0;
+                }
             }
-        }
-        
-        .profile-header-post {
-            .user-gradient(135deg);
-            .box-shadow(0, -3px, 3px, @shadow);
             
-            height: 16px;
-            
-            .inset-stamp {
-                background: url(/assets/img/insetstamp.png) center top no-repeat;
-                text-align: center;
-                position: relative;
-                top: -75px;
+            .profile-header-post {
+                .box-shadow(0, -3px, 3px, 0, @shadow);
                 
-                width: 167px;
-                min-height: 75px;
-                z-index: 100;
+                height: 16px;
                 
-                margin: 0 auto;
-                padding: 20px 20px 0;
-                
-                .number {
-                    font-family: "StampedButtonFont", helvetica, sans-serif;
-                    color: @user_dark;
-                    font-weight: bold;
+                .inset-stamp {
+                    background: url(/assets/img/insetstamp.png) center top no-repeat;
+                    text-align: center;
+                    position: relative;
+                    top: -75px;
+                    
+                    width: 167px;
+                    min-height: 75px;
+                    z-index: 100;
+                    
+                    margin: 0 auto;
+                    padding: 18px 20px 0;
+                    
+                    .number {
+                        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+                        
+                        font-size: 2em;
+                        letter-spacing: .05em;
+                        margin: 0 0 -.25em;
+                    }
+                    
+                    p {
+                        margin: 0 0 .5em;
+                        color: #000;
+                    }
                 }
             }
         }
@@ -197,6 +302,11 @@ TODO:
     height: 16px;
 }
 
+.profile-image-border(@size) {
+    border: @size solid #fff;
+    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+}
+
 .profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
@@ -204,8 +314,7 @@ TODO:
         width:  @size;
         height: @size;
         
-        border: @border solid #fff;
-        .box-shadow(@border / 2, @border / 2, @border / 4, rgba(0, 0, 0, 0.15));
+        .profile-image-border(@border);
     }
 }
 
@@ -227,12 +336,16 @@ TODO:
         width:  24px;
         height: 24px;
         
-        border: 2px solid #fff;
-        .box-shadow(1px, 1px, .5px, rgba(0, 0, 0, 0.15));
+        .profile-image-border(2px);
         
         img {
             display: none;
         }
+        
+        /*&:hover {
+            @base: #3b84eb;
+            background: lighten(@base, 10%);
+        }*/
     }
     
     :nth-child(n+11) {
@@ -258,7 +371,9 @@ TODO:
     width: 18%;
     
     .number {
-        font-family: "StampedButtonFont", helvetica, sans-serif;
+        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+        font-size: 2em;
+        letter-spacing: .05em;
         color: #000;
     }
 }
@@ -407,9 +522,10 @@ footer .copyright a, footer .copyright a {
 }
 
 .pronounced-title {
-    font-family: "StampedEntityFont", helvetica, sans-serif;
+    font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
     font-size: 2em;
     letter-spacing: .025em;
+    /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
 }
 
 .large {

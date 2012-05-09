@@ -32,23 +32,23 @@ STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETT
 class StampedAPIProxy(object):
     
     def __init__(self):
-        self._local = utils.is_ec2()
+        self._prod = IS_PROD
         self.api = globalMongoStampedAPI()
     
     def getUser(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("users/show.json", params)
     
     def getUserStamps(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("collections/user.json", params)
     
     def getFriends(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/friends.json", params)
@@ -62,7 +62,7 @@ class StampedAPIProxy(object):
                 return []
     
     def getFollowers(self, **params):
-        if self._local:
+        if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/followers.json", params)
@@ -224,18 +224,36 @@ def stamped_view(schema=None,
 def stamped_render(request, template, context, **kwargs):
     # augment template context with global django / stamped settings
     kwargs['context_instance'] = kwargs.get('context_instance', RequestContext(request))
-    context = get_stamped_context(context)
+    
+    preload = kwargs.pop('preload', None)
+    context = get_stamped_context(context, preload)
     
     return render_to_response(template, context, **kwargs)
 
-def get_stamped_context(context):
+def get_stamped_context(context, preload=None):
     context = copy.copy(context)
-    context["DEBUG"] = not IS_PROD
-    json_context = json.dumps(context, sort_keys=not IS_PROD)
-    preload = "var STAMPED_PRELOAD = %s;" % json_context
+    custom  = {}
     
-    context["IS_PROD"] = IS_PROD
-    context["STAMPED_PRELOAD_JS"] = preload
+    custom["DEBUG"]   = not IS_PROD
+    custom["IS_PROD"] = IS_PROD
+    
+    context.update(custom)
+    
+    # only preload global STAMPED_PRELOAD javscript variable if desired by the 
+    # calling view
+    if preload is not None:
+        if preload == 'all':
+            ctx = context
+        else:
+            ctx = dict(((k, context[k]) for k in preload))
+            ctx.update(custom)
+        
+        json_context = json.dumps(ctx, sort_keys=not IS_PROD)
+        stamped_preload = "var STAMPED_PRELOAD = %s;" % json_context
+    else:
+        stamped_preload = ""
+    
+    context["STAMPED_PRELOAD_JS"] = stamped_preload
     context.update(STAMPED_SETTINGS)
     
     return context
@@ -304,12 +322,14 @@ def format_url(url_format, schema, diff = None):
     
     for chunk in formatter.parse(url_format):
         variable = chunk[1]
+        value = ""
         
-        if variable in data:
-            value = data[variable]
-            del data[variable]
-        else:
-            value = schema[variable]
+        if variable is not None:
+            if variable in data:
+                value = data[variable]
+                del data[variable]
+            else:
+                value = schema[variable]
         
         url += "%s%s" % (chunk[0], value)
     

@@ -141,7 +141,9 @@ class TheTVDB(object):
                     
                     if len(image) > 0:
                         image = ImageSchema({
-                            'image' : 'http://thetvdb.com/banners/%s' % image, 
+                            'sizes' : [ImageSizeSchema({
+                                'url': 'http://thetvdb.com/banners/%s' % image
+                            }),]
                         })
                         
                         entity.images.append(image)

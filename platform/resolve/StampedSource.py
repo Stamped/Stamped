@@ -14,6 +14,7 @@ __all__ = [ 'StampedSource',
 
 import Globals
 from logs import report
+import re
 
 try:
     import logs
@@ -151,6 +152,38 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
         except Exception:
             return -1
 
+def _fixCast(cast):
+    newcast = []
+    import pprint
+    pprint.pprint('fixCast  cast: %s' % cast)
+    try:
+        # if it's just a string, construct a list of dictionaries with 'title' keys
+        if isinstance(cast, basestring):
+            print('converting cast from string')
+            names = cast.split(',')
+            cast = list()
+            for name in names:
+                cast.append( {'title': name} )
+            print('converted cast: %s' % cast)
+        for item in [c.value for c in cast]:
+            name = item.get('title', None)
+            character = item.get('character', None)
+            if name is None:
+                continue
+            m = re.match(r'(.+) as (.+)', name)
+            if m is not None:
+                name = m.group(1)
+                character = m.group(2)
+            newitem = dict()
+            newitem['name'] = name
+            if character is not None:
+                newitem['character'] = character
+            newcast.append(newitem)
+    except Exception as e:
+        print('ERROR: %s' % e)
+    pprint.pprint('newcast: %s' % newcast)
+    return newcast
+
 
 class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     """
@@ -163,7 +196,7 @@ class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     @lazyProperty 
     def cast(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity['cast'])#[ { 'name' : item['title'] } for item in self.entity['cast'] ]
         except Exception:
             return []
 
@@ -207,7 +240,7 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
     @lazyProperty 
     def cast(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity['cast'])# [ { 'name' : item['title'] } for item in self.entity['cast'] ]
         except Exception:
             return []
 
@@ -867,12 +900,14 @@ class StampedSource(GenericSource):
             'rdio'              : 'sources.rdio_id', 
             'opentable'         : 'sources.opentable_id', 
             'tmdb'              : 'sources.tmdb_id', 
-            'factual'           : 'sources.factual_id', 
-            'singleplatform'    : 'sources.singleplatform_id', 
+            'factual'           : 'sources.factual_id',
+            'instagram'         : 'sources.instagram_id',
+            'singleplatform'    : 'sources.singleplatform_id',
+            'foursquare'        : 'sources.foursquare_id',
             'fandango'          : 'sources.fandango_id', 
             'googleplaces'      : 'sources.googleplaces_id', 
             'itunes'            : 'sources.itunes_id', 
-            'netflix'           : 'sources.netflix.nid', 
+            'netflix'           : 'sources.netflix_id',
             'thetvdb'           : 'sources.thetvdb.thetvdb_id', 
         }
         

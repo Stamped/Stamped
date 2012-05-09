@@ -20,6 +20,7 @@ try:
     from utils                  import getFile
     from urllib2                import HTTPError
     from errors                 import StampedHTTPError
+    from RateLimiter            import RateLimiter, RateException
     from LRUCache               import lru_cache
     from Memcache               import memcached_function
     
@@ -34,6 +35,7 @@ except:
 class iTunes(object):
 
     def __init__(self):
+        self.__limiter = RateLimiter(cps=10)
         pass
     
     # note: these decorators add tiered caching to this function, such that 
@@ -44,12 +46,13 @@ class iTunes(object):
     def method(self, method, **params):
         try:
             url = 'http://itunes.apple.com/%s' % method
-            try:
-                logs.info("%s?%s" % (url, urllib.urlencode(params)))
-            except Exception:
-                report()
-            
-            result = getFile(url, params=params)
+            with self.__limiter:
+                try:
+                    logs.info("%s?%s" % (url, urllib.urlencode(params)))
+                except Exception:
+                    report()
+
+                result = getFile(url, params=params)
         except HTTPError as e:
             raise StampedHTTPError('itunes threw an exception',e.code,e.message)
         

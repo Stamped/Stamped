@@ -53,7 +53,7 @@ class MongoActivityCollection(AActivityDB):
             'since'     : kwargs.pop('since', None),
             'before'    : kwargs.pop('before', None),
             'limit'     : kwargs.pop('limit', 20),
-            'sort'      : 'timestamp.created',
+            'sort'      : 'timestamp.modified',
             'sortOrder' : pymongo.DESCENDING,
         }
 
@@ -79,7 +79,10 @@ class MongoActivityCollection(AActivityDB):
 
         activity = self.activity_items_collection.getActivityForUsers(userIds, **params)
 
-        return activity 
+        return activity
+
+    def getUnreadActivityCount(self, userId, timestamp):
+        return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
         subject         = kwargs.pop('subject', None)
@@ -166,7 +169,7 @@ class MongoActivityCollection(AActivityDB):
             if recipientId in sentTo:
                 continue
             
-            self.activity_links_collection.addActivityLink(activityId, recipientId)
+            self.activity_links_collection.saveActivityLink(activityId, recipientId)
 
 
             logs.info('\nSENDING ALERT TO %s' % (recipientId))
@@ -219,7 +222,8 @@ class MongoActivityCollection(AActivityDB):
             self._removeSubject(activityIds, userId)
     
     def removeActivityForStamp(self, stampId):
-        activityIds = self.activity_items_collection.getActivityIds(stampId=stampId)
+        objects     = { 'stamp_ids' : [ stampId ] }
+        activityIds = self.activity_items_collection.getActivityIds(objects=objects)
         self._removeActivityIds(activityIds)
     
     def removeUserActivity(self, userId):

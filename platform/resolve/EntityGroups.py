@@ -119,6 +119,20 @@ class FactualGroup(APlaceGroup):
         APlaceGroup.__init__(self, 'factual')
         self.addField(['factual_id'])
 
+class FoursquareGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'foursquare')
+        self.addField(['foursquare_id'])
+        self.addField(['foursquare_url'])
+
+class InstagramGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'instagram')
+        self.addField(['instagram_id'])
+
+
 class OpenTableGroup(APlaceGroup):
 
     def __init__(self):
@@ -164,6 +178,7 @@ class NetflixGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'netflix')
         self.addKind('media_item')
+        self.addKind('media_collection')
         self.addType('movie')
         self.addType('tv')
 
@@ -262,6 +277,12 @@ class SiteGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'site')
+        self.addNameField()
+
+class GalleryGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'gallery')
         self.addNameField()
 
 class PriceRangeGroup(ARestaurantGroup):
@@ -446,6 +467,8 @@ class SKUNumberGroup(ABookGroup):
 allGroups = [
     FactualGroup,
     SinglePlatformGroup,
+    FoursquareGroup,
+    InstagramGroup,
     GooglePlacesGroup,
     TMDBGroup,
     RdioGroup,
@@ -468,6 +491,7 @@ allGroups = [
     CoordinatesGroup,
     PhoneGroup,
     SiteGroup,
+    GalleryGroup,
     PriceRangeGroup,
     CuisineGroup,
     MenuGroup,

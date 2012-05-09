@@ -10,26 +10,46 @@
 override PROJECT_BASE_DIR	= .
 override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
 
-TEMPLATE_DIRS	= templates
-TEMPLATE_SUFFIX	= template.html
-TEMPLATE_DEST	= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
-TEMPLATE_PROG	= ./process_templates.py
-TEMPLATES 		= $(strip \
+LESS_CSS_DIRS				= assets/css assets/css/libs
+LESS_CSS_SOURCE_SUFFIX		= less
+LESS_CSS_TARGET_SUFFIX		= css
+LESS_CSS_PROG				= lessc
+LESS_CSS_SOURCES			= $(strip \
+	$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
+LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
+
+TEMPLATE_DIRS				= templates
+TEMPLATE_SUFFIX				= template.html
+TEMPLATE_DEST				= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
+TEMPLATE_PROG				= ./process_templates.py
+TEMPLATES 					= $(strip \
 	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX))))
 
-DEPENDENCIES	= $(TEMPLATES) $(TEMPLATE_PROG) assets/js/libs/mustache.js core/templatetags/stamped_tags.py
+DEPENDENCIES				= $(TEMPLATES) $(TEMPLATE_PROG) \
+	assets/js/libs/mustache.js core/templatetags/stamped_tags.py
+
+ALL_TARGETS					= $(TEMPLATE_DEST) $(LESS_CSS_TARGETS)
+
+define ADD_TARGET_PATTERN
+$1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
+	@$$(CECHO) "$(LESS_CSS_PROG) '$$(BOLD_COLOR)$$(FR_COLOR_RED)$$<$$(END_COLOR)' > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
+	@$(LESS_CSS_PROG) $$< > $$@
+	@echo
+endef
+
+$(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_TARGET_PATTERN,$(DIR))))
 
 .PHONY: $(TEMPLATE_DEST) all clean help
 
-all: $(TEMPLATE_DEST)
+all: $(ALL_TARGETS)
 
 $(TEMPLATE_DEST): $(DEPENDENCIES)
 	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
-	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_GREEN)$(TEMPLATE_DEST)$(END_COLOR)'."
+	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
 	@echo
 
 clean:
-	-$(RM) -f $(TEMPLATE_DEST)
+	-$(RM) -f $(ALL_TARGETS)
 	@echo
 
 help::

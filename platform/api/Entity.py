@@ -392,9 +392,11 @@ def upgradeEntityData(entityData):
     ]
     for oldImage in oldImages:
         if oldImage is not None:
-            item = ImageSchema()
-            item.image = oldImage
-            new.images.append(item)
+            image = ImageSchema()
+            size  = ImageSizeSchema()
+            size.url = oldImage
+            image.sizes.append(size)
+            new.images.append(image)
             break
     if len(new.images) > 0:
         new.images_source = 'seed'
@@ -575,8 +577,9 @@ def upgradeEntityData(entityData):
         screenshots = media.pop('screenshots', [])
         for screenshot in screenshots:
             imageSchema = ImageSchema()
-            imageSchema.image = screenshot 
-            imageSchema.source = 'itunes'
+            imageSizeSchema = ImageSizeSchema()
+            imageSizeSchema.url = screenshot
+            imageSchema.sizes.append(imageSizeSchema)
             new.screenshots.append(imageSchema)
         if len(screenshots) > 0:
             new.screenshots_source = media.pop('screenshots_source', 'format')

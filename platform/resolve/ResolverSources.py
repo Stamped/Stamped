@@ -22,6 +22,7 @@ try:
     from StampedSource          import StampedSource
     from TheTVDBSource          import TheTVDBSource
     from NetflixSource          import NetflixSource
+    from InstagramSource        import InstagramSource
 except:
     report()
     raise
@@ -32,6 +33,7 @@ allSources = [
     FactualSource,
     GooglePlacesSource,
     SinglePlatformSource,
+    InstagramSource,
     iTunesSource,
     TMDBSource,
     RdioSource,
