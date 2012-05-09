@@ -79,6 +79,10 @@ def _initialize_image_sizes(dest):
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
 
+    self.image.sizes.append(ImageSizeSchema({'url': image_url }))
+    for pix in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
+        self.image.sizes.append( ImageSizeSchema({'url': get_image_url(pix), 'height': pix, 'width': pix}) )
+
 def _formatURL(url):
     try:
         return url.split('://')[-1].split('/')[0].split('www.')[-1]
@@ -442,6 +446,7 @@ class HTTPUser(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image              = Schemaelement(ImageSchema())
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -533,6 +538,7 @@ class HTTPUserMini(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
+        self.image              = SchemaElement(ImageSchema())
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
