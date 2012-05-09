@@ -51,7 +51,7 @@
 - (id)init {
   self = [super initWithHeaderHeight:0];
   if (self) {
-    scope_ = STStampedAPIScopeFriends;
+    scope_ = STStampedAPIScopeYou;
     [self updateToggleButton];
   }
   return self;

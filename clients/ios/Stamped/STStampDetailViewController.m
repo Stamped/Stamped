@@ -33,16 +33,31 @@
 #import "STStampedAPI.h"
 #import "STButton.h"
 #import "TTTAttributedLabel.h"
+#import "STCommentButton.h"
+#import "STShareButton.h"
 
 @interface STStampDetailToolbar : UIView
 
-- (id)initWithParent:(UIView*)view andStamp:(id<STStamp>)stamp;
+- (id)initWithParent:(UIView*)view controller:(STStampDetailViewController*)controller andStamp:(id<STStamp>)stamp;
 - (void)toggleToolbar:(id)button;
 
 @property (nonatomic, readonly, retain) NSArray* buttons;
 @property (nonatomic, readwrite, assign) BOOL expanded;
 @property (nonatomic, readonly, retain) UIView* expandButton;
 @property (nonatomic, readonly, retain) UIView* buttonContainer;
+
+@end
+
+@interface STStampDetailViewController () <UIActionSheetDelegate, UITextFieldDelegate>
+
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
+
+- (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
+- (void)_deleteStampButtonPressed:(id)caller;
+
+@property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
+@property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
+@property (nonatomic, readwrite, retain) STCancellation* entityDetailCancellation;
 
 @end
 
@@ -53,7 +68,7 @@
 @synthesize expandButton = expandButton_;
 @synthesize buttonContainer = buttonContainer_;
 
-- (id)initWithParent:(UIView*)view andStamp:(id<STStamp>)stamp {
+- (id)initWithParent:(UIView*)view controller:(STStampDetailViewController*)controller andStamp:(id<STStamp>)stamp {
   CGFloat xPadding = 5;
   CGFloat yPadding = 10;
   CGFloat height = 40;
@@ -87,8 +102,12 @@
                  [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
                  [[[STTodoButton alloc] initWithStamp:stamp] autorelease],
                  [[[STStampButton alloc] initWithStamp:stamp] autorelease],
-                 [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
-                 [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
+                 [[[STCommentButton alloc] initWithCallback:^{
+      [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+    }] autorelease],
+                 [[[STShareButton alloc] initWithCallback:^{
+      [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+    }] autorelease],
                  nil] retain];
     CGFloat buttonSpacing = 60;
     buttonContainer_ = [[UIView alloc] initWithFrame:CGRectMake(0, -3, CGRectGetMinX(expandButton_.frame)+50, frame.size.height-7)];
@@ -150,19 +169,6 @@
 
 @end
 
-@interface STStampDetailViewController () <UIActionSheetDelegate, UITextFieldDelegate>
-
-@property (nonatomic, readwrite, retain) id<STStamp> stamp;
-
-- (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
-- (void)_deleteStampButtonPressed:(id)caller;
-
-@property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
-@property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
-@property (nonatomic, readwrite, retain) STCancellation* entityDetailCancellation;
-
-@end
-
 @implementation STStampDetailViewController
 
 @synthesize headerView = _headerView;
@@ -209,23 +215,15 @@
     _commentsView.addCommentView.delegate = self;
     [self.scrollView appendChildView:_commentsView];
   }
-  
-  NSMutableArray* views = [NSMutableArray arrayWithObjects:
-                           [[[STLikeButton alloc] initWithStamp:self.stamp] autorelease],
-                           [[[STTodoButton alloc] initWithStamp:self.stamp] autorelease],
-                           nil];
-  if (![AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
-    [views addObject:[[[STStampButton alloc] initWithStamp:self.stamp] autorelease]];
-  }
-  else {
+  if ([AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
     UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:@"Delete"
-                                                                    style:UIBarButtonItemStylePlain
-                                                                   target:self
-                                                                   action:@selector(_deleteStampButtonPressed:)] autorelease];
+                                                                     style:UIBarButtonItemStylePlain
+                                                                    target:self
+                                                                    action:@selector(_deleteStampButtonPressed:)] autorelease];
     self.navigationItem.rightBarButtonItem = rightButton;
   }
   //[toolbar packViews:views];
-  UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view andStamp:self.stamp] autorelease];
+  UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
   [self.view addSubview:newToolbar];
   
   self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID 

@@ -49,8 +49,16 @@
   CGFloat padding = 10;
   titleView.frame = CGRectOffset(titleView.frame, padding, padding);
   [self appendChildView:titleView];
-  subtitleView.frame = CGRectOffset(subtitleView.frame, padding, 0);
+  
+  UIImage* categoryImage = [Util imageForCategory:self.stamp.entity.category];
+  UIImageView* categoryView = [[[UIImageView alloc] initWithImage:categoryImage] autorelease];
+  CGFloat subtitleXOffset = padding + categoryView.frame.size.width + 5;
+  subtitleView.frame = CGRectOffset(subtitleView.frame, subtitleXOffset, 0);
   [self appendChildView:subtitleView];
+  CGRect categoryFrame = [Util centeredAndBounded:categoryView.frame.size inFrame:subtitleView.frame];
+  categoryFrame.origin.x = padding;
+  categoryView.frame = categoryFrame;
+  [self addSubview:categoryView];
   UIImageView* arrowImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"gray_disclosure_arrow"]] autorelease];
   arrowImage.frame = [Util centeredAndBounded:arrowImage.frame.size inFrame:CGRectMake(280, 0, 40, self.frame.size.height)];
   [self addSubview:arrowImage];

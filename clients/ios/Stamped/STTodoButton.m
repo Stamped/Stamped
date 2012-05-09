@@ -12,7 +12,15 @@
 #import "Util.h"
 #import "STStampedAPI.h"
 
+@interface STTodoButton ()
+
+@property (nonatomic, readwrite, assign) BOOL waiting;
+
+@end
+
 @implementation STTodoButton
+
+@synthesize waiting = waiting_;
 
 - (id)initWithStamp:(id<STStamp>)stamp
 {
@@ -27,12 +35,15 @@
 }
 
 - (void)defaultHandler:(id)myself {
-  if (self.stamp) {
+  if (self.stamp && !self.waiting) {
+    self.waiting = YES;
     STActionContext* context = [STActionContext contextWithCompletionBlock:^(id stamp, NSError* error) {
+      self.waiting = NO;
       if (!error) {
         [Util reloadStampedData];
       }
       else {
+        self.on = !self.on;
         [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
       }
     }];
@@ -45,6 +56,7 @@
       action = [STStampedActions actionTodoStamp:self.stamp.stampID withOutputContext:context];
     }
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    self.on = !self.on;
   }
 }
 

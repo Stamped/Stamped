@@ -81,8 +81,11 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
     }
     NSString* imagePath = nil;
     if (entity.images && [entity.images count] > 0) {
-      id<STImage> image = [entity.images objectAtIndex:0];
-      imagePath = image.image;
+      id<STImageList> imageList = [entity.images objectAtIndex:0];
+      if (imageList.sizes.count > 0) {
+        id<STImage> firstImage = [imageList.sizes objectAtIndex:0];
+        imagePath = firstImage.image;
+      }
     }
     UIView* imageView = nil;
     CGRect imageFrame = CGRectZero;

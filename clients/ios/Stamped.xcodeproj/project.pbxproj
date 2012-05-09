@@ -170,6 +170,9 @@
 		6360B5D7153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */; };
 		6360B5DA153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */; };
 		6360B5DB153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */; };
+		636273E8155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */ = {isa = PBXBuildFile; fileRef = 636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */; };
+		636273E9155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */ = {isa = PBXBuildFile; fileRef = 636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */; };
+		636273EA155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */ = {isa = PBXBuildFile; fileRef = 636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */; };
 		636961B01543673500993C4F /* ECSlidingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 636961AD1543673500993C4F /* ECSlidingViewController.m */; };
 		636961B11543673500993C4F /* ECSlidingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 636961AD1543673500993C4F /* ECSlidingViewController.m */; };
 		636961B21543673500993C4F /* UIImage+ImageWithUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 636961AF1543673500993C4F /* UIImage+ImageWithUIView.m */; };
@@ -197,6 +200,12 @@
 		637A183115595F7400148C0B /* STSimpleActivityCount.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A183015595F7400148C0B /* STSimpleActivityCount.m */; };
 		637A183215595F7400148C0B /* STSimpleActivityCount.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A183015595F7400148C0B /* STSimpleActivityCount.m */; };
 		637A183315595F7400148C0B /* STSimpleActivityCount.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A183015595F7400148C0B /* STSimpleActivityCount.m */; };
+		637E748A155AF8620022CD2E /* STCommentButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E7489155AF8620022CD2E /* STCommentButton.m */; };
+		637E748B155AF8620022CD2E /* STCommentButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E7489155AF8620022CD2E /* STCommentButton.m */; };
+		637E748C155AF8620022CD2E /* STCommentButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E7489155AF8620022CD2E /* STCommentButton.m */; };
+		637E748F155AFBF70022CD2E /* STShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E748E155AFBF60022CD2E /* STShareButton.m */; };
+		637E7490155AFBF70022CD2E /* STShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E748E155AFBF60022CD2E /* STShareButton.m */; };
+		637E7491155AFBF70022CD2E /* STShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E748E155AFBF60022CD2E /* STShareButton.m */; };
 		6380679D1541A72300423E98 /* STYouSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380679C1541A72300423E98 /* STYouSource.m */; };
 		6380679E1541A72300423E98 /* STYouSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380679C1541A72300423E98 /* STYouSource.m */; };
 		638067A21541B5A600423E98 /* STDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A11541B5A600423E98 /* STDebugViewController.m */; };
@@ -217,8 +226,6 @@
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		63865A80152A13C000FE8A68 /* STContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63865A7F152A13C000FE8A68 /* STContainerViewController.m */; };
 		63865A81152A13C000FE8A68 /* STContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63865A7F152A13C000FE8A68 /* STContainerViewController.m */; };
-		6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
-		6386EE8E150815FB0019F1DC /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
 		6386EE9515081D050019F1DC /* STSimpleSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9415081D040019F1DC /* STSimpleSource.m */; };
 		6386EE9615081D050019F1DC /* STSimpleSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9415081D040019F1DC /* STSimpleSource.m */; };
 		6386EE9715081D050019F1DC /* STSimpleSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9415081D040019F1DC /* STSimpleSource.m */; };
@@ -340,7 +347,6 @@
 		63B4F6931554628900C52C28 /* STConsumptionSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B4F6901554628800C52C28 /* STConsumptionSlice.m */; };
 		63BA76A01545A2AA00EE95DA /* STProfileSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA769F1545A2AA00EE95DA /* STProfileSource.m */; };
 		63BA76A11545A2AA00EE95DA /* STProfileSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA769F1545A2AA00EE95DA /* STProfileSource.m */; };
-		63BA76BD1545F69400EE95DA /* STSimpleGalleryItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */; };
 		63BA76BE1545F69400EE95DA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178213C3754300ABE6E2 /* main.m */; };
 		63BA76BF1545F69400EE95DA /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		63BA76C01545F69400EE95DA /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
@@ -3073,6 +3079,9 @@
 		6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivityObjects.m; sourceTree = "<group>"; };
 		6360B5D8153FA80900BB8C82 /* STSimpleActivityReference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActivityReference.h; sourceTree = "<group>"; };
 		6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivityReference.m; sourceTree = "<group>"; };
+		636273E5155AB07D006AF7B8 /* STImageList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageList.h; sourceTree = "<group>"; };
+		636273E6155AB0D7006AF7B8 /* STSimpleImageList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleImageList.h; sourceTree = "<group>"; };
+		636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleImageList.m; sourceTree = "<group>"; };
 		636961AC1543673500993C4F /* ECSlidingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ECSlidingViewController.h; sourceTree = "<group>"; };
 		636961AD1543673500993C4F /* ECSlidingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ECSlidingViewController.m; sourceTree = "<group>"; };
 		636961AE1543673500993C4F /* UIImage+ImageWithUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageWithUIView.h"; sourceTree = "<group>"; };
@@ -3093,6 +3102,10 @@
 		637A182E15595F1000148C0B /* STActivityCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityCount.h; sourceTree = "<group>"; };
 		637A182F15595F7400148C0B /* STSimpleActivityCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleActivityCount.h; sourceTree = "<group>"; };
 		637A183015595F7400148C0B /* STSimpleActivityCount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActivityCount.m; sourceTree = "<group>"; };
+		637E7488155AF8610022CD2E /* STCommentButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCommentButton.h; sourceTree = "<group>"; };
+		637E7489155AF8620022CD2E /* STCommentButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCommentButton.m; sourceTree = "<group>"; };
+		637E748D155AFBF60022CD2E /* STShareButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STShareButton.h; sourceTree = "<group>"; };
+		637E748E155AFBF60022CD2E /* STShareButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STShareButton.m; sourceTree = "<group>"; };
 		6380679B1541A72300423E98 /* STYouSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STYouSource.h; sourceTree = "<group>"; };
 		6380679C1541A72300423E98 /* STYouSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STYouSource.m; sourceTree = "<group>"; };
 		638067A01541B5A600423E98 /* STDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDebugViewController.h; sourceTree = "<group>"; };
@@ -3108,7 +3121,6 @@
 		6380A76015066EAD003087EF /* STPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPageControl.h; sourceTree = "<group>"; };
 		6380A76115066EAD003087EF /* STPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPageControl.m; sourceTree = "<group>"; };
 		6380A77815067776003087EF /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = "Vendor/gtm-oauth/Source/../../../RestKit/RestKit.xcodeproj"; sourceTree = "<group>"; };
-		6380A7A31506D3F8003087EF /* STGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGalleryItem.h; sourceTree = "<group>"; };
 		6380A7A61506D6C2003087EF /* STEntityDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetail.h; sourceTree = "<group>"; };
 		6380A7A81506D907003087EF /* STMetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMetadataItem.h; sourceTree = "<group>"; };
 		6380A7A91506DAC5003087EF /* STPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylist.h; sourceTree = "<group>"; };
@@ -3118,8 +3130,6 @@
 		6380A7B21507E63C003087EF /* STPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistItem.h; sourceTree = "<group>"; };
 		63865A7E152A13C000FE8A68 /* STContainerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STContainerViewController.h; sourceTree = "<group>"; };
 		63865A7F152A13C000FE8A68 /* STContainerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STContainerViewController.m; sourceTree = "<group>"; };
-		6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleGalleryItem.h; sourceTree = "<group>"; };
-		6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleGalleryItem.m; sourceTree = "<group>"; };
 		6386EE92150819270019F1DC /* STAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAction.h; sourceTree = "<group>"; };
 		6386EE9315081D040019F1DC /* STSimpleSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleSource.h; sourceTree = "<group>"; };
 		6386EE9415081D040019F1DC /* STSimpleSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleSource.m; sourceTree = "<group>"; };
@@ -4491,7 +4501,6 @@
 				6380A7A91506DAC5003087EF /* STPlaylist.h */,
 				6380A7B21507E63C003087EF /* STPlaylistItem.h */,
 				6386EED1150970F40019F1DC /* STGallery.h */,
-				6380A7A31506D3F8003087EF /* STGalleryItem.h */,
 				6386EF0C150FD3410019F1DC /* STViewDelegate.h */,
 				63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */,
 				63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */,
@@ -4526,6 +4535,7 @@
 				63C983F7154C9789000180DC /* STTableViewCellFactory.h */,
 				635D1C59155315D600103D1A /* STEndpointResponse.h */,
 				637A182E15595F1000148C0B /* STActivityCount.h */,
+				636273E5155AB07D006AF7B8 /* STImageList.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -4564,8 +4574,6 @@
 				6386EEA9150822900019F1DC /* STSimplePlaylistItem.m */,
 				6386EED21509713D0019F1DC /* STSimpleGallery.h */,
 				6386EED31509713E0019F1DC /* STSimpleGallery.m */,
-				6386EE8715080C7A0019F1DC /* STSimpleGalleryItem.h */,
-				6386EE8815080C7A0019F1DC /* STSimpleGalleryItem.m */,
 				6323F0DB1524E66800BE408C /* STSimpleMenu.h */,
 				6323F0DC1524E66800BE408C /* STSimpleMenu.m */,
 				6323F0DF1524E68000BE408C /* STSimpleSubmenu.h */,
@@ -4624,6 +4632,8 @@
 				635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */,
 				637A182F15595F7400148C0B /* STSimpleActivityCount.h */,
 				637A183015595F7400148C0B /* STSimpleActivityCount.m */,
+				636273E6155AB0D7006AF7B8 /* STSimpleImageList.h */,
+				636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -5002,6 +5012,10 @@
 				63CC443C152D12FE0026BB25 /* STAStampButton.m */,
 				63DC7B54152E1867001BA610 /* STStampButton.h */,
 				63DC7B55152E1867001BA610 /* STStampButton.m */,
+				637E7488155AF8610022CD2E /* STCommentButton.h */,
+				637E7489155AF8620022CD2E /* STCommentButton.m */,
+				637E748D155AFBF60022CD2E /* STShareButton.h */,
+				637E748E155AFBF60022CD2E /* STShareButton.m */,
 				63E5E6BE152E48A300579369 /* STStampsView.h */,
 				63E5E6BF152E48A300579369 /* STStampsView.m */,
 				63E5E6C2152E496100579369 /* STLegacyStampCell.h */,
@@ -8472,7 +8486,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63BA76BD1545F69400EE95DA /* STSimpleGalleryItem.m in Sources */,
 				63BA76BE1545F69400EE95DA /* main.m in Sources */,
 				63BA76BF1545F69400EE95DA /* STNavigationBar.m in Sources */,
 				63BA76C01545F69400EE95DA /* EntityDetailViewController.m in Sources */,
@@ -8732,6 +8745,9 @@
 				637A182815585F3900148C0B /* STConsumptionMapViewController.m in Sources */,
 				637A182D15588DE600148C0B /* STMapCache.m in Sources */,
 				637A183315595F7400148C0B /* STSimpleActivityCount.m in Sources */,
+				636273EA155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
+				637E748C155AF8620022CD2E /* STCommentButton.m in Sources */,
+				637E7491155AFBF70022CD2E /* STShareButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8739,7 +8755,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6386EE8E150815FB0019F1DC /* STSimpleGalleryItem.m in Sources */,
 				7E5893B7147C468B002268C4 /* main.m in Sources */,
 				7E5893BB147C468B002268C4 /* STNavigationBar.m in Sources */,
 				7E5893BD147C468B002268C4 /* EntityDetailViewController.m in Sources */,
@@ -8999,6 +9014,9 @@
 				637A182715585F3900148C0B /* STConsumptionMapViewController.m in Sources */,
 				637A182C15588DE600148C0B /* STMapCache.m in Sources */,
 				637A183215595F7400148C0B /* STSimpleActivityCount.m in Sources */,
+				636273E9155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
+				637E748B155AF8620022CD2E /* STCommentButton.m in Sources */,
+				637E7490155AFBF70022CD2E /* STShareButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9088,7 +9106,6 @@
 				7E33045C14F5795A00114494 /* STClosableOverlayView.m in Sources */,
 				6380A76215066EAE003087EF /* STPageControl.m in Sources */,
 				6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */,
-				6386EE8915080C7A0019F1DC /* STSimpleGalleryItem.m in Sources */,
 				6386EE9515081D050019F1DC /* STSimpleSource.m in Sources */,
 				6386EE9A15081EBE0019F1DC /* STSimpleAction.m in Sources */,
 				6386EEA41508210A0019F1DC /* STSimpleMetadataItem.m in Sources */,
@@ -9266,6 +9283,9 @@
 				637A182615585F3900148C0B /* STConsumptionMapViewController.m in Sources */,
 				637A182B15588DE600148C0B /* STMapCache.m in Sources */,
 				637A183115595F7400148C0B /* STSimpleActivityCount.m in Sources */,
+				636273E8155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
+				637E748A155AF8620022CD2E /* STCommentButton.m in Sources */,
+				637E748F155AFBF70022CD2E /* STShareButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

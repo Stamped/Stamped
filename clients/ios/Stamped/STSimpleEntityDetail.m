@@ -11,9 +11,8 @@
 #import "STSimpleMetadataItem.h"
 #import "STSimpleGallery.h"
 #import "STSimplePlaylist.h"
-#import "STGalleryItem.h"
 #import <RestKit/RestKit.h>
-#import "STSimpleImage.h"
+#import "STSimpleImageList.h"
 
 #pragma mark - Attributes
 
@@ -76,7 +75,7 @@
    @"caption",
    nil];
   
-  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
   [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
   [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
   [mapping mapRelationship:@"galleries" withMapping:[STSimpleGallery mapping]];

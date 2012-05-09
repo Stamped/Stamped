@@ -29,14 +29,14 @@ static const CGFloat _captionHeight = 25;
 
 @interface STGalleryItemView : UIView
 
-- (id)initWithFrame:(CGRect)frame image:(UIImage*)image text:(BOOL)text andGalleryItem:(id<STGalleryItem>)item;
+- (id)initWithFrame:(CGRect)frame image:(UIImage*)image text:(BOOL)text andGalleryItem:(id<STImageList>)item;
 
 - (void)clicked:(id)message;
 
 @property (nonatomic, retain) NSString* link;
 @property (nonatomic, retain) NSString* linkType;
 @property (nonatomic, retain) UILabel* caption;
-@property (nonatomic, readonly, retain) id<STGalleryItem> galleryItem;
+@property (nonatomic, readonly, retain) id<STImageList> galleryItem;
 
 @end
 
@@ -51,13 +51,16 @@ static const CGFloat _captionHeight = 25;
     
     CGFloat maxHeight = 0;
     BOOL hasText = NO;
-    for (id<STGalleryItem> item in gallery.data) {
-      if (item.image) {
-        UIImage* image = [images objectForKey:item.image];
-        if (image) {
-          CGFloat height = image.size.height + 2 * _padding_h;
-          hasText = hasText || item.caption;
-          maxHeight = MAX(maxHeight, height);
+    for (id<STImageList> item in gallery.data) {
+      if (item.sizes.count > 0) {
+        id<STImage> firstImage = [item.sizes objectAtIndex:0];
+        if (firstImage.image) {
+          UIImage* image = [images objectForKey:firstImage.image];
+          if (image) {
+            CGFloat height = image.size.height + 2 * _padding_h;
+            hasText = hasText || item.caption;
+            maxHeight = MAX(maxHeight, height);
+          }
         }
       }
     }
@@ -79,12 +82,15 @@ static const CGFloat _captionHeight = 25;
     scrollView.delegate = self;
     NSInteger offset = 0;
     for (NSInteger i = 0; i < [images count]; i++) {
-      id<STGalleryItem> item = [gallery.data objectAtIndex:i];
-      UIImage* image = [images objectForKey:item.image];
-      STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, width, maxHeight) image:image text:hasText andGalleryItem:item];
-      [scrollView addSubview:view];
-      [view release];
-      offset += width;
+      id<STImageList> item = [gallery.data objectAtIndex:i];
+      if (item.sizes.count > 0) {
+        id<STImage> firstImage = [item.sizes objectAtIndex:0];
+        UIImage* image = [images objectForKey:firstImage.image];
+        STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, width, maxHeight) image:image text:hasText andGalleryItem:item];
+        [scrollView addSubview:view];
+        [view release];
+        offset += width;
+      }
     }
     self.pageControl = [[[STPageControl alloc] initWithFrame:CGRectMake(0, 0, 100, 20)] autorelease];
     self.pageControl.radius = 3;
@@ -129,7 +135,7 @@ static const CGFloat _captionHeight = 25;
 @synthesize caption = caption_;
 @synthesize galleryItem = _galleryItem;
 
-- (id)initWithFrame:(CGRect)frame image:(UIImage*)image text:(BOOL)text andGalleryItem:(id<STGalleryItem>)item {
+- (id)initWithFrame:(CGRect)frame image:(UIImage*)image text:(BOOL)text andGalleryItem:(id<STImageList>)item {
   self = [super initWithFrame:frame];
   if (self) {
     _galleryItem = [item retain];

@@ -21,6 +21,7 @@
 #import "UIFont+Stamped.h"
 #import "ECSlidingViewController.h"
 #import "STStampedAPI.h"
+#import "STConfiguration.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -919,8 +920,11 @@ static Rdio* _rdio;
 + (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail {
   NSString* imagePath = nil;
   if (entityDetail.images && [entityDetail.images count] > 0) {
-    id<STImage> image = [entityDetail.images objectAtIndex:0];
-    imagePath = image.image;
+    id<STImageList> imageList = [entityDetail.images objectAtIndex:0];
+    if (imageList.sizes.count > 0) {
+      id<STImage> image = [imageList.sizes objectAtIndex:0];
+      imagePath = image.image;
+    }
   }
   return imagePath;
 }
@@ -1004,6 +1008,18 @@ static Rdio* _rdio;
   [button addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_btn_createStamp_overlay"]] autorelease]];
   //button.backgroundColor = [UIColor blackColor];
   controller.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+}
+
++ (void)_configurationButtonClicked:(id)notImportant {
+  [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
+}
+
++ (void)addConfigurationButtonToController:(UIViewController*)controller {
+  
+  controller.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Configuration"
+                                                                             style:UIBarButtonItemStyleDone
+                                                                            target:self 
+                                                                            action:@selector(_configurationButtonClicked:)] autorelease];
 }
 
 + (NSNumber*)numberFromString:(NSString*)string {

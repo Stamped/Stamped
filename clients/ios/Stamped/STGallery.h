@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STGalleryItem.h"
+#import "STImageList.h"
 
 @protocol STGallery <NSObject>
 
 @property (nonatomic, readonly, copy) NSString* layout;
-@property (nonatomic, readonly, retain) NSString* name;
-@property (nonatomic, readonly, retain) NSArray<STGalleryItem>* data;
+@property (nonatomic, readonly, copy) NSString* name;
+@property (nonatomic, readonly, copy) NSArray<STImageList>* data;
 
 @end

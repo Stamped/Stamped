@@ -7,7 +7,7 @@
 //
 
 #import "STSimpleGallery.h"
-#import "STSimpleGalleryItem.h"
+#import "STSimpleImageList.h"
 
 @implementation STSimpleGallery
 
@@ -23,7 +23,7 @@
    @"name",
    nil];
   
-  [mapping mapRelationship:@"data" withMapping:[STSimpleGalleryItem mapping]];
+  [mapping mapRelationship:@"data" withMapping:[STSimpleImageList mapping]];
   
   return mapping;
 }

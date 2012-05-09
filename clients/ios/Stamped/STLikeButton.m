@@ -12,7 +12,15 @@
 #import "Util.h"
 #import "STStampedAPI.h"
 
+@interface STLikeButton ()
+
+@property (nonatomic, readwrite, assign) BOOL waiting;
+
+@end
+
 @implementation STLikeButton
+
+@synthesize waiting = waiting_;
 
 - (id)initWithStamp:(id<STStamp>)stamp
 {
@@ -27,9 +35,14 @@
 }
 
 - (void)defaultHandler:(id)myself {
-  if (self.stamp) {
+  if (self.stamp && !self.waiting) {
+    self.waiting = YES;
     STActionContext* context = [STActionContext contextWithCompletionBlock:^(id stamp, NSError* error) {
-      if (!error) {
+      self.waiting = NO;
+      if (error) {
+        self.on = !self.on;
+      }
+      else {
         [Util reloadStampedData];
       }
     }];
@@ -41,6 +54,7 @@
       action = [STStampedActions actionLikeStamp:self.stamp.stampID withOutputContext:context];
     }
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    self.on = !self.on;
   }
 }
 
