@@ -114,8 +114,8 @@
 }
 
 + (void)setupConfigurations {
-  [STConsumptionViewController setupConfigurations];
   [STConsumptionMapViewController setupConfigurations];
+  [STConsumptionViewController setupConfigurations];
 }
 
 @end

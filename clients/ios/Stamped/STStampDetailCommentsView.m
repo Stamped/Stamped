@@ -202,15 +202,18 @@ andProfileImageSize:(STProfileImageSize)size {
   self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:ProfileImageSize46];
   if (self) {
     if (item.images) {
-      id<STImage> image = [item.images objectAtIndex:0];
-      if (image.width && image.height && image.image) {
-        CGSize imageSize = CGSizeMake(image.width.integerValue * [Util legacyImageScale], image.height.integerValue * [Util legacyImageScale]);
-        UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.image]
-                                          andFrame:CGRectMake(0, 0, imageSize.width, imageSize.height)];
-        imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, MIN(200,imageSize.height))];
-        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, imageView.frame.size.height + 10)];
-        [self addSubview:imageView];
-        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageClicked:)]];
+      id<STImageList> imageList = [item.images objectAtIndex:0];
+      if (imageList.sizes.count > 0) {
+        id<STImage> image = [imageList.sizes objectAtIndex:0];
+        if (image.width && image.height && image.image) {
+          CGSize imageSize = CGSizeMake(image.width.integerValue * [Util legacyImageScale], image.height.integerValue * [Util legacyImageScale]);
+          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.image]
+                                            andFrame:CGRectMake(0, 0, imageSize.width, imageSize.height)];
+          imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, MIN(200,imageSize.height))];
+          [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, imageView.frame.size.height + 10)];
+          [self addSubview:imageView];
+          [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageClicked:)]];
+        }
       }
     }
     CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];

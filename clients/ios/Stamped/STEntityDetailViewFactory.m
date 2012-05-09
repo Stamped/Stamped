@@ -123,6 +123,7 @@
                                                               andFrame:CGRectMake(0, 0, 320, 200)] autorelease];
       [view appendChildView:wrapper];
     }
+    [view appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 10)] autorelease]];
     STStampedBySlice* slice = [STStampedBySlice standardSliceWithEntityID:self.entityDetail.entityID];
     STViewFactoryBlock factory = ^(STViewCreatorCallback callback) {
       [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice andCallback:^(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation) {
@@ -151,8 +152,9 @@
     STSynchronousWrapper* stampedByWrapper = [[[STSynchronousWrapper alloc] initWithDelegate:view
                                                                                       frame:CGRectMake(0, 0, 320, 150)
                                                                                factoryBlock:factory
-                                                                              andCompletion:nil] autorelease];
+                                                                               andCompletion:nil] autorelease];
     [view appendChildView:stampedByWrapper];    
+    [view appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 20)] autorelease]];
     return view;
   }
   else {

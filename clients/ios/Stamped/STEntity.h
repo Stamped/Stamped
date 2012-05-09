@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STImage.h"
+#import "STImageList.h"
 
 @protocol STEntity <NSObject>
 
@@ -20,6 +20,6 @@
 @property (nonatomic, readonly, retain) NSString* subcategory;
 @property (nonatomic, readonly, retain) NSString* coordinates;
 
-@property (nonatomic, readonly, copy) NSArray<STImage>* images;
+@property (nonatomic, readonly, copy) NSArray<STImageList>* images;
 
 @end

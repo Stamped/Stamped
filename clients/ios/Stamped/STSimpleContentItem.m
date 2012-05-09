@@ -7,7 +7,7 @@
 //
 
 #import "STSimpleContentItem.h"
-#import "STSimpleImage.h"
+#import "STSimpleImageList.h"
 
 @implementation STSimpleContentItem
 
@@ -34,7 +34,7 @@
    @"created",
    nil];
   
-  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
   
   return mapping;
 }

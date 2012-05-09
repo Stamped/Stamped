@@ -8,6 +8,7 @@
 
 #import "STSimpleEntity.h"
 #import "STSimpleImage.h"
+#import "STSimpleImageList.h"
 
 @implementation STSimpleEntity
 
@@ -47,7 +48,7 @@
    @"coordinates",
    nil];
   
-  [mapping mapRelationship:@"images" withMapping:[STSimpleImage mapping]];
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
   
   return mapping;
 }
