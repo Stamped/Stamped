@@ -285,6 +285,7 @@ class StampStatsSchema(Schema):
 
 class StampStats(Schema):
     def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
         self.num_todos          = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
