@@ -184,6 +184,9 @@ class S3ImageDB(AImageDB):
         return url
     
     def addResizedStampImages(self, image_url, imageId):
+        """
+        image_url is the temp url
+        """
         try:
             f = utils.getFile(image_url)
         except urllib2.HTTPError:

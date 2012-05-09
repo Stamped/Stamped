@@ -216,12 +216,14 @@ class GenericSource(BasicSource):
 
         images = []
         for image in proxy.images:
+            logs.info('\n### iterating over image')
             img = ImageSchema()
             size = ImageSizeSchema()
             size.url = image
             img.sizes.append(size)
             images.append(img)
         if len(images) > 0:
+            logs.info('\n### adding images to entity')
             entity.images = images
             timestamps['images'] = controller.now
         
