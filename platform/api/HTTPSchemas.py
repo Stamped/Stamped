@@ -555,6 +555,8 @@ class HTTPUserMini(Schema):
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
+            import pprint
+            pprint.pprint(schema)
             self.importData(schema.exportSparse(), overflow=True)
             base_url = _profileImageURL(schema.screen_name, schema.image_cache)
             
@@ -1575,14 +1577,6 @@ class HTTPEntityGallery(Schema):
         self.name                   = SchemaElement(basestring)
         self.layout                 = SchemaElement(basestring) # 'list' or None
 
-class HTTPEntityGalleryItem(Schema):
-    def setSchema(self):
-        self.image                  = ImageSchema(required=True)
-        self.action                 = HTTPAction()
-        self.caption                = SchemaElement(basestring)
-        self.height                 = SchemaElement(int)
-        self.width                  = SchemaElement(int)
-
 class HTTPEntityPlaylist(Schema):
     def setSchema(self):
         self.data                   = SchemaList(HTTPEntityPlaylistItem(), required=True)
@@ -1869,7 +1863,7 @@ class HTTPStamp(Schema):
         self.user               = HTTPUserMini(required=True)
         self.contents           = SchemaList(HTTPStampContent())
         self.credit             = SchemaList(CreditSchema())
-        self.previews           = HTTPStampPreviews()
+        self.previews           = HTTPStampPreviews()\
         self.badges             = SchemaList(HTTPBadge())
         self.via                = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
