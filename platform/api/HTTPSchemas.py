@@ -1416,8 +1416,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
-                    logs.info('\nalbum loop')
-                    logs.info(pformat(album.images[0]))
+                    logs.info('\nalbum loop image sizes: %d' % len(album.images[0].sizes))
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
