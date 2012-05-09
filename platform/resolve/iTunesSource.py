@@ -595,6 +595,7 @@ class iTunesSource(GenericSource):
                 'publishers',
                 'authors',
                 'images',
+                'screenshots',
                 'length',
             ],
             kinds=[

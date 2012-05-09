@@ -32,13 +32,16 @@ static CGFloat _rowHeight = 44;
       CGFloat height = 40;
       CGFloat titleX = 100;
       if (context.entityDetail.images && context.entityDetail.images.count > 0) {
-        id<STImage> image = [context.entityDetail.images objectAtIndex:0];
-        UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:[image image]] andFrame:CGRectNull];
-        CGFloat imagePadding = 10;
-        [Util reframeView:imageView withDeltas:CGRectMake(imagePadding, imagePadding, 0, 0)];
-        height = MAX(CGRectGetMaxY(imageView.frame) + imagePadding, height);
-        titleX = MAX(CGRectGetMaxX(imageView.frame) + imagePadding, titleX);
-        [self.header addSubview:imageView];
+        id<STImageList> imageList = [context.entityDetail.images objectAtIndex:0];
+        if (imageList.sizes.count > 0) {
+          id<STImage> image = [imageList.sizes objectAtIndex:0];
+          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:[image image]] andFrame:CGRectNull];
+          CGFloat imagePadding = 10;
+          [Util reframeView:imageView withDeltas:CGRectMake(imagePadding, imagePadding, 0, 0)];
+          height = MAX(CGRectGetMaxY(imageView.frame) + imagePadding, height);
+          titleX = MAX(CGRectGetMaxX(imageView.frame) + imagePadding, titleX);
+          [self.header addSubview:imageView];
+        }
       }
       UIView* titleView = [Util viewWithText:context.entityDetail.title
                                         font:[UIFont stampedTitleFont]

@@ -441,7 +441,7 @@ class GenericSource(BasicSource):
                         proxy = best[1]
             except ValueError:
                 pass
-        
+
         source_id = entity[self.idField]
         if source_id is not None:
             try:
@@ -450,6 +450,6 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e
-        
+
         return True
 

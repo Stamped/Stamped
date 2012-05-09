@@ -14,6 +14,10 @@
 #import "STConfiguration.h"
 #import <math.h>
 #import "Util.h"
+#import "STStampedActions.h"
+#import "UserImageView.h"
+
+static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 
 static NSString* const _restaurantNameKey = @"Consumption.food.restaurants.name";
 static NSString* const _restaurantIconKey = @"Consumption.food.restaurants.icon";
@@ -40,7 +44,7 @@ NSInteger height;
 NSInteger zoom;
 } STTileRect;
 
-@interface STConsumptionMapTile : NSObject
+@interface STConsumptionMapTile : NSObject <MKOverlay>
 
 - (id)initWithX:(NSInteger)x y:(NSInteger)y andZoom:(NSInteger)zoom;
 
@@ -51,6 +55,14 @@ NSInteger zoom;
 @property (nonatomic, readonly, assign) NSInteger zoom;
 @property (nonatomic, readonly, retain) NSMutableDictionary* stamps;
 @property (nonatomic, readonly, copy) NSString* key;
+
+@end
+
+@interface STConsumptionMapTileView : MKOverlayView
+
+- (id)initWithMapTile:(STConsumptionMapTile*)tile;
+
+@property (nonatomic, readonly, retain) STConsumptionMapTile* tile;
 
 @end
 
@@ -68,6 +80,8 @@ NSInteger zoom;
                     scope:(STStampedAPIScope)scope 
                    filter:(NSString*)filter 
                     query:(NSString*)query;
+
+- (NSArray*)cachedTilesForRegion:(MKCoordinateRegion)region;
 
 - (STCancellation*)stampsForRegion:(MKCoordinateRegion)region
                        andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
@@ -92,7 +106,7 @@ NSInteger zoom;
 
 @end
 
-@interface STConsumptionMapViewController () <MKMapViewDelegate>
+@interface STConsumptionMapViewController () <MKMapViewDelegate, STScopeSliderDelegate, STConsumptionToolbarDelegate>
 
 - (void)update;
 
@@ -108,6 +122,7 @@ NSInteger zoom;
 @property (nonatomic, readwrite, copy) NSString* query;
 @property (nonatomic, readonly, retain) NSMutableArray* annotations;
 @property (nonatomic, readonly, retain) NSMutableArray* cancellations;
+@property (nonatomic, readonly, retain) NSMutableArray* tileOverlays;
 @property (nonatomic, readwrite, assign) BOOL cachingDisabled;
 
 @end
@@ -127,6 +142,7 @@ NSInteger zoom;
 @synthesize annotations = annotations_;
 @synthesize cancellations = cancellations_;
 @synthesize cachingDisabled = cachingDisabled_;
+@synthesize tileOverlays = tileOverlays_;
 
 - (STConsumptionToolbarItem*)rootItem {
   STConsumptionToolbarItem* item = [[STConsumptionToolbarItem alloc] init];
@@ -169,6 +185,7 @@ NSInteger zoom;
     scope_ = STStampedAPIScopeFriends;
     annotations_ = [[NSMutableArray alloc] init];
     cancellations_ = [[NSMutableArray alloc] init];
+    tileOverlays_ = [[NSMutableArray alloc] init];
   }
   return self;
 }
@@ -180,12 +197,17 @@ NSInteger zoom;
   [subcategory_ release];
   [filter_ release];
   [query_ release];
+  [tileOverlays_ release];
+  [cancellations_ release];
+  [annotations_ release];
   [super dealloc];
 }
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  self.consumptionToolbar.slider.delegate = self;
+  self.consumptionToolbar.delegate = self;
   self.zoomToUserLocation = YES;
   UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
   searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
@@ -202,6 +224,7 @@ NSInteger zoom;
                                                          self.scrollView.contentSize.height - CGRectGetMaxY(searchBar.frame))];
   [self.scrollView appendChildView:mapView_];
   mapView_.delegate = self;
+  [Util addConfigurationButtonToController:self];
   [self update];
 }
 
@@ -240,6 +263,7 @@ NSInteger zoom;
 }
 
 + (CGFloat)tileSizeWithZoomLevel:(NSInteger)zoomLevel {
+  //TODO optimize
   CGFloat tileSize = 1;
   while (zoomLevel < 0) {
     tileSize /= 2;
@@ -253,7 +277,8 @@ NSInteger zoom;
 }
 
 + (NSInteger)zoomLevelWithRegion:(MKCoordinateRegion)region {
-  CGFloat tileHeight = 3;
+  //TODO optimize
+  CGFloat tileHeight = 1.5;
   NSInteger zoomLevel = 0;
   CGFloat span = region.span.latitudeDelta / tileHeight;
   CGFloat tileSize = 1;
@@ -294,8 +319,9 @@ NSInteger zoom;
   CGPoint lonLat = CGPointMake(region.center.longitude - ( region.span.longitudeDelta / 2 ), region.center.latitude - ( region.span.latitudeDelta / 2 ));
   STTileRect tileRect = [self tileOriginWithPoint:lonLat andZoom:zoom];
   CGFloat tileSize = [self tileSizeWithZoomLevel:zoom];
-  tileRect.width = ceil( region.span.longitudeDelta / tileSize );
-  tileRect.height = ceil( region.span.latitudeDelta / tileSize );
+  //TODO improve
+  tileRect.width = ceil( region.span.longitudeDelta / tileSize ) + 1;
+  tileRect.height = ceil( region.span.latitudeDelta / tileSize ) + 1;
   return tileRect;
 }
 
@@ -343,8 +369,86 @@ NSInteger zoom;
   [self update]; 
 }
 
+
+
+- (void)mapDisclosureTapped:(id)sender {
+  UIButton* disclosureButton = sender;
+  UIView* view = [disclosureButton superview];
+  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+    view = [view superview];
+  
+  if (!view)
+    return;
+  
+  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
+  UIViewController* vc = nil;
+  if (annotation.stamp) {
+    [[STStampedActions sharedInstance] viewStampWithStampID:annotation.stamp.stampID];
+  } else if (annotation.entityObject) {
+    vc = [Util detailViewControllerForEntity:annotation.entityObject];
+  }
+  if (!vc)
+    return;
+  
+  [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)viewUser:(id<STUser>)user {
+  NSLog(@"view user");
+  [[STStampedActions sharedInstance] viewUserWithUserID:user.userID];
+}
+
+
+- (void)mapUserTapped:(id)sender {
+  UserImageView* userImage = sender;
+  UIView* view = [userImage superview];
+  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+    view = [view superview];
+  
+  if (!view)
+    return;
+  
+  STConsumptionAnnotation* annotation = (STConsumptionAnnotation*)[(MKPinAnnotationView*)view annotation];
+  [[STStampedActions sharedInstance] viewUserWithUserID:annotation.stamp.user.userID];
+}
+
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-  return [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"TODO"] autorelease];
+  if (![annotation isKindOfClass:[STConsumptionAnnotation class]])
+    return nil;
+  
+  MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
+  UIButton* disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+  [disclosureButton addTarget:self
+                       action:@selector(mapDisclosureTapped:)
+             forControlEvents:UIControlEventTouchUpInside];
+  pinView.rightCalloutAccessoryView = disclosureButton;
+  pinView.pinColor = MKPinAnnotationColorRed;
+  pinView.canShowCallout = YES;
+  
+  id<STStamp> stamp = [(STConsumptionAnnotation*)annotation stamp];
+  if (stamp) {
+    
+    UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, STProfileImageSize31, STProfileImageSize31)];
+    userImageView.enabled = YES;
+    [userImageView addTarget:self
+                      action:@selector(mapUserTapped:)
+            forControlEvents:UIControlEventTouchUpInside];
+    userImageView.imageURL = [Util profileImageURLForUser:stamp.user withSize:STProfileImageSize31];
+    pinView.leftCalloutAccessoryView = userImageView;
+  }
+  
+  return pinView;
+}
+
+- (MKOverlayView*)mapView:(MKMapView *)mapView viewForOverlay:(id<MKOverlay>)overlay {
+  NSLog(@"getting View");
+  if (![overlay isKindOfClass:[STConsumptionMapTile class]]) {
+    return nil;
+  }
+  else {
+    NSLog(@"adfs");
+    return [[[STConsumptionMapTileView alloc] initWithMapTile:(id)overlay] autorelease];
+  }
 }
 
 - (void)update {
@@ -356,6 +460,16 @@ NSInteger zoom;
   if (!cache) {
     cache = [[[STConsumptionMapCache alloc] initWithSubcategory:self.subcategory scope:self.scope filter:self.filter query:self.query] autorelease];
     [self.caches setObject:cache forKey:key];
+  }
+  for (STConsumptionMapTile* tile in self.tileOverlays) {
+    [self.mapView removeOverlay:tile];
+  }
+  [self.tileOverlays removeAllObjects];
+  
+  if ([STConfiguration flag:_cacheOverlayKey]) {
+    NSArray* cachedTiles = [cache cachedTilesForRegion:self.mapView.region];
+    [self.tileOverlays addObjectsFromArray:cachedTiles];
+    [self.mapView addOverlays:self.tileOverlays];
   }
   for (STCancellation* c in self.cancellations) {
     [c cancel];
@@ -374,7 +488,71 @@ NSInteger zoom;
   [self.cancellations addObject:cancellation];
 }
 
+#pragma mark - UITextFieldDelegate Methods.
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+  [Util executeOnMainThread:^{
+    self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+  }];
+  return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  //Override collapsing behavior
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+  //Override collapsing behavior
+  self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  return YES;
+}
+
+#pragma mark - Slice mutations
+
+- (void)setQuery:(NSString *)query {
+  if (query != query_ && ![query isEqualToString:query_]) {
+    [query_ autorelease];
+    query_ = [query copy];
+    [self update];
+  }
+}
+
+- (void)setScope:(STStampedAPIScope)scope {
+  if (scope_ != scope) {
+    scope_ = scope;
+    [self update];
+  }
+}
+
+- (void)scopeSlider:(STScopeSlider *)slider didChangeGranularity:(STStampedAPIScope)granularity {
+  self.scope = granularity;
+}
+
+- (void)toolbar:(STConsumptionToolbar *)toolbar didMoveToItem:(STConsumptionToolbarItem *)item from:(STConsumptionToolbarItem *)previous {
+  if ([item.type isEqualToString:_subcategoryType]) {
+    self.filter = nil;
+    self.subcategory = item.value;
+  }
+  else if ([item.type isEqualToString:_filterType]) {
+    self.filter = item.value;
+    self.subcategory = item.parent.value;
+  }
+  else {
+    self.filter = nil;
+    self.subcategory = nil;
+  }
+  [self update];
+}
+
+#pragma mark - Configuration
+
 + (void)setupConfigurations {
+  [STConfiguration addFlag:NO forKey:_cacheOverlayKey];
+   
   [STConfiguration addString:@"Restaurants" forKey:_restaurantNameKey];
   [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_restaurantIconKey];
   [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_restaurantBackIconKey];
@@ -428,7 +606,7 @@ NSInteger zoom;
         if (!tile) {
           tile = [[[STConsumptionMapTile alloc] initWithX:x y:y andZoom:frame.zoom] autorelease];
           [self.cache setObject:tile forKey:tileKey];
-          NSLog(@"created cache tile:%@",tileKey);
+          // NSLog(@"created cache tile:%@",tileKey);
         }
       }
     }
@@ -450,6 +628,19 @@ NSInteger zoom;
   block(stamps, error, cancellation);
 }
 
+- (NSArray*)cachedTilesForRegion:(MKCoordinateRegion)region {
+  STTileRect frame = [STConsumptionMapViewController tileFrameWithRegion:region];
+  NSSet* tileKeys = [STConsumptionMapViewController tileKeysForTileFrame:frame];
+  NSMutableArray* tiles = [NSMutableArray array];
+  for (NSString* tileKey in tileKeys) {
+    STConsumptionMapTile* tile = [self.cache objectForKey:tileKey];
+    if (tile) {
+      [tiles addObject:tile];
+    }
+  }
+  return tiles;
+}
+
 - (STCancellation*)stampsForRegion:(MKCoordinateRegion)region
                        andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
   STTileRect frame = [STConsumptionMapViewController tileFrameWithRegion:region];
@@ -458,11 +649,11 @@ NSInteger zoom;
   for (NSString* tileKey in tileKeys) {
     STConsumptionMapTile* tile = [self.cache objectForKey:tileKey];
     if (tile) {
-      NSLog(@"found cache tile:%@", tileKey);
+      //NSLog(@"found cache tile:%@", tileKey);
       [tiles addObject:tile];
     }
     else {
-      NSLog(@"missed cache tile:%@", tileKey);
+      //NSLog(@"missed cache tile:%@", tileKey);
     }
   }
   if (tileKeys.count == tiles.count) {
@@ -493,6 +684,10 @@ NSInteger zoom;
     slice.scope = [[STStampedAPI sharedInstance] stringForScope:self.scope];
     slice.subcategory = self.subcategory;
     slice.filter = self.filter;
+    slice.query = self.query;
+    if (slice.query) {
+      slice.sort = @"relevance";
+    }
     slice.viewport = [NSString stringWithFormat:@"%f,%f,%f,%f", 
                       actualFrame.origin.y + actualFrame.size.height,
                       actualFrame.origin.x,
@@ -553,6 +748,38 @@ NSInteger zoom;
   return [NSString stringWithFormat:@"%d,%d,%d", x, y, zoom];
 }
 
+- (CLLocationCoordinate2D)coordinate {
+  CGFloat tileSize = [STConsumptionMapViewController tileSizeWithZoomLevel:self.zoom];
+  CLLocationCoordinate2D origin;
+  origin.longitude = self.x * tileSize + tileSize / 2.0;
+  origin.latitude = self.y * tileSize + tileSize / 2.0;
+  return origin;
+}
+
+- (MKMapRect)boundingMapRect {
+  CGFloat tileSize = [STConsumptionMapViewController tileSizeWithZoomLevel:self.zoom];
+  CGFloat half = tileSize / 2.0;
+  CLLocationCoordinate2D center = self.coordinate;
+  
+  CLLocationCoordinate2D topLeftCoordinate;
+  topLeftCoordinate.latitude = center.latitude + half;
+  topLeftCoordinate.longitude = center.longitude - half;
+  
+  MKMapPoint topLeft = MKMapPointForCoordinate(topLeftCoordinate);
+  
+  CLLocationCoordinate2D bottomRightCoord;
+  bottomRightCoord.latitude = center.latitude - half;
+  bottomRightCoord.longitude = center.longitude + half;
+  
+  MKMapPoint bottomRight = MKMapPointForCoordinate(bottomRightCoord);
+  
+  double width = bottomRight.x - topLeft.x;
+  double height = bottomRight.y - topLeft.y;
+  
+  MKMapRect bounds = MKMapRectMake(topLeft.x, topLeft.y, width, height);
+  return bounds;
+}
+
 @end
 
 @implementation STConsumptionAnnotation
@@ -563,7 +790,7 @@ NSInteger zoom;
 - (id)initWithStamp:(id<STStamp>)stamp {
   self = [super init];
   if (self) {
-    
+    stamp_ = [stamp retain];
     NSArray* coordinates = [stamp.entity.coordinates componentsSeparatedByString:@","];
     CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
     CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
@@ -590,6 +817,45 @@ NSInteger zoom;
     return [NSString stringWithFormat:@"@%@", stamp_.user.screenName];
   }
   return self.stamp.entity.subtitle;
+}
+
+@end
+
+@implementation STConsumptionMapTileView
+
+@synthesize tile = tile_;
+
+- (id)initWithMapTile:(STConsumptionMapTile*)tile {
+  self = [super initWithOverlay:tile];
+  if (self) {
+    tile_ = [tile retain];
+  }
+  return self;
+}
+
+- (void)dealloc
+{
+  [tile_ release];
+  [super dealloc];
+}
+
+- (void)drawMapRect:(MKMapRect)mapRect
+          zoomScale:(MKZoomScale)zoomScale
+          inContext:(CGContextRef)ctx
+{
+  CGContextSetAlpha(ctx, 0.5);
+  MKMapRect boundary = self.tile.boundingMapRect;
+  
+  //NSLog(@"drawing:%f,%f,%f,%f", boundary.origin.x, boundary.origin.y, boundary.size.width, boundary.size.height);
+  CGContextSetFillColorWithColor(ctx, [UIColor redColor].CGColor);
+  CGContextSetStrokeColorWithColor(ctx, [UIColor blackColor].CGColor);
+  // Convert the MKMapRect (absolute points on the map proportional to screen points) to
+  // a CGRect (points relative to the origin of this view) that can be drawn.
+  CGRect boundaryCGRect = [self rectForMapRect:boundary];
+  
+  CGContextFillRect(ctx, boundaryCGRect);
+  CGContextStrokeRect(ctx, boundaryCGRect);
+  
 }
 
 @end

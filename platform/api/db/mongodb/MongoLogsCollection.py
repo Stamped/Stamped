@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, ast, pymongo
 
+from bson.objectid import ObjectId
 from AMongoCollection import AMongoCollection
 
 class MongoLogsCollection(AMongoCollection):
@@ -49,12 +50,15 @@ class MongoLogsCollection(AMongoCollection):
         errors      = kwargs.pop('errors', False)
         path        = kwargs.pop('path', None)
         severity    = kwargs.pop('severity', None)
-        logId       = kwargs.pop('log_id', None)
+        requestId   = kwargs.pop('requestId', None)
         method      = kwargs.pop('method', None)
 
         query = {}
+
         if userId != None:
-            query['user_id'] = userId 
+            query['user_id'] = userId
+        if requestId is not None:
+            query['request_id'] = requestId
         if errors == True:
             query['result'] = {'$exists': True}
         if path != None:

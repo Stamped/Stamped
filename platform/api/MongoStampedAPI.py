@@ -20,9 +20,11 @@ from libs.notify            import StampedNotificationHandler
 
 from db.mongodb.MongoAccountCollection          import MongoAccountCollection
 from db.mongodb.MongoEntityCollection           import MongoEntityCollection
+from db.mongodb.MongoEntityStatsCollection      import MongoEntityStatsCollection
 from db.mongodb.MongoPlacesEntityCollection     import MongoPlacesEntityCollection
 from db.mongodb.MongoUserCollection             import MongoUserCollection
 from db.mongodb.MongoStampCollection            import MongoStampCollection
+from db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
 from db.mongodb.MongoCommentCollection          import MongoCommentCollection
 from db.mongodb.MongoFavoriteCollection         import MongoFavoriteCollection
 from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
@@ -148,6 +150,14 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _deletedEntityDB(self):
         return MongoDeletedEntityCollection()
+    
+    @lazyProperty
+    def _entityStatsDB(self):
+        return MongoEntityStatsCollection()
+    
+    @lazyProperty
+    def _stampStatsDB(self):
+        return MongoStampStatsCollection()
     
     @lazyProperty
     def _clientLogsDB(self):

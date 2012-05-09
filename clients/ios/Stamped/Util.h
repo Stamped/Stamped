@@ -178,6 +178,8 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)addCreateStampButtonToController:(UIViewController*)controller;
 
++ (void)addConfigurationButtonToController:(UIViewController*)controller;
+
 + (NSNumber*)numberFromString:(NSString*)string;
 
 @end

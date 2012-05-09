@@ -461,7 +461,7 @@ class HTTPUser(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = ImageSchema()
+        self.image              = HTTPImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -554,7 +554,7 @@ class HTTPUserMini(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = ImageSchema()
+        self.image              = HTTPImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -570,7 +570,7 @@ class HTTPUserMini(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)
-            base_url = _profileImageURL(schema.screen_name, schema.image_cache)
+            self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
             
             _initialize_image_sizes(self)
         else:
@@ -710,7 +710,7 @@ class HTTPEntity(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.caption            = SchemaElement(basestring)
-        self.images             = SchemaList(ImageSchema())
+        self.images             = SchemaList(HTTPImageSchema())
         self.last_modified      = SchemaElement(basestring)
         
         # Location
@@ -783,11 +783,10 @@ class HTTPEntity(Schema):
         for image in images:
             if len(image.sizes) == 0:
                 continue
-            newimg = ImageSchema()
+            newimg = HTTPImageSchema()
             for size in image.sizes:
                 if size.url is not None:
-                    newsize = ImageSizeSchema()
-                    newsize.url = _cleanImageURL(size.url)
+                    newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
             self.images.append(newimg)
 
@@ -851,10 +850,9 @@ class HTTPEntity(Schema):
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
-                    item = HTTPEntityGalleryItem()
-                    item.image = image
-                    item.caption = image.caption
-                    gallery.data.append(item)
+                    item = HTTPImageSchema()
+                    item.importSchema(image)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Reservation
@@ -936,18 +934,17 @@ class HTTPEntity(Schema):
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
                 for image in entity.gallery:
-                    item = HTTPEntityGalleryItem()
-                    item.image          = image
-                    item.caption        = image.caption
+                    item = HTTPImageSchema()
+                    item.importSchema(image)
                     source              = HTTPActionSource()
-                    source.source_id    = item.image
+                    source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
-                    source.link         = item.image
+                    source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
                     item.action     = action
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Call
@@ -1429,14 +1426,19 @@ class HTTPEntity(Schema):
             # Albums
 
             if entity.isType('artist') and len(entity.albums) > 0:
+                from pprint import pformat
+
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
+                    logs.info('\nalbum loop image sizes: %d' % len(album.images[0].sizes))
                     try:
-                        item            = HTTPEntityGalleryItem()
+                        item            = HTTPImageSchema()
+                        size            = HTTPImageSizeSchema()
                         ### TODO: Add placeholder if image doesn't exist
-                        item.image      = _cleanImageURL(album.images[0]['image'])
-                        item.caption    = album.title 
+                        size.url        = _cleanImageURL(album.images[0].sizes[0].url)
+                        item.caption    = album.title
+                        item.sizes.append(size)
 
                         if album.entity_id is not None:
                             source              = HTTPActionSource()
@@ -1451,10 +1453,12 @@ class HTTPEntity(Schema):
 
                             item.action         = action
 
-                        gallery.data.append(item)
-                    except:
+                        gallery.images.append(item)
+                    except Exception as e:
+                        logs.info(e.message)
                         pass
-                if len(gallery.data) > 0:
+                if len(gallery.images) > 0:
+                    logs.info('\nadding gallery with %d images' % len(gallery.images))
                     self.galleries.append(gallery)
 
         elif entity.kind == 'software' and entity.isType('app'):
@@ -1497,9 +1501,9 @@ class HTTPEntity(Schema):
             if entity.screenshots is not None and len(entity.screenshots) > 0:
                 gallery = HTTPEntityGallery()
                 for screenshot in entity.screenshots:
-                    item = HTTPEntityGalleryItem()
-                    item.image = screenshot.image
-                    gallery.data.append(item)
+                    item = HTTPImageSchema()
+                    item.importSchema(screenshot)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
 
@@ -1534,6 +1538,33 @@ class HTTPEntity(Schema):
         return self
 
 # HTTPEntity Components
+
+class HTTPImageSchema(Schema):
+    def setSchema(self):
+        self.sizes                  = SchemaList(HTTPImageSizeSchema())
+        self.caption                = SchemaElement(basestring)
+        self.action                 = HTTPAction()
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'ImageSchema':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPImageSizeSchema(Schema):
+    def setSchema(self):
+        self.url                    = SchemaElement(basestring)
+        self.width                  = SchemaElement(int)
+        self.height                 = SchemaElement(int)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'ImageSizeSchema':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
 
 class HTTPAction(Schema):
     def setSchema(self):
@@ -1585,17 +1616,9 @@ class HTTPEntityMetadataItem(Schema):
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
-        self.data                   = SchemaList(HTTPEntityGalleryItem(), required=True)
+        self.images                 = SchemaList(HTTPImageSchema(), required=True)
         self.name                   = SchemaElement(basestring)
         self.layout                 = SchemaElement(basestring) # 'list' or None
-
-class HTTPEntityGalleryItem(Schema):
-    def setSchema(self):
-        self.image                  = ImageSchema(required=True)
-        self.action                 = HTTPAction()
-        self.caption                = SchemaElement(basestring)
-        self.height                 = SchemaElement(int)
-        self.width                  = SchemaElement(int)
 
 class HTTPEntityPlaylist(Schema):
     def setSchema(self):
@@ -1631,7 +1654,7 @@ class HTTPEntityMini(Schema):
         self.category               = SchemaElement(basestring, required=True)
         self.subcategory            = SchemaElement(basestring, required=True)
         self.coordinates            = SchemaElement(basestring)
-        self.images                 = SchemaList(ImageSchema())
+        self.images                 = SchemaList(HTTPImageSchema())
 
     def importSchema(self, schema):
         if isinstance(schema, BasicEntity):
@@ -1865,7 +1888,7 @@ class HTTPStampContent(Schema):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
         self.blurb_formatted    = SchemaElement(basestring)
-        self.images             = SchemaList(ImageSchema())
+        self.images             = SchemaList(HTTPImageSchema())
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
 
@@ -1945,11 +1968,8 @@ class HTTPStamp(Schema):
                     item.blurb_references.append(reference)
                 
                 for image in content.images:
-                    img = HTTPEntityGalleryItem()
-                    img.image   = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                    img.width   = image.width 
-                    img.height  = image.height 
-                    
+                    img = HTTPImageSchema()
+                    img.importSchema(image)
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)

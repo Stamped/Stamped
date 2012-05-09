@@ -128,6 +128,14 @@ def mergeEntity(*args, **kwargs):
 def mergeEntityId(*args, **kwargs):
     invoke(mergeEntityId.request, *args, **kwargs)
 
+@task(ignore_result=True)
+def updateEntityStats(*args, **kwargs):
+    invoke(updateEntityStats.request, *args, **kwargs)
+
+@task(ignore_result=True)
+def updateStampStats(*args, **kwargs):
+    invoke(updateStampStats.request, *args, **kwargs)
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
     version = "%prog " + __version__

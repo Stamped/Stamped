@@ -197,6 +197,20 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def countStamps(self, userId):
         return len(self.user_stamps_collection.getUserStampIds(userId))
     
+    def countStampsForEntity(self, entityId, userIds=None):
+        query = { 'entity.entity_id' : entityId }
+
+        if userIds is not None:
+            if len(userIds) == 0:
+                return []
+            
+            if len(userIds) == 1:
+                query['user.user_id'] = userIds[0]
+            else:
+                query['user.user_id'] = { '$in' : userIds }
+
+        return self._collection.find(query).count()
+    
     def getDeletedStamps(self, stampIds, genericCollectionSlice):
         return self.deleted_stamp_collection.getStamps(stampIds, genericCollectionSlice)
     
@@ -209,12 +223,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if document['_id'] != None:
                 return True
             raise
-        except:
+        except Exception:
             return False
     
     def updateStampStats(self, stampId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)
-        if value != None:
+        if value is not None:
             self._collection.update(
                 {'_id': self._getObjectIdFromString(stampId)}, 
                 {'$set': {key: value, 'timestamp.modified': datetime.utcnow()}},
@@ -233,8 +247,18 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 'entity.entity_id': entityId,
             })
             return self._convertFromMongo(document)
-        except:
+        except Exception:
             return None
+    
+    def getStampsFromUsersForEntity(self, userIds, entityId):
+        try:
+            documents = self._collection.find({
+                'user.user_id' : { '$in' : userIds }, 
+                'entity.entity_id' : entityId,
+            })
+            return map(self._convertFromMongo, documents)
+        except Exception:
+            return []
     
     def getStampsSliceForEntity(self, entityId, genericCollectionSlice, userIds=None):
         query = {'entity.entity_id': entityId}
@@ -259,22 +283,20 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 docs = docs.limit(limit)
             
             return list(self._convertFromMongo(doc) for doc in docs)
-        except:
+        except Exception:
             return []
-    
-    def countStampsForEntity(self, entityId, userIds=None):
-        query = {'entity.entity_id': entityId}
 
-        if userIds is not None:
-            if len(userIds) == 0:
-                return []
-            
-            if len(userIds) == 1:
-                query['user.user_id'] = userIds[0]
-            else:
-                query['user.user_id'] = { '$in' : userIds }
-
-        return self._collection.find(query).count()
+    def getPopularityForEntity(self, entityId, limit=1000):
+        ### TODO: Stub! Make this better
+        try:
+            query       = { 'entity.entity_id' : entityId }
+            sort        = [ ('stats.num_likes', pymongo.DESCENDING), ('$natural', pymongo.ASCENDING) ]
+            documents   = self._collection.find(query, fields=['_id', 'user.user_id']).sort(sort).limit(limit)
+            # stampIds    = map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+            userIds     = map(lambda x: x['user']['user_id'], documents)
+            return userIds
+        except Exception:
+            return []
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:
@@ -285,7 +307,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 'stats.stamp_num': stampNum,
             })
             return self._convertFromMongo(document)
-        except:
+        except Exception:
             return None
     
     def giveCredit(self, creditedUserId, stamp):
@@ -320,7 +342,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             }
             documents = self._collection.find(query).sort('$natural', pymongo.DESCENDING).limit(limit)
             return map(self._convertFromMongo, documents)
-        except:
+        except Exception:
             return []
     
     def giveLikeCredit(self, stampId):
@@ -373,7 +395,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if userId in likes:
                 return True
             raise
-        except:
+        except Exception:
             return False
     
     def addView(self, userId, stampId):
