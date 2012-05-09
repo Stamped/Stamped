@@ -446,7 +446,7 @@ class HTTPUser(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = ImageSchema()
+        self.image              = HTTPImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -539,7 +539,7 @@ class HTTPUserMini(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = ImageSchema()
+        self.image              = HTTPImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -695,7 +695,7 @@ class HTTPEntity(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.caption            = SchemaElement(basestring)
-        self.images             = SchemaList(ImageSchema())
+        self.images             = SchemaList(HTTPImageSchema())
         self.last_modified      = SchemaElement(basestring)
         
         # Location
@@ -768,10 +768,10 @@ class HTTPEntity(Schema):
         for image in images:
             if len(image.sizes) == 0:
                 continue
-            newimg = ImageSchema()
+            newimg = HTTPImageSchema()
             for size in image.sizes:
                 if size.url is not None:
-                    newsize = ImageSizeSchema()
+                    newsize = HTTPImageSizeSchema()
                     newsize.url = _cleanImageURL(size.url)
                     newimg.sizes.append(newsize)
             self.images.append(newimg)
@@ -1520,6 +1520,33 @@ class HTTPEntity(Schema):
 
 # HTTPEntity Components
 
+class HTTPImageSchema(Schema):
+    def setSchema(self):
+        self.sizes                  = SchemaList(HTTPImageSizeSchema())
+        self.caption                = SchemaElement(basestring)
+        self.action                 = HTTPAction()
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'ImageSchema':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPImageSizeSchema(Schema):
+    def setSchema(self):
+        self.url                    = SchemaElement(basestring)
+        self.width                  = SchemaElement(int)
+        self.height                 = SchemaElement(int)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'ImageSizeSchema':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+
 class HTTPAction(Schema):
     def setSchema(self):
         self.type                   = SchemaElement(basestring, required=True)
@@ -1608,7 +1635,7 @@ class HTTPEntityMini(Schema):
         self.category               = SchemaElement(basestring, required=True)
         self.subcategory            = SchemaElement(basestring, required=True)
         self.coordinates            = SchemaElement(basestring)
-        self.images                 = SchemaList(ImageSchema())
+        self.images                 = SchemaList(HTTPImageSchema())
 
     def importSchema(self, schema):
         if isinstance(schema, BasicEntity):
@@ -1842,7 +1869,7 @@ class HTTPStampContent(Schema):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
         self.blurb_formatted    = SchemaElement(basestring)
-        self.images             = SchemaList(ImageSchema())
+        self.images             = SchemaList(HTTPImageSchema())
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
 

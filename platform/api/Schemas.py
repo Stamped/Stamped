@@ -75,7 +75,7 @@ class ImageSchema(Schema):
 
 class ImageSizeSchema(Schema):
     def setSchema(self):
-        self.url                            = SchemaElement(basestring) # url
+        self.url                            = SchemaElement(basestring)
         self.width                          = SchemaElement(int)
         self.height                         = SchemaElement(int)
 
