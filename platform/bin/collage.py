@@ -44,6 +44,14 @@ class ImageCollage(object):
             (256, 64), 
         ]
         
+        # 6  => 3x2
+        # 12 => 5x3
+        # num_tiles * aspect_ratio_num_cols / aspect_ratio_num_rows
+        
+        #num_rows = int(math.ceil(num_tiles / 3))
+        #num_cols = num_tiles % num_rows
+        
+        """
         size_map = {
             1  : (1, 1), 
             2  : (2, 1), 
@@ -70,13 +78,23 @@ class ImageCollage(object):
             23 : (6, 4), 
             24 : (6, 4), 
         }
+        """
         
         num_tiles = len(tiles)
-        num_cols  = size_map[num_tiles][0]
-        num_rows  = size_map[num_tiles][1]
+        #num_cols  = size_map[num_tiles][0]
+        #num_rows  = size_map[num_tiles][1]
         
         #num_cols  = 5
         #num_rows  = math.ceil(((float) num_tiles) / num_cols)
+        
+        aspect_ratio_num_cols = 5 # 9 to 12
+        aspect_ratio_num_rows = 2 # 9 to 12
+        
+        num_cols0 = int(math.ceil(aspect_ratio_num_cols * num_tiles / 9))
+        num_cols1 = int(math.floor(aspect_ratio_num_cols * num_tiles / 12))
+        
+        num_cols  = max(num_cols0, num_cols1)
+        num_rows  = int(math.ceil(num_tiles / num_cols))
         
         for size in sizes:
             filename = "collage.%sx%s.jpg" % size
@@ -87,7 +105,6 @@ class ImageCollage(object):
             
             # TODO: revisit tile layout algorithm ala http://www.csc.liv.ac.uk/~epa/surveyhtml.html#toc.2.1
             
-            '''
             offsets = []
             indices = []
             
@@ -113,20 +130,20 @@ class ImageCollage(object):
                     height = (width * tile.size[1]) / tile.size[0]
                     
                     if height > cell_size[1]:
-                        height = int((height + cell_size[1]) * (2.0 / 3.0));
+                        height = int((height + cell_size[1]) * (1.5 / 3.0))
                 else:
                     height = cell_size[1]
                     width  = (height * tile.size[0]) / tile.size[1]
                     
                     if width > cell_size[0]:
-                        width = int((width + cell_size[0]) * (2.0 / 3.0));
+                        width = int((width + cell_size[0]) * (1.5 / 3.0))
                 
                 cell   = tile.resize((width, height), Image.ANTIALIAS)
                 
                 canvas.paste(cell, (x0, y0))
                 #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
-            '''
             
+            '''
             for i in xrange(num_rows):
                 y0 = i * cell_size[1]
                 
@@ -142,18 +159,19 @@ class ImageCollage(object):
                         height = (width * tile.size[1]) / tile.size[0]
                         
                         if height > cell_size[1]:
-                            height = int((height + cell_size[1]) * (2.0 / 3.0));
+                            height = int((height + cell_size[1]) * (1.5 / 3.0))
                     else:
                         height = cell_size[1]
                         width  = (height * tile.size[0]) / tile.size[1]
                         
                         if width > cell_size[0]:
-                            width = int((width + cell_size[0]) * (2.0 / 3.0));
+                            width = int((width + cell_size[0]) * (1.5 / 3.0))
                     
                     cell   = tile.resize((width, height), Image.ANTIALIAS)
                     
                     canvas.paste(cell, (x0, y0))
                     #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
+            '''
             
             utils.log("blurring collage '%s'" % filename)
             
