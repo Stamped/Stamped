@@ -216,7 +216,7 @@ class GenericSource(BasicSource):
 
         images = []
         for image in proxy.images:
-            logs.info('\n### iterating over image')
+            logs.info('\n### iterating over image %s' % image)
             img = ImageSchema()
             size = ImageSizeSchema()
             size.url = image
