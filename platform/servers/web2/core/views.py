@@ -53,6 +53,9 @@ def profile(request, schema, **kwargs):
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
+    #utils.log("STAMPS:")
+    #utils.log(pprint.pformat(stamps))
+    
     def _is_static_profile_image(url):
         return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
     
@@ -89,7 +92,7 @@ def profile(request, schema, **kwargs):
             'offset' : schema.offset + len(stamps), 
         })
     
-    return stamped_render(request, 'profile.html', {
+    return stamped_render(request, 'profile2.html', {
         'user'      : user, 
         'stamps'    : stamps, 
         

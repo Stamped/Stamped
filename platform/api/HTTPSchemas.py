@@ -5,23 +5,28 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
+import libs.ec2_utils
 
 from errors             import *
 from schema             import *
-from utils              import lazyProperty
 from api.Schemas        import *
+from Entity             import *
+
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
-from Entity             import *
 from datetime           import datetime, date, timedelta
+
 
 # ####### #
 # PRIVATE #
 # ####### #
 
-### WARNING: COMPLETION ENDPOINT HARDCODED TO DEV!
-COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
+if libs.ec2_utils.is_prod_stack():
+    COMPLETION_ENDPOINT = 'https://api.stamped.com/v0/actions/complete.json'
+else:
+    COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
 
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
@@ -29,6 +34,7 @@ AMAZON_TOKEN    = 'stamped01-20'
 
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
 non_numeric_re  = re.compile('\D')
+mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -78,10 +84,17 @@ def _initialize_image_sizes(dest):
     dest.image_url_92  = get_image_url(92)
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
-
+    
     self.image.sizes.append(ImageSizeSchema({'url': image_url }))
-    for pix in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
-        self.image.sizes.append( ImageSizeSchema({'url': get_image_url(pix), 'height': pix, 'width': pix}) )
+    
+    for size in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
+        image = ImageSizeSchema({
+            'url'    : get_image_url(size), 
+            'height' : size, 
+            'width'  : size
+        })
+        
+        self.image.sizes.append(image)
 
 def _formatURL(url):
     try:
@@ -195,6 +208,7 @@ def _cleanImageURL(url):
     return url
 
 def _initialize_blurb_html(content):
+    # TODO: debug
     """
     blurb = content.blurb
     data  = []
@@ -228,6 +242,7 @@ def _initialize_blurb_html(content):
     pass
 
 def _initialize_comment_html(comment):
+    # TODO: debug
     """
     blurb = comment.blurb
     data  = []
@@ -1538,7 +1553,7 @@ class HTTPActionSource(Schema):
         self.icon                   = SchemaElement(basestring)
         self.completion_endpoint    = SchemaElement(basestring)
         self.completion_data        = SchemaElement(dict) # dictionary?
-
+    
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
         self.completion_data        = HTTPActionCompletionData(kwargs, overflow=True)
@@ -1880,10 +1895,6 @@ class HTTPStamp(Schema):
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
     
-    @lazyProperty
-    def _user_regex(self):
-        return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
-    
     def importSchema(self, schema):
         if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
             data                = schema.exportSparse()
@@ -1916,7 +1927,7 @@ class HTTPStamp(Schema):
                 item.created    = content.timestamp.created 
                 # item.modified   = content.timestamp.modified 
                 
-                for screenName in self._user_regex.finditer(content.blurb):
+                for screenName in mention_re.finditer(content.blurb):
                     source              = HTTPActionSource()
                     source.name         = 'View profile'
                     source.source       = 'stamped'

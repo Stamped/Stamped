@@ -5,13 +5,14 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 import copy, re
+
 from datetime   import datetime
 from schema     import *
 from utils      import lazyProperty
 from pprint     import pformat
-### TEMP
-# from Entity import *
+
 import libs.CountryData
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z]+).*')

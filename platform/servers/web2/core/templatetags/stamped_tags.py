@@ -107,7 +107,8 @@ class CustomCSSTemplateLibrary(object):
     def render(self, template_name, context):
         less    = self._renderer.render(self.templates[template_name][1], context)
         proxy   = ".%s.less" % template_name
-        cmd     = 'lessc %s' % proxy
+        prog    = "/stamped/node/node_modules/less/bin/lessc"
+        cmd     = "%s %s" % (prog, proxy)
         
         with open(proxy, 'w') as fp:
             fp.write(less)
