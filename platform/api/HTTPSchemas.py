@@ -837,7 +837,7 @@ class HTTPEntity(Schema):
                 for image in entity.gallery:
                     item = HTTPImageSchema()
                     item.importSchema(image)
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Reservation
@@ -929,7 +929,7 @@ class HTTPEntity(Schema):
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
                     item.action     = action
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
             # Actions: Call
@@ -1436,11 +1436,11 @@ class HTTPEntity(Schema):
 
                             item.action         = action
 
-                        gallery.data.append(item)
+                        gallery.images.append(item)
                     except Exception as e:
                         logs.info(e.message)
                         pass
-                if len(gallery.data) > 0:
+                if len(gallery.images) > 0:
                     print('\nadding gallery')
                     self.galleries.append(gallery)
 
@@ -1486,7 +1486,7 @@ class HTTPEntity(Schema):
                 for screenshot in entity.screenshots:
                     item = HTTPImageSchema()
                     item.importSchema(screenshot)
-                    gallery.data.append(item)
+                    gallery.images.append(item)
                 self.galleries.append(gallery)
 
 
