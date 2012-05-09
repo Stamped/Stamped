@@ -83,6 +83,7 @@
         // ---------------------------------------------------------------------
         
         var $container = $(".stamp-gallery .stamps");
+        // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();
         
@@ -115,7 +116,6 @@
             $(elements).emoji();
             $container.isotope('appended', elements);
         });
-
         
         var client = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;

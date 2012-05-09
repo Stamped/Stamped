@@ -578,7 +578,6 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('website',            { 'type' : "string", }), 
                     new SchemaElement('location',           { 'type' : "string", }), 
                     new SchemaElement('privacy',            { 'type' : "boolean", 'required' : true }), 
-                    new SchemaElement('image',              new ), 
                     new MultiScaleImage('image',            { }).schema(), 
                     new SchemaElement('identifier',         { 'type' : "string", }), 
                     new SchemaElement('num_stamps',         { 'type' : "number", 'default'  : 0 }), 

@@ -13,7 +13,7 @@ override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
 LESS_CSS_DIRS				= assets/css assets/css/libs
 LESS_CSS_SOURCE_SUFFIX		= less
 LESS_CSS_TARGET_SUFFIX		= css
-LESS_CSS_PROG				= lessc
+LESS_CSS_PROG				= /stamped/node/node_modules/less/bin/lessc
 LESS_CSS_SOURCES			= $(strip \
 	$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
 LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
@@ -37,16 +37,16 @@ $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
 	@echo
 endef
 
-$(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_TARGET_PATTERN,$(DIR))))
+all: $(ALL_TARGETS)
 
 .PHONY: $(TEMPLATE_DEST) all clean help
-
-all: $(ALL_TARGETS)
 
 $(TEMPLATE_DEST): $(DEPENDENCIES)
 	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
 	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
 	@echo
+
+$(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_TARGET_PATTERN,$(DIR))))
 
 clean:
 	-$(RM) -f $(ALL_TARGETS)

@@ -9,6 +9,10 @@
 @import "libs/elements.less";
 @import "libs/isotope.less";
 
+#main-content {
+    position: relative;
+}
+
 .stamp-gallery {
     position: relative;
     width: 100%;
@@ -78,17 +82,6 @@
             }
         }
         
-        /*
-        div.blurb {
-            background: url(/assets/img/blockquoteopen.png) left top no-repeat;
-            text-indent: 23px;
-            
-            span {
-                display: block;
-                background: url(/assets/img/blockquoteclose.png) bottom right no-repeat;
-            }
-        }*/
-        
         .previews {
             .profile-image-small {
                 display: inline-block;
@@ -132,8 +125,7 @@
                     right:  -(@width  / 3);
                     
                     display: block;
-                    /*width:  30px;*/
-                    width: 18px;
+                    width:  18px;
                     height: 18px;
                     z-index: 101;
                     
@@ -157,10 +149,6 @@
                     .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
                 }
             }
-            
-            /*div.comment {
-                display: none;
-            }*/
         }
     }
 }
@@ -286,9 +274,5 @@ ul.user-category-distribution {
             }
         }
     }
-}
-
-#main-content {
-    position: relative;
 }
 
