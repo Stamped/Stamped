@@ -1599,7 +1599,7 @@ class HTTPEntityMetadataItem(Schema):
 
 class HTTPEntityGallery(Schema):
     def setSchema(self):
-        self.data                   = SchemaList(HTTPImageSchema(), required=True)
+        self.images                 = SchemaList(HTTPImageSchema(), required=True)
         self.name                   = SchemaElement(basestring)
         self.layout                 = SchemaElement(basestring) # 'list' or None
 
