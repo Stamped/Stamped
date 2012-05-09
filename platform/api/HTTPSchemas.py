@@ -1414,6 +1414,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
+                    print('\nalbum loop')
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
@@ -1436,9 +1437,11 @@ class HTTPEntity(Schema):
                             item.action         = action
 
                         gallery.data.append(item)
-                    except:
+                    except Exception as e:
+                        log.info(e.message)
                         pass
                 if len(gallery.data) > 0:
+                    print('\nadding gallery')
                     self.galleries.append(gallery)
 
         elif entity.kind == 'software' and entity.isType('app'):
@@ -1482,8 +1485,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 for screenshot in entity.screenshots:
                     item = HTTPImageSchema()
-                    size = HTTPImageSizeSchema({'url': screenshot.image})
-                    item.sizes.append(size)
+                    item.importSchema(screenshot)
                     gallery.data.append(item)
                 self.galleries.append(gallery)
 
