@@ -30,6 +30,11 @@ class MongoStampStatsCollection(AMongoCollection):
         documentId = self._getObjectIdFromString(stampId)
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
+
+    def getStatsForStamps(self, stampIds):
+        documentIds = map(self._getObjectIdFromString, stampIds)
+        documents = self._getMongoDocumentsFromIds(ids)
+        return map(self._convertFromMongo, documents)
     
     def updateStampStats(self, stats):
         return self.update(stats)
