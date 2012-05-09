@@ -43,7 +43,6 @@ def lru_cache(maxsize=100):
         
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
-            logs.info('### lru_cache wrapper')
             # cache key records both positional and keyword args
             key = '%s' % user_function.__name__
             for arg in args:
@@ -126,7 +125,6 @@ def lfu_cache(maxsize=100):
 
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
-            logs.info('### lrucache wrapper again')
             key = args
             if kwds:
                 key += (kwd_mark,) + tuple(sorted(kwds.items()))

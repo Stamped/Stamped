@@ -32,7 +32,6 @@ except Exception:
 
 
 def generatorSource(generator, constructor=None, unique=False, tolerant=False):
-    logs.info('### GENERATORSOURCE')
     if constructor is None:
         constructor = lambda x: x
     results = []
@@ -73,7 +72,6 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
 
 def listSource(items, **kwargs):
     def gen():
-        logs.info('### LISTSOURCE')
         try:
             for item in items:
                 yield item
@@ -431,12 +429,9 @@ class GenericSource(BasicSource):
         proxy = None
         if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
-                logs.info('### before proxyFromEntity')
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
-                logs.info('### Before resolve')
                 results = self.resolver.resolve(query, self.matchSource(query))
-                logs.info('### Finished resolve')
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:
@@ -447,7 +442,6 @@ class GenericSource(BasicSource):
             except ValueError:
                 pass
 
-        logs.info('### BEFORE enrichEntityWithEntityProxy')
         source_id = entity[self.idField]
         if source_id is not None:
             try:
@@ -456,7 +450,6 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e
-        logs.info('### AFTER enrichEntityWithEntityProxy')
-        
+
         return True
 

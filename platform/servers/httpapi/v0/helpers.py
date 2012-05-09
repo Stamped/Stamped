@@ -111,7 +111,6 @@ def handleHTTPRequest(requires_auth=True,
         
         @wraps(fn)
         def wrapper(request, *args, **kwargs):
-            logs.info('### helpers wrapper')
             try:
                 origin = ""
                 
