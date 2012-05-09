@@ -787,37 +787,6 @@ class StampedAPI(AStampedAPI):
 
         # TODO check results
 
-
-
-#        # Only send alert once (when the user initially connects to Twitter)
-#        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
-#            return False
-#
-#        users = []
-#
-#        # Grab friend list from Twitter API
-#        if twitterKey is not None and twitterSecret is not None:
-#            users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
-#        elif twitterIds is not None:
-#            ### DEPRECATED
-#            users = self._userDB.findUsersByTwitter(twitterIds)
-#
-#        # Send alert to people not already following the user
-#        followers = self._friendshipDB.getFollowers(authUserId)
-#        userIds = []
-#        for user in users:
-#            if user.user_id not in followers:
-#                userIds.append(user.user_id)
-#
-#        # Generate activity item
-#        self._addActivity(verb          = 'friend_twitter',
-#            userId        = authUserId,
-#            recipientIds  = userIds,
-#            body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
-#
-#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
-
         return True
 
     @API_CALL
@@ -1483,13 +1452,66 @@ class StampedAPI(AStampedAPI):
             user    = self._userDB.getUser(stamp.user.user_id)
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
-            if action in actions:
+            if action in actions and authUserId != stamp.user.user_id:
                 self._addActivity(verb          = 'action_%s' % action, 
                                   userId        = authUserId, 
                                   friendId      = stamp.user.user_id, 
                                   stampId       = stamp.stamp_id)
 
         return True
+
+    @API_CALL
+    def entityStampedBy(self, entityId, authUserId=None, limit=10):
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+        except StampedUnavailableError:
+            stats = self.updateEntityStatsAsync(entityId)
+
+        popularUserIds = map(str, stats.popular_users[:limit])
+        popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
+        popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
+
+        result = {}
+        result['all_preview']   = self._enrichStampObjects(popularStamps)
+        result['all_count']     = stats.num_stamps
+
+        if authUserId is None:
+            return result
+
+        friendUserIds   = self._friendshipDB.getFriends(authUserId)
+        friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+
+        result['friend_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
+        result['friend_count']      = len(friendStamps)
+
+        fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
+        fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
+        fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
+
+        result['fof_preview']   = self._enrichStampObjects(fofStamps[:limit])
+        result['fof_count']     = len(fofStamps)
+
+        return result
+
+
+    def updateEntityStatsAsync(self, entityId):
+        numStamps = self._stampDB.countStampsForEntity(entityId)
+        popularUserIds = self._stampDB.getPopularityForEntity(entityId)
+
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+            stats.num_stamps = numStamps
+            stats.popular_users = popularUserIds
+            self._entityStatsDB.updateNumStamps(entityId, numStamps)
+            self._entityStatsDB.setPopular(entityId, popularUserIds)
+        except StampedUnavailableError:
+            stats = EntityStats()
+            stats.entity_id = entityId
+            stats.num_stamps = numStamps
+            stats.popular_users = popularUserIds
+            self._entityStatsDB.addEntityStats(stats)
+        return stats
+
 
 
 
@@ -1925,14 +1947,14 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def addStampAsync(self, authUserId, stamp_id):
-        stamp   = self._stampDB.getStamp(stamp_id)
+    def addStampAsync(self, authUserId, stampId):
+        stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
         followers.append(authUserId)
-        self._stampDB.addInboxStampReference(followers, stamp_id)
+        self._stampDB.addInboxStampReference(followers, stampId)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -1969,22 +1991,6 @@ class StampedAPI(AStampedAPI):
                 self._stampDB.giveCredit(item.user_id, stamp)
                 creditedUserIds.add(item.user_id)
                 
-                # # Add restamp as comment (if prior stamp exists)
-                # if 'stamp_id' in item and item['stamp_id'] is not None:
-                #     # Build comment
-                #     comment                     = Comment()
-                #     comment.user.user_id        = user_id
-                #     comment.stamp_id            = item.stamp_id
-                #     comment.restamp_id          = stamp.stamp_id
-                #     comment.blurb               = stamp.blurb
-                #     comment.mentions            = stamp.mentions
-                #     comment.timestamp.created   = datetime.utcnow()
-                #     
-                #     # Add the comment data to the database
-                #     comment = self._commentDB.addComment(comment)
-                #     self._rollback.append((self._commentDB.removeComment, \
-                #         {'commentId': comment.comment_id}))
-                
                 # Add stats
                 self._statsSink.increment('stamped.api.stamps.credit')
                 
@@ -2012,6 +2018,10 @@ class StampedAPI(AStampedAPI):
                               userId        = authUserId, 
                               recipientIds  = list(mentionedUserIds), 
                               stampId       = stamp.stamp_id)
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+
     
     @API_CALL
     def addResizedStampImagesAsync(self, imageId, imageUrl):
@@ -2250,6 +2260,9 @@ class StampedAPI(AStampedAPI):
         
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
         
         return stamp
     
@@ -2297,6 +2310,34 @@ class StampedAPI(AStampedAPI):
         stamp                   = self._stampDB.updateStamp(stamp)
         
         return stamp
+
+    def updateStampStatsAsync(self, stampId):
+        stats                   = StampStats()
+
+        MAX_PREVIEW             = 10
+        stamp                   = self._stampDB.getStamp(stampId)
+
+        likes                   = self._stampDB.getStampLikes(stampId)
+        stats.num_likes         = len(likes)
+        stats.preview_likes     = likes[-MAX_PREVIEW:]
+        stats.preview_likes.reverse()
+
+        followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
+        todos                   = self._favoriteDB.getFavoritesFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        stats.num_todos         = len(todos)
+        stats.preview_todos     = todos[:MAX_PREVIEW]
+
+        restamps                = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
+        stats.num_credits       = len(restamps)
+        stats.preview_credits   = map(lambda x: x['stamp_id'], restamps[:MAX_PREVIEW])
+
+        comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
+        stats.num_comments      = len(comments)
+        stats.preview_comments  = map(lambda x: x['comment_id'], comments[:MAX_PREVIEW])
+
+        self._stampStatsDB.saveStampStats(stats)
+
+        return stats
     
     
     """
@@ -2417,6 +2458,9 @@ class StampedAPI(AStampedAPI):
         
         # Increment comment count on stamp
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
+
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
     
     @API_CALL
     def removeComment(self, authUserId, commentId):
@@ -2444,6 +2488,9 @@ class StampedAPI(AStampedAPI):
         # Add user object
         user = self._userDB.getUser(comment.user_id)
         comment.user = user.exportSchema(UserMini())
+
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         return comment
     
@@ -2563,6 +2610,12 @@ class StampedAPI(AStampedAPI):
                               stampId       = stamp.stamp_id,
                               friendId      = stamp.user_id,
                               benefit       = benefit)
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return stamp
     
@@ -2593,6 +2646,9 @@ class StampedAPI(AStampedAPI):
         
         # Remove activity
         self._activityDB.removeActivity('like', authUserId, stampId=stampId)
+
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return stamp
     
@@ -2929,6 +2985,9 @@ class StampedAPI(AStampedAPI):
                               entityId      = entity.entity_id,
                               friendId      = favorite.stamp.user_id, 
                               stampId       = stampId)
+
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
         
         return favorite
     
@@ -2955,6 +3014,9 @@ class StampedAPI(AStampedAPI):
             
             # Remove activity
             self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
+
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return favorite
     

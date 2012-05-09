@@ -70,12 +70,12 @@ class CoordinatesSchema(Schema):
 
 class ImageSchema(Schema):
     def setSchema(self):
-        self.sizes                          = SchemaList(ImageSizeSchema()) # url
+        self.sizes                          = SchemaList(ImageSizeSchema())
         self.caption                        = SchemaElement(basestring)
 
 class ImageSizeSchema(Schema):
     def setSchema(self):
-        self.url                            = SchemaElement(basestring) # url
+        self.url                            = SchemaElement(basestring)
         self.width                          = SchemaElement(int)
         self.height                         = SchemaElement(int)
 
@@ -282,6 +282,24 @@ class StampStatsSchema(Schema):
         self.like_threshold_hit = SchemaElement(bool)
         self.stamp_num          = SchemaElement(int)
         self.num_blurbs         = SchemaElement(int)
+
+class StampStats(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.num_todos          = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.num_credits        = SchemaElement(int)
+        self.num_comments       = SchemaElement(int)
+        self.preview_todos      = SchemaList(SchemaElement(basestring)) # UserIds
+        self.preview_likes      = SchemaList(SchemaElement(basestring)) # UserIds
+        self.preview_credits    = SchemaList(SchemaElement(basestring)) # StampIds
+        self.preview_comments   = SchemaList(SchemaElement(basestring)) # CommentIds
+
+class EntityStats(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.num_stamps         = SchemaElement(int)
+        self.popular_users      = SchemaList(SchemaElement(basestring))
 
 
 # ########### #

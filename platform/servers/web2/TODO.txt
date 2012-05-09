@@ -43,8 +43,7 @@
 
 TODO:
     * audit box-shadow usage and replace w/ more efficient image-border where appropriate
-    * generate stamp collage images
-    * get full stamp inset image from anthony
+    * add ability to retain login
     
     * play around with different footer options
         * NOTE: make sure it looks good on maps ala (http://www.yelp.com/map/elite-barber-shop-manhattan)
@@ -82,4 +81,6 @@ OLD:
     * replace credit in stamp-gallery-items with real elements
     * find feasible approach to color scheme constants
     * customize infowindow to not look like shit
+    * generate stamp collage images
+    * get full stamp inset image from anthony
 

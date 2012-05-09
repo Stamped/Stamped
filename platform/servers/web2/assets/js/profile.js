@@ -117,11 +117,23 @@
         });
 
         
-        return;
-        
         var client = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;
         console.debug("Stamped profile page for screen_name '" + screen_name + "'");
+        
+        $('.sign-in a.button').click(function() {
+            client.login('travis', 'cierfshs2').done(function(user) {
+                console.debug("login:");
+                console.debug(user);
+                
+                client.get_authorized_user().done(function(auth_user) {
+                    console.debug("authorized:");
+                    console.debug(auth_user);
+                });
+            });
+        });
+        
+        return;
         
         var userP = client.get_user_by_screen_name(screen_name);
         

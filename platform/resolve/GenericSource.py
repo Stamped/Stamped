@@ -401,6 +401,7 @@ class GenericSource(BasicSource):
 
             screenshots = []
             for screenshot in proxy.screenshots:
+                print('\niterating through screenshots')
                 img = ImageSchema()
                 size = ImageSizeSchema()
                 size.url = screenshot
@@ -441,7 +442,7 @@ class GenericSource(BasicSource):
                         proxy = best[1]
             except ValueError:
                 pass
-        
+
         source_id = entity[self.idField]
         if source_id is not None:
             try:
@@ -450,6 +451,6 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 print 'Error: %s' % e
-        
+
         return True
 
