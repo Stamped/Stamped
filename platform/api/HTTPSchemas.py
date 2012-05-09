@@ -780,7 +780,9 @@ class HTTPEntity(Schema):
             self.metadata.append(item)
     
     def _addImages(self, images):
+        logs.info('\n### calling addImages')
         for image in images:
+            logs.info('\n### iterating through images')
             if len(image.sizes) == 0:
                 continue
             newimg = HTTPImageSchema()
@@ -788,6 +790,7 @@ class HTTPEntity(Schema):
                 if size.url is not None:
                     newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
+            logs.info('\n### adding image')
             self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
