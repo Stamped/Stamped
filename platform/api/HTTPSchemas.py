@@ -447,7 +447,7 @@ class HTTPUser(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = Schemaelement(ImageSchema())
+        self.image              = ImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -540,7 +540,7 @@ class HTTPUserMini(Schema):
         # solution to (e.g., activity item images, entity images, stamp images, etc.). until 
         # then, I'm inlining the available profile image sizes so as not to bake that logic 
         # into the web client (these sizes are already hard-coded in the iOS client...)
-        self.image              = SchemaElement(ImageSchema())
+        self.image              = ImageSchema()
         self.image_url          = SchemaElement(basestring) # original (historically 500x500)
         self.image_url_31       = SchemaElement(basestring)
         self.image_url_37       = SchemaElement(basestring)
@@ -1577,7 +1577,7 @@ class HTTPEntityGallery(Schema):
 
 class HTTPEntityGalleryItem(Schema):
     def setSchema(self):
-        self.image                  = SchemaElement(ImageSchema(), required=True)
+        self.image                  = ImageSchema(required=True)
         self.action                 = HTTPAction()
         self.caption                = SchemaElement(basestring)
         self.height                 = SchemaElement(int)
@@ -1851,7 +1851,7 @@ class HTTPStampContent(Schema):
         self.blurb              = SchemaElement(basestring)
         self.blurb_references   = SchemaList(HTTPTextReference())
         self.blurb_formatted    = SchemaElement(basestring)
-        self.images             = SchemaList(ImageSchema())
+        self.images             = ImageSchema()
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
 
