@@ -284,6 +284,12 @@ class StampStatsSchema(Schema):
         self.stamp_num          = SchemaElement(int)
         self.num_blurbs         = SchemaElement(int)
 
+class EntityStats(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.num_stamps         = SchemaElement(int)
+        self.popular_stamps     = SchemaList(SchemaElement(basestring))
+
 
 # ########### #
 # Friendships #

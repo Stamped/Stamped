@@ -1483,13 +1483,28 @@ class StampedAPI(AStampedAPI):
             user    = self._userDB.getUser(stamp.user.user_id)
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
-            if action in actions:
+            if action in actions and authUserId != stamp.user.user_id:
                 self._addActivity(verb          = 'action_%s' % action, 
                                   userId        = authUserId, 
                                   friendId      = stamp.user.user_id, 
                                   stampId       = stamp.stamp_id)
 
         return True
+
+    def updateEntityStatsAsync(self, entityId):
+        numStamps   = self._stampDB.countStampsForEntity(entityId)
+        popular     = self._stampDB.getPopularStampIdsForEntity(entityId)
+
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+            self._entityStatsDB.updateNumStamps(entityId, numStamps)
+            self._entityStatsDB.setPopular(entityId, popular)
+        except StampedUnavailableError:
+            stats = EntityStats()
+            stats.entity_id = entityId
+            stats.num_stamps = numStamps
+            stats.popular_stamps = popular
+            self._entityStatsDB.addEntityStats(stats)
 
 
 
@@ -1925,14 +1940,14 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def addStampAsync(self, authUserId, stamp_id):
-        stamp   = self._stampDB.getStamp(stamp_id)
+    def addStampAsync(self, authUserId, stampId):
+        stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
         followers.append(authUserId)
-        self._stampDB.addInboxStampReference(followers, stamp_id)
+        self._stampDB.addInboxStampReference(followers, stampId)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -1969,22 +1984,6 @@ class StampedAPI(AStampedAPI):
                 self._stampDB.giveCredit(item.user_id, stamp)
                 creditedUserIds.add(item.user_id)
                 
-                # # Add restamp as comment (if prior stamp exists)
-                # if 'stamp_id' in item and item['stamp_id'] is not None:
-                #     # Build comment
-                #     comment                     = Comment()
-                #     comment.user.user_id        = user_id
-                #     comment.stamp_id            = item.stamp_id
-                #     comment.restamp_id          = stamp.stamp_id
-                #     comment.blurb               = stamp.blurb
-                #     comment.mentions            = stamp.mentions
-                #     comment.timestamp.created   = datetime.utcnow()
-                #     
-                #     # Add the comment data to the database
-                #     comment = self._commentDB.addComment(comment)
-                #     self._rollback.append((self._commentDB.removeComment, \
-                #         {'commentId': comment.comment_id}))
-                
                 # Add stats
                 self._statsSink.increment('stamped.api.stamps.credit')
                 
@@ -2012,6 +2011,10 @@ class StampedAPI(AStampedAPI):
                               userId        = authUserId, 
                               recipientIds  = list(mentionedUserIds), 
                               stampId       = stamp.stamp_id)
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+
     
     @API_CALL
     def addResizedStampImagesAsync(self, imageId, imageUrl):
@@ -2250,6 +2253,9 @@ class StampedAPI(AStampedAPI):
         
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
         
         return stamp
     
@@ -2563,6 +2569,9 @@ class StampedAPI(AStampedAPI):
                               stampId       = stamp.stamp_id,
                               friendId      = stamp.user_id,
                               benefit       = benefit)
+
+        # Update entity stats
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
         
         return stamp
     
