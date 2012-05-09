@@ -17,16 +17,18 @@
   if ([anEntityDetail.galleries count] > 0) {
     for (id<STGallery> gallery in anEntityDetail.galleries) {
       NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-      for (id<STImageList> item in gallery.data) {
+      for (id<STImageList> item in gallery.images) {
         @autoreleasepool {
           if ([operation isCancelled]) {
             return nil;
           }
           if (item.sizes.count > 0) {
             id<STImage> image = [item.sizes objectAtIndex:0];
-            NSData* data = [NSData dataWithContentsOfURL:[NSURL URLWithString:image.image]];
+            NSData* data = [NSData dataWithContentsOfURL:[NSURL URLWithString:image.url]];
             UIImage* aImage = [UIImage imageWithData:data];
-            [dict setObject:aImage forKey:image.image];
+            if (aImage) {
+              [dict setObject:aImage forKey:image.url];
+            }
           }
         }
       }

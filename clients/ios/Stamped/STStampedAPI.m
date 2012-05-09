@@ -31,6 +31,7 @@
 #import "STSimpleEndpointResponse.h"
 #import "STActionManager.h"
 #import "STSimpleActivityCount.h"
+#import "STSimplePreviews.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -112,6 +113,10 @@ static STStampedAPI* _sharedInstance;
 
 - (id<STUser>)currentUser {
   return [STSimpleUser userFromLegacyUser:[AccountManager sharedManager].currentUser];
+}
+
+- (id<STStamp>)cachedStampForStampID:(NSString*)stampID {
+  return [self.stampCache cachedValueForKey:stampID];
 }
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
@@ -318,6 +323,80 @@ static STStampedAPI* _sharedInstance;
   //TODO
 }
 
+- (void)_updateLocalStampWithStampID:(NSString*)stampID 
+                                todo:(id<STUser>)todo
+                                like:(id<STUser>)like
+                             comment:(id<STComment>)comment
+                           andCredit:(id<STStamp>)credit{
+  id<STStamp> stamp = [self cachedStampForStampID:stampID];
+  if (stamp) {
+    STSimpleStamp* copy = [STSimpleStamp stampWithStamp:stamp];
+    STSimplePreviews* previews;
+    if (stamp.previews) {
+      previews = [STSimplePreviews previewsWithPreviews:stamp.previews];
+    }
+    else {
+      previews = [[[STSimplePreviews alloc] init] autorelease];
+    }
+    if (todo) {
+      NSMutableArray<STUser>* todos;
+      if (previews.todos) {
+        todos = [NSMutableArray arrayWithArray:previews.todos];
+      }
+      else {
+        todos = [NSMutableArray array];
+      }
+      [todos insertObject:todo atIndex:0];
+      previews.todos = todos;
+    }
+    if (like) {
+      NSMutableArray<STUser>* likes;
+      if (previews.likes) {
+        likes = [NSMutableArray arrayWithArray:previews.likes];
+      }
+      else {
+        likes = [NSMutableArray array];
+      }
+      [likes insertObject:like atIndex:0];
+      previews.likes = likes;
+      if ([like.userID isEqualToString:self.currentUser.userID]) {
+        copy.isLiked = [NSNumber numberWithBool:YES];
+      }
+      NSInteger numLikes = 0;
+      if (copy.numLikes) {
+        numLikes = copy.numLikes.integerValue;
+      }
+      copy.numLikes = [NSNumber numberWithInteger:numLikes + 1];
+    }
+    if (comment) {
+      NSMutableArray<STComment>* comments;
+      if (previews.comments) {
+        comments = [NSMutableArray arrayWithArray:previews.comments];
+      }
+      else {
+        comments = [NSMutableArray array];
+      }
+      [comments insertObject:comment atIndex:0];
+      previews.comments = comments;
+    }
+    if (credit) {
+      NSMutableArray<STStamp>* credits;
+      if (previews.credits) {
+        credits = [NSMutableArray arrayWithArray:previews.credits];
+      }
+      else {
+        credits = [NSMutableArray array];
+      }
+      STSimpleStamp* previewlessStamp = [STSimpleStamp stampWithStamp:credit];
+      previewlessStamp.previews = nil;
+      [credits insertObject:previewlessStamp atIndex:0];
+      previews.credits = credits;
+    }
+    copy.previews = previews;
+    copy.modified = [NSDate date];
+    [self.stampCache setObject:copy forKey:stampID];
+  }
+}
 
 - (void)createCommentForStampID:(NSString*)stampID 
                       withBlurb:(NSString*)blurb 
@@ -332,13 +411,25 @@ static STStampedAPI* _sharedInstance;
                                              params:params 
                                             mapping:[STSimpleComment mapping] 
                                         andCallback:^(id result, NSError* error, STCancellation* cancellation) {
+                                          if (!error && result) {
+                                            [self _updateLocalStampWithStampID:stampID
+                                                                          todo:nil
+                                                                          like:nil
+                                                                       comment:result
+                                                                     andCredit:nil];
+                                          }
                                           block(result, error);
                                         }];
 }
 
 - (void)likeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block {
   NSString* path = @"/stamps/likes/create.json";
-  [self path:path WithStampID:stampID andCallback:block];
+  [self path:path WithStampID:stampID andCallback:^(id<STStamp> stamp, NSError* error) {
+    if (!error && stamp) {
+      [self _updateLocalStampWithStampID:stampID todo:nil like:[self currentUser] comment:nil andCredit:nil];
+    }
+    block(stamp, error);
+  }];
 }
 
 - (void)unlikeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block {

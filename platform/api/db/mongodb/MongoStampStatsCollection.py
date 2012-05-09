@@ -33,7 +33,7 @@ class MongoStampStatsCollection(AMongoCollection):
 
     def getStatsForStamps(self, stampIds):
         documentIds = map(self._getObjectIdFromString, stampIds)
-        documents = self._getMongoDocumentsFromIds(ids)
+        documents = self._getMongoDocumentsFromIds(documentIds)
         return map(self._convertFromMongo, documents)
     
     def updateStampStats(self, stats):

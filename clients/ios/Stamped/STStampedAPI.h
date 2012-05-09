@@ -59,6 +59,8 @@ typedef enum {
 
 - (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
+- (id<STStamp>)cachedStampForStampID:(NSString*)stampID;
+
 - (STCancellation*)stampForStampID:(NSString*)stampID 
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 

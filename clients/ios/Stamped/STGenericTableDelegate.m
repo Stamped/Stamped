@@ -85,7 +85,6 @@
     id data = [self.lazyList objectAtIndex:index];
     __block STGenericTableDelegate* weakSelf = self;
     STCancellation* cancellation = [self.tableViewCellFactory prepareForData:data andStyle:self.style withCallback:^(NSError *error, STCancellation *cancellation2) {
-      NSLog(@"preparedForDatum:%d",index);
       [weakSelf continuePreparations];
     }];
     [self.prepareCancellations addObject:cancellation];
@@ -170,7 +169,6 @@
 }
 
 - (void)lazyListDidReload:(id<STLazyList>)lazyList {
-  NSLog(@"did Reload");
   if (self.tableShouldReloadCallback) {
     self.endReached = NO;
     [self cancelAndClearPreparations];
@@ -179,7 +177,6 @@
 }
 
 - (void)lazyListDidGrow:(id<STLazyList>)lazyList {
-  NSLog(@"did grow");
   if (self.tableShouldReloadCallback) {
     [self continuePreparations];
     self.tableShouldReloadCallback(self);
@@ -187,7 +184,6 @@
 }
 
 - (void)lazyListDidShrink:(id<STLazyList>)lazyList {
-  NSLog(@"Did shrink");
   if (self.tableShouldReloadCallback) {
     NSInteger diff = self.prepareCancellations.count - lazyList.count;
     if (diff > 0) {
@@ -202,7 +198,6 @@
 }
 
 - (void)lazyListDidReachMaxCount:(id<STLazyList>)lazyList {
-  NSLog(@"Did reach max");
   if (self.tableShouldReloadCallback) {
     self.endReached = YES;
     self.tableShouldReloadCallback(self);
@@ -210,7 +205,6 @@
 }
 
 - (void)lazyListDidFail:(id<STLazyList>)lazyList {
-  NSLog(@"did fail");
   if (self.tableShouldReloadCallback) {
     self.failed = YES;
     self.endReached = YES;

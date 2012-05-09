@@ -13,7 +13,7 @@
 
 @synthesize layout = _layout;
 @synthesize name = _name;
-@synthesize data = _data;
+@synthesize images = _images;
 
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleGallery class]];
@@ -23,7 +23,7 @@
    @"name",
    nil];
   
-  [mapping mapRelationship:@"data" withMapping:[STSimpleImageList mapping]];
+  [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
   
   return mapping;
 }
@@ -31,7 +31,7 @@
 - (void)dealloc {
   [_layout release];
   [_name release];
-  [_data release];
+  [_images release];
   [super dealloc];
 }
 

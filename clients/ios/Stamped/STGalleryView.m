@@ -51,11 +51,11 @@ static const CGFloat _captionHeight = 25;
     
     CGFloat maxHeight = 0;
     BOOL hasText = NO;
-    for (id<STImageList> item in gallery.data) {
+    for (id<STImageList> item in gallery.images) {
       if (item.sizes.count > 0) {
         id<STImage> firstImage = [item.sizes objectAtIndex:0];
-        if (firstImage.image) {
-          UIImage* image = [images objectForKey:firstImage.image];
+        if (firstImage.url) {
+          UIImage* image = [images objectForKey:firstImage.url];
           if (image) {
             CGFloat height = image.size.height + 2 * _padding_h;
             hasText = hasText || item.caption;
@@ -82,10 +82,10 @@ static const CGFloat _captionHeight = 25;
     scrollView.delegate = self;
     NSInteger offset = 0;
     for (NSInteger i = 0; i < [images count]; i++) {
-      id<STImageList> item = [gallery.data objectAtIndex:i];
+      id<STImageList> item = [gallery.images objectAtIndex:i];
       if (item.sizes.count > 0) {
         id<STImage> firstImage = [item.sizes objectAtIndex:0];
-        UIImage* image = [images objectForKey:firstImage.image];
+        UIImage* image = [images objectForKey:firstImage.url];
         STGalleryItemView* view = [[STGalleryItemView alloc] initWithFrame:CGRectMake(offset, 0, width, maxHeight) image:image text:hasText andGalleryItem:item];
         [scrollView addSubview:view];
         [view release];
