@@ -1411,13 +1411,13 @@ class HTTPEntity(Schema):
             # Albums
 
             if entity.isType('artist') and len(entity.albums) > 0:
-                from pprint import pprint
+                from pprint import pformat
 
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
                     logs.info('\nalbum loop')
-                    pprint(album.images[0])
+                    logs.info(pformat(album.images[0]))
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
