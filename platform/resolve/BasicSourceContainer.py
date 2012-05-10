@@ -129,7 +129,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         return modified_total
 
     def shouldEnrich(self, group, source, entity, timestamp=None):
-        logs.info('\n### calling shouldEnrich for source: %s   group: %s' % (source, group))
         if timestamp is None:
             timestamp = self.now
         if group in self.__groups:
@@ -138,36 +137,46 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 currentSource = groupObj.getSource(entity)
                 if currentSource is None:
                     if groupObj.isSet(entity):
+                        logs.info('\n### Not enriching because current source is none and field is set.  source: %s, group: %s' % (source, group))
                         return False
                     return True
                 else:
                     priority = self.getGroupPriority(group, source)
                     currentPriority = self.getGroupPriority(group, currentSource)
                     if priority > currentPriority:
+                        logs.info('\n### enriching because priority is higher than cur priority.  source: %s, group: %s' % (source, group))
                         return True
                     elif priority < currentPriority:
+                        logs.info('\n### Not enriching because priority is less than cur priority.  source: %s, group: %s' % (source, group))
                         return False
                     else:
                         maxAge = self.getMaxAge(group, source)
                         if self.now - timestamp > maxAge:
+                            logs.info('\n### Not enriching maxAge not elapsed???.  source: %s, group: %s' % (source, group))
                             return False
                         else:
                             currentMaxAge = self.getMaxAge(group, currentSource)
                             currentTimestamp = groupObj.getTimestamp(entity)
                             if currentTimestamp is None:
+                                logs.info('\n### Enriching because timestamp is not set.  source: %s, group: %s' % (source, group))
                                 return True
                             try:
                                 currentTimestamp = currentTimestamp.replace(tzinfo=None)
                                 # if data is stale...
                                 if self.now - currentTimestamp > currentMaxAge:
+                                    logs.info('\n### Enriching because maxage has elapsed.  source: %s, group: %s' % (source, group))
                                     return True
                             except Exception as e:
                                 logs.warning('FAIL (%s / %s): self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
                                     (source, group, self.now, currentTimestamp, currentMaxAge, e))
+
+                            logs.info('\n### Not enriching because maxage has elapsed???.  source: %s, group: %s' % (source, group))
                             return False
             else:
+                logs.info('\n### Not enriching because group is ineligible.  source: %s, group: %s' % (source, group))
                 return False
         else:
+            logs.info('\n### Not enriching because group not in source.  source: %s, group: %s' % (source, group))
             return False
 
     @property
