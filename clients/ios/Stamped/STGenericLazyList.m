@@ -219,7 +219,7 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)notifyDelegates:(SEL)selector {
-  for (NSValue* pointerValue in self.delegates) {
+  for (NSValue* pointerValue in [NSArray arrayWithArray:self.delegates.allKeys]) {
     id<STLazyListDelegate> delegate = [pointerValue pointerValue];
     NSInteger count = [[self.delegates objectForKey:pointerValue] integerValue];
     for (NSInteger i = 0; i < count; i++) {
