@@ -45,10 +45,7 @@ TODO:
     * figure out how to install less on Ubuntu and have it actually work..
         * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     
-    * move all clearfix, fullwidth, fixedwidth definitions over to stylesheets!
-    * experiment with :before and :after instead of top-wave and bottom-wave
-    
-    * NO stamped-specific likes at all -- just FB likes?!
+    * experiment with the idea of having no stamped-specific likes at all -- just FB likes?
     
     * how to reference a specific stamp-gallery-item via stamp_id, entity_id, or filter
     
@@ -83,6 +80,9 @@ POLISH:
     * fix profile header nav animation
     * link profile image to lightboxed full-resolution version
     * link stamp image to lightboxed full-resolution version
+    * move all clearfix, fullwidth, fixedwidth definitions over to stylesheets!
+    * experiment with :before and :after instead of top-wave and bottom-wave
+    
 
 OPTIMIZE:
     * 

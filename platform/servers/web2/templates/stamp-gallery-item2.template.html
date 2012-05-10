@@ -1,0 +1,101 @@
+
+<div class="stamp-gallery-item">
+    <div class="top-wave"></div>
+    <div class="content clearfix">
+        {{#user}}
+        <div class="profile-image-medium">
+            <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+        </div>
+        {{/user}}
+        
+        <div class="inner-content">
+            <div class="stamp-category-{{#entity}}{{category}}{{/entity}}">
+                <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
+                
+                <div class="subtitle-line">
+                    <p>
+                        <span class="icon"></span>
+                        {{#entity}}
+                        <span class="subtitle">{{subtitle}}</span>
+                        {{/entity}}
+                    </p>
+                </div>
+                
+                {{#entity}}
+                {{#image}}
+                <div class="stamp-image">
+                    <img src="{{.}}" />
+                </div>
+                {{/image}}
+                {{/entity}}
+                
+                <div class="stamp-contents">
+                    {{#contents}}
+                    <div class="stamped-content">
+                        <div>
+                            {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
+                            
+                            <div class="images">
+                            {{#images}}
+                                {{! TODO: here would be a perfect example of Handlebars relative 
+                                    paths being handy; e.g., using entity.title as the alt text.
+                                }}
+                                <img src="{{image}}" {{#width}}width="{{.}}"{{/width}} {{#height}}height="{{.}}"{{/height}} {{#source}}alt="{{.}}"{{/source}} />
+                            {{/images}}
+                            </div>
+                        </div>
+                    </div>
+                    {{/contents}}
+                </div>
+                
+                {{#previews}}
+                <div class="previews">
+                    {{#likes}}
+                    <div class="profile-image-small like">
+                        <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                            <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                            <div class="like"></div>
+                        </a>
+                    </div>
+                    {{/likes}}
+                    
+                    {{#todos}}
+                    <div class="profile-image-small todo">
+                        <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                            <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                            <div class="todo"></div>
+                        </a>
+                    </div>
+                    {{/todos}}
+                    
+                    {{#credits}}
+                    <div class="profile-image-small credit">
+                        {{#user}}
+                        <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                            <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                            <div class="credit">
+                                <img src="http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-credit-18x18.png" />
+                            </div>
+                        </a>
+                        {{/user}}
+                    </div>
+                    {{/credits}}
+                    
+                    {{#comments}}
+                    <div class="profile-image-small comment">
+                        {{#user}}
+                        <a title="{{name}} (@{{screen_name}})" href="/{{screen_name}}">
+                            <img alt="{{name}} (@{{screen_name}})" src="{{image_url_72}}" />
+                            <div class="comment"></div>
+                        </a>
+                        {{/user}}
+                    </div>
+                    {{/comments}}
+                </div>
+                {{/previews}}
+            </div>
+        </div>
+    </div>
+    <div class="bottom-wave">&nbsp;</div>
+</div>
+

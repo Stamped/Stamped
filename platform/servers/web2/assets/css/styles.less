@@ -323,6 +323,10 @@ TODO:
 .profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
+    display: block;
+    width: @size + @border * 2;
+    height: @size + @border * 2;
+    
     img {
         width:  @size;
         height: @size;
@@ -333,6 +337,10 @@ TODO:
 
 .profile-image-large {
     .profile-image(128px, 4px);
+}
+
+.profile-image-medium {
+    .profile-image(54px,  2px);
 }
 
 .profile-image-small {

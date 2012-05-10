@@ -1,0 +1,25 @@
+
+<div class="stamp-gallery">
+    <div class="stamps">
+        {{#stamps}}
+            {{> stamp-gallery-item2}}
+        {{/stamps}}
+    </div>
+    
+    <div class="stamp-gallery-loading"></div>
+    <div class="stamp-gallery-nav">
+        <ul>
+            {{#prev_url}}
+            <li>
+                <a href="{{.}}">Prev</a>
+            </li>
+            {{/prev_url}}
+            {{#next_url}}
+            <li>
+                <a href="{{.}}">Next</a>
+            </li>
+            {{/next_url}}
+        </ul>
+    </div>
+</div>
+
