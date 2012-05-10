@@ -1596,6 +1596,9 @@ class StampedAPI(AStampedAPI):
         return None
     
     def _enrichStampObjectsNew(self, stampData, **kwargs):
+        t0 = time.time()
+        t1 = t0
+
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
@@ -1614,6 +1617,9 @@ class StampedAPI(AStampedAPI):
 
         stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
+        logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
+        t1 = time.time()
+
         """
         ENTITIES 
 
@@ -1629,7 +1635,16 @@ class StampedAPI(AStampedAPI):
         entities = self._entityDB.getEntities(list(missingEntityIds))
 
         for entity in entities:
-            entityIds[entity.entity_id] = entity
+            if entity.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        logs.debug('Time for getEntities: %s' % (time.time() - t1))
+        t1 = time.time()
 
         """ 
         STAMPS 
@@ -1648,6 +1663,9 @@ class StampedAPI(AStampedAPI):
 
         for stamp in underlyingStamps:
             underlyingStampIds[stamp.stamp_id] = stamp
+
+        logs.debug('Time for getStamps: %s' % (time.time() - t1))
+        t1 = time.time()
 
 
         """
@@ -1695,6 +1713,9 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[user.user_id] = user
 
+        logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
+        t1 = time.time()
+
         
         if authUserId:
             ### TODO: Intelligent matching with stampId
@@ -1704,6 +1725,9 @@ class StampedAPI(AStampedAPI):
             ### TODO: Intelligent matching with stampId
             # Likes
             likes = self._stampDB.getUserLikes(authUserId)
+
+            logs.debug('Time for authUserId queries: %s' % (time.time() - t1))
+            t1 = time.time()
 
 
         stamps = []
@@ -1785,11 +1809,16 @@ class StampedAPI(AStampedAPI):
             except Exception:
                 raise
 
+        logs.debug('Time for stamp iteration: %s' % (time.time() - t1))
+
         ### HACK UNTIL PAGING ISSUE IS RESOLVED
         while len(stamps) < origLen:
             stamps.append(stamps[len(stamps)-1])
 
+        logs.debug('TOTAL TIME: %s' % (time.time() - t0))
+
         return stamps
+
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
