@@ -113,6 +113,7 @@ class _NetflixObject(object):
     @lazyProperty
     def images(self):
         try:
+            #hack to replace large
             return [ self._titleObj['box_art']['large'] ]
         except Exception:
             return []
@@ -264,6 +265,16 @@ class NetflixSource(GenericSource):
 #            return
 #        except KeyError:
 #            raise
+
+    def entityProxyFromKey(self, netflix_id, **kwargs):
+        try:
+            titleObj = self.__netflix.getTitleDetails(netflix_id)
+            if titleObj['id'].find('/movies/') != -1:
+                return NetflixMovie(titleObj)
+            elif titleObj['id'].find('/series/') != -1:
+                return NetflixTVShow(titleObj)
+        except KeyError:
+            logs.warning('Unable to find Netflix item for key: %s' % netflix_id)
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)

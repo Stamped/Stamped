@@ -204,6 +204,9 @@ def _cleanImageURL(url):
     elif 'amazon.com' in domain:
         # strip the 'look inside' image modifier
         url = amazon_image_re.sub(r'\1.jpg', url)
+    elif 'nflximg.com' in domain:
+        # replace the large boxart with hd
+        url = url.replace('/large/', '/ghd/')
 
     return url
 
