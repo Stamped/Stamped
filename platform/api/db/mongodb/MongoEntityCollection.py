@@ -79,10 +79,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
         
-        if entity.tombstone_id is not None:
-            documentId  = self._getObjectIdFromString(entity.tombstone_id)
-            document    = self._getMongoDocumentFromId(documentId)
-            entity      = self._convertFromMongo(document)
+        # if entity.tombstone_id is not None:
+        #     documentId  = self._getObjectIdFromString(entity.tombstone_id)
+        #     document    = self._getMongoDocumentFromId(documentId)
+        #     entity      = self._convertFromMongo(document)
 
         return entity
     
@@ -95,8 +95,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         result = []
         for item in data:
             entity = self._convertFromMongo(item)
-            if entity.tombstone_id is not None:
-                entity = self.getEntity(entity.tombstone_id)
+            # if entity.tombstone_id is not None:
+            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
         return result
     
