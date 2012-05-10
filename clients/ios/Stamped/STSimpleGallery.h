@@ -14,7 +14,7 @@
 
 @property (nonatomic, readwrite, copy) NSString* layout;
 @property (nonatomic, readwrite, copy) NSString* name;
-@property (nonatomic, readwrite, copy) NSArray<STImageList>* data;
+@property (nonatomic, readwrite, copy) NSArray<STImageList>* images;
 
 + (RKObjectMapping*)mapping;
 

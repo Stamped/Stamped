@@ -214,14 +214,20 @@ class GenericSource(BasicSource):
         setAttribute('email',           'email')
         setAttribute('url',             'site')
 
+        logs.info('\n### about to enrich images and len(proxy.images) = %d' % len(proxy.images))
         images = []
         for image in proxy.images:
+            if image is None or image == '':
+                logs.info('Caught an empty image from the proxy entity %s' % (proxy,))
+                continue
+            logs.info('\n### iterating over image %s' % image)
             img = ImageSchema()
             size = ImageSizeSchema()
             size.url = image
-            img.sizes.append(size)
+            img.sizes = [size]
             images.append(img)
         if len(images) > 0:
+            logs.info('\n### adding images to entity')
             entity.images = images
             timestamps['images'] = controller.now
         

@@ -10,7 +10,7 @@
 
 @protocol STImage <NSObject>
 
-@property (nonatomic, readonly, copy) NSString* image;
+@property (nonatomic, readonly, copy) NSString* url;
 @property (nonatomic, readonly, copy) NSNumber* width;
 @property (nonatomic, readonly, copy) NSNumber* height;
 @property (nonatomic, readonly, copy) NSString* source;

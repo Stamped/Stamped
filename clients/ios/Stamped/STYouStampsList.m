@@ -26,6 +26,7 @@ static id _sharedInstance;
 - (void)setupSlice {
   STUserCollectionSlice* slice = [[[STUserCollectionSlice alloc] init] autorelease];
   slice.userID = [[STStampedAPI sharedInstance] currentUser].userID;
+  slice.sort = [STConfiguration value:@"Root.inboxSort"];
   self.genericSlice = slice;
 }
 

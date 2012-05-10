@@ -372,7 +372,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                            @"modified", @"Modified",
                            @"stamped", @"Stamped",
                            nil];
-  [STConfiguration addChoices:choices originalKey:@"Created" forKey:@"Root.inboxSort"];
+  [STConfiguration addChoices:choices originalKey:@"Stamped" forKey:@"Root.inboxSort"];
                           
   //UIColor
   

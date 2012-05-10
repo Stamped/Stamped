@@ -35,7 +35,7 @@ static CGFloat _rowHeight = 44;
         id<STImageList> imageList = [context.entityDetail.images objectAtIndex:0];
         if (imageList.sizes.count > 0) {
           id<STImage> image = [imageList.sizes objectAtIndex:0];
-          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:[image image]] andFrame:CGRectNull];
+          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.url] andFrame:CGRectNull];
           CGFloat imagePadding = 10;
           [Util reframeView:imageView withDeltas:CGRectMake(imagePadding, imagePadding, 0, 0)];
           height = MAX(CGRectGetMaxY(imageView.frame) + imagePadding, height);

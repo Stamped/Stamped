@@ -10,7 +10,7 @@
 
 @implementation STSimpleImage
 
-@synthesize image = _image;
+@synthesize url = _url;
 @synthesize width = _width;
 @synthesize height = _height;
 @synthesize source = _source;
@@ -18,7 +18,7 @@
 
 - (void)dealloc
 {
-  [_image release];
+  [_url release];
   [_width release];
   [_height release];
   [_source release];
@@ -31,7 +31,7 @@
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleImage class]];
   
   [mapping mapAttributes:
-   @"image",
+   @"url",
    @"width",
    @"height",
    @"source",

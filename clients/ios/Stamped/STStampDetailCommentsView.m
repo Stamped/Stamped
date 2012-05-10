@@ -205,9 +205,9 @@ andProfileImageSize:(STProfileImageSize)size {
       id<STImageList> imageList = [item.images objectAtIndex:0];
       if (imageList.sizes.count > 0) {
         id<STImage> image = [imageList.sizes objectAtIndex:0];
-        if (image.width && image.height && image.image) {
+        if (image.width && image.height && image.url) {
           CGSize imageSize = CGSizeMake(image.width.integerValue * [Util legacyImageScale], image.height.integerValue * [Util legacyImageScale]);
-          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.image]
+          UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.url]
                                             andFrame:CGRectMake(0, 0, imageSize.width, imageSize.height)];
           imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, MIN(200,imageSize.height))];
           [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, imageView.frame.size.height + 10)];
@@ -301,62 +301,93 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @interface STStampDetailCommentsView ()
 
-@property (nonatomic, readonly, retain) STViewContainer* commentViews;
+@property (nonatomic, readonly, assign) NSInteger index;
+@property (nonatomic, readonly, assign) STStampDetailCommentsViewStyle style;
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
 @end
 
 @implementation STStampDetailCommentsView
 
-@synthesize addCommentView = _addCommentView;
-@synthesize commentViews = _commentViews;
+@synthesize index = index_;
+@synthesize style = style_;
+@synthesize stamp = stamp_;
+@synthesize delegate = delegate_;
+
+- (void)setStamp:(id<STStamp>)stamp {
+  if (!stamp_ || ![stamp_.modified isEqualToDate:stamp.modified]) {
+    BOOL first = stamp_ == nil;
+    [stamp_ autorelease];
+    stamp_ = [stamp retain];
+    CGFloat heightBefore = self.frame.size.height;
+    for (UIView* view in [NSArray arrayWithArray:self.subviews]) {
+      [view removeFromSuperview];
+    }
+    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -self.frame.size.height)];
+    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
+    
+    STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
+    [Util appendView:topBar toParentView:self];
+    
+    UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp andIndex:index_] autorelease];
+    [Util appendView:blurbView toParentView:self];
+    if (index == 0 || YES) {
+      NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
+      for (NSInteger i = 0; i < limit; i++) {
+        NSInteger index = limit - (i + 1);
+        id<STComment> comment = [stamp.previews.comments objectAtIndex:index];
+        [Util appendView:[[[STStampDetailBarView alloc] init] autorelease] toParentView:self];
+        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
+        [Util appendView:commentView toParentView:self];
+      }
+    }
+    STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:NO] autorelease];
+    [Util appendView:bottomBar toParentView:self];
+    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
+    
+    if (!first) {
+      CGFloat heightDelta = self.frame.size.height - heightBefore;
+      NSLog(@"%f,%f,%f", heightBefore, self.frame.size.height, heightDelta);
+      [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -heightDelta)];
+      self.clipsToBounds = YES;
+      [self.delegate childView:self shouldChangeHeightBy:heightDelta overDuration:.25];
+    }
+  }
+}
 
 - (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index style:(STStampDetailCommentsViewStyle)style andDelegate:(id<STViewDelegate>)delegate
 {
   CGFloat width = _totalWidth;
   CGFloat padding_x = 5;
-  self = [super initWithDelegate:delegate andFrame:CGRectMake(padding_x, 5, width, 2)];
+  self = [super initWithFrame:CGRectMake(padding_x, 5, width, 0)];
   if (self) {
-    STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
-    [self appendChildView:topBar];
-    UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp andIndex:index] autorelease];
-    [self appendChildView:blurbView];
-    if (index == 0) {
-      NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
-      for (NSInteger i = 0; i < limit; i++) {
-        NSInteger index = limit - (i + 1);
-        id<STComment> comment = [stamp.previews.comments objectAtIndex:index];
-        [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-        STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-        [self appendChildView:commentView];
-      }
-      [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
-      STStampDetailAddCommentView* addCommentView = [[[STStampDetailAddCommentView alloc] initWithStamp:stamp] autorelease];
-      [self appendChildView:addCommentView];
-      _addCommentView = [addCommentView.textField retain];
-    }
-    STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:NO] autorelease];
-    [self appendChildView:bottomBar];
-    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
-    
+    delegate_ = delegate;
+    index_ = index;
+    style_ = style;
     self.backgroundColor = [UIColor whiteColor];
     
     self.layer.shadowColor = [UIColor blackColor].CGColor;
     self.layer.shadowOpacity = .1;
     self.layer.shadowRadius = 3.0;
     self.layer.shadowOffset = CGSizeMake(0, 1);
+    
+    [self setStamp:stamp];
   }
   return self;
 }
 
 - (void)dealloc
 {
-  [_addCommentView release];
+  [stamp_ release];
   [super dealloc];
 }
 
 - (void)reloadStampedData {
-  [super reloadStampedData];
-  
+  [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+    if (stamp) {
+      self.stamp = stamp;
+    }
+  }];
 }
 
 @end

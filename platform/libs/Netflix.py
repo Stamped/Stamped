@@ -178,7 +178,7 @@ class Netflix(object):
         )
         import pprint
         pprint.pprint (results)
-        return results.get('catalog_titles', None)
+        return results.get('catalog_title', None)
 
     def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
         """
@@ -342,6 +342,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'title' in params:       title       = params['title']
 
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
+    if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
@@ -350,7 +351,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'searchTitles'
+    methods = 'getTitleDetails'
     params['title'] = 'ghostbusters'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

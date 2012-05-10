@@ -54,6 +54,7 @@
 
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
 - (void)_deleteStampButtonPressed:(id)caller;
+- (void)commentButtonPressed;
 
 @property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
 @property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
@@ -97,16 +98,20 @@
                                           andAction:@selector(toggleToolbar:)];
     [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 10), 10, 0, 0)];
     
+    __block STStampDetailViewController* weakController = controller;
+    STCommentButton* commentButton = [[[STCommentButton alloc] initWithCallback:^{
+      [weakController commentButtonPressed];
+    }] autorelease];
     
     buttons_ = [[NSMutableArray arrayWithObjects:
                  [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
                  [[[STTodoButton alloc] initWithStamp:stamp] autorelease],
                  [[[STStampButton alloc] initWithStamp:stamp] autorelease],
-                 [[[STCommentButton alloc] initWithCallback:^{
-      [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
-    }] autorelease],
+                 commentButton,
                  [[[STShareButton alloc] initWithCallback:^{
-      [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+      [Util executeOnMainThread:^{
+        [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+      }];
     }] autorelease],
                  nil] retain];
     CGFloat buttonSpacing = 60;
@@ -212,7 +217,6 @@
                                                                index:i 
                                                                style:STStampDetailCommentsViewStyleNormal 
                                                          andDelegate:self.scrollView];
-    _commentsView.addCommentView.delegate = self;
     [self.scrollView appendChildView:_commentsView];
   }
   if ([AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
@@ -278,7 +282,6 @@
 }
 
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail {
-  NSLog(@"detail");
   CGFloat wrapperHeight = 200;
   CGRect wrapperFrame = CGRectMake(0, 0 , 320, wrapperHeight);
   STSynchronousWrapper* eDetailView = [STSynchronousWrapper wrapperForEntityDetail:detail
@@ -296,6 +299,21 @@
 
 - (UIView *)toolbar {
   return _toolbar;
+}
+
+static int _test = 0;
+
+- (void)commentButtonPressed {
+  [[STStampedAPI sharedInstance] createCommentForStampID:self.stamp.stampID 
+                                               withBlurb:[NSString stringWithFormat:@"Test comment %d\n1\n2\n3", _test++]
+                                             andCallback:^(id<STComment> comment, NSError *error) {
+    [Util reloadStampedData];
+  }];
+  /*
+  [Util executeOnMainThread:^{
+    [Util warnWithMessage:@"Not implemented yet" andBlock:nil];
+  }];
+   */
 }
 
 @end

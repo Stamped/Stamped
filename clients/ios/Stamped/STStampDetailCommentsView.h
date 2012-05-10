@@ -14,13 +14,13 @@ typedef enum {
   STStampDetailCommentsViewStyleBlurbOnly,
 } STStampDetailCommentsViewStyle;
 
-@interface STStampDetailCommentsView : STViewContainer
+@interface STStampDetailCommentsView : UIView
 
 - (id)initWithStamp:(id<STStamp>)stamp 
               index:(NSInteger)index 
               style:(STStampDetailCommentsViewStyle)style 
         andDelegate:(id<STViewDelegate>)delegate;
 
-@property (nonatomic, readonly, retain) UITextField* addCommentView;
+@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 
 @end

@@ -13,6 +13,6 @@
 
 @property (nonatomic, readonly, copy) NSString* layout;
 @property (nonatomic, readonly, copy) NSString* name;
-@property (nonatomic, readonly, copy) NSArray<STImageList>* data;
+@property (nonatomic, readonly, copy) NSArray<STImageList>* images;
 
 @end

@@ -86,7 +86,7 @@ static const NSInteger _batchSize = 20;
 
 - (void)growToCount:(NSInteger)count {
   if (!self.failed) {
-    NSLog(@"GrowTOCount:%d",count);
+    //NSLog(@"GrowTOCount:%d",count);
     if (self.count < count && !self.reachedMax) {
       NSInteger pendingCount = self.count;
       for (STGenericLazyListPending* pendingObject in self.pending) {
@@ -94,7 +94,7 @@ static const NSInteger _batchSize = 20;
       }
       if (pendingCount < count) {
         NSRange range = NSMakeRange(pendingCount, count - pendingCount);
-        NSLog(@"RequestingRange:%d,%d",range.location, range.length);
+        //NSLog(@"RequestingRange:%d,%d",range.location, range.length);
         STGenericLazyListPending* pendingObject = [[[STGenericLazyListPending alloc] initWithRange:range] autorelease];
         STCancellation* cancellation = [self fetchWithRange:range andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation2) {
           [self handlePending:pendingObject withResults:results andError:error];
@@ -107,7 +107,7 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)handlePending:(STGenericLazyListPending*)pendingObject withResults:(NSArray*)results andError:(NSError*)error {
-  NSLog(@"HandlePending:%@,%@",results, error);
+  //NSLog(@"HandlePending:%@,%@",results, error);
   if (results) {
     pendingObject.results = results;
     BOOL modified = NO;
@@ -187,7 +187,7 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)cancelPendingRequests {
-  NSLog(@"Cancelling pending operations");
+  //NSLog(@"Cancelling pending operations");
   for (STGenericLazyListPending* pendingObject in self.pending) {
     [pendingObject.cancellation cancel];
   }
@@ -219,7 +219,7 @@ static const NSInteger _batchSize = 20;
 }
 
 - (void)notifyDelegates:(SEL)selector {
-  for (NSValue* pointerValue in self.delegates) {
+  for (NSValue* pointerValue in [NSArray arrayWithArray:self.delegates.allKeys]) {
     id<STLazyListDelegate> delegate = [pointerValue pointerValue];
     NSInteger count = [[self.delegates objectForKey:pointerValue] integerValue];
     for (NSInteger i = 0; i < count; i++) {

@@ -85,7 +85,7 @@ def _initialize_image_sizes(dest):
     dest.image_url_110 = get_image_url(110)
     dest.image_url_144 = get_image_url(144)
     
-    self.image.sizes.append(ImageSizeSchema({'url': image_url }))
+    dest.image.sizes.append(ImageSizeSchema({'url': dest.image_url }))
     
     for size in [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]:
         image = ImageSizeSchema({
@@ -94,7 +94,7 @@ def _initialize_image_sizes(dest):
             'width'  : size
         })
         
-        self.image.sizes.append(image)
+        dest.image.sizes.append(image)
 
 def _formatURL(url):
     try:
@@ -204,6 +204,9 @@ def _cleanImageURL(url):
     elif 'amazon.com' in domain:
         # strip the 'look inside' image modifier
         url = amazon_image_re.sub(r'\1.jpg', url)
+    elif 'nflximg.com' in domain:
+        # replace the large boxart with hd
+        url = url.replace('/large/', '/ghd/')
 
     return url
 
@@ -780,14 +783,18 @@ class HTTPEntity(Schema):
             self.metadata.append(item)
     
     def _addImages(self, images):
+        logs.info('\n### calling addImages')
         for image in images:
+            logs.info('\n### iterating through images.  sizes: %d' % len(image.sizes))
             if len(image.sizes) == 0:
                 continue
             newimg = HTTPImageSchema()
             for size in image.sizes:
+                logs.info('\n### iterating through sizes.  size.url %s' % size.url)
                 if size.url is not None:
                     newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
+            logs.info('\n### adding image')
             self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
@@ -1431,7 +1438,6 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 for album in entity.albums:
-                    logs.info('\nalbum loop image sizes: %d' % len(album.images[0].sizes))
                     try:
                         item            = HTTPImageSchema()
                         size            = HTTPImageSizeSchema()
@@ -1458,7 +1464,6 @@ class HTTPEntity(Schema):
                         logs.info(e.message)
                         pass
                 if len(gallery.images) > 0:
-                    logs.info('\nadding gallery with %d images' % len(gallery.images))
                     self.galleries.append(gallery)
 
         elif entity.kind == 'software' and entity.isType('app'):
