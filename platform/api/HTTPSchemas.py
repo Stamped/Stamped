@@ -787,7 +787,7 @@ class HTTPEntity(Schema):
                 continue
             newimg = HTTPImageSchema()
             for size in image.sizes:
-                logs.info('\n### iteraring through sizes.  size.url %s' % size.url)
+                logs.info('\n### iterating through sizes.  size.url %s' % size.url)
                 if size.url is not None:
                     newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                     newimg.sizes.append(newsize)
