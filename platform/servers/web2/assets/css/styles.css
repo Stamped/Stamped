@@ -310,6 +310,9 @@ TODO:
 }
 .profile-image-large {
   float: left;
+  display: block;
+  width: 136px;
+  height: 136px;
 }
 .profile-image-large img {
   width: 128px;
@@ -321,8 +324,27 @@ TODO:
   -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
 }
+.profile-image-medium {
+  float: left;
+  display: block;
+  width: 58px;
+  height: 58px;
+}
+.profile-image-medium img {
+  width: 54px;
+  height: 54px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
 .profile-image-small {
   float: left;
+  display: block;
+  width: 28px;
+  height: 28px;
 }
 .profile-image-small img {
   width: 24px;
