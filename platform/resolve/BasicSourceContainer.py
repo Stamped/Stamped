@@ -129,6 +129,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         return modified_total
 
     def shouldEnrich(self, group, source, entity, timestamp=None):
+        logs.info('\n### calling shouldEnrich for source: %s   group: %s' % (source, group))
         if timestamp is None:
             timestamp = self.now
         if group in self.__groups:
