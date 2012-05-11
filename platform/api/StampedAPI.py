@@ -1817,6 +1817,9 @@ class StampedAPI(AStampedAPI):
 
         logs.debug('TOTAL TIME: %s' % (time.time() - t0))
 
+        if singleStamp:
+            return stamps[0]
+            
         return stamps
     
     def getStampBadges(self, stamp):
