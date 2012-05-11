@@ -101,7 +101,13 @@ class Memcache(object):
             logs.info('\n### memcache _import_value about to hit lambda')
             logs.info(pformat(value))
             logs.info(pformat(value.iteritems()))
-            value = dict(map(lambda k, v: (k, self._import_value(v)), value.iteritems()))
+
+            def importer(k, v):
+                logs.info('k: %s   v: %s' % (k, v))
+                return (k, self._import_value(v))
+
+            value = dict(map(importer, value.iteritems()))
+            #value = dict(map(lambda k, v: (k, self._import_value(v)), value.iteritems()))
         
         return value
     
