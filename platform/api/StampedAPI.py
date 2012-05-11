@@ -1707,7 +1707,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = user
+            userIds[user.user_id] = user.exportSchema(UserMini())
 
         logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
         t1 = time.time()
