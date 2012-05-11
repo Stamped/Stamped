@@ -100,12 +100,12 @@ class Memcache(object):
             from pprint import pformat
             logs.info('\n### memcache _import_value about to hit lambda')
             logs.info(pformat(value))
-#            iter = value.iteritems()
-#            while (True):
-#                try:
-#                    logs.info(pformat(iter.next()))
-#                except StopIteration:
-#                    pass
+            iter = value.iteritems()
+            while (True):
+                try:
+                    logs.info(pformat(iter.next()))
+                except StopIteration:
+                    break
 
             def importer(k, v):
                 logs.info('k: %s   v: %s' % (k, v))
