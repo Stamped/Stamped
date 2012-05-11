@@ -97,8 +97,6 @@ class Memcache(object):
         elif isinstance(value, (list, tuple)):
             value = map(self._import_value, value)
         elif isinstance(value, dict):
-            from pprint import pformat
-            logs.info('\n### memcache _import_value about to hit lambda')
             value = dict(map(lambda (k, v): (k, self._import_value(v)), value.iteritems()))
         
         return value
@@ -114,8 +112,7 @@ class Memcache(object):
                 # reinstantiate the Schema subclass with its prior data
                 return value['__schema__'](value['__value__'])
             else:
-                logs.info('\n### memcache _export_value about to hit lambda')
-                return dict(map(lambda k, v: (k, self._export_value(v)), value.iteritems()))
+                return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):
             value = map(self._export_value, value)
         else:
