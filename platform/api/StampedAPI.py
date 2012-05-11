@@ -1594,16 +1594,13 @@ class StampedAPI(AStampedAPI):
         
         return None
     
-    def _enrichStampObjectsNew(self, stampData, **kwargs):
+    def _enrichStampObjects(self, stampData, **kwargs):
         t0 = time.time()
         t1 = t0
 
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
-
-        ### HACK UNTIL PAGING ISSUE IS RESOLVED
-        origLen = len(stampData)
 
         singleStamp = False
         if not isinstance(stampData, list):
@@ -1810,189 +1807,12 @@ class StampedAPI(AStampedAPI):
 
         logs.debug('Time for stamp iteration: %s' % (time.time() - t1))
 
-        ### HACK UNTIL PAGING ISSUE IS RESOLVED
-        while len(stamps) < origLen:
-            stamps.append(stamps[len(stamps)-1])
+        ### TEMP: Verify no missing stamps
+        if len(stamps) < len(stampData):
+            logs.warning("Original stampData: %s" % stampData)
+            raise Exception("Missing stamps!")
 
         logs.debug('TOTAL TIME: %s' % (time.time() - t0))
-
-        return stamps
-
-    def _enrichStampObjects(self, stampData, **kwargs):
-        authUserId  = kwargs.pop('authUserId', None)
-        entityIds   = kwargs.pop('entityIds', {})
-        userIds     = kwargs.pop('userIds', {})
-
-        ### HACK UNTIL PAGING ISSUE IS RESOLVED
-        origLen = len(stampData)
-
-        singleStamp = False
-        if not isinstance(stampData, list):
-            singleStamp = True
-            stampData   = [stampData]
-        
-        # Users
-        if len(userIds) == 0:
-            for stamp in stampData:
-                # Grab user_id from stamp
-                userIds[stamp.user_id] = 1
-                
-                # Grab user_id from credit
-                for credit in stamp.credit:
-                    userIds[credit.user_id] = 1
-                
-                # Grab user_id from comments
-                for comment in stamp.previews.comments:
-                    userIds[comment.user_id] = 1
-        
-        # Entities
-        if len(entityIds) == 0:
-            for stamp in stampData:
-                # Grab entity_id from stamp
-                entityIds[stamp.entity_id] = 1
-            
-            # TODO: don't fetch entity if it's already filled in
-            entities = self._entityDB.getEntities(entityIds.keys())
-            
-            for entity in entities:
-                entityIds[entity.entity_id] = entity
-
-        # Likes
-        ### TODO: Rewrite to minimze db calls
-        likeUserIds = {}
-        for stamp in stampData:
-            likeUserIds[stamp.stamp_id] = self._stampDB.getStampLikes(stamp.stamp_id)[:10]
-            for likeUserId in likeUserIds[stamp.stamp_id]:
-                if likeUserId not in userIds:
-                    userIds[likeUserId] = 1
-
-        # Todos
-        ### TODO: Rewrite to minimize db calls
-        todoUserIds = {}
-        for stamp in stampData:
-            todoUserIds[stamp.stamp_id] = self._favoriteDB.getFavoritesFromEntityId(stamp.entity.entity_id)[:10]
-            for todoUserId in todoUserIds[stamp.stamp_id]:
-                if todoUserId not in userIds:
-                    userIds[todoUserId] = 1
-
-        # Credit
-        creditIds = {}
-        for stamp in stampData:
-            creditIds[stamp.stamp_id] = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=10)
-            for creditItem in creditIds[stamp.stamp_id]:
-                if creditItem.user.user_id not in userIds:
-                    userIds[creditItem.user.user_id] = 1
-
-        # Users
-        if 1 in userIds.values():
-            users = self._userDB.lookupUsers(userIds.keys(), None)
-            for user in users:
-                userIds[user.user_id] = user.exportSchema(UserMini())
-
-        
-        if authUserId:
-            ### TODO: Intelligent matching with stampId
-            # Favorites
-            favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
-            
-            ### TODO: Intelligent matching with stampId
-            # Likes
-            likes = self._stampDB.getUserLikes(authUserId)
-        
-        # Add user objects to stamps
-        stamps = []
-        for stamp in stampData:
-            # Add stamp user
-            ### TODO: Check that userIds != 1 (i.e. user still exists)?
-            if userIds[stamp.user_id] == 1:
-                msg = 'Unable to match user_id %s for stamp id %s' % (stamp.user_id, stamp.stamp_id)
-                logs.warning(msg)
-                continue
-            else:
-                stamp.user = userIds[stamp.user_id]
-            
-            # Add entity
-            if entityIds[stamp.entity_id] == 1:
-                msg = 'Unable to match entity_id %s for stamp_id %s' % (stamp.entity_id, stamp.stamp_id)
-                logs.warning(msg)
-                continue
-            else:
-                stamp.entity = entityIds[stamp.entity_id]
-            
-            # Add credited user(s)
-            if stamp.credit is not None:
-                credits = []
-                for i in xrange(len(stamp.credit)):
-                    creditedUser = userIds[stamp.credit[i].user_id]
-                    
-                    if creditedUser == 1:
-                        msg = 'Unable to match user_id %s for credit on stamp id %s' % \
-                            (stamp.credit[i].user_id, stamp.stamp_id)
-                        logs.warning(msg)
-                        continue
-                    
-                    credit = CreditSchema()
-                    credit.user_id          = stamp.credit[i].user_id
-                    credit.stamp_id         = stamp.credit[i].stamp_id
-                    credit.screen_name      = creditedUser['screen_name']
-                    credit.color_primary    = creditedUser['color_primary']
-                    credit.color_secondary  = creditedUser['color_secondary']
-                    credit.privacy          = creditedUser['privacy']
-                    credits.append(credit)
-                
-                stamp.credit = credits
-            
-            # Add commenting user(s)
-            if len(stamp.previews.comments) > 0:
-                comments = []
-                
-                for i in xrange(len(stamp.previews.comments)):
-                    commentingUser = userIds[stamp.previews.comments[i].user_id]
-                    
-                    if commentingUser != 1:
-                        stamp.previews.comments[i].user = commentingUser
-                        comments.append(stamp.previews.comments[i])
-                
-                stamp.previews.comments = comments
-
-            # Add likes
-            stamp.previews.likes = []
-            for likeUserId in likeUserIds[stamp.stamp_id]:
-                assert userIds[likeUserId] != 1
-                stamp.previews.likes.append(userIds[likeUserId])
-
-            # Add todos
-            stamp.previews.todos = []
-            for todoUserId in todoUserIds[stamp.stamp_id]:
-                assert userIds[todoUserId] != 1
-                stamp.previews.todos.append(userIds[todoUserId])
-
-            # Add restamps
-            stamp.previews.credits = []
-            for credit in creditIds[stamp.stamp_id]:
-                assert userIds[credit.user.user_id] != 1
-                assert entityIds[credit.entity.entity_id] != 1
-                credit.user = userIds[credit.user.user_id]
-                credit.entity = entityIds[credit.entity.entity_id]
-                stamp.previews.credits.append(credit)
-            
-            if authUserId:
-                # Mark as favorited
-                if stamp.entity_id in favorites:
-                    stamp.is_fav = True
-                
-                # Mark as liked
-                if stamp.stamp_id in likes:
-                    stamp.is_liked = True
-            
-            stamps.append(stamp)
-        
-        if singleStamp == True:
-            return stamps[0]
-
-        ### HACK UNTIL PAGING ISSUE IS RESOLVED
-        while len(stamps) < origLen:
-            stamps.append(stamps[len(stamps)-1])
 
         return stamps
     
