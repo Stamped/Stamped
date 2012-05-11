@@ -135,7 +135,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     result      = HTTPStampedBy()
 
     if http_schema.group is None:
-        data = entityStampedBy(self, entityId, authUserId)
+        data = stampedAPI.entityStampedBy(self, entityId, authUserId)
         result.all.count        = data['all_count']
         result.all.stamps       = data['all_preview']
         result.friends.count    = data['friends_count']
