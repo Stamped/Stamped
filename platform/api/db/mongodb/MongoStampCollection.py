@@ -71,8 +71,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         document['entity'] = {'entity_id': entity.entity_id}
         
         stamp = self._obj(document, overflow=self._overflow)
-        stamp.entity = entity 
-        
+        stamp.entity = entity
+
         return stamp 
     
     ### PUBLIC
