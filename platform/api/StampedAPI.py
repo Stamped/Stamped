@@ -2848,7 +2848,7 @@ class StampedAPI(AStampedAPI):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
 
         # TODO: deprecate with new clients going forward
-        genericCollectionSlice.deleted = True
+        # genericCollectionSlice.deleted = True
         
         return self._getStampCollection(authUserId, stampIds, genericCollectionSlice)
     
