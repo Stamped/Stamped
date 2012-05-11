@@ -490,7 +490,7 @@ class HTTPUser(Schema):
         self.distribution       = SchemaList(HTTPCategoryDistribution())
 
     def importSchema(self, schema, client=None):
-        if schema.__class__.__name__ in ('Account', 'User'):
+        if schema.__class__.__name__ in ('Account', 'User', 'Schemas.User'):
             self.importData(schema.exportSparse(), overflow=True)
             
             stats = schema.stats.exportSparse()
