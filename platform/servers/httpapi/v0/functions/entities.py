@@ -133,8 +133,17 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     showCount   = True if http_schema.group is None else False
     
     result      = HTTPStampedBy()
+
+    if http_schema.group is None:
+        data = entityStampedBy(self, entityId, authUserId)
+        result.all.count        = data['all_count']
+        result.all.stamps       = data['all_preview']
+        result.friends.count    = data['friends_count']
+        result.friends.stamps   = data['friends_preview']
+        result.fof.count        = data['fof_count']
+        result.fof.stamps       = data['fof_preview']
     
-    if http_schema.group is None or http_schema.group == 'friends':
+    elif http_schema.group == 'friends':
         requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 1
         
@@ -145,7 +154,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         if count is not None:
             result.friends.count = count
     
-    if http_schema.group is None or http_schema.group == 'fof':
+    elif http_schema.group == 'fof':
         requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
         requestSlice.inclusive = False
@@ -157,7 +166,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         if count is not None:
             result.fof.count = count
     
-    if http_schema.group is None or http_schema.group == 'all':
+    elif http_schema.group == 'all':
         requestSlice  = http_schema.exportSchema(GenericCollectionSlice())
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         

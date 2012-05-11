@@ -1481,8 +1481,8 @@ class StampedAPI(AStampedAPI):
         friendUserIds   = self._friendshipDB.getFriends(authUserId)
         friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-        result['friend_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
-        result['friend_count']      = len(friendStamps)
+        result['friends_preview']    = self._enrichStampObjects(friendStamps[:limit]) 
+        result['friends_count']      = len(friendStamps)
 
         fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
         fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
