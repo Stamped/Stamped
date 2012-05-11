@@ -2361,6 +2361,7 @@ class StampedAPI(AStampedAPI):
 
     def updateStampStatsAsync(self, stampId):
         stats                   = StampStats()
+        stats.stamp_id          = stampId
 
         MAX_PREVIEW             = 10
         stamp                   = self._stampDB.getStamp(stampId)
