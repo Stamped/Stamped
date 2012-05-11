@@ -1749,7 +1749,7 @@ class StampedAPI(AStampedAPI):
                 # Previews
                 try:
                     for stat in stats:
-                        if stat.stamp_id == stamp.stamp_id:
+                        if str(stat.stamp_id) == str(stamp.stamp_id):
                             break 
                     else:
                         stat = None
@@ -1758,29 +1758,29 @@ class StampedAPI(AStampedAPI):
                         # Likes
                         stamp.previews.likes = []
                         for like in stat.preview_likes:
-                            stamp.previews.likes.append(userIds[like])
+                            stamp.previews.likes.append(userIds[str(like)])
                         
                         # Todos
                         stamp.previews.todos = []
                         for todo in stat.preview_todos:
-                            stamp.previews.todos.append(userIds[todo])
+                            stamp.previews.todos.append(userIds[str(todo)])
 
                         # Credits
                         stamp.previews.credits = []
-                        for credit in stat.preview_credits:
-                            credit = underlyingStampIds[credit]
-                            credit.user = userIds[credit.user.user_id]
-                            credit.entity = entityIds[stamp.entity.entity_id]
+                        for i in stat.preview_credits:
+                            credit = underlyingStampIds[str(i)]
+                            credit.user = userIds[str(credit.user.user_id)]
+                            credit.entity = entityIds[str(stamp.entity.entity_id)]
                             stamp.previews.credits.append(credit)
 
                     else:
-                        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+                        tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
 
                     # Comments
                     comments = []
                     for comment in stamp.previews.comments:
                         try:
-                            comment.user = userIds[comment.user.user_id]
+                            comment.user = userIds[str(comment.user.user_id)]
                             comments.append(comment)
                         except KeyError, e:
                             logs.warning("Key error for comment / user: %s" % comment)
@@ -1789,7 +1789,6 @@ class StampedAPI(AStampedAPI):
 
                 except KeyError, e:
                     logs.warning("Key error: %s" % e)
-                    continue
 
                 # User-specific attributes
                 if authUserId:
