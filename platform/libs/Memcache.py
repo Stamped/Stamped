@@ -100,7 +100,7 @@ class Memcache(object):
             from pprint import pformat
             logs.info('\n### memcache _import_value about to hit lambda')
             logs.info(pformat(value))
-            iter = value.iteriterms()
+            iter = value.iteritems()
             while (True):
                 try:
                     logs.info(pformat(iter.next()))
