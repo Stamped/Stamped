@@ -1773,15 +1773,19 @@ class StampedAPI(AStampedAPI):
                             credit.entity = entityIds[stamp.entity.entity_id]
                             stamp.previews.credits.append(credit)
 
-                        # Comments
-                        comments = []
-                        for comment in stamp.previews.comments:
-                            comment.user = userIds[comment.user.user_id]
-                            comments.append(comment)
-                        stamp.previews.comments = comments
-
                     else:
                         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+                    # Comments
+                    comments = []
+                    for comment in stamp.previews.comments:
+                        try:
+                            comment.user = userIds[comment.user.user_id]
+                            comments.append(comment)
+                        except KeyError, e:
+                            logs.warning("Key error for comment / user: %s" % comment)
+                            continue
+                    stamp.previews.comments = comments
 
                 except KeyError, e:
                     logs.warning("Key error: %s" % e)
