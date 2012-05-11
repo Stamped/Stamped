@@ -107,7 +107,8 @@ class Memcache(object):
                 except StopIteration:
                     break
 
-            def importer(k, v):
+            def importer(data):
+                k, v = data
                 logs.info('k: %s   v: %s' % (k, v))
                 return (k, self._import_value(v))
 
