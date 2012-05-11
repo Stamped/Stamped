@@ -99,21 +99,7 @@ class Memcache(object):
         elif isinstance(value, dict):
             from pprint import pformat
             logs.info('\n### memcache _import_value about to hit lambda')
-            logs.info(pformat(value))
-            iter = value.iteritems()
-            while (True):
-                try:
-                    logs.info(pformat(iter.next()))
-                except StopIteration:
-                    break
-
-            def importer(data):
-                k, v = data
-                logs.info('k: %s   v: %s' % (k, v))
-                return (k, self._import_value(v))
-
-            value = dict(map(importer, value.iteritems()))
-            #value = dict(map(lambda k, v: (k, self._import_value(v)), value.iteritems()))
+            value = dict(map(lambda (k, v): (k, self._import_value(v)), value.iteritems()))
         
         return value
     
