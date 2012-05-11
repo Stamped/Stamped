@@ -154,7 +154,6 @@ def memcached_function(time=0, min_compress_len=0):
         
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
-            logs.info('\n### wrapper in memcached')
             # note: treat args[0] specially (self)
             self  = args[0].__class__.__name__
             args2 = args[1:]
