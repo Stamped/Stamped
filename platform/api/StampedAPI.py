@@ -1747,50 +1747,49 @@ class StampedAPI(AStampedAPI):
                 stamp.credit = credits
 
                 # Previews
-                try:
-                    for stat in stats:
-                        if str(stat.stamp_id) == str(stamp.stamp_id):
-                            break 
-                    else:
-                        stat = None
+                for stat in stats:
+                    if str(stat.stamp_id) == str(stamp.stamp_id):
+                        break 
+                else:
+                    stat = None
 
-                    if stat is not None:
-                        # Likes
-                        stamp.previews.likes = []
-                        for like in stat.preview_likes:
-                            try:
-                                stamp.previews.likes.append(userIds[str(like)])
-                            except KeyError:
-                                logs.warning("Key error for like (user_id = %s)" % like)
-                                continue
-                        
-                        # Todos
-                        stamp.previews.todos = []
-                        for todo in stat.preview_todos:
-                            try:
-                                stamp.previews.todos.append(userIds[str(todo)])
-                            except KeyError:
-                                logs.warning("Key error for todo (user_id = %s)" % todo)
-                                continue
+                if stat is not None:
+                    # Likes
+                    stamp.previews.likes = []
+                    for like in stat.preview_likes:
+                        try:
+                            stamp.previews.likes.append(userIds[str(like)])
+                        except KeyError:
+                            logs.warning("Key error for like (user_id = %s)" % like)
+                            logs.debug("Stamp: %s" % stamp)
+                            continue
+                    
+                    # Todos
+                    stamp.previews.todos = []
+                    for todo in stat.preview_todos:
+                        try:
+                            stamp.previews.todos.append(userIds[str(todo)])
+                        except KeyError:
+                            logs.warning("Key error for todo (user_id = %s)" % todo)
+                            logs.debug("Stamp: %s" % stamp)
+                            continue
 
-                        # Credits
-                        stamp.previews.credits = []
-                        for i in stat.preview_credits:
-                            try:
-                                credit = underlyingStampIds[str(i)]
-                                credit.user = userIds[str(credit.user.user_id)]
-                                credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                stamp.previews.credits.append(credit)
-                            except KeyError, e:
-                                logs.warning("Key error for credit (stamp_id = %s)" % i)
-                                logs.warning("Error: %s" % e)
-                                continue
+                    # Credits
+                    stamp.previews.credits = []
+                    for i in stat.preview_credits:
+                        try:
+                            credit = underlyingStampIds[str(i)]
+                            credit.user = userIds[str(credit.user.user_id)]
+                            credit.entity = entityIds[str(stamp.entity.entity_id)]
+                            stamp.previews.credits.append(credit)
+                        except KeyError, e:
+                            logs.warning("Key error for credit (stamp_id = %s)" % i)
+                            logs.warning("Error: %s" % e)
+                            logs.debug("Stamp: %s" % stamp)
+                            continue
 
-                    else:
-                        tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
-
-                except KeyError, e:
-                    logs.warning("Key error: %s" % e)
+                else:
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
 
                 # Comments
                 comments = []
@@ -1800,6 +1799,7 @@ class StampedAPI(AStampedAPI):
                         comments.append(comment)
                     except KeyError, e:
                         logs.warning("Key error for comment / user: %s" % comment)
+                        logs.debug("Stamp: %s" % stamp)
                         continue
                 stamp.previews.comments = comments
 
@@ -1817,16 +1817,12 @@ class StampedAPI(AStampedAPI):
 
             except KeyError, e:
                 logs.warning("Fatal key error: %s" % e)
+                logs.debug("Stamp: %s" % stamp)
                 continue 
             except Exception:
                 raise
 
         logs.debug('Time for stamp iteration: %s' % (time.time() - t1))
-
-        ### TEMP: Verify no missing stamps
-        if len(stamps) < len(stampData):
-            logs.warning("Original stampData: %s" % stampData)
-            raise Exception("Missing stamps!")
 
         logs.debug('TOTAL TIME: %s' % (time.time() - t0))
 
@@ -2806,6 +2802,10 @@ class StampedAPI(AStampedAPI):
         if genericCollectionSlice.limit is None:
             genericCollectionSlice.limit = stampCap
 
+        # Buffer of 5 additional stamps
+        limit = genericCollectionSlice.limit
+        genericCollectionSlice.limit = limit + 5
+
         # Adjustment for multiple blurbs to use "stamped" timestamp instead of "created"
         if genericCollectionSlice.sort == 'created':
             genericCollectionSlice.sort = 'stamped'
@@ -2813,6 +2813,10 @@ class StampedAPI(AStampedAPI):
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
         
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = stamps[:limit]
+
+        if len(stampData) >= limit and len(stamps) >= limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
         
         if self.__version == 0:
             if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created', 'stamped']):
