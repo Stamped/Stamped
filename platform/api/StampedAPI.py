@@ -1758,37 +1758,50 @@ class StampedAPI(AStampedAPI):
                         # Likes
                         stamp.previews.likes = []
                         for like in stat.preview_likes:
-                            stamp.previews.likes.append(userIds[str(like)])
+                            try:
+                                stamp.previews.likes.append(userIds[str(like)])
+                            except KeyError:
+                                logs.warning("Key error for like (user_id = %s)" % like)
+                                continue
                         
                         # Todos
                         stamp.previews.todos = []
                         for todo in stat.preview_todos:
-                            stamp.previews.todos.append(userIds[str(todo)])
+                            try:
+                                stamp.previews.todos.append(userIds[str(todo)])
+                            except KeyError:
+                                logs.warning("Key error for todo (user_id = %s)" % todo)
+                                continue
 
                         # Credits
                         stamp.previews.credits = []
                         for i in stat.preview_credits:
-                            credit = underlyingStampIds[str(i)]
-                            credit.user = userIds[str(credit.user.user_id)]
-                            credit.entity = entityIds[str(stamp.entity.entity_id)]
-                            stamp.previews.credits.append(credit)
+                            try:
+                                credit = underlyingStampIds[str(i)]
+                                credit.user = userIds[str(credit.user.user_id)]
+                                credit.entity = entityIds[str(stamp.entity.entity_id)]
+                                stamp.previews.credits.append(credit)
+                            except KeyError, e:
+                                logs.warning("Key error for credit (stamp_id = %s)" % i)
+                                logs.warning("Error: %s" % e)
+                                continue
 
                     else:
                         tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
 
-                    # Comments
-                    comments = []
-                    for comment in stamp.previews.comments:
-                        try:
-                            comment.user = userIds[str(comment.user.user_id)]
-                            comments.append(comment)
-                        except KeyError, e:
-                            logs.warning("Key error for comment / user: %s" % comment)
-                            continue
-                    stamp.previews.comments = comments
-
                 except KeyError, e:
                     logs.warning("Key error: %s" % e)
+
+                # Comments
+                comments = []
+                for comment in stamp.previews.comments:
+                    try:
+                        comment.user = userIds[str(comment.user.user_id)]
+                        comments.append(comment)
+                    except KeyError, e:
+                        logs.warning("Key error for comment / user: %s" % comment)
+                        continue
+                stamp.previews.comments = comments
 
                 # User-specific attributes
                 if authUserId:
@@ -1819,7 +1832,7 @@ class StampedAPI(AStampedAPI):
 
         if singleStamp:
             return stamps[0]
-            
+
         return stamps
     
     def getStampBadges(self, stamp):
