@@ -273,7 +273,7 @@ class S3ImageDB(AImageDB):
 
         try:
             image.save(out, 'jpeg', optimize=True)
-        except IOError:
+        except IOError as e:
             ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
             image.save(out, 'jpeg', optimize=True)
         
@@ -302,14 +302,16 @@ class S3ImageDB(AImageDB):
     def _addDataToS3(self, name, data, contentType):
         num_retries = 0
         max_retries = 5
-        
+
         while True:
             try:
                 conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
                 bucket = conn.lookup(self.bucket_name)
                 key = Key(bucket, name)
                 key.set_metadata('Content-Type', contentType)
-                key.set_contents_from_file(data, policy='public-read')
+                # for some reason, if we use set_contents_from_file here, an empty file is created
+                key.set_contents_from_string(data.getvalue(), policy='public-read')
+                #key.set_contents_from_file(data, policy='public-read')
                 key.close()
                 return key
 
