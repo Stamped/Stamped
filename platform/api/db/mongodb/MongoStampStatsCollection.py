@@ -41,7 +41,7 @@ class MongoStampStatsCollection(AMongoCollection):
 
     def saveStampStats(self, stats):
         document = self._convertToMongo(stats)
-        self._collection.save(document, safe=True, upsert=True)
+        self._collection.save(document, safe=True)
         return self._convertFromMongo(document)
     
     def removeStampStats(self, entityId):

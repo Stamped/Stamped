@@ -490,7 +490,7 @@ class HTTPUser(Schema):
         self.distribution       = SchemaList(HTTPCategoryDistribution())
 
     def importSchema(self, schema, client=None):
-        if schema.__class__.__name__ in ('Account', 'User'):
+        if schema.__class__.__name__ in ('Account', 'User', 'Schemas.User'):
             self.importData(schema.exportSparse(), overflow=True)
             
             stats = schema.stats.exportSparse()
@@ -704,6 +704,17 @@ class HTTPEndpointResponse(Schema):
 # Entities #
 # ######## #
 
+def _addImages(dest, images):
+    for image in images:
+        if len(image.sizes) == 0:
+            continue
+        newimg = HTTPImageSchema()
+        for size in image.sizes:
+            if size.url is not None:
+                newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
+                newimg.sizes.append(newsize)
+        dest.images.append(newimg)
+
 class HTTPEntity(Schema):
     def setSchema(self):
         # Core
@@ -781,21 +792,6 @@ class HTTPEntity(Schema):
                 item.action = kwargs['action']
 
             self.metadata.append(item)
-    
-    def _addImages(self, images):
-        logs.info('\n### calling addImages')
-        for image in images:
-            logs.info('\n### iterating through images.  sizes: %d' % len(image.sizes))
-            if len(image.sizes) == 0:
-                continue
-            newimg = HTTPImageSchema()
-            for size in image.sizes:
-                logs.info('\n### iterating through sizes.  size.url %s' % size.url)
-                if size.url is not None:
-                    newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
-                    newimg.sizes.append(newsize)
-            logs.info('\n### adding image')
-            self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
         try:
@@ -1528,7 +1524,7 @@ class HTTPEntity(Schema):
             # Don't add an image if coordinates exist
             del(self.images)
         elif len(entity.images) > 0:
-            self._addImages(entity.images)
+            _addImages(self, entity.images)
 
         return self
             
@@ -1668,7 +1664,8 @@ class HTTPEntityMini(Schema):
             self.subtitle           = schema.subtitle
             self.category           = schema.category
             self.subcategory        = schema.subcategory
-            self.images             = schema.images
+            _addImages(self, schema.images)
+
 
             try:
                 if 'coordinates' in schema.value:
@@ -1979,6 +1976,8 @@ class HTTPStamp(Schema):
                 for image in content.images:
                     img = HTTPImageSchema()
                     img.importSchema(image)
+                    # quick fix for now
+                    # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
