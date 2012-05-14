@@ -1932,10 +1932,11 @@ class StampedAPI(AStampedAPI):
             # Add image dimensions to stamp object
             image           = ImageSchema()
             size            = ImageSizeSchema()
+            #size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/users'
             size.width      = imageWidth
             size.height     = imageHeight
             image.sizes.append(size)
-            content.images  = [ image ]
+            content.images.append(image)
 
             imageExists     = True
 
