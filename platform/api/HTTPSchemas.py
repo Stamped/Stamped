@@ -2996,7 +2996,8 @@ class HTTPEntity_stampedtest(Schema):
 
             # TODO: Image
             if len(schema.images) > 0:
-                self.image = self._handle_image(schema.images[0]['image'])
+                if len(schema.images[0].sizes) > 0:
+                    self.image = self._handle_image(schema.images[0].sizes[0]['url'])
 
             # Affiliates
 
