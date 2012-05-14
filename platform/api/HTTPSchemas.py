@@ -1994,12 +1994,13 @@ class HTTPStamp(Schema):
                 self.num_likes          = schema.num_likes
             
             self.num_todos = 0
-            if schema.num_todos > 0:
-                self.num_todos          = schema.num_todos
+            if schema.stats is not None:
+                if schema.stats.num_todos > 0:
+                    self.num_todos          = schema.stats.num_todos
             
             self.num_credits = 0
-            if schema.num_credits > 0:
-                self.num_credits        = schema.num_credits
+            if len(schema.credits) > 0:
+                self.num_credits        = len(schema.credits)
             
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
