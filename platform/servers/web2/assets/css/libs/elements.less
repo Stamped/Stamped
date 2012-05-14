@@ -42,6 +42,14 @@
     background: -o-linear-gradient(@start, @c0, @c1, @c2);
 }
 
+.linear-gradient2(@start: left, @c0, @c1) {
+    background: @c0;
+    background: -webkit-linear-gradient(@start, @c0, @c1);
+    background: -moz-linear-gradient(@start, @c0, @c1);
+    background: -ms-linear-gradient(@start, @c0, @c1);
+    background: -o-linear-gradient(@start, @c0, @c1);
+}
+
 .bordered(@top-color: #EEE, @right-color: #EEE, @bottom-color: #EEE, @left-color: #EEE) {
     border-top: solid 1px @top-color;
     border-left: solid 1px @left-color;

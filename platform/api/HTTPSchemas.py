@@ -1918,8 +1918,12 @@ class HTTPStamp(Schema):
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
         self.stamped            = SchemaElement(basestring)
+        
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
+        self.num_todos          = SchemaElement(int)
+        self.num_credits        = SchemaElement(int)
+        
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
     
@@ -1989,6 +1993,14 @@ class HTTPStamp(Schema):
             self.num_likes = 0
             if schema.num_likes > 0:
                 self.num_likes          = schema.num_likes
+            
+            self.num_todos = 0
+            if schema.num_todos > 0:
+                self.num_todos          = schema.num_todos
+            
+            self.num_credits = 0
+            if schema.num_credits > 0:
+                self.num_credits        = schema.num_credits
             
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
