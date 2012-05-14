@@ -28,7 +28,7 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.exportSparse())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityIdSearchId)
+@handleHTTPRequest(http_schema=HTTPEntityIdSearchId)
 @require_http_methods(["GET"])
 def show(request, authUserId, authClientId, http_schema, **kwargs):
     entity      = stampedAPI.getEntity(http_schema, authUserId)
@@ -127,38 +127,52 @@ def menu(request, authUserId, http_schema, **kwargs):
     return transformOutput(http_menu.exportSparse())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampedBySlice)
+@handleHTTPRequest(http_schema=HTTPStampedBySlice)
 @require_http_methods(["GET"])
 def stampedBy(request, authUserId, http_schema, **kwargs):
     showCount   = True if http_schema.group is None else False
     
     result      = HTTPStampedBy()
 
-    if authUserId is not None:
-        if http_schema.group is None or http_schema.group == 'friends':
-            requestSlice = http_schema.exportSchema(FriendsSlice())
-            requestSlice.distance = 1
+    if http_schema.group is None:
+        data = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+        result.all.count        = data['all_count']
+        result.friends.count    = data['friends_count']
+        result.fof.count        = data['fof_count']
 
-            stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        for stamp in data['all_preview']:
+            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
 
-            for stamp in stamps:
-                result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
-            if count is not None:
-                result.friends.count = count
+        for stamp in data['friends_preview']:
+            result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
 
-        if http_schema.group is None or http_schema.group == 'fof':
-            requestSlice = http_schema.exportSchema(FriendsSlice())
-            requestSlice.distance = 2
-            requestSlice.inclusive = False
-
-            stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
-
-            for stamp in stamps:
-                result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
-            if count is not None:
-                result.fof.count = count
+        for stamp in data['fof_preview']:
+            result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
     
-    if http_schema.group is None or http_schema.group == 'all':
+    elif http_schema.group == 'friends':
+        requestSlice = http_schema.exportSchema(FriendsSlice())
+        requestSlice.distance = 1
+        
+        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        
+        for stamp in stamps:
+            result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if count is not None:
+            result.friends.count = count
+    
+    elif http_schema.group == 'fof':
+        requestSlice = http_schema.exportSchema(FriendsSlice())
+        requestSlice.distance = 2
+        requestSlice.inclusive = False
+        
+        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
+        
+        for stamp in stamps:
+            result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if count is not None:
+            result.fof.count = count
+    
+    elif http_schema.group == 'all':
         requestSlice  = http_schema.exportSchema(GenericCollectionSlice())
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         

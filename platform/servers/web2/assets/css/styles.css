@@ -188,33 +188,12 @@ header a.button {
   display: inline-block;
   width: 5em;
 }
-/*
-
-@color: color(`window.colors.baseColor`);
-@darkcolor: darken(@color, 10%);
-
-TODO:
-    * dynamic color scheme constants (e.g., constants that change per page)
-        * like a uniform variable in a shader language
-        * options:
-            * modify CSS onload via javascript
-                * downside: requires javascript
-            * separate generic styles from templated, customized styles generated server-side
-                * styles.css and custom.css?variables... (version should be one optional variable)
-                * generate and *cache* custom.css stylesheets w/ long TTL
-                * downside: harder to take advantage of CDN caching?
-                * NOTE: possibly wouldn't need to reference custom.css directly; could be inlined on page
-            * attempt to inline style on page to override !important colors?
-                * downside: wouldn't easily support static operations
-                * NOTE: static stylesheet would need to use less runtime in order to utilize javascript
-                    * this implies that it is better suited elsewhere!
-*/
 .user-logo {
-  width: 195px;
-  height: 195px;
   position: absolute;
   top: -125px;
   left: -125px;
+  width: 195px;
+  height: 195px;
   z-index: 101;
 }
 .profile-header-wrapper {

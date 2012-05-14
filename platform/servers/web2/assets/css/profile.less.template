@@ -29,9 +29,6 @@
 @secondary: darken( @user_dark,  10%);
 
 .user-gradient(@angle: 135deg) {
-    width:  100%;
-    margin: 0;
-    
     background: -webkit-linear-gradient(@angle, @primary, @secondary);
     background: -moz-linear-gradient(@angle, @primary, @secondary);
     background: -o-linear-gradient(@angle, @primary, @secondary);
@@ -41,14 +38,42 @@
 .profile-header {
     .profile-header-pre {
         .user-gradient(135deg);
+        
+        width:  100%;
+        margin: 0;
     }
     
     .profile-header-post {
         .user-gradient(135deg);
         
+        width:  100%;
+        margin: 0;
+        
         .inset-stamp .number {
             color: @user_dark;
         }
+    }
+}
+
+.user-logo {
+    {{#user}}
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png);
+    {{/user}}
+}
+
+/* target webkit-browsers */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .user-logo {
+        .user-gradient(135deg);
+        
+        @mask-image: url(/assets/img/stamped_logo_mask.png);
+        /*width:  212px;
+        height: 212px;*/
+        
+        -webkit-mask: @mask-image no-repeat;
+        -moz-mask: @mask-image no-repeat;
+        -o-mask: @mask-image no-repeat;
+        mask: @mask-image no-repeat;
     }
 }
 
