@@ -417,6 +417,17 @@ class StampTimestampSchema(TimestampSchema):
         TimestampSchema.setSchema(self)
         self.stamped            = SchemaElement(datetime)
 
+class StampedBy(Schema):
+    def setSchema(self):
+        self.friends            = StampedByGroup()
+        self.fof                = StampedByGroup()
+        self.all                = StampedByGroup()
+
+class StampedByGroup(Schema):
+    def setSchema(self):
+        self.count              = SchemaElement(int)
+        self.stamps             = SchemaList(Stamp())
+
 
 # ######## #
 # Comments #

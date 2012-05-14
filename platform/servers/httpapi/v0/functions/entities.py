@@ -135,21 +135,8 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     result      = HTTPStampedBy()
 
     if http_schema.group is None:
-        data = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
-        result.all.count        = data['all_count']
-
-        for stamp in data['all_preview']:
-            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
-
-        if authUserId is not None:
-            result.friends.count    = data['friends_count']
-            result.fof.count        = data['fof_count']
-
-            for stamp in data['friends_preview']:
-                result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
-
-            for stamp in data['fof_preview']:
-                result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+        stampedby = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+        result.importSchema(stampedby)
 
     elif http_schema.group == 'friends' and authUserId is not None:
         requestSlice = http_schema.exportSchema(FriendsSlice())

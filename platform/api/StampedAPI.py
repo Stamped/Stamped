@@ -1471,27 +1471,28 @@ class StampedAPI(AStampedAPI):
         popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
         popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
 
-        result = {}
-        result['all_preview']   = self._enrichStampObjects(popularStamps)
-        result['all_count']     = stats.num_stamps
+        stampedby = StampedBy()
+
+        stampedby.all.stamps = self._enrichStampObjects(popularStamps)
+        stampedby.all.count  = stats.num_stamps
 
         if authUserId is None:
-            return result
+            return stampedby
 
         friendUserIds   = self._friendshipDB.getFriends(authUserId)
         friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-        result['friends_preview']    = self._enrichStampObjects(friendStamps[:limit])
-        result['friends_count']      = len(friendStamps)
+        stampedby.friends.stamps    = self._enrichStampObjects(friendStamps[:limit])
+        stampedby.friends.count     = len(friendStamps)
 
         fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
         fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
         fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
 
-        result['fof_preview']   = self._enrichStampObjects(fofStamps[:limit])
-        result['fof_count']     = len(fofStamps)
+        stampedby.fof.stamps   = self._enrichStampObjects(fofStamps[:limit])
+        stampedby.fof.count    = len(fofStamps)
 
-        return result
+        return stampedby
 
 
     def updateEntityStatsAsync(self, entityId):
