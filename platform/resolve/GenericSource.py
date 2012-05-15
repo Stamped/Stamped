@@ -166,6 +166,7 @@ class GenericSource(BasicSource):
             entity.albums = albums
 
     def __repopulateTracks(self, entity, artist, controller, decorations=None):
+        logs.info('### just called repopulateTracks')
         if decorations is None:
             decorations = {}
 
