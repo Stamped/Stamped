@@ -7,12 +7,13 @@ __license__   = "TODO"
 
 import Globals
 import Entity
-import copy, json, re, urllib, utils
+import copy, json, re, urllib, utils, logs
 
 from resolve                import EntityProxyContainer
 from gevent.pool            import Pool
 from resolve.iTunesSource   import iTunesSource
 from pprint                 import pprint
+
 
 __all__ = [ "AppleRSS", "AppleRSSError" ]
 
