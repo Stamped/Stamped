@@ -57,8 +57,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
         
         suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)
         from pprint import pformat
-        for suggestion in suggested:
-            logs.info ('### suggested entity:\n%s' % pformat(suggestion))
+        for section in suggested:
+            for entity in section:
+                logs.info ('### suggested entity:\n%s' % pformat(entity))
         num_sections = len(suggested)
         
         if num_sections > 0:
