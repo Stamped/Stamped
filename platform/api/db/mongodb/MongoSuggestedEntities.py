@@ -56,6 +56,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             coords = None
         
         suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)
+        logs.info('### suggested entities:\n %s' % suggested)
         num_sections = len(suggested)
         
         if num_sections > 0:

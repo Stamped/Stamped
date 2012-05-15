@@ -65,6 +65,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 ]
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = document['timestamp']['created']
+
         
         entityData = document.pop('entity')
         entity = buildEntity(entityData, mini=True)

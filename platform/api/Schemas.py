@@ -740,7 +740,7 @@ class BasicEntity(Schema):
             if _is_valid_id(id):
                 return "%s%s" % (prefix, id)
         
-        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" % 
+        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
                              pformat(self.exportSparse()))
     
     def _genericSubtitle(self):
