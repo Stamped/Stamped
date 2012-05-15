@@ -1994,12 +1994,13 @@ class HTTPStamp(Schema):
                 self.num_likes          = schema.num_likes
             
             self.num_todos = 0
-            if schema.num_todos > 0:
-                self.num_todos          = schema.num_todos
+            if schema.stats is not None:
+                if schema.stats.num_todos > 0:
+                    self.num_todos          = schema.stats.num_todos
             
             self.num_credits = 0
-            if schema.num_credits > 0:
-                self.num_credits        = schema.num_credits
+            if len(schema.credits) > 0:
+                self.num_credits        = len(schema.credits)
             
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
@@ -2276,10 +2277,27 @@ class HTTPStampedBy(Schema):
         self.fof                = HTTPStampedByGroup()
         self.all                = HTTPStampedByGroup()
 
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'StampedBy':
+            self.friends.importSchema(schema.friends)
+            self.fof.importSchema(schema.fof)
+            self.all.importSchema(schema.all)
+        else:
+            raise NotImplementedError(type(schema))
+
 class HTTPStampedByGroup(Schema):
     def setSchema(self):
         self.count              = SchemaElement(int)
         self.stamps             = SchemaList(HTTPStamp())
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'StampedByGroup':
+            self.count = schema.count
+            for srcStamp in schema.stamps:
+                self.stamps.append(HTTPStamp().importSchema(srcStamp).exportSparse())
+        else:
+            raise NotImplementedError(type(schema))
+
 
 class HTTPStampImage(Schema):
     def setSchema(self):
@@ -3008,7 +3026,8 @@ class HTTPEntity_stampedtest(Schema):
 
             # TODO: Image
             if len(schema.images) > 0:
-                self.image = self._handle_image(schema.images[0]['image'])
+                if len(schema.images[0].sizes) > 0:
+                    self.image = self._handle_image(schema.images[0].sizes[0]['url'])
 
             # Affiliates
 
