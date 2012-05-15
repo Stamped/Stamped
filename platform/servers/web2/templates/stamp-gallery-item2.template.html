@@ -10,7 +10,7 @@
         
         <div class="inner-content">
             <div class="stamp-category-{{#entity}}{{category}}{{/entity}}">
-                <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a></div>
+                <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a><span class='user-logo-small'></span></div>
                 
                 <div class="subtitle-line">
                     <p>
@@ -48,7 +48,13 @@
                     {{/contents}}
                 </div>
                 
-                {{#previews}}
+                <div class="previews clearfix">
+                    <div class='like'></div><div class='count'>{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}</div>
+                    <div class='todo'></div><div class='count'>{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}</div>
+                    <div class='comments'></div><div class='count'>{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}</div>
+                </div>
+                
+                <!--{{#previews}}
                 <div class="previews">
                     {{#likes}}
                     <div class="profile-image-small like">
@@ -93,6 +99,7 @@
                     {{/comments}}
                 </div>
                 {{/previews}}
+                -->
             </div>
         </div>
     </div>

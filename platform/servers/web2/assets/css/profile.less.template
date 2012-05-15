@@ -55,20 +55,40 @@
     }
 }
 
-.user-logo {
+.user-logo-large {
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png);
     {{/user}}
 }
 
+.user-logo-small {
+    {{#user}}
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png);
+    {{/user}}
+    
+    width:  36px;
+    height: 36px;
+}
+
+
 /* target webkit-browsers */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-    .user-logo {
+    .user-logo-large {
         .user-gradient(135deg);
         
         @mask-image: url(/assets/img/stamped_logo_mask.png);
         /*width:  212px;
         height: 212px;*/
+        
+        -webkit-mask: @mask-image no-repeat;
+        -moz-mask: @mask-image no-repeat;
+        -o-mask: @mask-image no-repeat;
+        mask: @mask-image no-repeat;
+    }
+    
+    .user-logo-small {
+        .user-gradient(135deg);
+        @mask-image: url(/assets/img/stamped_email_mask.png);
         
         -webkit-mask: @mask-image no-repeat;
         -moz-mask: @mask-image no-repeat;

@@ -117,76 +117,103 @@
   max-width: 128px;
   height: auto;
 }
-.stamp-gallery-item .content .inner-content .previews .profile-image-small {
-  display: inline-block;
-  float: none;
-  position: relative;
-  margin: 0 2px 4px 0;
-}
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .like {
-  background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-  background-position: 0, 0;
-  position: absolute;
-  bottom: -4.666666666666667px;
-  right: -4.666666666666667px;
-  display: block;
-  width: 14px;
-  height: 14px;
-  z-index: 100;
-}
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .todo {
-  background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-  background-position: -16px, 0;
-  position: absolute;
-  bottom: -4.666666666666667px;
-  right: -4.666666666666667px;
-  display: block;
-  width: 14px;
-  height: 14px;
-  z-index: 100;
-}
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .comment {
-  background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-  background-position: -32px, 0;
-  position: absolute;
-  bottom: -4.666666666666667px;
-  right: -4.666666666666667px;
-  display: block;
-  width: 14px;
-  height: 14px;
-  z-index: 100;
-}
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .credit {
-  position: absolute;
-  bottom: -4.666666666666667px;
-  right: -4.666666666666667px;
-  display: block;
-  /*width:  30px;*/
+.stamp-gallery-item .content .inner-content .previews {
+  font-size: 80%;
+  /*.profile-image-small {
+                    display: inline-block;
+                    float: none;
+                    
+                    position: relative;
+                    margin: 0 2px 4px 0;
+                    
+                    @width:  14px;
+                    @height: 14px;
+                    
+                    .preview-image(@bgleft, @bgtop) {
+                        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
+                        background-position: @bgleft, @bgtop;
+                        
+                        position: absolute;
+                        bottom: -(@height / 3);
+                        right:  -(@width  / 3);
+                        
+                        display: block;
+                        width:  @width;
+                        height: @height;
+                        z-index: 100;
+                    }
+                    
+                    .like {
+                        .preview-image(0, 0);
+                    }
+                    
+                    .todo {
+                        .preview-image(-16px, 0);
+                    }
+                    
+                    .comment {
+                        .preview-image(-32px, 0);
+                    }
+                    
+                    .credit {
+                        position: absolute;
+                        bottom: -(@height / 3);
+                        right:  -(@width  / 3);
+                        
+                        display: block;
+                        width: 18px;
+                        height: 18px;
+                        z-index: 101;
+                        
+                        img {
+                            background: none;
+                            border: 0 none;
+                            
+                            -webkit-box-shadow: none;
+                            -moz-box-shadow: none;
+                            -ms-box-shadow: none;
+                            -o-box-shadow: none;
+                            box-shadow: none;
+                            
+                            display: block;
+                            width:  18px;
+                            height: 18px;
+                        }
+                    }
+                    
+                    .like img, .todo img, .comment img {
+                        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
+                    }
+                }*/
 
-  width: 18px;
-  height: 18px;
-  z-index: 101;
 }
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .credit img {
-  background: none;
-  border: 0 none;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  -ms-box-shadow: none;
-  -o-box-shadow: none;
-  box-shadow: none;
+.stamp-gallery-item .content .inner-content .previews div {
   display: block;
-  width: 18px;
-  height: 18px;
+  float: left;
 }
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .like img,
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .todo img,
-.stamp-gallery-item .content .inner-content .previews .profile-image-small .comment img {
-  -webkit-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
-  box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
+.stamp-gallery-item .content .inner-content .previews div.like {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: 0 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
+}
+.stamp-gallery-item .content .inner-content .previews div.todo {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: -19px 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
+}
+.stamp-gallery-item .content .inner-content .previews div.comments {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: -38px 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
 }
 .blurb {
   display: inline;

@@ -701,12 +701,7 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaList('likes',                 new UserMini().schema()), 
                     new SchemaList('todos',                 new UserMini().schema()), 
                     new SchemaList('credits',               new StampMini().schema()), 
-                    new SchemaList('comments',              new Comment().schema()), 
-                    
-                    new SchemaElement('num_likes',          { 'type' : "number", 'default' : 0 }), 
-                    new SchemaElement('num_todos',          { 'type' : "number", 'default' : 0 }), 
-                    new SchemaElement('num_credits',        { 'type' : "number", 'default' : 0 }), 
-                    new SchemaElement('num_comments',       { 'type' : "number", 'default' : 0 })
+                    new SchemaList('comments',              new Comment().schema())
                 );
             }
         });
@@ -729,7 +724,9 @@ if (typeof(StampedClient) == "undefined") {
                     new SchemaElement('modified',           { 'type' : "string" }), 
                     new SchemaElement('stamped',            { 'type' : "string" }), 
                     new SchemaElement('num_comments',       { 'type' : "number", 'default' : 0 }), 
-                    new SchemaElement('num_likes',          { 'type' : "number", 'default' : 0 })
+                    new SchemaElement('num_likes',          { 'type' : "number", 'default' : 0 }), 
+                    new SchemaElement('num_todos',          { 'type' : "number", 'default' : 0 }), 
+                    new SchemaElement('num_credits',        { 'type' : "number", 'default' : 0 })
                 );
             }
         });

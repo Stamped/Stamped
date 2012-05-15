@@ -84,7 +84,39 @@
             }
             
             .previews {
-                .profile-image-small {
+                font-size: 80%;
+                
+                div {
+                    display: block;
+                    float: left;
+                }
+                
+                .preview-image(@l, @t) {
+                    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+                    background-position: @l @t;
+                    
+                    width:  17px;
+                    height: 17px;
+                    z-index: 100;
+                    margin: -1px .2em 0 .7em;
+                }
+                
+                div.count {
+                }
+                
+                div.like {
+                    .preview-image(0, 0);
+                }
+                
+                div.todo {
+                    .preview-image(-19px, 0);
+                }
+                
+                div.comments {
+                    .preview-image(-38px, 0);
+                }
+                
+                /*.profile-image-small {
                     display: inline-block;
                     float: none;
                     
@@ -126,7 +158,6 @@
                         right:  -(@width  / 3);
                         
                         display: block;
-                        /*width:  30px;*/
                         width: 18px;
                         height: 18px;
                         z-index: 101;
@@ -150,7 +181,7 @@
                     .like img, .todo img, .comment img {
                         .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
                     }
-                }
+                }*/
             }
         }
     }

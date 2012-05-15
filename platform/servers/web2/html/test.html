@@ -1,0 +1,35 @@
+{% extends "base2.html" %}
+{% load stamped_tags %}
+{% load ssi from future %}
+
+{% block main %}
+    {{ block.super }}
+    
+    <div id="main-content" class="fixedwidth">
+        TEST1
+        <div class="test-wrapper">
+            <div class="test">
+                <div class="t0"></div>
+                <div class="t1"><div class='w'></div></div>
+                <div class="t2"></div>
+                <div class="t3"><div class='w'></div></div>
+            </div>
+        </div>
+    </div>
+{% endblock main %}
+
+{% block scripts %}
+    {{ block.super }}
+     
+     <!-- jQuery plugins -->
+    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+    
+    <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
+    <script src="{{ STATIC_URL }}js/client.js"></script>
+    
+    {% ssi STAMPED_TEMPLATE_FILE %}
+{% endblock scripts %}
+
