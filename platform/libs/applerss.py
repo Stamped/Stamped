@@ -54,6 +54,7 @@ class AppleRSS(object):
         return self._parse_feed('justadded', **kwargs)
     
     def _parse_feed(self, feedname, **kwargs):
+        logs.info('### _parse_feed begin')
         webobject   = (feedname in self._webobject_feeds)
         
         # extract keyword arguments and defaults
@@ -63,7 +64,7 @@ class AppleRSS(object):
         explicit    = kwargs.pop('explicit', True)
         transform   = kwargs.pop('transform', True)
         format      = kwargs.pop('format', 'xml' if webobject else self.DEFAULT_FORMAT)
-        
+
         if format not in [ 'xml', 'json' ]:
             raise AppleRSSError("invalid request format")
         
@@ -85,10 +86,14 @@ class AppleRSS(object):
             url += 'rss.%s' % format
         else:
             url += format
-        
+
+        logs.info('### about to call url %s' % url)
+
         # attempt to download feed
         utils.log(url)
         data = utils.getFile(url)
+
+        logs.info('### called url and received data: %s' % data)
         
         """
         f=open('out.xml', 'w')
