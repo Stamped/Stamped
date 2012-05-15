@@ -122,11 +122,12 @@ class AppleRSS(object):
                 utils.printException()
 
         logs.info('\n### about to spawn parse entry threads')
-        pool = Pool(16)
+        #pool = Pool(16)
         for entry in entries:
-            pool.spawn(_parse_entry, entities, entry)
+            _parse_entry(entities, entry)
+        #    pool.spawn(_parse_entry, entities, entry)
         
-        pool.join()
+        #pool.join()
         logs.info('\n### Created entities: %s' % pformat(entities))
         return entities
     
