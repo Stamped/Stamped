@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STActivityCount.h"
 
-@interface STSimpleActivityCount : NSObject <STActivityCount>
+@interface STSimpleActivityCount : NSObject <STActivityCount, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSNumber* numberUnread;
 

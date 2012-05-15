@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STActivityReference.h"
 
-@interface STSimpleActivityReference : NSObject <STActivityReference>
+@interface STSimpleActivityReference : NSObject <STActivityReference, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSArray* indices;
 @property (nonatomic, readwrite, retain) id<STAction> action;

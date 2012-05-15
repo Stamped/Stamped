@@ -13,11 +13,25 @@
 @synthesize genre = _genre;
 @synthesize userID = _userID;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _genre = [[decoder decodeObjectForKey:@"genre"] retain];
+    _userID = [[decoder decodeObjectForKey:@"userID"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_genre release];
   [_userID release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.genre forKey:@"genre"];
+  [encoder encodeObject:self.userID forKey:@"userID"];
 }
 
 + (RKObjectMapping *)mapping {

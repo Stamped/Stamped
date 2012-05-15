@@ -5,6 +5,7 @@ import settings
 urlpatterns = patterns('',
     # blog
     url(r'^blog$',                              'core.views.blog'), 
+    url(r'^test$',                              'core.views.test_view'), 
     
     # index
     url(r'^index$',                             'core.views.index'), 

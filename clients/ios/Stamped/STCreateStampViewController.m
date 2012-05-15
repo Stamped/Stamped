@@ -28,14 +28,32 @@
 - (void)editorDoneButtonPressed:(id)button;
 
 @property (nonatomic, readonly, retain) id<STEntity> entity;
-@property (nonatomic, readwrite, retain) UITextView* textView;
+@property (nonatomic, readwrite, retain) UIView* bodyView;
+@property (nonatomic, readwrite, retain) UIScrollView* blurbView;
+@property (nonatomic, readwrite, retain) UIView* blurbProfileImage;
+@property (nonatomic, readwrite, retain) UITextView* blurbTextView;
+@property (nonatomic, readwrite, retain) UIView* addCommentButton;
+@property (nonatomic, readwrite, retain) UIView* addPhotoButton;
+@property (nonatomic, readwrite, retain) UIImageView* blurbImageView;
+@property (nonatomic, readwrite, retain) UIButton* shareTwitterButton;
+@property (nonatomic, readwrite, retain) UIButton* shareFacebookButton;
+@property (nonatomic, readwrite, retain) STButton* stampButton;
 
 @end
 
 @implementation STCreateStampViewController
 
 @synthesize entity = entity_;
-@synthesize textView = textView_;
+@synthesize bodyView = bodyView_;
+@synthesize blurbView = blurbView_;
+@synthesize blurbProfileImage = blurbProfileImage_;
+@synthesize blurbTextView = blurbTextView_;
+@synthesize addCommentButton = addCommentButton_;
+@synthesize addPhotoButton = addPhotoButton_;
+@synthesize blurbImageView = blurbImageView_;
+@synthesize shareTwitterButton = shareTwitterButton_;
+@synthesize shareFacebookButton = shareFacebookButton_;
+@synthesize stampButton = stampButton_;
 
 - (id)initWithEntity:(id<STEntity>)entity
 {
@@ -48,7 +66,7 @@
 
 - (void)stampButtonPressed:(id)button {
   STStampNew* stampNew = [[[STStampNew alloc] init] autorelease];
-  stampNew.blurb = self.textView.text;
+  stampNew.blurb = self.blurbTextView.text;
   stampNew.entityID = self.entity.entityID;
   [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error) {
     if (stamp) {
@@ -65,6 +83,7 @@
   }];
 }
 
+/*
 - (UIView *)loadToolbar {
   STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
   CGRect buttonFrame = CGRectMake(0, 0, 95, 41);
@@ -114,19 +133,28 @@
 - (void)unloadToolbar {
   [self.toolbar release];
 }
+ 
+ */
+
+- (void)loadBodyView {
+  self.bodyView = [[[UIView alloc] initWithFrame:CGRectMake(5, 0, 310, 256)] autorelease];
+  self.bodyView.backgroundColor = [UIColor whiteColor];
+  id<STUser> user = [STStampedAPI sharedInstance].currentUser;
+  UIView* topBar = [[[STRippleBar alloc] initWithPrimaryColor:user.primaryColor andSecondaryColor:user.secondaryColor isTop:YES] autorelease];
+  [Util reframeView:topBar withDeltas:CGRectMake(0, 2, 0, 0)];
+  [self.bodyView addSubview:topBar];
+  UIView* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:user.primaryColor andSecondaryColor:user.secondaryColor isTop:NO] autorelease];
+  [Util reframeView:bottomBar withDeltas:CGRectMake(0, self.bodyView.frame.size.height - (bottomBar.frame.size.height + 2), 0, 0)];
+  [self.bodyView addSubview:bottomBar];
+  [self.scrollView appendChildView:self.bodyView];
+}
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   UIView* view = [[[STStampDetailHeaderView alloc] initWithEntity:self.entity] autorelease];
   [self.scrollView appendChildView:view];
-  STViewContainer* body = [[[STViewContainer alloc] initWithDelegate:self.scrollView andFrame:CGRectMake(5, 10, 310, 1)] autorelease];
-  body.backgroundColor = [UIColor whiteColor];
-  id<STUser> user = [STSimpleUser userFromLegacyUser:[[AccountManager sharedManager] currentUser]];
-  UIView* topBar = [[[STRippleBar alloc] initWithPrimaryColor:user.primaryColor andSecondaryColor:user.secondaryColor isTop:YES] autorelease];
-  [body appendChildView:topBar];
-  self.textView = [[[UITextView alloc] initWithFrame:CGRectMake(0, 0, body.frame.size.width, 100)] autorelease];
-  self.textView.delegate = self;
+  
   
   UIView* accessoryView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease];
   accessoryView.backgroundColor = [UIColor clearColor];
@@ -159,11 +187,13 @@
                    action:@selector(editorCameraButtonPressed:)
          forControlEvents:UIControlEventTouchDown];
   [accessoryView addSubview:cameraButton];
+  /*
   self.textView.inputAccessoryView = accessoryView;
   [body appendChildView:self.textView];
   UIView* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:user.primaryColor andSecondaryColor:user.secondaryColor isTop:NO] autorelease];
   [body appendChildView:bottomBar];
   [self.scrollView appendChildView:body];
+   */
 }
 
 - (void)viewDidUnload
@@ -189,7 +219,7 @@
 }
 
 - (void)editorDoneButtonPressed:(id)button {
-  [self.textView endEditing:YES];
+  //[self.textView endEditing:YES];
 }
 
 @end

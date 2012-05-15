@@ -199,12 +199,15 @@ static STStampedAPIScope _scope = STStampedAPIScopeFriends;
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   //Override collapsing behavior
+  [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+  [self.tableDelegate cancelPendingRequests];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
   //Override collapsing behavior
   self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
   [self setScope:_scope withInstance:self];
+  [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {

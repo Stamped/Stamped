@@ -18,6 +18,17 @@
 @synthesize todos = todos_;
 @synthesize credits = credits_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    comments_ = [[decoder decodeObjectForKey:@"comments"] retain];
+    likes_ = [[decoder decodeObjectForKey:@"likes"] retain];
+    todos_ = [[decoder decodeObjectForKey:@"todos"] retain];
+    credits_ = [[decoder decodeObjectForKey:@"credits"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [comments_ release];
@@ -25,6 +36,13 @@
   [todos_ release];
   [credits_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.comments forKey:@"comments"];
+  [encoder encodeObject:self.likes forKey:@"likes"];
+  [encoder encodeObject:self.todos forKey:@"todos"];
+  [encoder encodeObject:self.credits forKey:@"credits"];
 }
 
 + (RKObjectMapping*)mapping {

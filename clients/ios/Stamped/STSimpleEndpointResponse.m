@@ -13,10 +13,22 @@
 
 @synthesize action = action_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    action_ = [[decoder decodeObjectForKey:@"action"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [action_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.action forKey:@"action"];
 }
 
 + (RKObjectMapping*)mapping {

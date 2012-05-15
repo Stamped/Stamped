@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STPreviews.h"
 
-@interface STSimplePreviews : NSObject <STPreviews>
+@interface STSimplePreviews : NSObject <STPreviews, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSArray<STUser>* todos;
 @property (nonatomic, readwrite, copy) NSArray<STUser>* likes;

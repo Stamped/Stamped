@@ -92,8 +92,8 @@ typedef enum {
 - (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
-                            andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error))block;
+- (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
+                                       andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
 - (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
                          andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
@@ -115,22 +115,26 @@ typedef enum {
 
 - (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block;
 
-- (void)createCommentForStampID:(NSString*)stampID 
-                      withBlurb:(NSString*)blurb 
-                    andCallback:(void(^)(id<STComment> comment, NSError* error))block;
+- (STCancellation*)createCommentForStampID:(NSString*)stampID 
+                                 withBlurb:(NSString*)blurb 
+                               andCallback:(void(^)(id<STComment> comment, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)menuForEntityID:(NSString*)entityID 
                        andCallback:(void(^)(id<STMenu> menu, NSError* error, STCancellation* cancellation))block;
 
-- (void)likeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
+- (STCancellation*)likeWithStampID:(NSString*)stampID 
+                       andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block;
 
-- (void)unlikeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
+- (STCancellation*)unlikeWithStampID:(NSString*)stampID 
+                         andCallback:(void(^)(id<STStamp>,NSError*, STCancellation*))block;
 
-- (void)todoWithStampID:(NSString*)stampID 
-               entityID:(NSString*)entityID 
-            andCallback:(void(^)(id<STTodo>,NSError*))block;
+- (STCancellation*)todoWithStampID:(NSString*)stampID 
+                          entityID:(NSString*)entityID 
+                       andCallback:(void(^)(id<STTodo>,NSError*,STCancellation*))block;
 
-- (void)untodoWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block;
+- (STCancellation*)untodoWithStampID:(NSString*)stampID 
+                            entityID:(NSString*)entityID
+                         andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
 
 - (void)isTododWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block;
 
@@ -154,6 +158,8 @@ typedef enum {
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 
 - (NSString*)stringForScope:(STStampedAPIScope)scope;
+
+- (void)fastPurge;
 
 + (STStampedAPI*)sharedInstance;
 
