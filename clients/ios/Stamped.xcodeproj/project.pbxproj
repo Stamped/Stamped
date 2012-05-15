@@ -3233,7 +3233,6 @@
 		63BA769E1545A2AA00EE95DA /* STProfileSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STProfileSource.h; sourceTree = "<group>"; };
 		63BA769F1545A2AA00EE95DA /* STProfileSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STProfileSource.m; sourceTree = "<group>"; };
 		63BA7A141545F69400EE95DA /* StampedDev copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StampedDev copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		63BA7A161545F69400EE95DA /* StampedDev copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "StampedDev copy-Info.plist"; path = "/Users/landonjudkins/projects/Stamped/clients/ios/StampedDev copy-Info.plist"; sourceTree = "<absolute>"; };
 		63BA7A171546FB3C00EE95DA /* dots@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dots@2x.png"; sourceTree = "<group>"; };
 		63BA7A1B1546FF6A00EE95DA /* STToggleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToggleButton.h; sourceTree = "<group>"; };
 		63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToggleButton.m; sourceTree = "<group>"; };
@@ -3627,7 +3626,6 @@
 		7E5893AD147C4620002268C4 /* icon_dev.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon_dev.png; path = ../icon_dev.png; sourceTree = "<group>"; };
 		7E5893AF147C4628002268C4 /* icon_dev@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_dev@2x.png"; path = "../icon_dev@2x.png"; sourceTree = "<group>"; };
 		7E58964A147C468B002268C4 /* Stamped copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Stamped copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7E58964C147C468C002268C4 /* Stamped copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Stamped copy-Info.plist"; path = "/Users/andybons/Dev/Stamped/internal/projects/bulleit/Stamped copy-Info.plist"; sourceTree = "<absolute>"; };
 		7E5CB2CA1406EC9C00D0352D /* plus_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "plus_icon@2x.png"; sourceTree = "<group>"; };
 		7E5D9E9614B3C0DC00C340CA /* STScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollView.h; sourceTree = "<group>"; };
 		7E5D9E9714B3C0DD00C340CA /* STScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollView.m; sourceTree = "<group>"; };
@@ -5810,7 +5808,6 @@
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
 				1E5AFFC5141D2A5000772F11 /* Vendor */,
 				7EC0177213C3754300ABE6E2 /* Products */,
-				63BA7A161545F69400EE95DA /* StampedDev copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -5870,7 +5867,6 @@
 				7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */,
 				7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */,
 				7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */,
-				7E58964C147C468C002268C4 /* Stamped copy-Info.plist */,
 				7EC0177D13C3754300ABE6E2 /* Info.plist */,
 				7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */,
 				7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */,
