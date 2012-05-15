@@ -359,13 +359,16 @@ class GenericSource(BasicSource):
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
             if proxy.isType('album'):
-                logs.info('### seeing about repopulating tracks)')
+                logs.info('### seeing about repopulating tracks')
                 if controller.shouldEnrich('tracks', self.sourceName, entity):
+                    logs.info('### repopulating tracks')
                     self.__repopulateTracks(entity, proxy, controller)
+                    logs.info('### done repopulating tracks')
                     timestamps['tracks'] = controller.now
         
         ### Media Item
         if entity.kind == 'media_item' and proxy.kind == 'media_item':
+            logs.info('### enriching for media items')
             albums = []
             for album in proxy.albums:
                 entityMini = MediaCollectionEntityMini()
