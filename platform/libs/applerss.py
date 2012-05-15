@@ -131,6 +131,7 @@ class AppleRSS(object):
         aid = entry['id']['attributes']['im:id']
         
         proxy = self._source.entityProxyFromKey(aid)
+        logs.info('### proxy is %s' % pformat(proxy))
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
         
         return proxy.buildEntity()
