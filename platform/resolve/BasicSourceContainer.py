@@ -111,8 +111,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                     if len(enrichedOutput) > 0:
                                         logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
-                            except Exception:
+                            except Exception as e:
                                 logs.warning("Source '%s' threw an exception when enriching '%s'" % (source, pformat(entity) ) , exc_info=1 )
+                                raise
                                 failedSources.add(source)
                                 self.__failedValues[source] += self.failedIncrement
                                 if self.__failedValues[source] < self.failedCutoff:
