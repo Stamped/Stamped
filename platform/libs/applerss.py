@@ -12,7 +12,7 @@ import copy, json, re, urllib, utils, logs
 from resolve                import EntityProxyContainer
 from gevent.pool            import Pool
 from resolve.iTunesSource   import iTunesSource
-from pprint                 import pprint
+from pprint                 import pprint, pformat
 
 
 __all__ = [ "AppleRSS", "AppleRSSError" ]
@@ -127,7 +127,7 @@ class AppleRSS(object):
             pool.spawn(_parse_entry, entities, entry)
         
         pool.join()
-        logs.info('\n### Created entities: %s' pprint.pformat(entities))
+        logs.info('\n### Created entities: %s' % pformat(entities))
         return entities
     
     def _parse_entity(self, entry):
