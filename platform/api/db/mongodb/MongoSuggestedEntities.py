@@ -128,7 +128,9 @@ class MongoSuggestedEntities(ASuggestedEntities):
         elif category == 'music':
             songs   = self._appleRSS.get_top_songs (limit=10)
             albums  = self._appleRSS.get_top_albums(limit=10)
-            
+            for album in albums:
+                logs.info('\n### ALBUMS: %s' % album)
+
             artists = []
             artists.extend([ s.artists[0] for s in filter(lambda s: len(s.artists) > 0, songs)  ])
             artists.extend([ a.artists[0] for a in filter(lambda a: len(a.artists) > 0, albums) ])
