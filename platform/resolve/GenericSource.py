@@ -169,9 +169,11 @@ class GenericSource(BasicSource):
         if decorations is None:
             decorations = {}
 
+        logs.info('### artist.tracks: %s' % artist.tracks)
         tracks = []
         for track in artist.tracks:
             try:
+                logs.info('### in track loop for track %s' % pformat(track))
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
                 entityMini.types.append('track')
