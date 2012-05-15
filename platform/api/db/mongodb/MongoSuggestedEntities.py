@@ -59,7 +59,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
         from pprint import pformat
         for section in suggested:
             for entity in section['entities']:
-                logs.info ('### suggested entity:\n%s' % pformat(entity))
+                logs.info ('\n### suggested entity:\n%s' % pformat(entity))
         num_sections = len(suggested)
         
         if num_sections > 0:
