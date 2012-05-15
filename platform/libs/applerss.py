@@ -55,7 +55,6 @@ class AppleRSS(object):
         return self._parse_feed('justadded', **kwargs)
     
     def _parse_feed(self, feedname, **kwargs):
-        logs.info('### _parse_feed begin')
         webobject   = (feedname in self._webobject_feeds)
         
         # extract keyword arguments and defaults
@@ -88,14 +87,10 @@ class AppleRSS(object):
         else:
             url += format
 
-        logs.info('### about to call url %s' % url)
-
         # attempt to download feed
         utils.log(url)
         data = utils.getFile(url)
 
-        logs.info('### called url and received data: %s' % data)
-        
         """
         f=open('out.xml', 'w')
         f.write(data)
@@ -125,19 +120,20 @@ class AppleRSS(object):
                     entities.append(entity)
             except:
                 utils.printException()
-        
+
+        logs.info('\n### about to spawn parse entry threads')
         pool = Pool(16)
         for entry in entries:
             pool.spawn(_parse_entry, entities, entry)
         
         pool.join()
+        logs.info('\n### Created entities: %s' pprint.pformat(entities))
         return entities
     
     def _parse_entity(self, entry):
         aid = entry['id']['attributes']['im:id']
         
         proxy = self._source.entityProxyFromKey(aid)
-        logs.info('### proxy is %s' % pformat(proxy))
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
         
         return proxy.buildEntity()
