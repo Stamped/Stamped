@@ -1924,21 +1924,6 @@ class StampedAPI(AStampedAPI):
                     raise StampedInputError("invalid external image format; content-type must be image/jpeg")
             """
             pass
-        
-        if imageUrl is not None:
-            if imageWidth is None or imageHeight is None:
-                raise StampedInputError("invalid image dimensions")
-            
-            # Add image dimensions to stamp object
-            image           = ImageSchema()
-            size            = ImageSizeSchema()
-            #size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/users'
-            size.width      = imageWidth
-            size.height     = imageHeight
-            image.sizes.append(size)
-            content.images.append(image)
-
-            imageExists     = True
 
         # Update content if stamp exists
         if stampExists:
@@ -1975,9 +1960,30 @@ class StampedAPI(AStampedAPI):
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
         # Resize image
-        if imageExists:
-            self._statsSink.increment('stamped.api.stamps.images')
+        if imageUrl is not None:
+            if imageWidth is None or imageHeight is None:
+                raise StampedInputError("invalid image dimensions")
+
             imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
+            # Add image dimensions to stamp object
+            image           = ImageSchema()
+            sizes   = {
+                ''        : (imageWidth, imageHeight),   #original size
+                '-ios1x'  : (200, 200),
+                '-ios2x'  : (400, 400),
+                '-web'    : (580, 580),
+                '-mobile' : (572, 572),
+                }
+            for k,v in sizes.iteritems():
+                logs.info('adding image %s-%s.jpg size %d' % (imageId, k, v[0]))
+                size            = ImageSizeSchema()
+                size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                size.width      = v[0]
+                size.height     = v[1]
+                image.sizes.append(size)
+            content.images.append(image)
+
+            self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
 
         # Add stats
