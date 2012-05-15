@@ -121,24 +121,16 @@ class AppleRSS(object):
             except:
                 utils.printException()
 
-        logs.info('\n### about to spawn parse entry threads')
-        #pool = Pool(16)
+        pool = Pool(16)
         for entry in entries:
-            _parse_entry(entities, entry)
-        #    pool.spawn(_parse_entry, entities, entry)
+            pool.spawn(_parse_entry, entities, entry)
         
-        #pool.join()
-        logs.info('\n### Created entities: %s' % pformat(entities))
+        pool.join()
         return entities
     
     def _parse_entity(self, entry):
-        logs.info('\n### PRINTING ENTRY TO PARSE')
         logs.info(pformat(entry))
         aid = entry['id']['attributes']['im:id']
-
-
-
-        logs.info('\n### apple_id: %s' % aid)
 
         proxy = self._source.entityProxyFromKey(aid)
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
