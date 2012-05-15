@@ -10,7 +10,7 @@
 #import "STBadge.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleBadge : NSObject <STBadge>
+@interface STSimpleBadge : NSObject <STBadge, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* genre;
 @property (nonatomic, readwrite, copy) NSString* userID;

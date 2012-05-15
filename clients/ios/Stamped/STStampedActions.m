@@ -104,7 +104,7 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_like_stamp"] && source.sourceID != nil) {
       handled = YES;
       if (flag) {
-        [[STStampedAPI sharedInstance] likeWithStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error) {
+        [[STStampedAPI sharedInstance] likeWithStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
           if (context.completionBlock) {
             context.completionBlock(stamp, error);
           }
@@ -114,7 +114,7 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_unlike_stamp"] && source.sourceID != nil) {
       handled = YES;
       if (flag) {
-        [[STStampedAPI sharedInstance] unlikeWithStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error) {
+        [[STStampedAPI sharedInstance] unlikeWithStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
           if (context.completionBlock) {
             context.completionBlock(stamp, error);
           }
@@ -126,7 +126,7 @@ static STStampedActions* _sharedInstance;
       if (flag) {
         [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
           if (stamp) {
-            [[STStampedAPI sharedInstance] todoWithStampID:stamp.stampID entityID:stamp.entity.entityID andCallback:^(id<STTodo> todo, NSError* error2) {
+            [[STStampedAPI sharedInstance] todoWithStampID:stamp.stampID entityID:stamp.entity.entityID andCallback:^(id<STTodo> todo, NSError* error2, STCancellation* can2) {
               if (context.completionBlock) {
                 context.completionBlock(todo, error2);
               }
@@ -144,7 +144,7 @@ static STStampedActions* _sharedInstance;
       handled = YES;
       if (flag) {
         void (^block)(id<STStamp>, NSError*, STCancellation*) = ^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
-          [[STStampedAPI sharedInstance] untodoWithEntityID:stamp.entity.entityID andCallback:^(BOOL success, NSError * error) {
+          [[STStampedAPI sharedInstance] untodoWithStampID:stamp.stampID entityID:stamp.entity.entityID andCallback:^(BOOL success, NSError * error, STCancellation* can2) {
             if (context.completionBlock) {
               context.completionBlock([NSNumber numberWithBool:success], error);
             }

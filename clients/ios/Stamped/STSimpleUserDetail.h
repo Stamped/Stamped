@@ -10,7 +10,7 @@
 #import "STUserDetail.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleUserDetail : STSimpleUser <STUserDetail>
+@interface STSimpleUserDetail : STSimpleUser <STUserDetail, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* name;
 @property (nonatomic, readwrite, copy) NSString* bio;

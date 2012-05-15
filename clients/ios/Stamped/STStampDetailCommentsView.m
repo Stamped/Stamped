@@ -242,63 +242,6 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @end
 
-@interface STStampDetailAddCommentView : STAStampDetailCommentView
-
-@property (nonatomic, readonly, retain) UITextField* textField;
-
-- (id)initWithStamp:(id<STStamp>)stamp;
-
-- (void)send:(id)button;
-
-@property (nonatomic, readonly, retain) id<STStamp> stamp;
-
-@end
-
-@implementation STStampDetailAddCommentView
-
-@synthesize stamp = _stamp;
-@synthesize textField = _textField;
-
-- (id)initWithStamp:(id<STStamp>)stamp
-{
-  self = [super initWithUser:[STSimpleUser userFromLegacyUser:[AccountManager sharedManager].currentUser] andProfileImageSize:STProfileImageSize31];
-  if (self) {
-    _stamp = [stamp retain];
-    CGRect buttonFrame = CGRectMake(0, self.userImage.frame.origin.y, 55, self.userImage.frame.size.height);
-    buttonFrame.origin.x = _totalWidth - (buttonFrame.size.width + 5);
-    UIButton* sendButton = [[[UIButton alloc] initWithFrame:buttonFrame] autorelease];
-    [sendButton setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
-    [sendButton addTarget:self action:@selector(send:) forControlEvents:UIControlEventTouchUpInside];
-    [sendButton setTitle:@"Send" forState:UIControlStateNormal];
-    [self addSubview:sendButton];
-    CGRect textFieldFrame = CGRectMake(CGRectGetMaxX(self.userImage.frame)+ 5, self.userImage.frame.origin.y, 0, self.userImage.frame.size.height);
-    textFieldFrame.size.width = CGRectGetMinX(sendButton.frame) - ( textFieldFrame.origin.x + 5 );
-    _textField = [[UITextField alloc] initWithFrame:textFieldFrame];
-    _textField.backgroundColor = [UIColor colorWithWhite:0 alpha:.1];
-    [self addSubview:_textField];
-  }
-  return self;
-}
-
-- (void)dealloc
-{
-  [_stamp release];
-  [_textField release];
-  [super dealloc];
-}
-
-- (void)send:(id)button {
-  //TODO
-  [[STStampedAPI sharedInstance] createCommentForStampID:self.stamp.stampID withBlurb:self.textField.text andCallback:^(id<STComment> comment, NSError *error) {
-    if (comment) {
-      self.textField.text = @"";
-      [Util reloadStampedData];
-    }
-  }];
-}
-
-@end
-
 @interface STStampDetailCommentsView ()
 
 @property (nonatomic, readonly, assign) NSInteger index;

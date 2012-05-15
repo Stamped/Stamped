@@ -17,6 +17,7 @@
 #import "STUserDetail.h"
 #import "STActionContext.h"
 #import "STCancellation.h"
+#import <QuartzCore/QuartzCore.h>
 
 @class User;
 @class Entity;
@@ -140,7 +141,7 @@ extern NSString* const kKeychainTwitterToken;
 
 + (NSString*)trackLengthString:(NSInteger)length;
 
-+ (void)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
++ (CAGradientLayer*)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size;
 
@@ -167,6 +168,8 @@ extern NSString* const kKeychainTwitterToken;
 + (NSArray*)categories;
 
 + (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail;
+
++ (NSString*)entityImageURLForEntity:(id<STEntity>)entity;
 
 + (CGFloat)lineHeightForFont:(UIFont*)font;
 

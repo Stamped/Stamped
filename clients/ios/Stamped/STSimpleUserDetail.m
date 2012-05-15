@@ -29,6 +29,30 @@
 
 @synthesize distribution = _distribution;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _name = [[decoder decodeObjectForKey:@"name"] retain];
+    _bio = [[decoder decodeObjectForKey:@"bio"] retain];
+    _website = [[decoder decodeObjectForKey:@"website"] retain];
+    _location = [[decoder decodeObjectForKey:@"location"] retain];
+    _identifier = [[decoder decodeObjectForKey:@"identifier"] retain];
+    
+    _numStamps = [[decoder decodeObjectForKey:@"numStamps"] retain];
+    _numStampsLeft = [[decoder decodeObjectForKey:@"numStampsLeft"] retain];
+    _numFriends = [[decoder decodeObjectForKey:@"numFriends"] retain];
+    _numFollowers = [[decoder decodeObjectForKey:@"numFollowers"] retain];
+    _numTodos = [[decoder decodeObjectForKey:@"numTodos"] retain];
+    _numCredits = [[decoder decodeObjectForKey:@"numCredits"] retain];
+    _numCreditsGiven = [[decoder decodeObjectForKey:@"numCreditsGiven"] retain];
+    _numLikes = [[decoder decodeObjectForKey:@"numLikes"] retain];
+    _numLikesGiven = [[decoder decodeObjectForKey:@"numLikesGiven"] retain];
+    
+    _distribution = [[decoder decodeObjectForKey:@"distribution"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_name release];
@@ -50,6 +74,26 @@
   [_distribution release];
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.name forKey:@"name"];
+  [encoder encodeObject:self.bio forKey:@"bio"];
+  [encoder encodeObject:self.website forKey:@"website"];
+  [encoder encodeObject:self.location forKey:@"location"];
+  [encoder encodeObject:self.identifier forKey:@"identifier"];
+  
+  [encoder encodeObject:self.numStamps forKey:@"numStamps"];
+  [encoder encodeObject:self.numStampsLeft forKey:@"numStampsLeft"];
+  [encoder encodeObject:self.numFriends forKey:@"numFriends"];
+  [encoder encodeObject:self.numFollowers forKey:@"numFollowers"];
+  [encoder encodeObject:self.numTodos forKey:@"numTodos"];
+  [encoder encodeObject:self.numCredits forKey:@"numCredits"];
+  [encoder encodeObject:self.numCreditsGiven forKey:@"numCreditsGiven"];
+  [encoder encodeObject:self.numLikes forKey:@"numLikes"];
+  [encoder encodeObject:self.numLikesGiven forKey:@"numLikesGiven"];
+  
+  [encoder encodeObject:self.distribution forKey:@"distribution"];
 }
 
 + (RKObjectMapping*)mapping {

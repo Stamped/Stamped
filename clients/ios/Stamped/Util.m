@@ -760,7 +760,7 @@ static Rdio* _rdio;
   return [NSString stringWithFormat:@"%d:%@", length / 60, secondsString];
 }
 
-+ (void)addGradientToLayer:(CALayer*)layer withColors:(NSArray*)colors vertical:(BOOL)vertical {
++ (CAGradientLayer*)addGradientToLayer:(CALayer*)layer withColors:(NSArray*)colors vertical:(BOOL)vertical {
   CAGradientLayer* gradient = [CAGradientLayer layer];
   gradient.anchorPoint = CGPointMake(0, 0);
   gradient.position = CGPointMake(0, 0);
@@ -776,6 +776,7 @@ static Rdio* _rdio;
   gradient.cornerRadius = layer.cornerRadius;
   gradient.colors = cgColors;
   [layer insertSublayer:gradient atIndex:0];
+  return gradient;
 }
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
@@ -918,9 +919,13 @@ static Rdio* _rdio;
 }
 
 + (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail {
+  return [self entityImageURLForEntity:entityDetail];
+}
+
++ (NSString*)entityImageURLForEntity:(id<STEntity>)entity {
   NSString* imagePath = nil;
-  if (entityDetail.images && [entityDetail.images count] > 0) {
-    id<STImageList> imageList = [entityDetail.images objectAtIndex:0];
+  if (entity.images && [entity.images count] > 0) {
+    id<STImageList> imageList = [entity.images objectAtIndex:0];
     if (imageList.sizes.count > 0) {
       id<STImage> image = [imageList.sizes objectAtIndex:0];
       imagePath = image.url;

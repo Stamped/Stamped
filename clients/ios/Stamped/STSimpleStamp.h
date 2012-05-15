@@ -39,4 +39,16 @@
 
 + (STSimpleStamp*)stampWithStamp:(id<STStamp>)stamp;
 
++ (STSimpleStamp*)augmentedStampWithStamp:(id<STStamp>)stamp
+                                     todo:(id<STUser>)todo
+                                     like:(id<STUser>)like
+                                  comment:(id<STComment>)comment
+                                andCredit:(id<STStamp>)credit;
+
++ (STSimpleStamp*)reducedStampWithStamp:(id<STStamp>)stamp
+                                   todo:(id<STUser>)todo
+                                   like:(id<STUser>)like
+                                comment:(id<STComment>)comment
+                              andCredit:(id<STStamp>)credit;
+
 @end

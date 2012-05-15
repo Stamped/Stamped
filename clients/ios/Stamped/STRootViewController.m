@@ -11,6 +11,7 @@
 #import "STNavigationBar.h"
 #import "ECSlidingViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STAppDelegate.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -37,10 +38,19 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [self setValue:[[[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease] forKey:@"navigationBar"];
 }
 
+- (void)toggleGrid:(id)nothing {
+  STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+  app.grid.hidden = !app.grid.hidden;
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
   [self.navigationBar addGestureRecognizer:self.slidingViewController.panGesture];
+  UITapGestureRecognizer* gridRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleGrid:)] autorelease];
+  gridRecognizer.numberOfTapsRequired = 3;
+  gridRecognizer.numberOfTouchesRequired = 2;
+  [self.navigationBar addGestureRecognizer:gridRecognizer];
   //[self.view addGestureRecognizer:self.slidingViewController.panGesture];
   [self.slidingViewController setAnchorRightRevealAmount:260.0f];
   [self.slidingViewController setAnchorLeftRevealAmount:70.0f];

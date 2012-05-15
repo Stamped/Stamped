@@ -19,6 +19,17 @@
 @synthesize users = users_;
 @synthesize comments = comments_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    stamps_ = [[decoder decodeObjectForKey:@"stamps"] retain];
+    entities_ = [[decoder decodeObjectForKey:@"entities"] retain];
+    users_ = [[decoder decodeObjectForKey:@"users"] retain];
+    comments_ = [[decoder decodeObjectForKey:@"comments"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [stamps_ release];
@@ -26,6 +37,13 @@
   [users_ release];
   [comments_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.stamps forKey:@"stamps"];
+  [encoder encodeObject:self.entities forKey:@"entities"];
+  [encoder encodeObject:self.users forKey:@"users"];
+  [encoder encodeObject:self.comments forKey:@"comments"];
 }
 
 + (RKObjectMapping *)mapping {

@@ -89,15 +89,16 @@
       float latitude=location.coordinate.latitude;
       suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
     }
-    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error) {
-      if (results) {
-        self.suggestedSections = results;
-        [self.tableView reloadData];
-      }
-      else {
-        [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
-      }
-    }];
+    [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
+                                                       andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
+                                                         if (results) {
+                                                           self.suggestedSections = results;
+                                                           [self.tableView reloadData];
+                                                         }
+                                                         else {
+                                                           [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
+                                                         }
+                                                       }];
   }
   return self;
 }
@@ -170,13 +171,21 @@
   tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
                                                              CGRectGetMaxY(header.frame), 
                                                              self.view.frame.size.width, 
-                                                             self.view.frame.size.height - CGRectGetMaxY(header.frame))];
+                                                             self.view.frame.size.height + [Util sharedNavigationController].navigationBar.frame.size.height - CGRectGetMaxY(header.frame))];
   tableView_.delegate = self;
   tableView_.dataSource = self;
   tableView_.rowHeight = 68;
   //tableView.backgroundColor = [UIColor grayColor];
   [self.view addSubview:tableView_];
   [self.view addSubview:header];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

@@ -245,6 +245,15 @@ static NSString* const _filterType = @"filter";
   [self update];
 }
 
+- (void)cancelPendingRequests {
+  [self.tableDelegate cancelPendingRequests];
+}
+
+- (void)reloadStampedData {
+  [super reloadStampedData];
+  [self.tableDelegate reloadStampedData];
+}
+
 + (void)setupConfigurations {    
   //Film
   //Movie

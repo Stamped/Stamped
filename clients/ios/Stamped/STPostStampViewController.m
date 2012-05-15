@@ -172,6 +172,7 @@
                                                                    andDelegate:self.scrollView] autorelease];
   [Util reframeView:stampedByView withDeltas:CGRectMake(0, 5, 0, 0)];
   [self.scrollView appendChildView:stampedByView];
+  [self.scrollView appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 20)] autorelease]];
   
   //Update inbox
   //[[STLegacyInboxViewController sharedInstance] newStampCreated:self.stamp];

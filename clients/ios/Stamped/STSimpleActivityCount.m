@@ -12,12 +12,24 @@
 
 @synthesize numberUnread = numberUnread_;
 
+- (id)initWithCoder:(NSCoder *)decoder
+{
+  self = [super init];
+  if (self) {
+    numberUnread_ = [[decoder decodeObjectForKey:@"numberUnread"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [numberUnread_ release];
   [super dealloc];
 }
 
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.numberUnread forKey:@"numberUnread"];
+}
 
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleActivityCount class]];

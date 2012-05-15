@@ -33,6 +33,7 @@ typedef enum {
 - (void)setObject:(id)object forKey:(NSString*)key;
 - (void)removeObjectForKey:(NSString*)key;
 
+- (void)fastPurge;
 
 + (NSString*)errorDomain;
 
