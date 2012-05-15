@@ -1925,39 +1925,11 @@ class StampedAPI(AStampedAPI):
             """
             pass
 
-        # Update content if stamp exists
+        # Create the stamp or get the stamp object so we can use its stamp_id for image filenames
         if stampExists:
             stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
-            stamp.timestamp.stamped     = now
-            stamp.timestamp.modified    = now 
-            stamp.num_blurbs            = stamp.num_blurbs + 1 if stamp.num_blurbs is not None else 2
-            stamp.contents.append(content)
-
-            ### TODO: Extract credit
-            if creditData is not None:
-                raise NotImplementedError("Add credit for second stamp!")
-
-            stamp = self._stampDB.updateStamp(stamp)
-
-        # Build new stamp
         else:
             stamp                       = Stamp()
-            stamp.user_id               = user.user_id
-            stamp.entity                = entity
-            stamp.timestamp.created     = now
-            stamp.timestamp.stamped     = now
-            stamp.timestamp.modified    = now 
-            stamp.stamp_num             = user.num_stamps_total + 1
-            stamp.num_blurbs            = 1
-            stamp.badges                = self.getStampBadges(stamp)
-            stamp.contents.append(content)
-
-            # Extract credit
-            if creditData is not None:
-                stamp.credit = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
-
-            stamp = self._stampDB.addStamp(stamp)
-            self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
         # Resize image
         if imageUrl is not None:
@@ -1982,7 +1954,41 @@ class StampedAPI(AStampedAPI):
                 size.height     = v[1]
                 image.sizes.append(size)
             content.images.append(image)
+            imageExists = True
 
+        # Update content if stamp exists
+        if stampExists:
+            stamp.timestamp.stamped     = now
+            stamp.timestamp.modified    = now 
+            stamp.num_blurbs            = stamp.num_blurbs + 1 if stamp.num_blurbs is not None else 2
+            stamp.contents.append(content)
+
+            ### TODO: Extract credit
+            if creditData is not None:
+                raise NotImplementedError("Add credit for second stamp!")
+
+            stamp = self._stampDB.updateStamp(stamp)
+
+        # Build new stamp
+        else:
+            stamp.user_id               = user.user_id
+            stamp.entity                = entity
+            stamp.timestamp.created     = now
+            stamp.timestamp.stamped     = now
+            stamp.timestamp.modified    = now 
+            stamp.stamp_num             = user.num_stamps_total + 1
+            stamp.num_blurbs            = 1
+            stamp.badges                = self.getStampBadges(stamp)
+            stamp.contents.append(content)
+
+            # Extract credit
+            if creditData is not None:
+                stamp.credit = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
+
+            stamp = self._stampDB.addStamp(stamp)
+            self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
+
+        if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
 
