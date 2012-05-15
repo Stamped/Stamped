@@ -535,12 +535,16 @@ a.pronounced-title {
 .large {
   font-size: 2.2em;
 }
-.test-wrapper {
+.static-map-small {
+  /* TODO: non-zero border messes with map centering */
+
+  display: block;
+  width: 200px;
   padding: 30px;
   background: #888;
-  width: 200px;
 }
-.test-wrapper .test {
+.static-map-small .static-map-inner {
+  margin: 0 auto;
   position: relative;
   display: block;
   width: 200px;
@@ -553,21 +557,11 @@ a.pronounced-title {
   -ms-transform-style: preserve-3d;
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  /* TODO: polish animation and make w's opacity ease in */
+}
+.static-map-small .static-map-inner .r0 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
 
-}
-.test-wrapper .test .w {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #333;
-  opacity: 0;
-  -webkit-transition: opacity 0.1s ease-in-out;
-  -moz-transition: opacity 0.1s ease-in-out;
-  transition: opacity 0.1s ease-in-out;
-}
-.test-wrapper .test .t0 {
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: 0px;
   position: absolute;
   display: block;
@@ -587,8 +581,10 @@ a.pronounced-title {
   transition: all 0.1s linear;
   border-width: 0px 0 0px 0px;
 }
-.test-wrapper .test .t1 {
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+.static-map-small .static-map-inner .r1 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -50px;
   position: absolute;
   display: block;
@@ -608,8 +604,10 @@ a.pronounced-title {
   transition: all 0.1s linear;
   border-width: 0px 0;
 }
-.test-wrapper .test .t2 {
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+.static-map-small .static-map-inner .r2 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -100px;
   position: absolute;
   display: block;
@@ -629,8 +627,10 @@ a.pronounced-title {
   transition: all 0.1s linear;
   border-width: 0px 0;
 }
-.test-wrapper .test .t3 {
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+.static-map-small .static-map-inner .r3 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -150px;
   position: absolute;
   display: block;
@@ -650,34 +650,44 @@ a.pronounced-title {
   transition: all 0.1s linear;
   border-width: 0px 0px 0px 0;
 }
-.test-wrapper:hover .t0 {
+.static-map-small .static-map-inner .dark-layer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #333;
+  opacity: 0;
+  -webkit-transition: opacity 0.1s ease-in-out;
+  -moz-transition: opacity 0.1s ease-in-out;
+  transition: opacity 0.1s ease-in-out;
+}
+.static-map-small:hover .r0 {
   -webkit-transform: perspective(200px) rotatey(-35deg);
   -moz-transform: perspective(200px) rotatey(-35deg);
   -o-transform: perspective(200px) rotatey(-35deg);
   -ms-transform: perspective(200px) rotatey(-35deg);
   transform: perspective(200px) rotatey(-35deg);
 }
-.test-wrapper:hover .t1 {
+.static-map-small:hover .r1 {
   -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
 }
-.test-wrapper:hover .t2 {
+.static-map-small:hover .r2 {
   -webkit-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
   -moz-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
   -o-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
   -ms-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
   transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
 }
-.test-wrapper:hover .t3 {
+.static-map-small:hover .r3 {
   -webkit-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -o-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -ms-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
 }
-.test-wrapper:hover .w {
+.static-map-small:hover .dark-layer {
   opacity: 0.10;
 }

@@ -7,14 +7,20 @@
     
     <div id="main-content" class="fixedwidth">
         TEST1
-        <div class="test-wrapper">
-            <div class="test">
-                <div class="t0"></div>
-                <div class="t1"><div class='w'></div></div>
-                <div class="t2"></div>
-                <div class="t3"><div class='w'></div></div>
+        
+        {% with url='https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200' %}
+            {% custom_template "static-map-small" %}
+        {% endwith %}
+        
+        <!--
+        <div class="static-map-small">
+            <div class="static-map-inner">
+                <div class="r0"></div>
+                <div class="r1"><div class='dark-layer'></div></div>
+                <div class="r2"></div>
+                <div class="r3"><div class='dark-layer'></div></div>
             </div>
-        </div>
+        </div>-->
     </div>
 {% endblock main %}
 

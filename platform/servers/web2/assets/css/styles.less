@@ -548,17 +548,16 @@ footer .copyright a, footer .copyright a {
     font-size: 2.2em;
 }
 
-@size: 200px;
-@colsize: @size / 4;
-@b: 0px;
-
-.test-wrapper {
+.static-map(@size, @b, @angle) {
+    display: block;
+    width: @size;
     padding: 30px;
     background: #888;
     
-    width: @size;
-    
-    .test {
+    .static-map-inner {
+        margin: 0 auto;
+        @colsize: @size / 4;
+        
         position: relative;
         display: block;
         width:  @size;
@@ -569,17 +568,18 @@ footer .copyright a, footer .copyright a {
         .backface-visibility(hidden);
         
         .section(@x) {
-            background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+            /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+            background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
             background-position: -(@x * @colsize);
             
             position: absolute;
-            display: block;
+            display:  block;
             
             width:  @colsize;
             height: @size;
             
             left: @x * @colsize;
-            top: 0;
+            top:  0;
             
             border: @b solid rgba(0,0,0,0.9);
             /*outline: 1px solid transparent;*/
@@ -589,8 +589,23 @@ footer .copyright a, footer .copyright a {
             .transition(all, .1s, linear);
         }
         
-        /* TODO: polish animation and make w's opacity ease in */
-        .w {
+        .r0 {
+            .section(0);
+            border-width: @b 0 @b @b;
+        }
+        .r1 {
+            .section(1);
+            border-width: @b 0;
+        }
+        .r2 {
+            .section(2);
+            border-width: @b 0;
+        }
+        .r3 {
+            .section(3);
+            border-width: @b @b @b 0;
+        }
+        .dark-layer {
             display: block;
             width:  100%;
             height: 100%;
@@ -599,42 +614,29 @@ footer .copyright a, footer .copyright a {
             
             .transition(opacity, .1s, ease-in-out);
         }
-        .t0 {
-            .section(0);
-            border-width: @b 0 @b @b;
+    }
+    
+    &:hover {
+        .r0 {
+            .transform(perspective(200px) rotateY(-@angle));
         }
-        .t1 {
-            .section(1);
-            border-width: @b 0;
+        .r1 {
+            .transform(perspective(200px) translate(-6px,  0) rotateY(@angle));
         }
-        .t2 {
-            .section(2);
-            border-width: @b 0;
+        .r2 {
+            .transform(perspective(200px) translate(-18px, 0) rotateY(-@angle));
         }
-        .t3 {
-            .section(3);
-            border-width: @b @b @b 0;
+        .r3 {
+            .transform(perspective(200px) translate(-23px, 0) rotateY(@angle));
+        }
+        .dark-layer {
+            opacity: 0.10;
         }
     }
 }
 
-.test-wrapper:hover {
-    @angle: 35deg;
-    
-    .t0 {
-        .transform(perspective(200px) rotateY(-@angle));
-    }
-    .t1 {
-        .transform(perspective(200px) translate(-6px,  0) rotateY(@angle));
-    }
-    .t2 {
-        .transform(perspective(200px) translate(-18px, 0) rotateY(-@angle));
-    }
-    .t3 {
-        .transform(perspective(200px) translate(-23px, 0) rotateY(@angle));
-    }
-    .w {
-        opacity: 0.10;
-    }
+.static-map-small {
+    /* TODO: non-zero border messes with map centering */
+    .static-map(200px, 0px, 35deg);
 }
 
