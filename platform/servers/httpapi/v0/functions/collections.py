@@ -63,7 +63,7 @@ def friends(request, authUserId, schema, **kwargs):
 
     return transform_stamps(stamps)
 
-@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     before = time.time()
@@ -72,7 +72,7 @@ def suggested(request, authUserId, schema, **kwargs):
     
     return transform_stamps(stamps)
 
-@handleHTTPRequest(http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
 @require_http_methods(["GET"])
 def consumption(request, authUserId, schema, **kwargs):
     stamps = None

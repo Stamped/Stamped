@@ -232,26 +232,19 @@ def stamped_render(request, template, context, **kwargs):
 
 def get_stamped_context(context, preload=None):
     context = copy.copy(context)
-    custom  = {}
     
-    custom["DEBUG"]   = not IS_PROD
-    custom["IS_PROD"] = IS_PROD
-    
-    context.update(custom)
+    context["DEBUG"]   = not IS_PROD
+    context["IS_PROD"] = IS_PROD
     
     # only preload global STAMPED_PRELOAD javscript variable if desired by the 
     # calling view
-    if preload is not None:
-        if preload == 'all':
-            ctx = context
-        else:
-            ctx = dict(((k, context[k]) for k in preload))
-            ctx.update(custom)
-        
-        json_context = json.dumps(ctx, sort_keys=not IS_PROD)
-        stamped_preload = "var STAMPED_PRELOAD = %s;" % json_context
+    if preload is None:
+        ctx = context
     else:
-        stamped_preload = ""
+        ctx = dict(((k, context[k]) for k in preload))
+    
+    json_context = json.dumps(ctx, sort_keys=not IS_PROD)
+    stamped_preload = "var STAMPED_PRELOAD = %s;" % json_context
     
     context["STAMPED_PRELOAD_JS"] = stamped_preload
     context.update(STAMPED_SETTINGS)

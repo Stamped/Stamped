@@ -85,7 +85,7 @@ class Memcache(object):
     
     def _import_value(self, value):
         """
-            returns a custom, pickleable version of the given value for storage 
+            returns a custom, pickleable version of the given value for storage
             within memcached.
         """
         
@@ -97,7 +97,7 @@ class Memcache(object):
         elif isinstance(value, (list, tuple)):
             value = map(self._import_value, value)
         elif isinstance(value, dict):
-            value = dict(map(lambda k, v: (k, self._import_value(v)), value.iteritems()))
+            value = dict(map(lambda (k, v): (k, self._import_value(v)), value.iteritems()))
         
         return value
     
@@ -112,7 +112,7 @@ class Memcache(object):
                 # reinstantiate the Schema subclass with its prior data
                 return value['__schema__'](value['__value__'])
             else:
-                return dict(map(lambda k, v: (k, self._export_value(v)), value.iteritems()))
+                return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):
             value = map(self._export_value, value)
         else:

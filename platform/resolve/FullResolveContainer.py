@@ -46,7 +46,7 @@ class FullResolveContainer(BasicSourceContainer):
         # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
         self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
 
-def demo(default_title='Katy Perry'):
+def demo(default_title='Katy Perry', object_id=None):
     import bson, sys
     
     title = default_title.lower()
@@ -64,7 +64,10 @@ def demo(default_title='Katy Perry'):
     from MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db  = api._entityDB
-    query = {'titlel':title}
+    if object_id is not None:
+        query = {'_id':  bson.ObjectId(object_id)}
+    else:
+        query = {'titlel':title}
     
     if subcategory is not None:
         query['subcategory'] = subcategory
@@ -98,4 +101,12 @@ def demo(default_title='Katy Perry'):
                 print( "%s" % pformat(v) )
 
 if __name__ == "__main__":
-    demo()
+    import sys
+    params = {}
+    if len(sys.argv) == 2 and sys.argv[1].find('=') == -1:
+        params['default_title'] = sys.argv[1]
+    else:
+        for arg in sys.argv[1:]:
+            pair = arg.split('=')
+            params[pair[0]] = pair[1]
+    demo(**params)

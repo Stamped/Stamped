@@ -42,6 +42,14 @@
     background: -o-linear-gradient(@start, @c0, @c1, @c2);
 }
 
+.linear-gradient2(@start: left, @c0, @c1) {
+    background: @c0;
+    background: -webkit-linear-gradient(@start, @c0, @c1);
+    background: -moz-linear-gradient(@start, @c0, @c1);
+    background: -ms-linear-gradient(@start, @c0, @c1);
+    background: -o-linear-gradient(@start, @c0, @c1);
+}
+
 .bordered(@top-color: #EEE, @right-color: #EEE, @bottom-color: #EEE, @left-color: #EEE) {
     border-top: solid 1px @top-color;
     border-left: solid 1px @left-color;
@@ -107,10 +115,10 @@
     transform:scale(@ratio);
 }
 
-.transition(@duration: 0.2s, @ease: ease-out) {
-    -webkit-transition: all @duration @ease;
-    -moz-transition: all @duration @ease;
-    transition: all @duration @ease;
+.transition(@target: all, @duration: 0.2s, @ease: ease-out) {
+    -webkit-transition: @target @duration @ease;
+    -moz-transition: @target @duration @ease;
+    transition: @target @duration @ease;
 }
 
 .inner-shadow(@horizontal: 0, @vertical: 1px, @blur: 2px, @alpha: 0.4) {
@@ -164,5 +172,33 @@
     -o-transform: translate(@x, @y);
     -ms-transform: translate(@x, @y);
     transform: translate(@x, @y);
+}
+
+.transform(@args) {
+    -webkit-transform: @args;
+       -moz-transform: @args;
+         -o-transform: @args;
+        -ms-transform: @args;
+            transform: @args;
+}
+
+.transform-style(@args) {
+    -webkit-transform-style: @args;
+       -moz-transform-style: @args;
+         -o-transform-style: @args;
+        -ms-transform-style: @args;
+            transform-style: @args;
+}
+
+.perspective(@z: 600px) {
+    -webkit-perspective: @z;
+       -moz-perspective: @z;
+         -o-perspective: @z;
+        -ms-perspective: @z;
+            perspective: @z;
+}
+
+.backface-visibility(@args) {
+    backface-visibility: @args;
 }
 

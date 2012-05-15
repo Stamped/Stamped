@@ -190,34 +190,28 @@ header {
     }
 }
 
-/*
-
-@color: color(`window.colors.baseColor`);
-@darkcolor: darken(@color, 10%);
-
-TODO:
-    * dynamic color scheme constants (e.g., constants that change per page)
-        * like a uniform variable in a shader language
-        * options:
-            * modify CSS onload via javascript
-                * downside: requires javascript
-            * separate generic styles from templated, customized styles generated server-side
-                * styles.css and custom.css?variables... (version should be one optional variable)
-                * generate and *cache* custom.css stylesheets w/ long TTL
-                * downside: harder to take advantage of CDN caching?
-                * NOTE: possibly wouldn't need to reference custom.css directly; could be inlined on page
-            * attempt to inline style on page to override !important colors?
-                * downside: wouldn't easily support static operations
-                * NOTE: static stylesheet would need to use less runtime in order to utilize javascript
-                    * this implies that it is better suited elsewhere!
-*/
-
-.user-logo {
+.user-logo-large {
+    position: absolute;
+    
+    top:  -125px;
+    left: -125px;
+    
     width:  195px;
     height: 195px;
-    position: absolute;
-    top: -125px;
-    left: -125px;
+    
+    z-index: 101;
+}
+
+.user-logo-small {
+    position: relative;
+    
+    top:  -10px;
+    left: -10px;
+    
+    display: inline-block;
+    width:  44px;
+    height: 44px;
+    
     z-index: 101;
 }
 
@@ -323,6 +317,10 @@ TODO:
 .profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
+    display: block;
+    width:  @size + @border * 2;
+    height: @size + @border * 2;
+    
     img {
         width:  @size;
         height: @size;
@@ -333,6 +331,10 @@ TODO:
 
 .profile-image-large {
     .profile-image(128px, 4px);
+}
+
+.profile-image-medium {
+    .profile-image(54px,  2px);
 }
 
 .profile-image-small {
@@ -535,6 +537,7 @@ footer .copyright a, footer .copyright a {
 }
 
 .pronounced-title {
+    position: relative;
     font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
     font-size: 2em;
     letter-spacing: .025em;
@@ -543,5 +546,97 @@ footer .copyright a, footer .copyright a {
 
 .large {
     font-size: 2.2em;
+}
+
+.static-map(@size, @b, @angle) {
+    display: block;
+    width: @size;
+    padding: 30px;
+    background: #888;
+    
+    .static-map-inner {
+        margin: 0 auto;
+        @colsize: @size / 4;
+        
+        position: relative;
+        display: block;
+        width:  @size;
+        height: @size;
+        
+        /*.perspective(200px);*/
+        .transform-style(preserve-3d);
+        .backface-visibility(hidden);
+        
+        .section(@x) {
+            /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+            background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+            background-position: -(@x * @colsize);
+            
+            position: absolute;
+            display:  block;
+            
+            width:  @colsize;
+            height: @size;
+            
+            left: @x * @colsize;
+            top:  0;
+            
+            border: @b solid rgba(0,0,0,0.9);
+            /*outline: 1px solid transparent;*/
+            /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+            /*.transform-style(preserve-3d);*/
+            
+            .transition(all, .1s, linear);
+        }
+        
+        .r0 {
+            .section(0);
+            border-width: @b 0 @b @b;
+        }
+        .r1 {
+            .section(1);
+            border-width: @b 0;
+        }
+        .r2 {
+            .section(2);
+            border-width: @b 0;
+        }
+        .r3 {
+            .section(3);
+            border-width: @b @b @b 0;
+        }
+        .dark-layer {
+            display: block;
+            width:  100%;
+            height: 100%;
+            background: #333;
+            opacity: 0;
+            
+            .transition(opacity, .1s, ease-in-out);
+        }
+    }
+    
+    &:hover {
+        .r0 {
+            .transform(perspective(200px) rotateY(-@angle));
+        }
+        .r1 {
+            .transform(perspective(200px) translate(-6px,  0) rotateY(@angle));
+        }
+        .r2 {
+            .transform(perspective(200px) translate(-18px, 0) rotateY(-@angle));
+        }
+        .r3 {
+            .transform(perspective(200px) translate(-23px, 0) rotateY(@angle));
+        }
+        .dark-layer {
+            opacity: 0.10;
+        }
+    }
+}
+
+.static-map-small {
+    /* TODO: non-zero border messes with map centering */
+    .static-map(200px, 0px, 35deg);
 }
 

@@ -1,0 +1,332 @@
+/* profile2.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/**** Isotope Filtering ****/
+.isotope-item {
+  z-index: 2;
+}
+.isotope-hidden.isotope-item {
+  pointer-events: none;
+  z-index: 1;
+}
+/**** Isotope CSS3 transitions ****/
+.isotope,
+.isotope .isotope-item {
+  -webkit-transition-duration: 0.8s;
+  -moz-transition-duration: 0.8s;
+  -ms-transition-duration: 0.8s;
+  -o-transition-duration: 0.8s;
+  transition-duration: 0.8s;
+}
+.isotope {
+  -webkit-transition-property: height, width;
+  -moz-transition-property: height, width;
+  -ms-transition-property: height, width;
+  -o-transition-property: height, width;
+  transition-property: height, width;
+}
+.isotope .isotope-item {
+  -webkit-transition-property: -webkit-transform, opacity;
+  -moz-transition-property: -moz-transform, opacity;
+  -ms-transition-property: -ms-transform, opacity;
+  -o-transition-property: top, left, opacity;
+  transition-property: transform, opacity;
+}
+/**** disabling Isotope CSS3 transitions ****/
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+  -webkit-transition-duration: 0s;
+  -moz-transition-duration: 0s;
+  -ms-transition-duration: 0s;
+  -o-transition-duration: 0s;
+  transition-duration: 0s;
+}
+#main-content {
+  position: relative;
+}
+.stamp-gallery {
+  position: relative;
+  width: 100%;
+  clear: both;
+}
+.stamp-gallery-item {
+  /*background: url(/assets/img/main-noise.png) left top repeat;*/
+
+  -webkit-box-shadow: 10px 0 4px -7px rgba(125, 125, 125, 0.15), -10px 0 4px -7px rgba(125, 125, 125, 0.15);
+  -moz-box-shadow: 10px 0 4px -7px rgba(125, 125, 125, 0.15), -10px 0 4px -7px rgba(125, 125, 125, 0.15);
+  -ms-box-shadow: 10px 0 4px -7px rgba(125, 125, 125, 0.15), -10px 0 4px -7px rgba(125, 125, 125, 0.15);
+  -o-box-shadow: 10px 0 4px -7px rgba(125, 125, 125, 0.15), -10px 0 4px -7px rgba(125, 125, 125, 0.15);
+  box-shadow: 10px 0 4px -7px rgba(125, 125, 125, 0.15), -10px 0 4px -7px rgba(125, 125, 125, 0.15);
+  background: #fefefe;
+  float: left;
+  width: 100%;
+  margin: .5em 0;
+}
+.stamp-gallery-item .top-wave {
+  background: url(/assets/img/main-topcap.png) left top repeat-x;
+  height: 8px;
+  margin: 0;
+}
+.stamp-gallery-item .bottom-wave {
+  background: url(/assets/img/main-botcap.png) left top repeat-x;
+  height: 8px;
+  margin: 0;
+}
+.stamp-gallery-item .content {
+  padding: 2.5em 2em;
+}
+.stamp-gallery-item .content .inner-content {
+  display: block;
+  text-align: left;
+  float: left;
+  margin-left: 2em;
+  max-width: 60%;
+  text-align: justify;
+}
+.stamp-gallery-item .content .inner-content .stamp-contents {
+  font-size: 80%;
+}
+.stamp-gallery-item .content .inner-content .stamp-contents .stamped-content {
+  margin: .2em 0 1em;
+}
+.stamp-gallery-item .content .inner-content .stamp-contents .stamped-content .images {
+  float: right;
+  display: block;
+  width: 128px;
+  height: auto;
+  margin: .2em 0 .2em .2em;
+}
+.stamp-gallery-item .content .inner-content .stamp-contents .stamped-content .images img {
+  border: 1px solid;
+  display: inline-block;
+  max-width: 128px;
+  height: auto;
+}
+.stamp-gallery-item .content .inner-content .previews {
+  font-size: 80%;
+  /*.profile-image-small {
+                    display: inline-block;
+                    float: none;
+                    
+                    position: relative;
+                    margin: 0 2px 4px 0;
+                    
+                    @width:  14px;
+                    @height: 14px;
+                    
+                    .preview-image(@bgleft, @bgtop) {
+                        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
+                        background-position: @bgleft, @bgtop;
+                        
+                        position: absolute;
+                        bottom: -(@height / 3);
+                        right:  -(@width  / 3);
+                        
+                        display: block;
+                        width:  @width;
+                        height: @height;
+                        z-index: 100;
+                    }
+                    
+                    .like {
+                        .preview-image(0, 0);
+                    }
+                    
+                    .todo {
+                        .preview-image(-16px, 0);
+                    }
+                    
+                    .comment {
+                        .preview-image(-32px, 0);
+                    }
+                    
+                    .credit {
+                        position: absolute;
+                        bottom: -(@height / 3);
+                        right:  -(@width  / 3);
+                        
+                        display: block;
+                        width: 18px;
+                        height: 18px;
+                        z-index: 101;
+                        
+                        img {
+                            background: none;
+                            border: 0 none;
+                            
+                            -webkit-box-shadow: none;
+                            -moz-box-shadow: none;
+                            -ms-box-shadow: none;
+                            -o-box-shadow: none;
+                            box-shadow: none;
+                            
+                            display: block;
+                            width:  18px;
+                            height: 18px;
+                        }
+                    }
+                    
+                    .like img, .todo img, .comment img {
+                        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
+                    }
+                }*/
+
+}
+.stamp-gallery-item .content .inner-content .previews div {
+  display: block;
+  float: left;
+}
+.stamp-gallery-item .content .inner-content .previews div.like {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: 0 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
+}
+.stamp-gallery-item .content .inner-content .previews div.todo {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: -19px 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
+}
+.stamp-gallery-item .content .inner-content .previews div.comments {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  background-position: -38px 0;
+  width: 17px;
+  height: 17px;
+  z-index: 100;
+  margin: -1px 0.2em 0 0.7em;
+}
+.blurb {
+  display: inline;
+  text-align: left;
+  quotes: "\201C" "\201D";
+}
+.blurb:before {
+  content: open-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-right: .2em;
+}
+.blurb:after {
+  content: close-quote;
+  font-size: 200%;
+  font-weight: bold;
+  padding-left: .2em;
+}
+/* TODO: properly center subtitle-line */
+.subtitle-line {
+  position: relative;
+  display: block;
+  margin: 0 0 -0.5em;
+  top: -4px;
+}
+.subtitle-line p {
+  margin: 0;
+  padding: 0;
+}
+.subtitle-line .subtitle {
+  display: inline;
+  font-size: 80%;
+  position: relative;
+  top: -2px;
+}
+.subtitle-line .icon {
+  display: inline-block;
+  margin: 0 4px 0 0;
+}
+.stamp-gallery-loading {
+  text-align: center;
+  margin: 0 auto;
+}
+.profile-nav {
+  list-style: none;
+  text-decoration: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* TODO: 20x19 version */
+
+}
+.profile-nav a {
+  display: block;
+}
+.profile-nav a:focus {
+  text-decoration: none;
+  border: 0 none;
+  outline: none;
+}
+.profile-nav a.up-arrow {
+  background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
+  width: 21px;
+  height: 21px;
+  margin: 0 0 .5em;
+}
+.profile-nav a.up-arrow:hover {
+  background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
+}
+.profile-nav a.up-arrow:active {
+  background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
+}
+.profile-nav a.down-arrow {
+  background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
+  width: 21px;
+  height: 21px;
+}
+.profile-nav a.down-arrow:hover {
+  background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
+}
+.profile-nav a.down-arrow:active {
+  background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
+}
+/* TODO: fix height issues */
+ul.user-category-distribution {
+  list-style: none;
+  text-decoration: none;
+}
+ul.user-category-distribution li {
+  float: left;
+  width: 10%;
+  margin: 0 4% 0 0;
+}
+ul.user-category-distribution li img {
+  margin: 0 auto;
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+ul.user-category-distribution li .bargraph {
+  display: block;
+  background: #e5e5e5;
+  border: 1px solid #d4d4d4;
+  width: 100%;
+  height: 100%;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+ul.user-category-distribution li .bargraph .value {
+  /*.linear-gradient(left, @outer, @inner, @outer);*/
+
+}

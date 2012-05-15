@@ -204,6 +204,9 @@ def _cleanImageURL(url):
     elif 'amazon.com' in domain:
         # strip the 'look inside' image modifier
         url = amazon_image_re.sub(r'\1.jpg', url)
+    elif 'nflximg.com' in domain:
+        # replace the large boxart with hd
+        url = url.replace('/large/', '/ghd/')
 
     return url
 
@@ -487,7 +490,7 @@ class HTTPUser(Schema):
         self.distribution       = SchemaList(HTTPCategoryDistribution())
 
     def importSchema(self, schema, client=None):
-        if schema.__class__.__name__ in ('Account', 'User'):
+        if schema.__class__.__name__ in ('Account', 'User', 'Schemas.User'):
             self.importData(schema.exportSparse(), overflow=True)
             
             stats = schema.stats.exportSparse()
@@ -701,6 +704,17 @@ class HTTPEndpointResponse(Schema):
 # Entities #
 # ######## #
 
+def _addImages(dest, images):
+    for image in images:
+        if len(image.sizes) == 0:
+            continue
+        newimg = HTTPImageSchema()
+        for size in image.sizes:
+            if size.url is not None:
+                newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
+                newimg.sizes.append(newsize)
+        dest.images.append(newimg)
+
 class HTTPEntity(Schema):
     def setSchema(self):
         # Core
@@ -778,21 +792,6 @@ class HTTPEntity(Schema):
                 item.action = kwargs['action']
 
             self.metadata.append(item)
-    
-    def _addImages(self, images):
-        logs.info('\n### calling addImages')
-        for image in images:
-            logs.info('\n### iterating through images.  sizes: %d' % len(image.sizes))
-            if len(image.sizes) == 0:
-                continue
-            newimg = HTTPImageSchema()
-            for size in image.sizes:
-                logs.info('\n### iteraring through sizes.  size.url %s' % size.url)
-                if size.url is not None:
-                    newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
-                    newimg.sizes.append(newsize)
-            logs.info('\n### adding image')
-            self.images.append(newimg)
 
     def _formatReleaseDate(self, date):
         try:
@@ -1525,7 +1524,7 @@ class HTTPEntity(Schema):
             # Don't add an image if coordinates exist
             del(self.images)
         elif len(entity.images) > 0:
-            self._addImages(entity.images)
+            _addImages(self, entity.images)
 
         return self
             
@@ -1665,7 +1664,8 @@ class HTTPEntityMini(Schema):
             self.subtitle           = schema.subtitle
             self.category           = schema.category
             self.subcategory        = schema.subcategory
-            self.images             = schema.images
+            _addImages(self, schema.images)
+
 
             try:
                 if 'coordinates' in schema.value:
@@ -1915,8 +1915,12 @@ class HTTPStamp(Schema):
         self.created            = SchemaElement(basestring)
         self.modified           = SchemaElement(basestring)
         self.stamped            = SchemaElement(basestring)
+        
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
+        self.num_todos          = SchemaElement(int)
+        self.num_credits        = SchemaElement(int)
+        
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
     
@@ -1972,6 +1976,8 @@ class HTTPStamp(Schema):
                 for image in content.images:
                     img = HTTPImageSchema()
                     img.importSchema(image)
+                    # quick fix for now
+                    # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
@@ -1986,6 +1992,15 @@ class HTTPStamp(Schema):
             self.num_likes = 0
             if schema.num_likes > 0:
                 self.num_likes          = schema.num_likes
+            
+            self.num_todos = 0
+            if schema.stats is not None:
+                if schema.stats.num_todos > 0:
+                    self.num_todos          = schema.stats.num_todos
+            
+            self.num_credits = 0
+            if len(schema.credits) > 0:
+                self.num_credits        = len(schema.credits)
             
             url_title = encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
@@ -2262,10 +2277,27 @@ class HTTPStampedBy(Schema):
         self.fof                = HTTPStampedByGroup()
         self.all                = HTTPStampedByGroup()
 
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'StampedBy':
+            self.friends.importSchema(schema.friends)
+            self.fof.importSchema(schema.fof)
+            self.all.importSchema(schema.all)
+        else:
+            raise NotImplementedError(type(schema))
+
 class HTTPStampedByGroup(Schema):
     def setSchema(self):
         self.count              = SchemaElement(int)
         self.stamps             = SchemaList(HTTPStamp())
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'StampedByGroup':
+            self.count = schema.count
+            for srcStamp in schema.stamps:
+                self.stamps.append(HTTPStamp().importSchema(srcStamp).exportSparse())
+        else:
+            raise NotImplementedError(type(schema))
+
 
 class HTTPStampImage(Schema):
     def setSchema(self):
@@ -2994,7 +3026,8 @@ class HTTPEntity_stampedtest(Schema):
 
             # TODO: Image
             if len(schema.images) > 0:
-                self.image = self._handle_image(schema.images[0]['image'])
+                if len(schema.images[0].sizes) > 0:
+                    self.image = self._handle_image(schema.images[0].sizes[0]['url'])
 
             # Affiliates
 

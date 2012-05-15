@@ -14,6 +14,29 @@ from helpers        import *
 
 import travis_test
 
+def _is_static_profile_image(url):
+    return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
+
+# ensure friends and followers are randomly shuffled s.t. different users will 
+# appear every page refresh, with preferential treatment always going to users 
+# who have customized their profile image away from the default.
+def _shuffle_split_users(users):
+    # find all users who have a custom profile image
+    a0 = filter(lambda a: a['image_url'] and not _is_static_profile_image(a['image_url']), users)
+    
+    # find all users who have the default profile image
+    a1 = filter(lambda a: not (a['image_url'] and _is_static_profile_image(a['image_url'])), users)
+    
+    # shuffle them both independently
+    a0 = utils.shuffle(a0)
+    a1 = utils.shuffle(a1)
+    
+    # and combine the results s.t. all users with custom profile images precede 
+    # all those without custom profile images
+    a0.extend(a1)
+    
+    return a0
+
 @stamped_view()
 def index(request):
     autoplay_video = bool(request.GET.get('video', False))
@@ -55,29 +78,6 @@ def profile(request, schema, **kwargs):
     
     #utils.log("STAMPS:")
     #utils.log(pprint.pformat(stamps))
-    
-    def _is_static_profile_image(url):
-        return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
-    
-    # ensure friends and followers are randomly shuffled s.t. different users will 
-    # appear every page refresh, with preferential treatment always going to users 
-    # who have customized their profile image away from the default.
-    def _shuffle_split_users(users):
-        # find all users who have a custom profile image
-        a0 = filter(lambda a: a['image_url'] and not _is_static_profile_image(a['image_url']), users)
-        
-        # find all users who have the default profile image
-        a1 = filter(lambda a: not (a['image_url'] and _is_static_profile_image(a['image_url'])), users)
-        
-        # shuffle them both independently
-        a0 = utils.shuffle(a0)
-        a1 = utils.shuffle(a1)
-        
-        # and combine the results s.t. all users with custom profile images precede 
-        # all those without custom profile images
-        a0.extend(a1)
-        
-        return a0
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -135,34 +135,9 @@ def map(request, schema, **kwargs):
     # TODO: bake this into stampedAPIProxy request
     stamps = filter(lambda s: 'coordinates' in s['entity'], stamps)
     
-    def _is_static_profile_image(url):
-        return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
-    
-    # ensure friends and followers are randomly shuffled s.t. different users will 
-    # appear every page refresh, with preferential treatment always going to users 
-    # who have customized their profile image away from the default.
-    def _shuffle_split_users(users):
-        # find all users who have a custom profile image
-        a0 = filter(lambda a: a['image_url'] and not _is_static_profile_image(a['image_url']), users)
-        
-        # find all users who have the default profile image
-        a1 = filter(lambda a: not (a['image_url'] and _is_static_profile_image(a['image_url'])), users)
-        
-        # shuffle them both independently
-        a0 = utils.shuffle(a0)
-        a1 = utils.shuffle(a1)
-        
-        # and combine the results s.t. all users with custom profile images precede 
-        # all those without custom profile images
-        a0.extend(a1)
-        
-        return a0
-    
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
     
-    utils.log("STAMPS: %s" % len(stamps))
-     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
             'offset' : max(0, schema.offset - schema.limit), 
@@ -183,4 +158,8 @@ def map(request, schema, **kwargs):
         'prev_url'  : prev_url, 
         'next_url'  : next_url, 
     }, preload=[ 'user', 'stamps' ])
+
+@stamped_view(schema=HTTPUserCollectionSlice)
+def test_view(request, schema, **kwargs):
+    return stamped_render(request, 'test.html', { })
 

@@ -28,7 +28,7 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.exportSparse())
 
 
-@handleHTTPRequest(http_schema=HTTPEntityIdSearchId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityIdSearchId)
 @require_http_methods(["GET"])
 def show(request, authUserId, authClientId, http_schema, **kwargs):
     entity      = stampedAPI.getEntity(http_schema, authUserId)
@@ -127,14 +127,18 @@ def menu(request, authUserId, http_schema, **kwargs):
     return transformOutput(http_menu.exportSparse())
 
 
-@handleHTTPRequest(http_schema=HTTPStampedBySlice)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampedBySlice)
 @require_http_methods(["GET"])
 def stampedBy(request, authUserId, http_schema, **kwargs):
     showCount   = True if http_schema.group is None else False
     
     result      = HTTPStampedBy()
-    
-    if http_schema.group is None or http_schema.group == 'friends':
+
+    if http_schema.group is None:
+        stampedby = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+        result.importSchema(stampedby)
+
+    elif http_schema.group == 'friends' and authUserId is not None:
         requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 1
         
@@ -145,7 +149,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         if count is not None:
             result.friends.count = count
     
-    if http_schema.group is None or http_schema.group == 'fof':
+    elif http_schema.group == 'fof' and authUserId is not None:
         requestSlice = http_schema.exportSchema(FriendsSlice())
         requestSlice.distance = 2
         requestSlice.inclusive = False
@@ -157,12 +161,12 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         if count is not None:
             result.fof.count = count
     
-    if http_schema.group is None or http_schema.group == 'all':
+    elif http_schema.group == 'all':
         requestSlice  = http_schema.exportSchema(GenericCollectionSlice())
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         
         for stamp in stamps:
-            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.all.stafmps.append(HTTPStamp().importSchema(stamp).exportSparse())
         if count is not None:
             result.all.count = count
     

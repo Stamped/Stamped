@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 
+import logs
 import collections
 import functools, operator
 
