@@ -279,14 +279,14 @@ class StampedAuth(AStampedAuth):
                     raise
                 attempt += 1
 
-        accessToken = self.addAccessToken(refreshToken.client_id, \
-                                            refreshToken.user_id, \
-                                            refreshToken.token_id)
+        accessTokenData = self.addAccessToken(refreshToken.client_id, \
+                                                refreshToken.user_id, \
+                                                refreshToken.token_id)
         
         ret = {
-            'access_token': accessToken['access_token'],
-            'expires_in': accessToken['expires_in'],
-            'refresh_token': refreshToken['token_id']
+            'access_token': accessTokenData['access_token'],
+            'expires_in': accessTokenData['expires_in'],
+            'refresh_token': refreshToken.token_id,
         }
         return ret
     

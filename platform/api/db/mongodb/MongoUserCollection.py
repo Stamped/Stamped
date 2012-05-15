@@ -43,7 +43,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if '_id' in document:
             document['user_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-        return User(document, overflow=True)
+        return User().dataImport(document, overflow=True)
 
     def _getAllUserIds(self):
         documents = self._collection.find({}, {})

@@ -12,9 +12,9 @@ from httpapi.v0.helpers import *
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(requires_auth=False, 
@@ -27,7 +27,7 @@ def lookup(request, authUserId, http_schema, **kwargs):
     
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -43,12 +43,13 @@ def search(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPSuggestedUsers, schema=SuggestedUserRequest)
+@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest, 
+                   conversion=HTTPSuggestedUserRequest.convertToSuggestedUserRequest)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     results = stampedAPI.getSuggestedUsers(authUserId, schema)
@@ -56,12 +57,12 @@ def suggested(request, authUserId, schema, **kwargs):
     
     if schema.personalized:
         for user, explanations in results:
-            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            user2 = HTTPSuggestedUser().importSchema(user).dataExport()
             user2.explanations = explanations
             output.append(user2)
     else:
         for user in results:
-            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            user2 = HTTPSuggestedUser().importSchema(user).dataExport()
             output.append(user2)
     
     return transformOutput(output)
@@ -93,7 +94,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importSchema(user).dataExport())
     
     return transformOutput(output)
 
@@ -124,7 +125,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importSchema(user).dataExport())
     
     return transformOutput(output)
 
@@ -156,7 +157,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importSchema(user).dataExport())
     
     return transformOutput(output)
 
@@ -186,7 +187,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importSchema(user).dataExport())
     
     return transformOutput(output)
 

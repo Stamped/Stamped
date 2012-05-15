@@ -190,7 +190,7 @@ class StampedAPI(AStampedAPI):
         now = datetime.utcnow()
         
         account.timestamp.created = now
-        account.password = convertPasswordForStorage(account['password'])
+        account.password = convertPasswordForStorage(account.password)
         
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
@@ -562,8 +562,8 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
-        if isinstance(alerts, SchemaElement):
-            alerts = alerts.value
+        # if isinstance(alerts, SchemaElement):
+        #     alerts = alerts.value
         
         account = self._accountDB.getAccount(authUserId)
         
@@ -810,8 +810,8 @@ class StampedAPI(AStampedAPI):
     ### PRIVATE
     
     def _getUserFromIdOrScreenName(self, userTiny):
-        if not isinstance(userTiny, SchemaElement):
-            userTiny    = UserTiny(userTiny)
+        # if not isinstance(userTiny, SchemaElement):
+        #     userTiny    = UserTiny(userTiny)
         
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
@@ -1216,8 +1216,8 @@ class StampedAPI(AStampedAPI):
     """
 
     def _getEntityFromRequest(self, entityRequest):
-        if isinstance(entityRequest, SchemaElement):
-            entityRequest = entityRequest.value
+        # if isinstance(entityRequest, SchemaElement):
+        #     entityRequest = entityRequest.value
         
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
