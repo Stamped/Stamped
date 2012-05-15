@@ -228,6 +228,7 @@ class GenericSource(BasicSource):
             images.append(img)
         if len(images) > 0:
             logs.info('\n### adding images to entity')
+            logs.info('type(entity): %s images: %s' % (type(entity), images))
             entity.images = images
             timestamps['images'] = controller.now
         
