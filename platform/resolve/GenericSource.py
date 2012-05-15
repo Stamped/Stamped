@@ -230,6 +230,7 @@ class GenericSource(BasicSource):
             logs.info('\n### adding images to entity')
             logs.info('type(entity): %s images: %s' % (type(entity), images))
             entity.images = images
+            logs.info('### well we managed to set the entity images field, fancy that')
             timestamps['images'] = controller.now
         
         ### Place
