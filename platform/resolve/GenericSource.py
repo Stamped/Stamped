@@ -290,6 +290,7 @@ class GenericSource(BasicSource):
             setAttribute('mpaa_rating',     'mpaa_rating')
             setAttribute('release_date',    'release_date')
 
+            logs.info('### enriching for media collection san dmedia items')
             if proxy.length > 0:
                 entity.length = int(proxy.length)
                 timestamps['length'] = controller.now
@@ -380,7 +381,9 @@ class GenericSource(BasicSource):
             if proxy.sku_number is not None:
                 entity.sku_number = proxy.sku_number
                 timestamps['sku_number'] = controller.now
-        
+
+        logs.info('### done enriching for media collections and media items')
+
         ### Software
         if entity.kind == 'software' and proxy.kind == 'software':
             setAttribute('release_date', 'release_date')
