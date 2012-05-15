@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STImageList.h"
 
-@interface STSimpleImageList : NSObject <STImageList>
+@interface STSimpleImageList : NSObject <STImageList, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSArray<STImage>* sizes;
 @property (nonatomic, readwrite, copy) NSString* caption;

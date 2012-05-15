@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STActivity.h"
 
-@interface STSimpleActivity : NSObject <STActivity>
+@interface STSimpleActivity : NSObject <STActivity, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* header;
 @property (nonatomic, readwrite, copy) NSString* body;

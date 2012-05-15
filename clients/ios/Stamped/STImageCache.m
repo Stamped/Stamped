@@ -101,4 +101,8 @@ static STImageCache* _sharedInstance;
   return [self.cache cachedValueForKey:URL];
 }
 
+- (void)fastPurge {
+  [self.cache fastPurge];
+}
+
 @end

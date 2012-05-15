@@ -129,9 +129,6 @@
 		635D1C4D1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
 		635D1C4E1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
 		635D1C4F1551BB7300103D1A /* STEveryoneStampsList.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */; };
-		635D1C561552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
-		635D1C571552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
-		635D1C581552E10000103D1A /* STStampedByCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C551552E0FF00103D1A /* STStampedByCell.m */; };
 		635D1C5C1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
 		635D1C5D1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
 		635D1C5E1553164500103D1A /* STSimpleEndpointResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */; };
@@ -3040,8 +3037,6 @@
 		635D1C471551B99500103D1A /* STFriendsOfFriendsStampsList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STFriendsOfFriendsStampsList.m; sourceTree = "<group>"; };
 		635D1C4B1551BB7200103D1A /* STEveryoneStampsList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEveryoneStampsList.h; sourceTree = "<group>"; };
 		635D1C4C1551BB7300103D1A /* STEveryoneStampsList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEveryoneStampsList.m; sourceTree = "<group>"; };
-		635D1C541552E0FF00103D1A /* STStampedByCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedByCell.h; sourceTree = "<group>"; };
-		635D1C551552E0FF00103D1A /* STStampedByCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedByCell.m; sourceTree = "<group>"; };
 		635D1C59155315D600103D1A /* STEndpointResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEndpointResponse.h; sourceTree = "<group>"; };
 		635D1C5A1553164400103D1A /* STSimpleEndpointResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEndpointResponse.h; sourceTree = "<group>"; };
 		635D1C5B1553164400103D1A /* STSimpleEndpointResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEndpointResponse.m; sourceTree = "<group>"; };
@@ -5048,8 +5043,6 @@
 				6333E6FD154DF58F0019B450 /* STLoadingCell.m */,
 				6333E710154ED1D10019B450 /* STConsumptionCell.h */,
 				6333E711154ED1D20019B450 /* STConsumptionCell.m */,
-				635D1C541552E0FF00103D1A /* STStampedByCell.h */,
-				635D1C551552E0FF00103D1A /* STStampedByCell.m */,
 			);
 			name = "View Components";
 			sourceTree = "<group>";
@@ -8733,7 +8726,6 @@
 				635D1C451551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C4A1551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4F1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
-				635D1C581552E10000103D1A /* STStampedByCell.m in Sources */,
 				635D1C5E1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 				63B4F6931554628900C52C28 /* STConsumptionSlice.m in Sources */,
 				637A181E1558110F00148C0B /* STConsumptionToolbar.m in Sources */,
@@ -9002,7 +8994,6 @@
 				635D1C441551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C491551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4E1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
-				635D1C571552E10000103D1A /* STStampedByCell.m in Sources */,
 				635D1C5D1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 				63B4F6921554628900C52C28 /* STConsumptionSlice.m in Sources */,
 				637A181D1558110F00148C0B /* STConsumptionToolbar.m in Sources */,
@@ -9271,7 +9262,6 @@
 				635D1C431551B23700103D1A /* STFriendsStampsList.m in Sources */,
 				635D1C481551B99500103D1A /* STFriendsOfFriendsStampsList.m in Sources */,
 				635D1C4D1551BB7300103D1A /* STEveryoneStampsList.m in Sources */,
-				635D1C561552E10000103D1A /* STStampedByCell.m in Sources */,
 				635D1C5C1553164500103D1A /* STSimpleEndpointResponse.m in Sources */,
 				63B4F6911554628900C52C28 /* STConsumptionSlice.m in Sources */,
 				637A181C1558110F00148C0B /* STConsumptionToolbar.m in Sources */,

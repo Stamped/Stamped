@@ -10,7 +10,7 @@
 #import "STEndpointResponse.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleEndpointResponse : NSObject <STEndpointResponse>
+@interface STSimpleEndpointResponse : NSObject <STEndpointResponse, NSCoding>
 
 @property (nonatomic, readwrite, retain) id<STAction> action;
 

@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STActivityObjects.h"
 
-@interface STSimpleActivityObjects : NSObject <STActivityObjects>
+@interface STSimpleActivityObjects : NSObject <STActivityObjects, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSArray<STStamp>* stamps;
 @property (nonatomic, readwrite, copy) NSArray<STEntity>* entities;

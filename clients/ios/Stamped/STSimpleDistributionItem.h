@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STDistributionItem.h"
 
-@interface STSimpleDistributionItem : NSObject <STDistributionItem>
+@interface STSimpleDistributionItem : NSObject <STDistributionItem, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* category;
 @property (nonatomic, readwrite, copy) NSNumber* count;

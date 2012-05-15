@@ -32,6 +32,30 @@
 @synthesize bodyReferences = bodyReferences_;
 @synthesize footerReferences = footerReferences_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    header_ = [[decoder decodeObjectForKey:@"header"] retain];
+    body_ = [[decoder decodeObjectForKey:@"body"] retain];
+    footer_ = [[decoder decodeObjectForKey:@"footer"] retain];
+    
+    benefit_ = [[decoder decodeObjectForKey:@"benefit"] retain];
+    created_ = [[decoder decodeObjectForKey:@"created"] retain];
+    icon_ = [[decoder decodeObjectForKey:@"icon"] retain];
+    image_ = [[decoder decodeObjectForKey:@"image"] retain];
+    
+    subjects_ = [[decoder decodeObjectForKey:@"subjects"] retain];
+    verb_ = [[decoder decodeObjectForKey:@"verb"] retain];
+    objects_ = [[decoder decodeObjectForKey:@"objects"] retain];
+    action_ = [[decoder decodeObjectForKey:@"action"] retain];
+    
+    headerReferences_ = [[decoder decodeObjectForKey:@"headerReferences"] retain];
+    bodyReferences_ = [[decoder decodeObjectForKey:@"bodyReferences"] retain];
+    footerReferences_ = [[decoder decodeObjectForKey:@"footerReferences"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [header_ release];
@@ -53,6 +77,26 @@
   [footerReferences_ release];
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.header forKey:@"header"];
+  [encoder encodeObject:self.body forKey:@"body"];
+  [encoder encodeObject:self.footer forKey:@"footer"];
+  
+  [encoder encodeObject:self.benefit forKey:@"benefit"];
+  [encoder encodeObject:self.created forKey:@"created"];
+  [encoder encodeObject:self.icon forKey:@"icon"];
+  [encoder encodeObject:self.image forKey:@"image"];
+  
+  [encoder encodeObject:self.subjects forKey:@"subjects"];
+  [encoder encodeObject:self.verb forKey:@"verb"];
+  [encoder encodeObject:self.objects forKey:@"objects"];
+  [encoder encodeObject:self.action forKey:@"action"];
+  
+  [encoder encodeObject:self.headerReferences forKey:@"headerReferences"];
+  [encoder encodeObject:self.bodyReferences forKey:@"bodyReferences"];
+  [encoder encodeObject:self.footerReferences forKey:@"footerReferences"];
 }
 
 + (RKObjectMapping *)mapping {

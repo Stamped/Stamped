@@ -105,5 +105,8 @@
   return [self.cache objectForKey:key];
 }
 
+- (void)fastPurge {
+  [self.cache removeAllObjects];
+}
 
 @end

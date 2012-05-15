@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STEntitySearchResult.h"
 
-@interface STSimpleEntitySearchResult : NSObject <STEntitySearchResult>
+@interface STSimpleEntitySearchResult : NSObject <STEntitySearchResult, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* searchID;
 @property (nonatomic, readwrite, copy) NSString* title;

@@ -16,6 +16,17 @@
 @synthesize created = created_;
 @synthesize images = images_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    modified_ = [[decoder decodeObjectForKey:@"modified"] retain];
+    blurb_ = [[decoder decodeObjectForKey:@"blurb"] retain];
+    created_ = [[decoder decodeObjectForKey:@"created"] retain];
+    images_ = [[decoder decodeObjectForKey:@"images"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [modified_ release];
@@ -23,6 +34,13 @@
   [created_ release];
   [images_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.modified forKey:@"modified"];
+  [encoder encodeObject:self.blurb forKey:@"blurb"];
+  [encoder encodeObject:self.created forKey:@"created"];
+  [encoder encodeObject:self.images forKey:@"images"];
 }
 
 + (RKObjectMapping*)mapping {

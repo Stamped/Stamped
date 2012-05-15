@@ -15,6 +15,7 @@
 #import "STSimpleBadge.h"
 #import "STSimpleContentItem.h"
 #import "STSimplePreviews.h"
+#import "STStampedAPI.h"
 
 @implementation STSimpleStamp
 
@@ -124,6 +125,175 @@
   copy.badges = stamp.badges;
   copy.contents = stamp.contents;
   return copy;
+}
+
++ (STSimpleStamp*)augmentedStampWithStamp:(id<STStamp>)stamp
+                                     todo:(id<STUser>)todo
+                                     like:(id<STUser>)like
+                                  comment:(id<STComment>)comment
+                                andCredit:(id<STStamp>)credit {
+  STSimpleStamp* copy = [STSimpleStamp stampWithStamp:stamp];
+  STSimplePreviews* previews;
+  if (stamp.previews) {
+    previews = [STSimplePreviews previewsWithPreviews:stamp.previews];
+  }
+  else {
+    previews = [[[STSimplePreviews alloc] init] autorelease];
+  }
+  if (todo) {
+    NSMutableArray<STUser>* todos;
+    if (previews.todos) {
+      todos = [NSMutableArray arrayWithArray:previews.todos];
+    }
+    else {
+      todos = [NSMutableArray array];
+    }
+    [todos insertObject:todo atIndex:0];
+    if ([todo.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+      copy.isTodod = [NSNumber numberWithBool:YES];
+    }
+    previews.todos = todos;
+  }
+  if (like) {
+    NSMutableArray<STUser>* likes;
+    if (previews.likes) {
+      likes = [NSMutableArray arrayWithArray:previews.likes];
+    }
+    else {
+      likes = [NSMutableArray array];
+    }
+    [likes insertObject:like atIndex:0];
+    previews.likes = likes;
+    if ([like.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+      copy.isLiked = [NSNumber numberWithBool:YES];
+    }
+    copy.numLikes = [NSNumber numberWithInteger:copy.numLikes.integerValue + 1];
+  }
+  if (comment) {
+    NSMutableArray<STComment>* comments;
+    if (previews.comments) {
+      comments = [NSMutableArray arrayWithArray:previews.comments];
+    }
+    else {
+      comments = [NSMutableArray array];
+    }
+    [comments insertObject:comment atIndex:0];
+    copy.numComments = [NSNumber numberWithInteger:copy.numComments.integerValue + 1];
+    previews.comments = comments;
+  }
+  if (credit) {
+    NSMutableArray<STStamp>* credits;
+    if (previews.credits) {
+      credits = [NSMutableArray arrayWithArray:previews.credits];
+    }
+    else {
+      credits = [NSMutableArray array];
+    }
+    STSimpleStamp* previewlessStamp = [STSimpleStamp stampWithStamp:credit];
+    previewlessStamp.previews = nil;
+    [credits insertObject:previewlessStamp atIndex:0];
+    previews.credits = credits;
+  }
+  copy.previews = previews;
+  copy.modified = [NSDate date];
+  return copy;
+}
+
++ (STSimpleStamp*)reducedStampWithStamp:(id<STStamp>)stamp 
+                                   todo:(id<STUser>)todo
+                                   like:(id<STUser>)like
+                                comment:(id<STComment>)comment
+                              andCredit:(id<STStamp>)credit {
+  BOOL modified = NO;
+  STSimpleStamp* copy = [STSimpleStamp stampWithStamp:stamp];
+  if (stamp.previews) {
+    STSimplePreviews* previews = [STSimplePreviews previewsWithPreviews:stamp.previews];
+    if (todo) {
+      if (previews.todos) {
+        NSMutableArray<STUser>* todos = [NSMutableArray arrayWithArray:previews.todos];
+        id<STUser> target = nil;
+        for (id<STUser> cur in todos) {
+          if ([cur.userID isEqualToString:todo.userID]) {
+            target = cur;
+          }
+        }
+        if (target) {
+          [todos removeObject:target];
+          if ([todo.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+            copy.isTodod = [NSNumber numberWithBool:NO];
+          }
+          previews.todos = todos;
+          modified = YES;
+        }
+      }
+    }
+    if (like) {
+      if (previews.likes) {
+        NSMutableArray<STUser>* likes = [NSMutableArray arrayWithArray:previews.likes];
+        id<STUser> target = nil;
+        for (id<STUser> cur in likes) {
+          if ([cur.userID isEqualToString:like.userID]) {
+            target = cur;
+          }
+        }
+        if (target) {
+          [likes removeObject:target];
+          if (copy.numLikes.integerValue > 0) {
+            copy.numLikes = [NSNumber numberWithInteger:copy.numLikes.integerValue - 1];
+          }
+          if ([like.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+            copy.isLiked = [NSNumber numberWithBool:NO];
+          }
+          previews.likes = likes;
+          modified = YES;
+        }
+      }
+    }
+    if (comment) {
+      if (previews.comments) {
+        NSMutableArray<STComment>* comments = [NSMutableArray arrayWithArray:previews.comments];
+        id<STComment> target = nil;
+        for (id<STComment> cur in comments) {
+          if ([cur.commentID isEqualToString:comment.commentID]) {
+            target = cur;
+          }
+        }
+        if (target) {
+          [comments removeObject:target];
+          if (copy.numComments.integerValue > 0) {
+            copy.numComments = [NSNumber numberWithInteger:copy.numComments.integerValue - 1];
+          }
+          previews.comments = comments;
+          modified = YES;
+        }
+      }
+    }
+    if (credit) {
+      if (previews.credits) {
+        NSMutableArray<STStamp>* credits = [NSMutableArray arrayWithArray:previews.credits];
+        id<STStamp> target = nil;
+        for (id<STStamp> cur in credits) {
+          if ([cur.stampID isEqualToString:credit.stampID]) {
+            target = cur;
+            break;
+          }
+        }
+        if (target) {
+          [credits removeObject:target];
+          previews.credits = credits;
+          modified = YES;
+        }
+      }
+    }
+    if (modified) {
+      copy.previews = previews;
+      copy.modified = [NSDate date];
+    }
+    return copy;
+  }
+  else {
+    return copy;
+  }
 }
 
 @end
