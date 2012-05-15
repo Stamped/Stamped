@@ -132,7 +132,11 @@ class AppleRSS(object):
     
     def _parse_entity(self, entry):
         aid = entry['id']['attributes']['im:id']
-        
+
+        logs.info('\n### PRINTING ENTRY TO PARSE')
+        logs.info(pformat(entry))
+        logs.info('\n### apple_id: %s' % aid)
+
         proxy = self._source.entityProxyFromKey(aid)
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
         
