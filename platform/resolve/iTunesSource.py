@@ -232,6 +232,8 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
             results = self.data['tracks']
         else:
             results = self.itunes.method('lookup', id=self.key, entity='song')['results']
+        if results is None:
+            return []
         return [
             {
                 'name':             track['trackName'],

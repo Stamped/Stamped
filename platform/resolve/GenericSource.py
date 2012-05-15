@@ -166,15 +166,12 @@ class GenericSource(BasicSource):
             entity.albums = albums
 
     def __repopulateTracks(self, entity, artist, controller, decorations=None):
-        logs.info('### just called repopulateTracks')
         if decorations is None:
             decorations = {}
 
-        logs.info('### artist.tracks: %s' % artist.tracks)
         tracks = []
         for track in artist.tracks:
             try:
-                logs.info('### in track loop for track %s' % pformat(track))
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
                 entityMini.types.append('track')
@@ -223,17 +220,13 @@ class GenericSource(BasicSource):
             if image is None or image == '':
                 logs.info('Caught an empty image from the proxy entity %s' % (proxy,))
                 continue
-            logs.info('\n### iterating over image %s' % image)
             img = ImageSchema()
             size = ImageSizeSchema()
             size.url = image
             img.sizes = [size]
             images.append(img)
         if len(images) > 0:
-            logs.info('\n### adding images to entity')
-            logs.info('type(entity): %s images: %s' % (type(entity), images))
             entity.images = images
-            logs.info('### well we managed to set the entity images field, fancy that')
             timestamps['images'] = controller.now
         
         ### Place
@@ -293,17 +286,13 @@ class GenericSource(BasicSource):
             setAttribute('mpaa_rating',     'mpaa_rating')
             setAttribute('release_date',    'release_date')
 
-            logs.info('### enriching for media collection san dmedia items')
-            logs.info('### length')
             if proxy.length > 0:
                 entity.length = int(proxy.length)
                 timestamps['length'] = controller.now
-            logs.info('### genres')
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
                 timestamps['genres'] = controller.now
 
-            logs.info('### cast')
             cast = []
             for actor in proxy.cast:
                 entityMini = PersonEntityMini()
@@ -313,7 +302,6 @@ class GenericSource(BasicSource):
                 entity.cast = cast
                 timestamps['cast'] = controller.now
 
-            logs.info('### directors')
             directors = []
             for director in proxy.directors:
                 entityMini = PersonEntityMini()
@@ -323,7 +311,6 @@ class GenericSource(BasicSource):
                 entity.directors = directors
                 timestamps['directors'] = controller.now
 
-            logs.info('### publishers')
             publishers = []
             for publisher in proxy.publishers:
                 entityMini = PersonEntityMini()
@@ -333,7 +320,6 @@ class GenericSource(BasicSource):
                 entity.publishers = publishers
                 timestamps['publishers'] = controller.now
 
-            logs.info('### authors')
             authors = []
             for author in proxy.authors:
                 entityMini = PersonEntityMini()
@@ -343,7 +329,6 @@ class GenericSource(BasicSource):
                 entity.authors = authors
                 timestamps['authors'] = controller.now
 
-            logs.info('### artists')
             artists = []
             for artist in proxy.artists:
                 entityMini = PersonEntityMini()
@@ -362,16 +347,12 @@ class GenericSource(BasicSource):
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
             if proxy.isType('album'):
-                logs.info('### seeing about repopulating tracks')
                 if controller.shouldEnrich('tracks', self.sourceName, entity):
-                    logs.info('### repopulating tracks')
                     self.__repopulateTracks(entity, proxy, controller)
-                    logs.info('### done repopulating tracks')
                     timestamps['tracks'] = controller.now
         
         ### Media Item
         if entity.kind == 'media_item' and proxy.kind == 'media_item':
-            logs.info('### enriching for media items')
             albums = []
             for album in proxy.albums:
                 entityMini = MediaCollectionEntityMini()
@@ -394,8 +375,6 @@ class GenericSource(BasicSource):
             if proxy.sku_number is not None:
                 entity.sku_number = proxy.sku_number
                 timestamps['sku_number'] = controller.now
-
-        logs.info('### done enriching for media collections and media items')
 
         ### Software
         if entity.kind == 'software' and proxy.kind == 'software':

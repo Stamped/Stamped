@@ -113,7 +113,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception as e:
                                 logs.warning("Source '%s' threw an exception when enriching '%s': %s" % (source, pformat(entity), e.message) , exc_info=1 )
-                                raise
                                 failedSources.add(source)
                                 self.__failedValues[source] += self.failedIncrement
                                 if self.__failedValues[source] < self.failedCutoff:

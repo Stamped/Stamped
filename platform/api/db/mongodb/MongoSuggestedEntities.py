@@ -56,10 +56,6 @@ class MongoSuggestedEntities(ASuggestedEntities):
             coords = None
         
         suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)
-        from pprint import pformat
-        for section in suggested:
-            for entity in section['entities']:
-                logs.info ('\n### suggested entity:\n%s' % pformat(entity))
         num_sections = len(suggested)
         
         if num_sections > 0:
@@ -126,13 +122,8 @@ class MongoSuggestedEntities(ASuggestedEntities):
                     _add_suggested_section('Nearby', results)
                     popular = False
         elif category == 'music':
-            logs.info('\n### ABOUT TO CALL TOP SONGS')
             songs   = self._appleRSS.get_top_songs (limit=10)
-            logs.info('\n### ABOUT TO CALL TOP ALBUMS')
             albums  = self._appleRSS.get_top_albums(limit=10)
-            logs.info('\n### DONE CALLING TOP ALBUMS')
-            for album in albums:
-                logs.info('\n### ALBUMS: %s' % album)
 
             artists = []
             artists.extend([ s.artists[0] for s in filter(lambda s: len(s.artists) > 0, songs)  ])
