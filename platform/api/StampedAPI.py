@@ -1975,7 +1975,7 @@ class StampedAPI(AStampedAPI):
                 '-mobile' : (572, 572),
                 }
             for k,v in sizes.iteritems():
-                logs.info('adding image %s-%s.jpg size %d' % (imageId, k, v[0]))
+                logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                 size            = ImageSizeSchema()
                 size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                 size.width      = v[0]
