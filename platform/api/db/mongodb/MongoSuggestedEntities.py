@@ -126,8 +126,11 @@ class MongoSuggestedEntities(ASuggestedEntities):
                     _add_suggested_section('Nearby', results)
                     popular = False
         elif category == 'music':
+            logs.info('\n### ABOUT TO CALL TOP SONGS')
             songs   = self._appleRSS.get_top_songs (limit=10)
+            logs.info('\n### ABOUT TO CALL TOP ALBUMS')
             albums  = self._appleRSS.get_top_albums(limit=10)
+            logs.info('\n### DONE CALLING TOP ALBUMS')
             for album in albums:
                 logs.info('\n### ALBUMS: %s' % album)
 
