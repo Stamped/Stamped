@@ -72,9 +72,13 @@ a:hover {
   overflow: hidden;
 }
 .fullwidth {
+  position: relative;
+  width: 100%;
+}
+.fullsize {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
 }
 .floatleft {
   float: left;
@@ -82,13 +86,10 @@ a:hover {
 .floatright {
   float: right;
 }
-header,
 footer,
 .fixedwidth {
   width: 940px;
   margin: 0 auto;
-  padding: 0;
-  border: 0 none;
   position: relative;
 }
 header {
@@ -190,10 +191,13 @@ header a.button {
 }
 .user-logo-large {
   position: absolute;
-  top: -125px;
+  display: block;
+  top: -75px;
   left: -125px;
   width: 195px;
   height: 195px;
+  min-width: 195px;
+  min-height: 195px;
   z-index: 101;
 }
 .user-logo-small {
@@ -205,10 +209,37 @@ header a.button {
   height: 44px;
   z-index: 101;
 }
-.profile-header-wrapper {
-  width: 100%;
-  height: 100%;
+header {
   position: relative;
+  width: 100%;
+  position: fixed;
+  z-index: 150;
+  background: #fff;
+}
+.header-body {
+  width: 940px;
+  margin: 0 auto;
+  position: relative;
+}
+.post-header {
+  position: relative;
+  width: 100%;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  position: relative;
+  display: block;
+  height: 16px;
+}
+.profile-header-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 5em 0 0;
+  position: relative;
+  top: 0;
+  left: 0;
 }
 .profile-header-wrapper .profile-header {
   background: #e5e5e5;
@@ -216,8 +247,6 @@ header a.button {
   background: -moz-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
   background: -ms-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
   background: -o-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
-}
-.profile-header-wrapper .profile-header .innerbg {
   /* darken the background */
 
   /*background-color: rgba(0, 0, 0, 0.246094);*/
@@ -227,17 +256,18 @@ header a.button {
   /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
 
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-pre {
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-}
-.profile-header-wrapper .profile-header .innerbg .profile-header-body {
+.profile-header-wrapper .profile-header .profile-content-page {
   position: relative;
+  z-index: 50;
+  top: 0;
+  left: 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .innerbg0 {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body {
+  position: relative;
+  top: 0;
+  left: 0;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg0 {
   background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
   background-size: 100%;
   position: absolute;
@@ -245,21 +275,19 @@ header a.button {
   height: 100%;
   opacity: 0.45;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   width: 940px;
   margin: 0 auto;
-  padding: 0;
-  border: 0 none;
   position: relative;
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth .floatleft {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
   margin: 0 24px 0 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth p {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth p {
   margin: 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post {
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -267,24 +295,24 @@ header a.button {
   box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   height: 16px;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp {
   background: url(/assets/img/insetstamp.png) center top no-repeat;
   text-align: center;
   position: relative;
   top: -75px;
   width: 167px;
   min-height: 75px;
-  z-index: 100;
+  z-index: 52;
   margin: 0 auto;
   padding: 18px 20px 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp .number {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .number {
   font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
   font-size: 2em;
   letter-spacing: .05em;
   margin: 0 0 -0.25em;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp p {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp p {
   margin: 0 0 .5em;
   color: #000;
 }
@@ -541,7 +569,6 @@ a.pronounced-title {
   display: block;
   width: 200px;
   padding: 30px;
-  background: #888;
 }
 .static-map-small .static-map-inner {
   margin: 0 auto;
@@ -549,7 +576,7 @@ a.pronounced-title {
   display: block;
   width: 200px;
   height: 200px;
-  /*.perspective(200px);*/
+  /*.perspective(@perspective);*/
 
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
@@ -567,9 +594,8 @@ a.pronounced-title {
   display: block;
   width: 50px;
   height: 200px;
-  left: 0px;
   top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
 
   /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
@@ -579,7 +605,13 @@ a.pronounced-title {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  border-width: 0px 0 0px 0px;
+  left: 0px;
+  border-width: 2px 0 2px 2px;
+  -webkit-transform: perspective(200px) rotatey(-35deg);
+  -moz-transform: perspective(200px) rotatey(-35deg);
+  -o-transform: perspective(200px) rotatey(-35deg);
+  -ms-transform: perspective(200px) rotatey(-35deg);
+  transform: perspective(200px) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r1 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -590,9 +622,8 @@ a.pronounced-title {
   display: block;
   width: 50px;
   height: 200px;
-  left: 50px;
   top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
 
   /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
@@ -602,7 +633,13 @@ a.pronounced-title {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  border-width: 0px 0;
+  left: 52px;
+  border-width: 2px 0;
+  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
 }
 .static-map-small .static-map-inner .r2 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -613,9 +650,8 @@ a.pronounced-title {
   display: block;
   width: 50px;
   height: 200px;
-  left: 100px;
   top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
 
   /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
@@ -625,7 +661,13 @@ a.pronounced-title {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  border-width: 0px 0;
+  left: 102px;
+  border-width: 2px 0;
+  -webkit-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
+  -moz-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
+  -o-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
+  -ms-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
+  transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r3 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -636,9 +678,8 @@ a.pronounced-title {
   display: block;
   width: 50px;
   height: 200px;
-  left: 150px;
   top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
 
   /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
@@ -648,46 +689,69 @@ a.pronounced-title {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  border-width: 0px 0px 0px 0;
-}
-.static-map-small .static-map-inner .dark-layer {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #333;
-  opacity: 0;
-  -webkit-transition: opacity 0.1s ease-in-out;
-  -moz-transition: opacity 0.1s ease-in-out;
-  transition: opacity 0.1s ease-in-out;
-}
-.static-map-small:hover .r0 {
-  -webkit-transform: perspective(200px) rotatey(-35deg);
-  -moz-transform: perspective(200px) rotatey(-35deg);
-  -o-transform: perspective(200px) rotatey(-35deg);
-  -ms-transform: perspective(200px) rotatey(-35deg);
-  transform: perspective(200px) rotatey(-35deg);
-}
-.static-map-small:hover .r1 {
-  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-}
-.static-map-small:hover .r2 {
-  -webkit-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -moz-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -o-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -ms-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-}
-.static-map-small:hover .r3 {
+  left: 152px;
+  border-width: 2px 2px 2px 0;
   -webkit-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -o-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   -ms-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
   transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
 }
-.static-map-small:hover .dark-layer {
+.static-map-small .static-map-inner .dark-layer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #333;
+  -webkit-transition: opacity 0.1s ease-in-out;
+  -moz-transition: opacity 0.1s ease-in-out;
+  transition: opacity 0.1s ease-in-out;
   opacity: 0.10;
+}
+.static-map-small .static-map-inner .pin {
+  background: url(/assets/img/pin_shadow.png);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -9px auto auto 0;
+  display: block;
+  width: 24px;
+  height: 18px;
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  -webkit-transform: perspective(200px) translate(-15px, 0);
+  -moz-transform: perspective(200px) translate(-15px, 0);
+  -o-transform: perspective(200px) translate(-15px, 0);
+  -ms-transform: perspective(200px) translate(-15px, 0);
+  transform: perspective(200px) translate(-15px, 0);
+}
+.static-map-small .static-map-inner .pin:hover {
+  cursor: pointer;
+}
+.static-map-small .static-map-inner .pin .pin-inner {
+  background: url(/assets/img/pin.png);
+  position: relative;
+  top: -16px;
+  left: -10px;
+  display: block;
+  width: 26px;
+  height: 36px;
+}
+.static-map-small:hover {
+  /*cursor: pointer;*/
+
+}
+.static-map-small:hover .r0,
+.static-map-small:hover .r1,
+.static-map-small:hover .r2,
+.static-map-small:hover .r3,
+.static-map-small:hover .pin {
+  -webkit-transform: translatez(0);
+  -moz-transform: translatez(0);
+  -o-transform: translatez(0);
+  -ms-transform: translatez(0);
+  transform: translatez(0);
+}
+.static-map-small:hover .dark-layer {
+  opacity: 0;
 }

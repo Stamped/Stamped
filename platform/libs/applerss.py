@@ -7,12 +7,13 @@ __license__   = "TODO"
 
 import Globals
 import Entity
-import copy, json, re, urllib, utils
+import copy, json, re, urllib, utils, logs
 
 from resolve                import EntityProxyContainer
 from gevent.pool            import Pool
 from resolve.iTunesSource   import iTunesSource
-from pprint                 import pprint
+from pprint                 import pprint, pformat
+
 
 __all__ = [ "AppleRSS", "AppleRSSError" ]
 
@@ -63,7 +64,7 @@ class AppleRSS(object):
         explicit    = kwargs.pop('explicit', True)
         transform   = kwargs.pop('transform', True)
         format      = kwargs.pop('format', 'xml' if webobject else self.DEFAULT_FORMAT)
-        
+
         if format not in [ 'xml', 'json' ]:
             raise AppleRSSError("invalid request format")
         
@@ -85,11 +86,11 @@ class AppleRSS(object):
             url += 'rss.%s' % format
         else:
             url += format
-        
+
         # attempt to download feed
         utils.log(url)
         data = utils.getFile(url)
-        
+
         """
         f=open('out.xml', 'w')
         f.write(data)
@@ -119,7 +120,7 @@ class AppleRSS(object):
                     entities.append(entity)
             except:
                 utils.printException()
-        
+
         pool = Pool(16)
         for entry in entries:
             pool.spawn(_parse_entry, entities, entry)
@@ -128,8 +129,9 @@ class AppleRSS(object):
         return entities
     
     def _parse_entity(self, entry):
+        logs.info(pformat(entry))
         aid = entry['id']['attributes']['im:id']
-        
+
         proxy = self._source.entityProxyFromKey(aid)
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
         

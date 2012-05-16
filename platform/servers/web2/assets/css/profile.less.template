@@ -35,23 +35,21 @@
     background: linear-gradient(@angle, @primary, @secondary);
 }
 
-.profile-header {
-    .profile-header-pre {
-        .user-gradient(135deg);
-        
-        width:  100%;
-        margin: 0;
-    }
+.post-header {
+    .user-gradient(135deg);
     
-    .profile-header-post {
-        .user-gradient(135deg);
-        
-        width:  100%;
-        margin: 0;
-        
-        .inset-stamp .number {
-            color: @user_dark;
-        }
+    width:  100%;
+    margin: 0;
+}
+
+.profile-header-post {
+    .user-gradient(135deg);
+    
+    width:  100%;
+    margin: 0;
+    
+    .inset-stamp .number {
+        color: @user_dark;
     }
 }
 
@@ -74,19 +72,20 @@
 /* target webkit-browsers */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .user-logo-large {
+        background-image: none;
         .user-gradient(135deg);
         
         @mask-image: url(/assets/img/stamped_logo_mask.png);
-        /*width:  212px;
-        height: 212px;*/
         
         -webkit-mask: @mask-image no-repeat;
+        -webkit-mask-size: 195px 195px;
         -moz-mask: @mask-image no-repeat;
         -o-mask: @mask-image no-repeat;
         mask: @mask-image no-repeat;
     }
     
     .user-logo-small {
+        background-image: none;
         .user-gradient(135deg);
         @mask-image: url(/assets/img/stamped_email_mask.png);
         

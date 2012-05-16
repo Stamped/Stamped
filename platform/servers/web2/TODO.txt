@@ -42,6 +42,8 @@
 
 
 TODO:
+    * is it possible to use the n in nth-child?
+    
     * figure out how to install less on Ubuntu and have it actually work..
         * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     

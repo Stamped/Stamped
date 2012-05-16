@@ -1094,7 +1094,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available == True and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1664,9 +1664,9 @@ class HTTPEntityMini(Schema):
             self.subtitle           = schema.subtitle
             self.category           = schema.category
             self.subcategory        = schema.subcategory
+            
             _addImages(self, schema.images)
-
-
+            
             try:
                 if 'coordinates' in schema.value:
                     self.coordinates    = _coordinatesDictToFlat(schema.coordinates)

@@ -8,10 +8,12 @@ __license__   = "TODO"
 import Globals
 import os, utils
 
-from core.templatetags.stamped_tags import global_custom_template_library
+from core.templatetags.stamped_tags import global_mustache_template_library
+
+# TODO: incorporate handlebars templates as well
 
 def process_templates(output_path):
-    library   = global_custom_template_library()
+    library   = global_mustache_template_library()
     templates = library.templates
     
     scripts   = []

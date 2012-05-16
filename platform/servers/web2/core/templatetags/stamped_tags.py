@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logs, os, pystache, utils
+import logs, os, pystache, utils, pybars
 
 from subprocess import Popen, PIPE
 from pprint     import pformat
@@ -14,14 +14,23 @@ from django     import template
 
 register = template.Library()
 
-__global_template_library = None
-def global_custom_template_library():
-    global __global_template_library
+__global_mustache_template_library = None
+def global_mustache_template_library():
+    global __global_mustache_template_library
     
-    if __global_template_library is None:
-        __global_template_library = MustacheTemplateLibrary()
+    if __global_mustache_template_library is None:
+        __global_mustache_template_library = MustacheTemplateLibrary()
     
-    return __global_template_library
+    return __global_mustache_template_library
+
+__global_handlebars_template_library = None
+def global_handlebars_template_library():
+    global __global_handlebars_template_library
+    
+    if __global_handlebars_template_library is None:
+        __global_handlebars_template_library = HandlebarsTemplateLibrary()
+    
+    return __global_handlebars_template_library
 
 __global_css_template_library = None
 def global_custom_css_template_library():
@@ -70,10 +79,83 @@ class MustacheTemplateLibrary(object):
     def __str__(self):
         return self.__class__.__name__
 
+class HandlebarsTemplateLibrary(object):
+    
+    """
+        Container for all custom handlebars templates used in this django project.
+    """
+    
+    def __init__(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        root = os.path.dirname(os.path.dirname(path))
+        name = os.path.join(root, 'templates')
+        
+        self._load_templates(name)
+        self._renderer = pybars.Compiler()
+        self._compiled = {}
+        self._partials = {}
+        
+        for k, v in self.templates.iteritems():
+            path, source = v
+            source = unicode(source)
+            
+            try:
+                compiled = self._renderer.compile(source)
+                
+                self._compiled[k] = compiled
+                self._partials[k] = compiled
+            except Exception, e:
+                logs.warn("[%s] template compiler error (%s): %s" % (self, path, e))
+                raise
+            
+            #def m(n, k):
+            #    logs.warn("[%s] MISSING: '%s' '%s'" % (n, k))
+            #self._renderer.register_helper('helperMissing', m)
+            try:
+                pass
+                #def helper(items, options):
+                #    return compiled(items)
+                
+                #self._renderer.register_helper(k, compiled)
+            except Exception, e:
+                logs.warn("[%s] template register helper error (%s): %s" % (self, path, e))
+                raise
+    
+    def _load_templates(self, directory):
+        self.templates = {}
+        suffix = '.template.html'
+        
+        for template in sorted(os.listdir(directory)):
+            if not template.endswith(suffix):
+                continue
+            
+            path = os.path.join(directory, template)
+            with open(path, 'r') as f:
+                text = f.read()
+            
+            name = template[:-len(suffix)]
+            self.templates[name] = (path, text)
+        
+        logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
+        for t in self.templates:
+            logs.info("[%s] loaded '%s'" % (self, t))
+    
+    def render(self, template_name, context):
+        def missing(context, name):
+            logs.warn("[%s] '%s' missing key '%s'" % (self, template_name, name))
+            return ""
+        
+        helpers = dict(helperMissing=missing)
+        return self._compiled[template_name](context, helpers=helpers, partials=self._partials)
+    
+    def __str__(self):
+        return self.__class__.__name__
+
+
 class CustomCSSTemplateLibrary(object):
     
     """
-        Container for all custom mustache templated less css files used in this 
+        Container for all custom handlebars templated less css files used in this 
         django project.
     """
     
@@ -132,30 +214,42 @@ class CustomCSSTemplateLibrary(object):
     def __str__(self):
         return self.__class__.__name__
 
-@register.tag
-def custom_template(parser, token):
-    """
-        Defines a custom tag for the django templating engine called 'custom_template' 
-        which accepts exactly one parameter, the name of the custom template to render 
-        in the context of the current django templating context.
-    """
-    
+def custom_template(parser, token, template_library):
     try:
-        tag_name, less_css_template_name = token.split_contents()
+        tag_name, template_name = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
     
     for s in [ '"', '"' ]:
-        if (less_css_template_name.startswith(s) and less_css_template_name.endswith(s)):
-            less_css_template_name = less_css_template_name[len(s):-len(s)]
+        if (template_name.startswith(s) and template_name.endswith(s)):
+            template_name = template_name[len(s):-len(s)]
             break
     
-    library = global_custom_template_library()
-    if (less_css_template_name not in library.templates):
-        raise template.TemplateDoesNotExist("%r '%s' not found" % (less_css_template_name, 
+    if (template_name not in template_library.templates):
+        raise template.TemplateDoesNotExist("%r '%s' not found" % (template_name, 
                                                                    token.contents.split()[0]));
     
-    return CustomTemplateNode(less_css_template_name, library)
+    return CustomTemplateNode(template_name, template_library)
+
+@register.tag
+def mustache_template(parser, token):
+    """
+        Defines a custom tag for the django templating engine called 'mustache_template' 
+        which accepts exactly one parameter, the name of the custom template to render 
+        in the context of the current django templating context.
+    """
+    
+    return custom_template(parser, token, global_mustache_template_library())
+
+@register.tag
+def handlebars_template(parser, token):
+    """
+        Defines a custom tag for the django templating engine called 'handlebars_template' 
+        which accepts exactly one parameter, the name of the custom template to render 
+        in the context of the current django templating context.
+    """
+    
+    return custom_template(parser, token, global_handlebars_template_library())
 
 @register.tag
 def custom_css(parser, token):
@@ -214,7 +308,7 @@ class CustomTemplateNode(AStampedNode):
         try:
             context_dict = self._simplify_context(context)
             
-            result = self._library.render(self._name, context_dict)
+            result = unicode(self._library.render(self._name, context_dict))
             if len(result.strip()) == 0:
                 logs.warn("%s.render warning empty result (%s)" % (self, self._name))
             

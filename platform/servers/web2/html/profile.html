@@ -68,7 +68,7 @@
                                 <p>following</p>
                                 
                                 {% with users=friends %}
-                                    {% custom_template "user-gallery" %}
+                                    {% mustache_template "user-gallery" %}
                                 {% endwith %}
                             </div>
                             
@@ -77,7 +77,7 @@
                                 <p>followers</p>
                                 
                                 {% with users=followers %}
-                                    {% custom_template "user-gallery" %}
+                                    {% mustache_template "user-gallery" %}
                                 {% endwith %}
                             </div>
                         </div>
@@ -118,7 +118,7 @@
         {% endblock pre_profile_main_content %}
         
         {% block profile_main_content %}
-            {% custom_template "stamp-gallery" %}
+            {% mustache_template "stamp-gallery" %}
         {% endblock profile_main_content %}
         
         {% block post_profile_main_content %}
