@@ -21,7 +21,7 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
         AAuthPasswordResetDB.__init__(self)
     
     def _convertToMongo(self, token):
-        document = token.value
+        document = token.dataExport()
         if 'token_id' in document:
             document['_id'] = document['token_id']
             del(document['token_id'])
@@ -31,7 +31,7 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
         if document != None and '_id' in document:
             document['token_id'] = document['_id']
             del(document['_id'])
-        return PasswordResetToken(document)
+        return PasswordResetToken().dataImport(document)
 
     ### PUBLIC
 

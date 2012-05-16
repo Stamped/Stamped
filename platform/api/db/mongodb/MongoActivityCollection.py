@@ -100,10 +100,10 @@ class MongoActivityCollection(AActivityDB):
         alerts          = []
         sentTo          = set()
 
-        logs.info('\n ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+        logs.debug('\n ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
 
         try:
-            objects = objects.value
+            objects = objects.dataExport()
         except Exception:
             pass
 
@@ -115,7 +115,7 @@ class MongoActivityCollection(AActivityDB):
             if subject is not None:
                 activity.subjects = [ subject ]
             if len(objects) > 0:
-                activity.objects = ActivityObjectIds(objects)
+                activity.objects = ActivityObjectIds().dataImport(objects)
             if benefit is not None:
                 activity.benefit = benefit
             if body is not None:
@@ -170,9 +170,6 @@ class MongoActivityCollection(AActivityDB):
                 continue
             
             self.activity_links_collection.saveActivityLink(activityId, recipientId)
-
-
-            logs.info('\nSENDING ALERT TO %s' % (recipientId))
 
             sentTo.add(recipientId)
 

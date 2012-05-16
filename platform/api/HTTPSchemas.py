@@ -492,20 +492,37 @@ class HTTPAccountChangePassword(Schema):
 class HTTPAccountAlerts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('ios_alert_credit',       bool) #, default=False)
-        cls.addProperty('ios_alert_like',         bool) #, default=False)
-        cls.addProperty('ios_alert_fav',          bool) #, default=False)
-        cls.addProperty('ios_alert_mention',      bool) #, default=False)
-        cls.addProperty('ios_alert_comment',      bool) #, default=False)
-        cls.addProperty('ios_alert_reply',        bool) #, default=False)
-        cls.addProperty('ios_alert_follow',       bool) #, default=False)
-        cls.addProperty('email_alert_credit',     bool) #, default=False)
-        cls.addProperty('email_alert_like',       bool) #, default=False)
-        cls.addProperty('email_alert_fav',        bool) #, default=False)
-        cls.addProperty('email_alert_mention',    bool) #, default=False)
-        cls.addProperty('email_alert_comment',    bool) #, default=False)
-        cls.addProperty('email_alert_reply',      bool) #, default=False)
-        cls.addProperty('email_alert_follow',     bool) #, default=False)
+        cls.addProperty('ios_alert_credit',       bool)
+        cls.addProperty('ios_alert_like',         bool)
+        cls.addProperty('ios_alert_fav',          bool)
+        cls.addProperty('ios_alert_mention',      bool)
+        cls.addProperty('ios_alert_comment',      bool)
+        cls.addProperty('ios_alert_reply',        bool)
+        cls.addProperty('ios_alert_follow',       bool)
+        cls.addProperty('email_alert_credit',     bool)
+        cls.addProperty('email_alert_like',       bool)
+        cls.addProperty('email_alert_fav',        bool)
+        cls.addProperty('email_alert_mention',    bool)
+        cls.addProperty('email_alert_comment',    bool)
+        cls.addProperty('email_alert_reply',      bool)
+        cls.addProperty('email_alert_follow',     bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.ios_alert_credit           = False
+        self.ios_alert_like             = False
+        self.ios_alert_fav              = False
+        self.ios_alert_mention          = False
+        self.ios_alert_comment          = False
+        self.ios_alert_reply            = False
+        self.ios_alert_follow           = False
+        self.email_alert_credit         = False
+        self.email_alert_like           = False
+        self.email_alert_fav            = False
+        self.email_alert_mention        = False
+        self.email_alert_comment        = False
+        self.email_alert_reply          = False
+        self.email_alert_follow         = False
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
@@ -533,8 +550,8 @@ class HTTPUserId(Schema):
 class HTTPUserIds(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('user_ids',         basestring) ### TODO: delimiter=','
-        cls.addPropertyList('screen_names',     basestring) ### TODO: delimiter=','
+        cls.addPropertyList('user_ids',         basestring) # Comma delimited
+        cls.addPropertyList('screen_names',     basestring) # Comma delimited
 
 class HTTPUserSearch(Schema):
     @classmethod
@@ -554,19 +571,19 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) ### TODO: delimiter=','
+        cls.addProperty('q',                    basestring) # Comma delimited
 
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) ### TODO: delimiter=','
+        cls.addProperty('q',                    basestring) # Comma delimited
         cls.addProperty('twitter_key',          basestring)
         cls.addProperty('twitter_secret',       basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) ### TODO: delimiter=','
+        cls.addProperty('q',                    basestring) # Comma delimited
         cls.addProperty('facebook_token',       basestring)
 
 class HTTPNetflixId(Schema):

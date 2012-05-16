@@ -21,8 +21,8 @@ def show(request, authUserId, http_schema, **kwargs):
                    http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.getUsers(http_schema.user_ids.value, 
-                                http_schema.screen_names.value, 
+    users = stampedAPI.getUsers(http_schema.user_ids.split(','), 
+                                http_schema.screen_names.split(','), 
                                 authUserId)
     
     output = []
@@ -79,7 +79,7 @@ def privacy(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def findEmail(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     emails = []
     
     for email in q:
@@ -102,7 +102,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def findPhone(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     phoneNumbers = []
     
     for item in q:
@@ -141,7 +141,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
                                               twitterKey=http_schema.twitter_key, 
                                               twitterSecret=http_schema.twitter_secret)
     elif http_schema.q is not None:
-        q = http_schema.q.value
+        q = http_schema.q.split(',')
         twitterIds = []
         
         for item in q:
@@ -171,7 +171,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     if http_schema.facebook_token is not None:
         users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
     elif http_schema.q is not None:
-        q = http_schema.q.value
+        q = http_schema.q.split(',')
         facebookIds = []
         
         for item in q:

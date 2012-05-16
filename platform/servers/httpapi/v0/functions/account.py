@@ -37,7 +37,7 @@ def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
     account = HTTPAccount().importSchema(account)
     
-    return transformOutput(account.exportSparse())
+    return transformOutput(account.dataExport())
 
 
 @handleHTTPRequest(parse_request=False)
@@ -48,7 +48,7 @@ def settings(request, authUserId, **kwargs):
         
         ### TEMP: Generate list of changes. Need to do something better eventually..
         schema = parseRequest(HTTPAccountSettings(), request)
-        data   = schema.exportSparse()
+        data   = schema.dataExport()
         
         for k, v in data.iteritems():
             if v == '':
@@ -62,7 +62,7 @@ def settings(request, authUserId, **kwargs):
     
     account     = HTTPAccount().importSchema(account)
     
-    return transformOutput(account.exportSparse())
+    return transformOutput(account.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountProfile)
@@ -76,7 +76,7 @@ def update_profile(request, authUserId, data, **kwargs):
     account = stampedAPI.updateProfile(authUserId, data)
     user    = HTTPUser().importSchema(account)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountProfileImage, upload='profile_image')
@@ -85,7 +85,7 @@ def update_profile_image(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.updateProfileImage(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp)
@@ -94,7 +94,7 @@ def customize_stamp(request, authUserId, data, **kwargs):
     account = stampedAPI.customizeStamp(authUserId, data)
     user    = HTTPUser().importSchema(account)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(requires_auth=False, 
@@ -113,7 +113,7 @@ def check(request, client_id, http_schema, **kwargs):
         except:
             pass
         
-        return transformOutput(user.exportSparse())
+        return transformOutput(user.dataExport())
     except KeyError:
         response = HttpResponse("not_found")
         response.status_code = 404
@@ -164,7 +164,7 @@ def removeFacebook(request, authUserId, **kwargs):
                    parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     twitterIds = []
 
     for item in q:
@@ -184,7 +184,7 @@ def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def alertFollowersFromFacebook(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     facebookIds = []
 
     for item in q:
@@ -217,7 +217,7 @@ def createNetflixLoginResponse(authUserId):
     #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
-    return transformOutput(response.exportSparse())
+    return transformOutput(response.dataExport())
 
 @handleHTTPRequest()
 @require_http_methods(["GET"])
@@ -273,7 +273,7 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     response.setAction('netflix_login', 'Login to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
-    return transformOutput(response.exportSparse())
+    return transformOutput(response.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
@@ -321,7 +321,7 @@ def show_alerts(request, authUserId, **kwargs):
     account  = stampedAPI.getAccount(authUserId)
     settings = HTTPAccountAlerts().importSchema(account)
 
-    return transformOutput(settings.value)
+    return transformOutput(settings.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountAlerts)
@@ -330,7 +330,7 @@ def update_alerts(request, authUserId, http_schema, **kwargs):
     account  = stampedAPI.updateAlerts(authUserId, http_schema)
     settings = HTTPAccountAlerts().importSchema(account)
 
-    return transformOutput(settings.value)
+    return transformOutput(settings.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAPNSToken)

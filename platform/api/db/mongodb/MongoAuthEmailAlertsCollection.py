@@ -23,7 +23,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         self._collection.ensure_index('token_id', unique=True)
 
     def _convertToMongo(self, token):
-        document = token.value
+        document = token.dataExport()
         if 'user_id' in document:
             document['_id'] = document['user_id']
             del(document['user_id'])
@@ -33,7 +33,7 @@ class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
         if document != None and '_id' in document:
             document['user_id'] = document['_id']
             del(document['_id'])
-        return SettingsEmailAlertToken(document)
+        return SettingsEmailAlertToken().dataImport(document)
 
     ### PUBLIC
 
