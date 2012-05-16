@@ -399,6 +399,18 @@ class Invite(Schema):
         cls.addProperty('created',              datetime)
 
 
+# ########### #
+# Friendships #
+# ########### #
+
+class Friendship(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('friend_id',            basestring, required=True)
+        cls.addNestedProperty('timestamp',      TimestampSchema)
+
+
 # ######## #
 # Entities #
 # ######## #
@@ -700,6 +712,33 @@ class SoftwareEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'software'
+
+
+def getEntityObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntity
+    if kind == 'person':
+        return PersonEntity
+    if kind == 'media_collection':
+        return MediaCollectionEntity
+    if kind == 'media_item':
+        return MediaItemEntity
+    if kind == 'software':
+        return SoftwareEntity
+    return BasicEntity
+
+def getEntityMiniObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntityMini
+    if kind == 'person':
+        return PersonEntityMini
+    if kind == 'media_collection':
+        return MediaCollectionEntityMini
+    if kind == 'media_item':
+        return MediaItemEntityMini
+    if kind == 'software':
+        return SoftwareEntityMini
+    return BasicEntityMini
 
 
 
@@ -1123,11 +1162,6 @@ class EntitySuggested(Schema):
     def __init__(self):
         Schema.__init__(self)
         self.limit = 10
- 
-
-# ############# #
-# Mini Entities #
-# ############# #
 
 
 
@@ -1298,6 +1332,24 @@ class Stamp(Schema):
 
 
 
+# ######## #
+# Favorite #
+# ######## #
+
+class Favorite(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('user_id',                  basestring, required=True)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedProperty('stamp',              Stamp)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addProperty('complete',                 bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.entity = BasicEntity()
+
 
 # ######## #
 # Activity #
@@ -1424,139 +1476,86 @@ class EnrichedActivity(Schema):
 
 
 
-if 1 == 0:
+# ####### #
+# Slicing #
+# ####### #
+
+class ViewportSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('upperLeft',          CoordinatesSchema)
+        cls.addNestedProperty('lowerRight',         CoordinatesSchema)
 
 
+class GenericSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # paging
+        cls.addProperty('limit',                    int)
+        cls.addProperty('offset',                   int)
+        
+        # sorting
+        cls.addProperty('sort',                     basestring)
+        cls.addProperty('reverse',                  bool)
+        cls.addNestedProperty('coordinates',        CoordinatesSchema)
+        
+        # filtering
+        cls.addProperty('since',                    datetime)
+        cls.addProperty('before',                   datetime)
 
+    def __init__(self):
+        Schema.__init__(self)
+        self.offset = 0
+        self.sort = 'modified'
+        self.reverse = False
 
+class GenericCollectionSlice(GenericSlice):
+    @classmethod
+    def setSchema(cls):
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
 
+        # filtering
+        cls.addProperty('query',                    basestring)
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema)
+        
+        # misc options
+        cls.addProperty('quality',                  int)
+        cls.addProperty('deleted',                  bool)
+        cls.addProperty('comments',                 bool)
+        cls.addProperty('unique',                   bool)
 
+    def __init__(self):
+        GenericSlice.__init__(self)
+        self.quality = 1
+        self.deleted = False 
+        self.comments = True 
+        self.unique = False
 
-    # ########### #
-    # Friendships #
-    # ########### #
+class UserCollectionSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('screen_name',              basestring)
 
-    class Friendship(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.friend_id          = SchemaElement(basestring, required=True)
-            self.timestamp          = TimestampSchema()
+class FriendsSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('distance',                 int)
+        cls.addProperty('inclusive',                bool)
 
+    def __init__(self):
+        GenericCollectionSlice.__init__(self)
+        self.distance = 2
+        self.inclusive = True
 
-    # ######## #
-    # Favorite #
-    # ######## #
+class ConsumptionSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('scope',                    basestring)
+        cls.addProperty('filter',                   basestring)
 
-    class Favorite(Schema):
-        def setSchema(self):
-            self.favorite_id        = SchemaElement(basestring)
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.entity             = BasicEntity(required=True)
-            self.stamp              = Stamp()
-            self.timestamp          = TimestampSchema()
-            self.complete           = SchemaElement(bool)
-
-
-
-
-    # ####### #
-    # Slicing #
-    # ####### #
-
-    class GenericSlice(Schema):
-        def setSchema(self):
-            # paging
-            self.limit              = SchemaElement(int)
-            self.offset             = SchemaElement(int, default=0)
-            
-            # sorting
-            self.sort               = SchemaElement(basestring, default='modified')
-            self.reverse            = SchemaElement(bool,       default=False)
-            self.coordinates        = CoordinatesSchema()
-            
-            # filtering
-            self.since              = SchemaElement(datetime)
-            self.before             = SchemaElement(datetime)
-
-    class GenericCollectionSlice(GenericSlice):
-        def setSchema(self):
-            GenericSlice.setSchema(self)
-            
-            # sorting
-            # (relevance, popularity, proximity, created, modified, alphabetical)
-
-            # filtering
-            self.query              = SchemaElement(basestring)
-            self.category           = SchemaElement(basestring)
-            self.subcategory        = SchemaElement(basestring)
-            self.viewport           = ViewportSchema()
-            
-            # misc options
-            self.quality            = SchemaElement(int,  default=1)
-            self.deleted            = SchemaElement(bool, default=False)
-            self.comments           = SchemaElement(bool, default=True)
-            self.unique             = SchemaElement(bool, default=False)
-
-    class UserCollectionSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-            
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-
-    class FriendsSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-            
-            self.distance           = SchemaElement(int,  default=2)
-            self.inclusive          = SchemaElement(bool, default=True)
-
-    class ConsumptionSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-
-            self.scope              = SchemaElement(basestring)
-            self.filter             = SchemaElement(basestring)
-
-
-    class ViewportSchema(Schema):
-        def setSchema(self):
-            self.upperLeft          = CoordinatesSchema()
-            self.lowerRight         = CoordinatesSchema()
-
-
-
-
-
-
-
-
-
-
-    def getEntityObjectFromKind(kind):
-        if kind == 'place':
-            return PlaceEntity
-        if kind == 'person':
-            return PersonEntity
-        if kind == 'media_collection':
-            return MediaCollectionEntity
-        if kind == 'media_item':
-            return MediaItemEntity
-        if kind == 'software':
-            return SoftwareEntity
-        return BasicEntity
-
-    def getEntityMiniObjectFromKind(kind):
-        if kind == 'place':
-            return PlaceEntityMini
-        if kind == 'person':
-            return PersonEntityMini
-        if kind == 'media_collection':
-            return MediaCollectionEntityMini
-        if kind == 'media_item':
-            return MediaItemEntityMini
-        if kind == 'software':
-            return SoftwareEntityMini
-        return BasicEntityMini
 
 
