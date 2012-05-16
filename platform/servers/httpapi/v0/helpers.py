@@ -317,7 +317,8 @@ def checkOAuth(request):
         return authenticated_user_id, client_id
     except StampedHTTPError:
         raise
-    except Exception:
+    except Exception, e:
+        logs.warning("Error: %s" % e)
         raise StampedAuthError("invalid_token", "Invalid access token")
 
 def parseRequest(schema, request, **kwargs):

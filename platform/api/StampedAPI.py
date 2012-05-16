@@ -2903,7 +2903,7 @@ class StampedAPI(AStampedAPI):
                     userSlice.before = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
                     result = self._getStampCollection(authUserId, stampIds, userSlice)
             except Exception as e:
-                logs.warning(e)
+                logs.warning('Error: %s' % e)
                 pass
         
         return result

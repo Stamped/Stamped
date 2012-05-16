@@ -732,7 +732,7 @@ def sendEmail(msg, **kwargs):
         ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
     except Exception as e:
         logs.warning('EMAIL FAILED: %s' % msg)
-        logs.warning(e)
+        logs.warning("Error: %s" % e)
     
     return True
 

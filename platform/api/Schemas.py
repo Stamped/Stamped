@@ -54,6 +54,16 @@ class UserTimestampSchema(TimestampSchema):
         ### TODO: Right now inheritance happens automatically. Landon is fixing. 
         cls.addProperty('activity',                     datetime)
 
+class StampTimestampSchema(TimestampSchema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamped',              datetime)
+
+class ModifiedTimestampSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('modified',             datetime)
+
 class SettingsEmailAlertToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -117,6 +127,40 @@ class UserStatsSchema(Schema):
         cls.addProperty('num_likes_given',      int)
         cls.addProperty('num_unread_news',      int)
         cls.addNestedPropertyList('distribution', CategoryDistributionSchema)
+
+
+class StampStatsSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('num_comments       ',  int)
+        cls.addProperty('num_todos          ',  int)
+        cls.addProperty('num_credit         ',  int)
+        cls.addProperty('num_likes          ',  int)
+        cls.addProperty('like_threshold_hit ',  bool)
+        cls.addProperty('stamp_num          ',  int)
+        cls.addProperty('num_blurbs         ',  int)
+
+class StampStats(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id           ',  basestring, required=True)
+        cls.addProperty('num_todos          ',  int)
+        cls.addProperty('num_likes          ',  int)
+        cls.addProperty('num_credits        ',  int)
+        cls.addProperty('num_comments       ',  int)
+        cls.addPropertyList('preview_todos',      basestring) # UserIds
+        cls.addPropertyList('preview_likes',      basestring) # UserIds
+        cls.addPropertyList('preview_credits',    basestring) # StampIds
+        cls.addPropertyList('preview_comments',   basestring) # CommentIds
+
+class EntityStats(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id          ',  basestring, required=True)
+        cls.addProperty('num_stamps         ',  int)
+        cls.addPropertyList('popular_users',      basestring)
+
+
 
 
 # #### #
@@ -677,6 +721,98 @@ class PlaceEntity(Schema):
     pass
 
 
+# ###### #
+# Stamps #
+# ###### #
+
+class Badge(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('genre',                basestring, required=True)
+
+class MentionSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('screen_name',          basestring, required=True)
+        cls.addProperty('user_id',              basestring)
+        cls.addPropertyList('indices',      int)
+
+class CreditSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('screen_name',          basestring, required=True)
+        cls.addProperty('stamp_id',             basestring)
+        ### TEMP?
+        cls.addProperty('color_primary',        basestring)
+        cls.addProperty('color_secondary',      basestring)
+        cls.addProperty('privacy',              bool)
+
+class StampAttributesSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('is_liked',             bool)
+        cls.addProperty('is_fav',               bool)
+
+# class DeletedStamp(Schema):
+#     @classmethod
+#     def setSchema(cls):
+#         cls.addProperty('stamp_id',             basestring)
+#         cls.addNestedProperty('timestamp',          TimestampSchema)
+#         cls.addProperty('deleted',              bool)
+
+class StampContent(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('blurb',                basestring)
+        cls.addNestedPropertyList('images',             ImageSchema)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addNestedPropertyList('mentions',           MentionSchema)
+
+class StampMini(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                 basestring)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedProperty('user',               UserMini, required=True)
+        cls.addNestedPropertyList('credit',         CreditSchema)
+        cls.addNestedPropertyList('contents',       StampContent)
+        cls.addProperty('via',                      basestring)
+        cls.addNestedProperty('timestamp',          StampTimestampSchema)
+        cls.addNestedProperty('stats',              StampStatsSchema)
+        cls.addNestedProperty('attributes',         StampAttributesSchema)
+        cls.addNestedPropertyList('badges',         Badge)
+
+class StampPreviews(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('likes',              UserMini)
+        cls.addNestedPropertyList('todos',              UserMini)
+        cls.addNestedPropertyList('credits',            StampMini)
+        cls.addNestedPropertyList('comments',           Comment)
+
+class Stamp(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                 basestring)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedProperty('user',               UserMini, required=True)
+        cls.addNestedPropertyList('credit',         CreditSchema)
+        cls.addNestedPropertyList('contents',       StampContent)
+        cls.addProperty('via',                      basestring)
+        cls.addNestedProperty('timestamp',          StampTimestampSchema)
+        cls.addNestedProperty('stats',              StampStatsSchema)
+        cls.addNestedProperty('attributes',         StampAttributesSchema)
+        cls.addNestedPropertyList('badges',         Badge)
+        cls.addNestedProperty('previews',           StampPreviews)
+
+    def minimize(self):
+        return StampMini().dataImport(self.dataExport(), overflow=True)
+
+
+
+
 
 if 1 == 0:
 
@@ -684,39 +820,6 @@ if 1 == 0:
 
 
 
-
-
-    # ##### #
-    # Stats #
-    # ##### #
-
-    class StampStatsSchema(Schema):
-        def setSchema(self):
-            self.num_comments       = SchemaElement(int)
-            self.num_todos          = SchemaElement(int)
-            self.num_credit         = SchemaElement(int)
-            self.num_likes          = SchemaElement(int)
-            self.like_threshold_hit = SchemaElement(bool)
-            self.stamp_num          = SchemaElement(int)
-            self.num_blurbs         = SchemaElement(int)
-
-    class StampStats(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-            self.num_todos          = SchemaElement(int)
-            self.num_likes          = SchemaElement(int)
-            self.num_credits        = SchemaElement(int)
-            self.num_comments       = SchemaElement(int)
-            self.preview_todos      = SchemaList(SchemaElement(basestring)) # UserIds
-            self.preview_likes      = SchemaList(SchemaElement(basestring)) # UserIds
-            self.preview_credits    = SchemaList(SchemaElement(basestring)) # StampIds
-            self.preview_comments   = SchemaList(SchemaElement(basestring)) # CommentIds
-
-    class EntityStats(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-            self.num_stamps         = SchemaElement(int)
-            self.popular_users      = SchemaList(SchemaElement(basestring))
 
 
     # ########### #
@@ -743,95 +846,6 @@ if 1 == 0:
             self.timestamp          = TimestampSchema()
             self.complete           = SchemaElement(bool)
 
-
-    # ###### #
-    # Stamps #
-    # ###### #
-
-    class Stamp(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring)
-            self.entity             = BasicEntity(required=True)
-            self.user               = UserMini(required=True)
-            self.credit             = SchemaList(CreditSchema())
-            self.contents           = SchemaList(StampContent())
-            self.previews           = StampPreviews()
-            self.via                = SchemaElement(basestring)
-            self.timestamp          = StampTimestampSchema()
-            self.stats              = StampStatsSchema()
-            self.attributes         = StampAttributesSchema()
-            self.badges             = SchemaList(Badge())
-
-        def minimize(self):
-            return StampMini(self.value, overflow=True)
-
-    class StampMini(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring)
-            self.entity             = BasicEntity(required=True)
-            self.user               = UserMini(required=True)
-            self.credit             = SchemaList(CreditSchema())
-            self.contents           = SchemaList(StampContent())
-            self.via                = SchemaElement(basestring)
-            self.timestamp          = StampTimestampSchema()
-            self.stats              = StampStatsSchema()
-            self.attributes         = StampAttributesSchema()
-            self.badges             = SchemaList(Badge())
-
-    class StampContent(Schema):
-        def setSchema(self):
-            self.blurb              = SchemaElement(basestring)
-            self.images             = SchemaList(ImageSchema())
-            self.timestamp          = TimestampSchema()
-            self.mentions           = SchemaList(MentionSchema())
-
-    class StampPreviews(Schema):
-        def setSchema(self):
-            self.likes              = SchemaList(UserMini())
-            self.todos              = SchemaList(UserMini())
-            self.credits            = SchemaList(StampMini())
-            self.comments           = SchemaList(Comment())
-
-    class MentionSchema(Schema):
-        def setSchema(self):
-            self.screen_name        = SchemaElement(basestring, required=True)
-            self.user_id            = SchemaElement(basestring)
-            self.indices            = SchemaList(SchemaElement(int))
-
-    class CreditSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.screen_name        = SchemaElement(basestring, required=True)
-            self.stamp_id           = SchemaElement(basestring)
-            ### TEMP?
-            self.color_primary      = SchemaElement(basestring)
-            self.color_secondary    = SchemaElement(basestring)
-            self.privacy            = SchemaElement(bool)
-
-    class StampAttributesSchema(Schema):
-        def setSchema(self):
-            self.is_liked           = SchemaElement(bool)
-            self.is_fav             = SchemaElement(bool)
-
-    class DeletedStamp(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring)
-            self.timestamp          = TimestampSchema()
-            self.deleted            = SchemaElement(bool)
-
-    class ModifiedTimestampSchema(Schema):
-        def setSchema(self):
-            self.modified           = SchemaElement(datetime)
-
-    class Badge(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.genre              = SchemaElement(basestring, required=True)
-
-    class StampTimestampSchema(TimestampSchema):
-        def setSchema(self):
-            TimestampSchema.setSchema(self)
-            self.stamped            = SchemaElement(datetime)
 
 
     # ######## #

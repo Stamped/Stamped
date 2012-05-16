@@ -346,6 +346,7 @@ def update_apns(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPAPNSToken)
 @require_http_methods(["POST"])
 def remove_apns(request, authUserId, http_schema, **kwargs):
+    print http_schema
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
     
