@@ -12,4 +12,6 @@
 
 - (id)initWithEntity:(id<STEntity>)entity;
 
++ (void)setupConfigurations;
+
 @end

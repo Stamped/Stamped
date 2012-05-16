@@ -10,7 +10,7 @@
 #import "STStampedBy.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleStampedBy : NSObject <STStampedBy>
+@interface STSimpleStampedBy : NSObject <STStampedBy, NSCoding>
 
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> friends;
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> friendsOfFriends;
