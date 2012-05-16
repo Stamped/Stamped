@@ -10,7 +10,7 @@
 #import "STStampedByGroup.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleStampedByGroup : NSObject <STStampedByGroup>
+@interface STSimpleStampedByGroup : NSObject <STStampedByGroup, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSNumber* count;
 @property (nonatomic, readwrite, retain) NSArray<STStamp>* stamps;
