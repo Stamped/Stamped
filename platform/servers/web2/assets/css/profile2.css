@@ -89,13 +89,19 @@
 }
 .stamp-gallery-item .content {
   padding: 2.5em 2em;
+  position: relative;
+}
+.stamp-gallery-item .content .stamp-preview {
+  display: block;
+  float: right;
+  margin-left: 1em;
 }
 .stamp-gallery-item .content .inner-content {
   display: block;
   text-align: left;
   float: left;
   margin-left: 2em;
-  max-width: 60%;
+  max-width: 55%;
   text-align: justify;
 }
 .stamp-gallery-item .content .inner-content .stamp-contents {
@@ -237,7 +243,6 @@
   position: relative;
   display: block;
   margin: 0 0 -0.5em;
-  top: -4px;
 }
 .subtitle-line p {
   margin: 0;

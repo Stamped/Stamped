@@ -74,9 +74,14 @@ a:hover {
 }
 
 .fullwidth {
-    width: 100%;
-    height: 100%;
     position: relative;
+    width: 100%;
+}
+
+.fullsize {
+    position: relative;
+    width:  100%;
+    height: 100%;
 }
 
 .floatleft {
@@ -87,11 +92,9 @@ a:hover {
     float: right;
 }
 
-header, footer, .fixedwidth {
+footer, .fixedwidth {
     width: 940px;
     margin: 0 auto;
-    padding: 0;
-    border: 0 none;
     position: relative;
 }
 
@@ -107,9 +110,8 @@ header {
         }
     }
     
-    @base: #3b84eb;
-    
     /* TODO: use slight background gradient instead of flat color */
+    @base: #3b84eb;
     
     p.join {
         span.desc {
@@ -193,11 +195,14 @@ header {
 .user-logo-large {
     position: absolute;
     
-    top:  -125px;
+    display: block;
+    top:  -75px;
     left: -125px;
     
     width:  195px;
     height: 195px;
+    min-width: 195px;
+    min-height: 195px;
     
     z-index: 101;
 }
@@ -215,28 +220,58 @@ header {
     z-index: 101;
 }
 
+header {
+    .fullwidth;
+    position: fixed;
+    z-index: 150;
+    background: #fff;
+}
+
+@outer: #E5E5E5;
+@inner: #FEFEFE;
+@shadow: rgba(50,50,50,0.35);
+
+.header-body {
+    .fixedwidth;
+}
+
+.post-header {
+    .fullwidth;
+    .box-shadow(0, 3px, 3px, 0, @shadow);
+    
+    position: relative;
+    display:  block;
+    
+    height: 16px;
+}
+
 .profile-header-wrapper {
     .fullwidth;
     
+    padding: 5em 0 0;
+    
+    position: relative;
+    top:  0;
+    left: 0;
+    
     .profile-header {
-        @outer: #E5E5E5;
-        @inner: #FEFEFE;
-        @shadow: rgba(50,50,50,0.35);
-        
         .linear-gradient(left, @outer, @inner, @outer);
-        .innerbg {
-            /* darken the background */
-            /*background-color: rgba(0, 0, 0, 0.246094);*/
-            
-            /* TODO: get this mask working; kind of want blend-mode multiply... */
-            /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
-            
-            .profile-header-pre {
-                .box-shadow(0, 3px, 3px, 0, @shadow);
-            }
+        /* darken the background */
+        /*background-color: rgba(0, 0, 0, 0.246094);*/
+        
+        /* TODO: get this mask working; kind of want blend-mode multiply... */
+        /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+        
+        .profile-content-page {
+            position: relative;
+            z-index: 50;
+            top:  0;
+            left: 0;
             
             .profile-header-body {
                 position: relative;
+                top:  0;
+                left: 0;
                 
                 .innerbg0 {
                     background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
@@ -276,7 +311,7 @@ header {
                     
                     width: 167px;
                     min-height: 75px;
-                    z-index: 100;
+                    z-index: 52;
                     
                     margin: 0 auto;
                     padding: 18px 20px 0;
@@ -548,11 +583,10 @@ footer .copyright a, footer .copyright a {
     font-size: 2.2em;
 }
 
-.static-map(@size, @b, @angle) {
+.static-map(@size: 200px, @b: 0, @angle: 35deg, @perspective: 200px) {
     display: block;
     width: @size;
     padding: 30px;
-    background: #888;
     
     .static-map-inner {
         margin: 0 auto;
@@ -563,11 +597,11 @@ footer .copyright a, footer .copyright a {
         width:  @size;
         height: @size;
         
-        /*.perspective(200px);*/
+        /*.perspective(@perspective);*/
         .transform-style(preserve-3d);
         .backface-visibility(hidden);
         
-        .section(@x) {
+        ._section(@x) {
             /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
             background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
             background-position: -(@x * @colsize);
@@ -578,7 +612,6 @@ footer .copyright a, footer .copyright a {
             width:  @colsize;
             height: @size;
             
-            left: @x * @colsize;
             top:  0;
             
             border: @b solid rgba(0,0,0,0.9);
@@ -589,54 +622,94 @@ footer .copyright a, footer .copyright a {
             .transition(all, .1s, linear);
         }
         
+        .__section(@x) when (@x > 0) {
+            left: @x * @colsize + @b;
+        }
+        .__section(@x) when (@x = 0) {
+            left: @x * @colsize;
+        }
+        
+        .section(@x) {
+            ._section(@x);
+            .__section(@x);
+        }
+        
         .r0 {
             .section(0);
             border-width: @b 0 @b @b;
+            .transform(perspective(@perspective) rotateY(-@angle));
         }
         .r1 {
             .section(1);
             border-width: @b 0;
+            .transform(perspective(@perspective) translate(-6px,  0) rotateY(@angle));
         }
         .r2 {
             .section(2);
             border-width: @b 0;
+            .transform(perspective(@perspective) translate(-18px, 0) rotateY(-@angle));
         }
         .r3 {
             .section(3);
             border-width: @b @b @b 0;
+            .transform(perspective(@perspective) translate(-23px, 0) rotateY(@angle));
         }
         .dark-layer {
             display: block;
             width:  100%;
             height: 100%;
             background: #333;
-            opacity: 0;
             
             .transition(opacity, .1s, ease-in-out);
+            opacity: 0.10;
+        }
+        
+        .pin {
+            background: url(/assets/img/pin_shadow.png);
+            
+            position: absolute;
+            top:  50%;
+            left: 50%;
+            margin: -9px auto auto 0;
+            
+            display: block;
+            width:  24px;
+            height: 18px;
+            
+            &:hover {
+                cursor: pointer;
+            }
+            
+            .pin-inner {
+                background: url(/assets/img/pin.png);
+                
+                position: relative;
+                top:  -16px;
+                left: -10px;
+                
+                display: block;
+                width:  26px;
+                height: 36px;
+            }
+            
+            .transition(all, .1s, linear);
+            .transform(perspective(@perspective) translate(-15px, 0));
         }
     }
     
     &:hover {
-        .r0 {
-            .transform(perspective(200px) rotateY(-@angle));
-        }
-        .r1 {
-            .transform(perspective(200px) translate(-6px,  0) rotateY(@angle));
-        }
-        .r2 {
-            .transform(perspective(200px) translate(-18px, 0) rotateY(-@angle));
-        }
-        .r3 {
-            .transform(perspective(200px) translate(-23px, 0) rotateY(@angle));
+        /*cursor: pointer;*/
+        .r0, .r1, .r2, .r3, .pin {
+            .transform(translateZ(0));
         }
         .dark-layer {
-            opacity: 0.10;
+            opacity: 0;
         }
     }
 }
 
 .static-map-small {
     /* TODO: non-zero border messes with map centering */
-    .static-map(200px, 0px, 35deg);
+    .static-map(200px, 2px, 35deg, 200px);
 }
 

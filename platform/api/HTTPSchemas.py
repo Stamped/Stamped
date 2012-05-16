@@ -1664,9 +1664,9 @@ class HTTPEntityMini(Schema):
             self.subtitle           = schema.subtitle
             self.category           = schema.category
             self.subcategory        = schema.subcategory
+            
             _addImages(self, schema.images)
-
-
+            
             try:
                 if 'coordinates' in schema.value:
                     self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
