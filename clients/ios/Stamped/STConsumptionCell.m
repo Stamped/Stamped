@@ -46,6 +46,7 @@
 @property (nonatomic, readwrite, retain) STCancellation* entityImageCancellation;
 @property (nonatomic, readonly, assign) CGFloat imageHeight;
 @property (nonatomic, readonly, assign) CGFloat imageYOffset;
+@property (nonatomic, readwrite, retain) UIView* imageView;
 
 @end
 
@@ -62,13 +63,13 @@
   self = [super init];
   if (self) {
     [self retain];
+    self.stamp = stamp;
     self.block = block;
     self.cancellation = [STCancellation cancellationWithDelegate:self];
     self.detailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:stamp.entity.entityID
                                                                          andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
                                                                            [self handleDetail:detail withError:error];
                                                                          }];
-    self.stamp = stamp;
   }
   return self;
 }
@@ -120,6 +121,7 @@
 @synthesize entityDetail = entityDetail_;
 @synthesize entityDetailCancellation = entityDetailCancellation_;
 @synthesize entityImageCancellation = entityImageCancellation_;
+@synthesize imageView = imageView_;
 
 + (id<STPreviews>)adjustedPreviewsForStamp:(id<STStamp>)stamp {
   STSimplePreviews* previews = [STSimplePreviews previewsWithPreviews:stamp.previews];
@@ -215,6 +217,16 @@
     [Util addGradientToLayer:self.layer withColors:[UIColor stampedLightGradient] vertical:YES];
     
     __block STConsumptionCell* weakSelf = self;
+    NSString* imageURL = [Util entityImageURLForEntity:self.stamp.entity];
+    if (imageURL) {
+      self.entityImageCancellation = [[STImageCache sharedInstance] imageForImageURL:imageURL
+                                                                         andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                                                           [self handleImage:image withError:error];
+                                                                         }];
+    }
+    else {
+      [self handleImage:[UIImage imageNamed:@"TEMP_noImage"] withError:nil];
+    }
     entityDetailCancellation_ = [[[STStampedAPI sharedInstance] entityDetailForEntityID:stamp.entity.entityID
                                                                             andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
                                                                               [weakSelf handleEntityDetail:detail andError:error];
@@ -238,7 +250,52 @@
   [entityDetailCancellation_ release];
   [entityImageCancellation_ cancel];
   [entityImageCancellation_ release];
+  [imageView_ release];
   [super dealloc];
+}
+
+- (void)handleCombo {
+  
+  if (self.entityDetail.actions.count > 0 && [self.stamp.entity.category isEqualToString:@"music"]) {
+    id<STActionItem> actionItem = [self.entityDetail.actions objectAtIndex:0];
+    id<STAction> action = [actionItem action];
+    if (action) {
+      STActionContext* context = [STActionContext context];
+      context.stamp = self.stamp;
+      context.entity = self.entityDetail;
+      if ([[STActionManager sharedActionManager] canHandleAction:action withContext:context]) {
+        UIView* buttonViews[2];
+        CGRect buttonFrame = CGRectMake(0, 0, 60, 60);
+        for (NSInteger i = 0; i < 2; i++) {
+          UIView* view = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
+          view.layer.cornerRadius = view.frame.size.width / 2;
+          view.layer.borderWidth = 2;
+          view.layer.borderColor = [UIColor colorWithWhite:.1 alpha:.4].CGColor;
+          UIColor* backgroundColor;
+          if (i == 0) {
+            backgroundColor = [UIColor colorWithWhite:1 alpha:.7];
+          }
+          else {
+            backgroundColor = [UIColor colorWithWhite:.7 alpha:.7];
+          }
+          view.backgroundColor = backgroundColor;
+          buttonViews[i] = view;
+        }
+        STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
+                                                 normalView:buttonViews[0]
+                                                 activeView:buttonViews[1]
+                                                     target:self
+                                                  andAction:@selector(actionButtonClicked:)] autorelease];
+        button.message = action;
+        UIImageView* playView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_play_button"]] autorelease];
+        playView.frame = [Util centeredAndBounded:playView.frame.size inFrame:button.frame];
+        [Util reframeView:playView withDeltas:CGRectMake(4, 0, 0, 0)];
+        [button addSubview:playView];
+        button.frame = [Util centeredAndBounded:button.frame.size inFrame:self.imageView.frame];
+        [self addSubview:button];
+      }
+    }
+  }
 }
 
 - (void)handleImage:(UIImage*)image withError:(NSError*)error {
@@ -268,45 +325,9 @@
                                                        0,
                                                        0)];
     [self addSubview:stampImage];
-    if (self.entityDetail.actions.count > 0 && [self.stamp.entity.category isEqualToString:@"music"]) {
-      id<STActionItem> actionItem = [self.entityDetail.actions objectAtIndex:0];
-      id<STAction> action = [actionItem action];
-      if (action) {
-        STActionContext* context = [STActionContext context];
-        context.stamp = self.stamp;
-        context.entity = self.entityDetail;
-        if ([[STActionManager sharedActionManager] canHandleAction:action withContext:context]) {
-          UIView* buttonViews[2];
-          CGRect buttonFrame = CGRectMake(0, 0, 60, 60);
-          for (NSInteger i = 0; i < 2; i++) {
-            UIView* view = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
-            view.layer.cornerRadius = view.frame.size.width / 2;
-            view.layer.borderWidth = 2;
-            view.layer.borderColor = [UIColor colorWithWhite:.1 alpha:.4].CGColor;
-            UIColor* backgroundColor;
-            if (i == 0) {
-              backgroundColor = [UIColor colorWithWhite:1 alpha:.7];
-            }
-            else {
-              backgroundColor = [UIColor colorWithWhite:.7 alpha:.7];
-            }
-            view.backgroundColor = backgroundColor;
-            buttonViews[i] = view;
-          }
-          STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                                   normalView:buttonViews[0]
-                                                   activeView:buttonViews[1]
-                                                       target:self
-                                                    andAction:@selector(actionButtonClicked:)] autorelease];
-          button.message = action;
-          UIImageView* playView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_play_button"]] autorelease];
-          playView.frame = [Util centeredAndBounded:playView.frame.size inFrame:button.frame];
-          [Util reframeView:playView withDeltas:CGRectMake(4, 0, 0, 0)];
-          [button addSubview:playView];
-          button.frame = [Util centeredAndBounded:button.frame.size inFrame:imageView.frame];
-          [self addSubview:button];
-        }
-      }
+    self.imageView = imageView;
+    if (self.entityDetail) {
+      [self handleCombo];
     }
   }
   else {
@@ -327,15 +348,9 @@
   [self.activityView stopAnimating];
   NSLog(@"array:%@",entityDetail.images);
   entityDetail_ = [entityDetail retain];
-  if ([Util entityImageURLForEntityDetail:entityDetail]) {
-    self.entityImageCancellation = [[STImageCache sharedInstance] entityImageForEntityDetail:entityDetail andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-      [self handleImage:image withError:error];
-    }];
+  if (self.imageView) {
+    [self handleCombo];
   }
-  else {
-    [self handleImage:[UIImage imageNamed:@"TEMP_noImage"] withError:nil];
-  }
-  
 }
 
 + (CGFloat)cellHeightForStamp:(id<STStamp>)stamp {
@@ -357,8 +372,15 @@
 }
 
 + (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError*, STCancellation*))block {
-  STConsumptionCellPreparation* prep = [[[STConsumptionCellPreparation alloc] initWithStamp:stamp andCallback:block] autorelease];
-  return prep.cancellation;
+  NSMutableArray* images = [NSMutableArray array];
+  NSString* bigImage = [Util entityImageURLForEntity:stamp.entity];
+  if (bigImage) {
+    [images addObject:bigImage];
+  }
+  [images addObjectsFromArray:[STPreviewsView imagesForPreviewWithStamp:stamp andMaxRows:1]];
+  return [STCancellation loadImages:images withCallback:block];
+  //STConsumptionCellPreparation* prep = [[[STConsumptionCellPreparation alloc] initWithStamp:stamp andCallback:block] autorelease];
+  //return prep.cancellation;
 }
 
 @end

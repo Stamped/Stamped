@@ -174,6 +174,7 @@ static const NSInteger _cellsPerRow = 7;
         else {
           STPreviewsViewItem* item = [items_ objectAtIndex:i];
           UIView* userImage = [Util profileImageViewForUser:item.user withSize:STProfileImageSize31];
+          userImage.layer.shadowOpacity = 0;
           [Util reframeView:userImage withDeltas:CGRectMake(xOffset, yOffset, 0, 0)];
           [self addSubview:userImage];
           UIImageView* imageView = [[[UIImageView alloc] initWithImage:item.icon] autorelease];

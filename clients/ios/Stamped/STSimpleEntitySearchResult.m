@@ -16,6 +16,18 @@
 @synthesize category = category_;
 @synthesize distance = distance_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    searchID_ = [[decoder decodeObjectForKey:@"searchID"] retain];
+    title_ = [[decoder decodeObjectForKey:@"title"] retain];
+    subtitle_ = [[decoder decodeObjectForKey:@"subtitle"] retain];
+    category_ = [[decoder decodeObjectForKey:@"category"] retain];
+    distance_ = [[decoder decodeObjectForKey:@"distance"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [searchID_ release];
@@ -24,6 +36,14 @@
   [category_ release];
   [distance_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.searchID forKey:@"searchID"];
+  [encoder encodeObject:self.title forKey:@"title"];
+  [encoder encodeObject:self.subtitle forKey:@"subtitle"];
+  [encoder encodeObject:self.category forKey:@"category"];
+  [encoder encodeObject:self.distance forKey:@"distance"];
 }
 
 + (RKObjectMapping *)mapping {

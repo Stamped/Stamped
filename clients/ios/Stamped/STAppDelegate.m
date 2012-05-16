@@ -39,6 +39,8 @@
 #import "STDebugViewController.h"
 #import "SettingsViewController.h"
 #import "STStampCell.h"
+#import "STImageCache.h"
+#import "STStampedAPI.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -59,11 +61,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 @synthesize window = _window;
 @synthesize navigationController = _navigationController;
+@synthesize grid = grid_;
 
 - (void)dealloc
 {
   [_window release];
   [_navigationController release];
+  [grid_ release];
   [super dealloc];
 }
 
@@ -107,6 +111,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   slider.underRightViewController = [[[STRightMenuViewController alloc] init] autorelease];
   [[AccountManager sharedManager] authenticate];
   [_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
+  grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
+  grid_.hidden = YES;
+  [self.window addSubview:grid_];
   STLog(@"Finished Loading application");
   return YES;
 }
@@ -148,7 +155,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
-  
+  [[STImageCache sharedInstance] fastPurge];
+  [[STStampedAPI sharedInstance] fastPurge];
 }
 
 - (void)applicationProtectedDataDidBecomeAvailable:(UIApplication *)application {
