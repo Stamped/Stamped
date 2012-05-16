@@ -44,14 +44,14 @@ class MongoAlertQueueCollection(AMongoCollection):
     
 
     def addAlert(self, alert):
-        result = self._collection.insert_one(alert.value)
+        result = self._collection.insert_one(alert.dataExport())
         return result
     
 
     def addAlerts(self, alerts):
         objects = []
         for alert in alerts:
-            objects.append(alert.value)
+            objects.append(alert.dataExport())
         result = self._collection.insert(objects)
         return result
 

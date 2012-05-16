@@ -344,13 +344,6 @@ class User(Schema):
         cls.addNestedProperty('stats',          UserStatsSchema)
         cls.addNestedProperty('timestamp',      UserTimestampSchema, required=True)
         cls.addProperty('identifier',           basestring)
-    
-    # def exportSchema(self, schema):
-    #     if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
-    #         schema.importData(self.value, overflow=True)
-    #     else:
-    #         raise NotImplementedError
-    #     return schema
 
 class UserMini(Schema):
     @classmethod
@@ -621,7 +614,7 @@ class BasicEntity(Schema):
                 return "%s%s" % (prefix, id)
         
         raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" % 
-                             pformat(self.exportSparse()))
+                             pformat(self.dataExport()))
     
     def _genericSubtitle(self):
         if self.user_generated_subtitle is not None:
@@ -651,7 +644,7 @@ class BasicEntity(Schema):
 
     def isType(self, t):
         try:
-            if t in self.types.value:
+            if t in self.types:
                 return True
         except:
             pass
@@ -662,9 +655,6 @@ class BasicEntity(Schema):
     #     # if len(t) == 1: t = t[0]
         
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(unicode(i) for i in t))
-    
-    def __repr__(self):
-        return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
 
 
 class BasicEntityMini(Schema):
@@ -866,13 +856,13 @@ class PlaceEntity(BasicEntity):
     @property 
     def category(self):
         food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-        if len(food.intersection(self.types.value)) > 0:
+        if len(food.intersection(self.types)) > 0:
             return 'food'
         return 'other'
 
     @property 
     def subcategory(self):
-        for t in self.types.value:
+        for t in self.types:
             return t
         return 'other'
 
@@ -1129,7 +1119,7 @@ class SoftwareEntity(BasicEntity):
                 suffix = ' (%s)' % ', '.join(unicode(i['title']) for i in self.authors)
             
             return 'App%s' % suffix
-        elif 'video_game' in self.types.value:
+        elif 'video_game' in self.types:
             suffix = ''
             if self.platform:
                 suffix = ' (%s)' % self.platform
@@ -1146,7 +1136,7 @@ class SoftwareEntity(BasicEntity):
     def subcategory(self):
         if self.isType('app'):
             return 'app'
-        elif 'video_game' in self.types.value:
+        elif 'video_game' in self.types:
             return 'video_game'
         
         return 'other'

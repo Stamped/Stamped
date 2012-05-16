@@ -126,7 +126,7 @@ class SimpleSchemaTest(ASchemaTestCase):
         ]
         for i in values:
             self.schema.basestring = i
-            # self.assertEqual(self.schema.basestring.value, i)
+            # self.assertEqual(self.schema.basestring, i)
 
     def test_invalid_string(self):
         values = [
@@ -264,9 +264,9 @@ class NestedSchemaTest(ASchemaTestCase):
         self.assertIsInstance(self.schema.basestring, basestring)
         self.assertIsInstance(self.schema.inner.item, basestring)
         self.assertIsInstance(self.schema.inner, Schema)
-        self.assertIsInstance(self.schema.inner.value, dict)
+        self.assertIsInstance(self.schema.inner.dataExport(), dict)
 
-        self.assertEqual(self.sampleData, self.schema.value)
+        self.assertEqual(self.sampleData, self.schema.dataExport())
 
     def test_contain_valid(self):
         self.assertIn('inner', self.schema)
@@ -395,17 +395,17 @@ class SparseSchemaTest(ASchemaTestCase):
     def test_sparse(self):
         self.assertEqual(
             self.sampleData['basestring'], 
-            self.schema.value['basestring']
+            self.schema['basestring']
         )
         self.assertEqual(
             self.sampleData['none'], 
-            self.schema.value['none']
+            self.schema['none']
         )
         self.assertEqual(
             'abc', 
-            self.schema.value['default']
+            self.schema['default']
         )
-        self.assertTrue('empty' not in self.schema.value)
+        self.assertTrue('empty' not in self.schema.dataExport())
 
 class ListSchemaTest(ASchemaTestCase):
 
@@ -437,10 +437,10 @@ class ListSchemaTest(ASchemaTestCase):
 
         self.assertIsInstance(self.schema.basestring, basestring)
         self.assertIsInstance(self.schema.items, SchemaList)
-        self.assertIsInstance(self.schema.items.value, list)
+        self.assertIsInstance(self.schema.items, list)
 
-        self.assertEqual(self.sampleData, self.schema.value)
-        self.assertEqual(self.sampleData['items'], self.schema.items.value)
+        self.assertEqual(self.sampleData, self.schema)
+        self.assertEqual(self.sampleData['items'], self.schema.items)
 
     def test_contain(self):
         self.assertIn('basestring', self.schema)
@@ -510,7 +510,7 @@ class ListCommaSchemaTest(ASchemaTestCase):
 
     def test_retrieve(self):
 
-        self.assertIsInstance(self.schema.items.value, list)
+        self.assertIsInstance(self.schema.items, list)
 
         self.assertEqual(
             len(self.sampleData['items'].split(',')), 

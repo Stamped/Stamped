@@ -109,7 +109,7 @@ class AmazonBookFeed(AExternalDumpEntitySource):
                                 entity.author = author
                                 pass
                 
-                #pprint(entity.value)
+                #pprint(entity)
                 #self._globals['books'] = entry
                 
                 if asin in self.seen:

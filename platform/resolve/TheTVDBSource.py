@@ -76,7 +76,7 @@ class _TheTVDBObject(object):
         return "thetvdb"
     
     def __repr__(self):
-        return pformat( self.data.value )
+        return pformat( self.data )
 
 class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     """
@@ -116,7 +116,7 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     @lazyProperty 
     def genres(self):
         try:
-            return self.data.genres.value
+            return self.data.genres
         except Exception:
             return []
     

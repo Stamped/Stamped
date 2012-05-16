@@ -562,9 +562,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
-        # if isinstance(alerts, SchemaElement):
-        #     alerts = alerts.value
-        
         account = self._accountDB.getAccount(authUserId)
         
         for k, v in alerts.iteritems():
@@ -1216,9 +1213,6 @@ class StampedAPI(AStampedAPI):
     """
 
     def _getEntityFromRequest(self, entityRequest):
-        # if isinstance(entityRequest, SchemaElement):
-        #     entityRequest = entityRequest.value
-        
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
         
@@ -1578,7 +1572,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser['screen_name']
                 
                 # Add to user ids
-                userIds[userId] = creditedUser.exportSchema(UserMini())
+                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
                 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity_id)
@@ -1707,7 +1701,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = user.exportSchema(UserMini())
+            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
 
         logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
         t1 = time.time()
@@ -1866,7 +1860,7 @@ class StampedAPI(AStampedAPI):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
-        userIds     = { user.user_id : user.exportSchema(UserMini()) }
+        userIds     = { user.user_id : UserMini().dataImport(user.dataExport()) }
         entityIds   = { entity.entity_id : entity }
         
         blurbData   = data.pop('blurb',  None)
@@ -2104,7 +2098,7 @@ class StampedAPI(AStampedAPI):
         
         # Collect user ids
         userIds = {}
-        userIds[user.user_id] = user.exportSchema(UserMini())
+        userIds[user.user_id] = UserMini().dataImport(user.dataExport())
         
         # Blurb & Mentions
         mentionedUsers = []
@@ -2156,7 +2150,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser['screen_name']
 
                 # Add to user ids
-                userIds[userId] = creditedUser.exportSchema(UserMini())
+                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, stamp.entity.entity_id)
@@ -2448,7 +2442,7 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._commentDB.removeComment, {'commentId': comment.comment_id}))
         
         # Add full user object back
-        comment.user = user.exportSchema(UserMini())
+        comment.user = UserMini().dataImport(user.dataExport())
         
         tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
         
@@ -2547,7 +2541,7 @@ class StampedAPI(AStampedAPI):
 
         # Add user object
         user = self._userDB.getUser(comment.user_id)
-        comment.user = user.exportSchema(UserMini())
+        comment.user = UserMini().dataImport(user.dataExport())
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
@@ -2577,7 +2571,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[user.user_id] = user.exportSchema(UserMini())
+            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
         
         comments = []
         for comment in commentData:
@@ -3300,7 +3294,7 @@ class StampedAPI(AStampedAPI):
             params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
             for item in dirtyActivityData:
-                item.subjects = list(set(item.subjects.value).intersection(set(friends)))
+                item.subjects = list(set(item.subjects).intersection(set(friends)))
                 activityData.append(item)
         else:
             personal = True
@@ -3327,7 +3321,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[str(user.user_id)] = user.exportSchema(UserMini())
+            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
         
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
@@ -3349,7 +3343,7 @@ class StampedAPI(AStampedAPI):
                 commentUserIds[comment.user.user_id] = None
         users = self._userDB.lookupUsers(commentUserIds.keys(), None)
         for user in users:
-            userIds[str(user.user_id)] = user.exportSchema(UserMini())
+            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
@@ -3493,7 +3487,7 @@ class StampedAPI(AStampedAPI):
 
     def mergeEntity(self, entity, link=True):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.value, link])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport(), link])
     
     def mergeEntityAsync(self, entityDict, link=True):
         self._mergeEntity(buildEntity(entityDict), link)

@@ -40,7 +40,7 @@ class AKindTypeGroup(BasicFieldGroup):
     
     def eligible(self, entity):
         if len(self.__kinds) == 0 or entity.kind in self.__kinds:
-            if len(self.__types) == 0 or len(self.__types.intersection(entity.types.value)) > 0:
+            if len(self.__types) == 0 or len(self.__types.intersection(entity.types)) > 0:
                 return True
         return False
 

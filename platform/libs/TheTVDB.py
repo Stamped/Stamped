@@ -199,7 +199,7 @@ def main():
         print etree.tostring(results, pretty_print=True)
     else:
         for entity in results:
-            pprint(entity.value)
+            pprint(entity)
 
 if __name__ == '__main__':
     main()

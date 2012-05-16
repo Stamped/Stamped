@@ -169,7 +169,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         entity.googleplaces_reference   = result['reference']
         
         # TODO: TYPE
-        types = set(entity.types.value)
+        types = set(entity.types)
         types.add(subcategory)
         entity.types = list(types)
         

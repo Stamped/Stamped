@@ -49,7 +49,7 @@ for result in rs:
         subject  = subject0 + subject1 + subject2
         ls0      = len(subject0)
         indices  = [ ls0, ls0 + len(subject1) ]
-        usermini = user.exportSchema(UserMini())
+        usermini = UserMini().dataImport(user.dataExport())
         user_id2 = user.user_id
         blurb    = ' and '.join(explanations)
         

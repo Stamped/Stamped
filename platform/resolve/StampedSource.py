@@ -42,7 +42,7 @@ class _EntityProxyObject(object):
     """
 
     def __init__(self, entity):
-        self.__entity = buildEntity(entity.value)
+        self.__entity = buildEntity(entity.dataExport())
 
     @property
     def entity(self):
@@ -74,7 +74,7 @@ class _EntityProxyObject(object):
             return 'other'
 
     def __repr__(self):
-        return pformat( self.entity.value )
+        return pformat( self.entity )
 
 
 class EntityProxyArtist(_EntityProxyObject, ResolverPerson):
@@ -165,7 +165,7 @@ def _fixCast(cast):
             for name in names:
                 cast.append( {'title': name} )
             print('converted cast: %s' % cast)
-        for item in [c.value for c in cast]:
+        for item in cast:
             name = item.get('title', None)
             character = item.get('character', None)
             if name is None:

@@ -20,7 +20,7 @@ def create(request, authUserId, http_schema, **kwargs):
     favorite = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
     favorite = HTTPFavorite().importSchema(favorite)
     
-    return transformOutput(favorite.exportSparse())
+    return transformOutput(favorite.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
@@ -31,7 +31,7 @@ def remove(request, authUserId, http_schema, **kwargs):
     
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
-    result   = favorite.exportSparse()
+    result   = favorite.dataExport()
     result['entity'] = None
     
     return transformOutput(result)
@@ -44,7 +44,7 @@ def show(request, authUserId, schema, **kwargs):
     
     result = []
     for favorite in favorites:
-        result.append(HTTPFavorite().importSchema(favorite).exportSparse())
+        result.append(HTTPFavorite().importSchema(favorite).dataExport())
     
     return transformOutput(result)
 
