@@ -93,21 +93,36 @@ footer,
   position: relative;
 }
 header {
+  position: relative;
+  width: 100%;
+  position: fixed;
+  z-index: 150;
+  background: #fff;
+}
+header .header-body {
+  width: 940px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 25;
   /* TODO: use slight background gradient instead of flat color */
 
 }
-header p {
+header .header-body p {
   float: right;
   clear: both;
+  position: relative;
   margin: 0.5em 0.5em 0.25em 0;
 }
-header p .desc {
+header .header-body p .desc {
   font-size: 90%;
 }
-header p.join span.desc {
+header .header-body p.join {
+  z-index: 27;
+}
+header .header-body p.join span.desc {
   color: #438fed;
 }
-header p.join a.button {
+header .header-body p.join a.button {
   color: #fff;
   background: #3b84eb;
   -webkit-box-shadow: 0 0 4px 0 #3b84eb;
@@ -122,7 +137,7 @@ header p.join a.button {
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-header p.join a.button:hover {
+header .header-body p.join a.button:hover {
   text-decoration: none;
   background: #69a1f0;
   -webkit-box-shadow: 0 0 4px 0 #1769dc;
@@ -131,7 +146,7 @@ header p.join a.button:hover {
   -o-box-shadow: 0 0 4px 0 #1769dc;
   box-shadow: 0 0 4px 0 #1769dc;
 }
-header p.join a.button:active {
+header .header-body p.join a.button:active {
   text-decoration: none;
   background: #0f4897;
   -webkit-box-shadow: 0 0 4px 0 #0f4897;
@@ -140,10 +155,13 @@ header p.join a.button:active {
   -o-box-shadow: 0 0 4px 0 #0f4897;
   box-shadow: 0 0 4px 0 #0f4897;
 }
-header p.sign-in span.desc {
+header .header-body p.sign-in {
+  z-index: 26;
+}
+header .header-body p.sign-in span.desc {
   color: #bbb;
 }
-header p.sign-in a.button {
+header .header-body p.sign-in a.button {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -159,7 +177,7 @@ header p.sign-in a.button {
   background: #FEFEFE;
   color: #666;
 }
-header p.sign-in a.button:hover {
+header .header-body p.sign-in a.button:hover {
   color: #fff;
   border-color: #69a1f0;
   background: #69a1f0;
@@ -170,7 +188,7 @@ header p.sign-in a.button:hover {
   -o-box-shadow: 0 0 4px 0 #1769dc;
   box-shadow: 0 0 4px 0 #1769dc;
 }
-header p.sign-in a.button:active {
+header .header-body p.sign-in a.button:active {
   color: #fff;
   border-color: #0f4897;
   background: #0f4897;
@@ -181,7 +199,7 @@ header p.sign-in a.button:active {
   -o-box-shadow: 0 0 4px 0 #0f4897;
   box-shadow: 0 0 4px 0 #0f4897;
 }
-header a.button {
+header .header-body a.button {
   font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
   letter-spacing: .1em;
   text-align: center;
@@ -196,8 +214,6 @@ header a.button {
   left: -125px;
   width: 195px;
   height: 195px;
-  min-width: 195px;
-  min-height: 195px;
   z-index: 101;
 }
 .user-logo-small {
@@ -208,18 +224,6 @@ header a.button {
   width: 44px;
   height: 44px;
   z-index: 101;
-}
-header {
-  position: relative;
-  width: 100%;
-  position: fixed;
-  z-index: 150;
-  background: #fff;
-}
-.header-body {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
 }
 .post-header {
   position: relative;
@@ -588,6 +592,8 @@ a.pronounced-title {
 .static-map-small .static-map-inner .r0 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
 
+  /* TODO: remove this static background image */
+
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: 0px;
   position: absolute;
@@ -615,6 +621,8 @@ a.pronounced-title {
 }
 .static-map-small .static-map-inner .r1 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
 
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -50px;
@@ -644,6 +652,8 @@ a.pronounced-title {
 .static-map-small .static-map-inner .r2 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
 
+  /* TODO: remove this static background image */
+
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -100px;
   position: absolute;
@@ -671,6 +681,8 @@ a.pronounced-title {
 }
 .static-map-small .static-map-inner .r3 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
 
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -150px;

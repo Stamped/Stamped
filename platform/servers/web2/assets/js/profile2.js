@@ -201,6 +201,108 @@
             }
         });
         
+        var $user_logo          = $('header .user-logo-large');
+        var user_logo_width     = parseFloat($user_logo.css('width'));
+        var user_logo_height    = parseFloat($user_logo.css('height'));
+        
+        var $window             = $(window);
+        var $header             = $('header .header-body');
+        var header_height       = $header.height();
+        var cur_header_height   = header_height;
+        var min_height_ratio    = 0.5;
+        
+        var $join               = $('.join');
+        var $join_button        = $join.find('a.button');
+        
+        var $sign_in            = $('.sign-in');
+        var $already_stamping   = $sign_in.find('span.desc');
+        var $sign_in_button     = $sign_in.find('a.button');
+        
+        var sign_in_button_width = $sign_in_button.width();
+        
+        var join_pos            = $join.position();
+        var sign_in_pos         = $sign_in.position();
+        
+        var pad                 = 4;
+        var join_width          = $join.width()  + pad;
+        var join_height         = $join.height() + pad;
+        
+        var sign_in_width       = $sign_in.width()  + pad;
+        var sign_in_height      = $sign_in.height() + pad;
+        
+        $header.height(header_height);
+        
+        $join.css({
+            position : 'absolute', 
+            float    : 'none', 
+            top      : join_pos.top, 
+            left     : join_pos.left, 
+            width    : join_width, 
+            height   : join_height, 
+        });
+        
+        $sign_in.css({
+            position : 'absolute', 
+            float    : 'none', 
+            top      : sign_in_pos.top, 
+            left     : sign_in_pos.left, 
+            width    : sign_in_width, 
+            height   : sign_in_height, 
+        });
+        
+        var last_ratio = null;
+        
+        $window.bind("scroll", function(n) {
+            var cur_ratio = Math.max((target_height - $window.scrollTop()) / target_height, 0);
+            
+            if (cur_ratio !== last_ratio) {
+                last_ratio = cur_ratio;
+                var inv_cur_ratio = 1.0 - cur_ratio;
+                
+                var cur_height_ratio = Math.max(cur_ratio, min_height_ratio);
+                var cur_height = header_height * cur_height_ratio;
+                
+                if (cur_height !== cur_header_height) {
+                    cur_header_height = cur_height;
+                    $header.height(cur_header_height);
+                }
+                
+                var style = {
+                    opacity : cur_ratio
+                };
+                
+                if (cur_ratio < 0.1) {
+                    style['visibility'] = 'hidden';
+                } else {
+                    style['visibility'] = 'visible';
+                }
+                
+                $already_stamping.css(style);
+                
+                var cur_left = join_pos.left - inv_cur_ratio * (sign_in_button_width + 16);
+                $join.css({
+                    left : cur_left
+                });
+                
+                var cur_top  = cur_ratio * sign_in_pos.top + inv_cur_ratio * join_pos.top;
+                $sign_in.css({
+                    top : cur_top
+                });
+                
+                var cur_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
+                var cur_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
+                var cur_size   = cur_width + 'px ' + cur_height + 'px';
+                
+                $user_logo.css({
+                    width  : cur_width, 
+                    height : cur_height, 
+                    'background-size'   : cur_size, 
+                    '-webkit-mask-size' : cur_size
+                });
+                console.debug("cur_ratio: " + cur_ratio);
+            }
+        });
+        
         return;
         
         /*
