@@ -22,6 +22,7 @@ def create(request, authUserId, data, **kwargs):
     
     return transformOutput(stamp.exportSparse())
 
+
 @handleHTTPRequest(http_schema=HTTPStampEdit)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, data, **kwargs):

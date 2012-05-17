@@ -16,16 +16,6 @@
                     </p>
                 </div>
                 
-                {{#entity}}
-                
-                {{#if image}}
-                <div class="stamp-image">
-                    <img src="{{.}}" />
-                </div>
-                {{/if}}
-                
-                {{/entity}}
-                
                 <div class="stamp-contents">
                     {{#contents}}
                     <div class="stamped-content">
@@ -55,13 +45,42 @@
             </div>
         </div>
         
-        {{#entity}}
-        <div class="stamp-preview">
-            {{#if coordinates}}
-                {{> static-map-small}}
-            {{/if}}
+        <div class="rhs">
+            {{#modified}}<div class="timestamp_raw">{{.}}</div>{{/modified}}
+            
+            <div class="stamp-preview">
+                {{#contents}}
+                    {{#images}}
+                        {{#sizes}}
+                            <div class="stamp-image">
+                                <img src="{{url}}" />
+                            </div>
+                        {{/sizes}}
+                    {{/images}}
+                {{/contents}}
+                
+                {{#entity}}
+                
+                {{#if coordinates}}
+                    <!-- TODO: incorporate other entity images and/or fallback to generic entity category icon -->
+                    {{> static-map-small}}
+                {{/if}}
+                
+                {{#images}}
+                    {{#sizes}}
+                        <div class="stamp-image">
+                            <img src="{{url}}" />
+                        </div>
+                    {{/sizes}}
+                {{/images}}
+                
+                <div class="stamp-category-{{category}}">
+                    <span class="icon"></span>
+                </div>
+                
+                {{/entity}}
+            </div>
         </div>
-        {{/entity}}
     </div>
 </div>
 

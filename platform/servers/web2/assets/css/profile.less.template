@@ -68,6 +68,9 @@
     height: 36px;
 }
 
+.stamp-gallery-item:hover {
+    background-color: @primary;
+}
 
 /* target webkit-browsers */
 @media screen and (-webkit-min-device-pixel-ratio:0) {

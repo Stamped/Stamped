@@ -266,14 +266,25 @@ header {
                 top:  0;
                 left: 0;
                 
-                .innerbg0 {
-                    background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
+                .innerbg {
+                    /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
                     background-size: 100%;
                     
                     position: absolute;
                     width:   100%;
                     height:  100%;
-                    opacity: 0.45;
+                    opacity: 0.45;*/
+                    
+                    /*$(document).ready(function() {
+                        $('.innerbg').css({
+                            position : 'absolute', 
+                            width    : '100%', 
+                            height   : '100%', 
+                            opacity  : '0.45', 
+                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                            'background-size': '100%', 
+                        }).addClass('blur_8');
+                    });*/
                 }
                 
                 .profile-header-body-fixedwidth {
@@ -496,6 +507,8 @@ header {
             .__section(@x);
         }
         
+        /* TODO: make the map crinkle to a centered version of itself */
+        
         .r0 {
             .section(0);
             border-width: @b 0 @b @b;
@@ -504,17 +517,17 @@ header {
         .r1 {
             .section(1);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-6px,  0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(-5px,  0) rotateY(@angle));
         }
         .r2 {
             .section(2);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-18px, 0) rotateY(-@angle));
+            .transform(perspective(@perspective) translate(-13px, 0) rotateY(-@angle));
         }
         .r3 {
             .section(3);
             border-width: @b @b @b 0;
-            .transform(perspective(@perspective) translate(-23px, 0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(-18px, 0) rotateY(@angle));
         }
         .dark-layer {
             display: block;
@@ -532,7 +545,7 @@ header {
             position: absolute;
             top:  50%;
             left: 50%;
-            margin: -9px auto auto 0;
+            margin: -7px auto auto 0;
             
             display: block;
             width:  24px;
@@ -555,7 +568,7 @@ header {
             }
             
             .transition(all, .1s, linear);
-            .transform(perspective(@perspective) translate(-15px, 0));
+            .transform(perspective(@perspective) translate(-10px, 0));
         }
     }
     
@@ -571,7 +584,7 @@ header {
 }
 
 .static-map-small {
-    .static-map(200px, 2px, 35deg, 200px);
+    .static-map(140px, 2px, 35deg, 200px);
 }
 
 
@@ -603,7 +616,7 @@ header {
         list-style: none;
         text-indent: 0;
         padding: 0;
-        margin: 0;
+        margin:  0;
         
         li {
             position: relative;
@@ -615,13 +628,13 @@ header {
                 display: block;
                 width:  60px;
                 height: 60px;
-                margin:  6px 0;
+                margin: 6px 0;
                 
                 position: relative;
                 z-index: 1000;
                 
                 opacity: 0;
-                .transition(opacity, .5s, ease-in-out);
+                .transition(opacity, .3s, ease-out);
             }
             
             div {

@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import api.HTTPSchemas
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
@@ -94,8 +95,78 @@ def profile(request, schema, **kwargs):
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
+    main_cluster    = { }
+    
     #utils.log("STAMPS:")
     #utils.log(pprint.pformat(stamps))
+    
+    if schema.category == 'place':
+        earthRadius = 3959.0 # miles
+        clusters    = [ ]
+        trivial     = True
+        
+        # find stamp clusters
+        for stamp in stamps:
+            entity = stamp['entity']
+            if 'coordinates' not in entity:
+                continue
+            
+            # TODO: really should be retaining this for stamps overall instead of just subset here...
+            
+            coords = api.HTTPSchemas._coordinatesFlatToDict(entity['coordinates'])
+            found_cluster = False
+            ll = [ coords['lat'], coords['lng'] ]
+            #print "%s) %s" % (stamp.title, ll)
+            
+            for cluster in clusters:
+                dist = earthRadius * utils.get_spherical_distance(ll, cluster['avg'])
+                #print "%s) %s vs %s => %s (%s)" % (stamp.title, ll, cluster['avg'], dist, cluster['data'])
+                
+                if dist < 10:
+                    cluster['data'].append((ll[0], ll[1]))
+                    
+                    len_cluster   = len(cluster['data'])
+                    found_cluster = True
+                    trivial       = False
+                    
+                    cluster['sum'][0] = cluster['sum'][0] + ll[0]
+                    cluster['sum'][1] = cluster['sum'][1] + ll[1]
+                    
+                    cluster['avg'][0] = cluster['sum'][0] / len_cluster
+                    cluster['avg'][1] = cluster['sum'][1] / len_cluster
+                    
+                    #print "%s) %d %s" % (stamp.title, len_cluster, cluster)
+                    break
+            
+            if not found_cluster:
+                clusters.append({
+                    'avg'  : [ ll[0], ll[1] ], 
+                    'sum'  : [ ll[0], ll[1] ], 
+                    'data' : [ (ll[0], ll[1]) ], 
+                })
+        
+        clusters_out = []
+        if trivial:
+            clusters_out = clusters
+        else:
+            # attempt to remove trivial clusters as outliers
+            for cluster in clusters:
+                if len(cluster['data']) > 1:
+                    clusters_out.append(cluster)
+            
+            if len(clusters_out) <= 0:
+                clusters_out.append(clusters[0])
+        
+        clusters = sorted(clusters_out, key=lambda c: len(c['data']), reverse=True)
+        
+        for cluster in clusters:
+            utils.log(pprint.pformat(cluster))
+        
+        main_cluster = clusters[0]
+        main_cluster = {
+            'coordinates' : "%f,%f" % (main_cluster['avg'][0], main_cluster['avg'][1]), 
+            'markers'     : list("%f,%f" % (c[0], c[1]) for c in main_cluster['data']), 
+        }
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -113,15 +184,17 @@ def profile(request, schema, **kwargs):
     body_classes = _get_body_classes('profile', schema)
     
     return stamped_render(request, 'profile2.html', {
-        'user'          : user, 
-        'stamps'        : stamps, 
+        'user'                  : user, 
+        'stamps'                : stamps, 
         
-        'friends'       : friends, 
-        'followers'     : followers, 
+        'friends'               : friends, 
+        'followers'             : followers, 
         
-        'prev_url'      : prev_url, 
-        'next_url'      : next_url, 
-        'body_classes'  : body_classes, 
+        'prev_url'              : prev_url, 
+        'next_url'              : next_url, 
+        
+        'body_classes'          : body_classes, 
+        'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
 @stamped_view(schema=HTTPUserCollectionSlice)
@@ -180,6 +253,7 @@ def map(request, schema, **kwargs):
         
         'prev_url'      : prev_url, 
         'next_url'      : next_url, 
+        
         'body_classes'  : body_classes, 
     }, preload=[ 'user', 'stamps' ])
 

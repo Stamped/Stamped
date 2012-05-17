@@ -86,19 +86,54 @@
     -o-box-shadow: @args;
     box-shadow: @args;*/
 
-  background: #FEFEFE;
+  /*.transition(background-color, .5s, ease-in);*/
+
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
   float: left;
   width: 100%;
   border-bottom: 1px solid #bbb;
+  background-color: #FEFEFE;
+}
+.stamp-gallery-item:hover .content .rhs .timestamp {
+  opacity: 1;
 }
 .stamp-gallery-item .content {
   padding: 2.5em 2em;
   position: relative;
 }
-.stamp-gallery-item .content .stamp-preview {
+.stamp-gallery-item .content .rhs {
   display: block;
   float: right;
+}
+.stamp-gallery-item .content .rhs .timestamp_raw,
+.stamp-gallery-item .content .rhs .timestamp {
+  font-size: 80%;
+}
+.stamp-gallery-item .content .rhs .timestamp_raw {
+  display: none;
+}
+.stamp-gallery-item .content .rhs .timestamp {
+  display: block;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-out;
+  -moz-transition: opacity 0.2s ease-out;
+  transition: opacity 0.2s ease-out;
+}
+.stamp-gallery-item .content .rhs .stamp-preview {
   margin-left: 1em;
+  display: block;
+  max-width: 140px;
+  height: auto;
+}
+.stamp-gallery-item .content .rhs .stamp-preview img {
+  display: block;
+  max-width: 140px;
+  height: auto;
 }
 .stamp-gallery-item .content .inner-content {
   display: block;
@@ -129,73 +164,6 @@
 }
 .stamp-gallery-item .content .inner-content .previews {
   font-size: 80%;
-  /*.profile-image-small {
-                    display: inline-block;
-                    float: none;
-                    
-                    position: relative;
-                    margin: 0 2px 4px 0;
-                    
-                    @width:  14px;
-                    @height: 14px;
-                    
-                    .preview-image(@bgleft, @bgtop) {
-                        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-                        background-position: @bgleft, @bgtop;
-                        
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width:  @width;
-                        height: @height;
-                        z-index: 100;
-                    }
-                    
-                    .like {
-                        .preview-image(0, 0);
-                    }
-                    
-                    .todo {
-                        .preview-image(-16px, 0);
-                    }
-                    
-                    .comment {
-                        .preview-image(-32px, 0);
-                    }
-                    
-                    .credit {
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width: 18px;
-                        height: 18px;
-                        z-index: 101;
-                        
-                        img {
-                            background: none;
-                            border: 0 none;
-                            
-                            -webkit-box-shadow: none;
-                            -moz-box-shadow: none;
-                            -ms-box-shadow: none;
-                            -o-box-shadow: none;
-                            box-shadow: none;
-                            
-                            display: block;
-                            width:  18px;
-                            height: 18px;
-                        }
-                    }
-                    
-                    .like img, .todo img, .comment img {
-                        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
-                    }
-                }*/
-
 }
 .stamp-gallery-item .content .inner-content .previews div {
   display: block;

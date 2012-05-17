@@ -27,11 +27,10 @@
         <div class="profile-header">
             <div class="profile-content-page">
                 <div class="profile-header-body">
-                    <div class="innerbg0"></div>
+                    <div class="innerbg"></div>
                     <div class="profile-header-body-fixedwidth clearfix">
                         <div class="profile-image-large floatleft">
                             <!-- TODO: link to lighthouse with full-resolution profile image -->
-                            
                             <img src="{{user.image_url_144}}" />
                         </div>
                         
@@ -159,9 +158,23 @@
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
     <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
     
+    <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
     <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/profile2.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('.innerbg').css({
+                position : 'absolute', 
+                width    : '100%', 
+                height   : '100%', 
+                opacity  : '0.45', 
+                background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                'background-size': '100%', 
+            }).addClass('blur_8');
+        });
+    </script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

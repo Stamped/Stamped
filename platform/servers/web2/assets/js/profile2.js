@@ -90,10 +90,11 @@
                     selector    : "div.stamp-gallery-loading"
                 }
             }, function(new_elements) {
-                var elements = $(new_elements);
+                var $elements = $(new_elements);
                 
-                $(elements).emoji();
-                $gallery.isotope('appended', elements);
+                //$elements.emoji();
+                $gallery.isotope('appended', $elements);
+                update_timestamps();
             });
         };
         
@@ -310,7 +311,7 @@
         var last_ratio = null;
         
         $window.bind("scroll", function(n) {
-            var cur_ratio = Math.max((header_height - $window.scrollTop()) / header_height, 0);
+            var cur_ratio = Math.min(Math.max((header_height - $window.scrollTop()) / header_height, 0.0), 1.0);
             
             if (cur_ratio !== last_ratio) {
                 last_ratio = cur_ratio;
@@ -441,6 +442,7 @@
                                 //$('.inset-stamp .number').html(stamps.length);
                                 
                                 $gallery.append($elements);
+                                update_timestamps();
                                 
                                 $gallery.isotope('remove',   $items,    function() {
                                     $('.loading').hide();
@@ -518,6 +520,17 @@
                 return false;
             });
         });
+        
+        var update_timestamps = function() {
+            $('.timestamp_raw').each(function(i, elem) {
+                var $elem = $(elem);
+                var expl  = moment($elem.text()).fromNow();
+                
+                $elem.removeClass('timestamp_raw').text(expl).addClass('timestamp');
+            });
+        };
+        
+        update_timestamps();
         
         return;
         
