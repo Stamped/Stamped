@@ -58,8 +58,8 @@ class SeedSource(BasicSource):
                 source = "%s_source" % group
                 cur = entity[source]
                 value = entity[group]
-                # if isinstance(value, SchemaElement):
-                #     value = value.value
+                if isinstance(value, Schema):
+                    value = value.dataExport()
                 if cur == None and value is not None and value != '' and value != {} and value != []:
                     timestamps[group] = controller.now
             except Exception as e:

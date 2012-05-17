@@ -28,7 +28,7 @@ def login(request, client_id, http_schema, **kwargs):
     user = HTTPUser().importSchema(user)
     logs.user(user.user_id)
     
-    output = { 'user' : user.exportSparse(), 'token' : token }
+    output = { 'user' : user.dataExport(), 'token' : token }
     
     return transformOutput(output)
 

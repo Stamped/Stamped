@@ -203,7 +203,7 @@ def main():
             
             autosuggest = []
             for item in results:
-                item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+                item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
                 autosuggest.append(item)
             
             value = json.dumps(autosuggest, sort_keys=True)

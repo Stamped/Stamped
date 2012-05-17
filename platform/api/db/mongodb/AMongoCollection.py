@@ -208,7 +208,6 @@ class AMongoCollection(object):
             assert obj.__class__.__name__ == self._obj.__name__
         
         #from pprint import pformat
-        #logs.warning(pformat(obj.value))
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
         

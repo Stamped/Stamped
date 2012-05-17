@@ -895,7 +895,7 @@ if __name__ == '__main__':
             f = Factual()
             entity = f.entity(sys.argv[2])
             if entity != None:
-                pprint(entity.value)
+                pprint(entity)
             else:
                 print("No data found for given factual_id")
         elif arg == 'enrichAll':

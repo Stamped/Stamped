@@ -15,7 +15,7 @@ def show(request, authUserId, data, **kwargs):
     
     result = []
     for item in activity:
-        result.append(HTTPActivity().importSchema(item).exportSparse())
+        result.append(HTTPActivity().importSchema(item).dataExport())
     
     return transformOutput(result)
 
@@ -27,7 +27,7 @@ def friends(request, authUserId, data, **kwargs):
     
     result = []
     for item in activity:
-        result.append(HTTPActivity().importSchema(item).exportSparse())
+        result.append(HTTPActivity().importSchema(item).dataExport())
     
     return transformOutput(result)
 

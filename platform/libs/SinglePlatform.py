@@ -203,7 +203,7 @@ if __name__ == '__main__':
         results = sp.get_menu(sp_id)
         #pprint(results)
         results = toMenuSchema(results)
-        pprint(results.value)
+        pprint(results)
     else:
         # Search for Nobu NY by its phone number
         #results = sp.search(query='2122190500')

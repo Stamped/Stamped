@@ -51,7 +51,7 @@ class PlacesSourceEnrichTest(APlacesSourceTest):
     def test_luger_enrich(self):
         modified = self.source.enrichEntity(self.entity,self.controller)
         if _verbose:
-            print(pformat(self.entity.value))
+            print(pformat(self.entity))
         self.assertEqual(modified,True)
         self.assertEqual(self.entity.address_country, 'US')
         self.assertEqual(self.entity.address_locality, 'Brooklyn')

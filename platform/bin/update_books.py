@@ -161,11 +161,11 @@ def handle_entity(entity, amazonAPI, matcher):
         utils.log("Success: %s vs %s" % (orig_title, entity.title))
     else:
         utils.log("Failure: %s" % entity.title)
-        pprint(entity.value)
+        pprint(entity)
         utils.log(len(amazon_results))
         #pprint(params)
         #for r in amazon_results:
-        #    pprint(r.value)
+        #    pprint(r)
 
 if __name__ == '__main__':
     main()

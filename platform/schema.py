@@ -8,15 +8,17 @@ __license__   = "TODO"
 import copy
 
 class SchemaException(Exception):
-   pass
+    pass
 
 class SchemaMeta(type):
-   def __new__(cls, name, bases, attrs):
-       result = type.__new__(cls, name, bases, attrs)
-       result._preSetSchema()
-       result.setSchema()
-       result._postSetSchema()
-       return result
+    def __new__(cls, name, bases, attrs):
+        flag = 'setSchema' in attrs
+        result = type.__new__(cls, name, bases, attrs)
+        result._preSetSchema()
+        if flag:
+            result.setSchema()
+        result._postSetSchema()
+        return result
 
 _propertyKey            = 'property'
 _propertyListKey        = 'property_list'
@@ -40,7 +42,9 @@ class Schema(object):
             if hasattr(c, '_propertyInfo'):
                 for k,v in c._propertyInfo.items():
                     if k in cls._propertyInfo:
-                        raise SchemaException('duplicate property %s' % (k,))
+                        cur = cls._propertyInfo[k]
+                        if cur != v:
+                            raise SchemaException('duplicate property with different definition %s' % (k,))
                     cls._propertyInfo[k] = v
                     # print("added %s to %s", k, cls)
 

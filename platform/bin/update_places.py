@@ -66,7 +66,7 @@ def handle_entity(entity, matcher, matcher2):
         utils.log("Success: %s vs %s" % (entity.title, match.title))
     else:
         utils.log("Failure: %s" % entity.title)
-        pprint(entity.value)
+        pprint(entity)
 
 if __name__ == '__main__':
     main()

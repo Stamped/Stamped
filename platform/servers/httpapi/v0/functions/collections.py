@@ -17,9 +17,9 @@ def transform_stamps(stamps):
     for stamp in stamps:
         try:
             if 'deleted' in stamp:
-                result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
+                result.append(HTTPDeletedStamp().importSchema(stamp).dataExport())
             else:
-                result.append(HTTPStamp().importSchema(stamp).exportSparse())
+                result.append(HTTPStamp().importSchema(stamp).dataExport())
         except:
             logs.warn(utils.getFormattedException())
     

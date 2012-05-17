@@ -295,7 +295,7 @@ class AEntityMatcher(object):
                     if self.options.verbose:
                         utils.log("updating stamp '%s' with entity_id '%s' => '%s'" % \
                                   (item.stamp_id, entity2.entity_id, entity1.entity_id))
-                        #pprint(item.value)
+                        #pprint(item)
                     
                     if not self.options.noop:
                         self._stampDB.update(item)
@@ -407,7 +407,7 @@ class AEntityMatcher(object):
             
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
-            _addDict(entity.value, keep, wrap)
+            _addDict(entity.dataExport(), keep, wrap)
             
             if not self.options.noop and 'entity_id' in entity:
                 try:
@@ -429,7 +429,7 @@ class AEntityMatcher(object):
             if self.options.verbose:
                 utils.log("[%s] retaining %s (title=%s) (removed %d):" % \
                           (self, keep.entity_id, keep.title, numDuplicates))
-                pprint(keep.value)
+                pprint(keep)
             
             if not self.options.noop:
                 keep.titlel = getSimplifiedTitle(keep.title)

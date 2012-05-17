@@ -80,6 +80,24 @@ class Client(Schema):
         cls.addProperty('is_mobile',          bool)
         cls.addProperty('resolution',         int) # 1, 2
 
+class HoursSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('open',                            basestring)
+        cls.addProperty('close',                           basestring)
+        cls.addProperty('desc',                            basestring)
+
+class TimesSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('sun',                 HoursSchema)
+        cls.addNestedPropertyList('mon',                 HoursSchema)
+        cls.addNestedPropertyList('tue',                 HoursSchema)
+        cls.addNestedPropertyList('wed',                 HoursSchema)
+        cls.addNestedPropertyList('thu',                 HoursSchema)
+        cls.addNestedPropertyList('fri',                 HoursSchema)
+        cls.addNestedPropertyList('sat',                 HoursSchema)
+
 
 # ########## #
 # ClientLogs #
@@ -132,22 +150,22 @@ class UserStatsSchema(Schema):
 class StampStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_comments       ',  int)
-        cls.addProperty('num_todos          ',  int)
-        cls.addProperty('num_credit         ',  int)
-        cls.addProperty('num_likes          ',  int)
-        cls.addProperty('like_threshold_hit ',  bool)
-        cls.addProperty('stamp_num          ',  int)
-        cls.addProperty('num_blurbs         ',  int)
+        cls.addProperty('num_comments',  int)
+        cls.addProperty('num_todos',  int)
+        cls.addProperty('num_credit',  int)
+        cls.addProperty('num_likes',  int)
+        cls.addProperty('like_threshold_hit',  bool)
+        cls.addProperty('stamp_num',  int)
+        cls.addProperty('num_blurbs',  int)
 
 class StampStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id           ',  basestring, required=True)
-        cls.addProperty('num_todos          ',  int)
-        cls.addProperty('num_likes          ',  int)
-        cls.addProperty('num_credits        ',  int)
-        cls.addProperty('num_comments       ',  int)
+        cls.addProperty('stamp_id',  basestring, required=True)
+        cls.addProperty('num_todos',  int)
+        cls.addProperty('num_likes',  int)
+        cls.addProperty('num_credits',  int)
+        cls.addProperty('num_comments',  int)
         cls.addPropertyList('preview_todos',      basestring) # UserIds
         cls.addPropertyList('preview_likes',      basestring) # UserIds
         cls.addPropertyList('preview_credits',    basestring) # StampIds
@@ -156,8 +174,8 @@ class StampStats(Schema):
 class EntityStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id          ',  basestring, required=True)
-        cls.addProperty('num_stamps         ',  int)
+        cls.addProperty('entity_id',  basestring, required=True)
+        cls.addProperty('num_stamps',  int)
         cls.addPropertyList('popular_users',      basestring)
 
 
@@ -326,13 +344,6 @@ class User(Schema):
         cls.addNestedProperty('stats',          UserStatsSchema)
         cls.addNestedProperty('timestamp',      UserTimestampSchema, required=True)
         cls.addProperty('identifier',           basestring)
-    
-    # def exportSchema(self, schema):
-    #     if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
-    #         schema.importData(self.value, overflow=True)
-    #     else:
-    #         raise NotImplementedError
-    #     return schema
 
 class UserMini(Schema):
     @classmethod
@@ -379,6 +390,18 @@ class Invite(Schema):
         cls.addProperty('recipient_email',      basestring, required=True)
         cls.addProperty('user_id',              basestring)
         cls.addProperty('created',              datetime)
+
+
+# ########### #
+# Friendships #
+# ########### #
+
+class Friendship(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('friend_id',            basestring, required=True)
+        cls.addNestedProperty('timestamp',      TimestampSchema)
 
 
 # ######## #
@@ -591,7 +614,7 @@ class BasicEntity(Schema):
                 return "%s%s" % (prefix, id)
         
         raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" % 
-                             pformat(self.exportSparse()))
+                             pformat(self.dataExport()))
     
     def _genericSubtitle(self):
         if self.user_generated_subtitle is not None:
@@ -621,7 +644,7 @@ class BasicEntity(Schema):
 
     def isType(self, t):
         try:
-            if t in self.types.value:
+            if t in self.types:
                 return True
         except:
             pass
@@ -632,10 +655,503 @@ class BasicEntity(Schema):
     #     # if len(t) == 1: t = t[0]
         
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(unicode(i) for i in t))
-    
-    def __repr__(self):
-        return "%s (%s)" % (self.__class__.__name__, pformat(self.value))
 
+
+class BasicEntityMini(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('schema_version',                   int)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('kind',                             basestring)
+        cls.addPropertyList('types',                        basestring)
+        cls.addNestedProperty('sources',                    EntitySourcesSchema)
+        cls.addNestedProperty('coordinates',                CoordinatesSchema)
+        cls.addNestedPropertyList('images',                 ImageSchema)
+
+    def __init__(self):
+        # BasicEntity.__init__(self)
+        self.schema_version = 0
+        self.kind = 'other'
+
+class PlaceEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'place'
+
+class PersonEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'person'
+
+class MediaCollectionEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'media_collection'
+
+class MediaItemEntityMini(BasicEntityMini):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('length', int)
+
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'media_item'
+
+class SoftwareEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'software'
+
+
+def getEntityObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntity
+    if kind == 'person':
+        return PersonEntity
+    if kind == 'media_collection':
+        return MediaCollectionEntity
+    if kind == 'media_item':
+        return MediaItemEntity
+    if kind == 'software':
+        return SoftwareEntity
+    return BasicEntity
+
+def getEntityMiniObjectFromKind(kind):
+    if kind == 'place':
+        return PlaceEntityMini
+    if kind == 'person':
+        return PersonEntityMini
+    if kind == 'media_collection':
+        return MediaCollectionEntityMini
+    if kind == 'media_item':
+        return MediaItemEntityMini
+    if kind == 'software':
+        return SoftwareEntityMini
+    return BasicEntityMini
+
+
+
+class PlaceEntity(BasicEntity):
+
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('coordinates',                CoordinatesSchema)
+        cls.addProperty('coordinates_source',               basestring)
+        cls.addProperty('coordinates_timestamp',            datetime) 
+        
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring)
+        cls.addProperty('address_source',                   basestring)
+        cls.addProperty('address_timestamp',                datetime)
+        
+        cls.addProperty('formatted_address',                basestring)
+        cls.addProperty('formatted_address_source',         basestring)
+        cls.addProperty('formatted_address_timestamp',      datetime)
+        
+        cls.addProperty('neighborhood',                     basestring)
+        cls.addProperty('neighborhood_source',              basestring)
+        cls.addProperty('neighborhood_timestamp',           datetime)
+
+        cls.addNestedPropertyList('gallery',                ImageSchema)
+        cls.addProperty('gallery_source',                   basestring)
+        cls.addProperty('gallery_timestamp',                datetime)
+        
+        cls.addNestedProperty('hours',                      TimesSchema)
+        cls.addProperty('hours_source',                     basestring)
+        cls.addProperty('hours_timestamp',                  datetime)
+        
+        cls.addPropertyList('cuisine',                      basestring)
+        cls.addProperty('cuisine_source',                   basestring)
+        cls.addProperty('cuisine_timestamp',                datetime)
+        
+        cls.addProperty('menu',                             bool)
+        cls.addProperty('menu_source',                      basestring)
+        cls.addProperty('menu_timestamp',                   datetime)
+        
+        cls.addProperty('price_range',                      int)
+        cls.addProperty('price_range_source',               basestring)
+        cls.addProperty('price_range_timestamp',            datetime)
+        
+        cls.addProperty('alcohol_flag',                     bool)
+        cls.addProperty('alcohol_flag_source',              basestring)
+        cls.addProperty('alcohol_flag_timestamp',           datetime)
+        
+    def __init__(self):
+        BasicMediaEntity.__init__(self)
+        self.kind = 'place'
+
+    def formatAddress(self, extendStreet=False, breakLines=False):
+        street      = self.address_street
+        street_ext  = self.address_street_ext
+        locality    = self.address_locality
+        region      = self.address_region
+        postcode    = self.address_postcode
+        country     = self.address_country
+
+        if country is not None:
+            country = country.upper()
+        
+        delimiter = '\n' if breakLines else ', '
+        
+        if street is not None and locality is not None and country is not None:
+            # Expand street 
+            if extendStreet == True and street_ext is not None:
+                street = '%s %s' % (street, street_ext)
+            
+            # Use state if in US
+            if country == 'US':
+                if region is not None and postcode is not None:
+                    return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
+                elif region is not None:
+                    return '%s%s%s, %s' % (street, delimiter, locality, postcode)
+                elif postcode is not None:
+                    return '%s%s%s, %s' % (street, delimiter, locality, region)
+            
+            # Use country if outside US
+            else:
+                countries = libs.CountryData.countries
+                if country in countries:
+                    return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
+                else:
+                    return '%s%s%s, %s' % (street, delimiter, locality, country)
+        
+        if self.formatted_address is not None:
+            return self.formatted_address
+        
+        if self.neighborhood is not None:
+            return self.neighborhood
+        
+        return None
+    
+    @property 
+    def subtitle(self):
+        # Check if address components exist
+        if self.address_country is not None and self.address_locality is not None:
+            if self.address_country.upper() == 'US':
+                if self.address_region is not None:
+                    return "%s, %s" % (self.address_locality, self.address_region)
+            else:
+                countries = libs.CountryData.countries
+                country = self.address_country
+                if self.address_country.upper() in countries:
+                    country = countries[self.address_country.upper()]
+                return "%s, %s" % (self.address_locality, country)
+        
+        # Extract city / state with regex as fallback
+        if self.formatted_address is not None:
+            match = city_state_re.match(self.formatted_address)
+            
+            if match is not None:
+                # city, state
+                return "%s, %s" % match.groups()
+
+        # Fallback to generic
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
+        if len(food.intersection(self.types)) > 0:
+            return 'food'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        for t in self.types:
+            return t
+        return 'other'
+
+
+class PersonEntity(BasicEntity):
+
+    @classmethod
+    def setSchema(cls):
+        cls.addPropertyList('genres',                       basestring)
+        cls.addProperty('genres_source',                    basestring)
+        cls.addProperty('genres_timestamp',                 datetime)
+
+        cls.addNestedPropertyList('tracks',                 MediaItemEntityMini)
+        cls.addProperty('tracks_source',                    basestring)
+        cls.addProperty('tracks_timestamp',                 datetime)
+        
+        cls.addNestedPropertyList('albums',                 MediaCollectionEntityMini)
+        cls.addProperty('albums_source',                    basestring)
+        cls.addProperty('albums_timestamp',                 datetime)
+        
+        cls.addNestedPropertyList('movies',                 MediaItemEntityMini)
+        cls.addProperty('movies_source',                    basestring)
+        cls.addProperty('movies_timestamp',                 datetime)
+        
+        cls.addNestedPropertyList('books',                  MediaItemEntityMini)
+        cls.addProperty('books_source',                     basestring)
+        cls.addProperty('books_timestamp',                  datetime)
+        
+    def __init__(self):
+        BasicMediaEntity.__init__(self)
+        self.kind = 'person'
+
+    @property 
+    def subtitle(self):
+        if self.isType('artist'):
+            return 'Artist'
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        if self.isType('artist'):
+            return 'music'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if self.isType('artist'):
+            return 'artist'
+        return 'other'
+
+
+class BasicMediaEntity(BasicEntity):
+
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('release_date',                     datetime)
+        cls.addProperty('release_date_source',              basestring)
+        cls.addProperty('release_date_timestamp',           datetime)
+        
+        cls.addProperty('length',                           int)
+        cls.addProperty('length_source',                    basestring)
+        cls.addProperty('length_timestamp',                 datetime)
+        
+        cls.addPropertyList('genres',                       basestring)
+        cls.addProperty('genres_source',                    basestring)
+        cls.addProperty('genres_timestamp',                 datetime)
+        
+        cls.addNestedPropertyList('artists',                PersonEntityMini)
+        cls.addProperty('artists_source',                   basestring)
+        cls.addProperty('artists_timestamp',                datetime)
+        
+        cls.addNestedPropertyList('authors',                PersonEntityMini)
+        cls.addProperty('authors_source',                   basestring)
+        cls.addProperty('authors_timestamp',                datetime)
+        
+        cls.addNestedPropertyList('directors',              PersonEntityMini)
+        cls.addProperty('directors_source',                 basestring)
+        cls.addProperty('directors_timestamp',              datetime)
+        
+        cls.addNestedPropertyList('cast',                   PersonEntityMini)
+        cls.addProperty('cast_source',                      basestring)
+        cls.addProperty('cast_timestamp',                   datetime)
+        
+        cls.addNestedPropertyList('publishers',             BasicEntityMini)
+        cls.addProperty('publishers_source',                basestring)
+        cls.addProperty('publishers_timestamp',             datetime)
+        
+        cls.addNestedPropertyList('studios',                BasicEntityMini)
+        cls.addProperty('studios_source',                   basestring)
+        cls.addProperty('studios_timestamp',                datetime)
+        
+        cls.addNestedPropertyList('networks',               BasicEntityMini)
+        cls.addProperty('networks_source',                  basestring)
+        cls.addProperty('networks_timestamp',               datetime)
+        
+        cls.addProperty('mpaa_rating',                      basestring)
+        cls.addProperty('mpaa_rating_source',               basestring)
+        cls.addProperty('mpaa_rating_timestamp',            datetime)
+        
+        cls.addProperty('parental_advisory',                basestring)
+        cls.addProperty('parental_advisory_source',         basestring)
+        cls.addProperty('parental_advisory_timestamp',      datetime)
+
+class MediaCollectionEntity(BasicMediaEntity):
+
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('tracks',                 MediaItemEntityMini)
+        cls.addProperty('tracks_source',                    basestring)
+        cls.addProperty('tracks_timestamp',                 datetime)
+        
+    def __init__(self):
+        BasicMediaEntity.__init__(self)
+        self.kind = 'media_collection'
+    
+    @property 
+    def subtitle(self):
+        if self.isType('album'):
+            if len(self.artists) > 0:
+                return 'Album by %s' % ', '.join(unicode(i['title']) for i in self.artists)
+            
+            return 'Album'
+        
+        if self.isType('tv'):
+            if len(self.networks) > 0:
+                return 'TV Show (%s)' % ', '.join(unicode(i['title']) for i in self.networks)
+            
+            return 'TV Show'
+        
+        return self._genericSubtitle()
+    
+    @property 
+    def category(self):
+        if self.isType('album'):
+            return 'music'
+        if self.isType('tv'):
+            return 'film'
+        return 'other'
+    
+    @property 
+    def subcategory(self):
+        if self.isType('album'):
+            return 'album'
+        if self.isType('tv'):
+            return 'tv'
+        return 'other'
+
+class MediaItemEntity(BasicMediaEntity):
+
+    @classmethod
+    def setSchema(cls):
+        # Tracks
+        cls.addNestedPropertyList('albums',                 MediaCollectionEntityMini)
+        cls.addProperty('albums_source',                    basestring)
+        cls.addProperty('albums_timestamp',                 datetime)
+        
+        # Books
+        cls.addProperty('isbn',                             basestring)
+        cls.addProperty('isbn_source',                      basestring)
+        cls.addProperty('isbn_timestamp',                   datetime)
+        
+        cls.addProperty('sku_number',                       basestring)
+        cls.addProperty('sku_number_source',                basestring)
+        cls.addProperty('sku_number_timestamp',             datetime)
+        
+    def __init__(self):
+        BasicMediaEntity.__init__(self)
+        self.kind = 'media_item'
+
+    def minimize(self):
+        return BasicEntity.minimize(self, 'length')
+    
+    @property 
+    def subtitle(self):
+        if self.isType('movie'):
+            if self.release_date is not None:
+                return 'Movie (%s)' % self.release_date.year
+            return 'Movie'
+
+        if self.isType('track'):
+            if len(self.artists) > 0:
+                return 'Song by %s' % ', '.join(unicode(i['title']) for i in self.artists)
+            return 'Song'
+
+        if self.isType('book'):
+            if len(self.authors) > 0:
+                return '%s' % ', '.join(unicode(i['title']) for i in self.authors)
+            return 'Book'
+
+        return self._genericSubtitle()
+
+    @property 
+    def category(self):
+        if self.isType('movie'):
+            return 'film'
+        if self.isType('track'):
+            return 'music'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
+    @property 
+    def subcategory(self):
+        if self.isType('movie'):
+            return 'movie'
+        if self.isType('track'):
+            return 'song'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
+
+class SoftwareEntity(BasicEntity):
+
+    @classmethod
+    def setSchema(cls):
+        cls.addPropertyList('genres',                       basestring)
+        cls.addProperty('genres_source',                    basestring)
+        cls.addProperty('genres_timestamp',                 datetime)
+
+        cls.addProperty('release_date',                     datetime)
+        cls.addProperty('release_date_source',              basestring)
+        cls.addProperty('release_date_timestamp',           datetime)
+
+        cls.addNestedPropertyList('screenshots',            ImageSchema)
+        cls.addProperty('screenshots_source',               basestring)
+        cls.addProperty('screenshots_timestamp',            datetime)
+
+        cls.addNestedPropertyList('authors',                PersonEntityMini)
+        cls.addProperty('authors_source',                   basestring)
+        cls.addProperty('authors_timestamp',                datetime)
+        
+        cls.addNestedPropertyList('publishers',             BasicEntityMini)
+        cls.addProperty('publishers_source',                basestring)
+        cls.addProperty('publishers_timestamp',             datetime)
+
+        cls.addPropertyList('supported_devices',            basestring)
+        cls.addProperty('supported_devices_source',         basestring)
+        cls.addProperty('supported_devices_timestamp',      datetime)
+        
+        cls.addProperty('platform',                         basestring)
+        cls.addProperty('platform_source',                  basestring)
+        cls.addProperty('platform_timestamp',               datetime)
+
+    def __init__(self):
+        BasicMediaEntity.__init__(self)
+        self.kind = 'software'
+    
+    @property 
+    def subtitle(self):
+        if self.isType('app'):
+            suffix = ''
+            if len(self.authors) > 0:
+                suffix = ' (%s)' % ', '.join(unicode(i['title']) for i in self.authors)
+            
+            return 'App%s' % suffix
+        elif 'video_game' in self.types:
+            suffix = ''
+            if self.platform:
+                suffix = ' (%s)' % self.platform
+            
+            return 'Video Game%s' % suffix
+        
+        return self._genericSubtitle()
+    
+    @property 
+    def category(self):
+        return 'other'
+    
+    @property 
+    def subcategory(self):
+        if self.isType('app'):
+            return 'app'
+        elif 'video_game' in self.types:
+            return 'video_game'
+        
+        return 'other'
+
+class EntitySuggested(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('coordinates',                CoordinatesSchema)
+        cls.addProperty('category',                         basestring)
+        cls.addProperty('subcategory',                      basestring)
+        cls.addProperty('limit',                            int)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.limit = 10
 
 
 
@@ -643,24 +1159,6 @@ class BasicEntity(Schema):
 # ##### #
 # Menus #
 # ##### #
-
-class HoursSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('open',                            basestring)
-        cls.addProperty('close',                           basestring)
-        cls.addProperty('desc',                            basestring)
-
-class TimesSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('sun',                 HoursSchema)
-        cls.addNestedPropertyList('mon',                 HoursSchema)
-        cls.addNestedPropertyList('tue',                 HoursSchema)
-        cls.addNestedPropertyList('wed',                 HoursSchema)
-        cls.addNestedPropertyList('thu',                 HoursSchema)
-        cls.addNestedPropertyList('fri',                 HoursSchema)
-        cls.addNestedPropertyList('sat',                 HoursSchema)
 
 class MenuPriceSchema(Schema):
     @classmethod
@@ -824,705 +1322,230 @@ class Stamp(Schema):
 
 
 
+# ######## #
+# Favorite #
+# ######## #
+
+class Favorite(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('user_id',                  basestring, required=True)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedProperty('stamp',              Stamp)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addProperty('complete',                 bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.entity = BasicEntity()
+
+
+# ######## #
+# Activity #
+# ######## #
+
+
+class ActivityObjects(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('users',          UserMini)
+        cls.addNestedPropertyList('stamps',         Stamp)
+        cls.addNestedPropertyList('entities',       BasicEntityMini)
+        cls.addNestedPropertyList('comments',       Comment)
+
+class ActivityObjectIds(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addPropertyList('user_ids',             basestring)
+        cls.addPropertyList('stamp_ids',            basestring)
+        cls.addPropertyList('entity_ids',           basestring)
+        cls.addPropertyList('comment_ids',          basestring)
+
+class ActivityLink(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('link_id',                  basestring)
+        cls.addProperty('activity_id',              basestring, required=True)
+        cls.addProperty('user_id',                  basestring, required=True)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+
+class ActivityReference(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('stamp_id',                 basestring)
+        cls.addProperty('entity_id',                basestring)
+        cls.addPropertyList('indices',              int)
+
+class ActivityFormat(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    bool)
+
+class Alert(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('alert_id',                 basestring)
+        cls.addProperty('activity_id',              basestring, required=True)
+        cls.addProperty('recipient_id',             basestring, required=True)
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('genre',                    basestring)
+        cls.addProperty('created',                  datetime)
+
+class Activity(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Metadata
+        cls.addProperty('activity_id',              basestring)
+        cls.addProperty('benefit',                  int)
+        cls.addNestedProperty('timestamp',          TimestampSchema, required=True)
+
+        # Structure
+        cls.addPropertyList('subjects',             basestring)
+        cls.addProperty('verb',                     basestring, required=True)
+        cls.addNestedProperty('objects',            ActivityObjectIds)
+
+        # Text
+        cls.addProperty('header',                   basestring)
+        cls.addProperty('body',                     basestring)
+        cls.addProperty('footer',                   basestring)
+
+    def enrich(self, **kwargs):
+        users       = kwargs.pop('users', {})
+        stamps      = kwargs.pop('stamps', {})
+        entities    = kwargs.pop('entities', {})
+        comments    = kwargs.pop('comments', {})
+        authUserId  = kwargs.pop('authUserId', None)
+        personal    = kwargs.pop('personal', False)
+
+        result              = EnrichedActivity()
+        result.activity_id  = self.activity_id
+        result.verb         = self.verb 
+        result.benefit      = self.benefit
+        result.timestamp    = self.timestamp 
+        result.personal     = personal
 
+        for userId in self.subjects:
+            result.subjects.append(users[str(userId)])
 
-if 1 == 0:
+        for userId in self.objects.user_ids:
+            result.objects.users.append(users[str(userId)])
 
+        for stampId in self.objects.stamp_ids:
+            result.objects.stamps.append(stamps[str(stampId)])
 
+        for entityId in self.objects.entity_ids:
+            result.objects.entities.append(entities[str(entityId)])
 
+        for commentId in self.objects.comment_ids:
+            result.objects.comments.append(comments[str(commentId)])
 
+        return result
 
 
+class EnrichedActivity(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('activity_id',              basestring, required=True)
+        cls.addProperty('benefit',                  int)
+        cls.addNestedProperty('timestamp',          TimestampSchema, required=True)
 
-    # ########### #
-    # Friendships #
-    # ########### #
+        # Structure
+        cls.addNestedPropertyList('subjects',       UserMini)
+        cls.addProperty('verb',                     basestring, required=True)
+        cls.addNestedProperty('objects',            ActivityObjects)
 
-    class Friendship(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.friend_id          = SchemaElement(basestring, required=True)
-            self.timestamp          = TimestampSchema()
+        # Text
+        cls.addProperty('personal',                 bool)
+        cls.addProperty('header',                   basestring)
+        cls.addProperty('body',                     basestring)
+        cls.addProperty('footer',                   basestring)
 
 
-    # ######## #
-    # Favorite #
-    # ######## #
 
-    class Favorite(Schema):
-        def setSchema(self):
-            self.favorite_id        = SchemaElement(basestring)
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.entity             = BasicEntity(required=True)
-            self.stamp              = Stamp()
-            self.timestamp          = TimestampSchema()
-            self.complete           = SchemaElement(bool)
 
 
+# ####### #
+# Slicing #
+# ####### #
 
+class ViewportSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('upperLeft',          CoordinatesSchema)
+        cls.addNestedProperty('lowerRight',         CoordinatesSchema)
 
-    # ######## #
-    # Activity #
-    # ######## #
 
-    class Activity(Schema):
-        def setSchema(self):
-            # Metadata
-            self.activity_id        = SchemaElement(basestring)
-            self.benefit            = SchemaElement(int)
-            self.timestamp          = TimestampSchema(required=True)
-
-            # Structure
-            self.subjects           = SchemaList(SchemaElement(basestring))
-            self.verb               = SchemaElement(basestring, required=True)
-            self.objects            = ActivityObjectIds()
-
-            # Text
-            self.header             = SchemaElement(basestring)
-            self.body               = SchemaElement(basestring)
-            self.footer             = SchemaElement(basestring)
-
-        def enrich(self, **kwargs):
-            users       = kwargs.pop('users', {})
-            stamps      = kwargs.pop('stamps', {})
-            entities    = kwargs.pop('entities', {})
-            comments    = kwargs.pop('comments', {})
-            authUserId  = kwargs.pop('authUserId', None)
-            personal    = kwargs.pop('personal', False)
-
-            result              = EnrichedActivity()
-            result.activity_id  = self.activity_id
-            result.verb         = self.verb 
-            result.benefit      = self.benefit
-            result.timestamp    = self.timestamp 
-            result.personal     = personal
-
-            for userId in self.subjects:
-                result.subjects.append(users[str(userId)])
-
-            for userId in self.objects.user_ids:
-                result.objects.users.append(users[str(userId)])
-
-            for stampId in self.objects.stamp_ids:
-                result.objects.stamps.append(stamps[str(stampId)])
-
-            for entityId in self.objects.entity_ids:
-                result.objects.entities.append(entities[str(entityId)])
-
-            for commentId in self.objects.comment_ids:
-                result.objects.comments.append(comments[str(commentId)])
-
-            return result
-
-
-    class EnrichedActivity(Schema):
-        def setSchema(self):
-            self.activity_id        = SchemaElement(basestring, required=True)
-            self.benefit            = SchemaElement(int)
-            self.timestamp          = TimestampSchema()
-
-            # Structure
-            self.subjects           = SchemaList(UserMini())
-            self.verb               = SchemaElement(basestring, required=True)
-            self.objects            = ActivityObjects()
-
-            # Text
-            self.personal           = SchemaElement(bool)
-            self.header             = SchemaElement(basestring)
-            self.body               = SchemaElement(basestring)
-            self.footer             = SchemaElement(basestring)
-
-
-    class ActivityObjects(Schema):
-        def setSchema(self):
-            self.users              = SchemaList(UserMini())
-            self.stamps             = SchemaList(Stamp())
-            self.entities           = SchemaList(BasicEntityMini())
-            self.comments           = SchemaList(Comment())
-
-    class ActivityObjectIds(Schema):
-        def setSchema(self):
-            self.user_ids           = SchemaList(SchemaElement(basestring))
-            self.stamp_ids          = SchemaList(SchemaElement(basestring))
-            self.entity_ids         = SchemaList(SchemaElement(basestring))
-            self.comment_ids        = SchemaList(SchemaElement(basestring))
-
-    class ActivityLink(Schema):
-        def setSchema(self):
-            self.link_id            = SchemaElement(basestring)
-            self.activity_id        = SchemaElement(basestring, required=True)
-            self.user_id            = SchemaElement(basestring, required=True)
-            self.timestamp          = TimestampSchema()
-
-    class ActivityReference(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.stamp_id           = SchemaElement(basestring)
-            self.entity_id          = SchemaElement(basestring)
-            self.indices            = SchemaList(SchemaElement(int))
-
-    class ActivityFormat(Schema):
-        def setSchema(self):
-            self.title              = SchemaElement(bool)
-
-    class Alert(Schema):
-        def setSchema(self):
-            self.alert_id           = SchemaElement(basestring)
-            self.activity_id        = SchemaElement(basestring, required=True)
-            self.recipient_id       = SchemaElement(basestring, required=True)
-            self.user_id            = SchemaElement(basestring)
-            self.genre              = SchemaElement(basestring)
-            self.created            = SchemaElement(datetime)
-
-
-
-
-    # ####### #
-    # Slicing #
-    # ####### #
-
-    class GenericSlice(Schema):
-        def setSchema(self):
-            # paging
-            self.limit              = SchemaElement(int)
-            self.offset             = SchemaElement(int, default=0)
-            
-            # sorting
-            self.sort               = SchemaElement(basestring, default='modified')
-            self.reverse            = SchemaElement(bool,       default=False)
-            self.coordinates        = CoordinatesSchema()
-            
-            # filtering
-            self.since              = SchemaElement(datetime)
-            self.before             = SchemaElement(datetime)
-
-    class GenericCollectionSlice(GenericSlice):
-        def setSchema(self):
-            GenericSlice.setSchema(self)
-            
-            # sorting
-            # (relevance, popularity, proximity, created, modified, alphabetical)
-
-            # filtering
-            self.query              = SchemaElement(basestring)
-            self.category           = SchemaElement(basestring)
-            self.subcategory        = SchemaElement(basestring)
-            self.viewport           = ViewportSchema()
-            
-            # misc options
-            self.quality            = SchemaElement(int,  default=1)
-            self.deleted            = SchemaElement(bool, default=False)
-            self.comments           = SchemaElement(bool, default=True)
-            self.unique             = SchemaElement(bool, default=False)
-
-    class UserCollectionSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-            
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-
-    class FriendsSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-            
-            self.distance           = SchemaElement(int,  default=2)
-            self.inclusive          = SchemaElement(bool, default=True)
-
-    class ConsumptionSlice(GenericCollectionSlice):
-        def setSchema(self):
-            GenericCollectionSlice.setSchema(self)
-
-            self.scope              = SchemaElement(basestring)
-            self.filter             = SchemaElement(basestring)
-
-
-    class ViewportSchema(Schema):
-        def setSchema(self):
-            self.upperLeft          = CoordinatesSchema()
-            self.lowerRight         = CoordinatesSchema()
-
-
-
-
-
-
-
-
-
-
-    def getEntityObjectFromKind(kind):
-        if kind == 'place':
-            return PlaceEntity
-        if kind == 'person':
-            return PersonEntity
-        if kind == 'media_collection':
-            return MediaCollectionEntity
-        if kind == 'media_item':
-            return MediaItemEntity
-        if kind == 'software':
-            return SoftwareEntity
-        return BasicEntity
-
-    def getEntityMiniObjectFromKind(kind):
-        if kind == 'place':
-            return PlaceEntityMini
-        if kind == 'person':
-            return PersonEntityMini
-        if kind == 'media_collection':
-            return MediaCollectionEntityMini
-        if kind == 'media_item':
-            return MediaItemEntityMini
-        if kind == 'software':
-            return SoftwareEntityMini
-        return BasicEntityMini
-
-
-
-    class PlaceEntity(BasicEntity):
-
-        def setSchema(self):
-            BasicEntity.setSchema(self)
-            self.kind                           = SchemaElement(basestring, required=True, default='place')
-            
-            self.coordinates                    = CoordinatesSchema()
-            self.coordinates_source             = SchemaElement(basestring)
-            self.coordinates_timestamp          = SchemaElement(datetime) 
-            
-            self.address_street                 = SchemaElement(basestring)
-            self.address_street_ext             = SchemaElement(basestring)
-            self.address_locality               = SchemaElement(basestring)
-            self.address_region                 = SchemaElement(basestring)
-            self.address_postcode               = SchemaElement(basestring)
-            self.address_country                = SchemaElement(basestring)
-            self.address_source                 = SchemaElement(basestring)
-            self.address_timestamp              = SchemaElement(datetime)
-            
-            self.formatted_address              = SchemaElement(basestring)
-            self.formatted_address_source       = SchemaElement(basestring)
-            self.formatted_address_timestamp    = SchemaElement(datetime)
-            
-            self.neighborhood                   = SchemaElement(basestring)
-            self.neighborhood_source            = SchemaElement(basestring)
-            self.neighborhood_timestamp         = SchemaElement(datetime)
-
-            self.gallery                        = SchemaList(ImageSchema())
-            self.gallery_source                 = SchemaElement(basestring)
-            self.gallery_timestamp              = SchemaElement(datetime)
-            
-            self.hours                          = TimesSchema()
-            self.hours_source                   = SchemaElement(basestring)
-            self.hours_timestamp                = SchemaElement(datetime)
-            
-            self.cuisine                        = SchemaList(SchemaElement(basestring))
-            self.cuisine_source                 = SchemaElement(basestring)
-            self.cuisine_timestamp              = SchemaElement(datetime)
-            
-            self.menu                           = SchemaElement(bool)
-            self.menu_source                    = SchemaElement(basestring)
-            self.menu_timestamp                 = SchemaElement(datetime)
-            
-            self.price_range                    = SchemaElement(int)
-            self.price_range_source             = SchemaElement(basestring)
-            self.price_range_timestamp          = SchemaElement(datetime)
-            
-            self.alcohol_flag                   = SchemaElement(bool)
-            self.alcohol_flag_source            = SchemaElement(basestring)
-            self.alcohol_flag_timestamp         = SchemaElement(datetime)
-
-        def formatAddress(self, extendStreet=False, breakLines=False):
-            street      = self.address_street
-            street_ext  = self.address_street_ext
-            locality    = self.address_locality
-            region      = self.address_region
-            postcode    = self.address_postcode
-            country     = self.address_country
-
-            if country is not None:
-                country = country.upper()
-            
-            delimiter = '\n' if breakLines else ', '
-            
-            if street is not None and locality is not None and country is not None:
-                # Expand street 
-                if extendStreet == True and street_ext is not None:
-                    street = '%s %s' % (street, street_ext)
-                
-                # Use state if in US
-                if country == 'US':
-                    if region is not None and postcode is not None:
-                        return '%s%s%s, %s %s' % (street, delimiter, locality, region, postcode)
-                    elif region is not None:
-                        return '%s%s%s, %s' % (street, delimiter, locality, postcode)
-                    elif postcode is not None:
-                        return '%s%s%s, %s' % (street, delimiter, locality, region)
-                
-                # Use country if outside US
-                else:
-                    countries = libs.CountryData.countries
-                    if country in countries:
-                        return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
-                    else:
-                        return '%s%s%s, %s' % (street, delimiter, locality, country)
-            
-            if self.formatted_address is not None:
-                return self.formatted_address
-            
-            if self.neighborhood is not None:
-                return self.neighborhood
-            
-            return None
+class GenericSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # paging
+        cls.addProperty('limit',                    int)
+        cls.addProperty('offset',                   int)
         
-        @property 
-        def subtitle(self):
-            # Check if address components exist
-            if self.address_country is not None and self.address_locality is not None:
-                if self.address_country.upper() == 'US':
-                    if self.address_region is not None:
-                        return "%s, %s" % (self.address_locality, self.address_region)
-                else:
-                    countries = libs.CountryData.countries
-                    country = self.address_country
-                    if self.address_country.upper() in countries:
-                        country = countries[self.address_country.upper()]
-                    return "%s, %s" % (self.address_locality, country)
-            
-            # Extract city / state with regex as fallback
-            if self.formatted_address is not None:
-                match = city_state_re.match(self.formatted_address)
-                
-                if match is not None:
-                    # city, state
-                    return "%s, %s" % match.groups()
-
-            # Fallback to generic
-            return self._genericSubtitle()
-
-        @property 
-        def category(self):
-            food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-            if len(food.intersection(self.types.value)) > 0:
-                return 'food'
-            return 'other'
-
-        @property 
-        def subcategory(self):
-            for t in self.types.value:
-                return t
-            return 'other'
-
-
-    class PersonEntity(BasicEntity):
-        def setSchema(self):
-            BasicEntity.setSchema(self)
-            self.kind                           = SchemaElement(basestring, required=True, default='person')
-
-            self.genres                         = SchemaList(SchemaElement(basestring))
-            self.genres_source                  = SchemaElement(basestring)
-            self.genres_timestamp               = SchemaElement(datetime)
-
-            self.tracks                         = SchemaList(MediaItemEntityMini())
-            self.tracks_source                  = SchemaElement(basestring)
-            self.tracks_timestamp               = SchemaElement(datetime)
-            
-            self.albums                         = SchemaList(MediaCollectionEntityMini())
-            self.albums_source                  = SchemaElement(basestring)
-            self.albums_timestamp               = SchemaElement(datetime)
-            
-            self.movies                         = SchemaList(MediaItemEntityMini())
-            self.movies_source                  = SchemaElement(basestring)
-            self.movies_timestamp               = SchemaElement(datetime)
-            
-            self.books                          = SchemaList(MediaItemEntityMini())
-            self.books_source                   = SchemaElement(basestring)
-            self.books_timestamp                = SchemaElement(datetime)
-
-        @property 
-        def subtitle(self):
-            if self.isType('artist'):
-                return 'Artist'
-            return self._genericSubtitle()
-
-        @property 
-        def category(self):
-            if self.isType('artist'):
-                return 'music'
-            return 'other'
-
-        @property 
-        def subcategory(self):
-            if self.isType('artist'):
-                return 'artist'
-            return 'other'
-
-
-    class BasicMediaEntity(BasicEntity):
-        def setSchema(self):
-            BasicEntity.setSchema(self)
-            
-            self.release_date                   = SchemaElement(datetime)
-            self.release_date_source            = SchemaElement(basestring)
-            self.release_date_timestamp         = SchemaElement(datetime)
-            
-            self.length                         = SchemaElement(int)
-            self.length_source                  = SchemaElement(basestring)
-            self.length_timestamp               = SchemaElement(datetime)
-            
-            self.genres                         = SchemaList(SchemaElement(basestring))
-            self.genres_source                  = SchemaElement(basestring)
-            self.genres_timestamp               = SchemaElement(datetime)
-            
-            self.artists                        = SchemaList(PersonEntityMini())
-            self.artists_source                 = SchemaElement(basestring)
-            self.artists_timestamp              = SchemaElement(datetime)
-            
-            self.authors                        = SchemaList(PersonEntityMini())
-            self.authors_source                 = SchemaElement(basestring)
-            self.authors_timestamp              = SchemaElement(datetime)
-            
-            self.directors                      = SchemaList(PersonEntityMini())
-            self.directors_source               = SchemaElement(basestring)
-            self.directors_timestamp            = SchemaElement(datetime)
-            
-            self.cast                           = SchemaList(PersonEntityMini())
-            self.cast_source                    = SchemaElement(basestring)
-            self.cast_timestamp                 = SchemaElement(datetime)
-            
-            self.publishers                     = SchemaList(BasicEntityMini())
-            self.publishers_source              = SchemaElement(basestring)
-            self.publishers_timestamp           = SchemaElement(datetime)
-            
-            self.studios                        = SchemaList(BasicEntityMini())
-            self.studios_source                 = SchemaElement(basestring)
-            self.studios_timestamp              = SchemaElement(datetime)
-            
-            self.networks                       = SchemaList(BasicEntityMini())
-            self.networks_source                = SchemaElement(basestring)
-            self.networks_timestamp             = SchemaElement(datetime)
-            
-            self.mpaa_rating                    = SchemaElement(basestring)
-            self.mpaa_rating_source             = SchemaElement(basestring)
-            self.mpaa_rating_timestamp          = SchemaElement(datetime)
-            
-            self.parental_advisory              = SchemaElement(basestring)
-            self.parental_advisory_source       = SchemaElement(basestring)
-            self.parental_advisory_timestamp    = SchemaElement(datetime)
-
-    class MediaCollectionEntity(BasicMediaEntity):
-        def setSchema(self):
-            BasicMediaEntity.setSchema(self)
-            self.kind                           = SchemaElement(basestring, required=True, default='media_collection')
-            
-            self.tracks                         = SchemaList(MediaItemEntityMini())
-            self.tracks_source                  = SchemaElement(basestring)
-            self.tracks_timestamp               = SchemaElement(datetime)
-            
-            #self.seasons                        = SchemaList(SeasonSchema())
-            #self.status                         = SchemaElement(basestring)
+        # sorting
+        cls.addProperty('sort',                     basestring)
+        cls.addProperty('reverse',                  bool)
+        cls.addNestedProperty('coordinates',        CoordinatesSchema)
         
-        @property 
-        def subtitle(self):
-            if self.isType('album'):
-                if len(self.artists) > 0:
-                    return 'Album by %s' % ', '.join(unicode(i['title']) for i in self.artists)
-                
-                return 'Album'
-            
-            if self.isType('tv'):
-                if len(self.networks) > 0:
-                    return 'TV Show (%s)' % ', '.join(unicode(i['title']) for i in self.networks)
-                
-                return 'TV Show'
-            
-            return self._genericSubtitle()
+        # filtering
+        cls.addProperty('since',                    datetime)
+        cls.addProperty('before',                   datetime)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.offset = 0
+        self.sort = 'modified'
+        self.reverse = False
+
+class GenericCollectionSlice(GenericSlice):
+    @classmethod
+    def setSchema(cls):
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+
+        # filtering
+        cls.addProperty('query',                    basestring)
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema)
         
-        @property 
-        def category(self):
-            if self.isType('album'):
-                return 'music'
-            if self.isType('tv'):
-                return 'film'
-            return 'other'
-        
-        @property 
-        def subcategory(self):
-            if self.isType('album'):
-                return 'album'
-            if self.isType('tv'):
-                return 'tv'
-            return 'other'
+        # misc options
+        cls.addProperty('quality',                  int)
+        cls.addProperty('deleted',                  bool)
+        cls.addProperty('comments',                 bool)
+        cls.addProperty('unique',                   bool)
 
-    class MediaItemEntity(BasicMediaEntity):
-        def setSchema(self):
-            BasicMediaEntity.setSchema(self)
-            self.kind                           = SchemaElement(basestring, required=True, default='media_item')
-            
-            # Tracks
-            self.albums                         = SchemaList(MediaCollectionEntityMini())
-            self.albums_source                  = SchemaElement(basestring)
-            self.albums_timestamp               = SchemaElement(datetime)
-            
-            # Books
-            self.isbn                           = SchemaElement(basestring)
-            self.isbn_source                    = SchemaElement(basestring)
-            self.isbn_timestamp                 = SchemaElement(datetime)
-            
-            self.sku_number                     = SchemaElement(basestring)
-            self.sku_number_source              = SchemaElement(basestring)
-            self.sku_number_timestamp           = SchemaElement(datetime)
+    def __init__(self):
+        GenericSlice.__init__(self)
+        self.quality = 1
+        self.deleted = False 
+        self.comments = True 
+        self.unique = False
 
-        def minimize(self):
-            return BasicEntity.minimize(self, 'length')
-        
-        @property 
-        def subtitle(self):
-            if self.isType('movie'):
-                if self.release_date is not None:
-                    return 'Movie (%s)' % self.release_date.year
-                return 'Movie'
+class UserCollectionSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('screen_name',              basestring)
 
-            if self.isType('track'):
-                if len(self.artists) > 0:
-                    return 'Song by %s' % ', '.join(unicode(i['title']) for i in self.artists)
-                return 'Song'
+class FriendsSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('distance',                 int)
+        cls.addProperty('inclusive',                bool)
 
-            if self.isType('book'):
-                if len(self.authors) > 0:
-                    return '%s' % ', '.join(unicode(i['title']) for i in self.authors)
-                return 'Book'
+    def __init__(self):
+        GenericCollectionSlice.__init__(self)
+        self.distance = 2
+        self.inclusive = True
 
-            return self._genericSubtitle()
-
-        @property 
-        def category(self):
-            if self.isType('movie'):
-                return 'film'
-            if self.isType('track'):
-                return 'music'
-            if self.isType('book'):
-                return 'book'
-            return 'other'
-
-        @property 
-        def subcategory(self):
-            if self.isType('movie'):
-                return 'movie'
-            if self.isType('track'):
-                return 'song'
-            if self.isType('book'):
-                return 'book'
-            return 'other'
+class ConsumptionSlice(GenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('scope',                    basestring)
+        cls.addProperty('filter',                   basestring)
 
 
-    class SoftwareEntity(BasicEntity):
-        def setSchema(self):
-            BasicEntity.setSchema(self)
-            self.kind                           = SchemaElement(basestring, required=True, default='software')
-
-            self.genres                         = SchemaList(SchemaElement(basestring))
-            self.genres_source                  = SchemaElement(basestring)
-            self.genres_timestamp               = SchemaElement(datetime)
-
-            self.release_date                   = SchemaElement(datetime)
-            self.release_date_source            = SchemaElement(basestring)
-            self.release_date_timestamp         = SchemaElement(datetime)
-
-            self.screenshots                    = SchemaList(ImageSchema())
-            self.screenshots_source             = SchemaElement(basestring)
-            self.screenshots_timestamp          = SchemaElement(datetime)
-
-            self.authors                        = SchemaList(PersonEntityMini())
-            self.authors_source                 = SchemaElement(basestring)
-            self.authors_timestamp              = SchemaElement(datetime)
-            
-            self.publishers                     = SchemaList(BasicEntityMini())
-            self.publishers_source              = SchemaElement(basestring)
-            self.publishers_timestamp           = SchemaElement(datetime)
-
-            self.supported_devices              = SchemaList(SchemaElement(basestring))
-            self.supported_devices_source       = SchemaElement(basestring)
-            self.supported_devices_timestamp    = SchemaElement(datetime)
-            
-            self.platform                       = SchemaElement(basestring)
-            self.platform_source                = SchemaElement(basestring)
-            self.platform_timestamp             = SchemaElement(datetime)
-        
-        @property 
-        def subtitle(self):
-            if self.isType('app'):
-                suffix = ''
-                if len(self.authors) > 0:
-                    suffix = ' (%s)' % ', '.join(unicode(i['title']) for i in self.authors)
-                
-                return 'App%s' % suffix
-            elif 'video_game' in self.types.value:
-                suffix = ''
-                if self.platform:
-                    suffix = ' (%s)' % self.platform
-                
-                return 'Video Game%s' % suffix
-            
-            return self._genericSubtitle()
-        
-        @property 
-        def category(self):
-            return 'other'
-        
-        @property 
-        def subcategory(self):
-            if self.isType('app'):
-                return 'app'
-            elif 'video_game' in self.types.value:
-                return 'video_game'
-            
-            return 'other'
-
-    class EntitySuggested(Schema):
-        def setSchema(self):
-            self.coordinates                    = CoordinatesSchema()
-            self.category                       = SchemaElement(basestring)
-            self.subcategory                    = SchemaElement(basestring)
-            self.limit                          = SchemaElement(int, default=10)
-     
-
-    # ############# #
-    # Mini Entities #
-    # ############# #
-
-    class BasicEntityMini(BasicEntity):
-        def setSchema(self):
-            self.schema_version                 = SchemaElement(int, default=0)
-            self.entity_id                      = SchemaElement(basestring)
-            self.title                          = SchemaElement(basestring)
-            self.kind                           = SchemaElement(basestring, default='other')
-            self.types                          = SchemaList(SchemaElement(basestring))
-            self.sources                        = EntitySourcesSchema()
-            self.coordinates                    = CoordinatesSchema()
-            self.images                         = SchemaList(ImageSchema())
-
-    class PlaceEntityMini(BasicEntityMini):
-        def setSchema(self):
-            BasicEntityMini.setSchema(self)
-            self.kind                           = SchemaElement(basestring, default='place')
-
-    class PersonEntityMini(BasicEntityMini, PersonEntity):
-        def setSchema(self):
-            BasicEntityMini.setSchema(self)
-            self.kind                           = SchemaElement(basestring, default='person')
-
-    class MediaCollectionEntityMini(BasicEntityMini, MediaCollectionEntity):
-        def setSchema(self):
-            BasicEntityMini.setSchema(self)
-            self.kind                           = SchemaElement(basestring, default='media_collection')
-
-    class MediaItemEntityMini(BasicEntityMini, MediaItemEntity):
-        def setSchema(self):
-            BasicEntityMini.setSchema(self)
-            self.kind                           = SchemaElement(basestring, default='media_item')
-            self.length                         = SchemaElement(int)
-
-    class SoftwareEntityMini(BasicEntityMini, SoftwareEntity):
-        def setSchema(self):
-            BasicEntityMini.setSchema(self)
-            self.kind                           = SchemaElement(basestring, default='software')
 

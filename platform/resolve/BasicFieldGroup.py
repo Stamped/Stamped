@@ -41,8 +41,8 @@ class BasicFieldGroup(AFieldGroup):
     def isSet(self, entity):
         for field in self.__fields:
             v = self.getValue(entity, field)
-            # if isinstance(v, SchemaElement):
-            #     v = v.value 
+            if isinstance(v, Schema):
+                v = v.dataExport()
             if v is not None:
                 return True
         return False
@@ -64,10 +64,10 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__fields:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
-            # if isinstance(old_value, SchemaElement):
-            #     old_value = old_value.value
-            # if isinstance(new_value, SchemaElement):
-            #     new_value = new_value.value
+            if isinstance(old_value, Schema):
+                old_value = old_value.dataExport()
+            if isinstance(new_value, Schema):
+                new_value = new_value.dataExport()
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True
@@ -78,10 +78,10 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__decorations:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
-            # if isinstance(old_value, SchemaElement):
-            #     old_value = old_value.value
-            # if isinstance(new_value, SchemaElement):
-            #     new_value = new_value.value
+            if isinstance(old_value, Schema):
+                old_value = old_value.dataExport()
+            if isinstance(new_value, Schema):
+                new_value = new_value.dataExport()
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True
@@ -109,11 +109,6 @@ class BasicFieldGroup(AFieldGroup):
         cur = entity
         for p in path[:-1]:
             cur = cur[p]
-        # weird schema error work-around
-        # if isinstance(value, SchemaElement):
-        #     cur[path[-1]] = value.value
-        # else:
-        #     cur[path[-1]] = value
         cur[path[-1]] = value
 
     def addNameField(self):

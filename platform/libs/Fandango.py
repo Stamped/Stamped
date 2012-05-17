@@ -203,7 +203,7 @@ def main():
     
     for entity in results:
         from pprint import pprint
-        pprint(entity.value)
+        pprint(entity)
 
 if __name__ == '__main__':
     main()

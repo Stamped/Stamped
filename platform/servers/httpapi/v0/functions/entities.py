@@ -25,7 +25,7 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
     entity          = stampedAPI.addEntity(entity)
     entity          = _convertHTTPEntity(entity, authClientId)
     
-    return transformOutput(entity.exportSparse())
+    return transformOutput(entity.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityIdSearchId)
@@ -34,7 +34,7 @@ def show(request, authUserId, authClientId, http_schema, **kwargs):
     entity      = stampedAPI.getEntity(http_schema, authUserId)
     entity      = _convertHTTPEntity(entity, authClientId)
     
-    return transformOutput(entity.exportSparse())
+    return transformOutput(entity.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPEntityEdit)
 @require_http_methods(["POST"])
@@ -57,7 +57,7 @@ def update(request, authUserId, authClientId, http_schema, data, **kwargs):
     entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, data)
     entity = _convertHTTPEntity(entity, authClientId)
     
-    return transformOutput(entity.exportSparse())
+    return transformOutput(entity.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
@@ -66,7 +66,7 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
     entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
     entity = _convertHTTPEntity(entity, authClientId)
 
-    return transformOutput(entity.exportSparse())
+    return transformOutput(entity.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntitySearch, schema=EntitySearch)
@@ -81,7 +81,7 @@ def search(request, authUserId, schema, **kwargs):
     autosuggest = []
     for item in result:
         try:
-            item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+            item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
             autosuggest.append(item)
         except Exception as e:
             logs.warning('Error: %s\n%s' % (e, item[1]))
@@ -100,7 +100,7 @@ def nearby(request, authUserId, schema, **kwargs):
     
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
         autosuggest.append(item)
     
     return transformOutput(autosuggest)
@@ -110,7 +110,7 @@ def nearby(request, authUserId, schema, **kwargs):
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
-    convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).exportSparse()
+    convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).dataExport()
     
     for section in results:
         section['entities'] = map(convert, section['entities'])
@@ -124,7 +124,7 @@ def menu(request, authUserId, http_schema, **kwargs):
     menu        = stampedAPI.getMenu(http_schema.entity_id)
     http_menu   = HTTPMenu().importSchema(menu)
     
-    return transformOutput(http_menu.exportSparse())
+    return transformOutput(http_menu.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPStampedBySlice)
@@ -141,13 +141,13 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         result.fof.count        = data['fof_count']
 
         for stamp in data['all_preview']:
-            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.all.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
 
         for stamp in data['friends_preview']:
-            result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.friends.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
 
         for stamp in data['fof_preview']:
-            result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.fof.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
     
     elif http_schema.group == 'friends':
         requestSlice = http_schema.exportSchema(FriendsSlice())
@@ -156,7 +156,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         
         for stamp in stamps:
-            result.friends.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.friends.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
         if count is not None:
             result.friends.count = count
     
@@ -168,7 +168,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         
         for stamp in stamps:
-            result.fof.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.fof.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
         if count is not None:
             result.fof.count = count
     
@@ -177,11 +177,11 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
         
         for stamp in stamps:
-            result.all.stamps.append(HTTPStamp().importSchema(stamp).exportSparse())
+            result.all.stamps.append(HTTPStamp().importSchema(stamp).dataExport())
         if count is not None:
             result.all.count = count
     
-    return transformOutput(result.exportSparse())
+    return transformOutput(result.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPActionComplete)
@@ -190,8 +190,8 @@ def completeAction(request, http_schema, **kwargs):
     authUserId, authClientId = checkOAuth(request)
     
     #schema      = parseRequest(HTTPActionComplete(), request)
-    logs.info('http_schema.value: %s' % http_schema.value)
-    result      = stampedAPI.completeAction(authUserId, **http_schema.value)
+    logs.info('http_schema: %s' % http_schema)
+    result      = stampedAPI.completeAction(authUserId, **http_schema.dataExport())
 
     return transformOutput(result)
 

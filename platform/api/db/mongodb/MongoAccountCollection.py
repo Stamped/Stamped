@@ -123,19 +123,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         # Twitter
         if twitter is not None:
-            for k, v in twitter.value.iteritems():
+            for k, v in twitter.dataExport().iteritems():
                 if k in valid_twitter and v is not None:
                     fields['linked_accounts.twitter.%s' % k] = v
             
         # Facebook
         if facebook is not None:
-            for k, v in facebook.value.iteritems():
+            for k, v in facebook.dataExport().iteritems():
                 if k in valid_facebook and v is not None:
                     fields['linked_accounts.facebook.%s' % k] = v
 
         # Netflix
         if netflix is not None:
-            for k, v in netflix.value.iteritems():
+            for k, v in netflix.dataExport().iteritems():
                 if k in valid_netflix and v is not None:
                     fields['linked_accounts.netflix.%s' % k] = v
             

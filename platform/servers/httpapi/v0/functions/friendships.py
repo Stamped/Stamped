@@ -13,7 +13,7 @@ def create(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.addFriendship(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
@@ -22,7 +22,7 @@ def remove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeFriendship(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserRelationship)
@@ -59,7 +59,7 @@ def approve(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.approveFriendship(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
 
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
@@ -68,7 +68,7 @@ def blocksCreate(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.addBlock(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
@@ -94,7 +94,7 @@ def blocksRemove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeBlock(authUserId, http_schema)
     user = HTTPUser().importSchema(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEmail)
