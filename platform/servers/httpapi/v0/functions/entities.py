@@ -136,6 +136,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 
     if http_schema.group is None:
         stampedby = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+        logs.info('### STAMPED BY result:')
         logs.info(stampedby)
         result.importSchema(stampedby)
 
