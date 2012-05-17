@@ -74,13 +74,15 @@ def suggested(request, authUserId, schema, **kwargs):
 def consumption(request, authUserId, schema, **kwargs):
     stamps = None
     if schema.scope == 'you':
-        userCollSlice = schema.exportSchema(UserCollectionSlice())
-        userCollSlice['user_id'] = authUserId
+        userCollSlice = UserCollectionSlice()
+        userCollSlice.dataImport(schema.dataExport(), overflow=True)
+        userCollSlice.user_id = authUserId
         stamps = stampedAPI.getUserStamps(authUserId, userCollSlice)
     elif schema.scope == 'friends':
         stamps = stampedAPI.getInboxStamps(authUserId, schema)
     elif schema.scope == 'fof':
-        friendsSlice = schema.exportSchema(FriendsSlice())
+        friendsSlice = FriendsSlice()
+        friendsSlice.dataImport(schema.dataExport(), overflow=True)
         friendsSlice.distance = 2
         stamps = stampedAPI.getFriendsStamps(authUserId, friendsSlice)
     elif schema.scope == 'everyone':

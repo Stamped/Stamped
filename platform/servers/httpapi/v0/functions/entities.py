@@ -12,7 +12,7 @@ def _convertHTTPEntity(entity, authClientId=None):
     client = stampedAuth.getClientDetails(authClientId)
     
     if client.api_version < 1:
-        return HTTPEntity_stampedtest().importSchema(entity)
+        raise NotImplementedError
     else:
         return HTTPEntity().importEntity(entity, client)
 
@@ -36,28 +36,28 @@ def show(request, authUserId, authClientId, http_schema, **kwargs):
     
     return transformOutput(entity.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPEntityEdit)
-@require_http_methods(["POST"])
-def update(request, authUserId, authClientId, http_schema, data, **kwargs):
-    ### TEMP: Generate list of changes. Need to do something better eventually...
-    del(data['entity_id'])
+# @handleHTTPRequest(http_schema=HTTPEntityEdit)
+# @require_http_methods(["POST"])
+# def update(request, authUserId, authClientId, http_schema, data, **kwargs):
+#     ### TEMP: Generate list of changes. Need to do something better eventually...
+#     del(data['entity_id'])
     
-    for k, v in data.iteritems():
-        if v == '':
-            data[k] = None
-    if 'address' in data:
-        data['details.place.address'] = data['address']
-        del(data['address'])
-    if 'coordinates' in data and data['coordinates'] != None:
-        data['coordinates'] = {
-            'lat': data['coordinates'].split(',')[0],
-            'lng': data['coordinates'].split(',')[-1]
-        }
+#     for k, v in data.iteritems():
+#         if v == '':
+#             data[k] = None
+#     if 'address' in data:
+#         data['details.place.address'] = data['address']
+#         del(data['address'])
+#     if 'coordinates' in data and data['coordinates'] != None:
+#         data['coordinates'] = {
+#             'lat': data['coordinates'].split(',')[0],
+#             'lng': data['coordinates'].split(',')[-1]
+#         }
     
-    entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, data)
-    entity = _convertHTTPEntity(entity, authClientId)
+#     entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, data)
+#     entity = _convertHTTPEntity(entity, authClientId)
     
-    return transformOutput(entity.dataExport())
+#     return transformOutput(entity.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
@@ -69,7 +69,7 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySearch, schema=EntitySearch)
+@handleHTTPRequest(http_schema=HTTPEntitySearch, conversion=HTTPEntitySearch.exportEntitySearch)
 @require_http_methods(["GET"])
 def search(request, authUserId, schema, **kwargs):
     result = stampedAPI.searchEntities(authUserId=authUserId, 
@@ -81,7 +81,7 @@ def search(request, authUserId, schema, **kwargs):
     autosuggest = []
     for item in result:
         try:
-            item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
+            item = HTTPEntityAutosuggest().importEntity(item[0], item[1]).dataExport()
             autosuggest.append(item)
         except Exception as e:
             logs.warning('Error: %s\n%s' % (e, item[1]))
@@ -89,7 +89,7 @@ def search(request, authUserId, schema, **kwargs):
     return transformOutput(autosuggest)
 
 
-@handleHTTPRequest(http_schema=HTTPEntityNearby, schema=EntityNearby)
+@handleHTTPRequest(http_schema=HTTPEntityNearby, conversion=HTTPEntityNearby.exportEntityNearby)
 @require_http_methods(["GET"])
 def nearby(request, authUserId, schema, **kwargs):
     result      = stampedAPI.searchNearby(authUserId=authUserId, 
@@ -100,17 +100,17 @@ def nearby(request, authUserId, schema, **kwargs):
     
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
+        item = HTTPEntityAutosuggest().importEntity(item[0], item[1]).dataExport()
         autosuggest.append(item)
     
     return transformOutput(autosuggest)
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySuggested, schema=EntitySuggested)
+@handleHTTPRequest(http_schema=HTTPEntitySuggested, conversion=HTTPEntitySuggested.exportEntitySuggested)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
-    convert     = lambda e: HTTPEntityAutosuggest().importSchema(e).dataExport()
+    convert     = lambda e: HTTPEntityAutosuggest().importEntity(e).dataExport()
     
     for section in results:
         section['entities'] = map(convert, section['entities'])
@@ -122,7 +122,7 @@ def suggested(request, authUserId, schema, **kwargs):
 @require_http_methods(["GET"])
 def menu(request, authUserId, http_schema, **kwargs):
     menu        = stampedAPI.getMenu(http_schema.entity_id)
-    http_menu   = HTTPMenu().importSchema(menu)
+    http_menu   = HTTPMenu().importMenuSchema(menu)
     
     return transformOutput(http_menu.dataExport())
 

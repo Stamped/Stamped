@@ -553,29 +553,36 @@ class BasicEntity(Schema):
 
     @classmethod
     def setSchema(cls):
-        cls.addProperty('schema_version',         int, required=True) ### TO-DO: DEFAULT = 0
+        cls.addProperty('schema_version',                   int, required=True) 
 
-        cls.addProperty('entity_id',              basestring)
-        cls.addProperty('title',                  basestring)
-        cls.addProperty('kind',                   basestring, required=True) ### TO-DO: DEFAULT = 'other'
-        cls.addProperty('locale',                 basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('kind',                             basestring, required=True)
+        cls.addProperty('locale',                           basestring)
 
-        cls.addProperty('desc',                            basestring)
-        cls.addProperty('desc_source',                     basestring)
-        cls.addProperty('desc_timestamp',                  datetime)
+        cls.addProperty('desc',                             basestring)
+        cls.addProperty('desc_source',                      basestring)
+        cls.addProperty('desc_timestamp',                   datetime)
         
         cls.addPropertyList('types',                        basestring)
-        cls.addProperty('types_source',                    basestring)
-        cls.addProperty('types_timestamp',                 datetime)
+        cls.addProperty('types_source',                     basestring)
+        cls.addProperty('types_timestamp',                  datetime)
         
         cls.addNestedPropertyList('images',                 ImageSchema)
-        cls.addProperty('images_source',                   basestring)
-        cls.addProperty('images_timestamp',                datetime)
+        cls.addProperty('images_source',                    basestring)
+        cls.addProperty('images_timestamp',                 datetime)
         
-        cls.addNestedProperty('contact',                         EntityContactSchema)
-        cls.addNestedProperty('stats',                           EntityStatsSchema)
-        cls.addNestedProperty('sources',                         EntitySourcesSchema)
-        cls.addNestedProperty('timestamp',                 TimestampSchema)
+        cls.addNestedProperty('contact',                    EntityContactSchema)
+        cls.addNestedProperty('stats',                      EntityStatsSchema)
+        cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
+        cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.schema_version = 0
+        self.kind = 'other'
+        self.sources = EntitySourcesSchema()
+        self.timestamp = TimestampSchema()
     
     @property 
     def subtitle(self):
@@ -782,7 +789,7 @@ class PlaceEntity(BasicEntity):
         cls.addProperty('alcohol_flag_timestamp',           datetime)
         
     def __init__(self):
-        BasicMediaEntity.__init__(self)
+        BasicEntity.__init__(self)
         self.kind = 'place'
 
     def formatAddress(self, extendStreet=False, breakLines=False):
@@ -892,7 +899,7 @@ class PersonEntity(BasicEntity):
         cls.addProperty('books_timestamp',                  datetime)
         
     def __init__(self):
-        BasicMediaEntity.__init__(self)
+        BasicEntity.__init__(self)
         self.kind = 'person'
 
     @property 
@@ -1108,7 +1115,7 @@ class SoftwareEntity(BasicEntity):
         cls.addProperty('platform_timestamp',               datetime)
 
     def __init__(self):
-        BasicMediaEntity.__init__(self)
+        BasicEntity.__init__(self)
         self.kind = 'software'
     
     @property 
@@ -1547,5 +1554,17 @@ class ConsumptionSlice(GenericCollectionSlice):
         cls.addProperty('scope',                    basestring)
         cls.addProperty('filter',                   basestring)
 
+class EntitySearch(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('q',                        basestring, required=True)
+        cls.addNestedProperty('coordinates',        CoordinatesSchema)
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addProperty('local',                    bool)
+        cls.addProperty('page',                     int)
 
+    def __init__(self):
+        Schema.__init__(self)
+        self.page = 0
 

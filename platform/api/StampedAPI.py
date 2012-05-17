@@ -1005,7 +1005,9 @@ class StampedAPI(AStampedAPI):
         if user.user_id == authUserId:
             raise StampedIllegalActionError("Illegal friendship: you can't follow yourself!")
         
-        friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+        friendship              = Friendship()
+        friendship.user_id      = authUserId 
+        friendship.friend_id    = user.user_id
         
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
@@ -1053,8 +1055,10 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
-        user       = self._getUserFromIdOrScreenName(userRequest)
-        friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+        user                    = self._getUserFromIdOrScreenName(userRequest)
+        friendship              = Friendship()
+        friendship.user_id      = authUserId
+        friendship.friend_id    = user.user_id
         
         # Check if friendship doesn't exist
         if self._friendshipDB.checkFriendship(friendship) == False:
@@ -1142,8 +1146,13 @@ class StampedAPI(AStampedAPI):
     def addBlock(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
-        friendship        = Friendship(user_id=authUserId, friend_id=user.user_id)
-        reverseFriendship = Friendship(user_id=user.user_id, friend_id=authUserId)
+        friendship                      = Friendship()
+        friendship.user_id              = authUserId 
+        friendship.friend_id            = user.user_id
+
+        reverseFriendship               = Friendship()
+        reverseFriendship.user_id       = user.user_id
+        reverseFriendship.friend_id     = authUserId
         
         # Check if block already exists
         if self._friendshipDB.checkBlock(friendship) == True:
@@ -1161,8 +1170,10 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def checkBlock(self, authUserId, userRequest):
-        user       = self._getUserFromIdOrScreenName(userRequest)
-        friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+        user                    = self._getUserFromIdOrScreenName(userRequest)
+        friendship              = Friendship()
+        friendship.user_id      = authUserId 
+        friendship.friend_id    = user.user_id
         
         if self._friendshipDB.checkBlock(friendship):
             return True
@@ -1175,8 +1186,10 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeBlock(self, authUserId, userRequest):
-        user       = self._getUserFromIdOrScreenName(userRequest)
-        friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+        user                    = self._getUserFromIdOrScreenName(userRequest)
+        friendship              = Friendship()
+        friendship.user_id      = authUserId 
+        friendship.friend_id    = user.user_id
         
         # Check if block already exists
         if self._friendshipDB.checkBlock(friendship) == False:

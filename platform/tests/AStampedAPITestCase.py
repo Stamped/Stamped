@@ -12,7 +12,7 @@ import atexit, os, json, mimetools, sys, urllib, urllib2
 from pprint           import pprint
 from StampedTestUtils import *
 
-DEFAULT_CLIENT_ID       = "stampedtest"
+DEFAULT_CLIENT_ID       = "iphone8"
 CLIENT_SECRETS  = {
     'stampedtest': 'august1ftw',
     'iphone8': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',

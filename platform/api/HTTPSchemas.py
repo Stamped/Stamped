@@ -1855,7 +1855,8 @@ class HTTPEntitySearch(Schema):
 
     def exportEntitySearch(self):
         entSearch = EntitySearch().dataImport(self.dataExport(), overflow=True)
-        entSearch.coordinates = _coordinatesFlatToDict(self.coordinates)
+        if self.coordinates is not None:
+            entSearch.coordinates = _coordinatesFlatToDict(self.coordinates)
         return entSearch
 
 #        def exportSchema(self, schema):
