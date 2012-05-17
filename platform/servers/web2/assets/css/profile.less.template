@@ -78,7 +78,7 @@
         @mask-image: url(/assets/img/stamped_logo_mask.png);
         
         -webkit-mask: @mask-image no-repeat;
-        -webkit-mask-size: 195px 195px;
+        -webkit-mask-size: 100% 100%;
         -moz-mask: @mask-image no-repeat;
         -o-mask: @mask-image no-repeat;
         mask: @mask-image no-repeat;

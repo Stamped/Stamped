@@ -2828,7 +2828,7 @@ class StampedAPI(AStampedAPI):
         
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
-
+        
         if len(stampData) >= limit and len(stamps) < limit:
             logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
         

@@ -170,16 +170,22 @@ def getSimplifiedTitle(title):
 
 def deriveSubcategoriesFromCategory(category):
     result = set()
+    
     for k, v in subcategories.iteritems():
-        if v == category:
+        if v == category or (category == 'place' and (v == 'food')):
             result.add(k)
     return result
 
 def deriveKindFromCategory(category):
     result = set()
-    for k, v in subcategories.iteritems():
-        if v == category:
-            result.add(deriveKindFromSubcategory(k))
+    
+    if category == 'place':
+        result.add('place')
+    else:
+        for k, v in subcategories.iteritems():
+            if v == category:
+                result.add(deriveKindFromSubcategory(k))
+    
     return result
 
 def deriveKindFromSubcategory(subcategory):
@@ -244,9 +250,12 @@ def deriveKindFromSubcategory(subcategory):
 
 def deriveTypesFromCategory(category):
     result = set()
+    
     for k, v in subcategories.iteritems():
-        if v == category:
+        # TODO TODO TODO: this place category handling is not correct; just temporary
+        if v == category or (category == 'place' and (v == 'food')):
             result = result.union(deriveTypesFromSubcategories([k]))
+    
     return result
 
 def deriveTypesFromSubcategories(subcategories):
@@ -254,10 +263,10 @@ def deriveTypesFromSubcategories(subcategories):
 
     if 'song' in subcategories:
         result.add('track')
-
+    
     for item in types.intersection(subcategories):
         result.add(item)
-
+    
     return result 
 
 def deriveSubcategoryFromTypes(types):
