@@ -21,9 +21,12 @@ def show(request, authUserId, http_schema, **kwargs):
                    http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.getUsers(http_schema.user_ids.split(','), 
-                                http_schema.screen_names.split(','), 
-                                authUserId)
+    if http_schema.user_ids is not None:
+        users = stampedAPI.getUsers(http_schema.user_ids.split(','), None, authUserId)
+    elif http_schema.screen_names is not None:
+        users = stampedAPI.getUsers(None, http_schema.screen_names.split(','), authUserId)
+    else:
+        raise Exception("Field missing")
     
     output = []
     for user in users:
@@ -57,12 +60,12 @@ def suggested(request, authUserId, schema, **kwargs):
     
     if schema.personalized:
         for user, explanations in results:
-            user2 = HTTPSuggestedUser().importSchema(user).dataExport()
+            user2 = HTTPSuggestedUser().importUser(user).dataExport()
             user2.explanations = explanations
             output.append(user2)
     else:
         for user in results:
-            user2 = HTTPSuggestedUser().importSchema(user).dataExport()
+            user2 = HTTPSuggestedUser().importUser(user).dataExport()
             output.append(user2)
     
     return transformOutput(output)
@@ -94,7 +97,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).dataExport())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -125,7 +128,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).dataExport())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -157,7 +160,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).dataExport())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -187,7 +190,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).dataExport())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 

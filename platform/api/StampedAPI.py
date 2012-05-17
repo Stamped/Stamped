@@ -980,7 +980,7 @@ class StampedAPI(AStampedAPI):
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
-            return sorted(users, key=lambda k: suggested[k['screen_name']])
+            return sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
     
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):

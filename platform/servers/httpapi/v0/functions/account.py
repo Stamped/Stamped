@@ -127,10 +127,10 @@ def check(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccounts)
 @require_http_methods(["POST"])
 def linked_accounts(request, authUserId, http_schema, **kwargs):
-    linked       = http_schema.exportSchema(LinkedAccounts())
-    twitterAuth  = http_schema.exportSchema(TwitterAuthSchema())
-    facebookAuth = http_schema.exportSchema(FacebookAuthSchema())
-    netflixAuth = http_schema.exportSchema(NetflixAuthSchema())
+    linked          = http_schema.exportLinkedAccounts()
+    twitterAuth     = http_schema.exportTwitterAuthSchema()
+    facebookAuth    = http_schema.exportFacebookAuthSchema()
+    netflixAuth     = http_schema.exportNetflixAuthSchema()
     
     data = {
         'twitter'       : linked.twitter, 
