@@ -10,4 +10,15 @@
 
 @implementation STImageUpload
 
+@synthesize tempImageURL = tempImageURL_;
+@synthesize tempImageHeight = tempImageHeight_;
+@synthesize tempImageWidth = tempImageWidth_;
+
+- (NSMutableDictionary*)asDictionaryParams {
+  return [NSMutableDictionary dictionary];
+}
+
+- (void)importDictionaryParams:(NSDictionary*)params {
+}
+
 @end

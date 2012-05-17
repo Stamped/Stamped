@@ -11,6 +11,8 @@
 
 @interface STImageUpload : STStampedParameter
 
-//TODO
+@property (nonatomic, readwrite, copy) NSString* tempImageURL;
+@property (nonatomic, readwrite, copy) NSNumber* tempImageWidth;
+@property (nonatomic, readwrite, copy) NSNumber* tempImageHeight;
 
 @end
