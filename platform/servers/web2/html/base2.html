@@ -1,5 +1,12 @@
 <!doctype html>
+
+<!--[if lte IE 9]>
+<html class="ie" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
 <html lang="en">
+<!--<![endif]-->
+
     {% block pre_head %}
     <head>
         {% endblock pre_head %}
@@ -39,7 +46,7 @@
     {% endblock post_head %}
     
     {% block pre_body %}
-    <body>
+    <body {% if body_classes %}class="{{ body_classes }}"{% endif %}>
         {% endblock pre_body %}
         
         {% block pre_header %}

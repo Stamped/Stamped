@@ -4,7 +4,7 @@
  */
 
 /*jslint plusplus: false */
-/*global jQuery, $, Backbone, Mustache, _, Persist */
+/*global debugger, jQuery, $, Backbone, Handlebars, Persist */
 
 if (typeof(StampedClient) == "undefined") {
     
@@ -80,33 +80,20 @@ if (typeof(StampedClient) == "undefined") {
         
         /* STAMPS */
         
-        this.get_user_stamps_by_id = function(user_id) {
+        this.get_user_stamps_by_id = function(user_id, params) {
             // TODO: support genericslice params
             // TODO: support HTTPGenericSlice params as schema which may be validated
+            if (!_is_defined(params)) { params = {} }
+            params['user_id'] = user_id;
             
-            //return that.get_user_stamps({ 'user_id' : user_id });
-            return _get("/collections/user.json", {
-                'user_id' : user_id
-            }).pipe(function (data) {
-                return new Stamps(data);
-            });
+            return _get_user_stamps(params);
         };
         
-        this.get_user_stamps_by_screen_name = function(screen_name) {
-            return _get("/collections/user.json", {
-                'screen_name' : screen_name
-            }).pipe(function (data) {
-                return new Stamps(data);
-            });
-        };
-        
-        this.get_user_stamps = function(options) {
-            // TODO: validate options
+        this.get_user_stamps_by_screen_name = function(screen_name, params) {
+            if (!_is_defined(params)) { params = {} }
+            params['screen_name'] = screen_name;
             
-            return _get("/collections/user.json", options)
-                .pipe(function (data) {
-                    return new Stamps(data);
-                });
+            return _get_user_stamps(params);
         };
         
         /* ------------------------------------------------------------------
@@ -150,7 +137,11 @@ if (typeof(StampedClient) == "undefined") {
                 data        : params, 
                 crossDomain : true, 
             }).pipe(function (data) {
-                return $.parseJSON(data);
+                if (typeof(data) === 'string') {
+                    return $.parseJSON(data);
+                } else {
+                    return data;
+                }
             });
         };
         
@@ -237,6 +228,15 @@ if (typeof(StampedClient) == "undefined") {
             }
             
             _store[key] = value;
+        };
+        
+        var _get_user_stamps = function(params) {
+            // TODO: validate options
+            
+            return _get("/collections/user.json", params)
+                .pipe(function (data) {
+                    return new Stamps(data);
+                });
         };
         
         /* ------------------------------------------------------------------
@@ -801,13 +801,16 @@ if (typeof(StampedClient) == "undefined") {
         
         var partial_templates = {}
         
-        $(".mustache-template").each(function (i) {
-            partial_templates[$(this).attr('id')] = $(this).html();
+        $(".handlebars-template").each(function (i) {
+            var key = $(this).attr('id');
+            var val = $(this).html();
+            
+            partial_templates[key] = val;
         });
         
         /**
          * AStampedView is the superclass of all stamped views, combining the 
-         * benefits of Backbone.View with the ability to render Mustache 
+         * benefits of Backbone.View with the ability to render Handlebars 
          * templates.
          * 
          * NOTE: all AStampedView subclasses must override _get_template and 
@@ -823,14 +826,15 @@ if (typeof(StampedClient) == "undefined") {
             
             _render_template : function(view) {
                 if (this.__template === undefined) {
-                    this.__template = this._get_template();
+                    this.__template = Handlebars.compile(this._get_template());
                 }
                 
                 if (this.__template === undefined || this.__template === null) {
                     _throw("stamped render error: invaild template");
                 }
                 
-                return Mustache.render(this.__template, view, partial_templates);
+                return this.__template(view, { partials : partial_templates });
+                //return Mustache.render(this.__template, view, partial_templates);
             }, 
             
             _load_template  : function(template_name) {
@@ -847,7 +851,7 @@ if (typeof(StampedClient) == "undefined") {
         // TODO: make this private
         this.StampsGalleryView = AStampedView.extend({
             _get_template   : function() {
-                return this._load_template('stamp-gallery');
+                return this._load_template('stamp-gallery2');
             }, 
             
             _get_context    : function() {
