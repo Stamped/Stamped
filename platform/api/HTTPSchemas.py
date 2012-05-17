@@ -356,6 +356,12 @@ class HTTPImageSchema(Schema):
         cls.addProperty('caption',                  basestring)
         cls.addNestedProperty('action',             HTTPAction)
 
+class HTTPTextReference(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addPropertyList('indices',          int)
+        cls.addNestedProperty('action',         HTTPAction)
+
 
 # ####### #
 # Account #
@@ -758,7 +764,7 @@ class HTTPEmail(Schema):
 
 class HTTPClientLogsEntry(Schema):
     @classmethod
-    def setSchema(self):
+    def setSchema(cls):
         cls.addProperty('key',          basestring, required=True)
         cls.addProperty('value',        basestring)
 
@@ -800,6 +806,108 @@ def _addImages(dest, images):
                 newsize = HTTPImageSizeSchema({'url': _cleanImageURL(size.url) })
                 newimg.sizes.append(newsize)
         dest.images.append(newimg)
+
+
+class HTTPEntityAction(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('action',         HTTPAction, required=True)
+        cls.addProperty('name',                 basestring, required=True)
+        cls.addProperty('icon',                 basestring)
+
+class HTTPEntityMetadataItem(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name,',                basestring, required=True)
+        cls.addProperty('value',                basestring, required=True)
+        cls.addProperty('key',                  basestring)
+        cls.addNestedProperty('action',         HTTPAction)
+        cls.addProperty('icon',                 basestring)
+        cls.addProperty('extended',             bool)
+        cls.addProperty('optional',             bool)
+
+class HTTPEntityGallery(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('images',     HTTPImageSchema, required=True)
+        cls.addProperty('name',                 basestring)
+        cls.addProperty('layout',               basestring) # 'list' or None
+
+class HTTPEntityPlaylistItem(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',            basestring)
+        cls.addProperty('name',                 basestring, required=True)
+        cls.addNestedProperty('action',         HTTPAction)
+        cls.addProperty('length',               int)
+        cls.addProperty('icon',                 basestring)
+
+class HTTPEntityPlaylist(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
+        cls.addProperty('name',                 basestring)
+
+class HTTPEntityStampedBy(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('friends',              int, required=True)
+        cls.addProperty('friends_of_friends',   int)
+        cls.addProperty('everyone',             int)
+
+# Related
+
+class HTTPEntityMini(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',            basestring, required=True)
+        cls.addProperty('title',                basestring, required=True)
+        cls.addProperty('subtitle',             basestring, required=True)
+        cls.addProperty('category',             basestring, required=True)
+        cls.addProperty('subcategory',          basestring, required=True)
+        cls.addProperty('coordinates',          basestring)
+        cls.addNestedPropertyList('images',     HTTPImageSchema)
+
+    def importEntity(self, entity):
+        self.entity_id              = entity.entity_id
+        self.title                  = entity.title
+        self.subtitle               = entity.subtitle
+        self.category               = entity.category
+        self.subcategory            = entity.subcategory
+        _addImages(self, entity.images)
+
+
+        try:
+            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
+        except AttributeError:
+            pass
+
+
+#        def importSchema(self, schema):
+#            if isinstance(schema, BasicEntity):
+#                self.entity_id          = schema.entity_id
+#                self.title              = schema.title
+#                self.subtitle           = schema.subtitle
+#                self.category           = schema.category
+#                self.subcategory        = schema.subcategory
+#                _addImages(self, schema.images)
+#
+#
+#                try:
+#                    if 'coordinates' in schema.value:
+#                        self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
+#                except Exception:
+#                    pass
+#            else:
+#                raise NotImplementedError(type(schema))
+#            return self
+
+class HTTPEntityRelated(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('data',       HTTPEntityMini, required=True)
+        cls.addProperty('title',                basestring)
+
 
 class HTTPEntity(Schema):
     @classmethod
@@ -1630,106 +1738,6 @@ class HTTPEntity(Schema):
 
 
 
-class HTTPEntityAction(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedProperty('action',         HTTPAction, required=True)
-        cls.addProperty('name',                 basestring, required=True)
-        cls.addProperty('icon',                 basestring)
-
-class HTTPEntityMetadataItem(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('name,',                basestring, required=True)
-        cls.addProperty('value',                basestring, required=True)
-        cls.addProperty('key',                  basestring)
-        cls.addNestedProperty('action',         HTTPAction)
-        cls.addProperty('icon',                 basestring)
-        cls.addProperty('extended',             bool)
-        cls.addProperty('optional',             bool)
-
-class HTTPEntityGallery(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('images',     HTTPImageSchema, required=True)
-        cls.addProperty('name',                 basestring)
-        cls.addProperty('layout',               basestring) # 'list' or None
-
-class HTTPEntityPlaylist(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
-        cls.addProperty('name',                 basestring)
-
-class HTTPEntityPlaylistItem(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',            basestring)
-        cls.addProperty('name',                 basestring, required=True)
-        cls.addNestedProperty('action',         HTTPAction)
-        cls.addProperty('length',               int)
-        cls.addProperty('icon',                 basestring)
-
-class HTTPEntityStampedBy(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('friends',              int, required=True)
-        cls.addProperty('friends_of_friends',   int)
-        cls.addProperty('everyone',             int)
-
-class HTTPEntityRelated(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('data',       HTTPEntityMini, required=True)
-        cls.addProperty('title',                basestring)
-
-# Related
-
-class HTTPEntityMini(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',            basestring, required=True)
-        cls.addProperty('title',                basestring, required=True)
-        cls.addProperty('subtitle',             basestring, required=True)
-        cls.addProperty('category',             basestring, required=True)
-        cls.addProperty('subcategory',          basestring, required=True)
-        cls.addProperty('coordinates',          basestring)
-        cls.addNestedPropertyList('images',     HTTPImageSchema)
-
-    def importEntity(self, entity):
-        self.entity_id              = entity.entity_id
-        self.title                  = entity.title
-        self.subtitle               = entity.subtitle
-        self.category               = entity.category
-        self.subcategory            = entity.subcategory
-        _addImages(self, entity.images)
-
-
-        try:
-            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
-        except AttributeError:
-            pass
-
-
-#        def importSchema(self, schema):
-#            if isinstance(schema, BasicEntity):
-#                self.entity_id          = schema.entity_id
-#                self.title              = schema.title
-#                self.subtitle           = schema.subtitle
-#                self.category           = schema.category
-#                self.subcategory        = schema.subcategory
-#                _addImages(self, schema.images)
-#
-#
-#                try:
-#                    if 'coordinates' in schema.value:
-#                        self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
-#                except Exception:
-#                    pass
-#            else:
-#                raise NotImplementedError(type(schema))
-#            return self
-
 
 class HTTPEntityNew(Schema):
     @classmethod
@@ -1995,13 +2003,36 @@ class HTTPStampContent(Schema):
         cls.addProperty('created',                      basestring)
         cls.addProperty('modified',                     basestring)
 
+class HTTPBadge(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('genre',                basestring, required=True)
+
+class HTTPStampMini(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
+        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addNestedPropertyList('contents',   HTTPStampContent)
+        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('badges',     HTTPBadge)
+        cls.addProperty('via',                  basestring)
+        cls.addProperty('url',                  basestring)
+        cls.addProperty('created',              basestring)
+        cls.addProperty('modified',             basestring)
+        cls.addProperty('stamped',              basestring)
+        cls.addProperty('num_comments',         int)
+        cls.addProperty('num_likes',            int)
+
 class HTTPStampPreviews(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedPropertyList('likes',              HTTPUserMini)
         cls.addNestedPropertyList('todos',              HTTPUserMini)
         cls.addNestedPropertyList('credits',            HTTPStampMini)
-        cls.addNestedPropertyList('comments',           HTTPComment)
+        # cls.addNestedPropertyList('comments',           HTTPComment)
 
 class HTTPStamp(Schema):
     @classmethod
@@ -2235,33 +2266,10 @@ class HTTPStamp(Schema):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 #            return HTTPStampMini(self.value, overflow=True)
 
-class HTTPStampMini(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        cls.addNestedProperty('user',           HTTPUserMinid, required=True)
-        cls.addNestedPropertyList('contents',   HTTPStampContent)
-        cls.addNestedPropertyList('credit',     CreditSchema)
-        cls.addNestedPropertyList('badges',     HTTPBadge)
-        cls.addProperty('via',                  basestring)
-        cls.addProperty('url',                  basestring)
-        cls.addProperty('created',              basestring)
-        cls.addProperty('modified',             basestring)
-        cls.addProperty('stamped',              basestring)
-        cls.addProperty('num_comments',         int)
-        cls.addProperty('num_likes',            int)
-
-class HTTPBadge(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('genre',                basestring, required=True)
-
 class HTTPImageUpload(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('image',                basestring, normalize=False)
+        cls.addProperty('image',                basestring)
 
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',       basestring)
@@ -2271,8 +2279,6 @@ class HTTPImageUpload(Schema):
 class HTTPStampNew(HTTPImageUpload):
     @classmethod
     def setSchema(cls):
-        HTTPImageUpload.setSchema(cls)
-
         cls.addProperty('entity_id',            basestring)
         cls.addProperty('search_id',            basestring)
         cls.addProperty('blurb',                basestring)
@@ -2358,8 +2364,6 @@ class HTTPGenericSlice(Schema):
 class HTTPGenericCollectionSlice(HTTPGenericSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericSlice.setSchema(cls)
-
         # filtering
         cls.addProperty('query',                basestring)
         cls.addProperty('category',             basestring)
@@ -2410,8 +2414,6 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
 class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericCollectionSlice.setSchema(cls)
-
         cls.addProperty('user_id',          basestring)
         cls.addProperty('screen_name',      basestring)
 
@@ -2422,8 +2424,6 @@ class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
 class HTTPFriendsSlice(HTTPGenericCollectionSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericCollectionSlice.setSchema(cls)
-
         cls.addProperty('distance',         int)
         cls.addProperty('inclusive',        bool)
 
@@ -2434,8 +2434,6 @@ class HTTPFriendsSlice(HTTPGenericCollectionSlice):
 class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericcollectionSlice.setSchema(cls)
-
         cls.addProperty('scope',            basestring) # you, friends, fof, everyone
 
     def exportConsumptionSlice(self):
@@ -2445,8 +2443,6 @@ class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
 class HTTPStampedBySlice(HTTPGenericCollectionSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericCollectionSlice.setSchema(cls)
-
         cls.addProperty('entity_id',        basestring, required=True)
         cls.addProperty('group',            basestring)
 
@@ -2458,18 +2454,18 @@ class HTTPStampedBySlice(HTTPGenericCollectionSlice):
         data = self._convertData(self.dataExport())
         return GenericCollectionSlice().dataImport(data, overflow=True)
 
+class HTTPStampedByGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('count',            int)
+        cls.addNestedPropertyList('stamps', HTTPStamp)
+
 class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',    HTTPStampedByGroup)
         cls.addNestedProperty('fof',        HTTPStampedByGroup)
         cls.addNestedProperty('all',        HTTPStampedByGroup)
-
-class HTTPStampedByGroup(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('count',            int)
-        cls.addNestedPropertyList('stamps', HTTPStamp)
 
 class HTTPStampImage(Schema):
     @classmethod
@@ -2525,8 +2521,6 @@ class HTTPCommentId(Schema):
 class HTTPCommentSlice(HTTPGenericSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericSlice.setSchema(self)
-
         cls.addProperty('stamp_id',             basestring, required=True)
 
 
@@ -2990,13 +2984,6 @@ class HTTPActivity(Schema):
 
         return self
 
-
-class HTTPTextReference(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addPropertyList('indices',          int)
-        cls.addNestedProperty('action',         HTTPAction)
-
 class HTTPActivitySlice(HTTPGenericSlice):
     @classmethod
     def setSchema(cls):
@@ -3098,9 +3085,9 @@ class HTTPHours(Schema):
         cls.addProperty('close',                    basestring)
         cls.addProperty('desc',                     basestring)
 
-    # ########## #
-    # Deprecated #
-    # ########## #
+        # ########## #
+        # Deprecated #
+        # ########## #
 
 #    class HTTPEntity_stampedtest(Schema):
 #        def setSchema(self):
@@ -3310,3 +3297,5 @@ class HTTPHours(Schema):
 #
 #            return url
 #
+
+
