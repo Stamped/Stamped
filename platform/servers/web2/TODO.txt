@@ -42,6 +42,7 @@
 
 
 TODO:
+    * separate # STAMPS header from user.num_stamps
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
     * experiment with making innerbg fixed for parallax
     * experiment with static map styling

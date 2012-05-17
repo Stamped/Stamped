@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg width="1" height="1" version="1.1" 
+     xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <filter id="gaussian_blur_0"> <feGaussianBlur in="SourceGraphic" stdDeviation="0" /> </filter>
+        <filter id="gaussian_blur_1"> <feGaussianBlur in="SourceGraphic" stdDeviation="1" /> </filter>
+        <filter id="gaussian_blur_2"> <feGaussianBlur in="SourceGraphic" stdDeviation="2" /> </filter>
+        <filter id="gaussian_blur_3"> <feGaussianBlur in="SourceGraphic" stdDeviation="3" /> </filter>
+        <filter id="gaussian_blur_4"> <feGaussianBlur in="SourceGraphic" stdDeviation="4" /> </filter>
+        <filter id="gaussian_blur_5"> <feGaussianBlur in="SourceGraphic" stdDeviation="5" /> </filter>
+        <filter id="gaussian_blur_6"> <feGaussianBlur in="SourceGraphic" stdDeviation="6" /> </filter>
+        <filter id="gaussian_blur_7"> <feGaussianBlur in="SourceGraphic" stdDeviation="7" /> </filter>
+        <filter id="gaussian_blur_8"> <feGaussianBlur in="SourceGraphic" stdDeviation="8" /> </filter>
+        <filter id="gaussian_blur_9"> <feGaussianBlur in="SourceGraphic" stdDeviation="9" /> </filter>
+        <filter id="gaussian_blur_10"> <feGaussianBlur in="SourceGraphic" stdDeviation="10" /> </filter>
+        <filter id="gaussian_blur_11"> <feGaussianBlur in="SourceGraphic" stdDeviation="11" /> </filter>
+        <filter id="gaussian_blur_12"> <feGaussianBlur in="SourceGraphic" stdDeviation="12" /> </filter>
+        <filter id="gaussian_blur_13"> <feGaussianBlur in="SourceGraphic" stdDeviation="13" /> </filter>
+        <filter id="gaussian_blur_14"> <feGaussianBlur in="SourceGraphic" stdDeviation="14" /> </filter>
+        <filter id="gaussian_blur_15"> <feGaussianBlur in="SourceGraphic" stdDeviation="15" /> </filter>
+        <filter id="gaussian_blur_16"> <feGaussianBlur in="SourceGraphic" stdDeviation="16" /> </filter>
+        <filter id="gaussian_blur_17"> <feGaussianBlur in="SourceGraphic" stdDeviation="17" /> </filter>
+        <filter id="gaussian_blur_18"> <feGaussianBlur in="SourceGraphic" stdDeviation="18" /> </filter>
+        <filter id="gaussian_blur_19"> <feGaussianBlur in="SourceGraphic" stdDeviation="19" /> </filter>
+        <filter id="gaussian_blur_20"> <feGaussianBlur in="SourceGraphic" stdDeviation="20" /> </filter>
+        <filter id="gaussian_blur_21"> <feGaussianBlur in="SourceGraphic" stdDeviation="21" /> </filter>
+        <filter id="gaussian_blur_22"> <feGaussianBlur in="SourceGraphic" stdDeviation="22" /> </filter>
+        <filter id="gaussian_blur_23"> <feGaussianBlur in="SourceGraphic" stdDeviation="23" /> </filter>
+        <filter id="gaussian_blur_24"> <feGaussianBlur in="SourceGraphic" stdDeviation="24" /> </filter>
+        <filter id="gaussian_blur_25"> <feGaussianBlur in="SourceGraphic" stdDeviation="25" /> </filter>
+        <filter id="gaussian_blur_26"> <feGaussianBlur in="SourceGraphic" stdDeviation="26" /> </filter>
+        <filter id="gaussian_blur_27"> <feGaussianBlur in="SourceGraphic" stdDeviation="27" /> </filter>
+        <filter id="gaussian_blur_28"> <feGaussianBlur in="SourceGraphic" stdDeviation="28" /> </filter>
+        <filter id="gaussian_blur_29"> <feGaussianBlur in="SourceGraphic" stdDeviation="29" /> </filter>
+        <filter id="gaussian_blur_30"> <feGaussianBlur in="SourceGraphic" stdDeviation="30" /> </filter>
+        <filter id="gaussian_blur_31"> <feGaussianBlur in="SourceGraphic" stdDeviation="31" /> </filter>
+        <filter id="gaussian_blur_32"> <feGaussianBlur in="SourceGraphic" stdDeviation="32" /> </filter>
+        <filter id="gaussian_blur_48"> <feGaussianBlur in="SourceGraphic" stdDeviation="48" /> </filter>
+        <filter id="gaussian_blur_64"> <feGaussianBlur in="SourceGraphic" stdDeviation="64" /> </filter>
+        <filter id="gaussian_blur_96"> <feGaussianBlur in="SourceGraphic" stdDeviation="96" /> </filter>
+        <filter id="gaussian_blur_128"> <feGaussianBlur in="SourceGraphic" stdDeviation="128" /> </filter>
+    </defs>
+</svg>
+

@@ -6,11 +6,19 @@
     {{ block.super }}
     
     <div id="main-content" class="fixedwidth">
-        TEST1
+        <div>
+            TEST1
+            
+            {% with coordinates="40.714728,-73.998672" %}
+                {% handlebars_template "static-map-small" %}
+            {% endwith %}
+        </div>
         
-        {% with coordinates=40.714728,-73.998672 %}
-            {% handlebars_template "static-map-small" %}
-        {% endwith %}
+        <div>
+            TEST2
+            
+            <img class="blur_16" src="http://drublic.de/blog/wp-content/uploads/2011/12/Unsch%C3%A4rfe-via-CSS-Filter-SVG-Mozilla-Firefox_2011-12-18_21-18-59.png" />
+        </div>
         
         <!--
         <div class="static-map-small">

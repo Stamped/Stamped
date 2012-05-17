@@ -3,6 +3,9 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+/*jslint plusplus: false */
+/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, Backbone, Handlebars, Persist */
+
 (function() {
     $(document).ready(function() {
         // ---------------------------------------------------------------------
@@ -19,6 +22,8 @@
                     
                     $(elems).slideToggle('fast', function() { });
                 });
+                
+                return false;
             });
         });
         
@@ -29,7 +34,7 @@
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
-            } else if ('?' in href) {
+            } else if (href.indexof('?') !== -1) {
                 href = href + "&" + limit;
             } else {
                 href = href + "?" + limit;
@@ -38,173 +43,157 @@
             $(this).attr('href', href);
         });
         
-        // ---------------------------------------------------------------------
-        // initialize stamp-gallery isotope / masonry layout and infinite scroll
-        // ---------------------------------------------------------------------
-        
-        var $container = $(".stamp-gallery .stamps");
         // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();
         
-        $container.isotope({
-            itemSelector    : '.stamp-gallery-item', 
-            layoutMode      : "straightDown", 
-        });
+        // ---------------------------------------------------------------------
+        // initialize stamp-gallery isotope / masonry layout and infinite scroll
+        // ---------------------------------------------------------------------
         
-        // TODO: customize loading image
-        $container.infinitescroll({
-            debug           : STAMPED_PRELOAD.DEBUG, 
-            bufferPx        : 200, 
+        var $gallery = null;
+        var infinite_scroll = null;
+        
+        var init_gallery = function() {
+            $gallery = $(".stamp-gallery .stamps");
             
-            navSelector     : "div.stamp-gallery-nav", 
-            nextSelector    : "div.stamp-gallery-nav a:last", 
-            itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+            $gallery.isotope({
+                itemSelector    : '.stamp-gallery-item', 
+                layoutMode      : "straightDown"
+            });
             
-            loading         : {
-                finishedMsg : "No more stamps to load.", 
-                msgText     : "<em>Loading more stamps...</em>", 
-                img         : "/assets/img/loading.gif", 
-                selector    : "div.stamp-gallery-loading"
+            // TODO: customize loading image
+            infinite_scroll = $gallery.infinitescroll({
+                debug           : STAMPED_PRELOAD.DEBUG, 
+                bufferPx        : 200, 
+                
+                navSelector     : "div.stamp-gallery-nav", 
+                nextSelector    : "div.stamp-gallery-nav a:last", 
+                itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+                
+                loading         : {
+                    finishedMsg : "No more stamps to load.", 
+                    msgText     : "<em>Loading more stamps...</em>", 
+                    img         : "/assets/img/loading.gif", 
+                    selector    : "div.stamp-gallery-loading"
+                }
+            }, function(new_elements) {
+                var elements = $(new_elements);
+                
+                $(elements).emoji();
+                $gallery.isotope('appended', elements);
+            });
+        };
+        
+        var destroy_gallery = function() {
+            if ($gallery !== null) {
+                $gallery = $(".stamp-gallery .stamps");
+                $gallery.stop(true, false);
+                
+                if (infinite_scroll !== null) {
+                    $gallery.infinitescroll('destroy');
+                    infinite_scroll = null;
+                }
+                
+                $gallery.isotope('destroy');
+                $gallery = null;
             }
-        }, function(new_elements) {
-            var elements = $(new_elements);
-            
-            $(elements).emoji();
-            $container.isotope('appended', elements);
-        });
+        };
         
-        var client = new StampedClient();
+        var update_gallery = function(callback) {
+            if ($gallery !== null) {
+                $gallery = $(".stamp-gallery .stamps");
+                
+                $gallery.isotope('reLayout', callback);
+            }
+        };
+        
+        // TODO: initial gallery opening animation by adding items one at a time
+        init_gallery();
+        
+        var client      = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;
+        var url         = document.URL;
+        var parts       = url.split('?');
+        var base_url    = parts[0];
+        var options     = {};
+        
+        if (parts.length === 2) {
+            var opts = parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
+            
+            $.each(opts, function(i, opt) {
+                var opt_parts = opt.split('=');
+                var key = opt_parts[0];
+                
+                if (opt_parts.length === 2) {
+                    var value = opt_parts[1];
+                    
+                    options[key] = value;
+                }
+            });
+        }
+        
+        var get_custom_params = function(params) {
+            var custom_params = {};
+            var key, value;
+            
+            for (key in options) {
+                if (options.hasOwnProperty(key)) {
+                    value = options[key];
+                    
+                    if (value !== null) {
+                        custom_params[key] = value;
+                    } else {
+                        delete custom_params[key];
+                    }
+                }
+            }
+            
+            for (key in params) {
+                if (params.hasOwnProperty(key)) {
+                    value = params[key];
+                    
+                    if (value !== null) {
+                        custom_params[key] = value;
+                    } else {
+                        delete custom_params[key];
+                    }
+                }
+            }
+            
+            return custom_params;
+        };
+        
+        var get_custom_params_string = function(params) {
+            var custom_params = get_custom_params(params);
+            var str = "?";
+            var key;
+            
+            for (key in custom_params) {
+                if (custom_params.hasOwnProperty(key)) {
+                    str += key + "=" + custom_params[key];
+                }
+            }
+            
+            return str;
+        };
+        
+        var get_custom_url = function(params) {
+            var custom_params = get_custom_params(params);
+            var url = base_url;
+            var key;
+            
+            for (key in custom_params) {
+                if (custom_params.hasOwnProperty(key)) {
+                    url += key + "=" + custom_params[key];
+                }
+            }
+            
+            return url;
+        };
+        
         console.debug("Stamped profile page for screen_name '" + screen_name + "'");
-        
-        // ---------------------------------------------------------------------
-        // initialize parallax scrolling
-        // ---------------------------------------------------------------------
-        
-        /*var $target1 = $('.profile-content-page .profile-header-post');
-        var $target2 = $('.profile-content-page .profile-header-body');
-        var t1_h     = $target1.height();
-        var t2_h     = $target2.height();
-        var duration = 1200;
-         
-        $('.sign-in a.button').click(function(event) {
-            event.stopPropagation();
-            
-            $target1 = $target1.stop(true, false);
-            $target2 = $target2.stop(true, false);
-            
-            var is_hiding = function($t) {
-                return $t.hasClass('hidden') || $t.hasClass('hiding');
-            }
-            
-            var show = function($t, options) {
-                options = (typeof options === 'undefined' ? { } : options);
-                
-                $t.removeClass('hidden').removeClass('hiding').animate({
-                    opacity : 1, 
-                    height  : t2_h, 
-                }, {
-                    duration : (typeof options['duration'] === 'undefined' ? options['duration'] : duration), 
-                    specialEasing : {
-                        opacity : 'easeOutCubic', 
-                        height  : 'easeInOutCubic'
-                    }, 
-                    complete : function() {
-                        var complete = options['complete'];
-                        
-                        if (_.isFunction(complete)) {
-                            complete();
-                        }
-                    }
-                });
-            };
-            
-            var hide = function($t, options) {
-                options = (typeof options === 'undefined' ? { } : options);
-                
-                $t.addClass('hiding').animate({
-                    opacity : 0, 
-                    height  : 0, 
-                }, {
-                    duration : (typeof options['duration'] === 'undefined' ? options['duration'] : duration), 
-                    specialEasing : {
-                        opacity : 'easeInCubic', 
-                        height  : 'easeInOutCubic'
-                    }, 
-                    complete : function() {
-                        $t.addClass('hidden');
-                        $t.removeClass('hiding');
-                        var complete = options['complete'];
-                        
-                        if (_.isFunction(complete)) {
-                            complete();
-                        }
-                    }
-                });
-            }
-            
-            if (is_hiding($target1)) {
-                show($target1, {
-                    complete : function() {
-                        show($target2);
-                    }
-                });
-            } else if (is_hiding($target2)) {
-                show($target2);
-            } else {
-                hide($target2);
-                
-                setTimeout(function() {
-                    hide($target1, {
-                        duration : duration / 3
-                    });
-                }, (2 * duration) / 3);
-            }
-        });*/
-        
-        var $target         = $('.profile-content-page');
-        var target_height   = $target.height();
-        var duration        = 1200;
-        
-        $('.sign-in a.button').click(function(event) {
-            event.stopPropagation();
-            
-            $target = $target.stop(true, false);
-            
-            // demo animation of profile header's body
-            if ($target.hasClass('hidden') || $target.hasClass('hiding')) {
-                $target.removeClass('hidden').removeClass('hiding').animate({
-                    opacity : 1, 
-                    height  : target_height
-                    //top     : 0
-                }, {
-                    duration : duration, 
-                    specialEasing : {
-                        opacity : 'easeOutCubic', 
-                        height  : 'easeInOutCubic'
-                    }
-                });
-            } else {
-                $target.addClass('hiding');
-                
-                $target.animate({
-                    opacity : 0, 
-                    height  : 0
-                    //top     : -target_height
-                }, {
-                    duration : duration, 
-                    specialEasing : {
-                        opacity : 'easeInCubic', 
-                        height  : 'easeInOutCubic'
-                    }, 
-                    complete : function() {
-                        $target.addClass('hidden');
-                        $target.removeClass('hiding');
-                    }
-                });
-            }
-        });
+        console.debug(options);
         
         // ---------------------------------------------------------------------
         // initialize responsive header that gets smaller as you scroll
@@ -247,7 +236,7 @@
             top      : join_pos.top, 
             left     : join_pos.left, 
             width    : join_width, 
-            height   : join_height, 
+            height   : join_height
         });
         
         $sign_in.css({
@@ -256,13 +245,13 @@
             top      : sign_in_pos.top, 
             left     : sign_in_pos.left, 
             width    : sign_in_width, 
-            height   : sign_in_height, 
+            height   : sign_in_height
         });
         
         var last_ratio = null;
         
         $window.bind("scroll", function(n) {
-            var cur_ratio = Math.max((target_height - $window.scrollTop()) / target_height, 0);
+            var cur_ratio = Math.max((header_height - $window.scrollTop()) / header_height, 0);
             
             if (cur_ratio !== last_ratio) {
                 last_ratio = cur_ratio;
@@ -298,15 +287,15 @@
                     top : cur_top
                 });
                 
-                var cur_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
-                var cur_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
-                var cur_size   = cur_width + 'px ' + cur_height + 'px';
+                var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
+                var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
+                var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
                 
                 $user_logo.css({
-                    width  : cur_width, 
-                    height : cur_height, 
-                    'background-size'   : cur_size, 
-                    '-webkit-mask-size' : cur_size
+                    width  : cur_logo_width, 
+                    height : cur_logo_height, 
+                    'background-size'   : cur_logo_size, 
+                    '-webkit-mask-size' : cur_logo_size
                 });
                 console.debug("cur_ratio: " + cur_ratio);
             }
@@ -316,17 +305,100 @@
         // initialize stamp category nav bar
         // ---------------------------------------------------------------------
         
-        var $nav_bar = $('#stamp-category-nav-bar');
+        var $nav_bar   = $('#stamp-category-nav-bar');
+        var categories = 'default place music book film other';
+        
+        var set_body_class = function(category) {
+            var $body  = $('body');
+            
+            $body.removeClass(categories).addClass(category);
+        };
+        
+        if (History && History.enabled) {
+            History.Adapter.bind(window, 'statechange', function() {
+                var State    = History.getState();
+                var category = 'default';
+                
+                if (typeof(State.data['category']) !== 'undefined') {
+                    category = State.data['category'];
+                }
+                
+                History.log(State.data, State.title, State.url);
+                set_body_class(category);
+                
+                if (category === 'default') {
+                    category = null;
+                }
+                
+                var params   = get_custom_params({
+                    category : category
+                });
+                
+                var $items    = $('.stamp-gallery-item');
+                var completed = false;
+                
+                $gallery.isotope('remove', $items, function() {
+                    $items.remove();
+                    completed = true;
+                });
+                $('.loading').show();
+                
+                client.get_user_stamps_by_screen_name(screen_name, params).done(function(stamps) {
+                    //console.debug("num_stamps: " + stamps.length);
+                    
+                    if (stamps.length > 0) {
+                        var $target = $("<div></div>");
+                        
+                        var stamps_view = new client.StampsGalleryView({
+                            model : stamps, 
+                            el : $target
+                        });
+                        
+                        var complete_animation = function() {
+                            if (completed) {
+                                stamps_view.render();
+                                
+                                var $elements = $target.find('.stamp-gallery-item').remove();
+                                
+                                $('.loading').hide();
+                                /*$('.inset-stamp .number').html(stamps.length);*/
+                                
+                                $gallery.append($elements);
+                                $gallery.isotope('appended', $elements, function() { });
+                            } else {
+                                setTimeout(complete_animation, 50);
+                            }
+                        };
+                        
+                        complete_animation();
+                    }
+                });
+            });
+        }
         
         $nav_bar.find('a').each(function () {
             $(this).click(function(event) {
                 event.stopPropagation();
                 
                 var link     = $(this);
-                var category = link.parent().attr('class');
+                var orig_category = link.parent().attr('class');
+                var category = orig_category;
                 
-                // TODO: how to best update stamp-gallery contents
-                console.debug(category);
+                if (category === 'default') {
+                    category = null;
+                }
+                
+                var params   = get_custom_params({
+                    category : category
+                });
+                
+                if (History && History.enabled) {
+                    var params_str = get_custom_params_string(params);
+                    
+                    History.pushState(params, orig_category, params_str);
+                }
+                
+                return false;
             });
         });
         

@@ -262,6 +262,14 @@
   display: inline-block;
   margin: 0 4px 0 0;
 }
+.loading {
+  background: url(/assets/img/loading.gif) no-repeat;
+  text-align: center;
+  display: none;
+  margin: 2em auto;
+  width: 32px;
+  height: 32px;
+}
 .stamp-gallery-loading {
   text-align: center;
   margin: 0 auto;
